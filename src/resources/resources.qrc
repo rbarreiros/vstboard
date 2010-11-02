@@ -1,0 +1,20 @@
+<RCC>
+    <qresource prefix="/">
+        <file>LICENSE.html</file>
+        <file>img16x16/empty.png</file>
+        <file>img16x16/folder.png</file>
+        <file>img16x16/file_project.png</file>
+        <file>img16x16/file_setup.png</file>
+        <file>img16x16/filenew.png</file>
+        <file>img16x16/fileopen.png</file>
+        <file>img16x16/filesave.png</file>
+        <file>img16x16/filesaveas.png</file>
+        <file>img16x16/configure.png</file>
+        <file>img16x16/viewmag-.png</file>
+        <file>img16x16/viewmag+.png</file>
+        <file>img16x16/viewmagfit.png</file>
+        <file>img16x16/documentinfo.png</file>
+        <file>img16x16/messagebox_critical.png</file>
+        <file>img32x32/agt_action_fail.png</file>
+    </qresource>
+</RCC>

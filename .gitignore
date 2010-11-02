@@ -1,0 +1,4 @@
+*.pdb
+*.pro.user*
+/tools/*
+Thumbs.db
