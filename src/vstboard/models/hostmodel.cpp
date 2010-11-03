@@ -23,6 +23,7 @@
 #include "connectables/objectfactory.h"
 #include "mainhost.h"
 #include "connectables/objectinfo.h"
+#include "connectables/vstplugin.h"
 
 HostModel::HostModel(QObject *parent) :
         QStandardItemModel(parent)
@@ -161,7 +162,11 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
 
                         QSharedPointer<Connectables::Object> objPtr = Connectables::ObjectFactory::Get()->NewObject(infoVst);
                         if(objPtr.isNull()) {
-                            debug("HostModel::dropMimeData vstplugin object not found")
+                            if(Connectables::VstPlugin::shellSelectView) {
+                                Connectables::VstPlugin::shellSelectView->cntPtr=cntPtr;
+                            } else {
+                                debug("HostModel::dropMimeData vstplugin object not found")
+                            }
                             return false;
                         }
                         cntPtr->AddObject(objPtr);

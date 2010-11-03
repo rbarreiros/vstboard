@@ -24,12 +24,14 @@
 #include "../mainwindow.h"
 #include "../vst/cvsthost.h"
 #include "../views/vstpluginwindow.h"
-#include "../views/vstshellselect.h"
+
 
 using namespace Connectables;
 
 VstPlugin *VstPlugin::pluginLoading = 0;
 QList<VstPlugin*>VstPlugin::listPlugins;
+
+View::VstShellSelect *VstPlugin::shellSelectView=0;
 
 VstPlugin::VstPlugin(int index, const ObjectInfo & info) :
     Object(index, info),
@@ -244,9 +246,8 @@ bool VstPlugin::Open()
 
     {
         QMutexLocker lock(&objMutex);
-//identity=1397510477;
-//identity=1397510483;
         VstPlugin::pluginLoading = this;
+
         if(!Load( objInfo.filename )) {
             VstPlugin::pluginLoading = 0;
             return false;
@@ -263,9 +264,15 @@ bool VstPlugin::Open()
                 while ((id = EffGetNextShellPlugin(szName))) {
                     listPlugins.insert(id,QString::fromAscii(szName));
                 }
-                View::VstShellSelect *selectView = new View::VstShellSelect();
-                selectView->SetListPlugins(objInfo.name, listPlugins);
-                selectView->show();
+
+                if(VstPlugin::shellSelectView) {
+                    debug("VstPlugin::Open shell selection already opened")
+                    return false;
+                }
+
+                VstPlugin::shellSelectView = new View::VstShellSelect();
+                VstPlugin::shellSelectView->SetListPlugins(objInfo.name, listPlugins);
+                VstPlugin::shellSelectView->show();
                 return false;
             } //else {
                 //if not, why did he asked for shellCategory capability !?

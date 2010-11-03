@@ -23,17 +23,21 @@
 #include "../mainhost.h"
 #include "../connectables/objectfactory.h"
 #include "../connectables/container.h"
+#include "../connectables/vstplugin.h"
 
 using namespace View;
 
 VstShellSelect::VstShellSelect() :
+    cntPtr(0),
     ui(new Ui::VstShellSelect)
 {
     ui->setupUi(this);
+    setAttribute( Qt::WA_DeleteOnClose );
 }
 
 VstShellSelect::~VstShellSelect()
 {
+    Connectables::VstPlugin::shellSelectView=0;
     delete ui;
 }
 
@@ -82,7 +86,21 @@ void View::VstShellSelect::on_buttonOk_clicked()
 
 //    QSharedPointer<Connectables::Object> objPtr = Connectables::ObjectFactory::Get()->NewObject(ObjType::VstPlugin, id, vstDll);
     QSharedPointer<Connectables::Object> objPtr = Connectables::ObjectFactory::Get()->NewObject(info);
-    MainHost::Get()->parkingContainer->AddObject(objPtr);
+    if(objPtr.isNull()) {
+        debug("View::VstShellSelect::on_buttonOk_clicked object not loaded")
+        close();
+        return;
+    }
+    if(!cntPtr) {
+        debug("View::VstShellSelect::on_buttonOk_clicked container not set")
+        close();
+        return;
+    }
+
+    cntPtr->AddObject(objPtr);
+
+//    MainHost::Get()->parkingContainer->AddObject(objPtr);
+
     //MainHost::Get()->parkingContainer->AddObject( Connectables::ObjectFactory::Get()->NewObject(ObjType::VstPlugin, id, vstDll) );
     close();
 }

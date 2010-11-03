@@ -35,7 +35,7 @@ public:
 
     NodeType::Enum nodeType;
     ObjType::Enum objType;
-    quint16 id;
+    quint32 id;
     QString name;
     QString filename;
     quint16 inputs;

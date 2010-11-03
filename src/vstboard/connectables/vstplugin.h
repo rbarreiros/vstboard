@@ -23,7 +23,7 @@
 
 #include "object.h"
 #include "../vst/ceffect.h"
-
+#include "../views/vstshellselect.h"
 
 namespace View {
     class VstPluginWindow;
@@ -62,6 +62,8 @@ namespace Connectables {
         void UpdateModelNode();
         void UpdateEditorNode();
         bool GetEditorVisible();
+
+        static View::VstShellSelect *shellSelectView;
 
     protected:
         float sampleRate;

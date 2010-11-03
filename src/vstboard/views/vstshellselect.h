@@ -22,7 +22,7 @@
 #define VSTSHELLSELECT_H
 
 #include "../precomp.h"
-
+#include "../connectables/container.h"
 
 namespace Ui {
     class VstShellSelect;
@@ -36,6 +36,7 @@ namespace View {
         ~VstShellSelect();
 
         void SetListPlugins(QString file, QMap<ulong,QString> &listPlugins);
+        QSharedPointer<Connectables::Container> cntPtr;
 
     protected:
         void changeEvent(QEvent *e);
