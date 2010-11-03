@@ -1,0 +1,21 @@
+How to build VstBoard :
+
+Steinberg SDKs :
+================
+Steinberg Vst Sdk and Asio Sdk can't be redistributed : you have to create a free account and download them yourself.
+we need "VST 2.4 Audio Plug-Ins SDK" and "ASIO SDK" available at http://www.steinberg.net/en/company/developer.html
+
+from the Vst SDK : copy "pluginterfaces" and "public.sdk" to ./libs/vstsdk2.4.2 (see README.txt in that folder)
+from the Asio SDK : copy "common" and "host" to ./libs/portaudio/src/hostapi/asio/ASIOSDK (see README.txt in that folder)
+
+Qt Creator :
+============
+Download and install "Qt SDK for Windows (based on MinGW)" (the Complete Development Environment) from http://qt.nokia.com/downloads
+
+in Qt Creator, create a new session and open :
+ ./src/vstboard/VstBoard.pro
+ ./src/portaudio/portaudio.pro
+ ./src/pormidi/portmidi.pro
+
+- compile portaudio and portmidi
+- you can now compile the VstBoard project
