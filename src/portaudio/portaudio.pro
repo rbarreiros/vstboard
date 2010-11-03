@@ -43,55 +43,6 @@ linux-g++ {
     #SOURCES += $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/oss/pa_unix_oss.c
 }
 
-win32-g++ {
-    DEFINES += KSAUDIO_SPEAKER_DIRECTOUT=0
-    DEFINES += METHOD_NEITHER=3
-    DEFINES += FILE_ANY_ACCESS=0
-
-    DEFINES += PA_NO_WDMKS
-    DEFINES += PA_NO_DS
-    DEFINES += PA_NO_WASAPI
-    DEFINES += PA_NO_WMME
-#    DEFINES += PA_NO_ASIO
-
-    INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/wasapi/mingw-include
-
-    SOURCES += $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/asio/iasiothiscallresolver.cpp
-
-}
-
-win32-msvc2008 {
-    DEFINES += PAWIN_USE_DIRECTSOUNDFULLDUPLEXCREATE
-
-    INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/src/os/win
-    HEADERS += $$top_srcdir/$$PORTAUDIO_PATH/src/os/win/pa_win_wdmks_utils.h \
-            $$top_srcdir/$$PORTAUDIO_PATH/src/os/win/pa_x86_plain_converters.h \
-            $$top_srcdir/$$PORTAUDIO_PATH/include/pa_win_ds.h
-    SOURCES += $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/wdmks/pa_win_wdmks.c \
-            $$top_srcdir/$$PORTAUDIO_PATH/src/os/win/pa_win_wdmks_utils.c \
-            $$top_srcdir/$$PORTAUDIO_PATH/src/os/win/pa_x86_plain_converters.c \
-            $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/dsound/pa_win_ds.c \
-            $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/dsound/pa_win_ds_dynlink.c
-}
-
-
-
-INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/src/common
-INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/src/
-
-HEADERS += $$top_srcdir/$$PORTAUDIO_PATH/include/portaudio.h
-
-SOURCES += $$top_srcdir/$$PORTAUDIO_PATH/src/common/pa_stream.c \
-    $$top_srcdir/$$PORTAUDIO_PATH/src/common/pa_skeleton.c \
-    $$top_srcdir/$$PORTAUDIO_PATH/src/common/pa_ringbuffer.c \
-    $$top_srcdir/$$PORTAUDIO_PATH/src/common/pa_process.c \
-    $$top_srcdir/$$PORTAUDIO_PATH/src/common/pa_front.c \
-    $$top_srcdir/$$PORTAUDIO_PATH/src/common/pa_dither.c \
-    $$top_srcdir/$$PORTAUDIO_PATH/src/common/pa_debugprint.c \
-    $$top_srcdir/$$PORTAUDIO_PATH/src/common/pa_cpuload.c \
-    $$top_srcdir/$$PORTAUDIO_PATH/src/common/pa_converters.c \
-    $$top_srcdir/$$PORTAUDIO_PATH/src/common/pa_allocation.c
-
 win32 {
     INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/src/os/win
     INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/common
@@ -113,13 +64,64 @@ win32 {
     $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host/ASIOConvertSamples.cpp \
     $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host/asiodrivers.cpp \
     $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host/pc/asiolist.cpp
-}
 
-unix {
-    INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/src/os/unix
+    win32-g++ {
+        DEFINES += KSAUDIO_SPEAKER_DIRECTOUT=0
+        DEFINES += METHOD_NEITHER=3
+        DEFINES += FILE_ANY_ACCESS=0
 
-    SOURCES += $$top_srcdir/$$PORTAUDIO_PATH/src/os/unix/pa_unix_hostapis.c \
-    $$top_srcdir/$$PORTAUDIO_PATH/src/os/unix/pa_unix_util.c
+        DEFINES += PA_NO_WDMKS
+        DEFINES += PA_NO_DS
+        DEFINES += PA_NO_WASAPI
+        DEFINES += PA_NO_WMME
+    #    DEFINES += PA_NO_ASIO
+
+        INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/wasapi/mingw-include
+
+        SOURCES += $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/asio/iasiothiscallresolver.cpp
+
+    }
+
+    win32-msvc2008 {
+        DEFINES += PAWIN_USE_DIRECTSOUNDFULLDUPLEXCREATE
+
+        INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/src/os/win
+        HEADERS += $$top_srcdir/$$PORTAUDIO_PATH/src/os/win/pa_win_wdmks_utils.h \
+                $$top_srcdir/$$PORTAUDIO_PATH/src/os/win/pa_x86_plain_converters.h \
+                $$top_srcdir/$$PORTAUDIO_PATH/include/pa_win_ds.h
+        SOURCES += $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/wdmks/pa_win_wdmks.c \
+                $$top_srcdir/$$PORTAUDIO_PATH/src/os/win/pa_win_wdmks_utils.c \
+                $$top_srcdir/$$PORTAUDIO_PATH/src/os/win/pa_x86_plain_converters.c \
+                $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/dsound/pa_win_ds.c \
+                $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/dsound/pa_win_ds_dynlink.c
+    }
+
+
+
+    INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/src/common
+    INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/src/
+
+    HEADERS += $$top_srcdir/$$PORTAUDIO_PATH/include/portaudio.h
+
+    SOURCES += $$top_srcdir/$$PORTAUDIO_PATH/src/common/pa_stream.c \
+        $$top_srcdir/$$PORTAUDIO_PATH/src/common/pa_skeleton.c \
+        $$top_srcdir/$$PORTAUDIO_PATH/src/common/pa_ringbuffer.c \
+        $$top_srcdir/$$PORTAUDIO_PATH/src/common/pa_process.c \
+        $$top_srcdir/$$PORTAUDIO_PATH/src/common/pa_front.c \
+        $$top_srcdir/$$PORTAUDIO_PATH/src/common/pa_dither.c \
+        $$top_srcdir/$$PORTAUDIO_PATH/src/common/pa_debugprint.c \
+        $$top_srcdir/$$PORTAUDIO_PATH/src/common/pa_cpuload.c \
+        $$top_srcdir/$$PORTAUDIO_PATH/src/common/pa_converters.c \
+        $$top_srcdir/$$PORTAUDIO_PATH/src/common/pa_allocation.c
+
+
+
+    unix {
+        INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/src/os/unix
+
+        SOURCES += $$top_srcdir/$$PORTAUDIO_PATH/src/os/unix/pa_unix_hostapis.c \
+        $$top_srcdir/$$PORTAUDIO_PATH/src/os/unix/pa_unix_util.c
+    }
 }
 
 mac {

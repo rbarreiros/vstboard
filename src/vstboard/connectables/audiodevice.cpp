@@ -36,7 +36,7 @@ AudioDevice::AudioDevice(const ObjectInfo &info, QObject *parent) :
     QObject(parent),
 //    deviceNumber(-1),
     sampleRate(44100.0f),
-    bufferSize(1024),
+    bufferSize(4096),
     stream(0),
     devInfo(0),
     devIn(0),
@@ -326,7 +326,7 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
 
     int cpt = 0;
     if(framesPerBuffer != device->bufferSize) {
-        debug("AudioDevice::paCallback buffer size %ld -> %ld",device->bufferSize,framesPerBuffer)
+//        debug("AudioDevice::paCallback buffer size %ld -> %ld",device->bufferSize,framesPerBuffer)
         device->bufferSize = framesPerBuffer;
         MainHost::Get()->SetBufferSize((long)framesPerBuffer);
     }

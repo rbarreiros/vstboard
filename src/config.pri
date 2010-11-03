@@ -75,6 +75,7 @@ linux-g++ {
     message("win32-msvc2008")
     DEFINES += _CRT_SECURE_NO_WARNINGS
     INCLUDEPATH += $$quote($$(INCLUDE))
+message($$(INCLUDE))
     LIBS += -L$$quote($$(LIB))
 
 #to add symbols :
@@ -90,7 +91,3 @@ linux-g++ {
 #QMAKE_CFLAGS_RELEASE    = -O2 -MT -GL -MP -Ob2 -Oi -Ot -Oy- -EHsc -GS -Gy -fp:fast -GA -arch:SSE2
 #QMAKE_LFLAGS_RELEASE    = /INCREMENTAL:NO /OPT:REF /OPT:ICF /LTCG  /NODEFAULTLIB:MSVCRT
 #QMAKE_LIB               = lib /NOLOGO /LTCG
-
-HEADERS +=
-
-SOURCES +=

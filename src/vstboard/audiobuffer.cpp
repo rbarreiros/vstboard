@@ -86,8 +86,12 @@ void AudioBuffer::AddToStack(AudioBuffer * buff)
 {
 //    Q_ASSERT(buff->GetSize()==nSize);
     if(buff->GetSize()!=nSize) {
-        debug("AudioBuffer::AddToStack : not the same size, abort %ld != %ld",buff->GetSize(),nSize)
-        return;
+        if(stackSize==0) {
+            SetSize(buff->GetSize());
+        } else {
+            debug("AudioBuffer::AddToStack : not the same size, abort %ld != %ld",buff->GetSize(),nSize)
+            return;
+        }
     }
 
     if(stackSize==0) {
