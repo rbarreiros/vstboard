@@ -1,4 +1,22 @@
-                    GNU GENERAL PUBLIC LICENSE
+COPYRIGHT
+---------
+
+Copyright (C) 2010 Raphaël François
+More detailed copyright information can be found in the individual source code files.
+
+APPLICABLE LICENSES
+-------------------
+
+* All VstBoard source code, header files and documentation are licensed under the GNU GPL v3 license.
+
+* Qt Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies). released under LGPL.
+* PortAudio Portable Real-Time Audio Library Copyright (c) 1999-2000 Ross Bencina and Phil Burk
+* PortMidi Copyright (c) 1999-2000 Ross Bencina and Phil Burk, Copyright (c) 2001-2009 Roger B. Dannenberg.
+* The Crystal Project Copyright (c) Everaldo Coelho, released under LGPL.
+
+GNU GENERAL PUBLIC LICENSE
+--------------------------
+
                        Version 3, 29 June 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
