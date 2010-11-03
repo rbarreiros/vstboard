@@ -19,6 +19,10 @@
 ******************************************************************************/
 
 #include "precomp.h"
+
+#include <QLibraryInfo>
+#include <QTranslator>
+
 #include "mainwindow.h"
 #include "mainconfig.h"
 #include "shortcutkeys.h"
@@ -83,6 +87,15 @@ int main(int argc, char *argv[])
         QCoreApplication::setApplicationName("VstBoard");
 
         QApplication app(argc, argv);
+
+        QTranslator qtTranslator;
+        qtTranslator.load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+        app.installTranslator(&qtTranslator);
+
+        QTranslator myappTranslator;
+        myappTranslator.load("vstboard_" + QLocale::system().name());
+        app.installTranslator(&myappTranslator);
+
         MainConfig::Get(&app);
         MainWindow *w = MainWindow::Get();
         w->setAttribute(Qt::WA_DeleteOnClose);

@@ -28,7 +28,7 @@ using namespace Connectables;
 //QList<QVariant> MidiSender::listChannels;
 
 MidiSender::MidiSender(int index) :
-        Object(index, ObjectInfo(NodeType::object, ObjType::MidiSender, "MidiSender") ),
+        Object(index, ObjectInfo(NodeType::object, ObjType::MidiSender, tr("MidiSender")) ),
     midiMsg(0),
     msgChanged(false)
 {

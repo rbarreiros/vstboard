@@ -26,6 +26,7 @@
 
 class MainConfig : public QObject
 {
+    Q_OBJECT
 public:
     static MainConfig * Get(QObject *parent = 0);
     ~MainConfig();

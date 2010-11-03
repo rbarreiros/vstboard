@@ -51,7 +51,7 @@ win32-g++ {
     DEFINES += PA_NO_WDMKS
     DEFINES += PA_NO_DS
     DEFINES += PA_NO_WASAPI
-#    DEFINES += PA_NO_WMME
+    DEFINES += PA_NO_WMME
 #    DEFINES += PA_NO_ASIO
 
     INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/wasapi/mingw-include

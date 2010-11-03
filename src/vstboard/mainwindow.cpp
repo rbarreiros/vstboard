@@ -210,7 +210,7 @@ void MainWindow::BuildListTools()
     QStandardItem *parentItem = listToolsModel.invisibleRootItem();
 
     //midi parameters
-    QStandardItem *item = new QStandardItem("MidiCC to parameter");
+    QStandardItem *item = new QStandardItem(tr("MidiCC to parameter"));
     ObjectInfo info;
     info.nodeType = NodeType::object;
     info.objType = ObjType::MidiToAutomation;
@@ -218,25 +218,25 @@ void MainWindow::BuildListTools()
     parentItem->appendRow(item);
 
     //midi sender
-    item = new QStandardItem("Midi sender");
+    item = new QStandardItem(tr("Midi sender"));
     info.nodeType = NodeType::object;
     info.objType = ObjType::MidiSender;
     item->setData(QVariant::fromValue(info),UserRoles::objInfo);
     parentItem->appendRow(item);
 
     //host controler
-    item = new QStandardItem("Host Controller");
+    item = new QStandardItem(tr("Host Controller"));
     info.nodeType = NodeType::object;
     info.objType = ObjType::HostController;
     item->setData(QVariant::fromValue(info),UserRoles::objInfo);
     parentItem->appendRow(item);
 
     //container
-    item = new QStandardItem("Container");
-    info.nodeType = NodeType::container;
-    info.objType = ObjType::Container;
-    item->setData(QVariant::fromValue(info),UserRoles::objInfo);
-    parentItem->appendRow(item);
+//    item = new QStandardItem(tr("Container"));
+//    info.nodeType = NodeType::container;
+//    info.objType = ObjType::Container;
+//    item->setData(QVariant::fromValue(info),UserRoles::objInfo);
+//    parentItem->appendRow(item);
 
     ui->treeTools->setModel(&listToolsModel);
     ui->treeTools->header()->setResizeMode(0,QHeaderView::Stretch);

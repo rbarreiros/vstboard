@@ -28,6 +28,7 @@ namespace Connectables {
 
     class MidiToAutomation : public Object
     {
+    Q_OBJECT
     public:
         explicit MidiToAutomation(int index);
 //        ~MidiToAutomation();

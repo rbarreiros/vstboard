@@ -202,3 +202,5 @@ FORMS += mainwindow.ui \
 PRECOMPILED_HEADER = precomp.h
 RESOURCES += ../resources/resources.qrc
 OTHER_FILES += 
+
+TRANSLATIONS = vstboard_fr.ts

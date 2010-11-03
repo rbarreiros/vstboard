@@ -27,7 +27,7 @@ using namespace Connectables;
 //QList<QVariant> MidiToAutomation::listValues;
 
 MidiToAutomation::MidiToAutomation(int index) :
-        Object(index, ObjectInfo(NodeType::object, ObjType::MidiToAutomation, "Midi2Param") )
+        Object(index, ObjectInfo(NodeType::object, ObjType::MidiToAutomation, tr("MidiCC->Automation")) )
 {
 
 //    if(listValues.isEmpty()) {

@@ -30,7 +30,7 @@ using namespace Connectables;
 //QList<QVariant> HostController::listSign2;
 
 HostController::HostController(int index):
-    Object(index, ObjectInfo(NodeType::object, ObjType::HostController,"HostController" ) ),
+    Object(index, ObjectInfo(NodeType::object, ObjType::HostController, tr("HostController") ) ),
     tempoChanged(false),
     progChanged(false),
     prog(0)

@@ -11,7 +11,10 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string/>
+  </property>
+  <property name="locale">
+   <locale language="English" country="UnitedStates"/>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="margin">
@@ -76,9 +79,6 @@
      <property name="dragDropMode">
       <enum>QAbstractItemView::DragOnly</enum>
      </property>
-     <attribute name="headerVisible">
-      <bool>false</bool>
-     </attribute>
      <attribute name="headerVisible">
       <bool>false</bool>
      </attribute>
