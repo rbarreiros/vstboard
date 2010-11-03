@@ -1,5 +1,5 @@
 Name "VstBoard"
-OutFile "VstBoard_Setup.exe"
+OutFile "vstboard_win32_setup.exe"
 SetDateSave on
 SetDatablockOptimize on
 CRCCheck on

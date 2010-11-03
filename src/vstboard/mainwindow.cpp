@@ -549,12 +549,15 @@ void MainWindow::readSettings()
     listDocks << ui->dockAudioDevices;
     listDocks << ui->dockVstBrowser;
 
-    listDocks << ui->dockSmallView;
-    listDocks << ui->dockSolver;
     listDocks << ui->dockPrograms;
+    listDocks << ui->dockSolver;
+    listDocks << ui->dockHostModel;
+    listDocks << ui->dockParking;
+
 
     foreach(QDockWidget *dock, listDocks) {
         ui->menuView->addAction(dock->toggleViewAction());
+        ui->mainToolBar->addAction(dock->toggleViewAction());
     }
 
     //recent setups
@@ -602,34 +605,8 @@ void MainWindow::restoreDefaultDocking()
     tabifyDockWidget(ui->dockMidiDevices,ui->dockAudioDevices);
     tabifyDockWidget(ui->dockAudioDevices,ui->dockVstBrowser);
 
-    tabifyDockWidget(ui->dockSmallView,ui->dockSolver);
-    //    tabifyDockWidget(ui->dockSolver,ui->dockLayers);
-    tabifyDockWidget(ui->dockSolver,ui->dockPrograms);
-    //    tabifyDockWidget(ui->dockLayers,ui->dockPrograms);
-
-    ui->dockSolver->hide();
-    ui->dockSmallView->hide();
-
-    ui->menuView->addAction(ui->dockAudioDevices->toggleViewAction());
-    ui->menuView->addAction(ui->dockMidiDevices->toggleViewAction());
-    ui->menuView->addAction(ui->dockVstBrowser->toggleViewAction());
-    ui->menuView->addAction(ui->dockTools->toggleViewAction());
-
-    ui->menuView->addAction(ui->dockPrograms->toggleViewAction());
-    //    ui->menuView->addAction(ui->dockLayers->toggleViewAction());
-    ui->menuView->addAction(ui->dockSmallView->toggleViewAction());
-    ui->menuView->addAction(ui->dockSolver->toggleViewAction());
-
-
-    ui->mainToolBar->addAction(ui->dockAudioDevices->toggleViewAction());
-    ui->mainToolBar->addAction(ui->dockMidiDevices->toggleViewAction());
-    ui->mainToolBar->addAction(ui->dockVstBrowser->toggleViewAction());
-    ui->mainToolBar->addAction(ui->dockTools->toggleViewAction());
-
-    ui->mainToolBar->addAction(ui->dockPrograms->toggleViewAction());
-    //    ui->mainToolBar->addAction(ui->dockLayers->toggleViewAction());
-    ui->mainToolBar->addAction(ui->dockSmallView->toggleViewAction());
-    ui->mainToolBar->addAction(ui->dockSolver->toggleViewAction());
+    tabifyDockWidget(ui->dockParking,ui->dockSolver);
+    tabifyDockWidget(ui->dockSolver,ui->dockHostModel);
 
 }
 
