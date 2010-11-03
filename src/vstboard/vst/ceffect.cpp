@@ -1,6 +1,6 @@
 /******************************************************************************
-#    Copyright 2006,2010 Raphaël François, Hermann Seib
-#    Contact : ctrlbrk76@gmail.com
+#   Copyright 2006 Hermann Seib
+#   Copyright 2010 Raphaël François
 #
 #    This file is part of VstBoard.
 #

@@ -1,6 +1,6 @@
 /******************************************************************************
-#    Copyright 2006, 2010 Hermann Seib, Raphaël François
-#    Contact : ctrlbrk76@gmail.com
+#   Copyright 2006 Hermann Seib
+#   Copyright 2010 Raphaël François
 #
 #    This file is part of VstBoard.
 #
@@ -17,7 +17,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
-
 
 #ifndef VSTBANK_H
 #define VSTBANK_H
