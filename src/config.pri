@@ -16,11 +16,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 
-PORTAUDIO_PATH 	= ../../portaudio
-PORTMIDI_PATH 	= ../../portmidi
+PORTAUDIO_PATH 	= ../libs/portaudio
+PORTMIDI_PATH 	= ../libs/portmidi
 
 win32|macx {
-    VSTSDK_PATH	= ../../vstsdk2.4.2
+    VSTSDK_PATH	= ../libs/vstsdk2.4
     CONFIG += vstsdk
 }
 

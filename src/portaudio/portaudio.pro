@@ -122,3 +122,16 @@ unix {
     $$top_srcdir/$$PORTAUDIO_PATH/src/os/unix/pa_unix_util.c
 }
 
+mac {
+    INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/src/os/mac_osx
+    INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/common
+    INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host
+    INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host/mac
+
+    SOURCES += $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/asio/pa_asio.cpp \
+    $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/common/asio.cpp \
+    $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host/ASIOConvertSamples.cpp \
+    $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host/asiodrivers.cpp \
+    $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host/mac/asioshlib.cpp \
+    $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host/mac/codefragements.cpp
+}
