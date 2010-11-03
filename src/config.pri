@@ -20,7 +20,7 @@ PORTAUDIO_PATH 	= ../libs/portaudio
 PORTMIDI_PATH 	= ../libs/portmidi
 
 win32|macx {
-    VSTSDK_PATH	= ../libs/vstsdk2.4.2
+    VSTSDK_PATH	= ../libs/vstsdk2.4
     CONFIG += vstsdk
 }
 

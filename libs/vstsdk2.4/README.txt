@@ -1,6 +1,6 @@
-copy here the 'pluginterfaces' and 'public.sdk' folders found in the VST SDK 2.4.2
+we only need the 'pluginterfaces' and 'public.sdk' folders found in the VST SDK 2.4
 
-|- vstsdk2.4.2
+|- vstsdk2.4
 |  |- pluginterfaces
 |  |  |- vst2.x
 |  |  
