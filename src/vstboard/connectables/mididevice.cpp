@@ -69,7 +69,6 @@ bool MidiDevice::Close()
     if(err!=pmNoError)
         debug("error closing midi queue");
 
-//    TODO: when closed, a midi device can't be reopened ?
      err = Pm_Close(stream);
      if(err!=pmNoError)
          debug("MidiDevice::Close error closing midi port");
@@ -86,7 +85,6 @@ bool MidiDevice::FindDeviceFromName()
 
     for(int i=0;i<Pm_CountDevices();i++) {
         const PmDeviceInfo *info = Pm_GetDeviceInfo(i);
-//        if(QString::fromStdWString(info->name) == objInfo.name
         if(QString::fromStdString(info->name) == objInfo.name
            && info->input == objInfo.inputs
            && info->output == objInfo.outputs) {

@@ -45,7 +45,6 @@ Pin::~Pin()
 
 void Pin::setObjectName(const QString &name)
 {
-//    MainHost::modelProxy->Update(connectInfo.GetId(),Qt::DisplayRole,name);
     if(modelPin)
         modelPin->setData(name,Qt::DisplayRole);
 
@@ -83,7 +82,6 @@ void Pin::SetDisplayedText(const QString &txt)
 
     txtMutex.lock();
     displayedText = txt;
-//    MainHost::modelProxy->Update(connectInfo.GetId(),Qt::DisplayRole,displayedText);
     if(modelPin)
         modelPin->setData(displayedText,Qt::DisplayRole);
     txtMutex.unlock();
@@ -113,7 +111,6 @@ void Pin::Close()
     parentNode=0;
     modelPin=0;
     closed=true;
-   // visible=false;
 }
 
 void Pin::SetVisible(bool vis)
@@ -137,7 +134,6 @@ void Pin::SetVisible(bool vis)
             modelPin->setData( QVariant::fromValue(ObjectInfo(NodeType::pin)),UserRoles::objInfo);
             modelPin->setData(QVariant::fromValue(connectInfo),UserRoles::connectionInfo);
             modelPin->setData(stepSize,UserRoles::stepSize);
-//            MainHost::modelProxy->Add(connectInfo.GetId(),modelPin,parentNode);
             parentNode->appendRow(modelPin);
         }
 
@@ -158,7 +154,6 @@ void Pin::SetVisible(bool vis)
                 disconnect(MainHost::Get()->updateViewTimer,SIGNAL(timeout()),
                         this,SLOT(updateView()));
             }
-    //        MainHost::modelProxy->Remove(connectInfo.GetId());
 
             parentNode->removeRow(modelPin->row());
             modelPin=0;
@@ -171,6 +166,5 @@ void Pin::updateView()
     QMutexLocker l(&objMutex);
 
     if(!closed && visible)
-//        MainHost::modelProxy->Update(connectInfo.GetId(),UserRoles::value,GetValue());
         modelPin->setData(GetValue(),UserRoles::value);
 }

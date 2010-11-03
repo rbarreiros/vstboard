@@ -89,12 +89,8 @@ bool VstPluginWindow::SetPlugin(Connectables::VstPlugin *plugin)
     SetWindowSize(rect->right, rect->bottom);
     setWindowTitle(plugin->objectName());
 
-//    connect(plugin,SIGNAL(destroyed()),
-//            this,SLOT(close()));
     connect(this,SIGNAL(destroyed()),
             plugin,SLOT(EditorDestroyed()));
-//    connect(this,SIGNAL(Hide()),
-//            plugin,SLOT(CloseEditor()));
     connect(plugin,SIGNAL(WindowSizeChange(int,int)),
             this,SLOT(SetWindowSize(int,int)));
 
@@ -107,15 +103,12 @@ bool VstPluginWindow::SetPlugin(Connectables::VstPlugin *plugin)
     connect(plugin, SIGNAL(UnLearningModeChanged(bool)),
             ui->toolUnLearning,SLOT(setChecked(bool)));
 
-
-
     return true;
 }
 
 void VstPluginWindow::closeEvent( QCloseEvent * event )
 {
     hide();
-//    MainHost::modelProxy->Update(plugin->GetIndex()+1000,UserRoles::value,false);
     if(plugin->modelEditor)
         plugin->modelEditor->setData(false,UserRoles::value);
 
@@ -125,7 +118,6 @@ void VstPluginWindow::closeEvent( QCloseEvent * event )
 void VstPluginWindow::SetWindowSize(int newWidth, int newHeight)
 {
     ui->scrollAreaWidgetContents->setFixedSize(newWidth,newHeight);
-   // setMaximumSize(newWidth,newHeight);
     resize(newWidth,newHeight+menuHeight);
 }
 

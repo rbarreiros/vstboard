@@ -34,7 +34,6 @@ public:
         void GetAllBuffers(float ** buf);
         long GetSize() const {return nSize;}
         int GetNbBuffers() const {return nCptBuffers;}
-//	bool SetBuffer(int cpt,float * buff);
         AudioBuffer * AddBuffer();
         bool RemoveBuffer(int nb=1);
         void SetAllBuffers(float ** buff);
@@ -43,7 +42,6 @@ public:
         bool ClearBuffer(int cpt);
         bool ClearBuffer(float *buff);
         void ClearAllBuffer();
-//        void CopyFrom(AudioBufferGroup *buffers);
 
 protected:
         void DeleteAllBuffers();
@@ -52,9 +50,9 @@ protected:
 
         AudioBuffer ** pBuffers;
 
-        //actual number of used buffers
+        //number of used buffers
         int nCptBuffers;
-        //actual usable size of buffers
+        //usable size of buffers
         long nSize;
 
         //number of allocated buffers

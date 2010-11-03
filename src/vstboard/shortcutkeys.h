@@ -38,7 +38,7 @@ public:
     Action(int id, const QString &name, const QString &displayedName) :
             id(id),
             name(name),
-            displayedName(displayedName) {};
+            displayedName(displayedName) {}
 
     int id;
     QString name;

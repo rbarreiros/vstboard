@@ -34,7 +34,7 @@ namespace Connectables {
     {
 
     public:
-        ObjectProgram(int progId) : progId(progId) {};
+        ObjectProgram(int progId) : progId(progId) {}
         ObjectProgram(int progId,const hashListParamPin& listIn, const hashListParamPin& listOut);
 
         ObjectProgram(const ObjectProgram &c) {

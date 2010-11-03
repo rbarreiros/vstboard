@@ -42,7 +42,6 @@ namespace Connectables {
 
         virtual void OnValueChanged(float val);
 
-//        inline float GetValue() {return value;}
         inline int GetIndex() {return stepIndex;}
         inline QVariant GetVariantValue() {return listValues->at(stepIndex);}
 

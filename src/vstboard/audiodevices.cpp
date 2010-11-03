@@ -45,7 +45,6 @@ void AudioDevices::BuildModel()
     headerLabels << "Name";
     headerLabels << "In";
     headerLabels << "Out";
-//    headerLabels << "InUse";
 
     model = new ListAudioInterfacesModel();
     model->setHorizontalHeaderLabels(  headerLabels );
@@ -99,21 +98,7 @@ void AudioDevices::BuildModel()
         outs->setEditable(false);
         items << outs;
 
-//        QStandardItem *sampleRate = new QStandardItem( QString::number(devInfo->defaultSampleRate));
-//        QStringList strList;
-//        devInfo->numsa
-//        strList << "44100" << "48000" << "88200" << "96000";
-//        sampleRate->setData(strList,UserRoles::value);
-//        items << sampleRate;
-
-
-//        items[0]->setData(cptDuplicateNames,Qt::UserRole);
-
         QStandardItem *parent = model->item(devInfo->hostApi,0);
         parent->appendRow(items);
-
     }
-
-
-
 }

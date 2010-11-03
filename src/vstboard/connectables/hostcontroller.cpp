@@ -25,33 +25,24 @@
 
 using namespace Connectables;
 
-//QList<QVariant> HostController::listTempo;
-//QList<QVariant> HostController::listSign1;
-//QList<QVariant> HostController::listSign2;
-
 HostController::HostController(int index):
     Object(index, ObjectInfo(NodeType::object, ObjType::HostController, tr("HostController") ) ),
     tempoChanged(false),
     progChanged(false),
     prog(0)
 {
-//    if(listTempo.isEmpty()) {
+
         for(int i=1;i<300;i++) {
             listTempo << i;
         }
-//    }
 
-//    if(listSign1.isEmpty()) {
         for(int i=1;i<33;i++) {
             listSign1 << i;
         }
-//    }
 
-//    if(listSign2.isEmpty()) {
         for(int i=0;i<8;i++) {
             listSign2 << (1<<i);
         }
-//    }
 
 
     listMidiPinIn << new MidiPinIn(this);
@@ -78,7 +69,6 @@ void HostController::Render()
         int sign2 = listParameterPinIn.value(Param_Sign2)->GetVariantValue().toInt();
 
         emit tempoChange(tempo,sign1,sign2);
-//        MainHost::Get()->SetTempo(tempo,sign1,sign2);
     }
 
     if(progChanged) {
@@ -91,7 +81,6 @@ void HostController::Render()
         }
 
         emit progChange(prg->progIndex);
-//        MainHost::Get()->SetProgram(prg->progIndex);
     }
 }
 

@@ -56,13 +56,10 @@ void VstShellSelect::changeEvent(QEvent *e)
 void VstShellSelect::SetListPlugins(QString file, QMap<ulong,QString> &listPlugins)
 {
     vstDll = file;
-//    int cpt=0;
     QMap<ulong,QString>::iterator i = listPlugins.begin();
     while(i!=listPlugins.end()) {
         QListWidgetItem *item = new QListWidgetItem(i.value(),ui->listPlugins);
         item->setData(Qt::UserRole,(int)i.key());
-//        ui->listPlugins->insertItem(cpt, i.value());
-//        cpt++;
         ++i;
     }
 }
@@ -72,19 +69,12 @@ void View::VstShellSelect::on_buttonOk_clicked()
     QModelIndex index = ui->listPlugins->currentIndex();
     int id = index.data(Qt::UserRole).toInt();
 
-//    QSharedPointer<Connectables::Object> objPtr = Connectables::ObjectFactory::Get()->GetObjectFromId(containerId);
-//    if(objPtr.isNull())
-//        return;
-//    Connectables::Container* cnt = static_cast<Connectables::Container*>(objPtr.data());
-//    cnt->AddChildObject(ObjType::VstPlugin, id,vstDll);
-
     ObjectInfo info;
     info.nodeType = NodeType::object;
     info.objType = ObjType::VstPlugin;
     info.filename = vstDll;
     info.id = id;
 
-//    QSharedPointer<Connectables::Object> objPtr = Connectables::ObjectFactory::Get()->NewObject(ObjType::VstPlugin, id, vstDll);
     QSharedPointer<Connectables::Object> objPtr = Connectables::ObjectFactory::Get()->NewObject(info);
     if(objPtr.isNull()) {
         debug("View::VstShellSelect::on_buttonOk_clicked object not loaded")
@@ -98,10 +88,6 @@ void View::VstShellSelect::on_buttonOk_clicked()
     }
 
     cntPtr->AddObject(objPtr);
-
-//    MainHost::Get()->parkingContainer->AddObject(objPtr);
-
-    //MainHost::Get()->parkingContainer->AddObject( Connectables::ObjectFactory::Get()->NewObject(ObjType::VstPlugin, id, vstDll) );
     close();
 }
 
@@ -109,17 +95,4 @@ void View::VstShellSelect::on_buttonCancel_clicked()
 {
     close();
 }
-
-//void View::VstShellSelect::on_listPlugins_doubleClicked(QModelIndex index)
-//{
-//    int id = index.data(Qt::UserRole).toInt();
-
-//    QSharedPointer<Connectables::Object> objPtr = Connectables::ObjectFactory::Get()->GetObjectFromId(containerId);
-//    if(objPtr.isNull())
-//        return;
-
-//    Connectables::Container* cnt = static_cast<Connectables::Container*>(objPtr.data());
-//    cnt->AddChildObject(ObjType::VstPlugin, id,vstDll);
-//    close();
-//}
 

@@ -41,10 +41,6 @@ CEffect::CEffect()
     bWantMidi = false;
     bInSetProgram = false;
     pMasterEffect = NULL;
-
-//    hModule = NULL;
-//    sDir = NULL;
-
     sName.clear();
 }
 
@@ -89,11 +85,7 @@ bool CEffect::Load(const QString &name)
         pEffect = NULL;
         return false;
     }
-
-  //  dispatcherFuncPtr dispatcher = (dispatcherFuncPtr)(plugin->dispatcher);
-
     sName = name;
-
     return true;
 }
 
@@ -107,24 +99,6 @@ bool CEffect::Unload()
     pEffect = NULL;
     pluginLib->unload();
     pluginLib->deleteLater();
-//    if (hModule) {
-//        ::FreeLibrary(hModule);               /* remove it.                        */
-//        hModule = NULL;                       /* and reset the handle              */
-//    }
-
-//    if (sDir)                               /* reset module directory            */
-//    {
-//        delete[] sDir;
-//        sDir = NULL;
-//    }
-
-//    if (sName)                              /* reset module name                 */
-//    {
-//            delete[] sName;
-//            sName = NULL;
-//    }
-
-
     return true;
 }
 
@@ -159,15 +133,6 @@ bool CEffect::SaveBank(std::string * name)
 }
 
 /*****************************************************************************/
-/* OnGetDirectory : returns the plug's directory (char* on pc, FSSpec on mac)*/
-/*****************************************************************************/
-
-//void * CEffect::OnGetDirectory()
-//{
-//    return sDir;
-//}
-
-/*****************************************************************************/
 /* EffDispatch : calls an effect's dispatcher                                */
 /*****************************************************************************/
 
@@ -177,14 +142,7 @@ long CEffect::EffDispatch(VstInt32 opCode, VstInt32 index, VstInt32 value, void 
         return 0;
 
     long disp=0L;
-//    try
-//    {
         disp = pEffect->dispatcher(pEffect, opCode, index, value, ptr, opt);
-//    }
-//    catch(...)
-//    {
-//        debug(QString("vst dispatch exception : opcode%1 index%2 value%3").arg(opCode).arg(index).arg(value).toAscii());
-//    }
 
     return disp;
 }
@@ -195,12 +153,7 @@ long CEffect::EffDispatch(VstInt32 opCode, VstInt32 index, VstInt32 value, void 
 
 void CEffect::EffProcess(float **inputs, float **outputs, long sampleframes)
 {
-
-//    if (!pEffect)
-//        return;
-
     pEffect->process(pEffect, inputs, outputs, sampleframes);
-
 }
 
 /*****************************************************************************/
@@ -209,21 +162,8 @@ void CEffect::EffProcess(float **inputs, float **outputs, long sampleframes)
 
 void CEffect::EffProcessReplacing(float **inputs, float **outputs, long sampleframes)
 {
-
-//    if ((!pEffect) || (!(pEffect->flags & effFlagsCanReplacing)))
-//        return;
-
-    //catch exception, some plugins are not thread safe (open/close window)
-    //        __try
-    //        {
     pEffect->processReplacing(pEffect, inputs, outputs, sampleframes);
-    //        }
-    //        __except (EXCEPTION_EXECUTE_HANDLER)
-    //        {
-    //                //TRACE("ex");
-    //        }
-
-}
+ }
 
 /*****************************************************************************/
 /* EffProcessDoubleReplacing : calls an effect's processDoubleReplacing() f. */
@@ -232,12 +172,7 @@ void CEffect::EffProcessReplacing(float **inputs, float **outputs, long samplefr
 void CEffect::EffProcessDoubleReplacing(double **inputs, double **outputs, long sampleFrames)
 {
 #if defined(VST_2_4_EXTENSIONS)
-
-//    if ((!pEffect) || (!(pEffect->flags & effFlagsCanDoubleReplacing)))
-//        return;
-
     pEffect->processDoubleReplacing(pEffect, inputs, outputs, sampleFrames);
-
 #endif
 }
 
@@ -247,7 +182,6 @@ void CEffect::EffProcessDoubleReplacing(double **inputs, double **outputs, long 
 
 void CEffect::EffSetParameter(long index, float parameter)
 {
-  //  if (pEffect)
         pEffect->setParameter(pEffect, index, parameter);
 }
 
@@ -257,12 +191,7 @@ void CEffect::EffSetParameter(long index, float parameter)
 
 float CEffect::EffGetParameter(long index)
 {
-//    if (!pEffect)
-//        return 0.;
-
-    float frc = pEffect->getParameter(pEffect, index);
-
-    return frc;
+    return pEffect->getParameter(pEffect, index);
 }
 
 long CEffect::OnMasterCallback(long opcode, long index, long value, void *ptr, float opt,long currentReturnCode)

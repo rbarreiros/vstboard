@@ -29,7 +29,6 @@
 #include "container.h"
 #include "bridge.h"
 #include "mainhost.h"
-//#include "loader.h"
 
 #ifdef VSTSDK
     #include "vstplugin.h"
@@ -65,13 +64,6 @@ ObjectFactory::~ObjectFactory()
 void ObjectFactory::Clear()
 {
     cptListObjects=0;
-
-//    hashObjects::iterator i = listObjects.begin();
-//    while(!listObjects.isEmpty()) {
-//        i.value()->Close();
-//        i = listObjects.erase(i);
-//    }
-
     listObjects.clear();
 }
 
@@ -146,7 +138,6 @@ void ObjectFactory::RemoveObject(int id)
      QSharedPointer<Object> objPtr = listObjects.take(id);
      if(objPtr.isNull())
          return;
-//     objPtr->Hide();
 }
 
 QSharedPointer<Object> ObjectFactory::GetObj(const QModelIndex & index)
@@ -159,17 +150,6 @@ QSharedPointer<Object> ObjectFactory::GetObj(const QModelIndex & index)
     //or return the existing object
     return GetObjectFromId(index.data(UserRoles::value).toInt());
 }
-
-//QSharedPointer<Object> ObjectFactory::NewObject(ObjType::Enum type, int id, QString name, int forceObjId)
-//{
-//    ObjectInfo info;
-//    info.objType = type;
-//    info.id = id;
-//    info.name = name;
-//    info.forcedObjId = forceObjId;
-
-//    return NewObject(info);
-//}
 
 QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
 {
@@ -205,18 +185,6 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
         case NodeType::object :
 
             switch(info.objType) {
-
-        //        case ObjType::AudioInterface:
-        //            //create both input and output
-        //            if(info.inputs>0) {
-        //                info.objType = ObjType::AudioInterfaceIn;
-        //                NewObject(info);
-        //            }
-        //            if(info.outputs>0) {
-        //                info.objType = ObjType::AudioInterfaceOut;
-        //                NewObject(info);
-        //            }
-        //            break;
 
                 case ObjType::AudioInterfaceIn:
                     obj = new AudioDeviceIn(objId, info);
@@ -284,54 +252,3 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
     return sharedObj;
 
 }
-
-
-//QDataStream & ObjectFactory::toStream(QDataStream & out) const
-//{
-//    out << (qint16)listObjects.size();
-//    hashObjects::const_iterator i = listObjects.constBegin();
-//    foreach(QSharedPointer<Object> objPtr, listObjects) {
-//        if(!objPtr.isNull()) {
-//            out<<(quint8)objPtr->GetType();
-//            out<<(quint16)objPtr->GetIdentity();
-//            out<<objPtr->GetIdentityString();
-//            out<<*objPtr.data();
-
-//            debug(QString("save %1 %2").arg(objPtr->GetIndex()).arg(objPtr->objectName()).toAscii())
-//        }
-//    }
-//    return out;
-//}
-
-//QDataStream & ObjectFactory::fromStream(QDataStream & in)
-//{
-//    ResetSavedId();
-
-//    quint16 nbObj;
-//    in >> nbObj;
-//    for(quint16 i=0; i<nbObj; i++) {
-//        quint8 objType;
-//        in>>objType;
-//        quint16 identity;
-//        in>>identity;
-//        QString identityString;
-//        in>>identityString;
-
-//        debug(QString("load %1 %2").arg(objType).arg(identityString).toAscii())
-
-//       QSharedPointer<Object> objPtr = NewObject((ObjType::Enum)objType,identity,identityString);
-//       if(!objPtr.isNull())
-//           in>>*objPtr.data();
-//    }
-//    return in;
-//}
-
-//QDataStream & operator<< (QDataStream & out, const Connectables::ObjectFactory& value)
-//{
-//    return value.toStream(out);
-//}
-
-//QDataStream & operator>> (QDataStream & in, Connectables::ObjectFactory& value)
-//{
-//    return value.fromStream(in);
-//}

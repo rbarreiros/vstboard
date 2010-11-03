@@ -38,9 +38,6 @@ ContainerContent::ContainerContent(QAbstractItemModel *model, QGraphicsItem * pa
     pal = palette();
     pal.setBrush(QPalette::Active, QPalette::Window, Qt::lightGray);
     setPalette(pal);
-   // setAcceptDrops(true);
-   // setAcceptHoverEvents(true);
-
 }
 
 void ContainerContent::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -77,7 +74,6 @@ void ContainerContent::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
             info.setFile( fName );
             if ( info.isFile() && info.isReadable() && info.suffix()=="dll" ) {
                 event->accept();
-//                GraphicScene::Get()->SetDropReceiver(this);
             }
         }
         return;

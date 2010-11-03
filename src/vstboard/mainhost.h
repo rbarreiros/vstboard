@@ -22,7 +22,6 @@
 #define MAINHOST_H
 
 #include "precomp.h"
-//#include "hostlayer.h"
 #include "connectables/objectfactory.h"
 #include "connectables/object.h"
 #include "connectables/maincontainer.h"
@@ -41,14 +40,6 @@
 #endif
 
 
-
-//class UpdateSolverEvent : public QEvent
-//{
-//public:
-//    UpdateSolverEvent() : QEvent(Event::UpdateSolver) {}
-//};
-
-
 class MainHost : public QObject
 {
 Q_OBJECT
@@ -57,13 +48,8 @@ public:
     ~MainHost();
 
     void Open();
-//    void run();
-
-//    void AddPin(Connectables::Pin *pin);
-//    void RemovePin(const ConnectionInfo &pinInfo);
 
     void SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum msgType,void *data);
-//    void SendMsg(const ConnectionInfo &senderPin,PinMessageEvent *event );
     void Render(unsigned long samples);
     void SetBufferSize(long size);
     void SetSampleRate(float rate=44100.0);
@@ -80,18 +66,11 @@ public:
     QDataStream & toStream(QDataStream& stream) const;
     QDataStream & fromStream(QDataStream& stream);
 
-//    QMap<int,int>GetLayersPrograms();
-
-//    bool event(QEvent *event);
-
-
-
     QSharedPointer<Connectables::MainContainer> mainContainer;
     QSharedPointer<Connectables::MainContainer> hostContainer;
     QSharedPointer<Connectables::MainContainer> projectContainer;
     QSharedPointer<Connectables::MainContainer> programContainer;
     QSharedPointer<Connectables::ParkingContainer> parkingContainer;
-//    Connectables::Container *programContainer;
 
     ListAudioInterfacesModel * GetAudioDevicesModel() {return listAudioDevices->GetModel();}
 
@@ -116,10 +95,7 @@ private:
 
     AudioDevices *listAudioDevices;
 
-//    QMap<int,HostLayer*>listLayers;
     QMap<int,Connectables::Object*>listContainers;
-//    HostLayer *currentLayer;
-
     QMap<ConnectionInfo,Connectables::Pin*>listPins;
 
     QList< QSharedPointer<Connectables::Object> >listMidiDevices;
@@ -130,7 +106,6 @@ private:
     vst::CVSTHost vstHost;
 #endif
 
-    //list of cable including all layers
     hashCables workingListOfCables;
     QMutex mutexListCables;
     Renderer renderer;
@@ -175,8 +150,6 @@ public slots:
 
     void UpdateCpuLoad(float load);
     void SetTempo(int tempo=120, int sign1=4, int sign2=4);
-//    void AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
-//    void RemoveCableFromPin(const ConnectionInfo &pin);
     void OnNewRenderingOrder(orderedNodes *renderLines);
 
 private slots:

@@ -80,20 +80,6 @@ void ProjectFile::BuildModel()
 
 Program* ProjectFile::GetProgram(int prog)
 {
-//    switch(prog) {
-//        case EMPTY_PROGRAM:
-//            return emptyProgram;
-
-//        case HOST_PROGRAM:
-//            return hostProgram;
-
-//        case PROJECT_PROGRAM:
-//            return projectProgram;
-
-//        default:
-//            if(listPrograms.contains(prog))
-//                return listPrograms.value(prog);
-//    }
     if(listPrograms.contains(prog))
         return listPrograms.value(prog);
     return 0;
@@ -112,12 +98,6 @@ QStandardItem *ProjectFile::ItemFromProgId(int progId)
     return grp->child(prg->progPlaceInGroup);
 }
 
-//void ProjectFile::OnRemoveObject(int id, int /*containerId*/)
-//{
-//    foreach(Program *prog,listPrograms)
-//        prog->RemoveCableFromObj(id);
-//}
-
 void ProjectFile::SaveToFile(QString filePath)
 {
     if(filePath.isNull())
@@ -130,9 +110,6 @@ void ProjectFile::SaveToFile(QString filePath)
     stream << (quint32)0x757b0a5d;  //key
     stream << (quint32)1;           //version
     stream.setVersion(QDataStream::Qt_4_6);
-
-//    stream << *Connectables::ObjectFactory::Get();
-//    MainHost::Get()->SaveAllCurrentPrograms();
     stream << *MainHost::Get();
 }
 
@@ -164,8 +141,6 @@ bool ProjectFile::LoadFromFile(QString filePath)
     }
 
     stream.setVersion(QDataStream::Qt_4_6);
-
-//    stream >> *Connectables::ObjectFactory::Get();
     stream >> *MainHost::Get();
     return true;
 }

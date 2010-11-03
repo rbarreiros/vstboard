@@ -120,7 +120,6 @@ void CVSTHost::UpdateTimeInfo(double timer, int addSamples, double sampleRate)
 
     }
 
-
     //start of last bar
     vstTimeInfo.barStartPos = barLengthq*floor(vstTimeInfo.ppqPos/barLengthq);
 

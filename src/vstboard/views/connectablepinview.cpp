@@ -93,5 +93,4 @@ void ConnectablePinView::wheelEvent ( QGraphicsSceneWheelEvent * event )
     if(val<.0f) val=.0f;
 
     model->setData(pinIndex,val,UserRoles::value);
-//    emit indexEdited(pinIndex,val,UserRoles::value);
 }

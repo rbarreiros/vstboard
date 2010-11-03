@@ -29,40 +29,7 @@ using namespace View;
 ContainerView::ContainerView(QAbstractItemModel *model, QGraphicsItem *parent) :
     ObjectView(model, parent)
 {
-//    border=0;
-//    backgroundImg = 0;//new QGraphicsPixmapItem(this,scene());
-//    editorButton = 0;
 
-//    layout = new QGraphicsGridLayout() ;
-//    layout->setSpacing(0);
-//    layout->setContentsMargins(0,0,0,0);
-//    setLayout(layout);
-
-//    setFlag(QGraphicsItem::ItemIsMovable, true);
-//    setFlag(QGraphicsItem::ItemIsSelectable, true);
-//    setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
-
-//    bridgeIn = new BridgeView(model, this);
-//    centerLayout = new ListPinsView(this);
-//    bridgeOut = new BridgeView(model, this);
-
-//    content = new ContainerContent(centerLayout);
-//    centerLayout->layout->addItem(content);
-
-//    layout->setColumnFixedWidth(0,10);
-//    layout->setColumnFixedWidth(2,10);
-
-//    layout->addItem(bridgeIn,0,0,Qt::AlignLeft);
-//    layout->addItem(centerLayout,0,1,Qt::AlignHCenter);
-//    layout->addItem(bridgeOut,0,2,Qt::AlignRight);
-
-//    titleText = new QGraphicsSimpleTextItem(QString("Title"),this);
-//    titleText->moveBy(15,1);
-
-//    setAcceptDrops(true);
-//    setWindowFlags(Qt::Tool);
-
-//    setGeometry(QRectF(0,0,100,15));
 }
 
 ContainerView::~ContainerView()
@@ -93,12 +60,6 @@ void ContainerView::UpdateModelIndex()
     if(objIndex.data(UserRoles::position).isValid())
         resize(objIndex.data(UserRoles::size).toSizeF() );
 }
-
-//void ContainerView::moveEvent ( QGraphicsSceneMoveEvent * event )
-//{
-//    if(model)
-//        model->setData(objIndex,event->newPos(),UserRoles::position);
-//}
 
 void ContainerView::resizeEvent ( QGraphicsSceneResizeEvent * event )
 {

@@ -43,13 +43,9 @@ namespace View {
         virtual const QPointF pinPos() const;
         void AddCable(CableView *cable);
         void RemoveCable(CableView *cable);
-        //virtual void UpdateView(QModelIndex /*modelIndex*/) {}
 
         virtual void UpdateModelIndex(QModelIndex index) {}
         void SetPinModelIndex(QPersistentModelIndex index) {pinIndex = index; UpdateModelIndex(index);}
-//        void SetValueModelIndex(QPersistentModelIndex index) {valueIndex = index; UpdateModelIndex(index);}
-//        void SetFalloffModelIndex(QPersistentModelIndex index) {falloffIndex = index; UpdateModelIndex(index);}
-
         void UpdateCablesPosition();
 
     protected:
@@ -59,7 +55,6 @@ namespace View {
         void mouseMoveEvent ( QGraphicsSceneMouseEvent  * event );
         void mouseReleaseEvent ( QGraphicsSceneMouseEvent  * event );
         void mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * event );
-//        void dragEnterEvent ( QGraphicsSceneDragDropEvent  * event );
         void dragLeaveEvent( QGraphicsSceneDragDropEvent  * event );
         void dragMoveEvent ( QGraphicsSceneDragDropEvent * event );
         void dropEvent ( QGraphicsSceneDragDropEvent  * event );
@@ -67,7 +62,6 @@ namespace View {
 
         QAbstractGraphicsShapeItem *rectBgnd;
 
-//        static QBrush backBrush;
         static QBrush highlightBrush;
 
         QList<CableView *> connectedCables;
@@ -81,13 +75,10 @@ namespace View {
 
         QAbstractItemModel *model;
         QPersistentModelIndex pinIndex;
-//        QPersistentModelIndex valueIndex;
-//        QPersistentModelIndex falloffIndex;
 
     signals:
         void ConnectPins(ConnectionInfo outputPin, ConnectionInfo inputPin);
         void RemoveCablesFromPin(ConnectionInfo pin);
-//        void indexEdited(QPersistentModelIndex index, QVariant value,  int role);
 
     public slots:
         virtual void updateVu(){}

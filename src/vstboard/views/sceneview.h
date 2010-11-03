@@ -22,10 +22,8 @@
 #define SCENEVIEW_H
 
 #include "precomp.h"
-#include <QHBoxLayout>
 #include "connectables/connectioninfo.h"
 #include "maingraphicsview.h"
-#include "subscene.h"
 
 namespace View {
     class SceneView : public QAbstractItemView
@@ -41,8 +39,6 @@ namespace View {
         MainGraphicsView *viewHost;
         MainGraphicsView *viewProject;
         MainGraphicsView *viewProgram;
-
-//        void setModel ( QAbstractItemModel * model );
 
     protected:
 
@@ -62,10 +58,10 @@ namespace View {
 
         QHash<QPersistentModelIndex,QObject*>hashItems;
         QMap<ConnectionInfo,QPersistentModelIndex>mapConnectionInfo;
-//        QVBoxLayout *layout;
-        SubScene *sceneHost;
-        SubScene *sceneProject;
-        SubScene *sceneProgram;
+
+        QGraphicsScene *sceneHost;
+        QGraphicsScene *sceneProject;
+        QGraphicsScene *sceneProgram;
         QTimer *timerFalloff;
 
     signals:

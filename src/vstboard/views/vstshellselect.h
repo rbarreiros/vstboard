@@ -46,7 +46,6 @@ namespace View {
         Ui::VstShellSelect *ui;
 
 private slots:
-//    void on_listPlugins_doubleClicked(QModelIndex index);
     void on_buttonCancel_clicked();
     void on_buttonOk_clicked();
 };

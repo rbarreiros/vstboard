@@ -53,9 +53,6 @@ namespace Connectables {
         void SetParentModelNode(QStandardItem* parent);
         void UpdateModelNode();
 
-//        void SetBridgePinsInVisible(bool visible);
-//        void SetBridgePinsOutVisible(bool visible);
-
     protected:
         QList< QSharedPointer< Object > >listStaticObjects;
 

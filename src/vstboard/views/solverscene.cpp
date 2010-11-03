@@ -56,17 +56,13 @@ void SolverScene::NewSolver(orderedNodes* nodes)
         addItem(renderLineView);
 
         float lineWidth=0;
-        //foreach(Connectables::Object* obj, i.value()->listObjects){
         Connectables::Object* obj = i.value()->objectPtr.data();
-//            QRectF rectObj(0,0,obj->GetProcessingTime(),objHeight);
         QRectF rectObj(0,0,10,objHeight);
             QGraphicsRectItem *objView = new QGraphicsRectItem(rectObj,renderLineView);
             QGraphicsTextItem *txt = new QGraphicsTextItem(QString::number(obj->GetIndex()),objView);
             txt=0; //unused
             objView->setPos(lineWidth,0);
-//            lineWidth+=obj->GetProcessingTime();
             lineWidth+=10;
-        //}
 
         renderLineView->setRect(0,0,lineWidth,lineHeight);
         passWidth = std::max(passWidth,lineWidth);

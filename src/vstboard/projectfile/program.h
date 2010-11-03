@@ -57,12 +57,7 @@ namespace Project {
         bool dirty;
         int savedId;
 
-//        QDataStream & toStream(QDataStream& stream) const;
-//        QDataStream & fromStream(QDataStream& stream);
     };
 }
-
-//QDataStream & operator<< (QDataStream& stream, const Project::Program& prog);
-//QDataStream & operator>> (QDataStream& stream, Project::Program& prog);
 
 #endif // PROGRAM_H

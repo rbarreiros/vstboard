@@ -135,13 +135,6 @@ void AudioBufferGroup::ClearAllBuffer()
     }
 }
 
-//void AudioBufferGroup::CopyFrom(AudioBufferGroup *buffers)
-//{
-//    for(int j=0;j<nCptBuffers;j++) {
-//        pBuffers[j]->CopyFrom(buffers->GetBuffer(j));
-//    }
-//}
-
 AudioBuffer * AudioBufferGroup::GetBuffer (int cpt) const
 {
     if(cpt>=nCptBuffers)
@@ -163,12 +156,3 @@ void AudioBufferGroup::SetAllBuffers(float ** buff)
     }
 }
 
-/*
-bool AudioBufferGroup::SetBuffer(int cpt,float * buff)
-{
-    if(cpt<nCptBuffers)
-        pBuffers[cpt]->Set(buff);
-    else
-        return false;
-}
-*/

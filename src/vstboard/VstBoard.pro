@@ -68,7 +68,6 @@ SOURCES += main.cpp \
     connectables/mididevice.cpp \
     connectables/midipinin.cpp \
     connectables/midipinout.cpp \
-    projectfile/programgroup.cpp \
     connectables/parameterpinin.cpp \
     views/listpinsview.cpp \
     connectables/miditoautomation.cpp \
@@ -107,12 +106,8 @@ SOURCES += main.cpp \
     audiodevices.cpp \
     connectables/bridgepinin.cpp \
     connectables/bridgepinout.cpp \
-    tests.cpp \
-    debugmemreport.cpp \
-    connectables/loader.cpp \
     connectables/parkingcontainer.cpp \
     views/combodelegate.cpp \
-    views/subscene.cpp \
     connectables/maincontainer.cpp \
     connectables/objectinfo.cpp \
     views/aboutdialog.cpp \
@@ -145,7 +140,6 @@ HEADERS += mainwindow.h \
     connectables/mididevice.h \
     connectables/midipinin.h \
     connectables/midipinout.h \
-    projectfile/programgroup.h \
     connectables/parameterpinin.h \
     views/listpinsview.h \
     connectables/miditoautomation.h \
@@ -184,12 +178,8 @@ HEADERS += mainwindow.h \
     audiodevices.h \
     connectables/bridgepinin.h \
     connectables/bridgepinout.h \
-    tests.h \
-    debugmemreport.h \
-    connectables/loader.h \
     connectables/parkingcontainer.h \
     views/combodelegate.h \
-    views/subscene.h \
     connectables/maincontainer.h \
     connectables/objectinfo.h \
     views/aboutdialog.h \

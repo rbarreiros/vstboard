@@ -99,15 +99,6 @@ QRectF OutlinedText::boundingRect() const
 
 void OutlinedText::paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
 {
-    //redraw if the scale changed enough or if we're close to the original size
-//    if(!pix //we have no cache yet
-//       || cachedText != text() //text changed
-//       || ( fabs( static_cast<float>( painter->matrix().m22() ) - 1.0f ) < 0.2f
-//           && fabs( scaleX - static_cast<float>( painter->matrix().m11() )) >0.001f
-//           ) //small change but close to 1.0
-//       || fabs( (scaleX - static_cast<float>(painter->matrix().m11()) )/scaleX ) > 0.4f //big change, far from 1.0
-//     ) {
-
     if(text().length()==0)
         return;
 

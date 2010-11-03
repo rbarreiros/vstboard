@@ -38,8 +38,6 @@ namespace Connectables {
     protected:
         const ConnectionInfo pinOut;
         const ConnectionInfo pinIn;
-//        QStandardItem *modelOut;
-//        QStandardItem *modelIn;
         QStandardItem *modelItem;
     };
 }

@@ -43,7 +43,6 @@ namespace View {
         ListPinsView *listBridgeOut;
 
     protected:
-//        void closeEvent ( QCloseEvent * event );
         WId backOri;
 
         QList<CableView*>listCables;
@@ -52,7 +51,6 @@ namespace View {
         void CommandStep(ConnectionInfo pinInfo, int delta);
 
     public slots:
-//        void SetObject(QSharedPointer<Connectables::Object> objPtr);
         void SetBackground();
     };
 

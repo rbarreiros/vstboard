@@ -27,7 +27,7 @@
 
 namespace View {
 
-    //inherits from QObject to send destroy signal
+    //must inherits from QObject to send destroy signal
     class CableView : public QGraphicsPathItem, public QObject
     {
     public:

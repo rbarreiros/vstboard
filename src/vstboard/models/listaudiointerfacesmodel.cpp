@@ -38,14 +38,6 @@ QMimeData  * ListAudioInterfacesModel::mimeData ( const QModelIndexList  & index
     QByteArray b;
     QDataStream stream(&b,QIODevice::WriteOnly);
 
-//    bool ok = false;
-//    stream << item->text();
-//    stream << item->data(Qt::UserRole).toInt(&ok);
-
-//    Q_ASSERT(ok);
-//    if(!ok)
-//        return 0;
-
     stream << item->data(UserRoles::objInfo).value<ObjectInfo>();
 
     data->setData("application/x-audiointerface",b);

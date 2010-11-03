@@ -347,11 +347,9 @@ void ConfigDialog::accept()
 
     int buffer = ui->bufferSize->itemData(ui->bufferSize->currentIndex()).toInt();
     settings.setValue("bufferSize", buffer);
-//    MainHost::Get()->SetBufferSize( ui->bufferSize->itemData(ui->bufferSize->currentIndex()).toLongLong() );
 
     int precision = ui->samplePrecision->itemData(ui->samplePrecision->currentIndex()).toInt();
     settings.setValue("samplePrecision",precision);
-//    MainHost::Get()->SetSamplePrecision( ui->samplePrecision->itemData(ui->samplePrecision->currentIndex()).toInt() );
 
     MainConfig::Get()->UpdateShortcutsFromModel();
 

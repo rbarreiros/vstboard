@@ -98,16 +98,6 @@ void TextButton::CreateCache(const QString &/*text*/, const QStyleOptionGraphics
     QGraphicsSimpleTextItem::paint(&p2,option,widget);
 }
 
-QRectF TextButton::boundingRect() const
-{
-//    //our bounding is the text bounding with a 2px margin
-//    QRectF bounding = QGraphicsSimpleTextItem::boundingRect();
-//    rect.setWidth(rect.width()+2);
-//    rect.setHeight(rect.height()+2);
-//    return rect;
-    return bounding;
-}
-
 void TextButton::paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
 {
     if(!pix                         //no cache yet

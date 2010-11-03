@@ -67,24 +67,8 @@ void AudioBuffer::Clear()
     memcpy(pBuffer,blankBuffer,sizeof(float)*nSize);
 }
 
-//void AudioBuffer::MixWith(AudioBuffer * buff, float mult)
-//{
-//    Q_ASSERT(buff->GetSize()==nSize);
-//    float *tmp=buff->Get();
-//
-//    if(mult==1.0f) {
-//        memcpy(pBuffer,tmp,sizeof(float)*nSize);
-//        return;
-//    }
-//
-//    for(long i=0;i<nSize;i++) {
-//        pBuffer[i]+=tmp[i]*mult;
-//    }
-//}
-
 void AudioBuffer::AddToStack(AudioBuffer * buff)
 {
-//    Q_ASSERT(buff->GetSize()==nSize);
     if(buff->GetSize()!=nSize) {
         if(stackSize==0) {
             SetSize(buff->GetSize());
@@ -112,32 +96,10 @@ void AudioBuffer::AddToStack(AudioBuffer * buff)
     stackSize++;
 }
 
-//void AudioBuffer::SetGain(float gain)
-//{
-//    for(long i=0;i<nSize;i++) {
-//        pBuffer[i]*=gain;
-//    }
-//}
-
-//void AudioBuffer::CopyFrom(AudioBuffer * buff)
-//{
-//    Q_ASSERT(buff->GetSize()==nSize);
-//    float * tmp=buff->Get();
-//
-//    for(long i=0;i<nSize;i++) {
-//        pBuffer[i]+=tmp[i];
-//    }
-//}
 
 //if tmpBufferToBeFilled : this buff is not a sound and a blank buffer will be returned if no other sounds are added to the stack
 void AudioBuffer::SetPointer(float * buff, bool tmpBufferToBeFilled)
 {
-//    if(!bExternalAllocation) {
-//        if(pBuffer)
-//            delete pBuffer;
-//        bExternalAllocation=true;
-//    }
-
     pBuffer=buff;
 
     if(tmpBufferToBeFilled)
@@ -164,11 +126,7 @@ float *AudioBuffer::ConsumeStack()
     switch(stackSize) {
         case 0:
             //empty stack : return a blank buffer
-//            if(bExternalAllocation) {
                 Clear();
-//            } else {
-//                pBuffer = AudioBuffer::blankBuffer;
-//            }
             break;
 
         case 1:
@@ -215,22 +173,8 @@ float *AudioBuffer::ConsumeStack()
         }
         _maxVal = 1.0f;
     }
-
-//    stackSize=0; // not yet, wait for feedback
     return pBuffer;
 }
-//
-//void AudioBuffer::InvalidateVu()
-//{
-//    float ma=.0f;
-//    float mi=.0f;
-//
-//    for(long i=0;i<nSize;i++) {
-//        ma = std::max(pBuffer[i],ma);
-//        mi = std::min(pBuffer[i],mi);
-//    }
-//    _maxVal = std::max(_maxVal, std::max(ma,-mi));
-//}
 
 float AudioBuffer::GetVu()
 {

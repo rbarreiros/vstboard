@@ -34,7 +34,6 @@ namespace Connectables {
         ~AudioPinOut();
 
         void SetBuffer(AudioBuffer *buffer);
-    //    AudioBuffer *GetBuffer() {return buffer;}
         void SendAudioBuffer();
         AudioBuffer *buffer;
         float GetValue();

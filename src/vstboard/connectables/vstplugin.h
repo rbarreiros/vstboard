@@ -46,7 +46,6 @@ namespace Connectables {
         int GetProcessingTime() {return 20;}
         long OnGetUniqueId() { return index; }
         long OnMasterCallback(long opcode, long index, long value, void *ptr, float opt, long currentReturnCode);
-        void UpdateDisplay();
         void SetSleep(bool sleeping);
         void MidiMsgFromInput(long msg);
         QString GetParameterName(ConnectionInfo pinInfo);
@@ -82,7 +81,6 @@ namespace Connectables {
     public slots:
         void SetBufferSize(long size);
         void SetSampleRate(float rate=44100.0);
-//        void ToggleEditor();
         void RaiseEditor();
         void EditorDestroyed();
         void EditIdle();

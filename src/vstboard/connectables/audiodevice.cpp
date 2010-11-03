@@ -34,7 +34,6 @@ QHash<int,AudioDevice*>AudioDevice::listAudioDevices;
 
 AudioDevice::AudioDevice(const ObjectInfo &info, QObject *parent) :
     QObject(parent),
-//    deviceNumber(-1),
     sampleRate(44100.0f),
     bufferSize(4096),
     stream(0),
@@ -42,12 +41,9 @@ AudioDevice::AudioDevice(const ObjectInfo &info, QObject *parent) :
     devIn(0),
     devOut(0),
     closeFlag(false),
-//    identity(0),
     closed(true),
     objInfo(info)
 {
-//    identityString=objInfo.name;
-//    identity=objInfo.id;
     setObjectName(objInfo.name);
     listAudioDevices.insert(objInfo.id,this);
 
@@ -58,7 +54,6 @@ AudioDevice::AudioDevice(const ObjectInfo &info, QObject *parent) :
 AudioDevice::~AudioDevice()
 {
     Close();
-
     listAudioDevices.remove(objInfo.id);
 
     debug("%s deleted",objectName().toAscii().constData())
@@ -66,8 +61,6 @@ AudioDevice::~AudioDevice()
 
 bool AudioDevice::SetObjectInput(AudioDeviceIn *obj)
 {
-  //  QMutexLocker lock(&objMutex);
-
     if(devIn && obj) {
         debug("AudioDevice::SetObjectInput already used")
         return false;
@@ -79,8 +72,6 @@ bool AudioDevice::SetObjectInput(AudioDeviceIn *obj)
 
 bool AudioDevice::SetObjectOutput(AudioDeviceOut *obj)
 {
-   // QMutexLocker lock(&objMutex);
-
     if(devOut && obj) {
         debug("AudioDevice::SetObjectOutput already used")
         return false;
@@ -193,7 +184,7 @@ bool AudioDevice::OpenStream(double sampleRate)
 
 bool AudioDevice::Open()
 {
-    debug("%s open",objectName().toAscii().constData())
+//    debug("%s open",objectName().toAscii().constData())
 
     //find the corresponding device
     if(!FindDeviceFromName()) {
@@ -234,21 +225,13 @@ bool AudioDevice::Open()
         return false;
     }
 
-
-//        const PaStreamInfo *info = Pa_GetStreamInfo(stream);
-//        debug(QString("inLatency:%1ms outLatency:%2ms")
-//               .arg(1000*info->inputLatency)
-//               .arg(1000*info->outputLatency)
-//               .toAscii());
-
-
     closed=false;
     return true;
 }
 
 bool AudioDevice::CloseStream()
 {
-    debug("AudioDevice::CloseStream")
+//    debug("AudioDevice::CloseStream")
 
     PaError err;
 
@@ -281,7 +264,7 @@ bool AudioDevice::Close()
     if(closed)
         return true;
 
-    debug("%s close",objectName().toAscii().constData())
+//    debug("%s close",objectName().toAscii().constData())
 
     closeFlag=true;
     QMutexLocker lock(&objMutex);

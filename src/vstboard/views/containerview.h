@@ -48,16 +48,12 @@ namespace View {
         BridgeView *bridgeOut;
 
     protected:
-//        void moveEvent ( QGraphicsSceneMoveEvent * event );
         void resizeEvent ( QGraphicsSceneResizeEvent * event );
         void closeEvent ( QCloseEvent * event );
         ContainerContent *content;
         ListPinsView *centerLayout;
         QHash<int,ObjectView*>listChildObjects;
         QList<CableView*>listCables;
-
-//    signals:
-//        void AddObject(ObjType::Enum type, int containerId, QPointF pos, int id=0, QString name="");
 
     };
 }

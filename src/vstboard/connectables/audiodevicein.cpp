@@ -45,20 +45,12 @@ bool AudioDeviceIn::Close()
 
     if(parentDevice) {
         parentDevice->SetObjectInput(0);
-
-//        if(!parentDevice->devIn && !parentDevice->devOut) {
-//            parentDevice->Close();
-//            parentDevice->deleteLater();
-//            parentDevice=0;
-//        }
     }
     return true;
 }
 
 void AudioDeviceIn::Render()
 {
-//    parentObject->Render();
-
     foreach(AudioPinOut* pin,listAudioPinOut) {
         pin->SendAudioBuffer();
     }
@@ -94,7 +86,6 @@ bool AudioDeviceIn::Open()
         AudioPinOut *pin = new AudioPinOut(this,i,true);
         pin->setObjectName(QString("Input %1").arg(i));
         listAudioPinOut << pin;
-//        listPins << pin;
     }
 
     //device already has a child
@@ -103,7 +94,6 @@ bool AudioDeviceIn::Open()
         return false;
     }
 
-    //UpdateModelNode();
     Object::Open();
     return true;
 }

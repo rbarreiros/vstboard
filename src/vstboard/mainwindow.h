@@ -28,12 +28,7 @@
 #include "models/listtoolsmodel.h"
 #include "projectfile/projectfile.h"
 #include "views/solverscene.h"
-
 #include "views/sceneview.h"
-
-#ifndef QT_NO_DEBUG
-#include "tests.h"
-#endif
 
 namespace Ui {
     class MainWindow;
@@ -82,40 +77,25 @@ private:
     MainHost *mainHost;
     Project::ProjectFile *project;
 
-#ifndef QT_NO_DEBUG
-    tests tst;
-#endif
-
-signals:
-
 public slots:
     void UpdateCpuLoad();
-    void OnFileLoaded();
     void OnProgramChange(int prog);
 
 private slots:
-    void on_actionProject_panel_triggered(bool checked);
     void on_actionSave_Setup_As_triggered();
     void on_actionSave_Project_As_triggered();
     void on_actionAbout_triggered();
     void on_actionConfig_triggered();
     void on_actionNew_Setup_triggered();
     void on_actionSave_Setup_triggered();
-    void on_actionDelete_triggered();
-    void on_treeHostModel_doubleClicked(QModelIndex index);
     void on_actionShortcuts_toggled(bool );
     void on_actionNew_triggered();
     void on_treePrograms_clicked(QModelIndex index);
     void on_treePrograms_activated(QModelIndex index);
     void on_actionLoad_triggered();
     void on_actionSave_triggered();
-//    void on_treeParking_doubleClicked(QModelIndex index);
     void openRecentSetup();
     void openRecentProject();
-
-//#ifndef QT_NO_DEBUG
-//    void on_actionTest_triggered();
-//#endif
 
 };
 

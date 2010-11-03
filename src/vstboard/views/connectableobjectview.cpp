@@ -49,8 +49,6 @@ ConnectableObjectView::ConnectableObjectView(QAbstractItemModel *model,QGraphics
     setLayout(layout);
 
     setFlag(QGraphicsItem::ItemIsMovable, true);
-//    setFlag(QGraphicsItem::ItemIsSelectable, true);
-//    setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
 
     listAudioIn = new ListPinsView(this);
     listAudioOut = new ListPinsView(this);
@@ -70,30 +68,6 @@ ConnectableObjectView::ConnectableObjectView(QAbstractItemModel *model,QGraphics
     layout->addItem(listBridgeIn,3,0,Qt::AlignLeft);
     layout->addItem(listBridgeOut,3,1,Qt::AlignRight);
 }
-
-
-//void ConnectableObjectView::SetObject(QSharedPointer<Connectables::Object> objPtr)
-//{
-//#ifdef VSTSDK
-//    if(obj->type == ObjType::VstPlugin) {
-//        Connectables::VstPlugin* vst = static_cast<Connectables::VstPlugin*>(obj);
-//        if(vst->editorWnd) {
-//            backOri = vst->editorWnd->GetWinId();
-//            //grab the window content
-//            QTimer::singleShot(50,this,SLOT(SetBackground()));
-//            //retry later, let the plugin show its window
-//            QTimer::singleShot(200,this,SLOT(SetBackground()));
-//            connect(MainWindow::Get()->timerVu,SIGNAL(timeout()),
-//                    vst,SLOT(EditIdle()));
-//            connect(this, SIGNAL(ToggleEditor()),
-//                    vst, SLOT(ToggleEditor()));
-//            connect(this, SIGNAL(Clicked()),
-//                    vst, SLOT(RaiseEditor()));
-//        }
-//    }
-//#endif
-//
-//}
 
 void ConnectableObjectView::SetBackground()
 {

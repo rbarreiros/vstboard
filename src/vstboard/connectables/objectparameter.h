@@ -29,10 +29,10 @@ namespace Connectables {
     {
 
     public:
-        ObjectParameter() : value(.0f), index(0), visible(false) {};
-        ObjectParameter(float value, bool visible=false) : value(value), index(0), visible(visible) {};
-        ObjectParameter(int index, bool visible=false) : value(.0f), index(index), visible(visible) {};
-        ObjectParameter(bool visible) : value(.0f), index(0), visible(visible) {};
+        ObjectParameter() : value(.0f), index(0), visible(false) {}
+        ObjectParameter(float value, bool visible=false) : value(value), index(0), visible(visible) {}
+        ObjectParameter(int index, bool visible=false) : value(.0f), index(index), visible(visible) {}
+        ObjectParameter(bool visible) : value(.0f), index(0), visible(visible) {}
 
         ObjectParameter(const ObjectParameter &c) {
             *this = c;

@@ -34,7 +34,6 @@ namespace Connectables {
         ~AudioPinIn();
 
         void SetBuffer(AudioBuffer *buffer);
-//        void ProcessAudio();
         void ReceiveMsg(const int msgType=0,void *data=0);
         AudioBuffer *buffer;
         float GetValue();

@@ -37,12 +37,6 @@ PathSolver::~PathSolver()
 void PathSolver::Clear()
 {
     model.clear();
-   /* const Connectables::hashObjects listObjects = Connectables::ObjectFactory::Get()->GetListObjects();
-    Connectables::hashObjects::const_iterator i = listObjects.constBegin();
-    while(i!=listObjects.constEnd()) {
-        i.value()->solverNode = 0;
-        ++i;
-    }*/
 
     renderingOrder.clear();
     foreach(SolverNode* line, SolverNode::listNodes) {
@@ -54,14 +48,11 @@ void PathSolver::Clear()
 
 void PathSolver::Resolve(hashCables cables)
 {
-//    debug("solver resolve");
-
     Clear();
 
     listCables = cables;
 
     //encapsulate objects in solvernodes
-//    debug(QString("PathSolver::Resolve nbobj1 %1").arg( Connectables::ObjectFactory::Get()->GetListObjects().size() ).toAscii())
     const Connectables::hashObjects listObjects = Connectables::ObjectFactory::Get()->GetListObjects();
     Connectables::hashObjects::const_iterator i = listObjects.constBegin();
     while(i!=listObjects.constEnd()) {
@@ -149,8 +140,6 @@ void PathSolver::Resolve(hashCables cables)
         maxStep = std::max(maxStep, node->SetMinRenderOrder(0));
     }
 
-//    debug(QString("PathSolver::Resolve nbobj2 %1").arg( Connectables::ObjectFactory::Get()->GetListObjects().size() ).toAscii())
-
     foreach(SolverNode *node, SolverNode::listNodes) {
         if(!node->IsTail())
             continue;
@@ -226,7 +215,6 @@ QList<SolverNode*> PathSolver::ListOfGoodStarts(const QList<SolverNode*>&loop)
 //return the best start of a loop by finding the ending node close to a tail
 QList<SolverNode*> PathSolver::BestStartsInAList(const QList<SolverNode*>&loop, const QList<SolverNode*>&possibleStarts)
 {
-//    SolverNode* bestStart=0;
     QList<SolverNode*> bestStarts;
     int minStep=99999;
 

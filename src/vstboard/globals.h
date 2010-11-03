@@ -25,7 +25,6 @@
 
 #define EMPTY_PROGRAM 0xffff
 #define TEMP_PROGRAM 0xfffe
-//#define PROJECT_PROGRAM 0xfffd
 
 #define SETUP_FILE_EXTENSION "ctrls"
 #define PROJECT_FILE_EXTENSION "ctrlp"

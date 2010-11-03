@@ -29,7 +29,6 @@ public:
     TextButton(const QString &text, QGraphicsItem *parent, const QBrush &textBrush, const QBrush &outlineBrush);
     ~TextButton();
     void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
-    QRectF boundingRect() const;
     void Toggle(bool value);
 
 protected:

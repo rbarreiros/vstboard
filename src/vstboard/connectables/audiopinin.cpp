@@ -49,17 +49,11 @@ void AudioPinIn::SetBuffer(AudioBuffer *buff)
     buffer = buff;
 }
 
-//void AudioPinIn::ProcessAudio()
-//{
-//    parent->BufferFromInput(buffer);
-//}
-
 void AudioPinIn::ReceiveMsg(const int msgType,void *data)
 {
     if(msgType==PinMessage::AudioBufferToMix) {
         AudioBuffer *buf = static_cast<AudioBuffer*>(data);
         buffer->AddToStack(buf);
-       // ProcessAudio();
     }
 }
 

@@ -37,13 +37,9 @@
 #include "bridgepinin.h"
 #include "bridgepinout.h"
 #include "objectprogram.h"
-class SolverNode;
-//#include "globals.h"
-
-//#include "data/objectdata.h"
-
 #include "objectinfo.h"
 
+class SolverNode;
 
 namespace Connectables {
 
@@ -66,7 +62,6 @@ namespace Connectables {
 
         void setObjectName(const QString &name);
 
-//        QString GetName() {return name;}
         virtual Pin * GetPin(const ConnectionInfo &pinInfo);
         inline int GetSavedIndex() {return savedIndex;}
         inline void ResetSavedIndex(int id=-2) {savedIndex=id;}
@@ -89,12 +84,6 @@ namespace Connectables {
 
         virtual float SetParameter(int paramId, float value) {return value;}
         virtual void MidiMsgFromInput(long msg) {}
-
-
-//        QString GetIdentityString() {return identityString;}
-//        qint32 GetIdentity() {return identity;}
-
-        //virtual void OnParameterChanged(ConnectionInfo pinInfo, float value) {};
 
         inline short GetLearningMode() {return parameterLearning;}
         virtual QString GetParameterName(ConnectionInfo pinInfo) {return "";}
@@ -131,8 +120,6 @@ namespace Connectables {
         virtual void SetBridgePinsOutVisible(bool visible);
 
     protected:
-//        QMap<PinType::Enum , QMap<PinDirection::Enum , Pin* > >mapListPins;
-
         QList<AudioPinIn*>listAudioPinIn;
         QList<AudioPinOut*>listAudioPinOut;
         QList<MidiPinIn*>listMidiPinIn;
@@ -144,28 +131,22 @@ namespace Connectables {
 
         QMutex objMutex;
 
-        //for pathsolver
+        //used by pathsolver
         SolverNode *solverNode;
-
-//        ObjType::Enum type;
 
         hashPrograms listPrograms;
 
         int index;
         int savedIndex;
 
-//        qint32 identity;
-//        QString identityString;
         bool sleep;
         short parameterLearning;
         ObjectProgram *currentProgram;
         bool progIsDirty;
-//        QString name;
 
         bool closed;
         quint16 containerId;
 
-//        QList<QStandardItem*>listNodes;
         QStandardItem *modelNode;
         QStandardItem *modelAudioIn;
         QStandardItem *modelAudioOut;
@@ -176,8 +157,6 @@ namespace Connectables {
         QStandardItem *modelBridgeIn;
         QStandardItem *modelBridgeOut;
         QStandardItem *modelEditor;
-
-//        NodeType::Enum nodeType;
 
         int currentProgId;
 

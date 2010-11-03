@@ -62,7 +62,6 @@ namespace Connectables {
        bool OpenStream(double sampleRate);
        bool CloseStream();
 
-//       int deviceNumber;
        float sampleRate;
        unsigned long bufferSize;
 
@@ -75,8 +74,6 @@ namespace Connectables {
         bool closeFlag;
 
         QMutex objMutex;
-//        int identity;
-//        QString identityString;
         bool closed;
 
         ObjectInfo objInfo;
@@ -88,6 +85,5 @@ namespace Connectables {
     friend class AudioDeviceOut;
     };
 }
-//Q_DECLARE_METATYPE(Connectables::AudioDevice)
 
 #endif // AUDIODEVICE_H

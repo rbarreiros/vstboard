@@ -20,9 +20,6 @@
 
 #include "vstbank.h"
 
-//#pragma warning (disable : 4996)
-
-
 using namespace vst;
 
 /*===========================================================================*/

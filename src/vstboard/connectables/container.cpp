@@ -158,11 +158,6 @@ void Container::LoadProgram(int prog)
     if(!listContainerPrograms.contains(currentProgId))
         listContainerPrograms.insert(currentProgId,new ContainerProgram(this));
 
-//    foreach(QSharedPointer<Object>objPtr, listStaticObjects) {
-//        if(!objPtr.isNull() && objPtr->listenProgramChanges)
-//            objPtr->LoadProgram(currentProgId);
-//    }
-
     ContainerProgram *tmp = listContainerPrograms.value(currentProgId);
     currentProgram = new ContainerProgram(*tmp);
     currentProgram->Load(prog);
@@ -178,11 +173,6 @@ void Container::SaveProgram()
     if(!currentProgram)
         return;
 
-//    foreach(QSharedPointer<Object>objPtr, listStaticObjects) {
-//        if(!objPtr.isNull() && objPtr->listenProgramChanges)
-//            objPtr->SaveProgram();
-//    }
-
     currentProgram->Save();
     delete listContainerPrograms.take(currentProgId);
     listContainerPrograms.insert(currentProgId,currentProgram);
@@ -194,16 +184,6 @@ void Container::UnloadProgram()
 {
     if(!currentProgram)
         return;
-
-//    foreach(QSharedPointer<Object>objPtr, listStaticObjects) {
-//        if(!objPtr.isNull() && objPtr->listenProgramChanges)
-//            objPtr->UnloadProgram();
-//    }
-
-//    foreach(QSharedPointer<Object> objPtr, currentProgram->listObjects) {
-//        if(!objPtr.isNull())
-//            objPtr->UnloadProgram();
-//    }
 
     currentProgram->Unload();
     delete currentProgram;
@@ -313,18 +293,6 @@ QDataStream & Container::toStream (QDataStream& out) const
             out << objectName();
             out << sleep;
 
-         /*   out << (quint16)listStaticObjects.size();
-            foreach(QSharedPointer<Object> objPtr, listStaticObjects) {
-                if(!objPtr.isNull()) {
-                    out<<(quint8)objPtr->GetType();
-                    out<<(quint16)objPtr->GetIdentity();
-                    out<<objPtr->GetIdentityString();
-                    out<<*objPtr.data();
-                } else {
-                    out<<(quint8)ObjType::ND;
-                }
-            }*/
-
             if(currentProgram) {
                 out << (quint16)currentProgram->listObjects.size();
                 foreach(QSharedPointer<Object> objPtr, currentProgram->listObjects) {
@@ -338,8 +306,6 @@ QDataStream & Container::toStream (QDataStream& out) const
                         out << (qint16)objPtr->GetIndex();
                         out << (quint16)tmpStream.size();
                         out << tmpStream;
-
-//                        out<<*objPtr.data();
                     } else {
                         out<<(quint8)ObjType::ND;
                     }
@@ -362,16 +328,6 @@ QDataStream & Container::toStream (QDataStream& out) const
             }
 
             out << (quint16)currentProgId;
-
-           /* out << (quint16)listStaticObjects.size();
-            foreach(QSharedPointer<Object> objPtr, listStaticObjects) {
-                if(!objPtr.isNull()) {
-                    out<<(quint16)objPtr->GetIndex();
-                    out<<*objPtr.data();
-                } else {
-                    out<<(quint16)-1;
-                }
-            }*/
 
             if(currentProgram) {
                 out << (quint16)currentProgram->listObjects.size();
@@ -408,36 +364,8 @@ QDataStream & Container::fromStream (QDataStream& in)
             in >> sleep;
 
             quint16 nbObj;
-      /*      in >> nbObj;
-            for(quint16 i=0; i<nbObj; i++) {
-                quint8 objType;
-                in>>objType;
-                if( (ObjType::Enum)objType!=ObjType::ND ) {
-                    quint16 identity;
-                    in>>identity;
-                    QString identityString;
-                    in>>identityString;
-
-                    QSharedPointer<Object> objPtr = ObjectFactory::Get()->NewObject((ObjType::Enum)objType,identity,identityString);
-                    if(!objPtr.isNull()) {
-                        AddStaticObject(objPtr);
-                        in>>*objPtr.data();
-                   }
-                }
-            }
-*/
-            //load objects in a tmp program
-//            LoadProgram(TEMP_PROGRAM);
-
             in >> nbObj;
             for(quint16 i=0; i<nbObj; i++) {
-//                quint8 objType;
-//                in>>objType;
-//                if( (ObjType::Enum)objType!=ObjType::ND ) {
-//                    quint16 identity;
-//                    in>>identity;
-//                    QString identityString;
-//                    in>>identityString;
 
                     ObjectInfo info;
                     qint16 savedIndex;
@@ -456,8 +384,6 @@ QDataStream & Container::fromStream (QDataStream& in)
                         tmp >> *objPtr.data();
                     } else {
                         //error while creating the object, build a dummy object with the same saved id
-//                        if(info.nodeType==NodeType::ND)
-//                            info.nodeType=NodeType::dummy;
                         info.objType=ObjType::dummy;
                         objPtr = ObjectFactory::Get()->NewObject(info);
                         QDataStream tmp2( &tmpStream , QIODevice::ReadWrite);
@@ -469,7 +395,6 @@ QDataStream & Container::fromStream (QDataStream& in)
                             debug("Container::fromStream dummy object not created")
                         }
                     }
-//                }
             }
             break;
         }
@@ -495,26 +420,11 @@ QDataStream & Container::fromStream (QDataStream& in)
 
             }
 
-//            UnloadProgram();
-//            listContainerPrograms.remove(TEMP_PROGRAM);
-
             quint16 progId;
             in >> progId;
 
            quint16 nbObj;
-        /*    in >> nbObj;
-            for(quint16 i=0; i<nbObj; i++) {
-                quint16 objId;
-                in>>objId;
-                if(objId!=(quint16)-1) {
-                    int id = ObjectFactory::Get()->IdFromSavedId(objId);
-                    QSharedPointer<Object> objPtr = ObjectFactory::Get()->GetObjectFromId(id);
-                    if(!objPtr.isNull()) {
-                        in>>*objPtr.data();
-                   }
-                }
-            }
-*/
+
             in >> nbObj;
             for(quint16 i=0; i<nbObj; i++) {
                 quint16 objId;

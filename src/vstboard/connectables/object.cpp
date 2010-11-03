@@ -30,11 +30,8 @@ Object::Object(int index, const ObjectInfo &info) :
     QObject(),
     listenProgramChanges(true),
     solverNode(0),
-//    type(type),
     index(index),
     savedIndex(-2),
-//    identity(0),
-//    identityString(QString::null),
     sleep(true),
     parameterLearning(0),
     currentProgram(0),
@@ -51,20 +48,15 @@ Object::Object(int index, const ObjectInfo &info) :
     modelBridgeIn(0),
     modelBridgeOut(0),
     modelEditor(0),
-//    nodeType(NodeType::object),
     currentProgId(TEMP_PROGRAM),
     objInfo(info)
 {
     setObjectName(QString("%1.%2").arg(objInfo.name).arg(index));
-   //    debug(QString("create obj %1:%2").arg(GetIndex()).arg(objectName()).toAscii())
-   // modelNode = new QStandardItem("tmpNode");
-
 }
 
 Object::~Object()
 {
     Close();
-//    debug(QString("delete obj %1:%2 %3").arg(GetIndex()).arg(objectName()).arg((long)this,0,16).toAscii())
 }
 
 
@@ -75,13 +67,10 @@ bool Object::Open()
     return true;
 }
 
-//returns false if already close
 bool Object::Close()
 {
     if(closed)
         return false;
-
-//debug(QString("object closed %1").arg((long)this,0,16).toAscii())
 
     SetSleep(true);
     Hide();
@@ -91,11 +80,6 @@ bool Object::Close()
         delete prg;
     }
     listPrograms.clear();
-
-
-//    MainHost::modelProxy->Remove(index);
-//    if(modelNode)
-//    modelNode->parent()->removeRow(modelNode->row());
 
     return true;
 }
@@ -151,7 +135,6 @@ void Object::SetBridgePinsOutVisible(bool visible)
 
 void Object::setObjectName(const QString &name)
 {
-//    MainHost::modelProxy->Update(index,Qt::DisplayRole,name);
     if(modelNode)
         modelNode->setData(name,Qt::DisplayRole);
     QObject::setObjectName(name);
@@ -265,15 +248,7 @@ Pin * Object::GetPin(const ConnectionInfo &pinInfo)
                 return listBridgePinIn.at(pinInfo.pinNumber);
             else
                 return listBridgePinOut.at(pinInfo.pinNumber);
-
-//        default:
-//            debug("object getpin : pin not found");
         }
-
-    //i'm a dummy object : i create needed pins
-//    if(objInfo.objType == ObjType::dummy) {
-
-//    }
 
     return 0;
 }
@@ -283,8 +258,6 @@ void Object::SetParentModelNode(QStandardItem* parent)
     if(modelNode && modelNode->parent() == parent)
         return;
 
-//    debug("Object::SetParentModelNode %d",index)
-
     if(modelNode)
         Hide();
 
@@ -292,17 +265,13 @@ void Object::SetParentModelNode(QStandardItem* parent)
     modelNode->setData(QVariant::fromValue(objInfo), UserRoles::objInfo);
     modelNode->setData(index, UserRoles::value);
     modelNode->setData(objInfo.name, Qt::DisplayRole);
-//    modelNode->setData(listenProgramChanges,UserRoles::programmable);
 
     parent->appendRow(modelNode);
     containerId = parent->data(UserRoles::value).toInt();
-    //UpdateModelNode();
 }
 
 void Object::SetParkingNode(QStandardItem* parent)
 {
-//    debug("Object::SetParkingNode %d",index)
-
     if(modelNode)
         Hide();
 
@@ -317,24 +286,8 @@ void Object::SetParkingNode(QStandardItem* parent)
 
 void Object::UpdateModelNode()
 {
-//    debug("Object::UpdateModelNode %d",index)
-
     if(!modelNode)
         return;
-
-//    debug(QString("Object::UpdateModelNode %1 %2").arg(index).arg(objectName()).toAscii())
-
-//    if(modelNode->parent()==0) {
-//        debug("Object::UpdateModelNode no parent container")
-//    } else {
-//       containerId = modelNode->parent()->data(UserRoles::value).toInt();
-//    }
-
-//    MainHost::modelProxy->Update(index,Qt::DisplayRole,objectName());
-//    modelNode->setData(objectName(),Qt::DisplayRole);
-//    MainHost::modelProxy->Update(index,UserRoles::nodeType,nodeType);
-    //modelNode->setData(objInfo.nodeType,UserRoles::nodeType);
-//    modelNode->setData(listenProgramChanges,UserRoles::programmable);
 
     modelNode->setData(QVariant::fromValue(objInfo), UserRoles::objInfo);
 
@@ -342,55 +295,46 @@ void Object::UpdateModelNode()
     if(!modelAudioIn && listAudioPinIn.size()>0) {
         modelAudioIn = new QStandardItem("AudioIn");
         modelAudioIn->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listAudioIn)) , UserRoles::objInfo);
-//        MainHost::modelProxy->Add(-1,modelAudioIn,modelNode);
         modelNode->appendRow(modelAudioIn);
     }
     foreach(AudioPinIn* pin, listAudioPinIn) {
         pin->SetParentModelNode(modelAudioIn);
-//        pin->SetVisible(true);
     }
 
     //audio out
     if(!modelAudioOut && listAudioPinOut.size()>0) {
         modelAudioOut = new QStandardItem("AudioOut");
         modelAudioOut->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listAudioOut)) , UserRoles::objInfo);
-//        MainHost::modelProxy->Add(-1,modelAudioOut,modelNode);
         modelNode->appendRow(modelAudioOut);
     }
     foreach(AudioPinOut* pin, listAudioPinOut) {
         pin->SetParentModelNode(modelAudioOut);
-//        pin->SetVisible(true);
     }
 
     //midi in
     if(!modelMidiIn && listMidiPinIn.size()>0) {
         modelMidiIn = new QStandardItem("MidiIn");
         modelMidiIn->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listMidiIn)) , UserRoles::objInfo);
-//        MainHost::modelProxy->Add(-1,modelMidiIn,modelNode);
         modelNode->appendRow(modelMidiIn);
     }
     foreach(MidiPinIn* pin, listMidiPinIn) {
         pin->SetParentModelNode(modelMidiIn);
-//        pin->SetVisible(true);
     }
 
     //midi out
     if(!modelMidiOut && listMidiPinOut.size()>0) {
         modelMidiOut = new QStandardItem("MidiOut");
         modelMidiOut->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listMidiOut)) , UserRoles::objInfo);
-//        MainHost::modelProxy->Add(-1,modelMidiOut,modelNode);
         modelNode->appendRow(modelMidiOut);
     }
     foreach(MidiPinOut* pin, listMidiPinOut) {
         pin->SetParentModelNode(modelMidiOut);
-//        pin->SetVisible(true);
     }
 
     //param in
     if(!modelParamIn && listParameterPinIn.size()>0) {
         modelParamIn = new QStandardItem("ParamIn");
         modelParamIn->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listParamIn)) , UserRoles::objInfo);
-//        MainHost::modelProxy->Add(-1,modelParamIn,modelNode);
         modelNode->appendRow(modelParamIn);
     }
     hashListParamPin::iterator i = listParameterPinIn.begin();
@@ -403,7 +347,6 @@ void Object::UpdateModelNode()
     if(!modelParamOut && listParameterPinOut.size()>0) {
         modelParamOut = new QStandardItem("ParamOut");
         modelParamOut->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listParamOut)) , UserRoles::objInfo);
-//        MainHost::modelProxy->Add(-1,modelParamOut,modelNode);
         modelNode->appendRow(modelParamOut);
     }
     hashListParamPin::iterator j = listParameterPinOut.begin();
@@ -416,24 +359,20 @@ void Object::UpdateModelNode()
     if(!modelBridgeIn && listBridgePinIn.size()>0) {
         modelBridgeIn = new QStandardItem("BridgeIn");
         modelBridgeIn->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listBridgeIn)) , UserRoles::objInfo);
-//        MainHost::modelProxy->Add(-1,modelBridgeIn,modelNode);
         modelNode->appendRow(modelBridgeIn);
     }
     foreach(BridgePinIn* pin, listBridgePinIn) {
         pin->SetParentModelNode(modelBridgeIn);
-//        pin->SetVisible(true);
     }
 
     //bridge out
     if(!modelBridgeOut && listBridgePinOut.size()>0) {
         modelBridgeOut = new QStandardItem("BridgeOut");
         modelBridgeOut->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listBridgeOut)) , UserRoles::objInfo);
-//        MainHost::modelProxy->Add(-1,modelBridgeOut,modelNode);
         modelNode->appendRow(modelBridgeOut);
     }
     foreach(BridgePinOut* pin, listBridgePinOut) {
         pin->SetParentModelNode(modelBridgeOut);
-//        pin->SetVisible(true);
     }
 }
 
@@ -460,14 +399,12 @@ void Object::SetUnLearningMode(bool unlearning)
 void Object::SetPosition(QPointF pos)
 {
     position=pos;
-//    MainHost::modelProxy->Update(index,UserRoles::position,position);
     modelNode->setData(position,UserRoles::position);
 }
 
 void Object::SetSize(QSizeF s)
 {
     size=s;
-//    MainHost::modelProxy->Update(index,UserRoles::size,size);
     modelNode->setData(size,UserRoles::size);
 }
 
@@ -491,7 +428,6 @@ QDataStream & Object::toStream(QDataStream & out) const
     else
         out << (quint16)EMPTY_PROGRAM;
 
-
     return out;
 }
 
@@ -504,8 +440,6 @@ QDataStream & Object::fromStream(QDataStream & in)
     in >> (qint8&)parameterLearning;
     in >> listenProgramChanges;
 
-//    UnloadProgram();
-//    LoadProgram(TEMP_PROGRAM);
 
     quint16 nbProg;
     in >> nbProg;
@@ -527,10 +461,7 @@ QDataStream & Object::fromStream(QDataStream & in)
 
     quint16 progId;
     in >> progId;
-//    UnloadProgram();
-    //LoadProgram(progId);
 
-//    listPrograms.remove(EMPTY_PROGRAM-1)
     return in;
 }
 

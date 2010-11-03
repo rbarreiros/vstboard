@@ -31,18 +31,10 @@ QMimeData  * ListMidiInterfacesModel::mimeData ( const QModelIndexList  & indexe
     QMimeData  *data = new QMimeData();//QStandardItemModel::mimeData ( indexes ) ;
     QStandardItem *item = itemFromIndex(indexes.first());
 
-    //don't drag api
-//    if(item->parent()==0)
-//        return 0;
-
     QByteArray b;
     QDataStream stream(&b,QIODevice::WriteOnly);
 
-//    stream << item->text();
     stream << item->data(UserRoles::objInfo).value<ObjectInfo>();
-    //stream << item->data(Qt::UserRole+2).toInt();
-    //stream << item->data(Qt::UserRole+3).toInt();
-
     data->setData("application/x-midiinterface",b);
 
     return data;

@@ -47,17 +47,6 @@ ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int num
     loading=true;
     OnValueChanged(value);
     loading=false;
-
-//    modelPin->setData(1.0f,UserRoles::falloff);
-//    modelPin->setData(stepSize,UserRoles::stepSize);
-//    modelFalloff->setData(1.0f,Qt::DisplayRole);
-
-//    connect(this, SIGNAL(ParameterChanged(ConnectionInfo,float)),
-//            parent, SLOT(OnParameterChanged(ConnectionInfo,float)),
-//            Qt::QueuedConnection);
-//    connect(this, SIGNAL(SetProgDirty()),
-//            parent, SLOT(OnProgramDirty()),
-//            Qt::QueuedConnection);
 }
 
 //parameter is a int with a list of possible values
@@ -80,17 +69,6 @@ ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int num
     loading=true;
     OnValueChanged(value);
     loading=false;
-
-//    modelPin->setData(1.0f,UserRoles::falloff);
-//    modelPin->setData(stepSize,UserRoles::stepSize);
-
-//    connect(this, SIGNAL(ParameterChanged(ConnectionInfo,float)),
-//            parent, SLOT(OnParameterChanged(ConnectionInfo,float)),
-//            Qt::QueuedConnection);
-//    connect(this, SIGNAL(SetProgDirty()),
-//            parent, SLOT(OnProgramDirty()),
-//            Qt::QueuedConnection);
-
 }
 
 void ParameterPin::GetDefault(ObjectParameter &param)
@@ -125,8 +103,6 @@ void ParameterPin::ChangeValue(float val)
     OnValueChanged(val);
 
     parent->OnParameterChanged(connectInfo,value);
-//    emit ParameterChanged(connectInfo, value);
-
 }
 
 //from int
@@ -142,7 +118,6 @@ void ParameterPin::ChangeValue(int index)
     OnValueChanged(stepSize*index);
 
     parent->OnParameterChanged(connectInfo,value);
-//    emit ParameterChanged(connectInfo, value);
 }
 
 //from variant
@@ -194,8 +169,6 @@ void ParameterPin::OnValueChanged(float val)
     }
 
     if(visible) {
-//        modelValue->setData(value,Qt::DisplayRole);
-
         if(nameCanChange)
             setObjectName(parent->GetParameterName(connectInfo));
 

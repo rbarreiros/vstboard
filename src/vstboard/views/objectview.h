@@ -38,7 +38,6 @@ namespace View {
         explicit ObjectView(QAbstractItemModel *model, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
         virtual ~ObjectView();
         void setPen(const QPen &pen);
-//        void UnitWithRect( QRectF &rect );
 
         virtual void SetModelIndex(QPersistentModelIndex index);
         virtual void UpdateModelIndex();
@@ -62,9 +61,7 @@ namespace View {
 
         TextButton *editorButton;
 
-//        int objectId;
         QGraphicsGridLayout *layout;
-//        ObjectView *container;
 
         QAbstractItemModel *model;
         QPersistentModelIndex objIndex;

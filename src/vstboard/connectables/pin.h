@@ -53,20 +53,15 @@ namespace Connectables {
 
         void setObjectName(const QString &name);
 
-//        void SetName(const QString &newName);
-//        QString &GetName();
-
         void SetDisplayedText(const QString &txt);
         QString GetDisplayedText();
 
         Object *GetParentObj() {return parent;}
 
         const ConnectionInfo &GetConnectionInfo() const {return connectInfo;}
-//        void SetBridge(bool bridge);
         bool event(QEvent *event);
 
         void SetParentModelNode(QStandardItem *parent_Node);
-//        QList<QStandardItem*> GetModelNode() {return modelNode;}
 
         inline bool GetVisible() {return visible;}
         void SetVisible(bool vis);
@@ -87,7 +82,6 @@ namespace Connectables {
 
     private:
         QMutex txtMutex;
-//        QString name;
         QString displayedText;
 
     public slots:

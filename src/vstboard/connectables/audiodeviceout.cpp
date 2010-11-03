@@ -39,12 +39,6 @@ AudioDeviceOut::~AudioDeviceOut()
     Close();
 }
 
-//void AudioDeviceOut::init()
-//{
-//        qRegisterMetaTypeStreamOperators<Connectables::AudioDeviceOut>("Connectables::AudioDeviceOut");
-//        qMetaTypeId<Connectables::AudioDeviceOut>();
-//}
-
 bool AudioDeviceOut::Close()
 {
     if(!Object::Close())
@@ -52,12 +46,6 @@ bool AudioDeviceOut::Close()
 
     if(parentDevice) {
         parentDevice->SetObjectOutput(0);
-
-//        if(!parentDevice->devIn && !parentDevice->devOut) {
-//            parentDevice->Close();
-//            parentDevice->deleteLater();
-//            parentDevice=0;
-//        }
     }
     return true;
 }
@@ -97,7 +85,6 @@ bool AudioDeviceOut::Open()
         AudioPinIn *pin = new AudioPinIn(this,i,true);
         pin->setObjectName(QString("Output %1").arg(i));
         listAudioPinIn << pin;
-//        listPins << pin;
     }
 
     //device already has a child
@@ -106,7 +93,6 @@ bool AudioDeviceOut::Open()
         return false;
     }
 
-    //UpdateModelNode();
     Object::Open();
     return true;
 }

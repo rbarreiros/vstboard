@@ -32,15 +32,11 @@ public:
         ~AudioBuffer(void);
         bool SetSize(long size);
         void Clear();
-//        void MixWith(AudioBuffer * buff, float mult=1.0f);
         void AddToStack(AudioBuffer * buff);
-//        void SetGain(float gain);
         void SetPointer(float * buff, bool tmpBufferToBeFilled=false);
         float *GetPointer(bool willBeFilled=false);
         float *ConsumeStack();
         inline long GetSize() {return nSize;}
-//        void CopyFrom(AudioBuffer * buff);
-//        void InvalidateVu();
         float GetVu();
         inline void ResetStackCounter() {stackSize=0;}
 

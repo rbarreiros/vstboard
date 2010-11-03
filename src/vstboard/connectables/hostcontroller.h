@@ -37,7 +37,6 @@ namespace Connectables {
     Q_OBJECT
     public:
         explicit HostController(int index);
-//        ~HostController();
         void Render();
         void MidiMsgFromInput(long msg);
 

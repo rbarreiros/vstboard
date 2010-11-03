@@ -35,7 +35,7 @@ namespace Connectables {
     public:
         static ObjectFactory *Get();
         ~ObjectFactory();
-//        QSharedPointer<Object> NewObject(ObjType::Enum type, int id=0, QString name="", int forceObjId=0);
+
         QSharedPointer<Object> NewObject(const ObjectInfo &info);
         QSharedPointer<Object> GetObj(const QModelIndex & index);
         void RemoveObject(int id);
@@ -49,9 +49,6 @@ namespace Connectables {
 
         const hashObjects &GetListObjects() {return listObjects;}
 
-//        QDataStream & toStream (QDataStream &) const;
-//        QDataStream & fromStream (QDataStream &);
-
     private:
         ObjectFactory();
         static ObjectFactory *theObjFactory;
@@ -62,9 +59,5 @@ namespace Connectables {
     };
 
 }
-
-//QDataStream & operator<< (QDataStream & out, const Connectables::ObjectFactory& value);
-//QDataStream & operator>> (QDataStream & in, Connectables::ObjectFactory& value);
-
 
 #endif // OBJECTFACTORY_H

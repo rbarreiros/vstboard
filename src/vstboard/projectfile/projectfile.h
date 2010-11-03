@@ -41,22 +41,14 @@ namespace Project {
 
         QStandardItemModel programModel;
         QStandardItem *ItemFromProgId(int progId);
-//        void SaveProgram(Program *prog);
 
         QMap<int,Program*>listPrograms;
 
         static ProjectFile *theProjectFile;
 
-//        hashCables listCables;
-
     protected:
         void BuildModel();
-//        QHash<int,Connectables::Object*>listConnectableObjects;
         QString fileName;
-
-//        Program *emptyProgram;
-//        Program *hostProgram;
-//        Program *projectProgram;
 
     signals:
 
@@ -64,7 +56,6 @@ namespace Project {
     public slots:
         void SaveToFile(QString filePath);
         bool LoadFromFile(QString filePath);
-//        void OnRemoveObject(int id, int containerId);
 
     };
 

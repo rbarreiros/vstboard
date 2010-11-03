@@ -26,7 +26,6 @@
 
 using namespace View;
 
-//QBrush PinView::backBrush(QColor(255,255,255,50),Qt::SolidPattern);
 QBrush PinView::highlightBrush(QColor(100,0,200,100),Qt::SolidPattern);
 
 QGraphicsLineItem *PinView::currentLine = 0;
@@ -37,10 +36,6 @@ PinView::PinView(QAbstractItemModel *model,QGraphicsItem * parent, Connectables:
         model(model)
 {
     setObjectName(QString("PinView%1").arg((long)pin,0,16));
-
-//    setFlag(QGraphicsItem::ItemIsSelectable, true);
-//    setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
-//    setFlag(QGraphicsItem::ItemSendsScenePositionChanges, true);
     setAcceptDrops(true);
     setCursor(Qt::OpenHandCursor);
 }

@@ -43,10 +43,6 @@ VstPlugin::VstPlugin(int index, const ObjectInfo & info) :
     isShell(false)
 {
     listPlugins << this;
-//    identityString = file;
-//    identity = id;
-
-//    setObjectName(file.append(QString::number(index)));
 }
 
 VstPlugin::~VstPlugin()
@@ -170,10 +166,6 @@ void VstPlugin::Render()
 
             EffProcessEvents(listEvnts);
         }
-//        else {
-//            static VstEvents noEvData = {0};
-//            EffProcessEvents(&noEvData);
-//        }
     }
 
     //audio buffers
@@ -195,7 +187,6 @@ void VstPlugin::Render()
 
         cpt=0;
         foreach(AudioPinIn* pin,listAudioPinIn) {
-//            pin->buffer->InvalidateVu();
             tmpBufIn[cpt] = pin->buffer->ConsumeStack();
             cpt++;
         }
@@ -207,7 +198,6 @@ void VstPlugin::Render()
     if (pEffect->flags & effFlagsCanReplacing) {
         EffProcessReplacing(tmpBufIn, tmpBufOut, bufferSize);
     } else {
-//            pBuffersOut->ClearAllBuffer();
         EffProcess(tmpBufIn, tmpBufOut, bufferSize);
     }
 
@@ -232,7 +222,6 @@ void VstPlugin::Render()
     foreach(AudioPinOut* pin,listAudioPinOut) {
         pin->buffer->ConsumeStack();
         pin->SendAudioBuffer();
-//        pin->buffer->InvalidateVu();
     }
 
 
@@ -344,19 +333,6 @@ bool VstPlugin::Open()
                         EffConnectOutput(1,1);
         }
 
-      //  long prog = EffGetProgram();
-    /*
-        char name[25]={0};
-        pEffect->EffGetProgramNameIndexed(-1,0,name);
-        pEffect->EffGetProgramNameIndexed(-1,1,name);
-        pEffect->EffGetProgramNameIndexed(-1,2,name);
-        pEffect->EffGetProgramNameIndexed(-1,3,name);
-        ...
-        effGetProgram
-        effGetChunk
-        effGetProgram
-
-    */
         EffSetProgram(0);
 
         char szBuf[256] = "";
@@ -373,20 +349,12 @@ bool VstPlugin::Open()
         for(int i=0;i<pEffect->numInputs;i++) {
             AudioPinIn *pin = new AudioPinIn(this,i);
             pin->buffer->SetSize(bufferSize);
-//            AudioBuffer *buff = new AudioBuffer();
-//            buff->SetSize(bufferSize);
-//            pin->SetBuffer(buff);
             listAudioPinIn << pin;
-//            listPins << pin;
         }
         for(int i=0;i<pEffect->numOutputs;i++) {
             AudioPinOut *pin = new AudioPinOut(this,i);
             pin->buffer->SetSize(bufferSize);
-//            AudioBuffer *buff = new AudioBuffer();
-//            buff->SetSize(bufferSize);
-//            pin->SetBuffer(buff);
             listAudioPinOut << pin;
-//            listPins << pin;
         }
 
         if(bWantMidi) {
@@ -399,24 +367,17 @@ bool VstPlugin::Open()
         }
     }
 
-    //OpenEditor();
-
     int nbParam = pEffect->numParams;
     bool nameCanChange=false;
     bool defVisible = true;
 
     //plugin with gui :
     if((pEffect->flags & effFlagsHasEditor) != 0) {
-//    if(editorWnd) {
         //plugin may change the parameter name
         nameCanChange=true;
 
         //only show learned parameters
         defVisible=false;
-
-        //some plugins add parameters afterward, create a minimum of 16 parameters just in case
-//        if(nbParam<16)
-//            nbParam=16;
     }
 
     //create all parameters pins
@@ -485,9 +446,6 @@ void VstPlugin::CloseEditor()
         return;
 
     emit CloseEditorWindow();
-
-//    editorWnd->hide();
-
     UpdateEditorNode();
 }
 
@@ -523,12 +481,10 @@ void VstPlugin::UpdateEditorNode()
 void VstPlugin::SetParentModelNode(QStandardItem* parent)
 {
     Object::SetParentModelNode(parent);
-//    if(editorWnd) {
         modelEditor = new QStandardItem();
         modelEditor->setData("Editor",Qt::DisplayRole);
         modelEditor->setData(QVariant::fromValue(ObjectInfo(NodeType::editor)), UserRoles::objInfo);
         modelNode->appendRow(modelEditor);
-//    }
     UpdateEditorNode();
 }
 
@@ -609,42 +565,18 @@ long VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr,
             }
             break;
 
-        case audioMasterUpdateDisplay : //42
-            UpdateDisplay();
-            break;
-
-//        case audioMasterBeginEdit : //43
-//            if(!listParameterPin.contains((int)index)) {
-//                ParameterPin *param = new ParameterPin((int)index,this);
-//                listParameterPin[(int)index] = param;
-//                listPins << param;
-//                emit PinAdded(param->GetIndex());
-//            }
+//        case audioMasterUpdateDisplay : //42
 //            break;
-
     }
 
     return CEffect::OnMasterCallback(opcode, index, value, ptr, opt, currentReturnCode);
 }
 
-void VstPlugin::UpdateDisplay()
-{
-//    QHash<ushort,ParameterPinIn*>::iterator i = listParameterPinIn.begin();
-//    while(i != listParameterPinIn.end()) {
-//        i.value()->SetName(QString("%1:%2").arg(i.key(),0,10).arg(EffGetParamName(i.key())));
-//        float val = EffGetParameter(i.key());
-//        i.value()->OnValueChanged(val);
-//        workingCopyOfProgIn->value(i.key())->value=val;
-//        ++i;
-//    }
-}
-
-
 void VstPlugin::OnParameterChanged(ConnectionInfo pinInfo, float value)
 {
     if(pinInfo.direction == PinDirection::Input) {
         if(EffCanBeAutomated(pinInfo.pinNumber)!=1) {
-            debug(QString("vst parameter can't be automated %1").arg(pinInfo.pinNumber).toAscii());
+            debug(QString("vst parameter can't be automated %1").arg(pinInfo.pinNumber).toAscii())
             return;
         }
         EffSetParameter(pinInfo.pinNumber,value);

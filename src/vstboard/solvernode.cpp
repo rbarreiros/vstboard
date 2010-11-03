@@ -219,11 +219,6 @@ float SolverNode::GetHeight()
         foreach(SolverNode* line,listParents) {
             height+=line->GetHeight();
         }
-//        float wc=0;
-//        foreach(RenderLine* line,listChilds) {
-//            wc+=line->GetHeight();
-//        }
-//        height = std::max(wp,wc);
         if(height==0)
             height=1;
     }

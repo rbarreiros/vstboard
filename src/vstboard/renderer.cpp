@@ -38,9 +38,6 @@ void Renderer::Clear()
 void Renderer::OnNewRenderingOrder(orderedNodes *newSteps)
 {
     QMutexLocker mutx(&mutexRender);
-
-//    renderSteps=newSteps;
-
     renderSteps.clear();
 
     orderedNodes::iterator i = newSteps->begin();

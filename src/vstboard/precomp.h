@@ -18,8 +18,6 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#include "debugmemreport.h"
-
 #ifndef PRECOMP_H
 #define PRECOMP_H
 
@@ -61,6 +59,7 @@
 #include <QGraphicsTextItem>
 #include <QGraphicsView>
 #include <QGraphicsWidget>
+#include <QHBoxLayout>
 #include <QLibrary>
 #include <QLineEdit>
 #include <QListWidgetItem>
@@ -91,24 +90,9 @@
     #define debug(...) {qDebug(__VA_ARGS__);}
 #endif
 
-
-
 #include "porttime.h"
 #include "portmidi.h"
 #include "pmutil.h"
-
-//#include "debugmemreport.h"
-
-//#ifdef WIN32
-//#ifndef QT_NO_DEBUG
-//#include "debugmemreport.h"
-////    #define _CRTDBG_MAP_ALLOC
-////    #include <stdlib.h>
-////    #include <crtdbg.h>
-//#endif
-//#endif
-
-
 
 #endif
 #endif // PRECOMP_H

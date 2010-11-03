@@ -27,7 +27,6 @@ namespace Connectables {
 
     class MidiPinIn : public Pin
     {
-//    Q_OBJECT
     public:
         MidiPinIn(Object *parent, int number=0, bool bridge=false);
         void ReceiveMsg(const int msgType=0,void *data=0);
@@ -40,9 +39,6 @@ namespace Connectables {
     protected:
         int activity;
         QList<PmMessage*>msgBuffer;
-
-//    signals:
-//        void MidiMsg(long msg);
     };
 
 }

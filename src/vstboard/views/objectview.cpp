@@ -32,24 +32,19 @@ ObjectView::ObjectView(QAbstractItemModel *model, QGraphicsItem * parent, Qt::Wi
     backgroundImg(0),
     editorButton(0),
     layout(0),
-//    container(0),
     model(model)
 
 {
-//    if(parent)
-//        container = parent;
+
 }
 
 ObjectView::~ObjectView()
 {
     setActive(false);
-//    debug("ObjectView::~ObjectView : %d deleted",objectId)
 }
 
 void ObjectView::SetModelIndex(QPersistentModelIndex index)
 {
-//    setObjectName(QString("ObjectView%1").arg(index.data(UserRoles::value).toInt()));
-
     ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
     if(info.objType == ObjType::dummy) {
         QPixmap pix(":/img32x32/agt_action_fail.png");
@@ -63,7 +58,6 @@ void ObjectView::SetModelIndex(QPersistentModelIndex index)
     }
 
     objIndex = index;
-//    objectId = index.data(UserRoles::value).toInt();
     if(titleText) {
         titleText->setText(index.data(Qt::DisplayRole).toString());
     }
@@ -97,11 +91,8 @@ void ObjectView::SetEditorIndex(QPersistentModelIndex index)
 
 void ObjectView::closeEvent ( QCloseEvent * event )
 {
-//    debug("ObjectView::closeEvent %d",objectId)
-
     setActive(false);
 
-//    emit removeObject(objIndex);
     static_cast<Connectables::Container*>(
             Connectables::ObjectFactory::Get()->GetObj(objIndex.parent()).data()
         )->RemoveObject(
@@ -111,15 +102,6 @@ void ObjectView::closeEvent ( QCloseEvent * event )
     event->ignore();
 }
 
-/*
-PinView *ObjectView::FindPin(ConnectionInfo &pin)
-{
-    if(!listPins.contains(pin))
-        return 0;
-    return listPins.value(pin);
-}
-*/
-
 QVariant ObjectView::itemChange ( GraphicsItemChange  change, const QVariant & value )
 {
     switch(change) {
@@ -128,28 +110,6 @@ QVariant ObjectView::itemChange ( GraphicsItemChange  change, const QVariant & v
                 editorButton->installSceneEventFilter(this);
             }
             break;
-
-//        case ItemPositionHasChanged:
-//            emit indexEdited(objIndex,value,UserRoles::position);
-//            break;
-
-//        case ItemPositionChange:
-//        {
-//            if(container) {
-//                QPointF pt = value.toPointF();
-//                if(pt.x()<0)
-//                    pt.setX(0);
-//                if(pt.y()<0)
-//                    pt.setY(0);
-//                if(pt.x()+size().width() > container->rect().width())
-//                    pt.setX( container->rect().width()-size().width());
-//                if(pt.y()+size().height() > container->rect().height())
-//                    pt.setY( container->rect().height()-size().height());
-//                return pt;
-//            }
-//                break;
-//        }
-
         default:
             break;
     }
@@ -158,44 +118,15 @@ QVariant ObjectView::itemChange ( GraphicsItemChange  change, const QVariant & v
 
 void ObjectView::resizeEvent ( QGraphicsSceneResizeEvent * event )
 {
-//    if(!container)
-//        return;
-
-//    QPointF pt = pos();
-//    if(pt.x()<0)
-//        pt.setX(0);
-//    if(pt.y()<0)
-//        pt.setY(0);
-//    if(pt.x()+size().width() > container->rect().width())
-//        pt.setX( container->rect().width()-size().width());
-//    if(pt.y()+size().height() > container->rect().height())
-//        pt.setY( container->rect().height()-size().height());
-
-//    setPos(pt);
-
-//    emit indexEdited(objIndex,event->newSize(),UserRoles::size);
-
     if(model)
         model->setData(objIndex,event->newSize(),UserRoles::size);
 }
-/*
-void ObjectView::UnitWithRect( QRectF &rect )
-{
-    QRectF child = mapToParent(rect).boundingRect().adjusted(2,2,2,2);
-    QRectF myRect = geometry();
 
-    if(!myRect.contains(child)) {
-        setGeometry(myRect.united(child));
-        rect.moveTopLeft( mapFromParent(child).boundingRect().topLeft() );
-    }
-}
-*/
 bool ObjectView::sceneEventFilter ( QGraphicsItem * watched, QEvent * event )
 {
     if(watched == editorButton) {
         if(event->type() == QEvent::GraphicsSceneMousePress) {
             bool val = !editorIndex.data(UserRoles::value).toBool();
-//            emit indexEdited(editorIndex,val,UserRoles::value);
             model->setData(editorIndex,val,UserRoles::value);
         }
     }
@@ -208,34 +139,8 @@ void ObjectView::mouseDoubleClickEvent ( QGraphicsSceneMouseEvent  * /*event*/ )
     close();
 }
 
-//void ObjectView::mousePressEvent ( QGraphicsSceneMouseEvent * event )
-//{
-//    emit Clicked();
-//    QGraphicsItem::mousePressEvent(event);
-//}
-
 void ObjectView::mouseReleaseEvent ( QGraphicsSceneMouseEvent * event )
 {
     QGraphicsWidget::mouseReleaseEvent(event);
-//    emit indexEdited(objIndex,pos(),UserRoles::position);
     model->setData(objIndex,pos(),UserRoles::position);
 }
-
-/*
-
-void ObjectView::Shrink()
-{
-    resize(0,0);
-}
-
-
-
-void ObjectView::setPen(const QPen &pen)
-{
-//    QColor c = pen.color();
-//    c.setAlpha(150);
-    if(border)
-        border->setBrush(QBrush(pen.color(),Qt::SolidPattern));
-}
-
-*/

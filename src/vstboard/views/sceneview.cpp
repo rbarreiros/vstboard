@@ -46,53 +46,19 @@ SceneView::SceneView(MainGraphicsView *viewHost, MainGraphicsView *viewProject, 
     timerFalloff = new QTimer(this);
     timerFalloff->start(50);
 
-//    layout = new QVBoxLayout(this);
-//    layout->setSpacing(0);
-//    layout->setContentsMargins(0,0,0,0);
-//    setLayout(layout);
-
-    sceneHost = new SubScene(this);
-    sceneProject = new SubScene(this);
-    sceneProgram = new SubScene(this);
+    sceneHost = new QGraphicsScene(this);
+    sceneProject = new QGraphicsScene(this);
+    sceneProgram = new QGraphicsScene(this);
 
     //we need a root object to avoid a bug when the scene is empty
     rootObjHost = new QGraphicsRectItem(0, sceneHost);
     rootObjProject = new QGraphicsRectItem(0, sceneProject);
     rootObjProgram = new QGraphicsRectItem(0, sceneProgram);
 
-//    QSplitter *splitter = new QSplitter(Qt::Vertical, this);
-//    layout->addWidget(splitter);
-
-//    viewHost = new MainGraphicsView(this);
-//    viewHost->setDragMode(QGraphicsView::ScrollHandDrag);
     viewHost->setScene(sceneHost);
-//    splitter->addWidget(viewHost);
-
-//    viewProject = new MainGraphicsView(this);
-//    viewProject->setDragMode(QGraphicsView::ScrollHandDrag);
     viewProject->setScene(sceneProject);
-//    splitter->addWidget(viewProject);
-
-//    viewProgram = new MainGraphicsView(this);
-//    viewProgram->setDragMode(QGraphicsView::ScrollHandDrag);
     viewProgram->setScene(sceneProgram);
-//    splitter->addWidget(viewProgram);
-
-//    viewHost->setRenderHints(QPainter::Antialiasing);
-//    viewProject->setRenderHints(QPainter::Antialiasing);
-//    viewProgram->setRenderHints(QPainter::Antialiasing);
 }
-
-//void SceneView::setModel ( QAbstractItemModel * model )
-//{
-//    QAbstractItemView::setModel(model);
-//    if(sceneHost)
-//        sceneHost->setModel(model);
-//    if(sceneProject)
-//        sceneProject->setModel(model);
-//    if(sceneProgram)
-//        sceneProgram->setModel(model);
-//}
 
 void SceneView::dataChanged ( const QModelIndex & topLeft, const QModelIndex & bottomRight  )
 {
@@ -101,7 +67,6 @@ void SceneView::dataChanged ( const QModelIndex & topLeft, const QModelIndex & b
     QModelIndex tmpIndex = topLeft;
     do {
         ObjectInfo info = tmpIndex.data(UserRoles::objInfo).value<ObjectInfo>();
-//        int nodeType=tmpIndex.data(UserRoles::nodeType).toInt();
 
         switch( info.nodeType ) {
         case NodeType::object :
@@ -163,15 +128,8 @@ QModelIndex SceneView::traverseTroughIndexes ( QModelIndex index ) {
 
 void SceneView::rowsAboutToBeRemoved ( const QModelIndex & parent, int start, int end  )
 {
-    //QPersistentModelIndex p(parent);
-//    debug("SceneView::rowsAboutToBeRemoved parent %d",parent.data(UserRoles::value).toInt())
-
     for ( int i = start; i <= end; ++i ) {
-//        QModelIndex item = model()->index( i, 0, parent );
         const QModelIndex item = parent.child(i,0);
-//        if(!item.isValid()) {
-//            debug("SceneView::rowsAboutToBeRemoved obj %d",item.data(UserRoles::value).toInt())
-//        }
 
         ObjectInfo info = item.data(UserRoles::objInfo).value<ObjectInfo>();
         switch(info.nodeType) {
@@ -267,12 +225,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
     for ( int i = start; i <= end; ++i ) {
         QPersistentModelIndex index( parent.child(i,0) ); // model()->index( i, 0, parent );
 
-//        if(hashItems.contains(index)) {
-//            debug("SceneView::rowsInserted already there")
-//        }
-
         ObjectView *objView = 0;
-
         ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
 
         switch(info.nodeType) {
@@ -397,7 +350,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
             }
             case NodeType::listPin :
             {
-                ObjectInfo infoParent = parent.data(UserRoles::objInfo).value<ObjectInfo>();
+//                ObjectInfo infoParent = parent.data(UserRoles::objInfo).value<ObjectInfo>();
                 ObjectView *parentView = static_cast<ObjectView*>(hashItems.value(parent,0));
                 if(!parentView) {
                     debug("SceneView::rowsInserted listAudioIn parent not found")
@@ -529,12 +482,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
 
 void SceneView::graphicObjectRemoved ( QObject* obj)
 {
-//    int i = hashItems.key(obj).data(UserRoles::value).toInt();
-//    if(i)
-//        debug("SceneView::graphicObjectRemoved %d",i)
-
     hashItems.remove( hashItems.key(obj) );
-
 }
 
 void SceneView::ConnectPins(ConnectionInfo pinOut,ConnectionInfo pinIn)

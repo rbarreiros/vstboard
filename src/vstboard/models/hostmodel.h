@@ -21,8 +21,7 @@
 #ifndef HOSTMODEL_H
 #define HOSTMODEL_H
 
-#include "precomp.h"
-//#include <QStandardItemModel>
+#include "../precomp.h"
 
 class HostModel : public QStandardItemModel
 {
@@ -32,15 +31,10 @@ public:
 
     QMimeData * mimeData ( const QModelIndexList & indexes ) const;
 
-//    Qt::DropActions supportedDropActions () const;
     QStringList mimeTypes () const;
     bool dropMimeData ( const QMimeData * data, Qt::DropAction action, int row, int column, const QModelIndex & parent );
-
-//    bool insertRows ( int row, int count, const QModelIndex & parent = QModelIndex() );
-//    bool insertColumns ( int column, int count, const QModelIndex & parent = QModelIndex() );
     bool setData ( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole );
     bool setItemData ( const QModelIndex & index, const QMap<int, QVariant> & roles );
-//    bool removeRows ( int row, int count, const QModelIndex & parent = QModelIndex() );
 
 protected:
     QMap<int,QStandardItem*>mapObjects;

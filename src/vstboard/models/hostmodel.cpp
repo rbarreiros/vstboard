@@ -37,7 +37,6 @@ QMimeData * HostModel::mimeData ( const QModelIndexList & indexes ) const
 
     foreach(QModelIndex index, indexes) {
         ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
-//        int nodeType = index.sibling(index.row(),0).data(UserRoles::nodeType).toInt();
         switch(info.nodeType) {
             case NodeType::pin :
                 if(index.data(UserRoles::connectionInfo).isValid()) {
@@ -46,13 +45,6 @@ QMimeData * HostModel::mimeData ( const QModelIndexList & indexes ) const
                     QByteArray bytes;
                     QDataStream stream(&bytes,QIODevice::WriteOnly);
                     stream << connectInfo;
-//                    stream << connectInfo.container;
-//                    stream << connectInfo.objId;
-//                    stream << connectInfo.type;
-//                    stream << connectInfo.direction;
-//                    stream << connectInfo.pinNumber;
-//                    stream << connectInfo.bridge;
-
                     mimeData->setData("application/x-pin",bytes);
                 }
                 return mimeData;
@@ -64,13 +56,7 @@ QMimeData * HostModel::mimeData ( const QModelIndexList & indexes ) const
     }
 
     return QStandardItemModel::mimeData(indexes);
-//    return mimeData;
 }
-
-//Qt::DropActions HostModel::supportedDropActions () const
-//{
-
-//}
 
 QStringList HostModel::mimeTypes () const
 {
@@ -87,22 +73,7 @@ QStringList HostModel::mimeTypes () const
 
 bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, int row, int column, const QModelIndex & parent )
 {
-//    if(QStandardItemModel::dropMimeData(data,action,row,column,parent))
-//        return true;
-
-//    if(index.data(UserRoles::parking).toBool()) {
-//        QSharedPointer<Connectables::Object> objPtr = Connectables::ObjectFactory::Get()->GetObj(index);
-//        QSharedPointer<Connectables::Object> cntPtr = Connectables::ObjectFactory::Get()->GetObj(parent);
-//        if(!cntPtr.isNull() && !objPtr.isNull()) {
-//            static_cast<Connectables::Container*>(cntPtr.data())->AddObject(objPtr);
-//            return;
-//        }
-
-//    }
-
     QModelIndex rootIndex = parent.sibling(parent.row(),0);
-
-   // debug(QString("hostmodel: drop obj:%1 root:%2 row:%3 col:%4").arg(parent.data(Qt::DisplayRole).toInt()).arg(rootIndex.data(Qt::DisplayRole).toInt()).arg(row).arg(column).toAscii())
 
     QSharedPointer<Connectables::Container> cntPtr = Connectables::ObjectFactory::Get()->GetObjectFromId(parent.data(UserRoles::value).toInt()).staticCast<Connectables::Container>();
     if(cntPtr.isNull()) {
@@ -276,12 +247,6 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
 
                 QDataStream stream(&bytes,QIODevice::ReadOnly);
                 stream >> droppedInfo;
-//                stream >> droppedInfo.container;
-//                stream >> droppedInfo.objId;
-//                stream >> droppedInfo.type;
-//                stream >> droppedInfo.direction;
-//                stream >> droppedInfo.pinNumber;
-//                stream >> droppedInfo.bridge;
 
                 if(droppedInfo.CanConnectTo(parentInfo)) {
                     if(droppedInfo.direction == PinDirection::Output)
@@ -305,11 +270,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
 bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int role )
 {
     QStandardItem *item = itemFromIndex(index);
-//    int nodeType = index.data(UserRoles::nodeType).toInt();
     ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
-
-//    debug(QString("HostModel::setData %1:%2").arg(nodeType).arg(value.toString()).toAscii())
-
     switch(info.nodeType) {
         case NodeType::object :
         case NodeType::container :
@@ -353,11 +314,6 @@ bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int
                 newVal = objPtr->OpenEditor();
             else
                 objPtr->CloseEditor();
-
-
-       //     item->setData(newVal,role);
-      //      setData(index,newVal,role);
-
             break;
         }
 
@@ -388,66 +344,3 @@ bool HostModel::setItemData ( const QModelIndex & index, const QMap<int, QVarian
 {
     return true;
 }
-
-//bool HostModel::removeRows ( int row, int count, const QModelIndex & parent )
-//{
-//    for(int i=row;i<row+count;i++) {
-//        QModelIndex index = parent.child(row,0);
-
-//        QStandardItem *item = itemFromIndex(parent);
-//        item->removeRow(i);
-//        QStandardItemModel::removeRows(row,count,parent);
-//        debug(QString("HostModel::removeRows row:%1 count:%2 nodetype:%3 objid:%4").arg(row).arg(i).arg(index.data(UserRoles::nodeType).toInt()).arg(index.data(Qt::DisplayRole).toString()).toAscii())
-
-//        switch(index.data(UserRoles::nodeType).toInt()) {
-//            case NodeType::container :
-//            case NodeType::object :
-//            {
-//                int cntId = parent.data(UserRoles::value).toInt();
-//                int objId = index.data(UserRoles::value).toInt();
-//                QSharedPointer<Connectables::Object> cntPtr = Connectables::ObjectFactory::Get()->GetObjectFromId(cntId);
-//                if(cntPtr.isNull()) {
-//                    debug(QString("HostModel::removeRows NodeType::object the container %1 is deleted").arg(cntId).toAscii())
-//                    return false;
-//                }
-//                Connectables::Container *cnt = static_cast<Connectables::Container*>(cntPtr.data());
-//                QSharedPointer<Connectables::Object> objPtr = Connectables::ObjectFactory::Get()->GetObjectFromId(objId);
-//                if(objPtr.isNull()) {
-//                    debug(QString("HostModel::removeRows NodeType::object the object %1 is deleted").arg(objId).toAscii())
-//                    return false;
-//                }
-//                cnt->RemoveChildObject(objPtr);
-//                break;
-//            }
-//            case NodeType::pin :
-//                switch(parent.data(UserRoles::nodeType).toInt()) {
-//                    case NodeType::listParamIn:
-//                    case NodeType::listParamOut:
-//                    {
-//                        ConnectionInfo info = index.data(UserRoles::connectionInfo).value<ConnectionInfo>();
-//                        Connectables::ParameterPin *pin = static_cast<Connectables::ParameterPin*>(Connectables::ObjectFactory::Get()->GetPin(info));
-//                        if(pin)
-//                            pin->SetVisible(false);
-//                        break;
-//                    }
-//                }
-//                break;
-
-//            case NodeType::cable :
-//            {
-//                    int cntId = parent.parent().data(UserRoles::value).toInt();
-//                ConnectionInfo outInfo = index.data(UserRoles::connectionInfo).value<ConnectionInfo>();
-//                ConnectionInfo inInfo = parent.child(row,1).data(UserRoles::connectionInfo).value<ConnectionInfo>();
-//                QSharedPointer<Connectables::Object> cntPtr = Connectables::ObjectFactory::Get()->GetObjectFromId(cntId);
-//                if(cntPtr.isNull()) {
-//                    debug(QString("HostModel::removeRows NodeType::cable the container %1 is deleted").arg(cntId).toAscii())
-//                    return false;
-//                }
-
-//                static_cast<Connectables::Container*>(cntPtr.data())->RemoveCable(outInfo,inInfo);
-//                break;
-//            }
-//        }
-//    }
-//    return true;
-//}

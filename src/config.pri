@@ -38,9 +38,6 @@ top_destdir  =$$top_srcdir/../bin/$$build_postfix
 builddir     =$$top_builddir/$$srcdir
 
 OBJECTS_DIR =$$builddir
-#MOC_DIR     =$$srcdir/..
-#UI_DIR      =$$srcdir/..
-#RCC_DIR     =$$srcdir/..
 DESTDIR     =$$top_destdir
 TARGET      =$$TARGET
 
@@ -77,17 +74,7 @@ linux-g++ {
     INCLUDEPATH += $$quote($$(INCLUDE))
 message($$(INCLUDE))
     LIBS += -L$$quote($$(LIB))
-
-#to add symbols :
-#    QMAKE_CFLAGS_RELEASE +=  -Zi
-#    QMAKE_LFLAGS_RELEASE += /DEBUG
-
     QMAKE_CFLAGS += -Fd$$top_destdir/$$TARGET
 } else {
     error("compiler not configured in config.pri")
 }
-
-#modified in qmake.conf for msvc2008 :
-#QMAKE_CFLAGS_RELEASE    = -O2 -MT -GL -MP -Ob2 -Oi -Ot -Oy- -EHsc -GS -Gy -fp:fast -GA -arch:SSE2
-#QMAKE_LFLAGS_RELEASE    = /INCREMENTAL:NO /OPT:REF /OPT:ICF /LTCG  /NODEFAULTLIB:MSVCRT
-#QMAKE_LIB               = lib /NOLOGO /LTCG

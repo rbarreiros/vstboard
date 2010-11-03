@@ -106,12 +106,9 @@ bool MainConfig::AddWidgetToActionsModel(QWidget *widg, QStandardItem *parentIte
         item->appendRow(itemAct);
     }
 
-    //if(childs || actions) {
+
         parentItem->appendRow(item);
         return true;
-    //}
-
-    //return false;
 }
 
 QStandardItemModel * MainConfig::GetShortcutsModel()
@@ -193,7 +190,7 @@ void MainConfig::ListenToAction(QString const &action, QObject * listener)
     }
 
     if(!act) {
-        debug("action not found %s",action.toAscii().constData());
+        debug("action not found %s",action.toAscii().constData())
         return;
     }
 
@@ -212,7 +209,6 @@ void MainConfig::SendAction(int actionId, const QVariant &value)
 {
     QHash<int, QObject *>::iterator i = actionListeners.find(actionId);
     while(i!=actionListeners.end() && i.key()==actionId) {
-//        QApplication::removePostedEvents(listener,Event::Shortcut);
         ShortcutEvent *event = new ShortcutEvent(actionId,value);
         QApplication::postEvent(i.value(),event);
         ++i;
@@ -223,7 +219,7 @@ void MainConfig::ShortcutStateChanged(ShortcutKeys &shortcut, bool pressed)
 {
     if(pressed) {
         currentShortcutPressed = true;
-        debug("pressed shortcut %s",shortcut.ToString().toAscii().constData());
+        debug("pressed shortcut %s",shortcut.ToString().toAscii().constData())
 
         QHash<ShortcutKeys /*keycombination*/ , int /*action*/>::iterator i = globalShortcutBinding.find(currentShortcut);
         while(i!=globalShortcutBinding.end() && i.key()==currentShortcut) {
@@ -232,7 +228,7 @@ void MainConfig::ShortcutStateChanged(ShortcutKeys &shortcut, bool pressed)
         }
 
     } else {
-        debug("released shortcut %s",shortcut.ToString().toAscii().constData());
+        debug("released shortcut %s",shortcut.ToString().toAscii().constData())
 
         QHash<ShortcutKeys /*keycombination*/ , int /*action*/>::iterator i = globalShortcutBinding.find(currentShortcut);
         while(i!=globalShortcutBinding.end() && i.key()==currentShortcut) {
@@ -249,8 +245,6 @@ bool MainConfig::eventFilter(QObject *obj, QEvent *event)
         case QEvent::KeyRelease :
             {
                 QKeyEvent *e = static_cast<QKeyEvent *>(event);
-//                    if(e->isAutoRepeat())
-//                        break;
                 currentShortcut.listKeys.remove(e->key());
             }
             if(currentShortcutPressed)
@@ -269,8 +263,6 @@ bool MainConfig::eventFilter(QObject *obj, QEvent *event)
         case QEvent::KeyPress :
             {
                 QKeyEvent *e = static_cast<QKeyEvent *>(event);
-//                    if(e->isAutoRepeat())
-//                        break;
                 currentShortcut.listKeys << e->key();
             }
             break;

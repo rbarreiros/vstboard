@@ -36,17 +36,12 @@ namespace Connectables {
         AudioDeviceOut(int index, const ObjectInfo &info);
         ~AudioDeviceOut();
 
-//        static void init();
-
         bool Open();
         bool Close();
         void Render();
         int GetProcessingTime() {return 10;}
 
         bool bufferReady;
-
-//        virtual QDataStream & toStream (QDataStream &) const;
-//        virtual QDataStream & fromStream (QDataStream &);
 
     protected:
         AudioDevice *parentDevice;
@@ -57,6 +52,5 @@ namespace Connectables {
     };
 
 }
-//Q_DECLARE_METATYPE(Connectables::AudioDeviceOut)
 
 #endif // AUDIODEVICEOUT_H

@@ -30,11 +30,9 @@ MidiToAutomation::MidiToAutomation(int index) :
         Object(index, ObjectInfo(NodeType::object, ObjType::MidiToAutomation, tr("MidiCC->Automation")) )
 {
 
-//    if(listValues.isEmpty()) {
         for(int i=0;i<128;i++) {
             listValues << i;
         }
-//    }
 
     parameterLearning = true;
 
@@ -45,11 +43,6 @@ MidiToAutomation::MidiToAutomation(int index) :
     }
 
 }
-
-//MidiToAutomation::~MidiToAutomation()
-//{
-//    debug("delete midi2automation")
-//}
 
 void MidiToAutomation::Render()
 {

@@ -43,11 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
         ui(new Ui::MainWindow)
 {
     MainWindow::theMainWindow=this;
-
-//    solverScene = 0;
-
     mainHost = MainHost::Get(this);
-
     ui->setupUi(this);
 
     ui->treeAudioInterfaces->setModel(mainHost->GetAudioDevicesModel());
@@ -79,44 +75,13 @@ MainWindow::MainWindow(QWidget *parent) :
     timerVu = new QTimer(this);
     timerVu->start(40);
 
-    //start timer (used by cpuload)
-//    QTimer *timer = new QTimer(this);
-//    connect(timer, SIGNAL(timeout()), this, SLOT(UpdateCpuLoad()));
-//    timer->start(200);
-
     ui->treeHostModel->setModel(mainHost->GetModel());
     ui->treeParking->setModel(mainHost->GetParkingModel());
-
-//    ui->sceneView->setModel(mainHost->GetModel());
-//    connect(ui->actionZoom_in,SIGNAL(triggered()),
-//            ui->sceneView->viewProgram,SLOT(zoomIn()));
-//    connect(ui->actionZoom_out,SIGNAL(triggered()),
-//            ui->sceneView->viewProgram,SLOT(zoomOut()));
-//    connect(ui->actionZoom_100,SIGNAL(triggered()),
-//            ui->sceneView->viewProgram,SLOT(zoomReset()));
 
     mySceneView = new View::SceneView(ui->hostView, ui->projectView, ui->programView);
     mySceneView->setModel(mainHost->GetModel());
 
     ui->solverView->setModel(&mainHost->solver.model);
-
-//    connect(ui->actionHost_panel,SIGNAL(triggered(bool)),
-//            ui->sceneView,SLOT(ToggleHostView(bool)));
-//    connect(ui->sceneView,SIGNAL(hostShown(bool)),
-//            ui->actionHost_panel,SLOT(setChecked(bool)));
-//    ui->sceneView->ToggleHostView(false);
-
-//    connect(ui->actionProject_panel,SIGNAL(triggered(bool)),
-//            ui->sceneView,SLOT(ToggleProjectView(bool)));
-//    connect(ui->sceneView,SIGNAL(projectShown(bool)),
-//            ui->actionProject_panel,SLOT(setChecked(bool)));
-//    ui->sceneView->ToggleProjectView(false);
-
-//    connect(ui->actionProgram_panel,SIGNAL(triggered(bool)),
-//            ui->sceneView,SLOT(ToggleProgramView(bool)));
-//    connect(ui->sceneView,SIGNAL(programShown(bool)),
-//            ui->actionProgram_panel,SLOT(setChecked(bool)));
-//    ui->sceneView->ToggleProgramView(true);
 
     connect(mainHost, SIGNAL(ProgramChanged(int)),
             this,SLOT(OnProgramChange(int)));
@@ -138,15 +103,6 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     readSettings();
-
-    //    connect(mainHost,SIGNAL(finished()),
-    //            this,SLOT(close()));
-    //    connect(mainHost,SIGNAL(terminated()),
-    //            this,SLOT(close()));
-    //    mainHost->start(QThread::TimeCriticalPriority);
-
-
-
 }
 
 MainWindow::~MainWindow()
@@ -186,14 +142,6 @@ void MainWindow::changeEvent(QEvent *e)
 
 void MainWindow::OnProgramChange(int prog)
 {
-    //    //we only show the program layer's program
-    //    if(layer!=DefaultLayers::program)
-    //        return;
-
-    //    Project::Program *prg = project->GetProgram(prog);
-    //    QStandardItem *item = project->programModel.invisibleRootItem()->child(prg->progGroup)->child(prg->progPlaceInGroup);
-    //    ui->treePrograms->setCurrentIndex(project->programModel.indexFromItem(item));
-
     QStandardItem *item = project->ItemFromProgId(prog);
     if(!item)
         return;
@@ -281,9 +229,6 @@ void MainWindow::BuildListMidiInterfaces()
         items << new QStandardItem(QString::number(devInfo->input));
         items << new QStandardItem(QString::number(devInfo->output));
 
-        //        items[0]->setData(cptDuplicateNames,Qt::UserRole+1);
-        //        items[0]->setData(devInfo->input,Qt::UserRole+2);
-        //        items[0]->setData(devInfo->output,Qt::UserRole+3);
         items[0]->setData(QVariant::fromValue(obj), UserRoles::objInfo);
 
         parentItem->appendRow(items);
@@ -299,23 +244,6 @@ void MainWindow::BuildListMidiInterfaces()
     ui->treeMidiInterfaces->header()->resizeSection(2,30);
 }
 
-
-
-//void MainWindow::NewSolver(orderedNodes *renderLines)
-//{
-//    ui->solverView->setScene(0);
-
-//    if(solverScene)
-//        delete solverScene;
-
-//    solverScene = new View::SolverScene(this);
-//    ui->solverView->setScene(solverScene);
-//    solverScene->NewSolver(renderLines);
-//  //  contProject->SetModelItem(mainHost->model->invisibleRootItem()->child(0)->child(2));
-
-
-//}
-
 void MainWindow::UpdateCpuLoad()
 {
     ui->progressCpuLoad->setValue(mainHost->GetCpuLoad());
@@ -323,8 +251,6 @@ void MainWindow::UpdateCpuLoad()
 
 void MainWindow::on_actionLoad_triggered()
 {
-    //    MainHost::Get()->ClearHost();
-    //QTimer::singleShot(0,project,SLOT(LoadFromFile()));
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Project or Setup"), "", tr("Supported Files (*.%1 *.%2);;Project Files (*.%1);;Setup Files (*.%2)").arg(PROJECT_FILE_EXTENSION).arg(SETUP_FILE_EXTENSION));
 
     if(fileName.isEmpty())
@@ -436,12 +362,6 @@ void MainWindow::on_actionSave_Setup_As_triggered()
     updateRecentFileActions();
 }
 
-
-void MainWindow::OnFileLoaded()
-{
-    //    contProject->SetModelItem(mainHost->model->invisibleRootItem()->child(0)->child(2));
-}
-
 void MainWindow::on_treePrograms_activated(QModelIndex index)
 {
     if(!index.isValid())
@@ -485,36 +405,6 @@ void MainWindow::on_actionShortcuts_toggled(bool onOff)
     MainConfig::Get()->shortcutConfig = onOff;
     ui->dockMidiDevices->setMouseTracking(onOff);
 }
-
-void MainWindow::on_treeHostModel_doubleClicked(QModelIndex index)
-{
-    on_actionDelete_triggered();
-}
-
-void MainWindow::on_actionDelete_triggered()
-{
-    QModelIndexList indexes = ui->treeHostModel->selectionModel()->selectedRows();
-    for(int i=indexes.size()-1; i>=0; i--) {
-        //        mainHost->modelProxy->Remove(indexes.at(i).row(),indexes.at(i).parent());
-        //        mainHost->model->removeRow(indexes.at(i).row(),indexes.at(i).parent());
-    }
-}
-
-//void MainWindow::on_treeParking_doubleClicked(QModelIndex index)
-//{
-//    QSharedPointer<Connectables::Object> objPtr = Connectables::ObjectFactory::Get()->GetObj(index);
-//    if(objPtr.isNull())
-//        return;
-//}
-
-//#ifndef QT_NO_DEBUG
-//void MainWindow::on_actionTest_triggered()
-//{
-//    tst.Start();
-//    QTimer::singleShot(2000,&tst,SLOT(Stop()));
-//}
-
-//#endif
 
 void MainWindow::on_actionConfig_triggered()
 {
@@ -684,8 +574,3 @@ void MainWindow::openRecentProject()
          updateRecentFileActions();
      }
  }
-
-void MainWindow::on_actionProject_panel_triggered(bool checked)
-{
-
-}

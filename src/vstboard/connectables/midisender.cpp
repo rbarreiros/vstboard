@@ -23,32 +23,24 @@
 
 using namespace Connectables;
 
-//QList<QVariant> MidiSender::listMsgType;
-//QList<QVariant> MidiSender::listValues;
-//QList<QVariant> MidiSender::listChannels;
-
 MidiSender::MidiSender(int index) :
         Object(index, ObjectInfo(NodeType::object, ObjType::MidiSender, tr("MidiSender")) ),
     midiMsg(0),
     msgChanged(false)
 {
 
-//    if(listMsgType.isEmpty()) {
         listMsgType << "Note off";
         listMsgType << "Note on";
         listMsgType << "Ctrl";
         listMsgType << "ProgChang";
-//    }
-//    if(listValues.isEmpty()) {
+
         for(int i=0;i<128;i++) {
             listValues << i;
         }
-//    }
-//    if(listChannels.isEmpty()) {
+
         for(int i=0;i<16;i++) {
             listChannels << (i+1);
         }
-//    }
 
     listMidiPinOut << new MidiPinOut(this);
 

@@ -26,17 +26,8 @@ using namespace View;
 MainContainerView::MainContainerView(QAbstractItemModel *model) :
         ContainerView(model)
 {
-//    layout = new QGraphicsGridLayout() ;
-//    layout->setSpacing(0);
-//    layout->setContentsMargins(0,0,0,0);
-//    setLayout(layout);
-
-//    centerLayout = new ListPinsView(this);
     content = new ContainerContent(model,this);
-   // content->setFlag(QGraphicsItem::ItemIsMovable, false);
     content->setAcceptDrops(true);
-
-//    centerLayout->layout->addItem(content);
 
     bridgeIn = new BridgeView(model, this);
     bridgeIn->listBridgeIn->layout->setOrientation(Qt::Horizontal);
@@ -54,29 +45,6 @@ MainContainerView::MainContainerView(QAbstractItemModel *model) :
     bridgeReturn->listBridgeIn->layout->setOrientation(Qt::Horizontal);
     bridgeReturn->listBridgeOut->layout->setOrientation(Qt::Horizontal);
 
-
-
-//    layout->setRowFixedHeight(0,10);
-//    layout->setRowFixedHeight(2,10);
-
-//    layout->addItem(bridgeIn,0,0,Qt::AlignLeft);
-//    layout->addItem(bridgeOut,0,2,Qt::AlignRight);
-//    layout->addItem(centerLayout,0,0,Qt::AlignHCenter);
-//    layout->addItem(bridgeSend,2,0,Qt::AlignLeft);
-//    layout->addItem(bridgeReturn,2,2,Qt::AlignRight);
-
-//    titleText = new QGraphicsSimpleTextItem(QString("Title"),this);
-//    titleText->moveBy(15,1);
-
-//    setAcceptDrops(true);
-
-//    setGeometry(QRectF(0,0,100,15));
-
-//    setFlag(QGraphicsItem::ItemIsMovable, false);
-//    setFlag(QGraphicsItem::ItemIsSelectable, false);
-//    setFlag(QGraphicsItem::ItemSendsGeometryChanges, false);
-
-//    setWindowFlags(0);
     setGeometry(0,0,0,0);
 }
 
@@ -95,8 +63,4 @@ void MainContainerView::OnViewChanged(QRectF rect)
     bridgeSend->setPos(rect.left(), rect.bottom() - bridgeSend->geometry().height() );
     bridgeReturn->setPos(rect.right() - bridgeReturn->geometry().width(), rect.bottom() - bridgeReturn->geometry().height());
     content->setGeometry(rect);
-    //setGeometry(rect);
-    //scene()->setSceneRect(childrenBoundingRect());
-
-//    setGeometry(rect);
 }

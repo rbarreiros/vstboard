@@ -371,18 +371,6 @@ void MainHost::ClearHost()
     SetProgram(0);
 }
 
-
-//bool MainHost::event(QEvent *event)
-//{
-//    if (event->type() == Event::UpdateSolver) {
-//        if(loading)
-//            return true;
-//        solver.Resolve(workingListOfCables);
-//        return true;
-//    }
-//    return QObject::event(event);
-//}
-
 void MainHost::EnableSolverUpdate(bool enable)
 {
     mutexProgChange.lock();
@@ -502,8 +490,6 @@ void MainHost::OnNewRenderingOrder(orderedNodes * renderLines)
 
 void MainHost::Render(unsigned long samples)
 {
-   // if(!IsSolverUpdateEnabled())
-   //     return;
 
 #ifdef VSTSDK
     vstHost.UpdateTimeInfo(timeFromStart.elapsed(), samples, sampleRate);
@@ -621,11 +607,6 @@ void MainHost::MidiReceive_poll(PtTimestamp timestamp, void *userData)
                         continue;
                     }
                     if(rslt == 1 ) {
-                        //filter sysex
-                        //status = Pm_MessageStatus(buffer.message);
-                        //if (((status & 0x80) == 0)) {
-                        //    continue;
-                        //}
                         Pm_Enqueue(device->queue, &buffer);
                     } else {
                         debug(QString("midi in error on device %1 %2").arg(device->GetIndex()).arg(device->objectName()).toAscii())
@@ -638,8 +619,6 @@ void MainHost::MidiReceive_poll(PtTimestamp timestamp, void *userData)
         //it's a midi output
         if(device->devInfo->output) {
             while (!Pm_QueueEmpty(device->queue)) {
-                //PmEvent *next = (PmEvent *) Pm_QueuePeek(device->queue);
-
                 result = Pm_Dequeue(device->queue, &buffer);
                 Pm_Write(device->stream, &buffer, 1);
             }

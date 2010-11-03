@@ -31,7 +31,6 @@ namespace Connectables {
     Q_OBJECT
     public:
         explicit MidiToAutomation(int index);
-//        ~MidiToAutomation();
         void Render();
         void MidiMsgFromInput(long msg);
 

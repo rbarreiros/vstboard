@@ -34,10 +34,8 @@ ParkingContainer::ParkingContainer() :
 ParkingContainer::~ParkingContainer()
 {
     closing=true;
-//    debug("delete parking")
 
     foreach(QSharedPointer<Object> objPtr, listObj) {
-//        objPtr->Hide();
         RemoveObject(objPtr);
     }
 
@@ -59,7 +57,6 @@ void ParkingContainer::RemoveObject(QSharedPointer<Object> &objPtr)
     if(objPtr.isNull())
         return;
 
-    //objPtr->Hide();
     listObj.removeAll(objPtr);
 }
 
@@ -82,9 +79,6 @@ QDataStream & ParkingContainer::toStream (QDataStream &out) const
             out << (quint16)listObj.size();
             foreach(QSharedPointer<Object> objPtr, listObj) {
                 if(!objPtr.isNull()) {
-//                    out<<(quint8)objPtr->GetType();
-//                    out<<(quint16)objPtr->GetIdentity();
-//                    out<<objPtr->GetIdentityString();
                     out<<objPtr->info();
                     out<<*objPtr.data();
                 } else {
@@ -121,10 +115,6 @@ QDataStream & ParkingContainer::fromStream (QDataStream &in)
                 quint8 objType;
                 in>>objType;
                 if( (ObjType::Enum)objType!=ObjType::ND ) {
-//                    quint16 identity;
-//                    in>>identity;
-//                    QString identityString;
-//                    in>>identityString;
                     ObjectInfo info;
                     in>>info;
 

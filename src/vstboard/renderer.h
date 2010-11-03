@@ -24,9 +24,6 @@
 #include "precomp.h"
 #include "connectables/object.h"
 class SolverNode;
-//namespace Connectables {
-//    class Object;
-//}
 
 typedef QMultiHash<int, SolverNode*> orderedNodes;
 typedef QMultiHash<int, QSharedPointer<Connectables::Object> > orderedObjects;
@@ -43,10 +40,6 @@ public:
 
 protected:
     orderedObjects renderSteps;
-
-
-signals:
-
 
 public slots:
     void Clear();

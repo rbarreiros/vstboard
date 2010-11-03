@@ -31,9 +31,6 @@
 
 #ifndef QT_NO_DEBUG
 
-#include "debugmemreport.h"
-
-
     void myMessageOutput(QtMsgType type, const char *msg)
      {
         qInstallMsgHandler(0);
@@ -83,7 +80,6 @@ int main(int argc, char *argv[])
 
     {
         QCoreApplication::setOrganizationName("CtrlBrk");
-//        QCoreApplication::setOrganizationDomain("vstboard.ctrlbrk.com.fake");
         QCoreApplication::setApplicationName("VstBoard");
 
         QApplication app(argc, argv);
@@ -102,12 +98,6 @@ int main(int argc, char *argv[])
         w->show();
         app.exec();
     }
-/*
-#ifdef WIN32
-#ifndef QT_NO_DEBUG
-    fdumpLeaks();
-#endif
-#endif
-*/
+
     return 0;
 }
