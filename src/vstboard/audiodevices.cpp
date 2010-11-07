@@ -21,22 +21,49 @@
 #include "audiodevices.h"
 #include "globals.h"
 #include "connectables/objectinfo.h"
+#include "connectables/audiodevice.h"
+#include "mainhost.h"
 
 AudioDevices::AudioDevices() :
         model(0)
 {
-    PaError paRet =Pa_Initialize();
-    if(paRet!=paNoError) {
-        debug(Pa_GetErrorText(paRet))
-    }
-
-    BuildModel();
+    GetModel();
 }
 
 AudioDevices::~AudioDevices()
 {
     model->clear();
     model->deleteLater();
+    model=0;
+    Pa_Terminate();
+}
+
+ListAudioInterfacesModel * AudioDevices::GetModel()
+{
+    foreach(Connectables::AudioDevice *ad, Connectables::AudioDevice::listAudioDevices) {
+        ad->SetSleep(true);
+    }
+//    MainHost::Get()->UpdateSolver(true);
+
+
+    if(model) {
+        Pa_Terminate();
+        model->deleteLater();
+    }
+
+
+    PaError paRet =Pa_Initialize();
+    if(paRet!=paNoError) {
+        debug(Pa_GetErrorText(paRet))
+    }
+    BuildModel();
+
+    foreach(Connectables::AudioDevice *ad, Connectables::AudioDevice::listAudioDevices) {
+        ad->SetSleep(false);
+    }
+//    MainHost::Get()->UpdateSolver(true);
+
+    return model;
 }
 
 void AudioDevices::BuildModel()

@@ -46,6 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
     mainHost = MainHost::Get(this);
     ui->setupUi(this);
 
+    //audio devices
     ui->treeAudioInterfaces->setModel(mainHost->GetAudioDevicesModel());
     ui->treeAudioInterfaces->header()->setResizeMode(0,QHeaderView::Stretch);
     ui->treeAudioInterfaces->header()->setResizeMode(1,QHeaderView::Fixed);
@@ -53,7 +54,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->treeAudioInterfaces->header()->resizeSection(1,30);
     ui->treeAudioInterfaces->header()->resizeSection(2,30);
 
-    BuildListMidiInterfaces();
+    //midi devices
+    ui->treeMidiInterfaces->setModel(mainHost->GetMidiDeviceModel());
+    ui->treeMidiInterfaces->header()->setResizeMode(0,QHeaderView::Stretch);
+    ui->treeMidiInterfaces->header()->setResizeMode(1,QHeaderView::Fixed);
+    ui->treeMidiInterfaces->header()->setResizeMode(2,QHeaderView::Fixed);
+    ui->treeMidiInterfaces->header()->resizeSection(1,30);
+    ui->treeMidiInterfaces->header()->resizeSection(2,30);
+
     BuildListTools();
 
     //ProjectFile
@@ -190,59 +198,6 @@ void MainWindow::BuildListTools()
     ui->treeTools->header()->setResizeMode(0,QHeaderView::Stretch);
 }
 
-void MainWindow::BuildListMidiInterfaces()
-{
-    QStringList headerLabels;
-    headerLabels << "Name";
-    headerLabels << "In";
-    headerLabels << "Out";
-
-    listMidiInterfacesModel.setHorizontalHeaderLabels(  headerLabels );
-    QStandardItem *parentItem = listMidiInterfacesModel.invisibleRootItem();
-
-    QString lastName;
-    int cptDuplicateNames=0;
-
-    for(int i=0;i<Pm_CountDevices();i++) {
-        QList<QStandardItem *>  items;
-        const PmDeviceInfo *devInfo = Pm_GetDeviceInfo(i);
-
-        QString devName= QString::fromStdString(devInfo->name);
-        if(lastName == devName) {
-            cptDuplicateNames++;
-        } else {
-            cptDuplicateNames=0;
-        }
-        lastName = devName;
-
-        ObjectInfo obj;
-        obj.nodeType = NodeType::object;
-        obj.objType = ObjType::MidiInterface;
-        obj.id = i;
-        obj.name = devName;
-        obj.api = QString::fromStdString( devInfo->interf );
-        obj.duplicateNamesCounter = cptDuplicateNames;
-        obj.inputs = devInfo->input;
-        obj.outputs = devInfo->output;
-
-        items << new QStandardItem(devName);
-        items << new QStandardItem(QString::number(devInfo->input));
-        items << new QStandardItem(QString::number(devInfo->output));
-
-        items[0]->setData(QVariant::fromValue(obj), UserRoles::objInfo);
-
-        parentItem->appendRow(items);
-    }
-
-    ui->treeMidiInterfaces->setModel(&listMidiInterfacesModel);
-
-    ui->treeMidiInterfaces->header()->setResizeMode(0,QHeaderView::Stretch);
-    ui->treeMidiInterfaces->header()->setResizeMode(1,QHeaderView::Fixed);
-    ui->treeMidiInterfaces->header()->setResizeMode(2,QHeaderView::Fixed);
-
-    ui->treeMidiInterfaces->header()->resizeSection(1,30);
-    ui->treeMidiInterfaces->header()->resizeSection(2,30);
-}
 
 void MainWindow::UpdateCpuLoad()
 {
@@ -574,3 +529,13 @@ void MainWindow::openRecentProject()
          updateRecentFileActions();
      }
  }
+
+void MainWindow::on_actionRefresh_Audio_devices_triggered()
+{
+    ui->treeAudioInterfaces->setModel(mainHost->GetAudioDevicesModel());
+}
+
+void MainWindow::on_actionRefresh_Midi_devices_triggered()
+{
+    ui->treeMidiInterfaces->setModel(mainHost->GetMidiDeviceModel());
+}

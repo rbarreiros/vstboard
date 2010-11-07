@@ -399,6 +399,8 @@
     <addaction name="actionConfig"/>
     <addaction name="actionShortcuts"/>
     <addaction name="actionDelete"/>
+    <addaction name="actionRefresh_Audio_devices"/>
+    <addaction name="actionRefresh_Midi_devices"/>
    </widget>
    <widget class="QMenu" name="menuFile">
     <property name="title">
@@ -1013,6 +1015,16 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="actionRefresh_Audio_devices">
+   <property name="text">
+    <string>Refresh Audio devices</string>
+   </property>
+  </action>
+  <action name="actionRefresh_Midi_devices">
+   <property name="text">
+    <string>Refresh Midi devices</string>
    </property>
   </action>
  </widget>

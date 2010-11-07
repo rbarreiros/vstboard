@@ -68,15 +68,7 @@ MainHost::MainHost(QObject *parent) :
     sampleRate = 44100.0;
     bufferSize = 256;
 
-    //portmidi
-    PmError pmRet = Pm_Initialize();
-    if(pmRet!=pmNoError)
-        debug(Pm_GetErrorText(pmRet));
-
-    PtError ptRet = Pt_Start(1, MainHost::MidiReceive_poll, (void*)this);
-    if(ptRet!=ptNoError)
-        debug(QString("pterror %1").arg(ptRet).toAscii());
-
+    listMidiDevices = new MidiDevices();
     listAudioDevices = new AudioDevices();
 
     //timer
@@ -514,10 +506,8 @@ void MainHost::OnObjectAdded(QSharedPointer<Connectables::Object> objPtr)
     if(parkingContainer)
         parkingContainer->RemoveObject(objPtr);
 
-    mutexListMidi.lock();
     if(objPtr->info().objType == ObjType::MidiInterface)
-        listMidiDevices << objPtr;
-    mutexListMidi.unlock();
+        listMidiDevices->OpenDevice(objPtr);
 
     connect(this,SIGNAL(SampleRateChanged(float)),
             objPtr.data(),SLOT(SetSampleRate(float)));
@@ -541,10 +531,7 @@ void MainHost::OnObjectRemoved(QSharedPointer<Connectables::Object> objPtr, Conn
     disconnect(this,SIGNAL(BufferSizeChanged(long)),
             objPtr.data(),SLOT(SetBufferSize(long)));
 
-
-    mutexListMidi.lock();
-    listMidiDevices.removeAll(objPtr);
-    mutexListMidi.unlock();
+    listMidiDevices->CloseDevice(objPtr);
 
     //if the object comes from a programmable container : don't delete it, store it in the parking container
     if(container && container->listenProgramChanges && parkingContainer
@@ -572,64 +559,6 @@ void MainHost::OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionI
 
     emit SolverToUpdate();
 }
-
-//midi interfaces entry point
-//===============================
-void MainHost::MidiReceive_poll(PtTimestamp timestamp, void *userData)
-{
-    MainHost *host = static_cast<MainHost*>(userData);
-
-    PmEvent buffer;
-    PmError result = pmNoError;
-
-    host->mutexListMidi.lock();
-    foreach(QSharedPointer<Connectables::Object> objPtr, host->listMidiDevices) {
-        if(objPtr.isNull())
-            continue;
-        if(objPtr->GetSleep())
-            continue;
-
-        Connectables::MidiDevice *device = static_cast<Connectables::MidiDevice*>(objPtr.data());
-        if(!device->stream)
-           continue;
-
-        //lock device while processing (no rendering, no delete)
-        device->Lock();
-
-        //it's a midi input
-        if(device->devInfo->input) {
-            do {
-                result = Pm_Poll(device->stream);
-                if (result) {
-                    PmError rslt = (PmError)Pm_Read(device->stream, &buffer, 1);
-                    if (rslt == pmBufferOverflow) {
-                        debug(QString("midi buffer overflow on device %1 %2").arg(device->GetIndex()).arg(device->objectName()).toAscii())
-                        continue;
-                    }
-                    if(rslt == 1 ) {
-                        Pm_Enqueue(device->queue, &buffer);
-                    } else {
-                        debug(QString("midi in error on device %1 %2").arg(device->GetIndex()).arg(device->objectName()).toAscii())
-                        continue;
-                    }
-                }
-            } while (result);
-        }
-
-        //it's a midi output
-        if(device->devInfo->output) {
-            while (!Pm_QueueEmpty(device->queue)) {
-                result = Pm_Dequeue(device->queue, &buffer);
-                Pm_Write(device->stream, &buffer, 1);
-            }
-        }
-
-        device->Unlock();
-    }
-    host->mutexListMidi.unlock();
-}
-
-
 
 int MainHost::GetCpuLoad()
 {

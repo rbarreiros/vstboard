@@ -36,7 +36,7 @@ namespace Connectables {
     class AudioDeviceOut;
     class AudioDevice : QObject //: public Object
     {
-    Q_OBJECT
+        Q_OBJECT
     public:
         AudioDevice(const ObjectInfo &info, QObject *parent=0);
         ~AudioDevice();
@@ -50,20 +50,22 @@ namespace Connectables {
 
         static QHash<qint32,AudioDevice*>listAudioDevices;
 
+        void SetSleep(bool sleeping);
+
     protected:
-       void SetSleep(bool sleeping);
-       static int paCallback( const void *inputBuffer, void *outputBuffer,
-                             unsigned long framesPerBuffer,
-                             const PaStreamCallbackTimeInfo* timeInfo,
-                             PaStreamCallbackFlags statusFlags,
-                             void *userData );
 
-       bool FindDeviceFromName();
-       bool OpenStream(double sampleRate);
-       bool CloseStream();
+        static int paCallback( const void *inputBuffer, void *outputBuffer,
+                               unsigned long framesPerBuffer,
+                               const PaStreamCallbackTimeInfo* timeInfo,
+                               PaStreamCallbackFlags statusFlags,
+                               void *userData );
 
-       float sampleRate;
-       unsigned long bufferSize;
+        bool FindDeviceFromName();
+        bool OpenStream(double sampleRate);
+        bool CloseStream();
+
+        float sampleRate;
+        unsigned long bufferSize;
 
         PaStream *stream;
         const PaDeviceInfo *devInfo;
@@ -81,8 +83,8 @@ namespace Connectables {
     public slots:
         void SetSampleRate(float rate=44100.0);
 
-    friend class AudioDeviceIn;
-    friend class AudioDeviceOut;
+        friend class AudioDeviceIn;
+        friend class AudioDeviceOut;
     };
 }
 

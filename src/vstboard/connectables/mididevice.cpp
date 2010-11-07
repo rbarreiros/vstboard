@@ -24,10 +24,11 @@
 using namespace Connectables;
 
 MidiDevice::MidiDevice(int index, const ObjectInfo &info) :
-    Object(index, info),
-    stream(0),
-    queue(0),
-    devInfo(0)
+        Object(index, info),
+        stream(0),
+        queue(0),
+        devInfo(0),
+        deviceOpened(false)
 {
 }
 
@@ -58,22 +59,102 @@ void MidiDevice::MidiMsgFromInput(long msg) {
     }
 }
 
-bool MidiDevice::Close()
+bool MidiDevice::OpenStream()
 {
-    if(!Object::Close())
+    if(deviceOpened)
+        return true;
+
+    QMutexLocker l(&objMutex);
+
+    if(!FindDeviceFromName())
         return false;
-    Lock();
+
+    queue = Pm_QueueCreate(QUEUE_SIZE, sizeof(PmEvent));
+    if(!queue) {
+        debug("MidiDevice::OpenStream can't create queue")
+                return false;
+    }
+
+    if(objInfo.inputs>0) {
+        PmError err = Pm_OpenInput(&stream, (PmDeviceID)objInfo.id, 0, 512, 0, 0);
+        if (err!=pmNoError) {
+            if(err==pmHostError) {
+                char msg[20];
+                unsigned int len=20;
+                Pm_GetHostErrorText(msg,len);
+                debug("MidiDevice::OpenStream openInput %s",msg)
+                    } else {
+                debug("MidiDevice::OpenStream openInput %s",Pm_GetErrorText(err))
+                    }
+            return false;
+        }
+
+        err = Pm_SetFilter(stream, PM_FILT_ACTIVE | PM_FILT_SYSEX | PM_FILT_CLOCK);
+        if (err!=pmNoError) {
+            if(err==pmHostError) {
+                char msg[20];
+                unsigned int len=20;
+                Pm_GetHostErrorText(msg,len);
+                debug("MidiDevice::OpenStream setFilter %s",msg)
+                    } else {
+                debug("MidiDevice::OpenStream setFilter %s",Pm_GetErrorText(err))
+                    }
+            return false;
+        }
+    }
+
+    if(objInfo.outputs>0) {
+        PmError err = Pm_OpenOutput(&stream, (PmDeviceID)objInfo.id, 0, 512, 0, 0, 0);
+        if (err!=pmNoError) {
+            if(err==pmHostError) {
+                char msg[20];
+                unsigned int len=20;
+                Pm_GetHostErrorText(msg,len);
+                debug("MidiDevice::Open openInput %s",msg)
+                    } else {
+                debug("MidiDevice::Open openInput %s",Pm_GetErrorText(err))
+                    }
+            return false;
+        }
+    }
+
+    deviceOpened=true;
+//    SetSleep(false);
+    return true;
+}
+
+bool MidiDevice::CloseStream()
+{
+    if(!deviceOpened)
+        return true;
+
+//    SetSleep(true);
+
+
+    QMutexLocker l(&objMutex);
+
     PmError err = pmNoError;
+
+    err = Pm_Close(stream);
+    if(err!=pmNoError)
+        debug("MidiDevice::Close error closing midi port");
+
 
     err = Pm_QueueDestroy(queue);
     if(err!=pmNoError)
         debug("error closing midi queue");
 
-     err = Pm_Close(stream);
-     if(err!=pmNoError)
-         debug("MidiDevice::Close error closing midi port");
-     Unlock();
-     return true;
+    deviceOpened=false;
+
+    return true;
+}
+
+bool MidiDevice::Close()
+{
+    if(!Object::Close())
+        return false;
+    CloseStream();
+    return true;
 }
 
 
@@ -110,7 +191,7 @@ bool MidiDevice::FindDeviceFromName()
             devInfo = Pm_GetDeviceInfo(deviceNumber);
         } else {
             debug("MidiDevice::FindDeviceFromName device not found")
-            return false;
+                    return false;
         }
     }
 
@@ -122,14 +203,8 @@ bool MidiDevice::Open()
 {
     closed=false;
 
-    if(!FindDeviceFromName())
+    if(!OpenStream())
         return false;
-
-    queue = Pm_QueueCreate(QUEUE_SIZE, sizeof(PmEvent));
-    if(!queue) {
-        debug("MidiDevice::Open can't create queue")
-        return false;
-    }
 
     for(int i=0;i<devInfo->input;i++) {
         MidiPinOut *pin = new MidiPinOut(this);
@@ -141,48 +216,7 @@ bool MidiDevice::Open()
         listMidiPinIn << pin;
     }
 
-    if(objInfo.inputs>0) {
-        PmError err = Pm_OpenInput(&stream, (PmDeviceID)objInfo.id, 0, 512, 0, 0);
-        if (err!=pmNoError) {
-            if(err==pmHostError) {
-                char msg[20];
-                unsigned int len=20;
-                Pm_GetHostErrorText(msg,len);
-                debug("MidiDevice::Open openInput %s",msg)
-            } else {
-                debug("MidiDevice::Open openInput %s",Pm_GetErrorText(err))
-            }
-            return false;
-        }
 
-        err = Pm_SetFilter(stream, PM_FILT_ACTIVE | PM_FILT_SYSEX | PM_FILT_CLOCK);
-        if (err!=pmNoError) {
-            if(err==pmHostError) {
-                char msg[20];
-                unsigned int len=20;
-                Pm_GetHostErrorText(msg,len);
-                debug("MidiDevice::Open openInput %s",msg)
-            } else {
-                debug("MidiDevice::Open openInput %s",Pm_GetErrorText(err))
-            }
-            return false;
-        }
-    }
-
-    if(objInfo.outputs>0) {
-        PmError err = Pm_OpenOutput(&stream, (PmDeviceID)objInfo.id, 0, 512, 0, 0, 0);
-        if (err!=pmNoError) {
-            if(err==pmHostError) {
-                char msg[20];
-                unsigned int len=20;
-                Pm_GetHostErrorText(msg,len);
-                debug("MidiDevice::Open openInput %s",msg)
-            } else {
-                debug("MidiDevice::Open openInput %s",Pm_GetErrorText(err))
-            }
-            return false;
-        }
-    }
 
     Object::Open();
     return true;

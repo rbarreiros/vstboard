@@ -22,6 +22,7 @@
 #define MIDIPININ_H
 
 #include "pin.h"
+#include "portmidi.h"
 
 namespace Connectables {
 

@@ -24,7 +24,6 @@
 #include "precomp.h"
 
 #include "mainhost.h"
-#include "models/listmidiinterfacesmodel.h"
 #include "models/listtoolsmodel.h"
 #include "projectfile/projectfile.h"
 #include "views/solverscene.h"
@@ -48,7 +47,7 @@ protected:
     void changeEvent(QEvent *e);
     QGraphicsScene *sceneHostInputs;
     QGraphicsScene *sceneHostOutputs;
-    ListMidiInterfacesModel listMidiInterfacesModel;
+
     ListToolsModel listToolsModel;
 
     QFileSystemModel listVstPluginsModel;
@@ -59,7 +58,6 @@ protected:
 private:
     MainWindow(QWidget *parent = 0);
     bool userReallyWantsToQuit();
-    void BuildListMidiInterfaces();
     void BuildListTools();
     void writeSettings();
     void readSettings();
@@ -82,6 +80,8 @@ public slots:
     void OnProgramChange(int prog);
 
 private slots:
+    void on_actionRefresh_Midi_devices_triggered();
+    void on_actionRefresh_Audio_devices_triggered();
     void on_actionSave_Setup_As_triggered();
     void on_actionSave_Project_As_triggered();
     void on_actionAbout_triggered();

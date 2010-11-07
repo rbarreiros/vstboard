@@ -86,8 +86,8 @@ void AudioDevice::SetSampleRate(float rate)
     if(!closed) {
         closeFlag=true;
         QMutexLocker lock(&objMutex);
-        CloseStream();
-        Open();
+        SetSleep(true);
+        SetSleep(false);
     }
 }
 
@@ -285,10 +285,18 @@ bool AudioDevice::Close()
 
 void AudioDevice::SetSleep(bool sleeping)
 {
+    if(sleeping) {
+        CloseStream();
+    } else {
+        Open();
+    }
+
     if(devIn)
         devIn->SetSleep(sleeping);
     if(devOut)
         devOut->SetSleep(sleeping);
+
+
 }
 
 void AudioDevice::Render()

@@ -32,6 +32,7 @@
 #include "models/hostmodel.h"
 #include "models/hostmodelproxy.h"
 #include "audiodevices.h"
+#include "mididevices.h"
 
 #include "projectfile/setupfile.h"
 
@@ -73,6 +74,7 @@ public:
     QSharedPointer<Connectables::ParkingContainer> parkingContainer;
 
     ListAudioInterfacesModel * GetAudioDevicesModel() {return listAudioDevices->GetModel();}
+    ListMidiInterfacesModel * GetMidiDeviceModel() {return listMidiDevices->GetModel();}
 
     PathSolver solver;
 
@@ -93,14 +95,11 @@ private:
     void SetupProgramContainer();
     void SetupParking();
 
+    MidiDevices *listMidiDevices;
     AudioDevices *listAudioDevices;
 
     QMap<int,Connectables::Object*>listContainers;
     QMap<ConnectionInfo,Connectables::Pin*>listPins;
-
-    QList< QSharedPointer<Connectables::Object> >listMidiDevices;
-    static void MidiReceive_poll(PtTimestamp timestamp, void *userData);
-    QMutex mutexListMidi;
 
 #ifdef VSTSDK
     vst::CVSTHost vstHost;

@@ -30,8 +30,8 @@ class AudioDevices
 public:
     AudioDevices();
     ~AudioDevices();
-    ListAudioInterfacesModel * GetModel() const {return model;}
-protected:
+    ListAudioInterfacesModel * GetModel();
+private:
     void BuildModel();
     ListAudioInterfacesModel *model;
 };

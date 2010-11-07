@@ -111,7 +111,8 @@ SOURCES += main.cpp \
     connectables/maincontainer.cpp \
     connectables/objectinfo.cpp \
     views/aboutdialog.cpp \
-    views/splash.cpp
+    views/splash.cpp \
+    mididevices.cpp
 HEADERS += mainwindow.h \
     precomp.h \
     models/listaudiointerfacesmodel.h \
@@ -183,7 +184,8 @@ HEADERS += mainwindow.h \
     connectables/maincontainer.h \
     connectables/objectinfo.h \
     views/aboutdialog.h \
-    views/splash.h
+    views/splash.h \
+    mididevices.h
 FORMS += mainwindow.ui \
     views/filebrowser.ui \
     views/configdialog.ui \

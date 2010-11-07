@@ -22,6 +22,8 @@
 #define MIDIDEVICE_H
 
 #include "../precomp.h"
+#include "portmidi.h"
+#include "pmutil.h"
 #include "object.h"
 
 #define QUEUE_SIZE 1024
@@ -44,9 +46,12 @@ namespace Connectables {
         PmQueue *queue;
 
         const PmDeviceInfo *devInfo;
+        bool OpenStream();
+        bool CloseStream();
 
     protected:
         bool FindDeviceFromName();
+        bool deviceOpened;
 
     signals:
         void SendMsg(int msgType,void *data=0);
