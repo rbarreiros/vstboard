@@ -35,7 +35,7 @@ ObjectView::ObjectView(QAbstractItemModel *model, QGraphicsItem * parent, Qt::Wi
     model(model)
 
 {
-
+    setObjectName("objView");
 }
 
 ObjectView::~ObjectView()

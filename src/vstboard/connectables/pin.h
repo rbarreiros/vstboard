@@ -53,8 +53,8 @@ namespace Connectables {
 
         void setObjectName(const QString &name);
 
-        void SetDisplayedText(const QString &txt);
-        QString GetDisplayedText();
+//        void SetDisplayedText(const QString &txt);
+//        QString GetDisplayedText();
 
         Object *GetParentObj() {return parent;}
 
@@ -79,10 +79,11 @@ namespace Connectables {
 
         QMutex objMutex;
         bool closed;
+        QString displayedText;
 
     private:
-        QMutex txtMutex;
-        QString displayedText;
+//        QMutex txtMutex;
+
 
     public slots:
         virtual void updateView();

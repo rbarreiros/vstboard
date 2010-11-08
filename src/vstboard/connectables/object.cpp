@@ -85,6 +85,7 @@ bool Object::Close()
 }
 
 void Object::Hide() {
+//    SetSleep(true);
     foreach(AudioPinIn *pin, listAudioPinIn)
         pin->Close();
     foreach(AudioPinOut *pin, listAudioPinOut)
@@ -268,6 +269,7 @@ void Object::SetParentModelNode(QStandardItem* parent)
 
     parent->appendRow(modelNode);
     containerId = parent->data(UserRoles::value).toInt();
+//    SetSleep(false);
 }
 
 void Object::SetParkingNode(QStandardItem* parent)

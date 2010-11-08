@@ -158,7 +158,7 @@ void MainHost::SetupHostContainer()
         hostContainer.clear();
         UpdateSolver(true);
     }
-
+debug("MainHost::SetupHostContainer")
     ObjectInfo info;
     info.nodeType = NodeType::container;
     info.objType = ObjType::MainContainer;

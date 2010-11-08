@@ -40,6 +40,7 @@ Pin::Pin(Object *parent,PinType::Enum type, PinDirection::Enum direction, int nu
 
 Pin::~Pin()
 {
+//    SetVisible(false);
     Close();
 }
 
@@ -66,26 +67,21 @@ void Pin::SendMsg(int msgType,void *data)
     MainHost::Get()->SendMsg(connectInfo,(PinMessage::Enum)msgType,data);
 }
 
-QString Pin::GetDisplayedText()
-{
-    QString retStr;
+//QString Pin::GetDisplayedText()
+//{
+//    QString retStr;
+//    txtMutex.lock();
+//    retStr = displayedText;
+//    txtMutex.unlock();
+//    return retStr;
+//}
 
-    txtMutex.lock();
-    retStr = displayedText;
-    txtMutex.unlock();
-
-    return retStr;
-}
-
-void Pin::SetDisplayedText(const QString &txt)
-{
-
-    txtMutex.lock();
-    displayedText = txt;
-    if(modelPin)
-        modelPin->setData(displayedText,Qt::DisplayRole);
-    txtMutex.unlock();
-}
+//void Pin::SetDisplayedText(const QString &txt)
+//{
+//    txtMutex.lock();
+//    displayedText = txt;
+//    txtMutex.unlock();
+//}
 
 void Pin::SetParentModelNode(QStandardItem *parent_Node)
 {
@@ -104,10 +100,8 @@ void Pin::SetParentModelNode(QStandardItem *parent_Node)
 void Pin::Close()
 {
     QMutexLocker l(&objMutex);
-
     disconnect(MainHost::Get()->updateViewTimer,SIGNAL(timeout()),
             this,SLOT(updateView()));
-
     parentNode=0;
     modelPin=0;
     closed=true;
@@ -134,6 +128,7 @@ void Pin::SetVisible(bool vis)
             modelPin->setData( QVariant::fromValue(ObjectInfo(NodeType::pin)),UserRoles::objInfo);
             modelPin->setData(QVariant::fromValue(connectInfo),UserRoles::connectionInfo);
             modelPin->setData(stepSize,UserRoles::stepSize);
+//            MainHost::Get()->modelProxy->Add(connectInfo.GetId(),modelPin,parentNode);
             parentNode->appendRow(modelPin);
         }
 
@@ -156,6 +151,7 @@ void Pin::SetVisible(bool vis)
             }
 
             parentNode->removeRow(modelPin->row());
+//            MainHost::Get()->modelProxy->Remove(connectInfo.GetId());
             modelPin=0;
         }
     }
@@ -165,6 +161,9 @@ void Pin::updateView()
 {
     QMutexLocker l(&objMutex);
 
-    if(!closed && visible)
+    if(!closed && visible) {
         modelPin->setData(GetValue(),UserRoles::value);
+        if(!displayedText.isEmpty()) modelPin->setData(displayedText,Qt::DisplayRole);
+    }
+//        MainHost::Get()->modelProxy->Update(connectInfo,UserRoles::value,GetValue());
 }

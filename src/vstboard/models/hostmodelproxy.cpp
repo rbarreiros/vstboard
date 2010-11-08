@@ -25,46 +25,48 @@ HostModelProxy::HostModelProxy(QStandardItemModel* model) :
     QObject(model),
     model(model)
 {
-    connect(this,SIGNAL(_add(QStandardItem*,QStandardItem*,int)),
-            this,SLOT(addObject(QStandardItem*,QStandardItem*,int)),
+    connect(this,SIGNAL(_add(int,QStandardItem*,int)),
+            this,SLOT(__addObject(int,QStandardItem*,int)),
             Qt::QueuedConnection);
     connect(this,SIGNAL(_remove(int)),
-            this,SLOT(removeObject(int)),
+            this,SLOT(__removeObject(int)),
             Qt::QueuedConnection);
     connect(this,SIGNAL(_update(QVariant,int,int)),
-            this,SLOT(updateObject(QVariant,int,int)),
+            this,SLOT(__updateObject(QVariant,int,int)),
             Qt::QueuedConnection);
 }
 
-void HostModelProxy::Add(int objId, QStandardItem *item, QStandardItem *parent)
+void HostModelProxy::Add(const int objId, QStandardItem *item, const int parentId)
 {
-    emit _add(parent,item,objId);
+    emit _add(parentId,item,objId);
 }
 
-void HostModelProxy::Remove(int objId)
+void HostModelProxy::Remove(const int objId)
 {
     emit _remove(objId);
 }
 
-void HostModelProxy::Remove(int row, const QModelIndex & parent)
-{
-    int objId = parent.child(row,0).data(UserRoles::value).toInt();
-    emit _remove(objId);
-}
+//void HostModelProxy::Remove(int row, const QModelIndex & parent)
+//{
+//    int objId = parent.child(row,0).data(UserRoles::value).toInt();
+//    emit _remove(objId);
+//}
 
-void HostModelProxy::Update(int objId, int role, const QVariant & value)
+void HostModelProxy::Update(const int objId, const int role, const QVariant & value)
 {
     emit _update(value,role,objId);
 }
 
-void HostModelProxy::addObject (QStandardItem * parent, QStandardItem* item, int objId)
+void HostModelProxy::__addObject (int parentId, QStandardItem* item, const int objId)
 {
+    QStandardItem *parent = mapObjects.value(parentId,0);
+    if(!parent)
+        return;
+    mapObjects.insert(objId,item);
     parent->appendRow(item);
-    if(objId!=-1)
-        mapObjects.insert(objId,item);
 }
 
-void HostModelProxy::removeObject (int objId)
+void HostModelProxy::__removeObject (const int objId)
 {
     QStandardItem *item = mapObjects.value(objId,0);
     if(!item)
@@ -75,7 +77,7 @@ void HostModelProxy::removeObject (int objId)
     mapObjects.remove(objId);
 }
 
-void HostModelProxy::updateObject( const QVariant & value, int role, int objId)
+void HostModelProxy::__updateObject( const QVariant & value,const  int role, const int objId)
 {
     QStandardItem *item = mapObjects.value(objId,0);
     if(!item)

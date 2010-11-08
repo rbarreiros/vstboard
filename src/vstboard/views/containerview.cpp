@@ -29,7 +29,7 @@ using namespace View;
 ContainerView::ContainerView(QAbstractItemModel *model, QGraphicsItem *parent) :
     ObjectView(model, parent)
 {
-
+    setObjectName("ContainerView");
 }
 
 ContainerView::~ContainerView()

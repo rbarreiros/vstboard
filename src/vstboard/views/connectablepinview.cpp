@@ -35,7 +35,8 @@ ConnectablePinView::ConnectablePinView(QAbstractItemModel *model, QGraphicsItem 
 
     rectBgnd = new QGraphicsRectItem(geometry(), this);
 
-    textItem = new OutlinedText(pin->GetDisplayedText(), this, Qt::black, QColor(255,255,255,150));
+//    textItem = new OutlinedText(pin->GetDisplayedText(), this, Qt::black, QColor(255,255,255,150));
+    textItem = new OutlinedText("", this, Qt::black, QColor(255,255,255,150));
     textItem->moveBy(2,1);
 
     rectVu = new QGraphicsRectItem(this);

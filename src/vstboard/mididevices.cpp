@@ -1,6 +1,6 @@
 #include "mididevices.h"
 #include "connectables/objectinfo.h"
-
+#include "mainhost.h"
 
 QList< QSharedPointer<Connectables::MidiDevice> >MidiDevices::listOpenedMidiDevices;
 QMutex MidiDevices::mutexListMidi;

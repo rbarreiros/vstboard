@@ -26,6 +26,8 @@ using namespace View;
 MainContainerView::MainContainerView(QAbstractItemModel *model) :
         ContainerView(model)
 {
+    setObjectName("MainContainerView");
+
     content = new ContainerContent(model,this);
     content->setAcceptDrops(true);
 

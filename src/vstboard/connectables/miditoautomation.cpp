@@ -41,18 +41,40 @@ MidiToAutomation::MidiToAutomation(int index) :
     for(int i=0;i<128;i++) {
         listParameterPinOut.insert(i,new ParameterPinOut(this,i,0,&listValues,false,QString::number(i)));
     }
+    debug("MidiAuomation::New")
+}
 
+MidiToAutomation::~MidiToAutomation()
+{
+    debug("MidiToAutomation::Delete")
+}
+
+bool MidiToAutomation::Close()
+{
+    debug("MidiToAutomation::Close")
+    Object::Close();
+    this->deleteLater();
+    return true;
+}
+
+void MidiToAutomation::Hide()
+{
+    debug("MidiToAutomation::Hide")
+    Object::Hide();
 }
 
 void MidiToAutomation::Render()
 {
+//    QMutexLocker l(&objMutex);
+
     if(listChanged.isEmpty())
         return;
 
     QHash<quint8,quint8>::const_iterator i = listChanged.constBegin();
     while(i!=listChanged.constEnd()) {
-        if(listParameterPinOut.contains(i.key()))
+        if(listParameterPinOut.contains(i.key())) {
             listParameterPinOut.value(i.key())->ChangeValue(i.value());
+        }
         ++i;
     }
     listChanged.clear();
@@ -69,7 +91,9 @@ void MidiToAutomation::MidiMsgFromInput(long msg)
             debug("midi ctrl 0>127")
             return;
         }
+//        objMutex.lock();
         listChanged.insert(ctrl,val);
+//        objMutex.unlock();
     }
 }
 

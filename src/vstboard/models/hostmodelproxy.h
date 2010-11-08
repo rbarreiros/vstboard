@@ -30,26 +30,26 @@ class HostModelProxy : public QObject
 public:
     explicit HostModelProxy(QStandardItemModel* model);
 
-    void Add(int objId, QStandardItem *item, QStandardItem *parent=0);
-    void Remove(int objId);
-    void Remove(int row, const QModelIndex & parent);
-    void Update(int objId, int role, const QVariant & value);
+    void Add(const int objId, QStandardItem *item, const int parentId);
+    void Remove(const int objId);
+//    void Remove(int row, const QModelIndex & parent);
+    void Update(const int objId, const int role, const QVariant & value);
 
 private:
     QMap<int,QStandardItem*>mapObjects;
     QStandardItemModel *model;
 
 signals:
-    void _add(QStandardItem * parent, QStandardItem* item, int objId);
-    void _remove(int objId);
-    void _update( const QVariant & value, int role, int objId);
+    void _add(int parentId, QStandardItem* item, const int objId);
+    void _remove(const int objId);
+    void _update( const QVariant & value, const int role, const int objId);
 
 public slots:
 
 private slots:
-    void updateObject( const QVariant & value, int role, int objId);
-    void addObject(QStandardItem * parent, QStandardItem* item, int objId );
-    void removeObject (int objId);
+    void __addObject(int parentId, QStandardItem* item, const int objId );
+    void __removeObject (const int objId);
+    void __updateObject( const QVariant & value, const int role, const int objId);
 };
 
 #endif // HOSTMODELPROXY_H

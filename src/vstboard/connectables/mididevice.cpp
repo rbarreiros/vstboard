@@ -42,6 +42,7 @@ void MidiDevice::Render()
     if(devInfo->input) {
         PmEvent buffer;
         Lock();
+
         while (Pm_Dequeue(queue, &buffer) == 1) {
             foreach(MidiPinOut *pin,listMidiPinOut) {
                 pin->SendMsg(PinMessage::MidiMsg,(void*)&buffer.message);
@@ -215,8 +216,6 @@ bool MidiDevice::Open()
         MidiPinIn *pin = new MidiPinIn(this);
         listMidiPinIn << pin;
     }
-
-
 
     Object::Open();
     return true;

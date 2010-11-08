@@ -35,10 +35,8 @@ public:
     bool dropMimeData ( const QMimeData * data, Qt::DropAction action, int row, int column, const QModelIndex & parent );
     bool setData ( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole );
     bool setItemData ( const QModelIndex & index, const QMap<int, QVariant> & roles );
-
 protected:
     QMap<int,QStandardItem*>mapObjects;
-
 };
 
 #endif // HOSTMODEL_H

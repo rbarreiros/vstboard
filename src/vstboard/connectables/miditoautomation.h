@@ -31,6 +31,9 @@ namespace Connectables {
     Q_OBJECT
     public:
         explicit MidiToAutomation(int index);
+        ~MidiToAutomation();
+        bool Close();
+        void Hide();
         void Render();
         void MidiMsgFromInput(long msg);
 

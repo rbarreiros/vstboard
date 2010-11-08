@@ -71,6 +71,7 @@ ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int num
     loading=false;
 }
 
+
 void ParameterPin::GetDefault(ObjectParameter &param)
 {
     param.index=defaultIndex;
@@ -173,7 +174,8 @@ void ParameterPin::OnValueChanged(float val)
             setObjectName(parent->GetParameterName(connectInfo));
 
         if(listValues) {
-            SetDisplayedText( QString("%1:%2").arg(objectName()).arg(listValues->at(stepIndex).toString()) );
+            //SetDisplayedText( QString("%1:%2").arg(objectName()).arg(listValues->at(stepIndex).toString()) );
+            displayedText = QString("%1:%2").arg(objectName()).arg(listValues->at(stepIndex).toString());
         }
     }
 }

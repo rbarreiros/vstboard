@@ -46,11 +46,13 @@ void Cable::AddToParentNode(QStandardItem *parent)
     modelItem->setData(QVariant::fromValue(pinOut),UserRoles::value);
     modelItem->setData(QVariant::fromValue(pinIn),UserRoles::connectionInfo);
     parent->appendRow(modelItem);
+//    MainHost::Get()->modelProxy->Add(pinOut.GetId()*pinOut.GetId(),modelItem,parent);
 }
 
 void Cable::RemoveFromParentNode(QStandardItem *parent)
 {
     if(modelItem && parent)
         parent->removeRow(modelItem->row());
+//        MainHost::Get()->modelProxy->Remove(pinOut.GetId()*pinIn.GetId());
     modelItem=0;
 }

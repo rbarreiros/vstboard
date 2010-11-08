@@ -328,7 +328,10 @@ bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int
 
                 if(newVal>1.0f) newVal=1.0f;
                 if(newVal<.0f) newVal=.0f;
-                static_cast<Connectables::ParameterPin*>(Connectables::ObjectFactory::Get()->GetPin(info))->ChangeValue( newVal );
+                Connectables::ParameterPin* pin = static_cast<Connectables::ParameterPin*>(Connectables::ObjectFactory::Get()->GetPin(info));
+                if(!pin)
+                    return false;
+                pin->ChangeValue( newVal );
                 item->setData(newVal,role);
             }
             break;
