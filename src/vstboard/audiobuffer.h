@@ -21,7 +21,7 @@
 #ifndef AUDIOBUFFER_H
 #define AUDIOBUFFER_H
 
-#define BLANK_BUFFER_SIZE 1024
+#define BLANK_BUFFER_SIZE 4096
 
 #include "precomp.h"
 
@@ -30,21 +30,21 @@ class AudioBuffer
 public:
         AudioBuffer(bool externalAllocation = false);
         ~AudioBuffer(void);
-        bool SetSize(long size);
+        bool SetSize(unsigned long size);
         void Clear();
         void AddToStack(AudioBuffer * buff);
         void SetPointer(float * buff, bool tmpBufferToBeFilled=false);
         float *GetPointer(bool willBeFilled=false);
         float *ConsumeStack();
-        inline long GetSize() {return nSize;}
+        inline unsigned long GetSize() {return nSize;}
         float GetVu();
         inline void ResetStackCounter() {stackSize=0;}
 
 protected:
-        int stackSize;
+        unsigned int stackSize;
         float * pBuffer;
-        long nSize;
-        long nAllocatedSize;
+        unsigned long nSize;
+        unsigned long nAllocatedSize;
         float _maxVal;
         static float blankBuffer[BLANK_BUFFER_SIZE];
         bool bExternalAllocation;

@@ -28,7 +28,7 @@ CableView::CableView(ConnectionInfo pinOut, ConnectionInfo pinIn, QGraphicsItem 
     pinOut(pinOut),
     pinIn(pinIn)
 {
-    setObjectName("cable");
+//    setObjectName("cable");
 }
 
 void CableView::UpdatePosition(const ConnectionInfo &pinInfo, const QPointF &pt)

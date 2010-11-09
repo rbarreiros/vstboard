@@ -25,15 +25,19 @@
 #include "portaudio.h"
 #include "models/listaudiointerfacesmodel.h"
 
-class AudioDevices
+class AudioDevices : public QObject
 {
+    Q_OBJECT
 public:
-    AudioDevices();
+    explicit AudioDevices(QObject *parent=0);
     ~AudioDevices();
     ListAudioInterfacesModel * GetModel();
 private:
     void BuildModel();
     ListAudioInterfacesModel *model;
+
+private slots:
+    void UpdateCpuUsage();
 };
 
 #endif // AUDIODEVICES_H

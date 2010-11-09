@@ -24,7 +24,8 @@
 #include "connectables/audiodevice.h"
 #include "mainhost.h"
 
-AudioDevices::AudioDevices() :
+AudioDevices::AudioDevices(QObject *parent) :
+        QObject(parent),
         model(0)
 {
     GetModel();
@@ -36,6 +37,11 @@ AudioDevices::~AudioDevices()
     model->deleteLater();
     model=0;
     Pa_Terminate();
+}
+
+void AudioDevices::UpdateCpuUsage()
+{
+
 }
 
 ListAudioInterfacesModel * AudioDevices::GetModel()

@@ -32,21 +32,21 @@ namespace Connectables {
     class AudioDevice;
     class AudioDeviceOut : public Object
     {
+    Q_OBJECT
     public:
         AudioDeviceOut(int index, const ObjectInfo &info);
         ~AudioDeviceOut();
 
         bool Open();
         bool Close();
-        void Render();
-        int GetProcessingTime() {return 10;}
 
-        bool bufferReady;
+        int GetProcessingTime() {return 10;}
 
     protected:
         AudioDevice *parentDevice;
 
-
+    public slots:
+        void SetBufferSize(long size);
 
     friend class AudioDevice;
     };

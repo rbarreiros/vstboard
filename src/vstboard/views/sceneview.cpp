@@ -143,8 +143,6 @@ void SceneView::rowsAboutToBeRemoved ( const QModelIndex & parent, int start, in
                 obj->hide();
                 obj->scene()->removeItem(obj);
                 obj->deleteLater();
-
-
                 break;
             }
         case NodeType::container :
@@ -240,7 +238,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                             cntView->setParentItem(rootObjHost);
                             connect(viewHost,SIGNAL(viewResized(QRectF)),
                                     cntView,SLOT(OnViewChanged(QRectF)));
-
+                            QTimer::singleShot(0, viewHost, SLOT(ForceResize()));
                         }
 
                         if(index.data().toString().startsWith("projectContainer")) {
@@ -249,7 +247,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                             cntView->setParentItem(rootObjProject);
                             connect(viewProject,SIGNAL(viewResized(QRectF)),
                                     cntView,SLOT(OnViewChanged(QRectF)));
-
+                            QTimer::singleShot(0, viewProject, SLOT(ForceResize()));
                         }
 
                         if(index.data().toString().startsWith("programContainer")) {
@@ -258,7 +256,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                             cntView->setParentItem(rootObjProgram);
                             connect(viewProgram,SIGNAL(viewResized(QRectF)),
                                     cntView,SLOT(OnViewChanged(QRectF)));
-
+                            QTimer::singleShot(0, viewProgram, SLOT(ForceResize()));
                         }
                         break;
                     }
@@ -317,6 +315,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                 connect(objView,SIGNAL(destroyed(QObject*)),
                         this,SLOT(graphicObjectRemoved(QObject*)));
                 objView->SetModelIndex(index);
+               // viewHost->ForceResize();
                 break;
             }
             case NodeType::object :

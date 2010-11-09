@@ -31,9 +31,12 @@
 using namespace Connectables;
 
 QHash<int,AudioDevice*>AudioDevice::listAudioDevices;
+int AudioDevice::countDevicesReady=0;
+int AudioDevice::countInputDevices=0;
 
 AudioDevice::AudioDevice(const ObjectInfo &info, QObject *parent) :
     QObject(parent),
+    bufferReady(false),
     sampleRate(44100.0f),
     bufferSize(4096),
     stream(0),
@@ -59,6 +62,12 @@ AudioDevice::~AudioDevice()
     debug("%s deleted",objectName().toAscii().constData())
 }
 
+void AudioDevice::DeleteIfUnused()
+{
+    if(!devIn && !devOut)
+        deleteLater();
+}
+
 bool AudioDevice::SetObjectInput(AudioDeviceIn *obj)
 {
     if(devIn && obj) {
@@ -66,7 +75,15 @@ bool AudioDevice::SetObjectInput(AudioDeviceIn *obj)
         return false;
     }
 
+    if(obj) {
+        countInputDevices++;
+    } else {
+        countInputDevices--;
+    }
+
     devIn = obj;
+
+    QTimer::singleShot(5000,this,SLOT(DeleteIfUnused()));
     return true;
 }
 
@@ -78,6 +95,8 @@ bool AudioDevice::SetObjectOutput(AudioDeviceOut *obj)
     }
 
     devOut = obj;
+
+    QTimer::singleShot(5000,this,SLOT(DeleteIfUnused()));
     return true;
 }
 
@@ -134,12 +153,15 @@ bool AudioDevice::FindDeviceFromName()
 
 bool AudioDevice::OpenStream(double sampleRate)
 {
+
     unsigned long framesPerBuffer = paFramesPerBufferUnspecified;
 
     PaStreamParameters *inputParameters = NULL;
     PaStreamParameters *outputParameters = NULL;
+    PaStreamFlags flags = paClipOff; //paNoFlag;
 
     if(devInfo->maxInputChannels > 0) {
+
         inputParameters = new(PaStreamParameters);
         bzero( inputParameters, sizeof( PaStreamParameters ) );
         inputParameters->channelCount = devInfo->maxInputChannels;
@@ -147,9 +169,56 @@ bool AudioDevice::OpenStream(double sampleRate)
         inputParameters->hostApiSpecificStreamInfo = NULL;
         inputParameters->sampleFormat = paFloat32 | paNonInterleaved;
         inputParameters->suggestedLatency = Pa_GetDeviceInfo(objInfo.id)->defaultLowInputLatency ;
+
+        switch(Pa_GetHostApiInfo( devInfo->hostApi )->type) {
+            case paDirectSound :
+                directSoundStreamInfo.size = sizeof(PaWinDirectSoundStreamInfo);
+                directSoundStreamInfo.hostApiType = paDirectSound;
+                directSoundStreamInfo.version = 1;
+                //directSoundStreamInfo.flags = paWinDirectSoundUseChannelMask;
+                //directSoundStreamInfo.channelMask = PAWIN_SPEAKER_5POINT1; /* request 5.1 output format */
+                inputParameters->hostApiSpecificStreamInfo = &directSoundStreamInfo;
+                break;
+            case paMME :
+                wmmeStreamInfo.size = sizeof(PaWinMmeStreamInfo);
+                wmmeStreamInfo.hostApiType = paMME;
+                wmmeStreamInfo.version = 1;
+                wmmeStreamInfo.flags = paWinMmeUseLowLevelLatencyParameters | paWinMmeDontThrottleOverloadedProcessingThread;
+                wmmeStreamInfo.framesPerBuffer = 512;
+                wmmeStreamInfo.bufferCount = 8;//devInfo->maxInputChannels;
+                inputParameters->hostApiSpecificStreamInfo = &wmmeStreamInfo;
+                inputParameters->suggestedLatency = 0;
+                break;
+            case paASIO :
+                break;
+            case paSoundManager :
+                break;
+            case paCoreAudio :
+                break;
+            case paOSS :
+                break;
+            case paALSA :
+                break;
+            case paAL :
+                break;
+            case paBeOS :
+                break;
+            case paWDMKS :
+                break;
+            case paJACK :
+                break;
+            case paWASAPI :
+                break;
+            case paAudioScienceHPI :
+                break;
+            default:
+                break;
+        }
+
     }
 
     if(devInfo->maxOutputChannels > 0) {
+
         outputParameters = new(PaStreamParameters);
         bzero( outputParameters, sizeof( PaStreamParameters ) );
         outputParameters->channelCount = devInfo->maxOutputChannels;
@@ -157,6 +226,55 @@ bool AudioDevice::OpenStream(double sampleRate)
         outputParameters->hostApiSpecificStreamInfo = NULL;
         outputParameters->sampleFormat = paFloat32 | paNonInterleaved;
         outputParameters->suggestedLatency = Pa_GetDeviceInfo(objInfo.id)->defaultLowOutputLatency ;
+
+        switch(Pa_GetHostApiInfo( devInfo->hostApi )->type) {
+            case paDirectSound :
+                directSoundStreamInfo.size = sizeof(PaWinDirectSoundStreamInfo);
+                directSoundStreamInfo.hostApiType = paDirectSound;
+                directSoundStreamInfo.version = 1;
+                //directSoundStreamInfo.flags = paWinDirectSoundUseChannelMask;
+                //directSoundStreamInfo.channelMask = PAWIN_SPEAKER_5POINT1; /* request 5.1 output format */
+                outputParameters->hostApiSpecificStreamInfo = &directSoundStreamInfo;
+                break;
+            case paMME :
+                wmmeStreamInfo.size = sizeof(PaWinMmeStreamInfo);
+                wmmeStreamInfo.hostApiType = paMME;
+                wmmeStreamInfo.version = 1;
+                wmmeStreamInfo.flags = paWinMmeUseLowLevelLatencyParameters | paWinMmeDontThrottleOverloadedProcessingThread;
+                wmmeStreamInfo.framesPerBuffer = 512;
+                wmmeStreamInfo.bufferCount = 8;//devInfo->maxOutputChannels;
+                outputParameters->hostApiSpecificStreamInfo = &wmmeStreamInfo;
+                outputParameters->suggestedLatency = 0;
+                break;
+            case paASIO :
+                break;
+            case paSoundManager :
+                break;
+            case paCoreAudio :
+                break;
+            case paOSS :
+                break;
+            case paALSA :
+                break;
+            case paAL :
+                break;
+            case paBeOS :
+                break;
+            case paWDMKS :
+                break;
+            case paJACK :
+                break;
+            case paWASAPI :
+                break;
+            case paAudioScienceHPI :
+                break;
+            default :
+                break;
+        }
+    }
+
+    if(!Pa_IsFormatSupported( inputParameters, outputParameters, sampleRate ) == paFormatIsSupported) {
+        debug("AudioDevice::OpenStream format not supported")
     }
 
     PaError err = Pa_OpenStream(
@@ -165,7 +283,7 @@ bool AudioDevice::OpenStream(double sampleRate)
             outputParameters,
             sampleRate,
             framesPerBuffer,
-            paNoFlag, //flags that can be used to define dither, clip settings and more
+            flags,
             paCallback, //your callback function
             (void *)this ); //data to be passed to callback. In C++, it is frequently (void *)this
 
@@ -179,6 +297,9 @@ bool AudioDevice::OpenStream(double sampleRate)
         return false;
     }
 
+
+
+//    const PaStreamInfo *inf = Pa_GetStreamInfo(&stream);
     return true;
 }
 
@@ -225,6 +346,11 @@ bool AudioDevice::Open()
         return false;
     }
 
+    for(int i=0; i<devInfo->maxInputChannels; i++ )
+        listCircularBuffersIn << new CircularBuffer();
+    for(int i=0; i<devInfo->maxOutputChannels; i++ )
+        listCircularBuffersOut << new CircularBuffer();
+
     closed=false;
     return true;
 }
@@ -232,6 +358,10 @@ bool AudioDevice::Open()
 bool AudioDevice::CloseStream()
 {
 //    debug("AudioDevice::CloseStream")
+
+//    QMutexLocker lock(&objMutex);
+    closeFlag=true;
+//    waitClose.wait(&objMutex);
 
     PaError err;
 
@@ -256,6 +386,14 @@ bool AudioDevice::CloseStream()
         stream = 0;
     }
 
+    foreach(CircularBuffer *buf, listCircularBuffersIn)
+        delete buf;
+    listCircularBuffersIn.clear();
+
+    foreach(CircularBuffer *buf, listCircularBuffersOut)
+        delete buf;
+    listCircularBuffersOut.clear();
+
     return true;
 }
 
@@ -267,7 +405,7 @@ bool AudioDevice::Close()
 //    debug("%s close",objectName().toAscii().constData())
 
     closeFlag=true;
-    QMutexLocker lock(&objMutex);
+    //QMutexLocker lock(&objMutex);
 
     if(devIn) {
         devIn->parentDevice=0;
@@ -299,9 +437,12 @@ void AudioDevice::SetSleep(bool sleeping)
 
 }
 
-void AudioDevice::Render()
+void AudioDevice::UpdateCpuUsage()
 {
-    //emit CpuLoad((float)100*Pa_GetStreamCpuLoad(stream));
+    if(!stream)
+        return;
+//   return Pa_GetStreamCpuLoad(stream);
+   MainHost::Get()->UpdateCpuLoad(Pa_GetStreamCpuLoad(stream));
 }
 
 int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
@@ -310,52 +451,154 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
                                  PaStreamCallbackFlags /*statusFlags*/,
                                  void *userData )
 {
-    Q_ASSERT(userData);
+
+//    float *out = (float*)outputBuffer;
+//    for(unsigned long i=0; i<framesPerBuffer; i++) {
+//        *out++ = .0f;
+//        *out++ = .0f;
+//    }
+//    return paContinue;
+
+//    Q_ASSERT(userData);
     AudioDevice* device = (AudioDevice*)userData;
+
+    //check if the internal buffer is big enough
+//    unsigned int hostBuffSize = MainHost::Get()->GetBufferSize();
+//    if(framesPerBuffer > hostBuffSize) {
+//        MainHost::Get()->SetBufferSize((long)framesPerBuffer);
+//        hostBuffSize = framesPerBuffer;
+//        //reset devices ready flag
+//        foreach(AudioDevice *dev, listAudioDevices) {
+//            dev->bufferReady=false;
+//        }
+//        countDevicesReady=0;
+//    }
+
+    unsigned int hostBuffSize = MainHost::Get()->GetBufferSize();
+    if(framesPerBuffer < hostBuffSize) {
+       MainHost::Get()->SetBufferSize((long)framesPerBuffer);
+       hostBuffSize = framesPerBuffer;
+//       //reset devices ready flag
+//       foreach(AudioDevice *dev, listAudioDevices) {
+//           dev->bufferReady=false;
+//       }
+//       countDevicesReady=0;
+    }
+
 
     QMutexLocker lock(&device->objMutex);
 
-    int cpt = 0;
-    if(framesPerBuffer != device->bufferSize) {
-//        debug("AudioDevice::paCallback buffer size %ld -> %ld",device->bufferSize,framesPerBuffer)
-        device->bufferSize = framesPerBuffer;
-        MainHost::Get()->SetBufferSize((long)framesPerBuffer);
+    if(device->closeFlag) {
+        debug("AudioDevice::paCallback paAbort")
+//        device->waitClose.wakeAll();
+        return paAbort;
     }
 
-    //set buffers pointers on output pins
-    if(device->devOut) {
-        foreach(AudioPinIn* pin,device->devOut->listAudioPinIn) {
-            pin->buffer->SetPointer( ((float **) outputBuffer)[cpt], true );
-            pin->buffer->SetSize(framesPerBuffer);
-            cpt++;
-        }
-    }
+//    if(framesPerBuffer != device->bufferSize) {
+//        device->bufferSize = framesPerBuffer;
+//        MainHost::Get()->SetBufferSize((long)framesPerBuffer);
+//    }
 
-    cpt = 0;
-    //set buffers pointers on input pins
+
     if(device->devIn) {
-        foreach(AudioPinOut* pin,device->devIn->listAudioPinOut) {
-            pin->buffer->SetPointer( ((float **) inputBuffer)[cpt] );
-            pin->buffer->SetSize(framesPerBuffer);
-            pin->buffer->ConsumeStack();
+        //fill circular buffer with device audio
+        int cpt=0;
+        foreach(CircularBuffer *buf, device->listCircularBuffersIn) {
+            buf->Put( ((float **) inputBuffer)[cpt], framesPerBuffer );
+            cpt++;
+        }
+
+        //if we filled enough buffer
+        if(device->listCircularBuffersIn.at(0)->filledSize > hostBuffSize ) {
+
+            //put circular buffers into pins buffers
+            cpt=0;
+            foreach(CircularBuffer *buf, device->listCircularBuffersIn) {
+                if(device->devIn->listAudioPinOut.at(cpt)->buffer->GetSize() < hostBuffSize) {
+                    debug("AudioDevice::paCallback pin buffer too small")
+                }
+                buf->Get( device->devIn->listAudioPinOut.at(cpt)->buffer->GetPointer(true), hostBuffSize );
+                cpt++;
+            }
+
+            if(!device->bufferReady) {
+                device->bufferReady=true;
+                countDevicesReady++;
+            }
+
+
+        }
+    }
+
+    //all devices are ready : render
+    if(countDevicesReady>=countInputDevices) {
+        MainHost::Get()->Render();
+
+        //reset devices ready flag
+        foreach(AudioDevice *dev, listAudioDevices) {
+            if(dev->devOut) {
+                int cpt=0;
+                //put pins buffer into circular buffers
+                foreach(CircularBuffer *buf, dev->listCircularBuffersOut) {
+                    buf->Put( dev->devOut->listAudioPinIn.at(cpt)->buffer->ConsumeStack(), dev->devOut->listAudioPinIn.at(cpt)->buffer->GetSize() );
+                    cpt++;
+                }
+            }
+            dev->bufferReady=false;
+        }
+        countDevicesReady=0;
+    }
+
+    if(device->devOut) {
+        //send circular buffer to device if there's enough data
+        int cpt=0;
+        foreach(CircularBuffer *buf, device->listCircularBuffersOut) {
+            if(buf->filledSize>=framesPerBuffer)
+                buf->Get( ((float **) outputBuffer)[cpt], framesPerBuffer );
             cpt++;
         }
     }
 
-    //render everything
-    MainHost::Get()->Render(framesPerBuffer);
 
-    //consume resulting buffers (for audio level calculation only, we already own the pointers)
-    if(device->devOut) {
-        foreach(AudioPinIn* pin,device->devOut->listAudioPinIn) {
-            pin->buffer->ConsumeStack();
-        }
-    }
+
+//    cpt=0;
+//    //set buffers pointers on output pins
+//    if(device->devOut) {
+//        foreach(AudioPinIn* pin,device->devOut->listAudioPinIn) {
+//            pin->buffer->SetPointer( ((float **) outputBuffer)[cpt], true );
+//            pin->buffer->SetSize(framesPerBuffer);
+//            cpt++;
+//        }
+//    }
+
+//    cpt = 0;
+//    //set buffers pointers on input pins
+//    if(device->devIn) {
+//        foreach(AudioPinOut* pin,device->devIn->listAudioPinOut) {
+//            pin->buffer->SetPointer( ((float **) inputBuffer)[cpt] );
+//            pin->buffer->SetSize(framesPerBuffer);
+//            pin->buffer->ConsumeStack();
+//            cpt++;
+//        }
+//    }
+
+//    //render everything
+//    MainHost::Get()->Render(framesPerBuffer);
+
+//    //consume resulting buffers (for audio level calculation only, we already own the pointers)
+//    if(device->devOut) {
+//        foreach(AudioPinIn* pin,device->devOut->listAudioPinIn) {
+//            pin->buffer->ConsumeStack();
+//        }
+//    }
 
     if(device->closeFlag) {
         debug("AudioDevice::paCallback paAbort")
+//        device->waitClose.wakeAll();
         return paAbort;
     }
+
+    device->UpdateCpuUsage();
 
     return paContinue;
 

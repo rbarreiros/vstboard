@@ -38,7 +38,7 @@ AudioBuffer::~AudioBuffer(void)
         delete[] pBuffer;
 }
 
-bool AudioBuffer::SetSize(long size)
+bool AudioBuffer::SetSize(unsigned long size)
 {
     if(!bExternalAllocation) {
         if( size <= nAllocatedSize) {
@@ -86,7 +86,7 @@ void AudioBuffer::AddToStack(AudioBuffer * buff)
         float *buffToAdd = buff->GetPointer();
         float *myBuff = pBuffer;
 
-        for(long i=0;i<nSize;i++) {
+        for(unsigned long i=0;i<nSize;i++) {
             *myBuff += *buffToAdd;
             ++myBuff;
             ++buffToAdd;
@@ -133,7 +133,7 @@ float *AudioBuffer::ConsumeStack()
             //only 1 in stack, no mix needed
             //find max value
             buf = pBuffer;
-            for(long i=0;i<nSize;i++) {
+            for(unsigned long i=0;i<nSize;i++) {
                 if(*buf > ma)
                     ma = *buf;
                 if(*buf < mi)
@@ -146,7 +146,7 @@ float *AudioBuffer::ConsumeStack()
         default:
             //mixdown the stack and find max value
             buf = pBuffer;
-            for(long i=0;i<nSize;i++) {
+            for(unsigned long i=0;i<nSize;i++) {
                 *buf/=stackSize; //divide by the number of buffers, maybe not a good mix
 
                 if(*buf > ma)
@@ -164,7 +164,7 @@ float *AudioBuffer::ConsumeStack()
     //if we're off-limits : here is a limiter
     if(_maxVal > 1.0f) {
         buf = pBuffer;
-        for(long i=0;i<nSize;i++) {
+        for(unsigned long i=0;i<nSize;i++) {
             if(*buf > 1.0f)
                 *buf = .8f;
             if(*buf < -1.0f)

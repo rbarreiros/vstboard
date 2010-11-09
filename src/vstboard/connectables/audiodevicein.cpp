@@ -21,6 +21,7 @@
 #include "audiodevicein.h"
 #include "audiodevice.h"
 #include "../globals.h"
+#include "../audiobuffer.h"
 #include "../mainhost.h"
 
 using namespace Connectables;
@@ -56,6 +57,16 @@ void AudioDeviceIn::Render()
     }
 }
 
+void AudioDeviceIn::SetBufferSize(long size)
+{
+    foreach(AudioPinIn *pin, listAudioPinIn) {
+        pin->buffer->SetSize(size);
+    }
+    foreach(AudioPinOut *pin, listAudioPinOut) {
+        pin->buffer->SetSize(size);
+    }
+}
+
 bool AudioDeviceIn::Open()
 {
     closed=false;
@@ -83,7 +94,9 @@ bool AudioDeviceIn::Open()
         return false;
 
     for(int i=0;i<parentDevice->devInfo->maxInputChannels;i++) {
-        AudioPinOut *pin = new AudioPinOut(this,i,true);
+//        AudioPinOut *pin = new AudioPinOut(this,i,true);
+        AudioPinOut *pin = new AudioPinOut(this,i);
+        pin->buffer->SetSize(MainHost::Get()->GetBufferSize());
         pin->setObjectName(QString("Input %1").arg(i));
         listAudioPinOut << pin;
     }

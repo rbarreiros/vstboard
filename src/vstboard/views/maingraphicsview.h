@@ -31,7 +31,6 @@
     public:
         MainGraphicsView(QWidget * parent = 0);
         MainGraphicsView(QGraphicsScene * scene, QWidget * parent = 0);
-
         bool event(QEvent *event);
 
     protected:
@@ -46,6 +45,7 @@
         void zoomIn();
         void zoomOut();
         void zoomReset();
+        void ForceResize();
     };
 
 //}

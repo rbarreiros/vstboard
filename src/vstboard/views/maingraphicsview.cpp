@@ -38,6 +38,11 @@ MainGraphicsView::MainGraphicsView(QGraphicsScene * scene, QWidget * parent) :
 
 }
 
+void MainGraphicsView::ForceResize()
+{
+    emit viewResized( mapToScene(viewport()->rect()).boundingRect() );
+}
+
 void MainGraphicsView::wheelEvent(QWheelEvent * event)
 {
     if(event->modifiers() == Qt::ControlModifier) {

@@ -21,10 +21,16 @@
 #ifndef AUDIODEVICE_H
 #define AUDIODEVICE_H
 
+#include <QWaitCondition>
+
 #include "../precomp.h"
 #include "object.h"
 #include "objectinfo.h"
 #include "portaudio.h"
+#include "pa_win_wmme.h"
+#include "pa_win_ds.h"
+
+#include "../circularbuffer.h"
 
 #ifndef bzero
 #define bzero(memArea, len)  memset((memArea), 0, (len))
@@ -34,7 +40,7 @@ namespace Connectables {
 
     class AudioDeviceIn;
     class AudioDeviceOut;
-    class AudioDevice : QObject //: public Object
+    class AudioDevice : public QObject
     {
         Q_OBJECT
     public:
@@ -43,7 +49,8 @@ namespace Connectables {
 
         bool Open();
         bool Close();
-        void Render();
+
+        void UpdateCpuUsage();
 
         bool SetObjectInput(AudioDeviceIn *obj);
         bool SetObjectOutput(AudioDeviceOut *obj);
@@ -51,6 +58,10 @@ namespace Connectables {
         static QHash<qint32,AudioDevice*>listAudioDevices;
 
         void SetSleep(bool sleeping);
+
+        bool bufferReady;
+        static int countDevicesReady;
+        static int countInputDevices;
 
     protected:
 
@@ -80,11 +91,21 @@ namespace Connectables {
 
         ObjectInfo objInfo;
 
+        PaWinMmeStreamInfo wmmeStreamInfo;
+        PaWinDirectSoundStreamInfo directSoundStreamInfo;
+
+        QList<CircularBuffer*>listCircularBuffersIn;
+        QList<CircularBuffer*>listCircularBuffersOut;
+
+        QWaitCondition waitClose;
+
     public slots:
         void SetSampleRate(float rate=44100.0);
 
         friend class AudioDeviceIn;
         friend class AudioDeviceOut;
+
+        void DeleteIfUnused();
     };
 }
 

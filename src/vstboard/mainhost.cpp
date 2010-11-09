@@ -66,7 +66,7 @@ MainHost::MainHost(QObject *parent) :
     //init variables
     cpuLoad = .0f;
     sampleRate = 44100.0;
-    bufferSize = 256;
+    bufferSize = 512;
 
     listMidiDevices = new MidiDevices();
     listAudioDevices = new AudioDevices();
@@ -465,6 +465,7 @@ void MainHost::SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum ms
 
 void MainHost::SetBufferSize(long size)
 {
+    debug("MainHost::SetBufferSize %ld",size)
     bufferSize = size;
     emit BufferSizeChanged(bufferSize);
 }
@@ -482,6 +483,8 @@ void MainHost::OnNewRenderingOrder(orderedNodes * renderLines)
 
 void MainHost::Render(unsigned long samples)
 {
+    if(samples==0)
+        samples=bufferSize;
 
 #ifdef VSTSDK
     vstHost.UpdateTimeInfo(timeFromStart.elapsed(), samples, sampleRate);
@@ -560,7 +563,7 @@ void MainHost::OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionI
     emit SolverToUpdate();
 }
 
-int MainHost::GetCpuLoad()
+float MainHost::GetCpuLoad()
 {
     return cpuLoad;
 

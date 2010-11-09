@@ -32,6 +32,7 @@ namespace Connectables {
     class AudioDevice;
     class AudioDeviceIn : public Object
     {
+    Q_OBJECT
     public:
         AudioDeviceIn(int index, const ObjectInfo &info);
         ~AudioDeviceIn();
@@ -45,6 +46,9 @@ namespace Connectables {
 
     protected:
         AudioDevice *parentDevice;
+
+    public slots:
+        void SetBufferSize(long size);
 
     friend class AudioDevice;
     };

@@ -35,7 +35,7 @@ PinView::PinView(QAbstractItemModel *model,QGraphicsItem * parent, Connectables:
         connectInfo(pin->GetConnectionInfo()),
         model(model)
 {
-    setObjectName(QString("PinView%1").arg((long)pin,0,16));
+//    setObjectName(QString("PinView%1").arg((long)pin,0,16));
     setAcceptDrops(true);
     setCursor(Qt::OpenHandCursor);
 }

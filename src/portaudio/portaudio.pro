@@ -29,8 +29,6 @@ CONFIG += staticlib
 
 DEFINES -= UNICODE
 
-#DEFINES += PA_NO_WMME
-
 linux-g++ {
     DEFINES += KSAUDIO_SPEAKER_DIRECTOUT=0
     DEFINES += METHOD_NEITHER=3
@@ -73,7 +71,7 @@ win32 {
         DEFINES += PA_NO_WDMKS
         DEFINES += PA_NO_DS
         DEFINES += PA_NO_WASAPI
-        DEFINES += PA_NO_WMME
+    #    DEFINES += PA_NO_WMME
     #    DEFINES += PA_NO_ASIO
 
         INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/wasapi/mingw-include

@@ -133,7 +133,11 @@ void ContainerProgram::Save()
         }
     }
     foreach(QSharedPointer<Object> obj, container->listStaticObjects) {
-        if(!obj.isNull()) {
+        if(!obj.isNull() ) {
+            //don't save bridges position
+            if(obj->info().nodeType==NodeType::bridge) {
+                continue;
+            }
             objAttirbs attr;
             attr.position = obj->GetPosition();
             attr.size = obj->GetSize();

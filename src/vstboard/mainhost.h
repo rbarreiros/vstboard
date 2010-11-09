@@ -51,12 +51,12 @@ public:
     void Open();
 
     void SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum msgType,void *data);
-    void Render(unsigned long samples);
+    void Render(unsigned long samples=0);
     void SetBufferSize(long size);
     void SetSampleRate(float rate=44100.0);
     int GetBufferSize() {return (int)bufferSize;}
     float GetSampleRate() {return sampleRate;}
-    int GetCpuLoad();
+    float GetCpuLoad();
 
     void OnObjectAdded(QSharedPointer<Connectables::Object> objPtr);
     void OnObjectRemoved(QSharedPointer<Connectables::Object> objPtr, Connectables::Object *container=0);

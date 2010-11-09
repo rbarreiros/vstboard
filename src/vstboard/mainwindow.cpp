@@ -82,6 +82,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //timer
     timerVu = new QTimer(this);
     timerVu->start(40);
+    connect(timerVu, SIGNAL(timeout()),
+            this, SLOT(UpdateCpuLoad()));
 
     ui->treeHostModel->setModel(mainHost->GetModel());
     ui->treeParking->setModel(mainHost->GetParkingModel());
@@ -201,7 +203,7 @@ void MainWindow::BuildListTools()
 
 void MainWindow::UpdateCpuLoad()
 {
-    ui->progressCpuLoad->setValue(mainHost->GetCpuLoad());
+    ui->progressCpuLoad->setValue(mainHost->GetCpuLoad()*100);
 }
 
 void MainWindow::on_actionLoad_triggered()

@@ -28,7 +28,6 @@ using namespace Connectables;
 
 AudioDeviceOut::AudioDeviceOut(int index, const ObjectInfo &info) :
     Object(index, info),
-    bufferReady(false),
     parentDevice(0)
 {
 
@@ -50,9 +49,14 @@ bool AudioDeviceOut::Close()
     return true;
 }
 
-void AudioDeviceOut::Render()
+void AudioDeviceOut::SetBufferSize(long size)
 {
-    bufferReady = true;
+    foreach(AudioPinIn *pin, listAudioPinIn) {
+        pin->buffer->SetSize(size);
+    }
+    foreach(AudioPinOut *pin, listAudioPinOut) {
+        pin->buffer->SetSize(size);
+    }
 }
 
 bool AudioDeviceOut::Open()
@@ -82,7 +86,9 @@ bool AudioDeviceOut::Open()
         return false;
 
     for(int i=0;i<parentDevice->devInfo->maxOutputChannels;i++) {
-        AudioPinIn *pin = new AudioPinIn(this,i,true);
+//        AudioPinIn *pin = new AudioPinIn(this,i,true);
+        AudioPinIn *pin = new AudioPinIn(this,i);
+        pin->buffer->SetSize(MainHost::Get()->GetBufferSize());
         pin->setObjectName(QString("Output %1").arg(i));
         listAudioPinIn << pin;
     }
