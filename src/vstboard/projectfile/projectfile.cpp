@@ -19,7 +19,7 @@
 ******************************************************************************/
 
 #include "projectfile.h"
-#include "program.h"
+//#include "program.h"
 #include "../mainhost.h"
 
 using namespace Project;
@@ -31,7 +31,7 @@ ProjectFile::ProjectFile(QObject *parent) :
 {
     theProjectFile = this;
     fileName = "session.dat";
-
+/*
     int cpt=0;
     for(int i=0; i<4; i++) {
         for(int j=0; j<4; j++) {
@@ -41,9 +41,9 @@ ProjectFile::ProjectFile(QObject *parent) :
         }
     }
 
-    BuildModel();
+    BuildModel();*/
 }
-
+/*
 void ProjectFile::BuildModel()
 {
     programModel.clear();
@@ -97,7 +97,7 @@ QStandardItem *ProjectFile::ItemFromProgId(int progId)
 
     return grp->child(prg->progPlaceInGroup);
 }
-
+*/
 void ProjectFile::SaveToFile(QString filePath)
 {
     if(filePath.isNull())
@@ -144,3 +144,4 @@ bool ProjectFile::LoadFromFile(QString filePath)
     stream >> *MainHost::Get();
     return true;
 }
+

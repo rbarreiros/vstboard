@@ -68,6 +68,10 @@ MainHost::MainHost(QObject *parent) :
     sampleRate = 44100.0;
     bufferSize = 512;
 
+    programList = new Programs(this);
+    connect(programList, SIGNAL(ProgChanged(QModelIndex)),
+            this, SLOT(SetProgram(QModelIndex)));
+
     listMidiDevices = new MidiDevices();
     listAudioDevices = new AudioDevices();
 
@@ -133,7 +137,8 @@ void MainHost::Open()
     mainContainer->listenProgramChanges=false;
     hostContainer->listenProgramChanges=false;
     projectContainer->listenProgramChanges=false;
-    SetProgram(0);
+    programList->ChangeProg(0,0);
+    //SetProgram(0);
 }
 
 void MainHost::SetupMainContainer()
@@ -158,7 +163,7 @@ void MainHost::SetupHostContainer()
         hostContainer.clear();
         UpdateSolver(true);
     }
-debug("MainHost::SetupHostContainer")
+//debug("MainHost::SetupHostContainer")
     ObjectInfo info;
     info.nodeType = NodeType::container;
     info.objType = ObjType::MainContainer;
@@ -360,7 +365,9 @@ void MainHost::ClearHost()
 
     projectContainer->listenProgramChanges=false;
 
-    SetProgram(0);
+    programList->BuildModel();
+    programList->ChangeProg(0,0);
+    //SetProgram(0);
 }
 
 void MainHost::EnableSolverUpdate(bool enable)
@@ -419,7 +426,8 @@ void MainHost::UpdateSolver(bool forceUpdate)
         programContainer->SaveProgram();
         programContainer->UnloadProgram();
         programContainer->LoadProgram(prg);
-        emit ProgramChanged(prg);
+//        emit ProgramChanged(prg);
+//        programList->ChangeProg(prg);
     }
 
     mutexListCables.lock();
@@ -437,10 +445,10 @@ void MainHost::UpdateSolver(bool forceUpdate)
     EnableSolverUpdate(solverWasEnabled);
 }
 
-void MainHost::SetProgram(int prog)
+void MainHost::SetProgram(const QModelIndex &prgIndex)
 {
     mutexProgChange.lock();
-    progToChange=prog;
+    progToChange=prgIndex.data(UserRoles::value).toInt();
     mutexProgChange.unlock();
     emit SolverToUpdate();
 
@@ -601,6 +609,8 @@ QDataStream & operator<< (QDataStream& out, MainHost& value)
     out << *value.projectContainer;
     out << *value.programContainer;
 
+    out << *value.programList;
+
     value.EnableSolverUpdate(true);
 
     return out;
@@ -628,10 +638,13 @@ QDataStream & operator>> (QDataStream& in, MainHost& value)
 
     Connectables::ObjectFactory::Get()->ResetSavedId();
 
+    in >> *value.programList;
+
     value.projectContainer->LoadProgram(0);
     value.projectContainer->listenProgramChanges=false;
 
     value.EnableSolverUpdate(true);
-    value.SetProgram(0);
+  //  value.SetProgram(0);
+    value.programList->ChangeProg(0,0);
     return in;
 }

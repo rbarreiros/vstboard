@@ -108,6 +108,5 @@ bool SetupFile::LoadFromFile(QString filePath)
     host->hostContainer->LoadProgram(0);
 
     host->EnableSolverUpdate(true);
-debug("SetupFile::LoadFromFile loaded")
     return true;
 }

@@ -22,12 +22,12 @@
 #define PROJECTFILE_H
 
 #include "../precomp.h"
-#include "../connectables/connectioninfo.h"
+//#include "../connectables/connectioninfo.h"
 
 
-namespace Connectables {
-    class Object;
-}
+//namespace Connectables {
+//    class Object;
+//}
 
 namespace Project {
     class Program;
@@ -37,17 +37,17 @@ namespace Project {
     public:
         explicit ProjectFile(QObject *parent = 0);
 
-        Program* GetProgram(int program);
+      //  Program* GetProgram(int program);
 
-        QStandardItemModel programModel;
-        QStandardItem *ItemFromProgId(int progId);
+     //   QStandardItemModel programModel;
+      //  QStandardItem *ItemFromProgId(int progId);
 
-        QMap<int,Program*>listPrograms;
+      //  QMap<int,Program*>listPrograms;
 
         static ProjectFile *theProjectFile;
 
     protected:
-        void BuildModel();
+      //  void BuildModel();
         QString fileName;
 
     signals:
@@ -61,3 +61,4 @@ namespace Project {
 
 }
 #endif // PROJECTFILE_H
+

@@ -62,13 +62,13 @@ void ObjectProgram::Load(hashListParamPin& listIn, hashListParamPin& listOut)
 void ObjectProgram::Save(const hashListParamPin& listIn, const hashListParamPin& listOut)
 {
     hashListParamPin::const_iterator i = listIn.constBegin();
-    while(i!=listIn.constEnd()) {
+    while(i!=listIn.constEnd() && i.key()<listParametersIn.size()) {
         i.value()->GetValues( listParametersIn[i.key()] );
         ++i;
     }
 
     hashListParamPin::const_iterator j = listOut.constBegin();
-    while(j!=listOut.constEnd()) {
+    while(j!=listOut.constEnd() && j.key()<listParametersOut.size()) {
         j.value()->GetValues( listParametersOut[j.key()] );
         ++j;
     }

@@ -77,7 +77,6 @@ private:
 
 public slots:
     void UpdateCpuLoad();
-    void OnProgramChange(int prog);
 
 private slots:
     void on_actionRefresh_Midi_devices_triggered();
@@ -90,8 +89,6 @@ private slots:
     void on_actionSave_Setup_triggered();
     void on_actionShortcuts_toggled(bool );
     void on_actionNew_triggered();
-    void on_treePrograms_clicked(QModelIndex index);
-    void on_treePrograms_activated(QModelIndex index);
     void on_actionLoad_triggered();
     void on_actionSave_triggered();
     void openRecentSetup();

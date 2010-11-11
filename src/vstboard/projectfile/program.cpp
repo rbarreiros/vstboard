@@ -17,7 +17,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
-
+/*
 #include "program.h"
 #include "../globals.h"
 #include "../mainhost.h"
@@ -39,3 +39,4 @@ Program::~Program()
 
 }
 
+*/

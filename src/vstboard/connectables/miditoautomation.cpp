@@ -41,17 +41,17 @@ MidiToAutomation::MidiToAutomation(int index) :
     for(int i=0;i<128;i++) {
         listParameterPinOut.insert(i,new ParameterPinOut(this,i,0,&listValues,false,QString::number(i)));
     }
-    debug("MidiAuomation::New")
+//    debug("MidiAuomation::New")
 }
 
 MidiToAutomation::~MidiToAutomation()
 {
-    debug("MidiToAutomation::Delete")
+//    debug("MidiToAutomation::Delete")
 }
 
 bool MidiToAutomation::Close()
 {
-    debug("MidiToAutomation::Close")
+//    debug("MidiToAutomation::Close")
     Object::Close();
     this->deleteLater();
     return true;
@@ -59,7 +59,7 @@ bool MidiToAutomation::Close()
 
 void MidiToAutomation::Hide()
 {
-    debug("MidiToAutomation::Hide")
+//    debug("MidiToAutomation::Hide")
     Object::Hide();
 }
 

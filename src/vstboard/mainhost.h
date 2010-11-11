@@ -26,14 +26,15 @@
 #include "connectables/object.h"
 #include "connectables/maincontainer.h"
 #include "connectables/parkingcontainer.h"
-#include "projectfile/program.h"
+//#include "projectfile/program.h"
+#include "pathsolver.h"
 #include "renderer.h"
 #include "globals.h"
 #include "models/hostmodel.h"
 #include "models/hostmodelproxy.h"
 #include "audiodevices.h"
 #include "mididevices.h"
-
+#include "programs.h"
 #include "projectfile/setupfile.h"
 
 #ifdef VSTSDK
@@ -85,6 +86,9 @@ public:
     static HostModel * GetParkingModel() {return modelParking;}
 
     int filePass;
+
+    Programs *programList;
+
 private:
     bool solverNeedAnUpdate;
     bool solverUpdateEnabled;
@@ -94,6 +98,8 @@ private:
     void SetupProjectContainer();
     void SetupProgramContainer();
     void SetupParking();
+
+
 
     MidiDevices *listMidiDevices;
     AudioDevices *listAudioDevices;
@@ -125,7 +131,7 @@ private:
     static MainHost *theHost;
     static QMutex singletonMutex;
 
-    friend QDataStream & operator<< (QDataStream&, const MainHost&);
+    friend QDataStream & operator<< (QDataStream&, MainHost&);
     friend QDataStream & operator>> (QDataStream&, MainHost&);
 
     static HostModel *model;
@@ -135,7 +141,7 @@ signals:
     void SampleRateChanged(float rate);
     void BufferSizeChanged(long size);
     void NewSolver(orderedNodes *renderLines);
-    void ProgramChanged(int progId);
+//    void ProgramChanged(const QModelIndex &progIndex);
     void ObjectRemoved(int contrainerId, int obj);
     void SolverToUpdate();
 
@@ -143,7 +149,7 @@ public slots:
     void OnCableAdded(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
     void OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
 
-    void SetProgram(int prog);
+    void SetProgram(const QModelIndex &prgIndex);
     void UpdateSolver(bool forceUpdate=false);
     void ClearHost();
 

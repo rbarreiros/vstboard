@@ -74,7 +74,7 @@
    <item row="1" column="0" colspan="5">
     <widget class="QTreeView" name="treeFiles">
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::NoFrame</enum>
      </property>
      <property name="dragDropMode">
       <enum>QAbstractItemView::DragOnly</enum>

@@ -32,6 +32,8 @@ namespace Connectables {
             Param_Tempo,
             Param_Sign1,
             Param_Sign2,
+            Param_Group,
+            Param_Prog
         };
 
     Q_OBJECT
@@ -44,13 +46,18 @@ namespace Connectables {
         QList<QVariant> listTempo;
         QList<QVariant> listSign1;
         QList<QVariant> listSign2;
+        QList<QVariant> listPrg;
+        QList<QVariant> listGrp;
 
         bool tempoChanged;
-        bool progChanged;
+        bool midiProgChanged;
         int prog;
+        bool progChanged;
+        bool grpChanged;
 
     signals:
         void progChange(int prog);
+        void grpChange(int grp);
         void tempoChange(int tempo, int sign1, int sign2);
 
     public slots:

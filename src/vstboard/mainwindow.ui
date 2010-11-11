@@ -443,6 +443,11 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionNew"/>
+   <addaction name="actionNew_Setup"/>
+   <addaction name="actionLoad"/>
+   <addaction name="actionSave"/>
+   <addaction name="actionSave_Setup"/>
    <addaction name="actionConfig"/>
    <addaction name="separator"/>
    <addaction name="actionHost_panel"/>
@@ -479,17 +484,7 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QTreeView" name="treePrograms">
-       <property name="frameShape">
-        <enum>QFrame::StyledPanel</enum>
-       </property>
-       <property name="animated">
-        <bool>true</bool>
-       </property>
-       <attribute name="headerVisible">
-        <bool>false</bool>
-       </attribute>
-      </widget>
+      <widget class="ProgramList" name="Programs" native="true"/>
      </item>
     </layout>
    </widget>
@@ -523,6 +518,9 @@
      </property>
      <item>
       <widget class="QTreeView" name="treeMidiInterfaces">
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
        <property name="horizontalScrollBarPolicy">
         <enum>Qt::ScrollBarAlwaysOff</enum>
        </property>
@@ -596,6 +594,9 @@
      </property>
      <item>
       <widget class="QTreeView" name="treeAudioInterfaces">
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
        <property name="horizontalScrollBarPolicy">
         <enum>Qt::ScrollBarAlwaysOff</enum>
        </property>
@@ -641,7 +642,11 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QTreeView" name="solverView"/>
+      <widget class="QTreeView" name="solverView">
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -663,6 +668,9 @@
      </property>
      <item>
       <widget class="QTreeView" name="treeTools">
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
        <property name="horizontalScrollBarPolicy">
         <enum>Qt::ScrollBarAlwaysOff</enum>
        </property>
@@ -715,6 +723,9 @@
      </property>
      <item>
       <widget class="QTreeView" name="treeHostModel">
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
        <property name="editTriggers">
         <set>QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
        </property>
@@ -764,6 +775,9 @@
      </property>
      <item>
       <widget class="QTreeView" name="treeParking">
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
        <property name="editTriggers">
         <set>QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
        </property>
@@ -782,15 +796,18 @@
        <property name="indentation">
         <number>10</number>
        </property>
+       <property name="rootIsDecorated">
+        <bool>false</bool>
+       </property>
        <property name="uniformRowHeights">
         <bool>true</bool>
        </property>
        <property name="sortingEnabled">
         <bool>true</bool>
        </property>
-       <property name="animated">
-        <bool>true</bool>
-       </property>
+       <attribute name="headerVisible">
+        <bool>false</bool>
+       </attribute>
       </widget>
      </item>
     </layout>
@@ -1042,6 +1059,12 @@
     <slot>zoomOut()</slot>
     <slot>zoomReset()</slot>
    </slots>
+  </customwidget>
+  <customwidget>
+   <class>ProgramList</class>
+   <extends>QWidget</extends>
+   <header>views/programlist.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

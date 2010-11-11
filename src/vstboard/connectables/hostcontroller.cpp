@@ -28,8 +28,10 @@ using namespace Connectables;
 HostController::HostController(int index):
     Object(index, ObjectInfo(NodeType::object, ObjType::HostController, tr("HostController") ) ),
     tempoChanged(false),
+    midiProgChanged(false),
+    prog(0),
     progChanged(false),
-    prog(0)
+    grpChanged(false)
 {
 
         for(int i=1;i<300;i++) {
@@ -43,16 +45,26 @@ HostController::HostController(int index):
         for(int i=0;i<8;i++) {
             listSign2 << (1<<i);
         }
-
+        for(int i=0;i<128;i++) {
+            listPrg << i;
+        }
+        for(int i=0;i<128;i++) {
+            listGrp << i;
+        }
 
     listMidiPinIn << new MidiPinIn(this);
 
     listParameterPinIn.insert(Param_Tempo, new ParameterPinIn(this,Param_Tempo,120,&listTempo,true,"bpm"));
     listParameterPinIn.insert(Param_Sign1, new ParameterPinIn(this,Param_Sign1,4,&listSign1,true,"sign1"));
     listParameterPinIn.insert(Param_Sign2, new ParameterPinIn(this,Param_Sign2,4,&listSign2,true,"sign2"));
+    listParameterPinIn.insert(Param_Group, new ParameterPinIn(this,Param_Group,0,&listGrp,true,"ProgGrp"));
+    listParameterPinIn.insert(Param_Prog, new ParameterPinIn(this,Param_Prog,0,&listPrg,true,"Prog"));
 
     connect(this, SIGNAL(progChange(int)),
-            MainHost::Get(),SLOT(SetProgram(int)),
+            MainHost::Get()->programList,SLOT(ChangeProg(int)),
+            Qt::QueuedConnection);
+    connect(this, SIGNAL(grpChange(int)),
+            MainHost::Get()->programList,SLOT(ChangeGroup(int)),
             Qt::QueuedConnection);
     connect(this, SIGNAL(tempoChange(int,int,int)),
             MainHost::Get(),SLOT(SetTempo(int,int,int)),
@@ -71,16 +83,18 @@ void HostController::Render()
         emit tempoChange(tempo,sign1,sign2);
     }
 
+    if(midiProgChanged) {
+        midiProgChanged=false;
+        emit progChange(prog);
+    }
+
     if(progChanged) {
         progChanged=false;
-
-        Project::Program *prg =  Project::ProjectFile::theProjectFile->GetProgram(prog);
-        if(!prg) {
-            debug("HostController 65 : prog not found %d",prog)
-            return;
-        }
-
-        emit progChange(prg->progIndex);
+        emit progChange( listParameterPinIn.value(Param_Prog)->GetVariantValue().toInt() );
+    }
+    if(grpChanged) {
+        grpChanged=false;
+        emit grpChange( listParameterPinIn.value(Param_Group)->GetVariantValue().toInt() );
     }
 }
 
@@ -89,11 +103,23 @@ void HostController::MidiMsgFromInput(long msg)
     int command = Pm_MessageStatus(msg) & MidiConst::codeMask;
     if (command == MidiConst::prog) {
         prog = Pm_MessageData1(msg);
-        progChanged=true;
+        midiProgChanged=true;
     }
 }
 
 void HostController::OnParameterChanged(ConnectionInfo pinInfo, float value)
 {
-    tempoChanged=true;
+    switch(pinInfo.pinNumber) {
+        case Param_Tempo :
+        case Param_Sign1 :
+        case Param_Sign2 :
+            tempoChanged=true;
+            break;
+        case Param_Group :
+            grpChanged=true;
+            break;
+        case Param_Prog :
+            progChanged=true;
+            break;
+    }
 }

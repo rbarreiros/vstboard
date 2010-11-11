@@ -64,12 +64,15 @@ AudioDevice::~AudioDevice()
 
 void AudioDevice::DeleteIfUnused()
 {
+    QMutexLocker lock(&objMutex);
     if(!devIn && !devOut)
         deleteLater();
 }
 
 bool AudioDevice::SetObjectInput(AudioDeviceIn *obj)
 {
+    QMutexLocker lock(&objMutex);
+
     if(devIn && obj) {
         debug("AudioDevice::SetObjectInput already used")
         return false;
@@ -89,6 +92,8 @@ bool AudioDevice::SetObjectInput(AudioDeviceIn *obj)
 
 bool AudioDevice::SetObjectOutput(AudioDeviceOut *obj)
 {
+    QMutexLocker lock(&objMutex);
+
     if(devOut && obj) {
         debug("AudioDevice::SetObjectOutput already used")
         return false;

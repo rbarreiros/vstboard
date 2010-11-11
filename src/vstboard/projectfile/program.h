@@ -17,7 +17,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
-
+/*
 #ifndef PROGRAM_H
 #define PROGRAM_H
 
@@ -61,3 +61,4 @@ namespace Project {
 }
 
 #endif // PROGRAM_H
+*/

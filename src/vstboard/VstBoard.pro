@@ -113,7 +113,10 @@ SOURCES += main.cpp \
     views/aboutdialog.cpp \
     views/splash.cpp \
     mididevices.cpp \
-    circularbuffer.cpp
+    circularbuffer.cpp \
+    views/programlist.cpp \
+    programs.cpp \
+    views/grouplistview.cpp
 HEADERS += mainwindow.h \
     precomp.h \
     models/listaudiointerfacesmodel.h \
@@ -187,12 +190,16 @@ HEADERS += mainwindow.h \
     views/aboutdialog.h \
     views/splash.h \
     mididevices.h \
-    circularbuffer.h
+    circularbuffer.h \
+    views/programlist.h \
+    programs.h \
+    views/grouplistview.h
 FORMS += mainwindow.ui \
     views/filebrowser.ui \
     views/configdialog.ui \
     views/aboutdialog.ui \
-    views/splash.ui
+    views/splash.ui \
+    views/programlist.ui
 PRECOMPILED_HEADER = precomp.h
 RESOURCES += ../resources/resources.qrc
 OTHER_FILES += 

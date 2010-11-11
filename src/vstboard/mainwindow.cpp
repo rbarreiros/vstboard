@@ -64,9 +64,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
     BuildListTools();
 
-    //ProjectFile
-    project = new Project::ProjectFile(this);
-    ui->treePrograms->setModel(&project->programModel);
+    //programs
+//    project = new Project::ProjectFile(this);
+//    ui->Programs->SetModel(&project->programModel);
+    ui->Programs->SetModel(mainHost->programList->GetModel());
+    connect(mainHost->programList, SIGNAL(ProgChanged(QModelIndex)),
+            ui->Programs,SLOT(OnProgChange(QModelIndex)));
+    connect(ui->Programs,SIGNAL(ChangeProg(QModelIndex)),
+            mainHost->programList,SLOT(ChangeProg(QModelIndex)));
 
     //vst plugins browser
     listVstPluginsModel.setReadOnly(true);
@@ -87,14 +92,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->treeHostModel->setModel(mainHost->GetModel());
     ui->treeParking->setModel(mainHost->GetParkingModel());
+    //ui->treeParking->setRootIndex(mainHost->GetParkingModel()->invisibleRootItem()->index());
 
     mySceneView = new View::SceneView(ui->hostView, ui->projectView, ui->programView);
     mySceneView->setModel(mainHost->GetModel());
 
     ui->solverView->setModel(&mainHost->solver.model);
-
-    connect(mainHost, SIGNAL(ProgramChanged(int)),
-            this,SLOT(OnProgramChange(int)));
 
     mainHost->SetSampleRate( ConfigDialog::defaultSampleRate() );
     mainHost->Open();
@@ -148,15 +151,6 @@ void MainWindow::changeEvent(QEvent *e)
     default:
         break;
     }
-}
-
-void MainWindow::OnProgramChange(int prog)
-{
-    QStandardItem *item = project->ItemFromProgId(prog);
-    if(!item)
-        return;
-    ui->treePrograms->expand(item->parent()->index());
-    ui->treePrograms->selectionModel()->select(item->index(), QItemSelectionModel::ClearAndSelect );
 }
 
 void MainWindow::BuildListTools()
@@ -317,44 +311,6 @@ void MainWindow::on_actionSave_Setup_As_triggered()
     ConfigDialog::AddRecentSetupFile(fileName);
     currentSetupFile = fileName;
     updateRecentFileActions();
-}
-
-void MainWindow::on_treePrograms_activated(QModelIndex index)
-{
-    if(!index.isValid())
-        return;
-
-    bool ok;
-    int prog = index.data(UserRoles::programNumber).toInt(&ok);
-    if(!ok)
-        return;
-
-    Project::Program *prg = project->GetProgram(prog);
-    if(!prg) {
-        debug("MainWindow on_treePrograms_activated : prog not found")
-                return;
-    }
-
-    mainHost->SetProgram(prg->progIndex);
-}
-
-void MainWindow::on_treePrograms_clicked(QModelIndex index)
-{
-    if(!index.isValid())
-        return;
-
-    bool ok;
-    int prog = index.data(UserRoles::programNumber).toInt(&ok);
-    if(!ok)
-        return;
-
-    Project::Program *prg = project->GetProgram(prog);
-    if(!prg) {
-        debug("MainWindow on_treePrograms_clicked : prog not found")
-                return;
-    }
-
-    mainHost->SetProgram(prg->progIndex);
 }
 
 void MainWindow::on_actionShortcuts_toggled(bool onOff)
@@ -541,3 +497,6 @@ void MainWindow::on_actionRefresh_Midi_devices_triggered()
 {
     ui->treeMidiInterfaces->setModel(mainHost->GetMidiDeviceModel());
 }
+
+
+
