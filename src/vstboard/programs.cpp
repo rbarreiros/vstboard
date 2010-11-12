@@ -49,6 +49,11 @@ void Programs::ChangeProg(int midiProgNum, int grpNum) {
     currentProgId = currentGrp*128 + currentPrg;
 
     QStandardItem *grpItem = model->invisibleRootItem()->child(currentGrp);
+    if(!grpItem) {
+        debug("Programs::ChangeProg prog not found")
+        return;
+    }
+
     emit ProgChanged( grpItem->child(0)->child(currentPrg)->index() );
 }
 

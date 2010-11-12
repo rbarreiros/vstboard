@@ -53,7 +53,6 @@ SOURCES += main.cpp \
     audiobuffergroup.cpp \
     mainhost.cpp \
     projectfile/projectfile.cpp \
-    projectfile/program.cpp \
     connectables/audiodevicein.cpp \
     connectables/audiodeviceout.cpp \
     pathsolver.cpp \
@@ -129,7 +128,6 @@ HEADERS += mainwindow.h \
     audiobuffergroup.h \
     mainhost.h \
     projectfile/projectfile.h \
-    projectfile/program.h \
     globals.h \
     connectables/audiodevicein.h \
     connectables/audiodeviceout.h \

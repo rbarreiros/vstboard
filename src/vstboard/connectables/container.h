@@ -22,7 +22,6 @@
 #define CONTAINER_H
 
 #include "object.h"
-#include "projectfile/program.h"
 #include "bridge.h"
 #include "containerprogram.h"
 

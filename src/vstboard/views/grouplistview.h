@@ -10,10 +10,12 @@ public:
     explicit GroupListView(QWidget *parent = 0);
 
 protected:
+    void startDrag ( Qt::DropActions supportedActions );
     void dragMoveEvent ( QDragMoveEvent * event );
 
 signals:
     void DragOverItemFromWidget( QWidget *source, QModelIndex index);
+    void StartDrag(QModelIndex index);
 
 public slots:
 

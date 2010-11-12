@@ -27,6 +27,8 @@
 #include "miditoautomation.h"
 #include "hostcontroller.h"
 #include "container.h"
+#include "maincontainer.h"
+#include "parkingcontainer.h"
 #include "bridge.h"
 #include "mainhost.h"
 
@@ -170,6 +172,10 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
 
                 case ObjType::MainContainer:
                     obj = new MainContainer(objId, info);
+                    break;
+
+                case ObjType::ParkingContainer:
+                    obj = new ParkingContainer(objId, info);
                     break;
 
                 default :

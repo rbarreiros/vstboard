@@ -51,6 +51,12 @@ void MainContainer::AddObject(QSharedPointer<Object> objPtr)
 {
     //bridges are not stored in program
     if(objPtr->info().nodeType == NodeType::bridge) {
+        if(objPtr->info().objType==ObjType::BridgeIn) {
+            bridgeIn=objPtr;
+        }
+        if(objPtr->info().objType==ObjType::BridgeOut) {
+            bridgeOut=objPtr;
+        }
 
         if(objPtr->info().objType==ObjType::BridgeSend) {
             bridgeSend=objPtr;

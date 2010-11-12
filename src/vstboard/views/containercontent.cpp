@@ -34,6 +34,9 @@ ContainerContent::ContainerContent(QAbstractItemModel *model, QGraphicsItem * pa
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     setGeometry(0,0,50,50);
 
+    dropPos.setX(0);
+    dropPos.setY(0);
+
     QPalette pal;
     pal = palette();
     pal.setBrush(QPalette::Active, QPalette::Window, Qt::lightGray);
@@ -54,8 +57,8 @@ void ContainerContent::SetModelIndex(QPersistentModelIndex index)
 QPointF ContainerContent::GetDropPos()
 {
     QPointF p = dropPos;
-    dropPos.setX(0);
-    dropPos.setY(0);
+    dropPos.rx()+=20;
+    dropPos.ry()+=20;
     return p;
 }
 

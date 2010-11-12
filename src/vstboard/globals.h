@@ -70,6 +70,7 @@ namespace ObjType {
         MidiSender,
         HostController,
         MainContainer,
+        ParkingContainer,
         Container,
         BridgeIn,
         BridgeOut,
@@ -100,7 +101,8 @@ namespace FixedObjId {
         projectContainerReturn,
         programContainer,
         programContainerIn,
-        programContainerOut
+        programContainerOut,
+        parkingContainer
     };
 }
 

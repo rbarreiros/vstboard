@@ -22,7 +22,6 @@
 #include "../globals.h"
 #include "../mainhost.h"
 #include "../pathsolver.h"
-#include "../projectfile/program.h"
 
 using namespace Connectables;
 

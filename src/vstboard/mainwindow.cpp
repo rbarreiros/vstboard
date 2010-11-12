@@ -65,8 +65,6 @@ MainWindow::MainWindow(QWidget *parent) :
     BuildListTools();
 
     //programs
-//    project = new Project::ProjectFile(this);
-//    ui->Programs->SetModel(&project->programModel);
     ui->Programs->SetModel(mainHost->programList->GetModel());
     connect(mainHost->programList, SIGNAL(ProgChanged(QModelIndex)),
             ui->Programs,SLOT(OnProgChange(QModelIndex)));
@@ -90,10 +88,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(timerVu, SIGNAL(timeout()),
             this, SLOT(UpdateCpuLoad()));
 
-    ui->treeHostModel->setModel(mainHost->GetModel());
-    ui->treeParking->setModel(mainHost->GetParkingModel());
-    //ui->treeParking->setRootIndex(mainHost->GetParkingModel()->invisibleRootItem()->index());
-
     mySceneView = new View::SceneView(ui->hostView, ui->projectView, ui->programView);
     mySceneView->setModel(mainHost->GetModel());
 
@@ -116,6 +110,10 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     readSettings();
+
+    ui->treeHostModel->setModel(mainHost->GetModel());
+    ui->listParking->setModel(mainHost->GetParkingModel());
+    ui->listParking->setRootIndex(mainHost->GetParkingModel()->invisibleRootItem()->child(0)->index());
 }
 
 MainWindow::~MainWindow()

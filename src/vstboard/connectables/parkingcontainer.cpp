@@ -19,54 +19,57 @@
 ******************************************************************************/
 
 #include "parkingcontainer.h"
-#include "objectfactory.h"
+//#include "objectfactory.h"
 #include "../mainhost.h"
 
 using namespace Connectables;
 
-ParkingContainer::ParkingContainer() :
-    filePass(0),
-    modelNode(0),
-    closing(false)
+ParkingContainer::ParkingContainer(int index, const ObjectInfo &info) :
+    Container(index, info)
 {
 }
 
 ParkingContainer::~ParkingContainer()
 {
-    closing=true;
+    closed=true;
 
-    foreach(QSharedPointer<Object> objPtr, listObj) {
-        RemoveObject(objPtr);
-    }
+    listStaticObjects.clear();
 
     if(modelNode)
         modelNode->model()->invisibleRootItem()->removeRow(modelNode->row());
 }
 
-void ParkingContainer::AddObject(QSharedPointer<Object> &objPtr)
+void ParkingContainer::AddObject(QSharedPointer<Object> objPtr)
 {
-    if(closing)
+    if(closed)
         return;
 
-    listObj << objPtr;
+    listStaticObjects << objPtr;
     objPtr->SetParkingNode(modelNode);
 }
 
-void ParkingContainer::RemoveObject(QSharedPointer<Object> &objPtr)
+void ParkingContainer::RemoveObject(QSharedPointer<Object> objPtr)
 {
     if(objPtr.isNull())
         return;
 
-    listObj.removeAll(objPtr);
+    listStaticObjects.removeAll(objPtr);
+}
+
+void ParkingContainer::Clear()
+{
+    listStaticObjects.clear();
 }
 
 void ParkingContainer::SetParentModelNode(QStandardItem* parent)
 {
     modelNode = new QStandardItem();
-    modelNode->setData("parking",Qt::DisplayRole);
+    modelNode->setData(QVariant::fromValue(objInfo), UserRoles::objInfo);
+    modelNode->setData(index, UserRoles::value);
+    modelNode->setData(objInfo.name, Qt::DisplayRole);
     parent->appendRow(modelNode);
 
-    foreach(QSharedPointer<Object>objPtr, listObj) {
+    foreach(QSharedPointer<Object>objPtr, listStaticObjects) {
         objPtr->SetParkingNode(modelNode);
     }
 }
@@ -76,11 +79,18 @@ QDataStream & ParkingContainer::toStream (QDataStream &out) const
     switch(MainHost::Get()->filePass) {
         case 0:
         {
-            out << (quint16)listObj.size();
-            foreach(QSharedPointer<Object> objPtr, listObj) {
+            out << (quint16)listStaticObjects.size();
+            foreach(QSharedPointer<Object> objPtr, listStaticObjects) {
                 if(!objPtr.isNull()) {
-                    out<<objPtr->info();
-                    out<<*objPtr.data();
+
+                    QByteArray tmpStream;
+                    QDataStream tmp( &tmpStream , QIODevice::ReadWrite);
+                    tmp << *objPtr.data();
+
+                    out << objPtr->info();
+                    out << (qint16)objPtr->GetIndex();
+                    out << (quint16)tmpStream.size();
+                    out << tmpStream;
                 } else {
                     out<<(quint8)ObjType::ND;
                 }
@@ -89,8 +99,8 @@ QDataStream & ParkingContainer::toStream (QDataStream &out) const
         }
         case 1:
         {
-            out << (quint16)listObj.size();
-            foreach(QSharedPointer<Object> objPtr, listObj) {
+            out << (quint16)listStaticObjects.size();
+            foreach(QSharedPointer<Object> objPtr, listStaticObjects) {
                 if(!objPtr.isNull()) {
                     out<<(quint16)objPtr->GetIndex();
                     out<<*objPtr.data();
@@ -112,17 +122,33 @@ QDataStream & ParkingContainer::fromStream (QDataStream &in)
             quint16 nbObj;
             in >> nbObj;
             for(quint16 i=0; i<nbObj; i++) {
-                quint8 objType;
-                in>>objType;
-                if( (ObjType::Enum)objType!=ObjType::ND ) {
-                    ObjectInfo info;
-                    in>>info;
+                ObjectInfo info;
+                qint16 savedIndex;
+                quint16 size;
+                QByteArray tmpStream;
+                QDataStream tmp( &tmpStream , QIODevice::ReadWrite);
 
-                    QSharedPointer<Object> objPtr = ObjectFactory::Get()->NewObject(info);
+                in >> info;
+                in >> savedIndex;
+                in >> size;
+                in >> tmpStream;
+
+                QSharedPointer<Object> objPtr = ObjectFactory::Get()->NewObject(info);
+                if(!objPtr.isNull()) {
+                    AddObject(objPtr);
+                    tmp >> *objPtr.data();
+                } else {
+                    //error while creating the object, build a dummy object with the same saved id
+                    info.objType=ObjType::dummy;
+                    objPtr = ObjectFactory::Get()->NewObject(info);
+                    QDataStream tmp2( &tmpStream , QIODevice::ReadWrite);
                     if(!objPtr.isNull()) {
                         AddObject(objPtr);
-                        in>>*objPtr.data();
-                   }
+                        tmp2 >> *objPtr.data();
+                    } else {
+                        //can't even create a dummy object ?
+                        debug("Container::fromStream dummy object not created")
+                    }
                 }
             }
             break;

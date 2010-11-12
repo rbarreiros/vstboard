@@ -21,6 +21,9 @@ public:
 private:
     Ui::ProgramList *ui;
     QStandardItemModel *model;
+    int currentGrp;
+    int currentPrg;
+    int currentGrpDragging;
 
 signals:
     void ChangeProg(const QModelIndex &index);
@@ -28,6 +31,9 @@ signals:
 public slots:
     void OnProgChange(const QModelIndex &index);
     void OnDragOverGroups( QWidget *source, QModelIndex index);
+    void rowsInserted ( const QModelIndex & parent, int start, int end );
+    void OnGrpStartDrag(QModelIndex index);
+    void ShowCurrentGroup();
 
 private slots:
     void on_listProgs_clicked(QModelIndex index);

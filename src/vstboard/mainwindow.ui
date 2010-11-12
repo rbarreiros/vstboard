@@ -774,7 +774,7 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QTreeView" name="treeParking">
+      <widget class="QListView" name="listParking">
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
@@ -793,21 +793,9 @@
        <property name="selectionMode">
         <enum>QAbstractItemView::ExtendedSelection</enum>
        </property>
-       <property name="indentation">
-        <number>10</number>
-       </property>
-       <property name="rootIsDecorated">
-        <bool>false</bool>
-       </property>
-       <property name="uniformRowHeights">
+       <property name="uniformItemSizes">
         <bool>true</bool>
        </property>
-       <property name="sortingEnabled">
-        <bool>true</bool>
-       </property>
-       <attribute name="headerVisible">
-        <bool>false</bool>
-       </attribute>
       </widget>
      </item>
     </layout>

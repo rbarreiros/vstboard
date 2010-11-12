@@ -21,30 +21,27 @@
 #ifndef PARKINGCONTAINER_H
 #define PARKINGCONTAINER_H
 
-#include "../precomp.h"
-#include "object.h"
+//#include "../precomp.h"
+//#include "object.h"
+
+#include "container.h"
 
 namespace Connectables {
-    class ParkingContainer
+    class ParkingContainer : public Container
     {
     public:
-        ParkingContainer();
+        ParkingContainer(int index, const ObjectInfo &info);
         ~ParkingContainer();
 
         void SetParentModelNode(QStandardItem* parent);
 
-        void AddObject(QSharedPointer<Object> &objPtr);
-        void RemoveObject(QSharedPointer<Object> &objPtr);
+        void AddObject(QSharedPointer<Object> objPtr);
+        void RemoveObject(QSharedPointer<Object> objPtr);
+
+        void Clear();
 
         QDataStream & toStream (QDataStream &) const;
         QDataStream & fromStream (QDataStream &);
-
-        int filePass;
-
-    protected:
-        QList<QSharedPointer<Object> >listObj;
-        QStandardItem *modelNode;
-        bool closing;
     };
 }
 

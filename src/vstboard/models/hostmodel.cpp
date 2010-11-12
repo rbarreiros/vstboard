@@ -73,9 +73,13 @@ QStringList HostModel::mimeTypes () const
 
 bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, int row, int column, const QModelIndex & parent )
 {
+    QSharedPointer<Connectables::Container> cntPtr = MainHost::Get()->parkingContainer;
     QModelIndex rootIndex = parent.sibling(parent.row(),0);
+    if(parent.isValid()) {
+    //    QSharedPointer<Connectables::Container> cntPtr = Connectables::ObjectFactory::Get()->GetObjectFromId( rootIndex.data(UserRoles::value).toInt() ).staticCast<Connectables::Container>();
+        cntPtr = Connectables::ObjectFactory::Get()->GetObj(rootIndex).staticCast<Connectables::Container>();
+    }
 
-    QSharedPointer<Connectables::Container> cntPtr = Connectables::ObjectFactory::Get()->GetObjectFromId(parent.data(UserRoles::value).toInt()).staticCast<Connectables::Container>();
     if(cntPtr.isNull()) {
         debug(QString("HostModel::dropMimeData container not found").toAscii())
         return false;

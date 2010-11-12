@@ -137,6 +137,7 @@ void MainHost::Open()
     mainContainer->listenProgramChanges=false;
     hostContainer->listenProgramChanges=false;
     projectContainer->listenProgramChanges=false;
+
     programList->ChangeProg(0,0);
     //SetProgram(0);
 }
@@ -349,7 +350,18 @@ void MainHost::SetupProgramContainer()
 
 void MainHost::SetupParking()
 {
-    parkingContainer = QSharedPointer<Connectables::ParkingContainer>(new Connectables::ParkingContainer() );
+    if(parkingContainer) {
+        parkingContainer->Clear();
+        return;
+    }
+
+    ObjectInfo info;
+    info.nodeType = NodeType::container;
+    info.objType = ObjType::ParkingContainer;
+    info.name = "parkingContainer";
+    info.forcedObjId = FixedObjId::parkingContainer;
+
+    parkingContainer = Connectables::ObjectFactory::Get()->NewObject(info).staticCast< Connectables::ParkingContainer >();
     parkingContainer->SetParentModelNode( modelParking->invisibleRootItem() );
 }
 

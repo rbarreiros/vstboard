@@ -329,7 +329,9 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                 objView = new ConnectableObjectView(model(),parentView);
                 hashItems.insert( index , objView);
                 objView->SetModelIndex(index);
-                objView->setPos(parentView->GetDropPos());
+                QPointF pos = parentView->GetDropPos();
+                objView->setPos(pos);
+                model()->setData(index,pos,UserRoles::position);
 
                 connect(objView,SIGNAL(destroyed(QObject*)),
                         this,SLOT(graphicObjectRemoved(QObject*)));
