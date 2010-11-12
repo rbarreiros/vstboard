@@ -192,6 +192,34 @@ void Container::UnloadProgram()
     currentProgId=EMPTY_PROGRAM;
 }
 
+void Container::CopyProgram(int ori, int dest)
+{
+    if(!listContainerPrograms.contains(ori)) {
+        //not important : the program is empty and will be created when needed
+        //debug("Container::CopyProgram ori not found")
+        return;
+    }
+    if(listContainerPrograms.contains(dest)) {
+        debug("Container::CopyProgram dest already exists")
+        return;
+    }
+
+    ContainerProgram* progOri = listContainerPrograms.value(ori);
+    ContainerProgram* progCpy = progOri->Copy(ori,dest);
+    listContainerPrograms.insert(dest,progCpy);
+}
+
+void Container::RemoveProgram(int prg)
+{
+    if(!listContainerPrograms.contains(prg)) {
+//        debug("Container::RemoveProgram not found")
+        return;
+    }
+    ContainerProgram* prog = listContainerPrograms.value(prg);
+    prog->Remove(prg);
+    listContainerPrograms.remove(prg);
+}
+
 void Container::AddObject(QSharedPointer<Object> objPtr)
 {
     //bridges are not stored in program
@@ -319,15 +347,15 @@ QDataStream & Container::toStream (QDataStream& out) const
         case 1:
         {
 
-            out << (quint16)listContainerPrograms.size();
+            out << (quint32)listContainerPrograms.size();
             QHash<int,ContainerProgram*>::const_iterator i = listContainerPrograms.constBegin();
             while(i!=listContainerPrograms.constEnd()) {
-                out << (quint16)i.key();
+                out << (quint32)i.key();
                 out << *(i.value());
                 ++i;
             }
 
-            out << (quint16)currentProgId;
+            out << (quint32)currentProgId;
 
             if(currentProgram) {
                 out << (quint16)currentProgram->listObjects.size();
@@ -402,10 +430,10 @@ QDataStream & Container::fromStream (QDataStream& in)
         case 1:
         {
 
-            quint16 nbProg;
+            quint32 nbProg;
             in >> nbProg;
-            for(int i=0; i<nbProg; i++) {
-                quint16 progId;
+            for(quint32 i=0; i<nbProg; i++) {
+                quint32 progId;
                 in >> progId;
 
                 ContainerProgram *prog=0;
@@ -420,7 +448,7 @@ QDataStream & Container::fromStream (QDataStream& in)
 
             }
 
-            quint16 progId;
+            quint32 progId;
             in >> progId;
 
            quint16 nbObj;

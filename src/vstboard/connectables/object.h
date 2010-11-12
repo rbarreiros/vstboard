@@ -119,6 +119,9 @@ namespace Connectables {
         virtual void SetBridgePinsInVisible(bool visible);
         virtual void SetBridgePinsOutVisible(bool visible);
 
+        virtual void CopyProgram(int ori, int dest);
+        virtual void RemoveProgram(int prg);
+
     protected:
         QList<AudioPinIn*>listAudioPinIn;
         QList<AudioPinOut*>listAudioPinOut;

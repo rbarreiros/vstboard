@@ -18,6 +18,8 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
+#define SETUP_FILE_VERSION 1
+
 #include "setupfile.h"
 #include "../mainhost.h"
 
@@ -37,7 +39,7 @@ void SetupFile::SaveToFile(QString filePath)
     QDataStream stream(&file);
 
     stream << (quint32)0x7575e711;  //key
-    stream << (quint32)1;           //version
+    stream << (quint32)SETUP_FILE_VERSION;
     stream.setVersion(QDataStream::Qt_4_6);
 
     MainHost *host = MainHost::Get();
@@ -83,7 +85,7 @@ bool SetupFile::LoadFromFile(QString filePath)
 
     quint32 version;
     stream >> version;
-    if(version != 1) {
+    if(version != SETUP_FILE_VERSION) {
         QMessageBox msgBox;
         msgBox.setText(tr("Wrong file version."));
         msgBox.exec();

@@ -18,6 +18,8 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
+#define PROJECT_FILE_VERSION 2
+
 #include "projectfile.h"
 #include "../mainhost.h"
 
@@ -42,7 +44,7 @@ void ProjectFile::SaveToFile(QString filePath)
     QDataStream stream(&file);
 
     stream << (quint32)0x757b0a5d;  //key
-    stream << (quint32)1;           //version
+    stream << (quint32)PROJECT_FILE_VERSION;
     stream.setVersion(QDataStream::Qt_4_6);
     stream << *MainHost::Get();
 }
@@ -67,7 +69,7 @@ bool ProjectFile::LoadFromFile(QString filePath)
 
     quint32 version;
     stream >> version;
-    if(version != 1) {
+    if(version != PROJECT_FILE_VERSION) {
         QMessageBox msgBox;
         msgBox.setText(tr("Wrong file version."));
         msgBox.exec();

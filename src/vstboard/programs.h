@@ -2,6 +2,7 @@
 #define PROGRAMS_H
 
 #include "precomp.h"
+#include "models/programsmodel.h"
 //#include <QObject>
 
 class Programs : public QObject
@@ -10,22 +11,25 @@ class Programs : public QObject
 public:
     explicit Programs(QObject *parent = 0);
     void BuildModel();
-    QStandardItemModel *GetModel() {return model;}
-
+    ProgramsModel *GetModel() {return model;}
+    QStandardItem *CopyProgram(QStandardItem *progOri);
+    QStandardItem *CopyGroup(QStandardItem *grpOri);
+    void RemoveIndex(const QModelIndex &index);
     friend QDataStream & operator<< (QDataStream&, const Programs&);
     friend QDataStream & operator>> (QDataStream&, Programs&);
 
 private:
-    QStandardItemModel *model;
-    int currentGrp;
-    int currentPrg;
-    int currentProgId;
+    ProgramsModel *model;
+//    QStandardItem *currentGrp;
+    QStandardItem *currentPrg;
+//    unsigned int currentProgId;
+    unsigned int nextProgId;
 
 signals:
     void ProgChanged(const QModelIndex &prgIndex);
 
 public slots:
-    void ChangeProg(int midiPrgId, int grpNum=-1);
+    void ChangeProg(int midiPrgId);
     void ChangeGroup(int grpNum);
     void ChangeProg(const QModelIndex &prgIndex);
 

@@ -21,7 +21,6 @@
 #include "pathsolver.h"
 #include "globals.h"
 #include "projectfile/projectfile.h"
-#include "projectfile/program.h"
 #include "connectables/objectfactory.h"
 
 PathSolver::PathSolver(QObject *parent) :

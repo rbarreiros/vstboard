@@ -30,10 +30,10 @@ signals:
 
 public slots:
     void OnProgChange(const QModelIndex &index);
-    void OnDragOverGroups( QWidget *source, QModelIndex index);
-    void rowsInserted ( const QModelIndex & parent, int start, int end );
-    void OnGrpStartDrag(QModelIndex index);
+    void OnDragOverGroups( QWidget *source, const QModelIndex & index);
+    void OnGrpStartDrag(const QModelIndex & index);
     void ShowCurrentGroup();
+    void rowsInserted ( const QModelIndex & parent, int start, int end );
 
 private slots:
     void on_listProgs_clicked(QModelIndex index);

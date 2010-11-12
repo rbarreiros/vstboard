@@ -61,6 +61,21 @@ ContainerProgram::~ContainerProgram()
     mapObjAttribs.clear();
 }
 
+ContainerProgram * ContainerProgram::Copy(int fromId, int toId)
+{
+    foreach(QSharedPointer<Object> objPtr, listObjects) {
+        objPtr->CopyProgram(fromId,toId);
+    }
+    return new ContainerProgram(*this);
+}
+
+void ContainerProgram::Remove(int prgId)
+{
+    foreach(QSharedPointer<Object> objPtr, listObjects) {
+        objPtr->RemoveProgram(prgId);
+    }
+}
+
 void ContainerProgram::Load(int progId)
 {
     foreach(QSharedPointer<Object> objPtr, listObjects) {

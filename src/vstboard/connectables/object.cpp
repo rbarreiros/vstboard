@@ -198,6 +198,29 @@ void Object::LoadProgram(int prog)
         listPrograms.remove(TEMP_PROGRAM);
 }
 
+void Object::CopyProgram(int ori, int dest)
+{
+    if(!listPrograms.contains(ori)) {
+        debug("Object::CopyProgram ori not found")
+        return;
+    }
+    if(listPrograms.contains(dest)) {
+        debug("Object::CopyProgram dest already exists")
+        return;
+    }
+    ObjectProgram *cpy = new ObjectProgram( *listPrograms.value(ori) );
+    listPrograms.insert(dest,cpy);
+}
+
+void Object::RemoveProgram(int prg)
+{
+    if(!listPrograms.contains(prg)) {
+        debug("Object::RemoveProgram not found")
+        return;
+    }
+    listPrograms.remove(prg);
+}
+
 void Object::NewRenderLoop()
 {
     foreach(AudioPinIn *pin, listAudioPinIn) {

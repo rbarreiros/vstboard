@@ -138,7 +138,8 @@ void MainHost::Open()
     hostContainer->listenProgramChanges=false;
     projectContainer->listenProgramChanges=false;
 
-    programList->ChangeProg(0,0);
+    programList->BuildModel();
+    //programList->ChangeProg(0);
     //SetProgram(0);
 }
 
@@ -378,7 +379,7 @@ void MainHost::ClearHost()
     projectContainer->listenProgramChanges=false;
 
     programList->BuildModel();
-    programList->ChangeProg(0,0);
+    //programList->ChangeProg(0);
     //SetProgram(0);
 }
 
@@ -650,13 +651,14 @@ QDataStream & operator>> (QDataStream& in, MainHost& value)
 
     Connectables::ObjectFactory::Get()->ResetSavedId();
 
-    in >> *value.programList;
-
     value.projectContainer->LoadProgram(0);
     value.projectContainer->listenProgramChanges=false;
 
+    in >> *value.programList;
+
     value.EnableSolverUpdate(true);
-  //  value.SetProgram(0);
-    value.programList->ChangeProg(0,0);
+
+//    value.programList->ChangeGroup(0);
+
     return in;
 }

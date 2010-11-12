@@ -14,11 +14,16 @@ ProgramList::ProgramList(QWidget *parent) :
     ui->listGrps->setDragDropMode(QAbstractItemView::DragDrop);
     ui->listGrps->setDefaultDropAction(Qt::MoveAction);
     ui->listGrps->setFrameShape(QFrame::NoFrame);
-
+    ui->listGrps->setContextMenuPolicy(Qt::CustomContextMenu);
     connect( ui->listGrps, SIGNAL(DragOverItemFromWidget(QWidget*,QModelIndex)),
              this, SLOT(OnDragOverGroups(QWidget*,QModelIndex)));
     connect( ui->listGrps, SIGNAL(StartDrag(QModelIndex)),
              this,SLOT(OnGrpStartDrag(QModelIndex)));
+
+    ui->listProgs->setDragDropMode(QAbstractItemView::DragDrop);
+    ui->listProgs->setDefaultDropAction(Qt::MoveAction);
+    ui->listProgs->setFrameShape(QFrame::NoFrame);
+    ui->listProgs->setContextMenuPolicy(Qt::CustomContextMenu);
 }
 
 ProgramList::~ProgramList()
@@ -32,13 +37,13 @@ void ProgramList::SetModel(QStandardItemModel *model)
     ui->listGrps->setModel(model);
 
      ui->listProgs->setModel(model);
-     ui->listProgs->setRootIndex( model->invisibleRootItem()->child(0)->child(0)->index() );
+     //ui->listProgs->setRootIndex( model->invisibleRootItem()->child(0)->child(0)->index() );
 
     connect(model, SIGNAL(rowsInserted(QModelIndex,int,int)),
             this, SLOT(rowsInserted(QModelIndex,int,int)));
 }
 
-void ProgramList::OnDragOverGroups( QWidget *source, QModelIndex index)
+void ProgramList::OnDragOverGroups( QWidget *source, const QModelIndex & index)
 {
     if(source == ui->listProgs) {
         ui->listGrps->setCurrentIndex(index);
@@ -47,27 +52,32 @@ void ProgramList::OnDragOverGroups( QWidget *source, QModelIndex index)
     }
 }
 
-void ProgramList::OnGrpStartDrag(QModelIndex index)
+void ProgramList::OnGrpStartDrag(const QModelIndex & index)
 {
     currentGrpDragging=index.row();
 }
 
 void ProgramList::rowsInserted ( const QModelIndex & parent, int start, int end )
 {
+    //update view if the current group moved
     if(currentGrpDragging!=-1) {
         if(currentGrpDragging == currentGrp) {
             if(start > currentGrp)
                 currentGrp = start-1;
             else
                 currentGrp = start;
+            QTimer::singleShot(0, this, SLOT( ShowCurrentGroup()) );
         } else {
-            if(currentGrpDragging < currentGrp && start > currentGrp)
+            if(currentGrpDragging < currentGrp && start > currentGrp) {
                 currentGrp--;
-            if(currentGrpDragging > currentGrp && start < currentGrp)
+                QTimer::singleShot(0, this, SLOT( ShowCurrentGroup()) );
+            }
+            if(currentGrpDragging > currentGrp && start < currentGrp) {
                 currentGrp++;
+                QTimer::singleShot(0, this, SLOT( ShowCurrentGroup()) );
+            }
         }
         currentGrpDragging=-1;
-        QTimer::singleShot(0, this, SLOT( ShowCurrentGroup()) );
     }
 }
 
@@ -103,8 +113,11 @@ void ProgramList::on_listGrps_clicked(QModelIndex index)
 {
     QModelIndex newProg = index.child(0,0).child( currentPrg ,0 );
     if(!newProg.isValid()) {
-        debug("ProgramList::on_listGrps_clicked invalid prog")
-
+        newProg = index.child(0,0).child(0,0);
+        if(!newProg.isValid()) {
+            debug("ProgramList::on_listGrps_clicked invalid prog")
+            return;
+        }
     }
     emit ChangeProg( newProg );
 }

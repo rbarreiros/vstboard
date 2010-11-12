@@ -65,6 +65,7 @@
 #include <QListWidgetItem>
 #include <QMainWindow>
 #include <QMap>
+#include <QMenu>
 #include <QMessageBox>
 #include <QMimeData>
 #include <QMultiHash>

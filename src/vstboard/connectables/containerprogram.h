@@ -44,6 +44,8 @@ namespace Connectables {
         void Load(int progId);
         void Unload();
         void Save();
+        ContainerProgram * Copy(int fromId, int toId);
+        void Remove(int prgId);
 
         void AddObject(QSharedPointer<Object> objPtr);
         void RemoveObject(QSharedPointer<Object> objPtr);

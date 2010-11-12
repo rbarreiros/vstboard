@@ -42,7 +42,8 @@ namespace UserRoles {
         position,
         size,
         parking,
-        objInfo
+        objInfo,
+        nodeType
     };
 }
 namespace NodeType {
@@ -54,7 +55,9 @@ namespace NodeType {
         listPin,
         pin,
         cable,
-        editor
+        editor,
+        program,
+        programGroup
     };
 }
 

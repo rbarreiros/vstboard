@@ -51,6 +51,8 @@ namespace Connectables {
 
         void SetParentModelNode(QStandardItem* parent);
         void UpdateModelNode();
+        void CopyProgram(int ori, int dest);
+        void RemoveProgram(int prg);
 
     protected:
         QList< QSharedPointer< Object > >listStaticObjects;
@@ -76,6 +78,7 @@ namespace Connectables {
         void SaveProgram();
         void UnloadProgram();
         void LoadProgram(int prog);
+
 
         void SetSleep(bool sleeping);
 

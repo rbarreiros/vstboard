@@ -30,17 +30,7 @@
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QListView" name="listProgs">
-      <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
-      </property>
-      <property name="dragDropMode">
-       <enum>QAbstractItemView::InternalMove</enum>
-      </property>
-      <property name="uniformItemSizes">
-       <bool>true</bool>
-      </property>
-     </widget>
+     <widget class="ProgListView" name="listProgs" native="true"/>
     </widget>
    </item>
   </layout>
@@ -50,6 +40,12 @@
    <class>GroupListView</class>
    <extends>QWidget</extends>
    <header>views/grouplistview.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ProgListView</class>
+   <extends>QWidget</extends>
+   <header>views/proglistview.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

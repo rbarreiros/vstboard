@@ -115,7 +115,9 @@ SOURCES += main.cpp \
     circularbuffer.cpp \
     views/programlist.cpp \
     programs.cpp \
-    views/grouplistview.cpp
+    views/grouplistview.cpp \
+    views/proglistview.cpp \
+    models/programsmodel.cpp
 HEADERS += mainwindow.h \
     precomp.h \
     models/listaudiointerfacesmodel.h \
@@ -191,7 +193,9 @@ HEADERS += mainwindow.h \
     circularbuffer.h \
     views/programlist.h \
     programs.h \
-    views/grouplistview.h
+    views/grouplistview.h \
+    views/proglistview.h \
+    models/programsmodel.h
 FORMS += mainwindow.ui \
     views/filebrowser.ui \
     views/configdialog.ui \
