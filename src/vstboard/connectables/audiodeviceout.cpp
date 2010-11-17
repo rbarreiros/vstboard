@@ -97,8 +97,10 @@ bool AudioDeviceOut::Open()
         return false;
 
     //if no output channels
-    if(parentDevice->devInfo->maxOutputChannels==0)
+    if(parentDevice->devInfo->maxOutputChannels==0) {
+        parentDevice.clear();
         return false;
+    }
 
     for(int i=0;i<parentDevice->devInfo->maxOutputChannels;i++) {
 //        AudioPinIn *pin = new AudioPinIn(this,i,true);

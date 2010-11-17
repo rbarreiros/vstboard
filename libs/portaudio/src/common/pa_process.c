@@ -1,5 +1,5 @@
 /*
- * $Id: pa_process.c 1523 2010-07-10 17:41:25Z dmitrykos $
+ * $Id: pa_process.c 1555 2010-11-12 17:16:21Z richard_ash $
  * Portable Audio I/O Library
  * streamCallback <-> host buffer processing adapter
  *
@@ -764,7 +764,7 @@ static unsigned long NonAdaptingProcess( PaUtilBufferProcessor *bp,
                     destChannelStrideBytes = bp->bytesPerUserInputSample;
 
                     /* process host buffer directly, or use temp buffer if formats differ or host buffer non-interleaved */
-                    if( bp->userInputSampleFormatIsEqualToHost && bp->hostInputIsInterleaved )
+                    if( bp->userInputSampleFormatIsEqualToHost && bp->hostInputIsInterleaved && bp->hostInputChannels[0][0].data)
                     {
                         userInput = hostInputChannels[0].data;
                         destBytePtr = (unsigned char *)hostInputChannels[0].data;
@@ -781,7 +781,7 @@ static unsigned long NonAdaptingProcess( PaUtilBufferProcessor *bp,
                     destChannelStrideBytes = frameCount * bp->bytesPerUserInputSample;
 
                     /* setup non-interleaved ptrs */
-                    if( bp->userInputSampleFormatIsEqualToHost && !bp->hostInputIsInterleaved )
+                    if( bp->userInputSampleFormatIsEqualToHost && !bp->hostInputIsInterleaved && bp->hostInputChannels[0][0].data )
                     {
                         for( i=0; i<bp->inputChannelCount; ++i )
                         {

@@ -33,46 +33,35 @@ AudioDevices::AudioDevices(QObject *parent) :
 
 AudioDevices::~AudioDevices()
 {
-//    foreach(QSharedPointer<Connectables::AudioDevice *>dev, Connectables::AudioDevice::listAudioDevices) {
-//        delete dev;
-//        dev->deleteLater();
-//    }
-    Connectables::AudioDevice::listDevMutex.lock();
-    Connectables::AudioDevice::listAudioDevices.clear();
-    Connectables::AudioDevice::listDevMutex.unlock();
-
-    if(model) {
-        Pa_Terminate();
-        model->deleteLater();
-    }
-}
-
-//void AudioDevices::UpdateCpuUsage()
-//{
-//    float cpu=.0f;
-//    foreach(Connectables::AudioDevice *ad, Connectables::AudioDevice::listAudioDevices) {
-//        cpu = std::max( ad->GetCpuUsage(), cpu);
-//    }
-//    emit NewCpuUsage(cpu);
-//}
-
-ListAudioInterfacesModel * AudioDevices::GetModel()
-{
-    Connectables::AudioDevice::listDevMutex.lock();
     foreach(QSharedPointer<Connectables::AudioDevice>ad, Connectables::AudioDevice::listAudioDevices) {
         ad->SetSleep(true);
     }
-    Connectables::AudioDevice::listDevMutex.unlock();
-//    MainHost::Get()->UpdateSolver(true);
-
 
     if(model) {
-        debug("pa_terminate")
+        debug("AudioDevices::~AudioDevices pa_terminate")
+        PaError err=Pa_Terminate();
+        if(err!=paNoError) {
+            debug("AudioDevices::~AudioDevices Pa_Terminate %s",Pa_GetErrorText( err ))
+        }
+        model->deleteLater();
+    }
+
+    Connectables::AudioDevice::listAudioDevices.clear();
+}
+
+ListAudioInterfacesModel * AudioDevices::GetModel()
+{
+    foreach(QSharedPointer<Connectables::AudioDevice>ad, Connectables::AudioDevice::listAudioDevices) {
+        ad->SetSleep(true);
+    }
+
+    if(model) {
+        debug("AudioDevices::GetModel pa_terminate")
         PaError err=Pa_Terminate();
         if(err!=paNoError) {
             debug("AudioDevices::GetModel Pa_Terminate %s",Pa_GetErrorText( err ))
         }
-        model->deleteLater();
+        model->clear();
     }
 
 
@@ -87,7 +76,6 @@ ListAudioInterfacesModel * AudioDevices::GetModel()
         ad->SetSleep(false);
     }
     Connectables::AudioDevice::listDevMutex.unlock();
-//    MainHost::Get()->UpdateSolver(true);
 
     return model;
 }
@@ -99,7 +87,9 @@ void AudioDevices::BuildModel()
     headerLabels << "In";
     headerLabels << "Out";
 
-    model = new ListAudioInterfacesModel();
+    if(!model)
+        model = new ListAudioInterfacesModel();
+
     model->setHorizontalHeaderLabels(  headerLabels );
 
     QStandardItem *parentItem = model->invisibleRootItem();

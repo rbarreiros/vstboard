@@ -44,7 +44,6 @@ AudioDevice::AudioDevice(const ObjectInfo &info, QObject *parent) :
     devInfo(0),
     devIn(0),
     devOut(0),
-    closeFlag(false),
     closed(true),
     objInfo(info),
     cpuUsage(.0f)
@@ -75,6 +74,7 @@ void AudioDevice::DeleteIfUnused()
     devicesMutex.unlock();
 
     if(del) {
+        SetSleep(true);
         listDevMutex.lock();
         listAudioDevices.remove(objInfo.id);
         listDevMutex.unlock();
@@ -84,7 +84,7 @@ void AudioDevice::DeleteIfUnused()
 
 bool AudioDevice::SetObjectInput(AudioDeviceIn *obj)
 {
-    devicesMutex.lock();
+    QMutexLocker l(&devicesMutex);
 
     if(devIn && obj) {
         debug("AudioDevice::SetObjectInput already used")
@@ -99,15 +99,15 @@ bool AudioDevice::SetObjectInput(AudioDeviceIn *obj)
 
     devIn = obj;
 
-    devicesMutex.unlock();
+    if(!obj)
+        QTimer::singleShot(5000,this,SLOT(DeleteIfUnused()));
 
-    QTimer::singleShot(5000,this,SLOT(DeleteIfUnused()));
     return true;
 }
 
 bool AudioDevice::SetObjectOutput(AudioDeviceOut *obj)
 {
-    //QMutexLocker lock(&objMutex);
+    QMutexLocker l(&devicesMutex);
 
     if(devOut && obj) {
         debug("AudioDevice::SetObjectOutput already used")
@@ -116,15 +116,14 @@ bool AudioDevice::SetObjectOutput(AudioDeviceOut *obj)
 
     devOut = obj;
 
-    QTimer::singleShot(5000,this,SLOT(DeleteIfUnused()));
+    if(!obj)
+        QTimer::singleShot(5000,this,SLOT(DeleteIfUnused()));
     return true;
 }
 
 void AudioDevice::SetSampleRate(float rate)
 {
     if(!closed) {
-        closeFlag=true;
-        //QMutexLocker lock(&objMutex);
         SetSleep(true);
         SetSleep(false);
     }
@@ -234,7 +233,6 @@ bool AudioDevice::OpenStream(double sampleRate)
             default:
                 break;
         }
-
     }
 
     if(devInfo->maxOutputChannels > 0) {
@@ -294,7 +292,12 @@ bool AudioDevice::OpenStream(double sampleRate)
     }
 
     if(!Pa_IsFormatSupported( inputParameters, outputParameters, sampleRate ) == paFormatIsSupported) {
-        debug("AudioDevice::OpenStream format not supported")
+        debug("AudioDevice::OpenStream Pa_IsFormatSupported format not supported")
+        if(inputParameters)
+            delete inputParameters;
+        if(outputParameters)
+            delete outputParameters;
+        return false;
     }
 
     PaError err = Pa_OpenStream(
@@ -314,7 +317,7 @@ bool AudioDevice::OpenStream(double sampleRate)
 
     if( err != paNoError ) {
         Pa_CloseStream(stream);
-        debug("AudioDevice::OpenStream %s",Pa_GetErrorText( err ))
+        debug("AudioDevice::OpenStream Pa_OpenStream %s",Pa_GetErrorText( err ))
         return false;
     }
 
@@ -324,6 +327,8 @@ bool AudioDevice::OpenStream(double sampleRate)
 
 bool AudioDevice::Open()
 {
+    isClosing=false;
+
 //    debug("%s open",objectName().toAscii().constData())
 
     //find the corresponding device
@@ -342,9 +347,8 @@ bool AudioDevice::Open()
         }
 
         //opened with the default rate, change the host rate
-        MainHost::Get()->SetSampleRate(sampleRate);
+        //MainHost::Get()->SetSampleRate(sampleRate);
     }
-    closeFlag=false;
 
     //start the stream
     PaError err = Pa_StartStream( stream );
@@ -376,9 +380,16 @@ bool AudioDevice::Open()
 
 bool AudioDevice::CloseStream()
 {
-//    debug("AudioDevice::CloseStream")
+    devicesMutex.lock();
+    if(isClosing) {
+        debug("already closing")
+        return false;
+    }
+    isClosing=true;
 
-//    QMutexLocker lock(&objMutex);
+    devicesMutex.unlock();
+
+    bufferReady=false;
 
     PaError err;
 
@@ -386,56 +397,60 @@ bool AudioDevice::CloseStream()
     {
         err = Pa_IsStreamActive(stream);
         if( err < 0 ) {
+            debug("AudioDevice::CloseStream Pa_IsStreamActive %s %s",objectName().toAscii().constData(),Pa_GetErrorText( err ))
+
             //error : abort stream
 
-            debug("AudioDevice::CloseStream %s",Pa_GetErrorText( err ))
             err = Pa_AbortStream(stream);
             if( err != paNoError ) {
-                debug("AudioDevice::CloseStream %s",Pa_GetErrorText( err ))
+                debug("AudioDevice::CloseStream Pa_AbortStream %s %s",objectName().toAscii().constData(),Pa_GetErrorText( err ))
             }
 
         } else {
             //no error : clean close stream
 
             if( err > 0 ) {
-                //stream is active : set closeflag and wait
-//                Pa_StopStream(stream);
+                //stream is active
+                debug("pa_stopstream %s",objectName().toAscii().constData())
+                err = Pa_StopStream(stream);
+                if( err != paNoError ) {
+                    debug("AudioDevice::CloseStream Pa_StopStream %s %s",objectName().toAscii().constData(),Pa_GetErrorText( err ))
 
-//                closeFlag=true;
-//                while(closeFlag) {
-//                    Sleep(200);
-//                }
-
-//                err = Pa_StopStream(stream);
-//                if( err != paNoError ) {
-//                    debug("AudioDevice::CloseStream %s",Pa_GetErrorText( err ))
-//                }
+                    //retry
+                    Sleep(1000);
+                    err = Pa_StopStream(stream);
+                    if( err != paNoError ) {
+                        debug("AudioDevice::CloseStream Pa_StopStream 2 %s %s",objectName().toAscii().constData(),Pa_GetErrorText( err ))
+                        DeleteCircualBuffers();
+                        return false;
+                    }
+                }
             }
-
-            closeFlag=true;
-
-//            device->devicesMutex.lock();
-
-            debug("pa_stopstream")
-            err = Pa_StopStream(stream);
-            if( err != paNoError ) {
-                debug("AudioDevice::CloseStream %s",Pa_GetErrorText( err ))
-            }
-            Sleep(100);
 
             debug("pa_closestream")
             err = Pa_CloseStream(stream);
             if( err != paNoError ) {
-                debug("AudioDevice::CloseStream %s",Pa_GetErrorText( err ))
+                debug("AudioDevice::CloseStream Pa_CloseStream %s %s",objectName().toAscii().constData(),Pa_GetErrorText( err ))
+
+                //retry
+                Sleep(1000);
+                err = Pa_CloseStream(stream);
+                if( err != paNoError ) {
+                    debug("AudioDevice::CloseStream Pa_CloseStream 2 %s %s",objectName().toAscii().constData(),Pa_GetErrorText( err ))
+                    DeleteCircualBuffers();
+                    return false;
+                }
             }
-
-//            device->devicesMutex.unlock();
-
         }
-
         stream = 0;
     }
 
+    DeleteCircualBuffers();
+    return true;
+}
+
+void AudioDevice::DeleteCircualBuffers()
+{
     foreach(CircularBuffer *buf, listCircularBuffersIn)
         delete buf;
     listCircularBuffersIn.clear();
@@ -444,13 +459,14 @@ bool AudioDevice::CloseStream()
         delete buf;
     listCircularBuffersOut.clear();
 
-    return true;
 }
 
 bool AudioDevice::Close()
 {
     if(closed)
         return true;
+
+    closed=true;
 
     devicesMutex.lock();
 
@@ -499,91 +515,103 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
 {
     AudioDevice* device = (AudioDevice*)userData;
 
-    if(device->closeFlag) {
-        device->closeFlag=false;
-        debug("AudioDevice::paCallback paComplete")
-//        device->waitClose.wakeAll();
-        return paComplete;
-    }
-
     unsigned int hostBuffSize = MainHost::Get()->GetBufferSize();
-    if(framesPerBuffer < hostBuffSize) {
+    if(framesPerBuffer > hostBuffSize) {
        MainHost::Get()->SetBufferSize((long)framesPerBuffer);
        hostBuffSize = framesPerBuffer;
     }
 
-    device->devicesMutex.lock();
-    if(device->devIn) {
-        //fill circular buffer with device audio
-        int cpt=0;
-        foreach(CircularBuffer *buf, device->listCircularBuffersIn) {
-            buf->Put( ((float **) inputBuffer)[cpt], framesPerBuffer );
-            cpt++;
-        }
+    {
+        QMutexLocker devLock(&device->devicesMutex);
 
-        //if we filled enough buffer
-        if(device->listCircularBuffersIn.at(0)->filledSize >= hostBuffSize ) {
+        if(device->isClosing)
+            return paComplete;
 
-            //put circular buffers into pins buffers
-            cpt=0;
+        if(device->devIn) {
+            //fill circular buffer with device audio
+            int cpt=0;
             foreach(CircularBuffer *buf, device->listCircularBuffersIn) {
-                AudioBuffer *pinBuf = device->devIn->listAudioPinOut.at(cpt)->buffer;
-                if(pinBuf->GetSize() < hostBuffSize) {
-                    debug("AudioDevice::paCallback pin buffer too small")
-                }
-                buf->Get( pinBuf->GetPointer(true), hostBuffSize );
+                buf->Put( ((float **) inputBuffer)[cpt], framesPerBuffer );
                 cpt++;
             }
 
-            if(!device->bufferReady) {
-                device->bufferReady=true;
-                countDevicesReady++;
-            }
-        }
-    }
+            //if we filled enough buffer
+            if(device->listCircularBuffersIn.at(0)->filledSize >= hostBuffSize ) {
 
-    device->devicesMutex.unlock();
-
-    //all devices are ready : render
-    if(countDevicesReady>=countInputDevices) {
-        MainHost::Get()->Render();
-
-        //reset devices ready flag
-        listDevMutex.lock();
-        foreach(QSharedPointer<AudioDevice>dev, listAudioDevices) {
-            if(dev.isNull())
-                continue;
-            dev->devicesMutex.lock();
-            if(dev->devOut) {
-                int cpt=0;
-                //put pins buffer into circular buffers
-                foreach(CircularBuffer *buf, dev->listCircularBuffersOut) {
-                    AudioBuffer *pinBuf = dev->devOut->listAudioPinIn.at(cpt)->buffer;
-//                    if(!pinBuf->IsEmpty()) {
-                        buf->Put( pinBuf->ConsumeStack(), pinBuf->GetSize() );
-                        pinBuf->ResetStackCounter();
-//                    }
+                //put circular buffers into pins buffers
+                cpt=0;
+                foreach(CircularBuffer *buf, device->listCircularBuffersIn) {
+                    AudioBuffer *pinBuf = device->devIn->listAudioPinOut.at(cpt)->buffer;
+                    if(pinBuf->GetSize() < hostBuffSize) {
+                        debug("AudioDevice::paCallback pin buffer too small")
+                        continue;
+                    }
+                    buf->Get( pinBuf->GetPointer(true), hostBuffSize );
                     cpt++;
                 }
+
+                if(!device->bufferReady) {
+                    device->bufferReady=true;
+
+                    QMutexLocker locker(&listDevMutex);
+                    countDevicesReady++;
+                }
             }
-            dev->devicesMutex.unlock();
-            dev->bufferReady=false;
         }
-        listDevMutex.unlock();
-        countDevicesReady=0;
     }
 
-    device->devicesMutex.lock();
-    if(device->devOut) {
-        //send circular buffer to device if there's enough data
-        int cpt=0;
-        foreach(CircularBuffer *buf, device->listCircularBuffersOut) {
-            if(buf->filledSize>=framesPerBuffer)
-                buf->Get( ((float **) outputBuffer)[cpt], framesPerBuffer );
-            cpt++;
+
+    {
+        QMutexLocker locker(&listDevMutex);
+
+        //all devices are ready : render
+        if(countDevicesReady>=countInputDevices) {
+            countDevicesReady=0;
+
+            MainHost::Get()->Render();
+
+            foreach(QSharedPointer<AudioDevice>dev, listAudioDevices) {
+                if(dev.isNull())
+                    continue;
+
+                QMutexLocker devLock(&dev->devicesMutex);
+
+                if(dev->isClosing)
+                    continue;
+
+                if(dev->devOut) {
+                    int cpt=0;
+                    //put pins buffer into circular buffers
+                    foreach(CircularBuffer *buf, dev->listCircularBuffersOut) {
+                        AudioBuffer *pinBuf = dev->devOut->listAudioPinIn.at(cpt)->buffer;
+    //                    if(!pinBuf->IsEmpty()) {
+                            buf->Put( pinBuf->ConsumeStack(), pinBuf->GetSize() );
+                            pinBuf->ResetStackCounter();
+    //                    }
+                        cpt++;
+                    }
+                }
+                dev->bufferReady=false;
+            }
         }
     }
-    device->devicesMutex.unlock();
+
+
+    {
+        QMutexLocker devLock(&device->devicesMutex);
+        if(device->isClosing)
+            return paComplete;
+
+        if(device->devOut) {
+            //send circular buffer to device if there's enough data
+            int cpt=0;
+            foreach(CircularBuffer *buf, device->listCircularBuffersOut) {
+                if(buf->filledSize>=framesPerBuffer)
+                    buf->Get( ((float **) outputBuffer)[cpt], framesPerBuffer );
+                cpt++;
+            }
+        }
+    }
 
     return paContinue;
 

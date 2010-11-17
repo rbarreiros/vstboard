@@ -103,16 +103,16 @@ MainHost::~MainHost()
     solver.Resolve(workingListOfCables);
     renderer.Clear();
 
-    delete Connectables::ObjectFactory::Get();
-
-    delete listMidiDevices;
-    delete listAudioDevices;
-
     mainContainer.clear();
     hostContainer.clear();
     projectContainer.clear();
     programContainer.clear();
     parkingContainer.clear();
+
+    delete listMidiDevices;
+    delete listAudioDevices;
+
+    delete Connectables::ObjectFactory::Get();
 
     theHost = 0;
 }

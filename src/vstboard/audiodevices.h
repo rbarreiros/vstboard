@@ -36,12 +36,6 @@ public:
 private:
     void BuildModel();
     ListAudioInterfacesModel *model;
-
-//signals:
-//    void NewCpuUsage(float cpu);
-
-//private slots:
-//    void UpdateCpuUsage();
 };
 
 #endif // AUDIODEVICES_H

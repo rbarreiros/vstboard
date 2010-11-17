@@ -80,6 +80,10 @@ namespace Connectables {
         bool OpenStream(double sampleRate);
         bool CloseStream();
 
+        void DeleteCircualBuffers();
+
+        bool isClosing;
+
         float sampleRate;
         unsigned long bufferSize;
 
@@ -89,7 +93,6 @@ namespace Connectables {
         AudioDeviceIn *devIn;
         AudioDeviceOut *devOut;
 
-        bool closeFlag;
         bool closed;
 
         QMutex devicesMutex;
