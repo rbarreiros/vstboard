@@ -22,25 +22,76 @@
 #include "pinview.h"
 #include "../globals.h"
 #include "mainwindow.h"
-
+#include "imagecollection.h"
 using namespace View;
 
 ObjectView::ObjectView(QAbstractItemModel *model, QGraphicsItem * parent, Qt::WindowFlags wFlags ) :
     QGraphicsWidget(parent,wFlags),
     titleText(0),
     border(0),
-    backgroundImg(0),
-    editorButton(0),
+    selectBorder(0),
     layout(0),
     model(model)
 
 {
 //    setObjectName("objView");
+
+    setFocusPolicy(Qt::StrongFocus);
+//    setAutoFillBackground(true);
+
+    actDel = new QAction(QIcon(":/img16x16/delete.png"),tr("Delete"),this);
+    actDel->setShortcut( Qt::Key_Delete );
+    actDel->setShortcutContext(Qt::WidgetShortcut);
+    connect(actDel,SIGNAL(triggered()),
+            this,SLOT(close()));
+    addAction(actDel);
+
+    actEditor = new QAction(QIcon(":/img16x16/configure.png"), tr("Show editor"),this);
+    actEditor->setEnabled(false);
+    actEditor->setCheckable(true);
+    actEditor->setShortcut( Qt::Key_Asterisk );
+    actEditor->setShortcutContext(Qt::WidgetShortcut);
+    connect(actEditor, SIGNAL(toggled(bool)),
+            this,SLOT(ShowEditor(bool)));
+    addAction(actEditor);
+
+    actLearn = new QAction(tr("Learning mode"),this);
+    actLearn->setEnabled(false);
+    actLearn->setCheckable(true);
+    actLearn->setShortcut( Qt::Key_Plus );
+    actLearn->setShortcutContext(Qt::WidgetShortcut);
+    connect(actLearn, SIGNAL(toggled(bool)),
+            this,SLOT(ToggleLearningMode(bool)));
+    addAction(actLearn);
+
+    backgroundImg = new QGraphicsPixmapItem(this,scene());
 }
 
 ObjectView::~ObjectView()
 {
     setActive(false);
+}
+
+void ObjectView::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+{
+    QMenu menu;
+    menu.exec(actions(),event->screenPos(),actions().at(0),event->widget());
+}
+
+void ObjectView::ShowEditor(bool show)
+{
+//    if(!editorIndex.isValid())
+//        return;
+//    model->setData(editorIndex,show,UserRoles::value);
+    model->setData(objIndex,show,UserRoles::editorVisible);
+}
+
+void ObjectView::ToggleLearningMode(bool learn)
+{
+//    if(!learningIndex.isValid())
+//        return;
+//    model->setData(learningIndex,learn,UserRoles::value);
+    model->setData(objIndex,learn,UserRoles::paramLearning);
 }
 
 void ObjectView::SetModelIndex(QPersistentModelIndex index)
@@ -57,10 +108,21 @@ void ObjectView::SetModelIndex(QPersistentModelIndex index)
 
     }
 
+    actEditor->setEnabled( objIndex.data(UserRoles::hasEditor).toBool() );
+    actLearn->setEnabled( objIndex.data(UserRoles::canLearn).toBool() );
+
+    if(info.nodeType == NodeType::bridge) {
+        actDel->setEnabled(false);
+    }
+
     objIndex = index;
     if(titleText) {
         titleText->setText(index.data(Qt::DisplayRole).toString());
     }
+
+//    if(index.data(UserRoles::editorImage).isValid()) {
+//        SetBackground( index.data(UserRoles::editorImage).toString() );
+//    }
 }
 
 void ObjectView::UpdateModelIndex()
@@ -75,19 +137,37 @@ void ObjectView::UpdateModelIndex()
         titleText->setText(objIndex.data(Qt::DisplayRole).toString());
     }
 
+    actEditor->setEnabled( objIndex.data(UserRoles::hasEditor).toBool() );
+    actLearn->setEnabled( objIndex.data(UserRoles::canLearn).toBool() );
+
+    if(objIndex.data(UserRoles::editorVisible).isValid()) {
+        actEditor->setChecked( objIndex.data(UserRoles::editorVisible).toBool() );
+    }
+
+    if(objIndex.data(UserRoles::paramLearning).isValid()) {
+        actLearn->setChecked( objIndex.data(UserRoles::paramLearning).toBool() );
+    }
+
+//    if(objIndex.data(UserRoles::editorImage).isValid()) {
+//        SetBackground( objIndex.data(UserRoles::editorImage).toString() );
+//    }
 }
 
-void ObjectView::SetEditorIndex(QPersistentModelIndex index)
-{
-    if(!editorIndex.isValid() && scene()) {
-        if(editorButton) {
-            editorIndex=index;
-            editorButton->show();
-            editorButton->installSceneEventFilter(this);
-        }
-    }
-    editorButton->Toggle(editorIndex.data(UserRoles::value).toBool());
-}
+//void ObjectView::SetBackground(const QString & imgName)
+//{
+//    if(!backgroundImg->pixmap().isNull() &&
+//       backgroundImg->pixmap().size() == boundingRect().size().toSize())
+//        return;
+
+//    QPixmap pix = ImageCollection::Get()->GetImage( imgName ).copy(boundingRect().toRect());
+//    if(pix.isNull())
+//        return;
+
+//    backgroundImg->setPixmap(pix);
+//    QGraphicsBlurEffect *eff = new QGraphicsBlurEffect(this);
+//    eff->setBlurRadius(2);
+//    backgroundImg->setGraphicsEffect(eff);
+//}
 
 void ObjectView::closeEvent ( QCloseEvent * event )
 {
@@ -105,9 +185,16 @@ void ObjectView::closeEvent ( QCloseEvent * event )
 QVariant ObjectView::itemChange ( GraphicsItemChange  change, const QVariant & value )
 {
     switch(change) {
-        case ItemSceneHasChanged :
-            if(editorButton && value.value<QGraphicsScene*>()!=0) {
-                editorButton->installSceneEventFilter(this);
+        case QGraphicsItem::ItemSelectedChange :
+            if(value.toBool()) {
+                if(selectBorder)
+                    delete selectBorder;
+                selectBorder=new QGraphicsRectItem( -2,-2, size().width()+4, size().height()+4 , this );
+            } else {
+                if(selectBorder) {
+                    delete selectBorder;
+                    selectBorder =0;
+                }
             }
             break;
         default:
@@ -120,23 +207,6 @@ void ObjectView::resizeEvent ( QGraphicsSceneResizeEvent * event )
 {
     if(model)
         model->setData(objIndex,event->newSize(),UserRoles::size);
-}
-
-bool ObjectView::sceneEventFilter ( QGraphicsItem * watched, QEvent * event )
-{
-    if(watched == editorButton) {
-        if(event->type() == QEvent::GraphicsSceneMousePress) {
-            bool val = !editorIndex.data(UserRoles::value).toBool();
-            model->setData(editorIndex,val,UserRoles::value);
-        }
-    }
-
-    return false;
-}
-
-void ObjectView::mouseDoubleClickEvent ( QGraphicsSceneMouseEvent  * /*event*/ )
-{
-    close();
 }
 
 void ObjectView::mouseReleaseEvent ( QGraphicsSceneMouseEvent * event )

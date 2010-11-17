@@ -23,14 +23,9 @@
 
 #include "precomp.h"
 #include "cable.h"
+#include "objectinfo.h"
 
 namespace Connectables {
-
-    struct objAttirbs {
-        QPointF position;
-        QSizeF size;
-        bool editor;
-    };
 
     class Object;
     class Container;
@@ -66,7 +61,7 @@ namespace Connectables {
         QList< QSharedPointer<Object> >listObjects;
         QList<Cable*>listCables;
 
-        QMap<int,objAttirbs>mapObjAttribs;
+        QMap<int,ObjectConatinerAttribs>mapObjAttribs;
 
         friend class Container;
         friend class ParkingContainer;
@@ -75,5 +70,8 @@ namespace Connectables {
 
 QDataStream & operator<< (QDataStream & out, const Connectables::ContainerProgram& value);
 QDataStream & operator>> (QDataStream & in, Connectables::ContainerProgram& value);
+
+
+
 
 #endif // CONTAINERPROGRAM_H

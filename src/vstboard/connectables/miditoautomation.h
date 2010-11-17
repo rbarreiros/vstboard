@@ -36,6 +36,7 @@ namespace Connectables {
         void Hide();
         void Render();
         void MidiMsgFromInput(long msg);
+        void SetParentModeIndex(const QModelIndex &parentIndex);
 
     protected:
         QList<QVariant> listValues;

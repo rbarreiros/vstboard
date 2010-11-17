@@ -31,7 +31,7 @@ AudioDeviceIn::AudioDeviceIn(int index, const ObjectInfo &info) :
     bufferReady(false),
     parentDevice(0)
 {
-
+    listParameterPinOut.insert(0, new ParameterPinOut(this,0,0,true,"cpu%"));
 }
 
 AudioDeviceIn::~AudioDeviceIn()
@@ -46,6 +46,7 @@ bool AudioDeviceIn::Close()
 
     if(parentDevice) {
         parentDevice->SetObjectInput(0);
+        parentDevice.clear();
     }
     return true;
 }
@@ -53,8 +54,10 @@ bool AudioDeviceIn::Close()
 void AudioDeviceIn::Render()
 {
     foreach(AudioPinOut* pin,listAudioPinOut) {
+        pin->buffer->ConsumeStack();
         pin->SendAudioBuffer();
     }
+    listParameterPinOut.value(0)->ChangeValue(parentDevice->GetCpuUsage());
 }
 
 void AudioDeviceIn::SetBufferSize(long size)
@@ -72,15 +75,23 @@ bool AudioDeviceIn::Open()
     closed=false;
 
     //create the audiodevice if needed
-    if(!AudioDevice::listAudioDevices.contains(objInfo.id)) {
-        parentDevice = new AudioDevice(objInfo, MainHost::Get());
-        if(!parentDevice->Open()) {
-            delete parentDevice;
-            parentDevice=0;
-            return false;
+    {
+        QMutexLocker l(&AudioDevice::listDevMutex);
+
+        if(!AudioDevice::listAudioDevices.contains(objInfo.id)) {
+    //        parentDevice = new AudioDevice(objInfo);
+            AudioDevice *dev = new AudioDevice(objInfo);
+            parentDevice = QSharedPointer<AudioDevice>(dev);
+            if(!parentDevice->Open()) {
+    //            delete parentDevice;
+    //            parentDevice=0;
+                parentDevice.clear();
+                return false;
+            }
+            AudioDevice::listAudioDevices.insert(objInfo.id, parentDevice);
+        } else {
+            parentDevice = AudioDevice::listAudioDevices.value(objInfo.id);
         }
-    } else {
-        parentDevice = AudioDevice::listAudioDevices.value(objInfo.id);
     }
 
     if(!parentDevice)
@@ -103,7 +114,8 @@ bool AudioDeviceIn::Open()
 
     //device already has a child
     if(!parentDevice->SetObjectInput(this)) {
-        parentDevice = 0;
+//        parentDevice = 0;
+        parentDevice.clear();
         return false;
     }
 

@@ -21,6 +21,8 @@ srcdir = vstboard
 include($$top_srcdir/config.pri)
 TEMPLATE = app
 
+#QT += sql
+
 vstsdk { 
     DEFINES += VSTSDK
     INCLUDEPATH += $$top_srcdir/$$VSTSDK_PATH \
@@ -117,7 +119,8 @@ SOURCES += main.cpp \
     programs.cpp \
     views/grouplistview.cpp \
     views/proglistview.cpp \
-    models/programsmodel.cpp
+    models/programsmodel.cpp \
+    imagecollection.cpp
 HEADERS += mainwindow.h \
     precomp.h \
     models/listaudiointerfacesmodel.h \
@@ -195,7 +198,8 @@ HEADERS += mainwindow.h \
     programs.h \
     views/grouplistview.h \
     views/proglistview.h \
-    models/programsmodel.h
+    models/programsmodel.h \
+    imagecollection.h
 FORMS += mainwindow.ui \
     views/filebrowser.ui \
     views/configdialog.ui \

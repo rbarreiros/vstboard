@@ -32,12 +32,16 @@ public:
     explicit AudioDevices(QObject *parent=0);
     ~AudioDevices();
     ListAudioInterfacesModel * GetModel();
+
 private:
     void BuildModel();
     ListAudioInterfacesModel *model;
 
-private slots:
-    void UpdateCpuUsage();
+//signals:
+//    void NewCpuUsage(float cpu);
+
+//private slots:
+//    void UpdateCpuUsage();
 };
 
 #endif // AUDIODEVICES_H

@@ -45,7 +45,7 @@ namespace Connectables {
         bool bufferReady;
 
     protected:
-        AudioDevice *parentDevice;
+        QSharedPointer<AudioDevice>parentDevice;
 
     public slots:
         void SetBufferSize(long size);

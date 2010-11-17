@@ -39,6 +39,7 @@ public:
         inline unsigned long GetSize() {return nSize;}
         float GetVu();
         inline void ResetStackCounter() {stackSize=0;}
+        inline bool IsEmpty() {return (stackSize==0);}
 
 protected:
         unsigned int stackSize;

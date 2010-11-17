@@ -27,26 +27,33 @@ using namespace Connectables;
 
 Object::Object(int index, const ObjectInfo &info) :
     QObject(),
+//    position(QPointF(0,0)),
+//    size(QSize(0,0)),
+//    editorVisible(false),
+    hasEditor(false),
+    canLearn(false),
+//    modelNode(0),
     listenProgramChanges(true),
+    parked(false),
     solverNode(0),
     index(index),
     savedIndex(-2),
     sleep(true),
-    parameterLearning(0),
+//    parameterLearning(0),
     currentProgram(0),
     progIsDirty(false),
     closed(true),
     containerId(-1),
-    modelNode(0),
-    modelAudioIn(0),
-    modelAudioOut(0),
-    modelMidiIn(0),
-    modelMidiOut(0),
-    modelParamIn(0),
-    modelParamOut(0),
-    modelBridgeIn(0),
-    modelBridgeOut(0),
-    modelEditor(0),
+    modelAudioIn(QModelIndex()),
+    modelAudioOut(QModelIndex()),
+    modelMidiIn(QModelIndex()),
+    modelMidiOut(QModelIndex()),
+    modelParamIn(QModelIndex()),
+    modelParamOut(QModelIndex()),
+    modelBridgeIn(QModelIndex()),
+    modelBridgeOut(QModelIndex()),
+//    modelEditor(0),
+//    modelLearningMode(0),
     currentProgId(TEMP_PROGRAM),
     objInfo(info)
 {
@@ -85,40 +92,44 @@ bool Object::Close()
 
 void Object::Hide() {
 //    SetSleep(true);
+    modelAudioIn=QModelIndex();
     foreach(AudioPinIn *pin, listAudioPinIn)
         pin->Close();
+    modelAudioOut=QModelIndex();
     foreach(AudioPinOut *pin, listAudioPinOut)
         pin->Close();
+    modelMidiIn=QModelIndex();
     foreach(MidiPinIn *pin, listMidiPinIn)
         pin->Close();
+    modelMidiOut=QModelIndex();
     foreach(MidiPinOut *pin, listMidiPinOut)
         pin->Close();
+    modelBridgeIn=QModelIndex();
     foreach(BridgePinIn *pin, listBridgePinIn)
         pin->Close();
+    modelBridgeOut=QModelIndex();
     foreach(BridgePinOut *pin, listBridgePinOut)
         pin->Close();
+    modelParamIn=QModelIndex();
     foreach(ParameterPin *pin, listParameterPinIn)
         pin->Close();
+    modelParamOut=QModelIndex();
     foreach(ParameterPin *pin, listParameterPinOut)
         pin->Close();
 
-    if(modelNode) {
-        if(modelNode->parent())
-            modelNode->model()->removeRow(modelNode->row(), modelNode->parent()->index());
-        else
-            modelNode->model()->removeRow(modelNode->row());
-    }
+    QStandardItemModel *model = 0;
+    if(parked)
+        model = MainHost::GetParkingModel();
+    else
+        model = MainHost::GetModel();
 
-    modelNode=0;
-    modelAudioIn=0;
-    modelAudioOut=0;
-    modelMidiIn=0;
-    modelMidiOut=0;
-    modelParamIn=0;
-    modelParamOut=0;
-    modelBridgeIn=0;
-    modelBridgeOut=0;
-    modelEditor=0;
+    if(modelIndex.isValid()) {
+        if(modelIndex.parent().isValid())
+            model->removeRow(modelIndex.row(), modelIndex.parent());
+        else
+            model->removeRow(modelIndex.row());
+    }
+    modelIndex=QModelIndex();
 }
 
 void Object::SetBridgePinsInVisible(bool visible)
@@ -135,8 +146,11 @@ void Object::SetBridgePinsOutVisible(bool visible)
 
 void Object::setObjectName(const QString &name)
 {
-    if(modelNode)
-        modelNode->setData(name,Qt::DisplayRole);
+//    if(modelNode)
+//        modelNode->setData(name,Qt::DisplayRole);
+    if(modelIndex.isValid())
+        MainHost::GetModel()->setData(modelIndex, name, Qt::DisplayRole);
+
     QObject::setObjectName(name);
 }
 
@@ -276,167 +290,300 @@ Pin * Object::GetPin(const ConnectionInfo &pinInfo)
     return 0;
 }
 
-void Object::SetParentModelNode(QStandardItem* parent)
+void Object::SetParentModeIndex(const QModelIndex &parentIndex)
 {
-    if(modelNode && modelNode->parent() == parent)
-        return;
+    if(modelIndex.isValid()) {
+        if(modelIndex.parent() == parentIndex)
+            return;
+        else
+            Hide();
+    }
 
-    if(modelNode)
-        Hide();
+    parked=false;
 
-    modelNode = new QStandardItem();
+    QStandardItem *modelNode = new QStandardItem();
     modelNode->setData(QVariant::fromValue(objInfo), UserRoles::objInfo);
     modelNode->setData(index, UserRoles::value);
     modelNode->setData(objInfo.name, Qt::DisplayRole);
+    modelNode->setData(hasEditor, UserRoles::hasEditor);
+    modelNode->setData(canLearn,UserRoles::canLearn);
 
-    parent->appendRow(modelNode);
-    containerId = parent->data(UserRoles::value).toInt();
-//    SetSleep(false);
+    if(parentIndex.isValid()) {
+        MainHost::GetModel()->itemFromIndex(parentIndex)->appendRow(modelNode);
+    } else {
+        MainHost::GetModel()->appendRow(modelNode);
+    }
+
+    modelIndex=modelNode->index();
 }
 
-void Object::SetParkingNode(QStandardItem* parent)
+void Object::SetContainerId(quint16 id)
 {
-    if(modelNode)
+    containerId = id;
+
+    foreach(AudioPinIn* pin, listAudioPinIn) {
+        pin->SetContainerId(containerId);
+    }
+    foreach(AudioPinOut* pin, listAudioPinOut) {
+        pin->SetContainerId(containerId);
+    }
+    foreach(MidiPinIn* pin, listMidiPinIn) {
+        pin->SetContainerId(containerId);
+    }
+    foreach(MidiPinOut* pin, listMidiPinOut) {
+        pin->SetContainerId(containerId);
+    }
+    hashListParamPin::iterator i = listParameterPinIn.begin();
+    while(i!=listParameterPinIn.end()) {
+        i.value()->SetContainerId(containerId);
+        ++i;
+    }
+    hashListParamPin::iterator j = listParameterPinOut.begin();
+    while(j!=listParameterPinOut.end()) {
+        j.value()->SetContainerId(containerId);
+        ++j;
+    }
+    foreach(BridgePinIn* pin, listBridgePinIn) {
+        pin->SetContainerId(containerId);
+    }
+    foreach(BridgePinOut* pin, listBridgePinOut) {
+        pin->SetContainerId(containerId);
+    }
+}
+
+void Object::SetParkingIndex(const QModelIndex &parentIndex)
+{
+//    if(modelNode)
+//        Hide();
+    if(modelIndex.isValid())
         Hide();
 
-    modelNode=new QStandardItem();
+    parked=true;
+
+    QStandardItem *modelNode=new QStandardItem();
     modelNode->setData(QVariant::fromValue(objInfo), UserRoles::objInfo);
     modelNode->setData(index,UserRoles::value);
     modelNode->setData(objInfo.name, Qt::DisplayRole);
     modelNode->setData(true,UserRoles::parking);
     containerId=-1;
-    parent->appendRow(modelNode);
+
+    if(parentIndex.isValid())
+        MainHost::GetParkingModel()->itemFromIndex(parentIndex)->appendRow(modelNode);
+    else
+        MainHost::GetParkingModel()->appendRow(modelNode);
+
+    modelIndex=modelNode->index();
 }
 
 void Object::UpdateModelNode()
 {
-    if(!modelNode)
+    if(!modelIndex.isValid())
         return;
+
+    QStandardItem *modelNode = MainHost::GetModel()->itemFromIndex(modelIndex);
 
     modelNode->setData(QVariant::fromValue(objInfo), UserRoles::objInfo);
 
+//    if(hasEditor) {
+//        modelNode->setData(editorVisible,UserRoles::editorVisible);
+//    }
+//    if(canLearn) {
+//        modelNode->setData(parameterLearning,UserRoles::paramLearning);
+//    }
+
     //audio in
-    if(!modelAudioIn && listAudioPinIn.size()>0) {
-        modelAudioIn = new QStandardItem("AudioIn");
-        modelAudioIn->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listAudioIn)) , UserRoles::objInfo);
-        modelNode->appendRow(modelAudioIn);
+    if(!modelAudioIn.isValid() && listAudioPinIn.size()>0) {
+        QStandardItem *item = new QStandardItem("AudioIn");
+        item->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listAudioIn)) , UserRoles::objInfo);
+        modelNode->appendRow(item);
+        modelAudioIn=item->index();
     }
     foreach(AudioPinIn* pin, listAudioPinIn) {
-        pin->SetParentModelNode(modelAudioIn);
+        pin->SetParentModelIndex(modelAudioIn);
     }
 
     //audio out
-    if(!modelAudioOut && listAudioPinOut.size()>0) {
-        modelAudioOut = new QStandardItem("AudioOut");
-        modelAudioOut->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listAudioOut)) , UserRoles::objInfo);
-        modelNode->appendRow(modelAudioOut);
+    if(!modelAudioOut.isValid() && listAudioPinOut.size()>0) {
+        QStandardItem *item = new QStandardItem("AudioOut");
+        item->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listAudioOut)) , UserRoles::objInfo);
+        modelNode->appendRow(item);
+        modelAudioOut=item->index();
     }
     foreach(AudioPinOut* pin, listAudioPinOut) {
-        pin->SetParentModelNode(modelAudioOut);
+        pin->SetParentModelIndex(modelAudioOut);
     }
 
     //midi in
-    if(!modelMidiIn && listMidiPinIn.size()>0) {
-        modelMidiIn = new QStandardItem("MidiIn");
-        modelMidiIn->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listMidiIn)) , UserRoles::objInfo);
-        modelNode->appendRow(modelMidiIn);
+    if(!modelMidiIn.isValid() && listMidiPinIn.size()>0) {
+        QStandardItem *item = new QStandardItem("MidiIn");
+        item->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listMidiIn)) , UserRoles::objInfo);
+        modelNode->appendRow(item);
+        modelMidiIn=item->index();
     }
     foreach(MidiPinIn* pin, listMidiPinIn) {
-        pin->SetParentModelNode(modelMidiIn);
+        pin->SetParentModelIndex(modelMidiIn);
     }
 
     //midi out
-    if(!modelMidiOut && listMidiPinOut.size()>0) {
-        modelMidiOut = new QStandardItem("MidiOut");
-        modelMidiOut->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listMidiOut)) , UserRoles::objInfo);
-        modelNode->appendRow(modelMidiOut);
+    if(!modelMidiOut.isValid() && listMidiPinOut.size()>0) {
+        QStandardItem *item = new QStandardItem("MidiOut");
+        item->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listMidiOut)) , UserRoles::objInfo);
+        modelNode->appendRow(item);
+        modelMidiOut=item->index();
     }
     foreach(MidiPinOut* pin, listMidiPinOut) {
-        pin->SetParentModelNode(modelMidiOut);
+        pin->SetParentModelIndex(modelMidiOut);
     }
 
     //param in
-    if(!modelParamIn && listParameterPinIn.size()>0) {
-        modelParamIn = new QStandardItem("ParamIn");
-        modelParamIn->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listParamIn)) , UserRoles::objInfo);
-        modelNode->appendRow(modelParamIn);
+    if(!modelParamIn.isValid() && listParameterPinIn.size()>0) {
+        QStandardItem *item = new QStandardItem("ParamIn");
+        item->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listParamIn)) , UserRoles::objInfo);
+        modelNode->appendRow(item);
+        modelParamIn=item->index();
     }
     hashListParamPin::iterator i = listParameterPinIn.begin();
     while(i!=listParameterPinIn.end()) {
-        i.value()->SetParentModelNode(modelParamIn);
+        i.value()->SetParentModelIndex(modelParamIn);
         ++i;
     }
 
     //param out
-    if(!modelParamOut && listParameterPinOut.size()>0) {
-        modelParamOut = new QStandardItem("ParamOut");
-        modelParamOut->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listParamOut)) , UserRoles::objInfo);
-        modelNode->appendRow(modelParamOut);
+    if(!modelParamOut.isValid() && listParameterPinOut.size()>0) {
+        QStandardItem *item = new QStandardItem("ParamOut");
+        item->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listParamOut)) , UserRoles::objInfo);
+        modelNode->appendRow(item);
+        modelParamOut=item->index();
     }
     hashListParamPin::iterator j = listParameterPinOut.begin();
     while(j!=listParameterPinOut.end()) {
-        j.value()->SetParentModelNode(modelParamOut);
+        j.value()->SetParentModelIndex(modelParamOut);
         ++j;
     }
 
     //bridge in
-    if(!modelBridgeIn && listBridgePinIn.size()>0) {
-        modelBridgeIn = new QStandardItem("BridgeIn");
-        modelBridgeIn->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listBridgeIn)) , UserRoles::objInfo);
-        modelNode->appendRow(modelBridgeIn);
+    if(!modelBridgeIn.isValid() && listBridgePinIn.size()>0) {
+        QStandardItem *item = new QStandardItem("BridgeIn");
+        item->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listBridgeIn)) , UserRoles::objInfo);
+        modelNode->appendRow(item);
+        modelBridgeIn=item->index();
     }
     foreach(BridgePinIn* pin, listBridgePinIn) {
-        pin->SetParentModelNode(modelBridgeIn);
+        pin->SetParentModelIndex(modelBridgeIn);
     }
 
     //bridge out
-    if(!modelBridgeOut && listBridgePinOut.size()>0) {
-        modelBridgeOut = new QStandardItem("BridgeOut");
-        modelBridgeOut->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listBridgeOut)) , UserRoles::objInfo);
-        modelNode->appendRow(modelBridgeOut);
+    if(!modelBridgeOut.isValid() && listBridgePinOut.size()>0) {
+        QStandardItem *item = new QStandardItem("BridgeOut");
+        item->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listBridgeOut)) , UserRoles::objInfo);
+        modelNode->appendRow(item);
+        modelBridgeOut=item->index();
     }
     foreach(BridgePinOut* pin, listBridgePinOut) {
-        pin->SetParentModelNode(modelBridgeOut);
+        pin->SetParentModelIndex(modelBridgeOut);
     }
 }
 
-void Object::SetLearningMode(bool learning)
+bool Object::GetLearningMode()
 {
-    if(learning) {
-        UnLearningModeChanged(false);
-        parameterLearning = 1;
-    } else {
-        parameterLearning=0;
-    }
+    if(!modelIndex.isValid())
+        return false;
+    return MainHost::GetModel()->data(modelIndex, UserRoles::paramLearning).toBool();
 }
 
-void Object::SetUnLearningMode(bool unlearning)
+void Object::SetContainerAttribs(const ObjectConatinerAttribs &attr)
 {
-    if(unlearning) {
-        LearningModeChanged(false);
-        parameterLearning = -1;
-    } else {
-        parameterLearning=0;
-    }
+    if(!modelIndex.isValid())
+        return;
+
+    QStandardItem *item = MainHost::GetModel()->itemFromIndex(modelIndex);
+
+    item->setData(attr.position, UserRoles::position);
+    item->setData(attr.size, UserRoles::size);
+    item->setData(attr.editorVisible, UserRoles::editorVisible);
+    item->setData(attr.editorPosition, UserRoles::editorPos);
+    item->setData(attr.editorSize, UserRoles::editorSize);
+    item->setData(attr.paramLearning, UserRoles::paramLearning);
 }
 
-void Object::SetPosition(QPointF pos)
+void Object::GetContainerAttribs(ObjectConatinerAttribs &attr)
 {
-    position=pos;
-    modelNode->setData(position,UserRoles::position);
+    if(!modelIndex.isValid())
+        return;
+
+    attr.position = modelIndex.data(UserRoles::position).toPointF();
+    attr.size = modelIndex.data(UserRoles::size).toSizeF();
+    attr.editorVisible = modelIndex.data(UserRoles::editorVisible).toBool();
+    attr.editorPosition = modelIndex.data(UserRoles::editorPos).toPoint();
+    attr.editorSize = modelIndex.data(UserRoles::editorSize).toSize();
+    attr.paramLearning = modelIndex.data(UserRoles::paramLearning).toBool();
 }
 
-void Object::SetSize(QSizeF s)
-{
-    size=s;
-    modelNode->setData(size,UserRoles::size);
-}
+//void Object::OnEditorVisibilityChanged(bool visible)
+//{
+//    editorVisible = visible;
+//}
+
+//void Object::SetLearningMode(bool learning)
+//{
+////    if(modelLearningMode)
+////        modelLearningMode->setData(learning,UserRoles::value);
+
+//    if(learning) {
+//        UnLearningModeChanged(false);
+//        parameterLearning = 1;
+//    } else {
+//        parameterLearning=0;
+//    }
+
+////    if(modelNode)
+////        modelNode->setData(learning,UserRoles::paramLearning);
+//}
+
+//void Object::SetUnLearningMode(bool unlearning)
+//{
+//    if(unlearning) {
+////        modelLearningMode->setData(false,UserRoles::value);
+//        if(modelNode)
+//            modelNode->setData(false,UserRoles::paramLearning);
+
+//        LearningModeChanged(false);
+//        parameterLearning = -1;
+//    } else {
+//        parameterLearning=0;
+//    }
+//}
+
+//void Object::SetEditorVisible(bool visible)
+//{
+//    if(editorVisible==visible)
+//        return;
+
+//    editorVisible=visible;
+////    if(modelEditor)
+////        modelEditor->setData(visible ,UserRoles::value);
+//    if(modelNode)
+//        modelNode->setData(editorVisible, UserRoles::editorVisible);
+//}
+
+//void Object::SetPosition(const QPointF &pos)
+//{
+//    position=pos;
+//    if(modelNode)
+//        modelNode->setData(pos,UserRoles::position);
+//}
+
+//void Object::SetSize(QSizeF s)
+//{
+//    size=s;
+//    if(modelNode)
+//        modelNode->setData(s,UserRoles::size);
+//}
 
 QDataStream & Object::toStream(QDataStream & out) const
 {
     out << (qint16)index;
     out << sleep;
-    out << (qint8)parameterLearning;
     out << listenProgramChanges;
 
     out << (quint16)listPrograms.size();
@@ -461,9 +608,7 @@ QDataStream & Object::fromStream(QDataStream & in)
     in >> id;
     savedIndex=id;
     in >> sleep;
-    in >> (qint8&)parameterLearning;
     in >> listenProgramChanges;
-
 
     quint16 nbProg;
     in >> nbProg;

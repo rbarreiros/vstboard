@@ -43,15 +43,15 @@ namespace View {
         ListPinsView *listBridgeOut;
 
     protected:
-        WId backOri;
+//        WId backOri;
 
         QList<CableView*>listCables;
 
     signals:
         void CommandStep(ConnectionInfo pinInfo, int delta);
 
-    public slots:
-        void SetBackground();
+//    public slots:
+//        void SetBackground();
     };
 
 }

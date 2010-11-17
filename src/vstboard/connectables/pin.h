@@ -61,7 +61,8 @@ namespace Connectables {
         const ConnectionInfo &GetConnectionInfo() const {return connectInfo;}
         bool event(QEvent *event);
 
-        void SetParentModelNode(QStandardItem *parent_Node);
+        void SetParentModelIndex(const QModelIndex &parentIndex);
+        void SetContainerId(quint16 id);
 
         inline bool GetVisible() {return visible;}
         void SetVisible(bool vis);
@@ -74,8 +75,8 @@ namespace Connectables {
         float stepSize;
         Object *parent;
         bool visible;
-        QStandardItem *parentNode;
-        QStandardItem *modelPin;
+        QPersistentModelIndex parentIndex;
+        QPersistentModelIndex modelIndex;
 
         QMutex objMutex;
         bool closed;

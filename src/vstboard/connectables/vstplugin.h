@@ -42,7 +42,7 @@ namespace Connectables {
         bool Open();
         bool Close();
         void Render();
-        void Hide();
+        void SetParkingIndex(const QModelIndex &parentIndex);
         int GetProcessingTime() {return 20;}
         long OnGetUniqueId() { return index; }
         long OnMasterCallback(long opcode, long index, long value, void *ptr, float opt, long currentReturnCode);
@@ -56,13 +56,16 @@ namespace Connectables {
         static QList<VstPlugin*>listPlugins;
         static VstPlugin *pluginLoading;
 
-        bool OpenEditor();
-        void SetParentModelNode(QStandardItem* parent);
-        void UpdateModelNode();
-        void UpdateEditorNode();
-        bool GetEditorVisible();
+        void CreateEditorWindow();
+
+        void SetParentModeIndex(const QModelIndex &parentIndex);
+//        void UpdateModelNode();
+//        void UpdateEditorNode();
 
         static View::VstShellSelect *shellSelectView;
+
+        void SetContainerAttribs(const ObjectConatinerAttribs &attr);
+        void GetContainerAttribs(ObjectConatinerAttribs &attr);
 
     protected:
         float sampleRate;
@@ -85,7 +88,9 @@ namespace Connectables {
         void EditorDestroyed();
         void EditIdle();
         void OnParameterChanged(ConnectionInfo pinInfo, float value);
-        void CloseEditor();
+        void OnEditorVisibilityChanged(bool visible);
+
+//        void TakeScreenshot();
 
         friend class View::VstPluginWindow;
     };

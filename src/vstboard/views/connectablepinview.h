@@ -32,7 +32,7 @@ namespace View {
     public:
         ConnectablePinView(QAbstractItemModel *model,QGraphicsItem * parent, Connectables::Pin *pin);
         void SetFalloffSpeed(float speed) {falloffSpeed = speed;}
-        void UpdateModelIndex(QModelIndex index);
+        void UpdateModelIndex(const QModelIndex &index);
 
     protected:
         void wheelEvent ( QGraphicsSceneWheelEvent * event );
@@ -40,6 +40,7 @@ namespace View {
         QGraphicsRectItem *rectVu;
         QString text;
         float value;
+        bool isParameter;
 
     public slots:
         void updateVu();

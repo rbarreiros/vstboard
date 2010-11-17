@@ -25,7 +25,7 @@
 #include "../globals.h"
 #include "../connectables/object.h"
 #include "listpinsview.h"
-#include "textbutton.h"
+//#include "textbutton.h"
 
 namespace View {
 
@@ -41,31 +41,36 @@ namespace View {
 
         virtual void SetModelIndex(QPersistentModelIndex index);
         virtual void UpdateModelIndex();
-        void SetEditorIndex(QPersistentModelIndex index);
 
     protected:
+        void SetBackground(const QString & imgName);
+        virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
         void resizeEvent ( QGraphicsSceneResizeEvent * event );
         virtual void closeEvent ( QCloseEvent * event );
         QVariant itemChange ( GraphicsItemChange  change, const QVariant & value );
-        bool sceneEventFilter ( QGraphicsItem * watched, QEvent * event );
         QPen pen;
 
-        void mouseDoubleClickEvent ( QGraphicsSceneMouseEvent  * event );
         void mouseReleaseEvent ( QGraphicsSceneMouseEvent * event );
 
         QGraphicsSimpleTextItem *titleText;
         QGraphicsRectItem *border;
         QGraphicsPixmapItem *backgroundImg;
+        QGraphicsRectItem *selectBorder;
 
         QMap<ConnectionInfo, PinView*>listPins;
-
-        TextButton *editorButton;
 
         QGraphicsGridLayout *layout;
 
         QAbstractItemModel *model;
         QPersistentModelIndex objIndex;
-        QPersistentModelIndex editorIndex;
+
+        QAction *actDel;
+        QAction *actEditor;
+        QAction *actLearn;
+
+    public slots:
+        void ShowEditor(bool show);
+        void ToggleLearningMode(bool learn);
 
     friend class PinView;
     };

@@ -31,8 +31,6 @@ Pin::Pin(Object *parent,PinType::Enum type, PinDirection::Enum direction, int nu
     stepSize(.1f),
     parent(parent),
     visible(false),
-    parentNode(0),
-    modelPin(0),
     closed(false)
 {
     setObjectName(QString("pin:%1:%2:%3:%4").arg(connectInfo.objId).arg(connectInfo.type).arg(connectInfo.direction).arg(connectInfo.pinNumber));
@@ -46,8 +44,8 @@ Pin::~Pin()
 
 void Pin::setObjectName(const QString &name)
 {
-    if(modelPin)
-        modelPin->setData(name,Qt::DisplayRole);
+    if(modelIndex.isValid())
+        MainHost::GetModel()->setData(modelIndex,name,Qt::DisplayRole);
 
     QObject::setObjectName(name);
 }
@@ -83,18 +81,22 @@ void Pin::SendMsg(int msgType,void *data)
 //    txtMutex.unlock();
 //}
 
-void Pin::SetParentModelNode(QStandardItem *parent_Node)
+void Pin::SetParentModelIndex(const QModelIndex &parentIndex)
 {
     closed=false;
 
     bool wasVisible=visible;
     SetVisible(false);
 
-    parentNode=parent_Node;
-    connectInfo.container=parentNode->parent()->parent()->data(UserRoles::value).toInt();
+    this->parentIndex = parentIndex;
 
     if(wasVisible)
         SetVisible(true);
+}
+
+void Pin::SetContainerId(quint16 id)
+{
+    connectInfo.container = id;
 }
 
 void Pin::Close()
@@ -102,8 +104,8 @@ void Pin::Close()
     QMutexLocker l(&objMutex);
     disconnect(MainHost::Get()->updateViewTimer,SIGNAL(timeout()),
             this,SLOT(updateView()));
-    parentNode=0;
-    modelPin=0;
+    parentIndex=QModelIndex();
+    modelIndex=QModelIndex();
     closed=true;
 }
 
@@ -119,25 +121,25 @@ void Pin::SetVisible(bool vis)
     if(closed)
         return;
 
-    if(visible) {
-        if(parentNode) {
-            modelPin = new QStandardItem("pin");
-            modelPin->setData(objectName(),Qt::DisplayRole);
-            modelPin->setData(falloff,UserRoles::falloff);
-            modelPin->setData(GetValue(),UserRoles::value);
-            modelPin->setData( QVariant::fromValue(ObjectInfo(NodeType::pin)),UserRoles::objInfo);
-            modelPin->setData(QVariant::fromValue(connectInfo),UserRoles::connectionInfo);
-            modelPin->setData(stepSize,UserRoles::stepSize);
-//            MainHost::Get()->modelProxy->Add(connectInfo.GetId(),modelPin,parentNode);
-            parentNode->appendRow(modelPin);
-        }
+    if(!parentIndex.isValid())
+        return;
 
+    if(visible) {
+        QStandardItem *item = new QStandardItem("pin");
+        item->setData(objectName(),Qt::DisplayRole);
+        item->setData(falloff,UserRoles::falloff);
+        item->setData(GetValue(),UserRoles::value);
+        item->setData( QVariant::fromValue(ObjectInfo(NodeType::pin)),UserRoles::objInfo);
+        item->setData(QVariant::fromValue(connectInfo),UserRoles::connectionInfo);
+        item->setData(stepSize,UserRoles::stepSize);
+        MainHost::GetModel()->itemFromIndex(parentIndex)->appendRow(item);
+        modelIndex = item->index();
         if(connectInfo.type!=PinType::Bridge) {
             connect(MainHost::Get()->updateViewTimer,SIGNAL(timeout()),
                     this,SLOT(updateView()));
         }
     } else {
-        if(modelPin) {
+        if(modelIndex.isValid()) {
             //remove cables from pin
             QSharedPointer<Object> cnt = ObjectFactory::Get()->GetObjectFromId(connectInfo.container);
             if(!cnt.isNull()) {
@@ -150,9 +152,9 @@ void Pin::SetVisible(bool vis)
                         this,SLOT(updateView()));
             }
 
-            parentNode->removeRow(modelPin->row());
-//            MainHost::Get()->modelProxy->Remove(connectInfo.GetId());
-            modelPin=0;
+            if(modelIndex.isValid())
+                MainHost::GetModel()->removeRow(modelIndex.row(), modelIndex.parent());
+            modelIndex=QModelIndex();
         }
     }
 }
@@ -161,9 +163,8 @@ void Pin::updateView()
 {
     QMutexLocker l(&objMutex);
 
-    if(!closed && visible) {
-        modelPin->setData(GetValue(),UserRoles::value);
-        if(!displayedText.isEmpty()) modelPin->setData(displayedText,Qt::DisplayRole);
+    if(!closed && visible && modelIndex.isValid()) {
+        MainHost::GetModel()->setData(modelIndex, GetValue(), UserRoles::value);
+        if(!displayedText.isEmpty()) MainHost::GetModel()->setData(modelIndex, displayedText, Qt::DisplayRole);
     }
-//        MainHost::Get()->modelProxy->Update(connectInfo,UserRoles::value,GetValue());
 }

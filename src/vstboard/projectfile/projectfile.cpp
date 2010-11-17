@@ -19,6 +19,7 @@
 ******************************************************************************/
 
 #define PROJECT_FILE_VERSION 2
+#define PROJECT_FILE_KEY 0x757b0a5d
 
 #include "projectfile.h"
 #include "../mainhost.h"
@@ -43,7 +44,7 @@ void ProjectFile::SaveToFile(QString filePath)
     file.open(QIODevice::WriteOnly);
     QDataStream stream(&file);
 
-    stream << (quint32)0x757b0a5d;  //key
+    stream << (quint32)PROJECT_FILE_KEY;
     stream << (quint32)PROJECT_FILE_VERSION;
     stream.setVersion(QDataStream::Qt_4_6);
     stream << *MainHost::Get();
@@ -60,7 +61,7 @@ bool ProjectFile::LoadFromFile(QString filePath)
 
     quint32 magic;
     stream >> magic;
-    if(magic != 0x757b0a5d) {
+    if(magic != PROJECT_FILE_KEY) {
         QMessageBox msgBox;
         msgBox.setText(tr("Not a project file."));
         msgBox.exec();

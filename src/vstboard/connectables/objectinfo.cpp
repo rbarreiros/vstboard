@@ -93,3 +93,35 @@ QDataStream & operator>> (QDataStream& stream, ObjectInfo& objInfo)
 {
     return objInfo.fromStream(stream);
 }
+
+QDataStream & ObjectConatinerAttribs::toStream (QDataStream& out) const
+{
+    out << position;
+    out << size;
+    out << editorVisible;
+    out << editorPosition;
+    out << editorSize;
+    out << paramLearning;
+    return out;
+}
+
+QDataStream & ObjectConatinerAttribs::fromStream (QDataStream& in)
+{
+    in >> position;
+    in >> size;
+    in >> editorVisible;
+    in >> editorPosition;
+    in >> editorSize;
+    in >> paramLearning;
+    return in;
+}
+
+QDataStream & operator<< (QDataStream & out, const ObjectConatinerAttribs& value)
+{
+    return value.toStream(out);
+}
+
+QDataStream & operator>> (QDataStream & in, ObjectConatinerAttribs& value)
+{
+    return value.fromStream(in);
+}

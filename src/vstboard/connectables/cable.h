@@ -30,15 +30,15 @@ namespace Connectables {
     public:
         Cable(const ConnectionInfo &pinOut, const ConnectionInfo &pinIn);
         Cable(const Cable & c);
-        void AddToParentNode(QStandardItem *item);
-        void RemoveFromParentNode(QStandardItem *item);
+        void AddToParentNode(const QModelIndex &parentIndex);
+        void RemoveFromParentNode(const QModelIndex &parentIndex);
         inline const ConnectionInfo & GetInfoOut() const {return pinOut;}
         inline const ConnectionInfo & GetInfoIn() const {return pinIn;}
 
     protected:
         const ConnectionInfo pinOut;
         const ConnectionInfo pinIn;
-        QStandardItem *modelItem;
+        QPersistentModelIndex modelIndex;
     };
 }
 

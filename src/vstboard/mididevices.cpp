@@ -13,7 +13,13 @@ MidiDevices::MidiDevices():
 
 MidiDevices::~MidiDevices()
 {
-    model->deleteLater();
+    if(Pt_Started())
+        Pt_Stop();
+
+    if(model) {
+        model->deleteLater();
+        Pm_Terminate();
+    }
 }
 
 ListMidiInterfacesModel* MidiDevices::GetModel()

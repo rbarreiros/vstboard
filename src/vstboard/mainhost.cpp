@@ -29,17 +29,14 @@
 #endif
 
 MainHost *MainHost::theHost = 0;
-QMutex MainHost::singletonMutex;
 HostModel *MainHost::model = 0;
 HostModel *MainHost::modelParking = 0;
 HostModelProxy *MainHost::modelProxy = 0;
 
-MainHost *MainHost::Get(QObject *parent)
+MainHost* MainHost::Create(QObject *parent)
 {
-    singletonMutex.lock();
     if(!theHost)
         theHost = new MainHost(parent);
-    singletonMutex.unlock();
 
     return theHost;
 }
@@ -64,7 +61,7 @@ MainHost::MainHost(QObject *parent) :
     modelProxy = new HostModelProxy(model);
 
     //init variables
-    cpuLoad = .0f;
+//    cpuLoad = .0f;
     sampleRate = 44100.0;
     bufferSize = 512;
 
@@ -99,25 +96,23 @@ MainHost::~MainHost()
     updateViewTimer->stop();
     updateViewTimer->deleteLater();
 
-    hostContainer.clear();
-    projectContainer.clear();
-    programContainer.clear();
+    mutexListCables.lock();
+    workingListOfCables.clear();
+    mutexListCables.unlock();
 
-    mainContainer.clear();
-
-    EnableSolverUpdate(true);
-    UpdateSolver();
+    solver.Resolve(workingListOfCables);
+    renderer.Clear();
 
     delete Connectables::ObjectFactory::Get();
 
-    foreach(Connectables::AudioDevice *dev, Connectables::AudioDevice::listAudioDevices) {
-        delete dev;
-    }
-
-    Pt_Stop();
-    Pm_Terminate();
-
+    delete listMidiDevices;
     delete listAudioDevices;
+
+    mainContainer.clear();
+    hostContainer.clear();
+    projectContainer.clear();
+    programContainer.clear();
+    parkingContainer.clear();
 
     theHost = 0;
 }
@@ -154,7 +149,7 @@ void MainHost::SetupMainContainer()
     mainContainer = Connectables::ObjectFactory::Get()->NewObject(info).staticCast< Connectables::MainContainer >();
     mainContainer->LoadProgram(0);
     OnObjectAdded(mainContainer);
-    mainContainer->SetParentModelNode( model->invisibleRootItem() );
+    mainContainer->SetParentModeIndex( model->invisibleRootItem()->index() );
 
 }
 
@@ -191,7 +186,6 @@ void MainHost::SetupHostContainer()
     hostContainer->AddObject( bridge );
     bridge->SetBridgePinsOutVisible(false);
     hostContainer->bridgeSend = bridge;
-
     //return bridge
 
     ObjectInfo retrn;
@@ -292,6 +286,10 @@ void MainHost::SetupProjectContainer()
         mainContainer->ConnectBridges(projectContainer->bridgeSend, programContainer->bridgeIn);
         mainContainer->ConnectBridges(programContainer->bridgeOut, projectContainer->bridgeReturn);
     }
+
+    projectContainer->ConnectBridges(projectContainer->bridgeIn, projectContainer->bridgeSend,false);
+    projectContainer->ConnectBridges(projectContainer->bridgeReturn, projectContainer->bridgeOut,false);
+
 }
 
 void MainHost::SetupProgramContainer()
@@ -346,7 +344,6 @@ void MainHost::SetupProgramContainer()
         mainContainer->ConnectBridges(projectContainer->bridgeSend, programContainer->bridgeIn);
         mainContainer->ConnectBridges(programContainer->bridgeOut, projectContainer->bridgeReturn);
     }
-
 }
 
 void MainHost::SetupParking()
@@ -363,7 +360,7 @@ void MainHost::SetupParking()
     info.forcedObjId = FixedObjId::parkingContainer;
 
     parkingContainer = Connectables::ObjectFactory::Get()->NewObject(info).staticCast< Connectables::ParkingContainer >();
-    parkingContainer->SetParentModelNode( modelParking->invisibleRootItem() );
+    parkingContainer->SetParentModeIndex( modelParking->invisibleRootItem()->index() );
 }
 
 void MainHost::ClearHost()
@@ -463,13 +460,15 @@ void MainHost::SetProgram(const QModelIndex &prgIndex)
     mutexProgChange.lock();
     progToChange=prgIndex.data(UserRoles::value).toInt();
     mutexProgChange.unlock();
-    emit SolverToUpdate();
+    solverNeedAnUpdate=true;
+//    emit SolverToUpdate();
 
 }
 
 void MainHost::SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum msgType,void *data)
 {
     QMutexLocker lock(&mutexListCables);
+
 
     hashCables::const_iterator i = workingListOfCables.constFind(senderPin);
     while (i != workingListOfCables.constEnd()  && i.key() == senderPin) {
@@ -515,10 +514,13 @@ void MainHost::Render(unsigned long samples)
     renderer.StartRender();
     mutexRender.unlock();
 
-    mutexProgChange.lock();
-    bool b = solverNeedAnUpdate;
-    mutexProgChange.unlock();
-    if(b)
+//    mutexProgChange.lock();
+//    bool b = solverNeedAnUpdate;
+//    mutexProgChange.unlock();
+//    if(b)
+//        emit SolverToUpdate();
+
+    if(solverNeedAnUpdate && solverUpdateEnabled)
         emit SolverToUpdate();
 }
 
@@ -542,7 +544,8 @@ void MainHost::OnObjectAdded(QSharedPointer<Connectables::Object> objPtr)
     objPtr->SetBufferSize(bufferSize);
     objPtr->SetSleep(false);
 
-    emit SolverToUpdate();
+    solverNeedAnUpdate = true;
+//    emit SolverToUpdate();
 }
 
 void MainHost::OnObjectRemoved(QSharedPointer<Connectables::Object> objPtr, Connectables::Object *container)
@@ -562,7 +565,8 @@ void MainHost::OnObjectRemoved(QSharedPointer<Connectables::Object> objPtr, Conn
        && objPtr->info().nodeType!=NodeType::bridge )
         parkingContainer->AddObject(objPtr);
 
-    emit SolverToUpdate();
+    solverNeedAnUpdate = true;
+//    emit SolverToUpdate();
 }
 
 void MainHost::OnCableAdded(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
@@ -571,8 +575,8 @@ void MainHost::OnCableAdded(const ConnectionInfo &outputPin, const ConnectionInf
     workingListOfCables.insert(outputPin,inputPin);
     mutexListCables.unlock();
 
-    emit SolverToUpdate();
-
+    solverNeedAnUpdate = true;
+//    emit SolverToUpdate();
 }
 
 void MainHost::OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
@@ -581,20 +585,21 @@ void MainHost::OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionI
     workingListOfCables.remove(outputPin,inputPin);
     mutexListCables.unlock();
 
-    emit SolverToUpdate();
+    solverNeedAnUpdate = true;
+//    emit SolverToUpdate();
 }
 
-float MainHost::GetCpuLoad()
-{
-    return cpuLoad;
+//float MainHost::GetCpuLoad()
+//{
+//    float c=cpuLoad;
+//    cpuLoad=.0f;
+//    return c;
+//}
 
-//    return static_cast<Connectables::AudioDevice*>(listAudioDevices.at(0))->cpuLoad * 100;
-}
-
-void MainHost::UpdateCpuLoad(float load)
-{
-    cpuLoad=load;
-}
+//void MainHost::UpdateCpuLoad(float load)
+//{
+//    cpuLoad=std::max(cpuLoad, load);
+//}
 
 void MainHost::SetTempo(int tempo, int sign1, int sign2)
 {

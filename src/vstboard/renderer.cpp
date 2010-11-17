@@ -29,6 +29,11 @@ Renderer::Renderer(QObject *parent)
 
 }
 
+Renderer::~Renderer()
+{
+    Clear();
+}
+
 void Renderer::Clear()
 {
     QMutexLocker mutx(&mutexRender);

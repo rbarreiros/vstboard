@@ -28,7 +28,7 @@
      <number>0</number>
     </property>
     <item>
-     <widget class="QSplitter" name="splitter">
+     <widget class="QSplitter" name="splitterPanels">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
@@ -355,20 +355,6 @@
       </widget>
      </widget>
     </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <property name="spacing">
-       <number>0</number>
-      </property>
-      <item>
-       <widget class="QProgressBar" name="progressCpuLoad">
-        <property name="textVisible">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -388,6 +374,7 @@
     <addaction name="actionProject_panel"/>
     <addaction name="actionProgram_panel"/>
     <addaction name="separator"/>
+    <addaction name="actionRestore_default_layout"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -875,7 +862,7 @@
   <action name="actionDelete">
    <property name="icon">
     <iconset resource="../resources/resources.qrc">
-     <normaloff>:/img16x16/messagebox_critical.png</normaloff>:/img16x16/messagebox_critical.png</iconset>
+     <normaloff>:/img16x16/delete.png</normaloff>:/img16x16/delete.png</iconset>
    </property>
    <property name="text">
     <string>Delete</string>
@@ -1027,6 +1014,11 @@
   <action name="actionRefresh_Midi_devices">
    <property name="text">
     <string>Refresh Midi devices</string>
+   </property>
+  </action>
+  <action name="actionRestore_default_layout">
+   <property name="text">
+    <string>Restore default layout</string>
    </property>
   </action>
  </widget>

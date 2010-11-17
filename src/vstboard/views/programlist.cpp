@@ -126,3 +126,35 @@ void ProgramList::on_listProgs_clicked(QModelIndex index)
 {
     emit ChangeProg(index);
 }
+
+void ProgramList::writeSettings()
+{
+    QSettings settings;
+    settings.beginGroup("ProgramList");
+    settings.setValue("geometry", saveGeometry());
+    settings.setValue("state", ui->splitter->saveState());
+    settings.endGroup();
+    settings.sync();
+}
+
+void ProgramList::readSettings()
+{
+    QSettings settings;
+    settings.beginGroup("ProgramList");
+    if(settings.contains("geometry")) {
+        restoreGeometry(settings.value("geometry").toByteArray());
+        ui->splitter->restoreState(settings.value("state").toByteArray());
+    } else {
+        resetSettings();
+    }
+
+    settings.endGroup();
+}
+
+void ProgramList::resetSettings()
+{
+    int w = ui->splitter->width();
+    QList<int>widths;
+    widths << w << w;
+    ui->splitter->setSizes(widths);
+}

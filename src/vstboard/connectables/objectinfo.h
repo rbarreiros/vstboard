@@ -50,4 +50,30 @@ Q_DECLARE_METATYPE(ObjectInfo)
 QDataStream & operator<< (QDataStream& stream, const ObjectInfo& objInfo);
 QDataStream & operator>> (QDataStream& stream, ObjectInfo& objInfo);
 
+class ObjectConatinerAttribs
+{
+public:
+    ObjectConatinerAttribs() :
+        position(QPointF(0,0)),
+        size(QSizeF(0,0)),
+        editorVisible(false),
+        editorPosition(QPoint(0,0)),
+        editorSize(QSize(0,0)),
+        paramLearning(false)
+        {}
+
+    QPointF position;
+    QSizeF size;
+    bool editorVisible;
+    QPoint editorPosition;
+    QSize editorSize;
+    bool paramLearning;
+
+    QDataStream & toStream (QDataStream &) const;
+    QDataStream & fromStream (QDataStream &);
+};
+
+QDataStream & operator<< (QDataStream & out, const ObjectConatinerAttribs& value);
+QDataStream & operator>> (QDataStream & in, ObjectConatinerAttribs& value);
+
 #endif // OBJECTINFO_H

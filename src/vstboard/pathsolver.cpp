@@ -49,6 +49,12 @@ void PathSolver::Resolve(hashCables cables)
 {
     Clear();
 
+    if(cables.size()==0) {
+        UpdateModel();
+        emit NewRenderingOrder(&renderingOrder);
+        return;
+    }
+
     listCables = cables;
 
     //encapsulate objects in solvernodes

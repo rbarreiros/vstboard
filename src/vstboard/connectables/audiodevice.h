@@ -50,12 +50,12 @@ namespace Connectables {
         bool Open();
         bool Close();
 
-        void UpdateCpuUsage();
+        float GetCpuUsage();
 
         bool SetObjectInput(AudioDeviceIn *obj);
         bool SetObjectOutput(AudioDeviceOut *obj);
 
-        static QHash<qint32,AudioDevice*>listAudioDevices;
+        static QHash<qint32,QSharedPointer<AudioDevice> >listAudioDevices;
 
         void SetSleep(bool sleeping);
 
@@ -63,7 +63,12 @@ namespace Connectables {
         static int countDevicesReady;
         static int countInputDevices;
 
+//        QWeakPointer<AudioDevice> GetSharedPointer() {return this->sharedPointer;}
+
+        static QMutex listDevMutex;
+
     protected:
+//        QWeakPointer<AudioDevice>sharedPointer;
 
         static int paCallback( const void *inputBuffer, void *outputBuffer,
                                unsigned long framesPerBuffer,
@@ -85,10 +90,9 @@ namespace Connectables {
         AudioDeviceOut *devOut;
 
         bool closeFlag;
-
-        QMutex objMutex;
         bool closed;
 
+        QMutex devicesMutex;
         ObjectInfo objInfo;
 
         PaWinMmeStreamInfo wmmeStreamInfo;
@@ -97,7 +101,7 @@ namespace Connectables {
         QList<CircularBuffer*>listCircularBuffersIn;
         QList<CircularBuffer*>listCircularBuffersOut;
 
-        QWaitCondition waitClose;
+        float cpuUsage;
 
     public slots:
         void SetSampleRate(float rate=44100.0);

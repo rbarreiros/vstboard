@@ -26,7 +26,7 @@ using namespace Connectables;
 Cable::Cable(const ConnectionInfo &pinOut, const ConnectionInfo &pinIn) :
         pinOut(pinOut),
         pinIn(pinIn),
-        modelItem(0)
+        modelIndex(QModelIndex())
 {
 
 }
@@ -34,25 +34,26 @@ Cable::Cable(const ConnectionInfo &pinOut, const ConnectionInfo &pinIn) :
 Cable::Cable(const Cable & c) :
         pinOut(c.pinOut),
         pinIn(c.pinIn),
-        modelItem(c.modelItem)
+        modelIndex(c.modelIndex)
 {
 
 }
 
-void Cable::AddToParentNode(QStandardItem *parent)
+void Cable::AddToParentNode(const QModelIndex &parentIndex)
 {
-    modelItem = new QStandardItem(QString("cable %1:%2").arg(pinOut.objId).arg(pinIn.objId));
-    modelItem->setData(QVariant::fromValue(ObjectInfo(NodeType::cable)),UserRoles::objInfo);
-    modelItem->setData(QVariant::fromValue(pinOut),UserRoles::value);
-    modelItem->setData(QVariant::fromValue(pinIn),UserRoles::connectionInfo);
-    parent->appendRow(modelItem);
-//    MainHost::Get()->modelProxy->Add(pinOut.GetId()*pinOut.GetId(),modelItem,parent);
+    QStandardItem *item = new QStandardItem(QString("cable %1:%2").arg(pinOut.objId).arg(pinIn.objId));
+    item->setData(QVariant::fromValue(ObjectInfo(NodeType::cable)),UserRoles::objInfo);
+    item->setData(QVariant::fromValue(pinOut),UserRoles::value);
+    item->setData(QVariant::fromValue(pinIn),UserRoles::connectionInfo);
+
+    MainHost::GetModel()->itemFromIndex(parentIndex)->appendRow(item);
+    modelIndex = item->index();
 }
 
-void Cable::RemoveFromParentNode(QStandardItem *parent)
+void Cable::RemoveFromParentNode(const QModelIndex &parentIndex)
 {
-    if(modelItem && parent)
-        parent->removeRow(modelItem->row());
-//        MainHost::Get()->modelProxy->Remove(pinOut.GetId()*pinIn.GetId());
-    modelItem=0;
+    if(modelIndex.isValid() && parentIndex.isValid())
+        MainHost::GetModel()->removeRow(modelIndex.row(), parentIndex);
+
+    modelIndex=QModelIndex();
 }

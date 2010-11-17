@@ -46,7 +46,8 @@ class MainHost : public QObject
 {
 Q_OBJECT
 public:
-    static MainHost* Get(QObject *parent = 0);
+    inline static MainHost* Get() {return theHost;}
+    static MainHost* Create(QObject *parent = 0);
     ~MainHost();
 
     void Open();
@@ -57,7 +58,7 @@ public:
     void SetSampleRate(float rate=44100.0);
     int GetBufferSize() {return (int)bufferSize;}
     float GetSampleRate() {return sampleRate;}
-    float GetCpuLoad();
+//    float GetCpuLoad();
 
     void OnObjectAdded(QSharedPointer<Connectables::Object> objPtr);
     void OnObjectRemoved(QSharedPointer<Connectables::Object> objPtr, Connectables::Object *container=0);
@@ -99,8 +100,6 @@ private:
     void SetupProgramContainer();
     void SetupParking();
 
-
-
     MidiDevices *listMidiDevices;
     AudioDevices *listAudioDevices;
 
@@ -120,7 +119,7 @@ private:
     float sampleRate;
     long bufferSize;
     QTime timeFromStart;
-    float cpuLoad;
+//    float cpuLoad;
 
     QList<Connectables::Object*>listObjToRemove;
 
@@ -129,7 +128,6 @@ private:
 
     MainHost(QObject *parent = 0);
     static MainHost *theHost;
-    static QMutex singletonMutex;
 
     friend QDataStream & operator<< (QDataStream&, MainHost&);
     friend QDataStream & operator>> (QDataStream&, MainHost&);
@@ -153,7 +151,7 @@ public slots:
     void UpdateSolver(bool forceUpdate=false);
     void ClearHost();
 
-    void UpdateCpuLoad(float load);
+//    void UpdateCpuLoad(float load);
     void SetTempo(int tempo=120, int sign1=4, int sign2=4);
     void OnNewRenderingOrder(orderedNodes *renderLines);
 

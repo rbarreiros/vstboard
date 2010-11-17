@@ -43,6 +43,7 @@ SceneView::SceneView(MainGraphicsView *viewHost, MainGraphicsView *viewProject, 
         sceneProject(0),
         sceneProgram(0)
 {
+    setHidden(true);
     timerFalloff = new QTimer(this);
     timerFalloff->start(50);
 
@@ -90,16 +91,26 @@ void SceneView::dataChanged ( const QModelIndex & topLeft, const QModelIndex & b
                 view->UpdateModelIndex(tmpIndex);
                 break;
             }
-        case NodeType::editor :
-            {
-                ObjectView *view = static_cast<ObjectView*>(hashItems.value(tmpIndex.parent(),0));
-                if(!view) {
-                    debug("SceneView::dataChanged editor not found")
-                            return;
-                }
-                view->SetEditorIndex(tmpIndex);
-                break;
-            }
+//        case NodeType::editor :
+//            {
+//                ObjectView *view = static_cast<ObjectView*>(hashItems.value(tmpIndex.parent(),0));
+//                if(!view) {
+//                    debug("SceneView::dataChanged editor not found")
+//                            return;
+//                }
+//                view->SetEditorIndex(tmpIndex);
+//                break;
+//            }
+//        case NodeType::learning :
+//            {
+//                ObjectView *view = static_cast<ObjectView*>(hashItems.value(tmpIndex.parent(),0));
+//                if(!view) {
+//                    debug("SceneView::dataChanged editor not found")
+//                            return;
+//                }
+//                view->SetLearningIndex(tmpIndex);
+//                break;
+//            }
         default:
             break;
         }
@@ -337,18 +348,30 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                         this,SLOT(graphicObjectRemoved(QObject*)));
                 break;
             }
-            case NodeType::editor :
-            {
-                ObjectView *parentView = static_cast<ObjectView*>(hashItems.value(parent,0));
-                if(!parentView) {
-                    debug("SceneView::rowsInserted editor parent not found")
-                            continue;
-                }
+//            case NodeType::editor :
+//            {
+//                ObjectView *parentView = static_cast<ObjectView*>(hashItems.value(parent,0));
+//                if(!parentView) {
+//                    debug("SceneView::rowsInserted editor parent not found")
+//                            continue;
+//                }
 
-                ObjectView *objView = static_cast<ObjectView*>(parentView);
-                objView->SetEditorIndex(index);
-                break;
-            }
+//                ObjectView *objView = static_cast<ObjectView*>(parentView);
+//                objView->SetEditorIndex(index);
+//                break;
+//            }
+//            case NodeType::learning :
+//            {
+//                ObjectView *parentView = static_cast<ObjectView*>(hashItems.value(parent,0));
+//                if(!parentView) {
+//                    debug("SceneView::rowsInserted learning parent not found")
+//                            continue;
+//                }
+
+//                ObjectView *objView = static_cast<ObjectView*>(parentView);
+//                objView->SetLearningIndex(index);
+//                break;
+//            }
             case NodeType::listPin :
             {
 //                ObjectInfo infoParent = parent.data(UserRoles::objInfo).value<ObjectInfo>();

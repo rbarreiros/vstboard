@@ -37,7 +37,7 @@ namespace Connectables {
         virtual bool Close();
         void Hide();
 
-        void ConnectBridges(QSharedPointer<Object> bridgeA, QSharedPointer<Object> bridgeB);
+        void ConnectBridges(QSharedPointer<Object> bridgeA, QSharedPointer<Object> bridgeB, bool hidden=true);
 
         virtual void AddObject(QSharedPointer<Object> objPtr);
         virtual void RemoveObject(QSharedPointer<Object> objPtr);
@@ -49,8 +49,8 @@ namespace Connectables {
         QDataStream & toStream (QDataStream &) const;
         QDataStream & fromStream (QDataStream &);
 
-        void SetParentModelNode(QStandardItem* parent);
-        void UpdateModelNode();
+        void SetContainerId(quint16 id);
+        void SetParentModeIndex(const QModelIndex &parentIndex);
         void CopyProgram(int ori, int dest);
         void RemoveProgram(int prg);
 
@@ -65,7 +65,8 @@ namespace Connectables {
         QHash<int,ContainerProgram*>listContainerPrograms;
 
         ContainerProgram* currentProgram;
-        QStandardItem *cablesNode;
+//        QStandardItem *cablesNode;
+        QPersistentModelIndex cablesNode;
 
     signals:
 

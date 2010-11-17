@@ -45,8 +45,10 @@ INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/include
 INCLUDEPATH += $$top_srcdir/$$PORTMIDI_PATH/porttime
 INCLUDEPATH += $$top_srcdir/$$PORTMIDI_PATH/pm_common
 
+
 LIBS += -L$$top_destdir -lportaudio
 LIBS += -L$$top_destdir -lportmidi
+#LIBS += -L$$top_destdir -lqsqlite4
 
 win32 {
     LIBS += -lwinmm
@@ -72,9 +74,13 @@ linux-g++ {
     message("win32-msvc2008")
     DEFINES += _CRT_SECURE_NO_WARNINGS
     INCLUDEPATH += $$quote($$(INCLUDE))
-message($$(INCLUDE))
     LIBS += -L$$quote($$(LIB))
     QMAKE_CFLAGS += -Fd$$top_destdir/$$TARGET
+
+#to add symbols :
+    QMAKE_CFLAGS_RELEASE +=  -Zi
+    QMAKE_LFLAGS_RELEASE += /DEBUG
+
 } else {
     error("compiler not configured in config.pri")
 }

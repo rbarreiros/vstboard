@@ -19,6 +19,7 @@
 ******************************************************************************/
 
 #define SETUP_FILE_VERSION 1
+#define SETUP_FILE_KEY 0x7575e711
 
 #include "setupfile.h"
 #include "../mainhost.h"
@@ -38,7 +39,7 @@ void SetupFile::SaveToFile(QString filePath)
     file.open(QIODevice::WriteOnly);
     QDataStream stream(&file);
 
-    stream << (quint32)0x7575e711;  //key
+    stream << (quint32)SETUP_FILE_KEY;
     stream << (quint32)SETUP_FILE_VERSION;
     stream.setVersion(QDataStream::Qt_4_6);
 
@@ -62,6 +63,7 @@ void SetupFile::Clear()
     MainHost *host = MainHost::Get();
     host->EnableSolverUpdate(false);
     host->SetupHostContainer();
+    host->hostContainer->listenProgramChanges=false;
     host->EnableSolverUpdate(true);
 }
 
@@ -76,7 +78,7 @@ bool SetupFile::LoadFromFile(QString filePath)
 
     quint32 magic;
     stream >> magic;
-    if(magic != 0x7575e711) {
+    if(magic != SETUP_FILE_KEY) {
         QMessageBox msgBox;
         msgBox.setText(tr("Not a setup file."));
         msgBox.exec();

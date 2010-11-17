@@ -1,4 +1,4 @@
-#include <QDragMoveEvent>
+#include "precomp.h"
 #include "proglistview.h"
 #include "globals.h"
 ProgListView::ProgListView(QWidget *parent) :
@@ -6,6 +6,13 @@ ProgListView::ProgListView(QWidget *parent) :
 {
     connect(this, SIGNAL(customContextMenuRequested(QPoint)),
             this, SLOT(OnContextMenu(QPoint)));
+
+    QAction *actDel = new QAction(QIcon(":/img16x16/delete.png"),tr("Delete program"),this);
+    actDel->setShortcut(Qt::Key_Delete);
+    actDel->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    connect(actDel,SIGNAL(triggered()),
+            this,SLOT(DeleteItem()));
+    addAction(actDel);
 }
 
 void ProgListView::dragMoveEvent ( QDragMoveEvent * event )
@@ -25,25 +32,21 @@ void ProgListView::dragMoveEvent ( QDragMoveEvent * event )
 
 void ProgListView::OnContextMenu(const QPoint & pos)
 {
-    contextIndex = indexAt(pos);
-    NodeType::Enum t = (NodeType::Enum)contextIndex.data(UserRoles::nodeType).toInt();
+    NodeType::Enum t = (NodeType::Enum)currentIndex().data(UserRoles::nodeType).toInt();
     if(t == NodeType::program) {
         //item context
-        QMenu menu(this);
-        menu.addAction(tr("Delete"),this,SLOT(OnContextDelete()));
-        menu.exec(mapToGlobal(pos));
+        QMenu menu;
+        menu.exec(actions(), mapToGlobal(pos), actions().at(0), this);
     } else {
         //widget context
 
     }
-
-
 }
 
-void ProgListView::OnContextDelete()
+void ProgListView::DeleteItem()
 {
-    if(!contextIndex.isValid())
+    if(currentIndex().isValid()) {
+        model()->removeRow( currentIndex().row(), currentIndex().parent() );
         return;
-
-    model()->removeRow( contextIndex.row(), contextIndex.parent() );
+    }
 }

@@ -30,7 +30,7 @@ AudioDeviceOut::AudioDeviceOut(int index, const ObjectInfo &info) :
     Object(index, info),
     parentDevice(0)
 {
-
+    listParameterPinOut.insert(0, new ParameterPinOut(this,0,0,true,"cpu%"));
 }
 
 AudioDeviceOut::~AudioDeviceOut()
@@ -45,8 +45,14 @@ bool AudioDeviceOut::Close()
 
     if(parentDevice) {
         parentDevice->SetObjectOutput(0);
+        parentDevice.clear();
     }
     return true;
+}
+
+void AudioDeviceOut::Render()
+{
+    listParameterPinOut.value(0)->ChangeValue(parentDevice->GetCpuUsage());
 }
 
 void AudioDeviceOut::SetBufferSize(long size)
@@ -64,15 +70,24 @@ bool AudioDeviceOut::Open()
     closed=false;
 
     //create the audiodevice if needed
-    if(!AudioDevice::listAudioDevices.contains(objInfo.id)) {
-        parentDevice = new AudioDevice(objInfo, MainHost::Get());
-        if(!parentDevice->Open()) {
-            delete parentDevice;
-            parentDevice=0;
-            return false;
+    {
+        QMutexLocker l(&AudioDevice::listDevMutex);
+
+        if(!AudioDevice::listAudioDevices.contains(objInfo.id)) {
+    //        parentDevice = new AudioDevice(objInfo);
+            AudioDevice *dev = new AudioDevice(objInfo);
+            parentDevice = QSharedPointer<AudioDevice>(dev);
+
+    //        parentDevice = dev->GetSharedPointer().toStrongRef();
+            if(!parentDevice->Open()) {
+    //            delete parentDevice;
+                parentDevice.clear();
+                return false;
+            }
+            AudioDevice::listAudioDevices.insert(objInfo.id, parentDevice);
+        } else {
+            parentDevice = AudioDevice::listAudioDevices.value(objInfo.id);
         }
-    } else {
-        parentDevice = AudioDevice::listAudioDevices.value(objInfo.id);
     }
 
     if(!parentDevice)
@@ -95,7 +110,8 @@ bool AudioDeviceOut::Open()
 
     //device already has a child
     if(!parentDevice->SetObjectOutput(this)) {
-        parentDevice = 0;
+//        parentDevice = 0;
+        parentDevice.clear();
         return false;
     }
 

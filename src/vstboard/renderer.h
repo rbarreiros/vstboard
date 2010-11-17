@@ -34,6 +34,7 @@ class Renderer : public QThread
 
 public:
     Renderer(QObject *parent = 0);
+    ~Renderer();
 
     void run();
     QMutex mutexRender;

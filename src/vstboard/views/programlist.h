@@ -17,6 +17,9 @@ public:
     ~ProgramList();
 
     void SetModel(QStandardItemModel *model);
+    void writeSettings();
+    void readSettings();
+    void resetSettings();
 
 private:
     Ui::ProgramList *ui;

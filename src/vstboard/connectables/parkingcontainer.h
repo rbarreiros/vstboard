@@ -33,7 +33,7 @@ namespace Connectables {
         ParkingContainer(int index, const ObjectInfo &info);
         ~ParkingContainer();
 
-        void SetParentModelNode(QStandardItem* parent);
+        void SetParentModeIndex(const QModelIndex &parentIndex);
 
         void AddObject(QSharedPointer<Object> objPtr);
         void RemoveObject(QSharedPointer<Object> objPtr);
@@ -42,6 +42,9 @@ namespace Connectables {
 
         QDataStream & toStream (QDataStream &) const;
         QDataStream & fromStream (QDataStream &);
+    protected:
+        QList< QSharedPointer< Object > >listStaticObjects;
+
     };
 }
 

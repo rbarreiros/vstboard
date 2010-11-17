@@ -25,7 +25,8 @@ using namespace View;
 
 ConnectablePinView::ConnectablePinView(QAbstractItemModel *model, QGraphicsItem * parent, Connectables::Pin *pin) :
        PinView(model,parent,pin),
-       value(0)
+       value(0),
+       isParameter(false)
 {
     falloffSpeed = .05f;
 
@@ -48,7 +49,7 @@ ConnectablePinView::ConnectablePinView(QAbstractItemModel *model, QGraphicsItem 
     rectVu->setBrush(QBrush(gradient));
 }
 
-void ConnectablePinView::UpdateModelIndex(QModelIndex index)
+void ConnectablePinView::UpdateModelIndex(const QModelIndex &index)
 {
     QString newName = index.data(Qt::DisplayRole).toString();
     if(newName!=textItem->text())
@@ -64,7 +65,9 @@ void ConnectablePinView::UpdateModelIndex(QModelIndex index)
             rectVu->setRect(0,0, newVu, geometry().height());
     }
 
-
+    ConnectionInfo pinInfo = index.data(UserRoles::connectionInfo).value<ConnectionInfo>();
+    if(pinInfo.type == PinType::Parameter)
+        isParameter=true;
 
 }
 
@@ -83,6 +86,9 @@ void ConnectablePinView::updateVu()
 
 void ConnectablePinView::wheelEvent ( QGraphicsSceneWheelEvent * event )
 {
+    if(!isParameter)
+        return;
+
     event->accept();
 
     int increm=1;

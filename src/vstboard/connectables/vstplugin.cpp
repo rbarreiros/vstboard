@@ -24,7 +24,7 @@
 #include "../mainwindow.h"
 #include "../vst/cvsthost.h"
 #include "../views/vstpluginwindow.h"
-
+#include "imagecollection.h"
 
 using namespace Connectables;
 
@@ -57,7 +57,8 @@ bool VstPlugin::Close()
         EffEditClose();
         objMutex.unlock();
 
-        modelEditor=0;
+//        modelEditor=0;
+//        modelLearningMode=0;
         editorWnd->close();
         editorWnd->deleteLater();
         editorWnd=0;
@@ -391,75 +392,106 @@ bool VstPlugin::Open()
     }
 
     Object::Open();
+    CreateEditorWindow();
     return true;
 }
 
 void VstPlugin::RaiseEditor()
 {
-    if(!editorWnd || editorWnd->isHidden())
+    if(!editorWnd || !editorWnd->isVisible())
         return;
 
     editorWnd->raise();
 }
 
+//void VstPlugin::TakeScreenshot()
+//{
+//    const QPixmap backgroundPic = editorWnd->GetScreenshot();
+//    ImageCollection::Get()->AddImage( QString::number( pEffect->uniqueID ), backgroundPic );
+//    modelNode->setData( QString::number( pEffect->uniqueID ), UserRoles::editorImage );
+//}
 
-bool VstPlugin::OpenEditor()
+void VstPlugin::CreateEditorWindow()
 {
+    //already done
+    if(editorWnd)
+        return;
+
     //no gui
     if((pEffect->flags & effFlagsHasEditor) == 0)
-        return false;
+        return;
 
-    //no window : create it
-    if(!editorWnd) {
-        editorWnd = new View::VstPluginWindow(MainWindow::theMainWindow);
-        connect(this,SIGNAL(CloseEditorWindow()),
-                editorWnd,SLOT(hide()),
-                Qt::QueuedConnection);
+    hasEditor=true;
+    canLearn=true;
 
-        editorWnd->setAttribute(Qt::WA_ShowWithoutActivating);
+    editorWnd = new View::VstPluginWindow(MainWindow::theMainWindow);
+    connect(this,SIGNAL(CloseEditorWindow()),
+            editorWnd,SLOT(hide()),
+            Qt::QueuedConnection);
 
-        if(!editorWnd->SetPlugin(this)) {
-            editorWnd->close();
-            editorWnd=0;
-            return false;
-        }
+    editorWnd->setAttribute(Qt::WA_ShowWithoutActivating);
+
+    if(!editorWnd->SetPlugin(this)) {
+        editorWnd=0;
+        OnEditorVisibilityChanged(false);
+        return;
     }
 
-    if(!editorWnd || editorWnd->isVisible())
-        return false;
-
-    editorWnd->show();
-    editorWnd->raise();
-    connect(MainHost::Get()->updateViewTimer,SIGNAL(timeout()),
-            this,SLOT(EditIdle()));
-
-    UpdateEditorNode();
-
-    return true;
+    //no screenshot in db, create one
+//    if(!ImageCollection::Get()->ImageExists(QString::number( pEffect->uniqueID ))) {
+//        OnEditorVisibilityChanged(true);
+//        connect(MainHost::Get()->updateViewTimer,SIGNAL(timeout()),
+//                this,SLOT(EditIdle()));
+//        QTimer::singleShot(100,this,SLOT(TakeScreenshot()));
+//    }
 }
 
-void VstPlugin::CloseEditor()
+void VstPlugin::OnEditorVisibilityChanged(bool visible)
 {
-    disconnect(MainHost::Get()->updateViewTimer,SIGNAL(timeout()),
-            this,SLOT(EditIdle()));
+    Object::OnEditorVisibilityChanged(visible);
+
     if(!editorWnd)
         return;
 
-    emit CloseEditorWindow();
-    UpdateEditorNode();
+    if(visible) {
+        editorWnd->show();
+        editorWnd->raise();
+        connect(MainHost::Get()->updateViewTimer,SIGNAL(timeout()),
+                this,SLOT(EditIdle()));
+
+//        UpdateEditorNode();
+    } else {
+        disconnect(MainHost::Get()->updateViewTimer,SIGNAL(timeout()),
+                this,SLOT(EditIdle()));
+        emit CloseEditorWindow();
+//        UpdateEditorNode();
+    }
 }
 
-bool VstPlugin::GetEditorVisible()
+void VstPlugin::SetContainerAttribs(const ObjectConatinerAttribs &attr)
+{
+    Object::SetContainerAttribs(attr);
+
+    if(editorWnd && editorWnd->isVisible()) {
+        editorWnd->move(attr.editorPosition);
+        editorWnd->resize(attr.editorSize);
+    }
+}
+
+void VstPlugin::GetContainerAttribs(ObjectConatinerAttribs &attr)
 {
     if(editorWnd && editorWnd->isVisible())
-        return true;
+        editorWnd->SavePosSize();
 
-    return false;
+    Object::GetContainerAttribs(attr);
 }
 
 void VstPlugin::EditorDestroyed()
 {
     editorWnd = 0;
+//    modelNode->setData(false, UserRoles::editorVisible);
+    MainHost::GetModel()->setData(modelIndex, false, UserRoles::editorVisible);
+//    editorVisible = false;
 }
 
 void VstPlugin::EditIdle()
@@ -468,37 +500,38 @@ void VstPlugin::EditIdle()
         EffEditIdle();
 }
 
-void VstPlugin::UpdateEditorNode()
+//void VstPlugin::UpdateEditorNode()
+//{
+////    bool vis=false;
+////    if(editorWnd && editorWnd->isVisible())
+////        vis=true;
+
+////    if(modelEditor) {
+////        modelEditor->setData(vis,UserRoles::value);
+////        if(backgroundPic)
+////            modelEditor->setData(objectName(), UserRoles::objInfo);
+////    }
+//    if(modelLearningMode && editorWnd)
+//        modelLearningMode->setData(parameterLearning, UserRoles::value);
+//}
+
+void VstPlugin::SetParentModeIndex(const QModelIndex &parentIndex)
 {
-    bool vis=false;
-    if(editorWnd && editorWnd->isVisible())
-        vis=true;
+    Object::SetParentModeIndex(parentIndex);
 
-    if(modelEditor)
-        modelEditor->setData(vis,UserRoles::value);
-}
-
-void VstPlugin::SetParentModelNode(QStandardItem* parent)
-{
-    Object::SetParentModelNode(parent);
-        modelEditor = new QStandardItem();
-        modelEditor->setData("Editor",Qt::DisplayRole);
-        modelEditor->setData(QVariant::fromValue(ObjectInfo(NodeType::editor)), UserRoles::objInfo);
-        modelNode->appendRow(modelEditor);
-    UpdateEditorNode();
-}
-
-void VstPlugin::UpdateModelNode()
-{
-    Object::UpdateModelNode();
-    UpdateEditorNode();
-}
-
-void VstPlugin::Hide() {
-    if(modelEditor) {
-        CloseEditor();
+    if(hasEditor) {
+        QStandardItem *item = MainHost::GetModel()->itemFromIndex(modelIndex);
+        item->setData(editorWnd->isVisible(), UserRoles::editorVisible);
+        item->setData(false,UserRoles::paramLearning);
+        item->setData(pEffect->uniqueID, UserRoles::editorImage);
     }
-    Object::Hide();
+}
+
+void VstPlugin::SetParkingIndex(const QModelIndex &parentIndex)
+{
+    if(editorWnd && editorWnd->isVisible())
+        editorWnd->close();
+    Object::SetParkingIndex(parentIndex);
 }
 
 QString VstPlugin::GetParameterName(ConnectionInfo pinInfo)
@@ -532,7 +565,16 @@ long VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr,
         case audioMasterAutomate : //0
             //create the parameter pin if needed
             if(!listParameterPinIn.contains(index)) {
-                listParameterPinIn.insert(index, new ParameterPinIn(this, index, EffGetParameter(index), false, EffGetParamName(index), true) );
+//                float v=.0f;
+//                QString n="";
+//                try {
+//                    v=EffGetParameter(index);
+//                    n=EffGetParamName(index);
+//                } catch(...) {
+//                    debug("VstPlugin::OnMasterCallback exception")
+//                }
+
+                listParameterPinIn.insert(index, new ParameterPinIn(this, index, (float)opt, false, "n/d", true) );
             }
             listParameterPinIn.value(index)->OnValueChanged(opt);
             break;

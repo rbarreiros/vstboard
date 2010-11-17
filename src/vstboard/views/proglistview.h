@@ -11,13 +11,12 @@ public:
 
 protected:
     void dragMoveEvent ( QDragMoveEvent * event );
-    QModelIndex contextIndex;
 
 signals:
 
 public slots:
     void OnContextMenu(const QPoint & pos);
-    void OnContextDelete();
+    void DeleteItem();
 };
 
 #endif // PROGLISTVIEW_H

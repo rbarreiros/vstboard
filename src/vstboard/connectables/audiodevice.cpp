@@ -30,7 +30,8 @@
 
 using namespace Connectables;
 
-QHash<int,AudioDevice*>AudioDevice::listAudioDevices;
+QHash<int,QSharedPointer<AudioDevice> >AudioDevice::listAudioDevices;
+QMutex AudioDevice::listDevMutex;
 int AudioDevice::countDevicesReady=0;
 int AudioDevice::countInputDevices=0;
 
@@ -45,10 +46,15 @@ AudioDevice::AudioDevice(const ObjectInfo &info, QObject *parent) :
     devOut(0),
     closeFlag(false),
     closed(true),
-    objInfo(info)
+    objInfo(info),
+    cpuUsage(.0f)
 {
+//    QSharedPointer<AudioDevice> sptr(this);
+//    sharedPointer=sptr;
+//    listAudioDevices.insert(objInfo.id, sharedPointer);
+
     setObjectName(objInfo.name);
-    listAudioDevices.insert(objInfo.id,this);
+
 
     connect(MainHost::Get(),SIGNAL(SampleRateChanged(float)),
             this,SLOT(SetSampleRate(float)));
@@ -57,21 +63,28 @@ AudioDevice::AudioDevice(const ObjectInfo &info, QObject *parent) :
 AudioDevice::~AudioDevice()
 {
     Close();
-    listAudioDevices.remove(objInfo.id);
-
     debug("%s deleted",objectName().toAscii().constData())
 }
 
 void AudioDevice::DeleteIfUnused()
 {
-    QMutexLocker lock(&objMutex);
+    bool del=false;
+    devicesMutex.lock();
     if(!devIn && !devOut)
-        deleteLater();
+        del=true;
+    devicesMutex.unlock();
+
+    if(del) {
+        listDevMutex.lock();
+        listAudioDevices.remove(objInfo.id);
+        listDevMutex.unlock();
+    }
+
 }
 
 bool AudioDevice::SetObjectInput(AudioDeviceIn *obj)
 {
-    QMutexLocker lock(&objMutex);
+    devicesMutex.lock();
 
     if(devIn && obj) {
         debug("AudioDevice::SetObjectInput already used")
@@ -86,13 +99,15 @@ bool AudioDevice::SetObjectInput(AudioDeviceIn *obj)
 
     devIn = obj;
 
+    devicesMutex.unlock();
+
     QTimer::singleShot(5000,this,SLOT(DeleteIfUnused()));
     return true;
 }
 
 bool AudioDevice::SetObjectOutput(AudioDeviceOut *obj)
 {
-    QMutexLocker lock(&objMutex);
+    //QMutexLocker lock(&objMutex);
 
     if(devOut && obj) {
         debug("AudioDevice::SetObjectOutput already used")
@@ -109,7 +124,7 @@ void AudioDevice::SetSampleRate(float rate)
 {
     if(!closed) {
         closeFlag=true;
-        QMutexLocker lock(&objMutex);
+        //QMutexLocker lock(&objMutex);
         SetSleep(true);
         SetSleep(false);
     }
@@ -298,11 +313,10 @@ bool AudioDevice::OpenStream(double sampleRate)
         delete outputParameters;
 
     if( err != paNoError ) {
-        debug(Pa_GetErrorText( err ))
+        Pa_CloseStream(stream);
+        debug("AudioDevice::OpenStream %s",Pa_GetErrorText( err ))
         return false;
     }
-
-
 
 //    const PaStreamInfo *inf = Pa_GetStreamInfo(&stream);
     return true;
@@ -338,7 +352,7 @@ bool AudioDevice::Open()
     //failed to open the stream
     if( err != paNoError ) {
 
-        debug(Pa_GetErrorText( err ))
+        debug("AudioDevice::Open %s",Pa_GetErrorText( err ))
 
         if(stream)
         {
@@ -365,8 +379,6 @@ bool AudioDevice::CloseStream()
 //    debug("AudioDevice::CloseStream")
 
 //    QMutexLocker lock(&objMutex);
-    closeFlag=true;
-//    waitClose.wait(&objMutex);
 
     PaError err;
 
@@ -374,18 +386,51 @@ bool AudioDevice::CloseStream()
     {
         err = Pa_IsStreamActive(stream);
         if( err < 0 ) {
-            debug(Pa_GetErrorText( err ))
-        } else if(err>0) {
-            //err = Pa_StopStream( stream );
+            //error : abort stream
+
+            debug("AudioDevice::CloseStream %s",Pa_GetErrorText( err ))
             err = Pa_AbortStream(stream);
             if( err != paNoError ) {
-                debug(Pa_GetErrorText( err ))
+                debug("AudioDevice::CloseStream %s",Pa_GetErrorText( err ))
             }
 
+        } else {
+            //no error : clean close stream
+
+            if( err > 0 ) {
+                //stream is active : set closeflag and wait
+//                Pa_StopStream(stream);
+
+//                closeFlag=true;
+//                while(closeFlag) {
+//                    Sleep(200);
+//                }
+
+//                err = Pa_StopStream(stream);
+//                if( err != paNoError ) {
+//                    debug("AudioDevice::CloseStream %s",Pa_GetErrorText( err ))
+//                }
+            }
+
+            closeFlag=true;
+
+//            device->devicesMutex.lock();
+
+            debug("pa_stopstream")
+            err = Pa_StopStream(stream);
+            if( err != paNoError ) {
+                debug("AudioDevice::CloseStream %s",Pa_GetErrorText( err ))
+            }
+            Sleep(100);
+
+            debug("pa_closestream")
             err = Pa_CloseStream(stream);
             if( err != paNoError ) {
-                debug(Pa_GetErrorText( err ))
+                debug("AudioDevice::CloseStream %s",Pa_GetErrorText( err ))
             }
+
+//            device->devicesMutex.unlock();
+
         }
 
         stream = 0;
@@ -407,19 +452,17 @@ bool AudioDevice::Close()
     if(closed)
         return true;
 
-//    debug("%s close",objectName().toAscii().constData())
-
-    closeFlag=true;
-    //QMutexLocker lock(&objMutex);
+    devicesMutex.lock();
 
     if(devIn) {
-        devIn->parentDevice=0;
+        devIn->parentDevice.clear();
         devIn=0;
     }
     if(devOut) {
-        devOut->parentDevice=0;
+        devOut->parentDevice.clear();
         devOut=0;
     }
+    devicesMutex.unlock();
 
     CloseStream();
 
@@ -428,26 +471,24 @@ bool AudioDevice::Close()
 
 void AudioDevice::SetSleep(bool sleeping)
 {
-    if(sleeping) {
-        CloseStream();
-    } else {
-        Open();
-    }
 
+    if(!sleeping)
+        Open();
+
+    devicesMutex.lock();
     if(devIn)
         devIn->SetSleep(sleeping);
     if(devOut)
         devOut->SetSleep(sleeping);
+    devicesMutex.unlock();
 
-
+    if(sleeping)
+        CloseStream();
 }
 
-void AudioDevice::UpdateCpuUsage()
+float AudioDevice::GetCpuUsage()
 {
-    if(!stream)
-        return;
-//   return Pa_GetStreamCpuLoad(stream);
-   MainHost::Get()->UpdateCpuLoad(Pa_GetStreamCpuLoad(stream));
+   return Pa_GetStreamCpuLoad(stream);
 }
 
 int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
@@ -456,55 +497,22 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
                                  PaStreamCallbackFlags /*statusFlags*/,
                                  void *userData )
 {
-
-//    float *out = (float*)outputBuffer;
-//    for(unsigned long i=0; i<framesPerBuffer; i++) {
-//        *out++ = .0f;
-//        *out++ = .0f;
-//    }
-//    return paContinue;
-
-//    Q_ASSERT(userData);
     AudioDevice* device = (AudioDevice*)userData;
 
-    //check if the internal buffer is big enough
-//    unsigned int hostBuffSize = MainHost::Get()->GetBufferSize();
-//    if(framesPerBuffer > hostBuffSize) {
-//        MainHost::Get()->SetBufferSize((long)framesPerBuffer);
-//        hostBuffSize = framesPerBuffer;
-//        //reset devices ready flag
-//        foreach(AudioDevice *dev, listAudioDevices) {
-//            dev->bufferReady=false;
-//        }
-//        countDevicesReady=0;
-//    }
+    if(device->closeFlag) {
+        device->closeFlag=false;
+        debug("AudioDevice::paCallback paComplete")
+//        device->waitClose.wakeAll();
+        return paComplete;
+    }
 
     unsigned int hostBuffSize = MainHost::Get()->GetBufferSize();
     if(framesPerBuffer < hostBuffSize) {
        MainHost::Get()->SetBufferSize((long)framesPerBuffer);
        hostBuffSize = framesPerBuffer;
-//       //reset devices ready flag
-//       foreach(AudioDevice *dev, listAudioDevices) {
-//           dev->bufferReady=false;
-//       }
-//       countDevicesReady=0;
     }
 
-
-    QMutexLocker lock(&device->objMutex);
-
-    if(device->closeFlag) {
-        debug("AudioDevice::paCallback paAbort")
-//        device->waitClose.wakeAll();
-        return paAbort;
-    }
-
-//    if(framesPerBuffer != device->bufferSize) {
-//        device->bufferSize = framesPerBuffer;
-//        MainHost::Get()->SetBufferSize((long)framesPerBuffer);
-//    }
-
-
+    device->devicesMutex.lock();
     if(device->devIn) {
         //fill circular buffer with device audio
         int cpt=0;
@@ -514,15 +522,16 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
         }
 
         //if we filled enough buffer
-        if(device->listCircularBuffersIn.at(0)->filledSize > hostBuffSize ) {
+        if(device->listCircularBuffersIn.at(0)->filledSize >= hostBuffSize ) {
 
             //put circular buffers into pins buffers
             cpt=0;
             foreach(CircularBuffer *buf, device->listCircularBuffersIn) {
-                if(device->devIn->listAudioPinOut.at(cpt)->buffer->GetSize() < hostBuffSize) {
+                AudioBuffer *pinBuf = device->devIn->listAudioPinOut.at(cpt)->buffer;
+                if(pinBuf->GetSize() < hostBuffSize) {
                     debug("AudioDevice::paCallback pin buffer too small")
                 }
-                buf->Get( device->devIn->listAudioPinOut.at(cpt)->buffer->GetPointer(true), hostBuffSize );
+                buf->Get( pinBuf->GetPointer(true), hostBuffSize );
                 cpt++;
             }
 
@@ -530,30 +539,41 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
                 device->bufferReady=true;
                 countDevicesReady++;
             }
-
-
         }
     }
+
+    device->devicesMutex.unlock();
 
     //all devices are ready : render
     if(countDevicesReady>=countInputDevices) {
         MainHost::Get()->Render();
 
         //reset devices ready flag
-        foreach(AudioDevice *dev, listAudioDevices) {
+        listDevMutex.lock();
+        foreach(QSharedPointer<AudioDevice>dev, listAudioDevices) {
+            if(dev.isNull())
+                continue;
+            dev->devicesMutex.lock();
             if(dev->devOut) {
                 int cpt=0;
                 //put pins buffer into circular buffers
                 foreach(CircularBuffer *buf, dev->listCircularBuffersOut) {
-                    buf->Put( dev->devOut->listAudioPinIn.at(cpt)->buffer->ConsumeStack(), dev->devOut->listAudioPinIn.at(cpt)->buffer->GetSize() );
+                    AudioBuffer *pinBuf = dev->devOut->listAudioPinIn.at(cpt)->buffer;
+//                    if(!pinBuf->IsEmpty()) {
+                        buf->Put( pinBuf->ConsumeStack(), pinBuf->GetSize() );
+                        pinBuf->ResetStackCounter();
+//                    }
                     cpt++;
                 }
             }
+            dev->devicesMutex.unlock();
             dev->bufferReady=false;
         }
+        listDevMutex.unlock();
         countDevicesReady=0;
     }
 
+    device->devicesMutex.lock();
     if(device->devOut) {
         //send circular buffer to device if there's enough data
         int cpt=0;
@@ -563,47 +583,7 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
             cpt++;
         }
     }
-
-
-
-//    cpt=0;
-//    //set buffers pointers on output pins
-//    if(device->devOut) {
-//        foreach(AudioPinIn* pin,device->devOut->listAudioPinIn) {
-//            pin->buffer->SetPointer( ((float **) outputBuffer)[cpt], true );
-//            pin->buffer->SetSize(framesPerBuffer);
-//            cpt++;
-//        }
-//    }
-
-//    cpt = 0;
-//    //set buffers pointers on input pins
-//    if(device->devIn) {
-//        foreach(AudioPinOut* pin,device->devIn->listAudioPinOut) {
-//            pin->buffer->SetPointer( ((float **) inputBuffer)[cpt] );
-//            pin->buffer->SetSize(framesPerBuffer);
-//            pin->buffer->ConsumeStack();
-//            cpt++;
-//        }
-//    }
-
-//    //render everything
-//    MainHost::Get()->Render(framesPerBuffer);
-
-//    //consume resulting buffers (for audio level calculation only, we already own the pointers)
-//    if(device->devOut) {
-//        foreach(AudioPinIn* pin,device->devOut->listAudioPinIn) {
-//            pin->buffer->ConsumeStack();
-//        }
-//    }
-
-    if(device->closeFlag) {
-        debug("AudioDevice::paCallback paAbort")
-//        device->waitClose.wakeAll();
-        return paAbort;
-    }
-
-    device->UpdateCpuUsage();
+    device->devicesMutex.unlock();
 
     return paContinue;
 

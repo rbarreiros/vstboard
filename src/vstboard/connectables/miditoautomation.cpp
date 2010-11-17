@@ -21,6 +21,7 @@
 #include "miditoautomation.h"
 #include "midipinin.h"
 #include "../globals.h"
+#include "mainhost.h"
 
 using namespace Connectables;
 
@@ -34,7 +35,7 @@ MidiToAutomation::MidiToAutomation(int index) :
             listValues << i;
         }
 
-    parameterLearning = true;
+//    parameterLearning = true;
 
     listMidiPinIn << new MidiPinIn(this);
 
@@ -42,6 +43,12 @@ MidiToAutomation::MidiToAutomation(int index) :
         listParameterPinOut.insert(i,new ParameterPinOut(this,i,0,&listValues,false,QString::number(i)));
     }
 //    debug("MidiAuomation::New")
+}
+
+void MidiToAutomation::SetParentModeIndex(const QModelIndex &parentIndex)
+{
+    Object::SetParentModeIndex(parentIndex);
+    MainHost::GetModel()->setData(modelIndex, true, UserRoles::paramLearning);
 }
 
 MidiToAutomation::~MidiToAutomation()

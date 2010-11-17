@@ -28,7 +28,7 @@ BridgeView::BridgeView(QAbstractItemModel *model, QGraphicsItem * parent, Qt::Wi
     setGeometry(QRectF(0,0,0,0));
     border->hide();
     titleText->hide();
-    editorButton->hide();
+//    editorButton->hide();
     layout->setContentsMargins(0,0,0,0);
 
     setFlag(QGraphicsItem::ItemIsMovable, false);

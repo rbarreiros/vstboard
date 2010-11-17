@@ -43,7 +43,14 @@ namespace UserRoles {
         size,
         parking,
         objInfo,
-        nodeType
+        nodeType,
+        hasEditor,
+        editorVisible,
+        editorImage,
+        editorPos,
+        editorSize,
+        canLearn,
+        paramLearning
     };
 }
 namespace NodeType {
@@ -55,7 +62,8 @@ namespace NodeType {
         listPin,
         pin,
         cable,
-        editor,
+//        editor,
+//        learning,
         program,
         programGroup
     };

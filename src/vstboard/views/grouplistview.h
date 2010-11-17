@@ -13,16 +13,13 @@ protected:
     void startDrag ( Qt::DropActions supportedActions );
     void dragMoveEvent ( QDragMoveEvent * event );
 
-    QModelIndex contextIndex;
-
 signals:
     void DragOverItemFromWidget( QWidget *source, const QModelIndex &index);
     void StartDrag(const QModelIndex &index);
-//    void ContextMenu(const QModelIndex &index, const QPoint & globalPos);
 
 public slots:
     void OnContextMenu(const QPoint & pos);
-    void OnContextDelete();
+    void DeleteItem();
 };
 
 #endif // GROUPLISTVIEW_H

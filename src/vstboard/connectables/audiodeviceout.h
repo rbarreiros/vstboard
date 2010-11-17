@@ -39,11 +39,12 @@ namespace Connectables {
 
         bool Open();
         bool Close();
+        void Render();
 
         int GetProcessingTime() {return 10;}
 
     protected:
-        AudioDevice *parentDevice;
+        QSharedPointer<AudioDevice>parentDevice;
 
     public slots:
         void SetBufferSize(long size);

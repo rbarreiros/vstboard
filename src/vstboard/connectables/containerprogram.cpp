@@ -43,7 +43,7 @@ ContainerProgram::ContainerProgram(const ContainerProgram& c)
         listCables << new Cable(*cab);
     }
 
-    QMap<int,objAttirbs>::ConstIterator i = c.mapObjAttribs.constBegin();
+    QMap<int,ObjectConatinerAttribs>::ConstIterator i = c.mapObjAttribs.constBegin();
     while(i!=c.mapObjAttribs.constEnd()) {
         mapObjAttribs.insert(i.key(),i.value());
         ++i;
@@ -90,7 +90,9 @@ void ContainerProgram::Load(int progId)
         if(ObjectFactory::Get()->GetObjectFromId(cab->GetInfoOut().objId) &&
            ObjectFactory::Get()->GetObjectFromId(cab->GetInfoIn().objId)) {
 
-            cab->AddToParentNode(container->cablesNode);
+            if(container->cablesNode.isValid())
+                cab->AddToParentNode(container->cablesNode);
+
             MainHost::Get()->OnCableAdded(cab->GetInfoOut(),cab->GetInfoIn());
         } else {
             //delete cable if objects are not found
@@ -98,14 +100,11 @@ void ContainerProgram::Load(int progId)
         }
     }
 
-    QMap<int,objAttirbs>::Iterator i = mapObjAttribs.begin();
+    QMap<int,ObjectConatinerAttribs>::Iterator i = mapObjAttribs.begin();
     while(i!=mapObjAttribs.end()) {
         QSharedPointer<Object> obj = ObjectFactory::Get()->GetObjectFromId(i.key());
         if(!obj.isNull()) {
-            obj->SetPosition(i.value().position);
-            obj->SetSize(i.value().size);
-            if(i.value().editor)
-                obj->OpenEditor();
+            obj->SetContainerAttribs(i.value());
         } else {
             //delete attrib if object not found
             i=mapObjAttribs.erase(i);
@@ -140,23 +139,21 @@ void ContainerProgram::Save()
     mapObjAttribs.clear();
     foreach(QSharedPointer<Object> obj, listObjects) {
         if(!obj.isNull()) {
-            objAttirbs attr;
-            attr.position = obj->GetPosition();
-            attr.size = obj->GetSize();
-            attr.editor = obj->GetEditorVisible();
+            ObjectConatinerAttribs attr;
+            obj->GetContainerAttribs(attr);
             mapObjAttribs.insert(obj->GetIndex(),attr);
         }
     }
+
     foreach(QSharedPointer<Object> obj, container->listStaticObjects) {
         if(!obj.isNull() ) {
             //don't save bridges position
             if(obj->info().nodeType==NodeType::bridge) {
                 continue;
             }
-            objAttirbs attr;
-            attr.position = obj->GetPosition();
-            attr.size = obj->GetSize();
-            attr.editor = obj->GetEditorVisible();
+
+            ObjectConatinerAttribs attr;
+            obj->GetContainerAttribs(attr);
             mapObjAttribs.insert(obj->GetIndex(),attr);
         }
     }
@@ -183,7 +180,7 @@ void ContainerProgram::AddCable(const ConnectionInfo &outputPin, const Connectio
     Cable *cab = new Cable(outputPin,inputPin);
     listCables << cab;
 
-    if(!hidden)
+    if(!hidden && container && container->cablesNode.isValid())
         cab->AddToParentNode(container->cablesNode);
 
     MainHost::Get()->OnCableAdded(outputPin,inputPin);
@@ -267,11 +264,10 @@ QDataStream & ContainerProgram::toStream (QDataStream& out) const
     }
 
     out << (quint16)mapObjAttribs.size();
-    QMap<int,objAttirbs>::ConstIterator i = mapObjAttribs.constBegin();
+    QMap<int,ObjectConatinerAttribs>::ConstIterator i = mapObjAttribs.constBegin();
     while(i!=mapObjAttribs.constEnd()) {
         out << i.key();
-        out << i.value().position;
-        out << i.value().size;
+        out << i.value();
         ++i;
     }
     return out;
@@ -309,10 +305,9 @@ QDataStream & ContainerProgram::fromStream (QDataStream& in)
     in >> nbPos;
     for(quint16 i=0; i<nbPos; i++) {
         int objId;
-        objAttirbs attr;
+        ObjectConatinerAttribs attr;
         in >> objId;
-        in >> attr.position;
-        in >> attr.size;
+        in >> attr;
         objId=ObjectFactory::Get()->IdFromSavedId(objId);
         mapObjAttribs.insert(objId,attr);
     }
@@ -329,3 +324,5 @@ QDataStream & operator>> (QDataStream & in, Connectables::ContainerProgram& valu
 {
     return value.fromStream(in);
 }
+
+

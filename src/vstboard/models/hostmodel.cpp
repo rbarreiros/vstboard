@@ -290,64 +290,40 @@ bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int
                 return false;
             }
 
-            if(role==UserRoles::position)
-                objPtr->position = value.toPointF();
-            if(role==UserRoles::size)
-                objPtr->size = value.toSizeF();
-
-            break;
-        }
-
-        case NodeType::editor :
-        {
-            int objId = index.parent().data(UserRoles::value).toInt();
-            if(!objId) {
-                debug("HostModel::setData NodeType::editor has no object Id")
-                return false;
-            }
-
-            QSharedPointer<Connectables::Object> objPtr = Connectables::ObjectFactory::Get()->GetObjectFromId(objId);
-            if(objPtr.isNull()) {
-                debug(QString("HostModel::setData NodeType::editor the object %1 is deleted").arg(objId).toAscii())
-                return false;
-            }
-
-            bool newVal = value.toBool();
-
-            if(newVal)
-                newVal = objPtr->OpenEditor();
-            else
-                objPtr->CloseEditor();
+            if(role == UserRoles::editorVisible)
+                objPtr->OnEditorVisibilityChanged( value.toBool() );
             break;
         }
 
         case NodeType::pin :
         {
-            ConnectionInfo info = index.data(UserRoles::connectionInfo).value<ConnectionInfo>();
-            if(role==UserRoles::value) {
-                bool ok=true;
-                float newVal = value.toFloat(&ok);// item->data(Qt::DisplayRole).toFloat(&ok);
-                if(!ok)
-                    return false;
+            ConnectionInfo pinInfo = index.data(UserRoles::connectionInfo).value<ConnectionInfo>();
+            if(pinInfo.type==PinType::Parameter) {
+                if(role==UserRoles::value) {
+                    bool ok=true;
+                    float newVal = value.toFloat(&ok);// item->data(Qt::DisplayRole).toFloat(&ok);
+                    if(!ok)
+                        return false;
 
-                if(newVal>1.0f) newVal=1.0f;
-                if(newVal<.0f) newVal=.0f;
-                Connectables::ParameterPin* pin = static_cast<Connectables::ParameterPin*>(Connectables::ObjectFactory::Get()->GetPin(info));
-                if(!pin)
-                    return false;
-                pin->ChangeValue( newVal );
-                item->setData(newVal,role);
+                    if(newVal>1.0f) newVal=1.0f;
+                    if(newVal<.0f) newVal=.0f;
+                    Connectables::ParameterPin* pin = static_cast<Connectables::ParameterPin*>(Connectables::ObjectFactory::Get()->GetPin(pinInfo));
+                    if(!pin)
+                        return false;
+                    pin->ChangeValue( newVal );
+                    item->setData(newVal,role);
+                    return true;
+                }
             }
             break;
         }
-        default:
-            return false;
+
     }
 
-    return false;
+    return QStandardItemModel::setData(index,value,role);
 }
 
-bool HostModel::setItemData ( const QModelIndex & index, const QMap<int, QVariant> & roles )
-{
-    return true;
-}
+//bool HostModel::setItemData ( const QModelIndex & index, const QMap<int, QVariant> & roles )
+//{
+//    return true;
+//}

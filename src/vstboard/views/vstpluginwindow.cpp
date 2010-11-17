@@ -39,17 +39,17 @@ VstPluginWindow::~VstPluginWindow()
     delete ui;
 }
 
-void VstPluginWindow::changeEvent(QEvent *e)
-{
-    QFrame::changeEvent(e);
-    switch (e->type()) {
-    case QEvent::LanguageChange:
-        ui->retranslateUi(this);
-        break;
-    default:
-        break;
-    }
-}
+//void VstPluginWindow::changeEvent(QEvent *e)
+//{
+//    QFrame::changeEvent(e);
+//    switch (e->type()) {
+//    case QEvent::LanguageChange:
+//        ui->retranslateUi(this);
+//        break;
+//    default:
+//        break;
+//    }
+//}
 
 WId VstPluginWindow::GetWinId()
 {
@@ -94,23 +94,39 @@ bool VstPluginWindow::SetPlugin(Connectables::VstPlugin *plugin)
     connect(plugin,SIGNAL(WindowSizeChange(int,int)),
             this,SLOT(SetWindowSize(int,int)));
 
-    connect(ui->toolLearning, SIGNAL(toggled(bool)),
-            plugin,SLOT(SetLearningMode(bool)));
-    connect(ui->toolUnLearning, SIGNAL(toggled(bool)),
-            plugin,SLOT(SetUnLearningMode(bool)));
-    connect(plugin, SIGNAL(LearningModeChanged(bool)),
-            ui->toolLearning,SLOT(setChecked(bool)));
-    connect(plugin, SIGNAL(UnLearningModeChanged(bool)),
-            ui->toolUnLearning,SLOT(setChecked(bool)));
+//    connect(ui->toolLearning, SIGNAL(toggled(bool)),
+//            plugin,SLOT(SetLearningMode(bool)));
+//    connect(ui->toolUnLearning, SIGNAL(toggled(bool)),
+//            plugin,SLOT(SetUnLearningMode(bool)));
+//    connect(plugin, SIGNAL(LearningModeChanged(bool)),
+//            ui->toolLearning,SLOT(setChecked(bool)));
+//    connect(plugin, SIGNAL(UnLearningModeChanged(bool)),
+//            ui->toolUnLearning,SLOT(setChecked(bool)));
 
     return true;
 }
 
+//void VstPluginWindow::SetLearningMode(bool learning)
+//{
+//    if(plugin->modelIndex.isValid())
+//        MainHost::GetModel()->setData(plugin->modelIndex, learning, UserRoles::paramLearning);
+//}
+
+void VstPluginWindow::SavePosSize()
+{
+    if(plugin->modelIndex.isValid()) {
+        MainHost::GetModel()->setData(plugin->modelIndex,size(),UserRoles::editorSize);
+        MainHost::GetModel()->setData(plugin->modelIndex,pos(),UserRoles::editorPos);
+    }
+}
+
 void VstPluginWindow::closeEvent( QCloseEvent * event )
 {
+    SavePosSize();
+
     hide();
-    if(plugin->modelEditor)
-        plugin->modelEditor->setData(false,UserRoles::value);
+    if(plugin->modelIndex.isValid())
+        MainHost::GetModel()->setData(plugin->modelIndex,false,UserRoles::editorVisible);
 
     event->ignore();
 }
@@ -123,23 +139,58 @@ void VstPluginWindow::SetWindowSize(int newWidth, int newHeight)
 
 void VstPluginWindow::showEvent ( QShowEvent * event )
 {
-    if(menuHeight==0) {
-        menuHeight=ui->toolLearning->height();
-        int w = ui->scrollAreaWidgetContents->width();
-        int h = ui->scrollAreaWidgetContents->height();
-        setMaximumSize(w,h+menuHeight);
-        resize(w,h+menuHeight);
-    }
+//    if(menuHeight==0) {
+//        menuHeight=ui->toolLearning->height();
+//        int w = ui->scrollAreaWidgetContents->width();
+//        int h = ui->scrollAreaWidgetContents->height();
+//        setMaximumSize(w,h+menuHeight);
+//        resize(w,h+menuHeight);
+//    }
+
+    ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    int w = ui->scrollAreaWidgetContents->width();
+    int h = ui->scrollAreaWidgetContents->height();
+    setMaximumSize(w,h);
+    resize(w,h);
 }
 
 void VstPluginWindow::resizeEvent ( QResizeEvent * event )
 {
-    if( event->size().width() >= maximumSize().width() &&
-        event->size().height() >= maximumSize().height() ) {
+    int maxH=ui->scrollAreaWidgetContents->height();
+    int maxW=ui->scrollAreaWidgetContents->width();
+
+    if( event->size().width() >= maxW &&
+        event->size().height() >= maxH &&
+        ui->scrollArea->horizontalScrollBarPolicy()!=Qt::ScrollBarAlwaysOff) {
+
         ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    } else {
-        ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-        ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+        setMaximumSize(maxW,maxH);
+    } else
+        if(ui->scrollArea->horizontalScrollBarPolicy()!=Qt::ScrollBarAsNeeded) {
+
+        ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+        ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+        maxW+=ui->scrollArea->verticalScrollBar()->width();
+        maxH+=ui->scrollArea->horizontalScrollBar()->height();
+        setMaximumSize(maxW,maxH);
     }
+
+//    if(plugin->modelIndex.isValid())
+//        MainHost::GetModel()->setData(plugin->modelIndex,event->size(),UserRoles::editorSize);
 }
+
+//void VstPluginWindow::moveEvent ( QMoveEvent * event )
+//{
+//    if(plugin->modelIndex.isValid())
+//        MainHost::GetModel()->setData(plugin->modelIndex,event->pos(),UserRoles::editorPos);
+//}
+
+//const QPixmap VstPluginWindow::GetScreenshot()
+//{
+//    QPixmap pix = QPixmap::grabWindow(ui->scrollAreaWidgetContents->winId() ,0,0,size().width(),size().height());//45);
+//    QPainter p(&pix);
+//    p.fillRect(pix.rect(), QColor(255,255,255,150));
+//    return pix;
+//}

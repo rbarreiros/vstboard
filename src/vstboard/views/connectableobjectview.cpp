@@ -36,12 +36,12 @@ ConnectableObjectView::ConnectableObjectView(QAbstractItemModel *model,QGraphics
 {
     setGeometry(QRectF(0,0,100,15));
     border = new QGraphicsRectItem(geometry(),this,scene());
-    backgroundImg = new QGraphicsPixmapItem(this,scene());
+
     titleText = new QGraphicsSimpleTextItem(QString("Title"),this);
     titleText->moveBy(2,1);
-    editorButton =  new TextButton("Ed",this,Qt::black,QColor(255,255,255));
-    editorButton->moveBy(rect().width()-15,0);
-    editorButton->hide();
+//    editorButton =  new TextButton("Ed",this,Qt::black,QColor(255,255,255));
+//    editorButton->moveBy(rect().width()-15,0);
+//    editorButton->hide();
 
     layout = new QGraphicsGridLayout() ;
     layout->setSpacing(0);
@@ -49,6 +49,7 @@ ConnectableObjectView::ConnectableObjectView(QAbstractItemModel *model,QGraphics
     setLayout(layout);
 
     setFlag(QGraphicsItem::ItemIsMovable, true);
+    setFlag(QGraphicsItem::ItemIsSelectable, true);
 
     listAudioIn = new ListPinsView(this);
     listAudioOut = new ListPinsView(this);
@@ -67,21 +68,6 @@ ConnectableObjectView::ConnectableObjectView(QAbstractItemModel *model,QGraphics
     layout->addItem(listParametersOut,2,1,Qt::AlignRight);
     layout->addItem(listBridgeIn,3,0,Qt::AlignLeft);
     layout->addItem(listBridgeOut,3,1,Qt::AlignRight);
-}
-
-void ConnectableObjectView::SetBackground()
-{
-    qreal height = 15
-                   + std::max(listAudioIn->size().height(), listAudioOut->size().height())
-                   + std::max(listMidiIn->size().height(),  listMidiOut->size().height());
-    QPixmap pix = QPixmap::grabWindow(backOri,0,0,size().width(), height);//45);
-    QPainter p(&pix);
-    p.fillRect(pix.rect(), QColor(255,255,255,150));
-
-    backgroundImg->setPixmap(pix);
-    QGraphicsBlurEffect *eff = new QGraphicsBlurEffect(this);
-    eff->setBlurRadius(2);
-    backgroundImg->setGraphicsEffect(eff);
 }
 
 

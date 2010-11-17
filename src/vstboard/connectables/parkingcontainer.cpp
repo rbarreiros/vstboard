@@ -35,8 +35,8 @@ ParkingContainer::~ParkingContainer()
 
     listStaticObjects.clear();
 
-    if(modelNode)
-        modelNode->model()->invisibleRootItem()->removeRow(modelNode->row());
+    if(modelIndex.isValid())
+        MainHost::GetModel()->removeRow(modelIndex.row());
 }
 
 void ParkingContainer::AddObject(QSharedPointer<Object> objPtr)
@@ -45,7 +45,8 @@ void ParkingContainer::AddObject(QSharedPointer<Object> objPtr)
         return;
 
     listStaticObjects << objPtr;
-    objPtr->SetParkingNode(modelNode);
+    objPtr->SetContainerId(-1);
+    objPtr->SetParkingIndex(modelIndex);
 }
 
 void ParkingContainer::RemoveObject(QSharedPointer<Object> objPtr)
@@ -61,16 +62,18 @@ void ParkingContainer::Clear()
     listStaticObjects.clear();
 }
 
-void ParkingContainer::SetParentModelNode(QStandardItem* parent)
+void ParkingContainer::SetParentModeIndex(const QModelIndex &parentIndex)
 {
-    modelNode = new QStandardItem();
+    QStandardItem *modelNode = new QStandardItem();
     modelNode->setData(QVariant::fromValue(objInfo), UserRoles::objInfo);
     modelNode->setData(index, UserRoles::value);
     modelNode->setData(objInfo.name, Qt::DisplayRole);
-    parent->appendRow(modelNode);
+    MainHost::GetParkingModel()->appendRow(modelNode);
+    modelIndex=modelNode->index();
 
     foreach(QSharedPointer<Object>objPtr, listStaticObjects) {
-        objPtr->SetParkingNode(modelNode);
+        objPtr->SetContainerId(-1);
+        objPtr->SetParkingIndex(modelIndex);
     }
 }
 

@@ -63,6 +63,25 @@
      }
 #endif
 
+class MyApp : public QApplication {
+public:
+    MyApp(int &c, char **v): QApplication(c, v) {}
+
+    bool notify(QObject *rec, QEvent *ev) {
+           try {
+               return QApplication::notify(rec, ev);
+           }
+           catch (char const *str) {
+               debug("EXCEPTION: %s",str)
+               return false;
+           }
+           catch (...) {
+               debug("Unknown exception!")
+               abort();
+           }
+       }
+};
+
 int main(int argc, char *argv[])
 {
     qRegisterMetaType<ConnectionInfo>("ConnectionInfo");
@@ -78,11 +97,11 @@ int main(int argc, char *argv[])
     qInstallMsgHandler(myMessageOutput);
 #endif
 
-    {
+
         QCoreApplication::setOrganizationName("CtrlBrk");
         QCoreApplication::setApplicationName("VstBoard");
 
-        QApplication app(argc, argv);
+        MyApp app(argc, argv);
 
         QTranslator qtTranslator;
         qtTranslator.load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
@@ -97,7 +116,7 @@ int main(int argc, char *argv[])
         w->setAttribute(Qt::WA_DeleteOnClose);
         w->show();
         app.exec();
-    }
+
 
     return 0;
 }

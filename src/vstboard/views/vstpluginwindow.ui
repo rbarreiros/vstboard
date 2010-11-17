@@ -25,40 +25,13 @@
   <property name="lineWidth">
    <number>1</number>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QHBoxLayout" name="horizontalLayout">
    <property name="spacing">
     <number>0</number>
    </property>
    <property name="margin">
     <number>0</number>
    </property>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <property name="spacing">
-      <number>0</number>
-     </property>
-     <item>
-      <widget class="QToolButton" name="toolLearning">
-       <property name="text">
-        <string>Learn</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QToolButton" name="toolUnLearning">
-       <property name="text">
-        <string>unLearn</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
    <item>
     <widget class="QScrollArea" name="scrollArea">
      <property name="frameShape">
@@ -79,17 +52,9 @@
         <x>0</x>
         <y>0</y>
         <width>94</width>
-        <height>69</height>
+        <height>90</height>
        </rect>
       </property>
-      <layout class="QGridLayout" name="gridLayout_2">
-       <property name="margin">
-        <number>0</number>
-       </property>
-       <property name="spacing">
-        <number>0</number>
-       </property>
-      </layout>
      </widget>
     </widget>
    </item>

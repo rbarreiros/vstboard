@@ -33,40 +33,60 @@ AudioDevices::AudioDevices(QObject *parent) :
 
 AudioDevices::~AudioDevices()
 {
-    model->clear();
-    model->deleteLater();
-    model=0;
-    Pa_Terminate();
+//    foreach(QSharedPointer<Connectables::AudioDevice *>dev, Connectables::AudioDevice::listAudioDevices) {
+//        delete dev;
+//        dev->deleteLater();
+//    }
+    Connectables::AudioDevice::listDevMutex.lock();
+    Connectables::AudioDevice::listAudioDevices.clear();
+    Connectables::AudioDevice::listDevMutex.unlock();
+
+    if(model) {
+        Pa_Terminate();
+        model->deleteLater();
+    }
 }
 
-void AudioDevices::UpdateCpuUsage()
-{
-
-}
+//void AudioDevices::UpdateCpuUsage()
+//{
+//    float cpu=.0f;
+//    foreach(Connectables::AudioDevice *ad, Connectables::AudioDevice::listAudioDevices) {
+//        cpu = std::max( ad->GetCpuUsage(), cpu);
+//    }
+//    emit NewCpuUsage(cpu);
+//}
 
 ListAudioInterfacesModel * AudioDevices::GetModel()
 {
-    foreach(Connectables::AudioDevice *ad, Connectables::AudioDevice::listAudioDevices) {
+    Connectables::AudioDevice::listDevMutex.lock();
+    foreach(QSharedPointer<Connectables::AudioDevice>ad, Connectables::AudioDevice::listAudioDevices) {
         ad->SetSleep(true);
     }
+    Connectables::AudioDevice::listDevMutex.unlock();
 //    MainHost::Get()->UpdateSolver(true);
 
 
     if(model) {
-        Pa_Terminate();
+        debug("pa_terminate")
+        PaError err=Pa_Terminate();
+        if(err!=paNoError) {
+            debug("AudioDevices::GetModel Pa_Terminate %s",Pa_GetErrorText( err ))
+        }
         model->deleteLater();
     }
 
 
     PaError paRet =Pa_Initialize();
     if(paRet!=paNoError) {
-        debug(Pa_GetErrorText(paRet))
+        debug("AudioDevices::GetModel Pa_Initialize %s",Pa_GetErrorText(paRet))
     }
     BuildModel();
 
-    foreach(Connectables::AudioDevice *ad, Connectables::AudioDevice::listAudioDevices) {
+    Connectables::AudioDevice::listDevMutex.lock();
+    foreach(QSharedPointer<Connectables::AudioDevice>ad, Connectables::AudioDevice::listAudioDevices) {
         ad->SetSleep(false);
     }
+    Connectables::AudioDevice::listDevMutex.unlock();
 //    MainHost::Get()->UpdateSolver(true);
 
     return model;

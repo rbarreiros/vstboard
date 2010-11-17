@@ -106,7 +106,7 @@ void Programs::RemoveIndex(const QModelIndex &index)
 void Programs::ChangeProg(const QModelIndex &prgIndex)
 {
     QStandardItem *newPrg = model->itemFromIndex( prgIndex );
-    if(!newPrg)
+    if(!newPrg || newPrg==currentPrg)
         return;
     currentPrg = newPrg;
     emit ProgChanged( prgIndex );
@@ -114,9 +114,8 @@ void Programs::ChangeProg(const QModelIndex &prgIndex)
 
 void Programs::ChangeProg(int midiProgNum) {
     QStandardItem *newPrg = currentPrg->parent()->child(midiProgNum);
-    if(!newPrg)
+    if(!newPrg || newPrg==currentPrg)
         return;
-
     currentPrg = newPrg;
     emit ProgChanged( newPrg->index() );
 }

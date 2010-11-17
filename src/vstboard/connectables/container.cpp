@@ -29,7 +29,7 @@ Container::Container(int index, const ObjectInfo &info) :
     bridgeIn(0),
     bridgeOut(0),
     currentProgram(0),
-    cablesNode(0)
+    cablesNode(QModelIndex())
 {
     LoadProgram(TEMP_PROGRAM);
 }
@@ -39,41 +39,56 @@ Container::~Container()
     Close();
 }
 
-void Container::SetParentModelNode(QStandardItem* parent)
+void Container::SetParentModeIndex(const QModelIndex &parentIndex)
 {
-    if(modelNode && modelNode->parent() == parent)
-        return;
+    if(modelIndex.isValid()) {
+        if(modelIndex.parent() == parentIndex)
+            return;
+        else
+            Hide();
+    }
 
-    Object::SetParentModelNode(parent);
+    Object::SetParentModeIndex(parentIndex);
 
     if(currentProgram)
         foreach(QSharedPointer<Object>objPtr, currentProgram->listObjects) {
-            objPtr->SetParentModelNode(modelNode);
+            objPtr->SetParentModeIndex(modelIndex);
         }
 
     foreach(QSharedPointer<Object>objPtr, listStaticObjects) {
-        objPtr->SetParentModelNode(modelNode);
+        objPtr->SetParentModeIndex(modelIndex);
     }
 
-    cablesNode = new QStandardItem("cables");
-    modelNode->appendRow(cablesNode);
+    QStandardItem *cab = new QStandardItem("cables");
+    if(modelIndex.isValid()) {
+        MainHost::GetModel()->itemFromIndex(modelIndex)->appendRow(cab);
+    } else {
+        MainHost::GetModel()->appendRow(cab);
+    }
+    cablesNode = cab->index();
 }
 
-void Container::UpdateModelNode()
+void Container::SetContainerId(quint16 id)
 {
-    if(!modelNode)
-        return;
+    Object::SetContainerId(id);
 
-    Object::UpdateModelNode();
+    if(currentProgram)
+        foreach(QSharedPointer<Object>objPtr, currentProgram->listObjects) {
+            objPtr->SetContainerId(index);
+        }
+
+    foreach(QSharedPointer<Object>objPtr, listStaticObjects) {
+        objPtr->SetContainerId(index);
+    }
 }
 
-void Container::ConnectBridges(QSharedPointer<Object> bridgeA, QSharedPointer<Object> bridgeB)
+void Container::ConnectBridges(QSharedPointer<Object> bridgeA, QSharedPointer<Object> bridgeB, bool hidden)
 {
     if(bridgeA.isNull() || bridgeB.isNull())
         return;
 
     for(int i=0; i<bridgeB->GetListBridgePinIn().size(); i++) {
-        AddCable(bridgeA->GetListBridgePinOut().at(i)->GetConnectionInfo(), bridgeB->GetListBridgePinIn().at(i)->GetConnectionInfo(), true);
+        AddCable(bridgeA->GetListBridgePinOut().at(i)->GetConnectionInfo(), bridgeB->GetListBridgePinIn().at(i)->GetConnectionInfo(), hidden);
     }
 }
 
@@ -123,7 +138,7 @@ void Container::SetSleep(bool sleeping)
 
 void Container::Hide()
 {
-    cablesNode=0;
+    cablesNode=QModelIndex();
 
     if(currentProgram) {
         foreach(QSharedPointer<Object> objPtr, currentProgram->listObjects) {
@@ -269,7 +284,8 @@ void Container::RemoveCable(QModelIndex & index)
 
 void Container::AddChildObject(QSharedPointer<Object> objPtr)
 {
-    objPtr->SetParentModelNode(modelNode);
+    objPtr->SetParentModeIndex(modelIndex);
+    objPtr->SetContainerId(index);
     MainHost::Get()->OnObjectAdded(objPtr);
 }
 
@@ -279,9 +295,9 @@ void Container::RemoveChildObject(QSharedPointer<Object> objPtr)
         return;
 
     objPtr->Hide();
+    objPtr->SetContainerId(-1);
     MainHost::Get()->OnObjectRemoved(objPtr, this);
 }
-
 
 void Container::AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin, bool hidden)
 {
@@ -289,7 +305,6 @@ void Container::AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &
         return;
     currentProgram->AddCable(outputPin,inputPin, hidden);
 }
-
 
 void Container::RemoveCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
 {

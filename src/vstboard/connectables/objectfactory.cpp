@@ -44,10 +44,10 @@ QMutex ObjectFactory::singletonMutex;
 
 ObjectFactory * ObjectFactory::Get()
 {
-    singletonMutex.lock();
+    //singletonMutex.lock();
     if(!theObjFactory)
         theObjFactory = new ObjectFactory();
-    singletonMutex.unlock();
+    //singletonMutex.unlock();
 
     return theObjFactory;
 }

@@ -14,7 +14,7 @@
         <file>img16x16/viewmag+.png</file>
         <file>img16x16/viewmagfit.png</file>
         <file>img16x16/documentinfo.png</file>
-        <file>img16x16/messagebox_critical.png</file>
         <file>img32x32/agt_action_fail.png</file>
+        <file>img16x16/delete.png</file>
     </qresource>
 </RCC>

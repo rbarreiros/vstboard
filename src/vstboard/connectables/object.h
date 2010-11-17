@@ -74,7 +74,7 @@ namespace Connectables {
         QList<BridgePinOut*> GetListBridgePinOut() {return listBridgePinOut;}
 
         void SetIndex(int i) {index=i;}
-        const int GetIndex() const {return index;}
+        inline const int GetIndex() const {return index;}
 
         const int GetContainerId() const {return containerId;}
 
@@ -85,15 +85,11 @@ namespace Connectables {
         virtual float SetParameter(int paramId, float value) {return value;}
         virtual void MidiMsgFromInput(long msg) {}
 
-        inline short GetLearningMode() {return parameterLearning;}
         virtual QString GetParameterName(ConnectionInfo pinInfo) {return "";}
 
         void NewRenderLoop();
 
-        void SetParkingNode(QStandardItem* parent);
-        QStandardItem *GetModelNode() {return modelNode;}
-
-        virtual bool OpenEditor() {return false;}
+        virtual void SetParkingIndex(const QModelIndex &parentIndex);
 
         virtual QDataStream & toStream (QDataStream &) const;
         virtual QDataStream & fromStream (QDataStream &);
@@ -101,15 +97,22 @@ namespace Connectables {
         inline void Lock() { objMutex.lock();}
         inline void Unlock() { objMutex.unlock();}
 
-        void SetPosition(QPointF pos);
-        QPointF GetPosition() {return position;}
-        void SetSize(QSizeF s);
-        virtual QSizeF GetSize() {return size;}
-        virtual bool GetEditorVisible() {return false;}
-        QPointF position;
-        QSizeF size;
+        bool GetLearningMode();
+//        inline short GetLearningMode() {return parameterLearning;}
+//        void SetPosition(const QPointF &pos);
+//        QPointF GetPosition() {return position;}
+//        void SetSize(QSizeF s);
+//        QSizeF GetSize() {return size;}
+//        void SetEditorVisible(bool visible);
+//        bool GetEditorVisible() {return editorVisible;}
+//        QPointF position;
+//        QSizeF size;
+//        bool editorVisible;
+        bool hasEditor;
+        bool canLearn;
 
-        virtual void SetParentModelNode(QStandardItem* parent);
+        virtual void SetContainerId(quint16 id);
+        virtual void SetParentModeIndex(const QModelIndex &parentIndex);
         virtual void UpdateModelNode();
 
         int GetCurrentProgId() {return currentProgId;}
@@ -122,6 +125,12 @@ namespace Connectables {
         virtual void CopyProgram(int ori, int dest);
         virtual void RemoveProgram(int prg);
 
+//        QStandardItem *modelNode;
+        QPersistentModelIndex modelIndex;
+
+        virtual void SetContainerAttribs(const ObjectConatinerAttribs &attr);
+        virtual void GetContainerAttribs(ObjectConatinerAttribs &attr);
+
     protected:
         QList<AudioPinIn*>listAudioPinIn;
         QList<AudioPinOut*>listAudioPinOut;
@@ -133,6 +142,8 @@ namespace Connectables {
         QList<BridgePinOut*>listBridgePinOut;
 
         QMutex objMutex;
+
+        bool parked;
 
         //used by pathsolver
         SolverNode *solverNode;
@@ -150,16 +161,17 @@ namespace Connectables {
         bool closed;
         quint16 containerId;
 
-        QStandardItem *modelNode;
-        QStandardItem *modelAudioIn;
-        QStandardItem *modelAudioOut;
-        QStandardItem *modelMidiIn;
-        QStandardItem *modelMidiOut;
-        QStandardItem *modelParamIn;
-        QStandardItem *modelParamOut;
-        QStandardItem *modelBridgeIn;
-        QStandardItem *modelBridgeOut;
-        QStandardItem *modelEditor;
+        QPersistentModelIndex modelAudioIn;
+        QPersistentModelIndex modelAudioOut;
+        QPersistentModelIndex modelMidiIn;
+        QPersistentModelIndex modelMidiOut;
+        QPersistentModelIndex modelParamIn;
+        QPersistentModelIndex modelParamOut;
+        QPersistentModelIndex modelBridgeIn;
+        QPersistentModelIndex modelBridgeOut;
+
+//        QStandardItem *modelEditor;
+//        QStandardItem *modelLearningMode;
 
         int currentProgId;
 
@@ -176,15 +188,14 @@ namespace Connectables {
         virtual void SaveProgram();
         virtual void UnloadProgram();
         virtual void LoadProgram(int prog);
-        void SetLearningMode(bool learning);
-        void SetUnLearningMode(bool unlearning);
+//        void SetLearningMode(bool learning);
+//        void SetUnLearningMode(bool unlearning);
         void OnProgramDirty() {progIsDirty=true;}
 
         virtual void SetBufferSize(long size) {}
         virtual void SetSampleRate(float rate=44100.0) {}
         virtual void OnParameterChanged(ConnectionInfo pinInfo, float value) {}
-
-        virtual void CloseEditor() {}
+        virtual void OnEditorVisibilityChanged(bool visible) {}
 
         void CloseSlot() {Close();}
 

@@ -27,6 +27,7 @@
 #include "views/aboutdialog.h"
 #include "connectables/objectinfo.h"
 #include "views/splash.h"
+//#include "imagecollection.h"
 
 MainWindow *MainWindow::theMainWindow=0;
 
@@ -43,8 +44,11 @@ MainWindow::MainWindow(QWidget *parent) :
         ui(new Ui::MainWindow)
 {
     MainWindow::theMainWindow=this;
-    mainHost = MainHost::Get(this);
     ui->setupUi(this);
+
+    mainHost = MainHost::Create(this);
+
+//    ImageCollection::Create(this);
 
     //audio devices
     ui->treeAudioInterfaces->setModel(mainHost->GetAudioDevicesModel());
@@ -83,12 +87,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->VstBrowser->setModel(&listVstPluginsModel);
 
     //timer
-    timerVu = new QTimer(this);
-    timerVu->start(40);
-    connect(timerVu, SIGNAL(timeout()),
-            this, SLOT(UpdateCpuLoad()));
+//    QTimer *timerCpuLoad = new QTimer(this);
+//    timerCpuLoad->start(200);
+//    connect(timerCpuLoad, SIGNAL(timeout()),
+//            this, SLOT(UpdateCpuLoad()));
 
-    mySceneView = new View::SceneView(ui->hostView, ui->projectView, ui->programView);
+    mySceneView = new View::SceneView(ui->hostView, ui->projectView, ui->programView, this);
     mySceneView->setModel(mainHost->GetModel());
 
     ui->solverView->setModel(&mainHost->solver.model);
@@ -114,13 +118,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->treeHostModel->setModel(mainHost->GetModel());
     ui->listParking->setModel(mainHost->GetParkingModel());
     ui->listParking->setRootIndex(mainHost->GetParkingModel()->invisibleRootItem()->child(0)->index());
+
 }
 
 MainWindow::~MainWindow()
 {
-    writeSettings();
-    delete mySceneView;
-    delete ui;
+    if(ui)
+        delete ui;
     theMainWindow = 0;
 }
 
@@ -193,10 +197,10 @@ void MainWindow::BuildListTools()
 }
 
 
-void MainWindow::UpdateCpuLoad()
-{
-    ui->progressCpuLoad->setValue(mainHost->GetCpuLoad()*100);
-}
+//void MainWindow::UpdateCpuLoad()
+//{
+//    ui->progressCpuLoad->setValue(mainHost->GetCpuLoad()*100);
+//}
 
 void MainWindow::on_actionLoad_triggered()
 {
@@ -331,6 +335,7 @@ void MainWindow::writeSettings()
     settings.setValue("state", saveState());
     settings.endGroup();
     settings.setValue("lastVstPath", ui->VstBrowser->path());
+    ui->Programs->writeSettings();
     settings.sync();
 }
 
@@ -394,20 +399,61 @@ void MainWindow::readSettings()
         restoreGeometry(settings.value("geometry").toByteArray());
         restoreState(settings.value("state").toByteArray());
     } else {
-        restoreDefaultDocking();
+        resetSettings();
     }
 
     settings.endGroup();
+
+    ui->Programs->readSettings();
 }
 
-void MainWindow::restoreDefaultDocking()
+void MainWindow::resetSettings()
 {
+    QList<QDockWidget*>listDocks;
+    listDocks << ui->dockTools;
+    listDocks << ui->dockMidiDevices;
+    listDocks << ui->dockAudioDevices;
+    listDocks << ui->dockVstBrowser;
+
+    listDocks << ui->dockPrograms;
+    listDocks << ui->dockSolver;
+    listDocks << ui->dockHostModel;
+    listDocks << ui->dockParking;
+
+
+    foreach(QDockWidget *dock, listDocks) {
+        dock->setFloating(false);
+        dock->setVisible(true);
+    }
+
+    addDockWidget(Qt::LeftDockWidgetArea,  ui->dockTools);
+    addDockWidget(Qt::LeftDockWidgetArea,  ui->dockMidiDevices);
+    addDockWidget(Qt::LeftDockWidgetArea,  ui->dockAudioDevices);
+    addDockWidget(Qt::LeftDockWidgetArea,  ui->dockVstBrowser);
+
+    addDockWidget(Qt::RightDockWidgetArea,  ui->dockPrograms);
+    addDockWidget(Qt::RightDockWidgetArea,  ui->dockSolver);
+    addDockWidget(Qt::RightDockWidgetArea,  ui->dockHostModel);
+    addDockWidget(Qt::RightDockWidgetArea,  ui->dockParking);
+
+
+
     tabifyDockWidget(ui->dockTools,ui->dockMidiDevices);
     tabifyDockWidget(ui->dockMidiDevices,ui->dockAudioDevices);
     tabifyDockWidget(ui->dockAudioDevices,ui->dockVstBrowser);
 
-    tabifyDockWidget(ui->dockParking,ui->dockSolver);
-    tabifyDockWidget(ui->dockSolver,ui->dockHostModel);
+    tabifyDockWidget(ui->dockHostModel,ui->dockSolver);
+    tabifyDockWidget(ui->dockSolver,ui->dockParking);
+
+    ui->actionHost_panel->setChecked(true);
+    ui->actionProject_panel->setChecked(true);
+    ui->actionProgram_panel->setCheckable(true);
+    int h = ui->splitterPanels->height();
+    QList<int>heights;
+    heights << h << h << h;
+    ui->splitterPanels->setSizes(heights);
+
+    ui->Programs->resetSettings();
 
 }
 
@@ -498,3 +544,8 @@ void MainWindow::on_actionRefresh_Midi_devices_triggered()
 
 
 
+
+void MainWindow::on_actionRestore_default_layout_triggered()
+{
+    resetSettings();
+}

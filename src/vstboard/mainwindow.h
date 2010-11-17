@@ -40,7 +40,7 @@ public:
     static MainWindow *Get(QWidget *parent = 0);
     ~MainWindow();
     static MainWindow *theMainWindow;
-    QTimer *timerVu;
+
 
 protected:
     void closeEvent(QCloseEvent *event);
@@ -61,7 +61,7 @@ private:
     void BuildListTools();
     void writeSettings();
     void readSettings();
-    void restoreDefaultDocking();
+    void resetSettings();
     void updateRecentFileActions();
 
     QString currentProjectFile;
@@ -75,10 +75,11 @@ private:
     MainHost *mainHost;
     Project::ProjectFile *project;
 
-public slots:
-    void UpdateCpuLoad();
+//public slots:
+//    void UpdateCpuLoad();
 
 private slots:
+    void on_actionRestore_default_layout_triggered();
     void on_actionRefresh_Midi_devices_triggered();
     void on_actionRefresh_Audio_devices_triggered();
     void on_actionSave_Setup_As_triggered();
