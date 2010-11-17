@@ -1,4 +1,5 @@
 #include "circularbuffer.h"
+#include "precomp.h"
 
 CircularBuffer::CircularBuffer() :
         buffSize(4096)
@@ -16,10 +17,18 @@ CircularBuffer::~CircularBuffer()
     delete[] buffer;
 }
 
+void CircularBuffer::Clear()
+{
+    filledStart = bufStart;
+    filledEnd = bufStart;
+    filledSize=0;
+    buffer[0]=.0f;
+}
+
 bool CircularBuffer::Put(float *buf, unsigned int size)
 {
     if((buffSize-filledSize)<size) {
-        debug("CircularBuffer::Put not enough free space")
+       debug("CircularBuffer::Put not enough free space")
        return false;
 //        filledStart = bufStart;
 //        filledEnd = bufStart;

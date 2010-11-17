@@ -52,6 +52,8 @@ AudioDevice::AudioDevice(const ObjectInfo &info, QObject *parent) :
 //    sharedPointer=sptr;
 //    listAudioDevices.insert(objInfo.id, sharedPointer);
 
+    devOutClosing=false;
+
     setObjectName(objInfo.name);
 
 
@@ -99,8 +101,10 @@ bool AudioDevice::SetObjectInput(AudioDeviceIn *obj)
 
     devIn = obj;
 
-    if(!obj)
+    if(!obj) {
         QTimer::singleShot(5000,this,SLOT(DeleteIfUnused()));
+
+    }
 
     return true;
 }
@@ -109,6 +113,8 @@ bool AudioDevice::SetObjectOutput(AudioDeviceOut *obj)
 {
     QMutexLocker l(&devicesMutex);
 
+    devOutClosing=false;
+
     if(devOut && obj) {
         debug("AudioDevice::SetObjectOutput already used")
         return false;
@@ -116,8 +122,11 @@ bool AudioDevice::SetObjectOutput(AudioDeviceOut *obj)
 
     devOut = obj;
 
-    if(!obj)
+    if(!obj) {
         QTimer::singleShot(5000,this,SLOT(DeleteIfUnused()));
+        devOutClosing=true;
+    }
+
     return true;
 }
 
@@ -609,6 +618,19 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
                 if(buf->filledSize>=framesPerBuffer)
                     buf->Get( ((float **) outputBuffer)[cpt], framesPerBuffer );
                 cpt++;
+            }
+        } else {
+            if(device->devOutClosing) {
+                //the device was removed : clear the output buffer one time
+                device->devOutClosing=false;
+                int cpt=0;
+                foreach(CircularBuffer *buf, device->listCircularBuffersOut) {
+                    //empty the circular buffer
+                    buf->Clear();
+                    //send a blank buffer to the device
+                    memcpy(((float **) outputBuffer)[cpt], AudioBuffer::blankBuffer, sizeof(float)*framesPerBuffer );
+                    cpt++;
+                }
             }
         }
     }

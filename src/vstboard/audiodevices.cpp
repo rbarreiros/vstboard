@@ -61,7 +61,7 @@ ListAudioInterfacesModel * AudioDevices::GetModel()
         if(err!=paNoError) {
             debug("AudioDevices::GetModel Pa_Terminate %s",Pa_GetErrorText( err ))
         }
-        model->clear();
+        model->invisibleRootItem()->removeRows(0, model->invisibleRootItem()->rowCount());
     }
 
 
@@ -71,25 +71,24 @@ ListAudioInterfacesModel * AudioDevices::GetModel()
     }
     BuildModel();
 
-    Connectables::AudioDevice::listDevMutex.lock();
+//    Connectables::AudioDevice::listDevMutex.lock();
     foreach(QSharedPointer<Connectables::AudioDevice>ad, Connectables::AudioDevice::listAudioDevices) {
         ad->SetSleep(false);
     }
-    Connectables::AudioDevice::listDevMutex.unlock();
+//    Connectables::AudioDevice::listDevMutex.unlock();
 
     return model;
 }
 
 void AudioDevices::BuildModel()
 {
+    if(!model)
+        model = new ListAudioInterfacesModel();
+
     QStringList headerLabels;
     headerLabels << "Name";
     headerLabels << "In";
     headerLabels << "Out";
-
-    if(!model)
-        model = new ListAudioInterfacesModel();
-
     model->setHorizontalHeaderLabels(  headerLabels );
 
     QStandardItem *parentItem = model->invisibleRootItem();

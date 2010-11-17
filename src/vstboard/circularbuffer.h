@@ -6,6 +6,7 @@ class CircularBuffer
 public:
     CircularBuffer();
     ~CircularBuffer();
+    void Clear();
     bool Put(float *buf, unsigned int size);
     bool Get(float *buf, unsigned int size);
     unsigned int filledSize;

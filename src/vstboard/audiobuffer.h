@@ -40,6 +40,7 @@ public:
         float GetVu();
         inline void ResetStackCounter() {stackSize=0;}
         inline bool IsEmpty() {return (stackSize==0);}
+        static const float const blankBuffer[BLANK_BUFFER_SIZE];
 
 protected:
         unsigned int stackSize;
@@ -47,7 +48,7 @@ protected:
         unsigned long nSize;
         unsigned long nAllocatedSize;
         float _maxVal;
-        static float blankBuffer[BLANK_BUFFER_SIZE];
+
         bool bExternalAllocation;
 };
 

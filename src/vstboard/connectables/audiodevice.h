@@ -83,6 +83,7 @@ namespace Connectables {
         void DeleteCircualBuffers();
 
         bool isClosing;
+        bool devOutClosing;
 
         float sampleRate;
         unsigned long bufferSize;
