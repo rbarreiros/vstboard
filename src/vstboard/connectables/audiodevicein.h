@@ -40,7 +40,7 @@ namespace Connectables {
         bool Open();
         bool Close();
         void Render();
-        int GetProcessingTime() {return 10;}
+//        int GetProcessingTime() {return 10;}
 
         bool bufferReady;
 

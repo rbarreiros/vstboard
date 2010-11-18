@@ -60,6 +60,9 @@ namespace Connectables {
         void SetSleep(bool sleeping);
 
         bool bufferReady;
+
+        static bool FindDeviceFromName(ObjectInfo &objInfo, PaDeviceInfo *devInfo=0);
+
         static int countDevicesReady;
         static int countInputDevices;
 
@@ -76,7 +79,6 @@ namespace Connectables {
                                PaStreamCallbackFlags statusFlags,
                                void *userData );
 
-        bool FindDeviceFromName();
         bool OpenStream(double sampleRate);
         bool CloseStream();
 
@@ -89,7 +91,7 @@ namespace Connectables {
         unsigned long bufferSize;
 
         PaStream *stream;
-        const PaDeviceInfo *devInfo;
+        PaDeviceInfo devInfo;
 
         AudioDeviceIn *devIn;
         AudioDeviceOut *devOut;
@@ -106,6 +108,9 @@ namespace Connectables {
         QList<CircularBuffer*>listCircularBuffersOut;
 
         float cpuUsage;
+
+    signals:
+        void InUseChanged(const ObjectInfo &objInfo, bool inUse);
 
     public slots:
         void SetSampleRate(float rate=44100.0);

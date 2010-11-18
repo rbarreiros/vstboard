@@ -36,7 +36,7 @@ namespace View {
 
     protected:
         void wheelEvent ( QGraphicsSceneWheelEvent * event );
-        OutlinedText *textItem;
+        QGraphicsSimpleTextItem *textItem;
         QGraphicsRectItem *rectVu;
         QString text;
         float value;

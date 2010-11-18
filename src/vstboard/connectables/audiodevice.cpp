@@ -41,7 +41,6 @@ AudioDevice::AudioDevice(const ObjectInfo &info, QObject *parent) :
     sampleRate(44100.0f),
     bufferSize(4096),
     stream(0),
-    devInfo(0),
     devIn(0),
     devOut(0),
     closed(true),
@@ -59,6 +58,9 @@ AudioDevice::AudioDevice(const ObjectInfo &info, QObject *parent) :
 
     connect(MainHost::Get(),SIGNAL(SampleRateChanged(float)),
             this,SLOT(SetSampleRate(float)));
+
+    connect(this,SIGNAL(InUseChanged(ObjectInfo,bool)),
+            MainHost::Get(),SIGNAL(OnAudioDeviceToggleInUse(ObjectInfo,bool)));
 }
 
 AudioDevice::~AudioDevice()
@@ -69,6 +71,9 @@ AudioDevice::~AudioDevice()
 
 void AudioDevice::DeleteIfUnused()
 {
+    if(isClosing)
+        return;
+
     bool del=false;
     devicesMutex.lock();
     if(!devIn && !devOut)
@@ -138,7 +143,7 @@ void AudioDevice::SetSampleRate(float rate)
     }
 }
 
-bool AudioDevice::FindDeviceFromName()
+bool AudioDevice::FindDeviceFromName(ObjectInfo &objInfo, PaDeviceInfo *devInfo)
 {
     int cptDuplicateNames=0;
     int canBe=-1;
@@ -155,7 +160,8 @@ bool AudioDevice::FindDeviceFromName()
 
             //we found the same number and the same name
             if(objInfo.duplicateNamesCounter == cptDuplicateNames) {
-                devInfo = info;
+                if(devInfo)
+                    *devInfo = *info;
                 deviceNumber = i;
                 break;
             }
@@ -168,7 +174,8 @@ bool AudioDevice::FindDeviceFromName()
         //but we found a device with the same name
         if(canBe!=-1) {
             deviceNumber=canBe;
-            devInfo = Pa_GetDeviceInfo(deviceNumber);
+            if(devInfo)
+                *devInfo = *Pa_GetDeviceInfo(deviceNumber);
         } else {
             debug("AudioDevice::FindDeviceFromName device not found")
             return false;
@@ -188,17 +195,17 @@ bool AudioDevice::OpenStream(double sampleRate)
     PaStreamParameters *outputParameters = NULL;
     PaStreamFlags flags = paClipOff; //paNoFlag;
 
-    if(devInfo->maxInputChannels > 0) {
+    if(devInfo.maxInputChannels > 0) {
 
         inputParameters = new(PaStreamParameters);
         bzero( inputParameters, sizeof( PaStreamParameters ) );
-        inputParameters->channelCount = devInfo->maxInputChannels;
+        inputParameters->channelCount = devInfo.maxInputChannels;
         inputParameters->device = objInfo.id;
         inputParameters->hostApiSpecificStreamInfo = NULL;
         inputParameters->sampleFormat = paFloat32 | paNonInterleaved;
         inputParameters->suggestedLatency = Pa_GetDeviceInfo(objInfo.id)->defaultLowInputLatency ;
 
-        switch(Pa_GetHostApiInfo( devInfo->hostApi )->type) {
+        switch(Pa_GetHostApiInfo( devInfo.hostApi )->type) {
             case paDirectSound :
                 directSoundStreamInfo.size = sizeof(PaWinDirectSoundStreamInfo);
                 directSoundStreamInfo.hostApiType = paDirectSound;
@@ -244,17 +251,17 @@ bool AudioDevice::OpenStream(double sampleRate)
         }
     }
 
-    if(devInfo->maxOutputChannels > 0) {
+    if(devInfo.maxOutputChannels > 0) {
 
         outputParameters = new(PaStreamParameters);
         bzero( outputParameters, sizeof( PaStreamParameters ) );
-        outputParameters->channelCount = devInfo->maxOutputChannels;
+        outputParameters->channelCount = devInfo.maxOutputChannels;
         outputParameters->device = objInfo.id;
         outputParameters->hostApiSpecificStreamInfo = NULL;
         outputParameters->sampleFormat = paFloat32 | paNonInterleaved;
         outputParameters->suggestedLatency = Pa_GetDeviceInfo(objInfo.id)->defaultLowOutputLatency ;
 
-        switch(Pa_GetHostApiInfo( devInfo->hostApi )->type) {
+        switch(Pa_GetHostApiInfo( devInfo.hostApi )->type) {
             case paDirectSound :
                 directSoundStreamInfo.size = sizeof(PaWinDirectSoundStreamInfo);
                 directSoundStreamInfo.hostApiType = paDirectSound;
@@ -330,6 +337,7 @@ bool AudioDevice::OpenStream(double sampleRate)
         return false;
     }
 
+    emit InUseChanged(objInfo,true);
 //    const PaStreamInfo *inf = Pa_GetStreamInfo(&stream);
     return true;
 }
@@ -341,7 +349,7 @@ bool AudioDevice::Open()
 //    debug("%s open",objectName().toAscii().constData())
 
     //find the corresponding device
-    if(!FindDeviceFromName()) {
+    if(!FindDeviceFromName(objInfo,&devInfo)) {
         return false;
     }
 
@@ -350,7 +358,7 @@ bool AudioDevice::Open()
     if(!OpenStream(sampleRate)) {
 
         //if it fails, try to open with the default rate
-        sampleRate = devInfo->defaultSampleRate;
+        sampleRate = devInfo.defaultSampleRate;
         if(!OpenStream(sampleRate)) {
             return false;
         }
@@ -378,9 +386,9 @@ bool AudioDevice::Open()
         return false;
     }
 
-    for(int i=0; i<devInfo->maxInputChannels; i++ )
+    for(int i=0; i<devInfo.maxInputChannels; i++ )
         listCircularBuffersIn << new CircularBuffer();
-    for(int i=0; i<devInfo->maxOutputChannels; i++ )
+    for(int i=0; i<devInfo.maxOutputChannels; i++ )
         listCircularBuffersOut << new CircularBuffer();
 
     closed=false;
@@ -395,6 +403,16 @@ bool AudioDevice::CloseStream()
         return false;
     }
     isClosing=true;
+
+    emit InUseChanged(objInfo,false);
+
+    foreach(CircularBuffer *buf, listCircularBuffersOut) {
+        buf->Clear();
+    }
+    foreach(CircularBuffer *buf, listCircularBuffersIn) {
+        buf->Clear();
+    }
+
 
     devicesMutex.unlock();
 
@@ -625,7 +643,7 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
                 device->devOutClosing=false;
                 int cpt=0;
                 foreach(CircularBuffer *buf, device->listCircularBuffersOut) {
-                    //empty the circular buffer
+                    //empty the circular buffer, in case we reopen this device
                     buf->Clear();
                     //send a blank buffer to the device
                     memcpy(((float **) outputBuffer)[cpt], AudioBuffer::blankBuffer, sizeof(float)*framesPerBuffer );

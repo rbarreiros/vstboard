@@ -71,6 +71,8 @@ MainHost::MainHost(QObject *parent) :
 
     listMidiDevices = new MidiDevices();
     listAudioDevices = new AudioDevices();
+    connect(this,SIGNAL(OnAudioDeviceToggleInUse(ObjectInfo,bool)),
+            listAudioDevices,SLOT(OnToggleDeviceInUse(ObjectInfo,bool)));
 
     //timer
     timeFromStart.start();

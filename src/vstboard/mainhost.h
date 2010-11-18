@@ -142,6 +142,7 @@ signals:
 //    void ProgramChanged(const QModelIndex &progIndex);
     void ObjectRemoved(int contrainerId, int obj);
     void SolverToUpdate();
+    void OnAudioDeviceToggleInUse(const ObjectInfo &objInfo, bool inUse);
 
 public slots:
     void OnCableAdded(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
@@ -154,6 +155,8 @@ public slots:
 //    void UpdateCpuLoad(float load);
     void SetTempo(int tempo=120, int sign1=4, int sign2=4);
     void OnNewRenderingOrder(orderedNodes *renderLines);
+
+
 
 private slots:
 

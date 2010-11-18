@@ -24,6 +24,7 @@
 #include "precomp.h"
 #include "portaudio.h"
 #include "models/listaudiointerfacesmodel.h"
+#include "connectables/objectinfo.h"
 
 class AudioDevices : public QObject
 {
@@ -36,6 +37,9 @@ public:
 private:
     void BuildModel();
     ListAudioInterfacesModel *model;
+
+public slots:
+    void OnToggleDeviceInUse(const ObjectInfo &objInfo, bool opened);
 };
 
 #endif // AUDIODEVICES_H

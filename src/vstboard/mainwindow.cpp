@@ -55,8 +55,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->treeAudioInterfaces->header()->setResizeMode(0,QHeaderView::Stretch);
     ui->treeAudioInterfaces->header()->setResizeMode(1,QHeaderView::Fixed);
     ui->treeAudioInterfaces->header()->setResizeMode(2,QHeaderView::Fixed);
+    ui->treeAudioInterfaces->header()->setResizeMode(3,QHeaderView::Fixed);
     ui->treeAudioInterfaces->header()->resizeSection(1,30);
     ui->treeAudioInterfaces->header()->resizeSection(2,30);
+    ui->treeAudioInterfaces->header()->resizeSection(3,40);
+    ui->treeAudioInterfaces->expandAll();
 
     //midi devices
     ui->treeMidiInterfaces->setModel(mainHost->GetMidiDeviceModel());
@@ -65,6 +68,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->treeMidiInterfaces->header()->setResizeMode(2,QHeaderView::Fixed);
     ui->treeMidiInterfaces->header()->resizeSection(1,30);
     ui->treeMidiInterfaces->header()->resizeSection(2,30);
+    ui->treeMidiInterfaces->expandAll();
 
     BuildListTools();
 
@@ -395,7 +399,7 @@ void MainWindow::readSettings()
     //window state
     settings.beginGroup("MainWindow");
 
-    if(settings.contains("geometry")) {
+    if(settings.contains("geometry") && settings.contains("state")) {
         restoreGeometry(settings.value("geometry").toByteArray());
         restoreState(settings.value("state").toByteArray());
     } else {
@@ -426,6 +430,8 @@ void MainWindow::resetSettings()
         dock->setVisible(true);
     }
 
+    ui->Programs->resetSettings();
+
     addDockWidget(Qt::LeftDockWidgetArea,  ui->dockTools);
     addDockWidget(Qt::LeftDockWidgetArea,  ui->dockMidiDevices);
     addDockWidget(Qt::LeftDockWidgetArea,  ui->dockAudioDevices);
@@ -436,8 +442,6 @@ void MainWindow::resetSettings()
     addDockWidget(Qt::RightDockWidgetArea,  ui->dockHostModel);
     addDockWidget(Qt::RightDockWidgetArea,  ui->dockParking);
 
-
-
     tabifyDockWidget(ui->dockTools,ui->dockMidiDevices);
     tabifyDockWidget(ui->dockMidiDevices,ui->dockAudioDevices);
     tabifyDockWidget(ui->dockAudioDevices,ui->dockVstBrowser);
@@ -447,13 +451,14 @@ void MainWindow::resetSettings()
 
     ui->actionHost_panel->setChecked(true);
     ui->actionProject_panel->setChecked(true);
-    ui->actionProgram_panel->setCheckable(true);
+    ui->actionProgram_panel->setChecked(true);
+
     int h = ui->splitterPanels->height();
     QList<int>heights;
     heights << h << h << h;
     ui->splitterPanels->setSizes(heights);
 
-    ui->Programs->resetSettings();
+
 
 }
 

@@ -40,7 +40,7 @@ public:
         float GetVu();
         inline void ResetStackCounter() {stackSize=0;}
         inline bool IsEmpty() {return (stackSize==0);}
-        static const float const blankBuffer[BLANK_BUFFER_SIZE];
+        static float const blankBuffer[BLANK_BUFFER_SIZE];
 
 protected:
         unsigned int stackSize;

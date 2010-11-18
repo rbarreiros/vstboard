@@ -89,6 +89,7 @@ void AudioDevices::BuildModel()
     headerLabels << "Name";
     headerLabels << "In";
     headerLabels << "Out";
+    headerLabels << "InUse";
     model->setHorizontalHeaderLabels(  headerLabels );
 
     QStandardItem *parentItem = model->invisibleRootItem();
@@ -96,8 +97,7 @@ void AudioDevices::BuildModel()
     //APIs
     for (int i = 0; i < Pa_GetHostApiCount(); ++i) {
         QStandardItem *api = new QStandardItem(Pa_GetHostApiInfo(i)->name);
-        api->setColumnCount(1);
-
+       // api->setColumnCount(1);
         parentItem->appendRow(api);
     }
 
@@ -140,7 +140,33 @@ void AudioDevices::BuildModel()
         outs->setEditable(false);
         items << outs;
 
+        QStandardItem *inUse = new QStandardItem();
+        inUse->setCheckable(true);
+        inUse->setCheckable(false);
+        inUse->setEditable(false);
+        items << inUse;
+
         QStandardItem *parent = model->item(devInfo->hostApi,0);
         parent->appendRow(items);
+    }
+}
+
+void AudioDevices::OnToggleDeviceInUse(const ObjectInfo &objInfo, bool opened)
+{
+    for(int i=0; i<model->invisibleRootItem()->rowCount();i++) {
+        QStandardItem *itemApi = model->item(i,0);
+        if(itemApi->data(Qt::DisplayRole).toString()==objInfo.api) {
+            for(int j=0; j<itemApi->rowCount(); j++) {
+                QStandardItem *itemDev = itemApi->child(j,0);
+                ObjectInfo info = itemDev->data(UserRoles::objInfo).value<ObjectInfo>();
+                if(info.id == objInfo.id) {
+                    if(opened)
+                        itemApi->child(j,3)->setCheckState(Qt::Checked);
+                    else
+                        itemApi->child(j,3)->setCheckState(Qt::Unchecked);
+                    return;
+                }
+            }
+        }
     }
 }

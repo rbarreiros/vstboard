@@ -20,7 +20,7 @@
 
 #include "audiobuffer.h"
 
-const float const AudioBuffer::blankBuffer[] = {.0f};
+float const AudioBuffer::blankBuffer[] = {.0f};
 
 AudioBuffer::AudioBuffer(bool externalAllocation) :
     stackSize(0),

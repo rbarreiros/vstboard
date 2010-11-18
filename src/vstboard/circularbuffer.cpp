@@ -28,7 +28,7 @@ void CircularBuffer::Clear()
 bool CircularBuffer::Put(float *buf, unsigned int size)
 {
     if((buffSize-filledSize)<size) {
-       debug("CircularBuffer::Put not enough free space")
+//       debug("CircularBuffer::Put not enough free space")
        return false;
 //        filledStart = bufStart;
 //        filledEnd = bufStart;

@@ -72,6 +72,12 @@ void AudioDeviceIn::SetBufferSize(long size)
 
 bool AudioDeviceIn::Open()
 {
+    //can we find this device on this computer ?
+    if(!AudioDevice::FindDeviceFromName(objInfo)) {
+        debug("AudioDeviceIn::Open device not found")
+        return false;
+    }
+
     closed=false;
 
     //create the audiodevice if needed
@@ -97,16 +103,13 @@ bool AudioDeviceIn::Open()
     if(!parentDevice)
         return false;
 
-    if(!parentDevice->devInfo)
-        return false;
-
     //if no input channels
-    if(parentDevice->devInfo->maxInputChannels==0) {
+    if(parentDevice->devInfo.maxInputChannels==0) {
         parentDevice.clear();
         return false;
     }
 
-    for(int i=0;i<parentDevice->devInfo->maxInputChannels;i++) {
+    for(int i=0;i<parentDevice->devInfo.maxInputChannels;i++) {
 //        AudioPinOut *pin = new AudioPinOut(this,i,true);
         AudioPinOut *pin = new AudioPinOut(this,i);
         pin->buffer->SetSize(MainHost::Get()->GetBufferSize());
@@ -124,4 +127,3 @@ bool AudioDeviceIn::Open()
     Object::Open();
     return true;
 }
-
