@@ -317,6 +317,8 @@ bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int
             }
             break;
         }
+        default:
+            break;
 
     }
 

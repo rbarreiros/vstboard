@@ -60,6 +60,8 @@ MainHost::MainHost(QObject *parent) :
     modelParking->setColumnCount(1);
     modelProxy = new HostModelProxy(model);
 
+    Connectables::ObjectFactory::Create(this);
+
     //init variables
 //    cpuLoad = .0f;
     sampleRate = 44100.0;

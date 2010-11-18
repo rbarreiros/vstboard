@@ -71,12 +71,13 @@ public:
            try {
                return QApplication::notify(rec, ev);
            }
-           catch (char const *str) {
-               debug("EXCEPTION: %s",str)
-               return false;
-           }
            catch (...) {
                debug("Unknown exception!")
+#ifdef _MSC_VER
+                __asm int 3
+#else
+                __asm("int3");
+#endif
                abort();
            }
        }

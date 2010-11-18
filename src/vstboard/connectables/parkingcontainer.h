@@ -43,7 +43,7 @@ namespace Connectables {
         QDataStream & toStream (QDataStream &) const;
         QDataStream & fromStream (QDataStream &);
     protected:
-        QList< QSharedPointer< Object > >listStaticObjects;
+        QList< QWeakPointer< Object > >listStaticObjects;
 
     };
 }

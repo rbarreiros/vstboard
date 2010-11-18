@@ -44,9 +44,9 @@ void ParkingContainer::AddObject(QSharedPointer<Object> objPtr)
     if(closed)
         return;
 
-    listStaticObjects << objPtr;
     objPtr->SetContainerId(-1);
     objPtr->SetParkingIndex(modelIndex);
+    listStaticObjects << objPtr.toWeakRef();
 }
 
 void ParkingContainer::RemoveObject(QSharedPointer<Object> objPtr)
@@ -54,7 +54,7 @@ void ParkingContainer::RemoveObject(QSharedPointer<Object> objPtr)
     if(objPtr.isNull())
         return;
 
-    listStaticObjects.removeAll(objPtr);
+    listStaticObjects.removeAll(objPtr.toWeakRef());
 }
 
 void ParkingContainer::Clear()

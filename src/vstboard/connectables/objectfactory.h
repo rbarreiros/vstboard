@@ -30,10 +30,12 @@ namespace Connectables {
 
     typedef QHash<int,QWeakPointer<Object> > hashObjects;
 
-    class ObjectFactory
+    class ObjectFactory : public QObject
     {
+    Q_OBJECT
     public:
-        static ObjectFactory *Get();
+        static ObjectFactory * Create(QObject *parent=0);
+        inline static ObjectFactory * Get() {return theObjFactory;}
         ~ObjectFactory();
 
         QSharedPointer<Object> NewObject(const ObjectInfo &info);
@@ -50,9 +52,8 @@ namespace Connectables {
         const hashObjects &GetListObjects() {return listObjects;}
 
     private:
-        ObjectFactory();
+        ObjectFactory(QObject *parent=0);
         static ObjectFactory *theObjFactory;
-        static QMutex singletonMutex;
 
         hashObjects listObjects;
         int cptListObjects;

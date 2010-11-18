@@ -40,19 +40,17 @@
 using namespace Connectables;
 
 ObjectFactory *ObjectFactory::theObjFactory=0;
-QMutex ObjectFactory::singletonMutex;
 
-ObjectFactory * ObjectFactory::Get()
+ObjectFactory * ObjectFactory::Create(QObject *parent)
 {
-    //singletonMutex.lock();
     if(!theObjFactory)
-        theObjFactory = new ObjectFactory();
-    //singletonMutex.unlock();
+        theObjFactory = new ObjectFactory(parent);
 
     return theObjFactory;
 }
 
-ObjectFactory::ObjectFactory() :
+ObjectFactory::ObjectFactory(QObject *parent) :
+    QObject(parent),
     cptListObjects(50)
 {
 }
