@@ -2,3 +2,4 @@
 *.pro.user*
 /tools/*
 Thumbs.db
+.DS_Store
