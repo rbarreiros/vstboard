@@ -78,8 +78,8 @@ linux-g++ {
     QMAKE_CFLAGS += -Fd$$top_destdir/$$TARGET
 
 #to add symbols :
-    QMAKE_CFLAGS_RELEASE +=  -Zi
-    QMAKE_LFLAGS_RELEASE += /DEBUG
+#    QMAKE_CFLAGS_RELEASE +=  -Zi
+#    QMAKE_LFLAGS_RELEASE += /DEBUG
 
 } else {
     error("compiler not configured in config.pri")
