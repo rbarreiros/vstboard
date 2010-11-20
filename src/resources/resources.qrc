@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>LICENSE.html</file>
         <file>img16x16/empty.png</file>
         <file>img16x16/folder.png</file>
         <file>img16x16/file_project.png</file>

@@ -5,16 +5,16 @@
 #    This file is part of VstBoard.
 #
 #    VstBoard is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
+#    it under the terms of the under the terms of the GNU Lesser General Public License as published by
 #    the Free Software Foundation, either version 3 of the License, or
 #    (at your option) any later version.
 #
 #    VstBoard is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#    under the terms of the GNU Lesser General Public License for more details.
 #
-#    You should have received a copy of the GNU General Public License
+#    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
@@ -337,6 +337,13 @@ bool AudioDevice::OpenStream(double sampleRate)
         return false;
     }
 
+    err = Pa_SetStreamFinishedCallback( stream, &paStreamFinished );
+    if( err != paNoError ) {
+        Pa_CloseStream(stream);
+        debug("AudioDevice::OpenStream Pa_SetStreamFinishedCallback %s",Pa_GetErrorText( err ))
+        return false;
+    }
+
     emit InUseChanged(objInfo,true);
 //    const PaStreamInfo *inf = Pa_GetStreamInfo(&stream);
     return true;
@@ -406,12 +413,12 @@ bool AudioDevice::CloseStream()
 
     emit InUseChanged(objInfo,false);
 
-    foreach(CircularBuffer *buf, listCircularBuffersOut) {
-        buf->Clear();
-    }
-    foreach(CircularBuffer *buf, listCircularBuffersIn) {
-        buf->Clear();
-    }
+//    foreach(CircularBuffer *buf, listCircularBuffersOut) {
+//        buf->Clear();
+//    }
+//    foreach(CircularBuffer *buf, listCircularBuffersIn) {
+//        buf->Clear();
+//    }
 
 
     devicesMutex.unlock();
@@ -443,14 +450,14 @@ bool AudioDevice::CloseStream()
                 if( err != paNoError ) {
                     debug("AudioDevice::CloseStream Pa_StopStream %s %s",objectName().toAscii().constData(),Pa_GetErrorText( err ))
 
-                    //retry
-                    Sleep(1000);
-                    err = Pa_StopStream(stream);
-                    if( err != paNoError ) {
-                        debug("AudioDevice::CloseStream Pa_StopStream 2 %s %s",objectName().toAscii().constData(),Pa_GetErrorText( err ))
-                        DeleteCircualBuffers();
-                        return false;
-                    }
+//                    //retry
+//                    Sleep(1000);
+//                    err = Pa_StopStream(stream);
+//                    if( err != paNoError ) {
+//                        debug("AudioDevice::CloseStream Pa_StopStream 2 %s %s",objectName().toAscii().constData(),Pa_GetErrorText( err ))
+//                        DeleteCircualBuffers();
+//                        return false;
+//                    }
                 }
             }
 
@@ -459,14 +466,14 @@ bool AudioDevice::CloseStream()
             if( err != paNoError ) {
                 debug("AudioDevice::CloseStream Pa_CloseStream %s %s",objectName().toAscii().constData(),Pa_GetErrorText( err ))
 
-                //retry
-                Sleep(1000);
-                err = Pa_CloseStream(stream);
-                if( err != paNoError ) {
-                    debug("AudioDevice::CloseStream Pa_CloseStream 2 %s %s",objectName().toAscii().constData(),Pa_GetErrorText( err ))
-                    DeleteCircualBuffers();
-                    return false;
-                }
+//                //retry
+//                Sleep(1000);
+//                err = Pa_CloseStream(stream);
+//                if( err != paNoError ) {
+//                    debug("AudioDevice::CloseStream Pa_CloseStream 2 %s %s",objectName().toAscii().constData(),Pa_GetErrorText( err ))
+//                    DeleteCircualBuffers();
+//                    return false;
+//                }
             }
         }
         stream = 0;
@@ -532,6 +539,12 @@ void AudioDevice::SetSleep(bool sleeping)
 float AudioDevice::GetCpuUsage()
 {
    return Pa_GetStreamCpuLoad(stream);
+}
+
+void AudioDevice::paStreamFinished( void* userData )
+{
+    AudioDevice* device = (AudioDevice*)userData;
+    debug("paStreamFinished %s",device->objectName().toAscii().constData())
 }
 
 int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
