@@ -26,8 +26,8 @@
 #define EMPTY_PROGRAM 0xffff
 #define TEMP_PROGRAM 0xfffe
 
-#define SETUP_FILE_EXTENSION "ctrls"
-#define PROJECT_FILE_EXTENSION "ctrlp"
+#define SETUP_FILE_EXTENSION "vstbsetup"
+#define PROJECT_FILE_EXTENSION "vstbproject"
 #define NB_RECENT_FILES 5
 
 namespace UserRoles {

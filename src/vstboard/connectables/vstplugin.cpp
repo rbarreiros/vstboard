@@ -52,6 +52,9 @@ VstPlugin::~VstPlugin()
 
 bool VstPlugin::Close()
 {
+    Object::Close();
+
+
     if(editorWnd) {
         objMutex.lock();
         EffEditClose();
@@ -75,8 +78,6 @@ bool VstPlugin::Close()
     }
     return true;
 }
-
-
 
 void VstPlugin::SetSleep(bool sleeping)
 {

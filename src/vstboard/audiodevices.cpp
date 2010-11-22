@@ -24,16 +24,31 @@
 #include "connectables/audiodevice.h"
 #include "mainhost.h"
 
+AudioDevices * AudioDevices::theAudioDevices=0;
+QHash<int,QSharedPointer<Connectables::AudioDevice> >AudioDevices::listAudioDevices;
+
+AudioDevices *AudioDevices::Create(QObject *parent)
+{
+    if(!theAudioDevices)
+        theAudioDevices = new AudioDevices(parent);
+
+    return theAudioDevices;
+}
+
 AudioDevices::AudioDevices(QObject *parent) :
         QObject(parent),
-        model(0)
+        model(0),
+        countActiveDevices(0)
 {
     GetModel();
+
+    fakeRenderTimer.start(FAKE_RENDER_TIMER_MS);
+
 }
 
 AudioDevices::~AudioDevices()
 {
-    foreach(QSharedPointer<Connectables::AudioDevice>ad, Connectables::AudioDevice::listAudioDevices) {
+    foreach(QSharedPointer<Connectables::AudioDevice>ad, listAudioDevices) {
         ad->SetSleep(true);
     }
 
@@ -46,12 +61,15 @@ AudioDevices::~AudioDevices()
         model->deleteLater();
     }
 
-    Connectables::AudioDevice::listAudioDevices.clear();
+    foreach(QSharedPointer<Connectables::AudioDevice>dev, listAudioDevices)
+        dev->DeleteIfUnused();
+
+    listAudioDevices.clear();
 }
 
 ListAudioInterfacesModel * AudioDevices::GetModel()
 {
-    foreach(QSharedPointer<Connectables::AudioDevice>ad, Connectables::AudioDevice::listAudioDevices) {
+    foreach(QSharedPointer<Connectables::AudioDevice>ad, listAudioDevices) {
         ad->SetSleep(true);
     }
 
@@ -72,7 +90,7 @@ ListAudioInterfacesModel * AudioDevices::GetModel()
     BuildModel();
 
 //    Connectables::AudioDevice::listDevMutex.lock();
-    foreach(QSharedPointer<Connectables::AudioDevice>ad, Connectables::AudioDevice::listAudioDevices) {
+    foreach(QSharedPointer<Connectables::AudioDevice>ad, listAudioDevices) {
         ad->SetSleep(false);
     }
 //    Connectables::AudioDevice::listDevMutex.unlock();
@@ -160,13 +178,33 @@ void AudioDevices::OnToggleDeviceInUse(const ObjectInfo &objInfo, bool opened)
                 QStandardItem *itemDev = itemApi->child(j,0);
                 ObjectInfo info = itemDev->data(UserRoles::objInfo).value<ObjectInfo>();
                 if(info.id == objInfo.id) {
-                    if(opened)
+                    if(opened) {
                         itemApi->child(j,3)->setCheckState(Qt::Checked);
-                    else
+                        countActiveDevices++;
+                    } else {
                         itemApi->child(j,3)->setCheckState(Qt::Unchecked);
+                        countActiveDevices--;
+                    }
+
+                    //the renderer is normally launched when all the audio devices are ready,
+                    //if there is no audio device we have to run it a "fake engine"
+                    if(countActiveDevices==1) {
+//                        disconnect(&fakeRenderTimer,SIGNAL(timeout()),
+//                                MainHost::Get(), SLOT(Render()));
+                        debug("AudioDevices::OnToggleDeviceInUse fakeRender off")
+                        fakeRenderTimer.stop();
+                    }
+                    if(countActiveDevices==0) {
+                        debug("AudioDevices::OnToggleDeviceInUse fakeRender on")
+                        fakeRenderTimer.start(FAKE_RENDER_TIMER_MS);
+//                        connect(&fakeRenderTimer,SIGNAL(timeout()),
+//                                MainHost::Get(), SLOT(Render()));
+                    }
                     return;
                 }
             }
         }
     }
 }
+
+

@@ -60,8 +60,10 @@ Object::Object(int index, const ObjectInfo &info) :
     setObjectName(QString("%1.%2").arg(objInfo.name).arg(index));
 }
 
+
 Object::~Object()
 {
+    debug2(<< "delete Object" << objectName())
     Close();
 }
 

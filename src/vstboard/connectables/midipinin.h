@@ -31,14 +31,14 @@ namespace Connectables {
     public:
         MidiPinIn(Object *parent, int number=0, bool bridge=false);
         void ReceiveMsg(const int msgType=0,void *data=0);
-        virtual float GetVu();
+        float GetValue();
 
-        void SetActivity(int channel);
-        int GetActivity();
+//        void SetActivity(int channel);
+//        int GetActivity();
 
 
     protected:
-        int activity;
+//        bool activity;
         QList<PmMessage*>msgBuffer;
     };
 

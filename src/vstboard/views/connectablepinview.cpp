@@ -23,6 +23,9 @@
 
 using namespace View;
 
+QBrush ConnectablePinView::normalBrush;
+QBrush ConnectablePinView::highBrush;
+
 ConnectablePinView::ConnectablePinView(QAbstractItemModel *model, QGraphicsItem * parent, Connectables::Pin *pin) :
        PinView(model,parent,pin),
        value(0),
@@ -43,10 +46,17 @@ ConnectablePinView::ConnectablePinView(QAbstractItemModel *model, QGraphicsItem 
     rectVu = new QGraphicsRectItem(this);
     rectBgnd->setBrush(Qt::NoBrush);
 
-    QLinearGradient gradient(0, 0, geometry().right(), 0);
-    gradient.setColorAt(0, QColor::fromRgbF(0, 0, 0, 0));
-    gradient.setColorAt(1, QColor::fromRgbF(0, 1, 0, 1));
-    rectVu->setBrush(QBrush(gradient));
+    QLinearGradient normalgradient(0, 0, geometry().right(), 0);
+    normalgradient.setColorAt(0, QColor::fromRgbF(0, 0, 0, 0));
+    normalgradient.setColorAt(1, QColor::fromRgbF(0, 1, 0, 1));
+    normalBrush = QBrush(normalgradient);
+
+    QLinearGradient highgradient(0, 0, geometry().right(), 0);
+    highgradient.setColorAt(0, QColor::fromRgbF(0, 1, 0, 0));
+    highgradient.setColorAt(1, QColor::fromRgbF(0, 0, 1, 1));
+    highBrush = QBrush(highgradient);
+
+    rectVu->setBrush(normalBrush);
 }
 
 void ConnectablePinView::UpdateModelIndex(const QModelIndex &index)
@@ -61,8 +71,9 @@ void ConnectablePinView::UpdateModelIndex(const QModelIndex &index)
         if(index.data(UserRoles::value).toFloat()>value)
             value = index.data(UserRoles::value).toFloat();
     } else {
-        float newVu = geometry().width() * index.data(UserRoles::value).toFloat();
-            rectVu->setRect(0,0, newVu, geometry().height());
+        value = index.data(UserRoles::value).toFloat();
+        float newVu = geometry().width() * value;
+        rectVu->setRect(0,0, newVu, geometry().height());
     }
 
     ConnectionInfo pinInfo = index.data(UserRoles::connectionInfo).value<ConnectionInfo>();
@@ -82,6 +93,12 @@ void ConnectablePinView::updateVu()
 
     float newVu = geometry().width() * value;
     rectVu->setRect(0,0, newVu, geometry().height());
+
+//    if(value>=.9f) {
+//        rectVu->setBrush(highBrush);
+//    } else {
+//        rectVu->setBrush(normalBrush);
+//    }
 }
 
 void ConnectablePinView::wheelEvent ( QGraphicsSceneWheelEvent * event )

@@ -77,11 +77,16 @@ void ParkingContainer::SetParentModeIndex(const QModelIndex &parentIndex)
     }
 }
 
-QDataStream & ParkingContainer::toStream (QDataStream &out) const
+QDataStream & ParkingContainer::toStream (QDataStream &out)
 {
     switch(MainHost::Get()->filePass) {
         case 0:
         {
+            foreach(QWeakPointer<Object> objPtr, listStaticObjects) {
+                if(objPtr.isNull())
+                    listStaticObjects.removeAll(objPtr);
+            }
+
             out << (quint16)listStaticObjects.size();
             foreach(QSharedPointer<Object> objPtr, listStaticObjects) {
                 if(!objPtr.isNull()) {
@@ -95,7 +100,8 @@ QDataStream & ParkingContainer::toStream (QDataStream &out) const
                     out << (quint16)tmpStream.size();
                     out << tmpStream;
                 } else {
-                    out<<(quint8)ObjType::ND;
+                    debug("ParkingContainer::toStream pass1 skip deleted object")
+                    out<<(ObjectInfo)ObjectInfo();
                 }
             }
             break;
@@ -108,6 +114,7 @@ QDataStream & ParkingContainer::toStream (QDataStream &out) const
                     out<<(quint16)objPtr->GetIndex();
                     out<<*objPtr.data();
                 } else {
+                    debug("ParkingContainer::toStream pass2 skip deleted object")
                     out<<(quint16)-1;
                 }
             }
@@ -136,21 +143,24 @@ QDataStream & ParkingContainer::fromStream (QDataStream &in)
                 in >> size;
                 in >> tmpStream;
 
-                QSharedPointer<Object> objPtr = ObjectFactory::Get()->NewObject(info);
-                if(!objPtr.isNull()) {
-                    AddObject(objPtr);
-                    tmp >> *objPtr.data();
-                } else {
-                    //error while creating the object, build a dummy object with the same saved id
-                    info.objType=ObjType::dummy;
-                    objPtr = ObjectFactory::Get()->NewObject(info);
-                    QDataStream tmp2( &tmpStream , QIODevice::ReadWrite);
+                if(info.objType != ObjType::dummy) {
+
+                    QSharedPointer<Object> objPtr = ObjectFactory::Get()->NewObject(info);
                     if(!objPtr.isNull()) {
                         AddObject(objPtr);
-                        tmp2 >> *objPtr.data();
+                        tmp >> *objPtr.data();
                     } else {
-                        //can't even create a dummy object ?
-                        debug("Container::fromStream dummy object not created")
+                        //error while creating the object, build a dummy object with the same saved id
+                        info.objType=ObjType::dummy;
+                        objPtr = ObjectFactory::Get()->NewObject(info);
+                        QDataStream tmp2( &tmpStream , QIODevice::ReadWrite);
+                        if(!objPtr.isNull()) {
+                            AddObject(objPtr);
+                            tmp2 >> *objPtr.data();
+                        } else {
+                            //can't even create a dummy object ?
+                            debug("Container::fromStream dummy object not created")
+                        }
                     }
                 }
             }
@@ -177,7 +187,7 @@ QDataStream & ParkingContainer::fromStream (QDataStream &in)
     return in;
 }
 
-QDataStream & operator<< (QDataStream & out, const Connectables::ParkingContainer& value)
+QDataStream & operator<< (QDataStream & out, Connectables::ParkingContainer& value)
 {
     return value.toStream(out);
 }

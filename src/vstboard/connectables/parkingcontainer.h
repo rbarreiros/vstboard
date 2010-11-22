@@ -40,7 +40,7 @@ namespace Connectables {
 
         void Clear();
 
-        QDataStream & toStream (QDataStream &) const;
+        QDataStream & toStream (QDataStream &);
         QDataStream & fromStream (QDataStream &);
     protected:
         QList< QWeakPointer< Object > >listStaticObjects;
@@ -48,7 +48,7 @@ namespace Connectables {
     };
 }
 
-QDataStream & operator<< (QDataStream & out, const Connectables::ParkingContainer& value);
+QDataStream & operator<< (QDataStream & out, Connectables::ParkingContainer& value);
 QDataStream & operator>> (QDataStream & in, Connectables::ParkingContainer& value);
 
 #endif // PARKINGCONTAINER_H

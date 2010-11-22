@@ -50,7 +50,7 @@ MainHost::MainHost(QObject *parent) :
     filePass(0),
     solverNeedAnUpdate(false),
     solverUpdateEnabled(true),
-    listAudioDevices(0),
+//    listAudioDevices(0),
     mutexListCables(QMutex::Recursive),
     progToChange(-1)
 {
@@ -72,9 +72,12 @@ MainHost::MainHost(QObject *parent) :
             this, SLOT(SetProgram(QModelIndex)));
 
     listMidiDevices = new MidiDevices();
-    listAudioDevices = new AudioDevices();
+//    listAudioDevices = new AudioDevices();
+    AudioDevices * devices = AudioDevices::Create(this);
     connect(this,SIGNAL(OnAudioDeviceToggleInUse(ObjectInfo,bool)),
-            listAudioDevices,SLOT(OnToggleDeviceInUse(ObjectInfo,bool)));
+            devices,SLOT(OnToggleDeviceInUse(ObjectInfo,bool)));
+    connect(&devices->fakeRenderTimer,SIGNAL(timeout()),
+            this, SLOT(Render()));
 
     //timer
     timeFromStart.start();
@@ -114,7 +117,7 @@ MainHost::~MainHost()
     parkingContainer.clear();
 
     delete listMidiDevices;
-    delete listAudioDevices;
+//    delete listAudioDevices;
 
     delete Connectables::ObjectFactory::Get();
 
@@ -620,6 +623,7 @@ QDataStream & operator<< (QDataStream& out, MainHost& value)
 
     value.projectContainer->SaveProgram();
     value.programContainer->SaveProgram();
+    value.parkingContainer->SaveProgram();
 
     MainHost::Get()->filePass=0;
     out << *value.parkingContainer;

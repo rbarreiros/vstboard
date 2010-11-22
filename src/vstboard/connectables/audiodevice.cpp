@@ -26,11 +26,11 @@
 #include "../audiobuffer.h"
 #include "../renderer.h"
 #include "../mainhost.h"
-
+#include "../audiodevices.h"
 
 using namespace Connectables;
 
-QHash<int,QSharedPointer<AudioDevice> >AudioDevice::listAudioDevices;
+//QHash<int,QSharedPointer<AudioDevice> >AudioDevice::listAudioDevices;
 QMutex AudioDevice::listDevMutex;
 int AudioDevice::countDevicesReady=0;
 int AudioDevice::countInputDevices=0;
@@ -83,7 +83,7 @@ void AudioDevice::DeleteIfUnused()
     if(del) {
         SetSleep(true);
         listDevMutex.lock();
-        listAudioDevices.remove(objInfo.id);
+        AudioDevices::listAudioDevices.remove(objInfo.id);
         listDevMutex.unlock();
     }
 
@@ -108,7 +108,6 @@ bool AudioDevice::SetObjectInput(AudioDeviceIn *obj)
 
     if(!obj) {
         QTimer::singleShot(5000,this,SLOT(DeleteIfUnused()));
-
     }
 
     return true;
@@ -610,7 +609,7 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
 
             MainHost::Get()->Render();
 
-            foreach(QSharedPointer<AudioDevice>dev, listAudioDevices) {
+            foreach(QSharedPointer<AudioDevice>dev, AudioDevices::listAudioDevices) {
                 if(dev.isNull())
                     continue;
 

@@ -63,11 +63,11 @@ void Renderer::StartRender()
     orderedObjects::iterator i = renderSteps.begin();
     while (i != renderSteps.end()) {
         if(!i.value().isNull()) {
-
-            if(!i.value()->GetSleep())
-                i.value()->NewRenderLoop();
+            QSharedPointer<Connectables::Object>objPtr = i.value().toStrongRef();
+            if(!objPtr->GetSleep())
+                objPtr->NewRenderLoop();
         } else {
-            debug("obj deleted")
+            debug("Renderer::StartRender obj deleted")
         }
         ++i;
     }
@@ -75,8 +75,11 @@ void Renderer::StartRender()
     //render each node
     i = renderSteps.begin();
     while (i != renderSteps.end()) {
-        if(!i.value()->GetSleep())
-            i.value()->Render();
+        QSharedPointer<Connectables::Object>objPtr = i.value().toStrongRef();
+        if(!objPtr.isNull()) {
+            if(!objPtr->GetSleep())
+                objPtr->Render();
+        }
         ++i;
     }
 }

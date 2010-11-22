@@ -42,6 +42,9 @@ namespace View {
         float value;
         bool isParameter;
 
+        static QBrush normalBrush;
+        static QBrush highBrush;
+
     public slots:
         void updateVu();
     };

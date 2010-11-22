@@ -55,7 +55,7 @@ namespace Connectables {
         bool SetObjectInput(AudioDeviceIn *obj);
         bool SetObjectOutput(AudioDeviceOut *obj);
 
-        static QHash<qint32,QSharedPointer<AudioDevice> >listAudioDevices;
+//        static QHash<qint32,QSharedPointer<AudioDevice> >listAudioDevices;
 
         void SetSleep(bool sleeping);
 

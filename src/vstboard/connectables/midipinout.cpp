@@ -27,7 +27,21 @@ using namespace Connectables;
 MidiPinOut::MidiPinOut(Object *parent, int number, bool bridge)
     :Pin(parent,PinType::Midi,PinDirection::Output,number,bridge)
 {
+    falloff = 0.05f;
+
     setObjectName(QString("MidiOut%1").arg(number));
     visible=true;
 }
 
+void MidiPinOut::SendMsg(int msgType,void *data) {
+    Pin::SendMsg(msgType,data);
+    value+=.2f;
+}
+
+float MidiPinOut::GetValue()
+{
+    float v=value;
+    if(v>1.0f) v=1.0f;
+    value=.0f;
+    return v;
+}

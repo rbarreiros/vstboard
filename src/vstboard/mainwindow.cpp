@@ -51,7 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //    ImageCollection::Create(this);
 
     //audio devices
-    ui->treeAudioInterfaces->setModel(mainHost->GetAudioDevicesModel());
+    ui->treeAudioInterfaces->setModel(AudioDevices::Get()->GetModel());
     ui->treeAudioInterfaces->header()->setResizeMode(0,QHeaderView::Stretch);
     ui->treeAudioInterfaces->header()->setResizeMode(1,QHeaderView::Fixed);
     ui->treeAudioInterfaces->header()->setResizeMode(2,QHeaderView::Fixed);
@@ -59,7 +59,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->treeAudioInterfaces->header()->resizeSection(1,30);
     ui->treeAudioInterfaces->header()->resizeSection(2,30);
     ui->treeAudioInterfaces->header()->resizeSection(3,40);
-    ui->treeAudioInterfaces->expandAll();
+//    ui->treeAudioInterfaces->expandAll();
 
     //midi devices
     ui->treeMidiInterfaces->setModel(mainHost->GetMidiDeviceModel());
@@ -68,7 +68,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->treeMidiInterfaces->header()->setResizeMode(2,QHeaderView::Fixed);
     ui->treeMidiInterfaces->header()->resizeSection(1,30);
     ui->treeMidiInterfaces->header()->resizeSection(2,30);
-    ui->treeMidiInterfaces->expandAll();
+//    ui->treeMidiInterfaces->expandAll();
 
     BuildListTools();
 
@@ -108,13 +108,15 @@ MainWindow::MainWindow(QWidget *parent) :
     currentSetupFile = ConfigDialog::defaultSetupFile();
     if(!currentSetupFile.isEmpty()) {
         SetupFile file(this);
-        file.LoadFromFile(currentSetupFile);
+        if(!file.LoadFromFile(currentSetupFile))
+            currentSetupFile = "";
     }
 
     //load default project file
     currentProjectFile = ConfigDialog::defaultProjectFile();
     if(!currentProjectFile.isEmpty()) {
-        project->LoadFromFile(currentProjectFile);
+        if(!project->LoadFromFile(currentProjectFile))
+            currentProjectFile = "";
     }
 
     readSettings();
@@ -539,7 +541,7 @@ void MainWindow::openRecentProject()
 
 void MainWindow::on_actionRefresh_Audio_devices_triggered()
 {
-    ui->treeAudioInterfaces->setModel(mainHost->GetAudioDevicesModel());
+    ui->treeAudioInterfaces->setModel(AudioDevices::Get()->GetModel());
 }
 
 void MainWindow::on_actionRefresh_Midi_devices_triggered()

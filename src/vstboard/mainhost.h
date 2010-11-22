@@ -53,7 +53,7 @@ public:
     void Open();
 
     void SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum msgType,void *data);
-    void Render(unsigned long samples=0);
+
     void SetBufferSize(long size);
     void SetSampleRate(float rate=44100.0);
     int GetBufferSize() {return (int)bufferSize;}
@@ -75,7 +75,7 @@ public:
     QSharedPointer<Connectables::MainContainer> programContainer;
     QSharedPointer<Connectables::ParkingContainer> parkingContainer;
 
-    ListAudioInterfacesModel * GetAudioDevicesModel() {return listAudioDevices->GetModel();}
+//    ListAudioInterfacesModel * GetAudioDevicesModel() {return listAudioDevices->GetModel();}
     ListMidiInterfacesModel * GetMidiDeviceModel() {return listMidiDevices->GetModel();}
 
     PathSolver solver;
@@ -101,7 +101,7 @@ private:
     void SetupParking();
 
     MidiDevices *listMidiDevices;
-    AudioDevices *listAudioDevices;
+//    AudioDevices *listAudioDevices;
 
     QMap<int,Connectables::Object*>listContainers;
     QMap<ConnectionInfo,Connectables::Pin*>listPins;
@@ -155,7 +155,7 @@ public slots:
 //    void UpdateCpuLoad(float load);
     void SetTempo(int tempo=120, int sign1=4, int sign2=4);
     void OnNewRenderingOrder(orderedNodes *renderLines);
-
+    void Render(unsigned long samples=0);
 
 
 private slots:

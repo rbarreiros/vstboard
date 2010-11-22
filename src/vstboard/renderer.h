@@ -26,7 +26,7 @@
 class SolverNode;
 
 typedef QMultiHash<int, SolverNode*> orderedNodes;
-typedef QMultiHash<int, QSharedPointer<Connectables::Object> > orderedObjects;
+typedef QMultiHash<int, QWeakPointer<Connectables::Object> > orderedObjects;
 
 class Renderer : public QThread
 {

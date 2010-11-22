@@ -23,6 +23,7 @@
 #include "../globals.h"
 #include "../audiobuffer.h"
 #include "../mainhost.h"
+#include "../audiodevices.h"
 
 using namespace Connectables;
 
@@ -76,7 +77,7 @@ bool AudioDeviceOut::Open()
     {
         QMutexLocker l(&AudioDevice::listDevMutex);
 
-        if(!AudioDevice::listAudioDevices.contains(objInfo.id)) {
+        if(!AudioDevices::listAudioDevices.contains(objInfo.id)) {
     //        parentDevice = new AudioDevice(objInfo);
             AudioDevice *dev = new AudioDevice(objInfo);
             parentDevice = QSharedPointer<AudioDevice>(dev);
@@ -87,9 +88,9 @@ bool AudioDeviceOut::Open()
                 parentDevice.clear();
                 return false;
             }
-            AudioDevice::listAudioDevices.insert(objInfo.id, parentDevice);
+            AudioDevices::listAudioDevices.insert(objInfo.id, parentDevice);
         } else {
-            parentDevice = AudioDevice::listAudioDevices.value(objInfo.id);
+            parentDevice = AudioDevices::listAudioDevices.value(objInfo.id);
         }
     }
 

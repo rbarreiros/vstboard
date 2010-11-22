@@ -48,6 +48,7 @@ namespace Connectables {
         Pin(Object *parent,PinType::Enum type, PinDirection::Enum direction, int number, bool bridge=false );
         virtual ~Pin();
 
+        virtual void SendMsg(int msgType,void *data=0);
         virtual void ReceiveMsg(const int msgType=0,void *data=0) {}
         virtual float GetValue() {return value;}
 
@@ -88,7 +89,7 @@ namespace Connectables {
 
     public slots:
         virtual void updateView();
-        void SendMsg(int msgType,void *data=0);
+
 
     signals:
     };

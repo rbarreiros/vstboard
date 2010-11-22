@@ -29,7 +29,8 @@ namespace Connectables {
     {
     public:
         MidiPinOut(Object *parent,int number=0, bool bridge=false);
-
+        float GetValue();
+        void SendMsg(int msgType,void *data);
     };
 
 }

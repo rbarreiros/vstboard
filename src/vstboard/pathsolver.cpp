@@ -84,10 +84,10 @@ void PathSolver::Resolve(hashCables cables)
         }
 
         //no parents, no childs : don't render it
-        if(node->listChilds.isEmpty() && node->listParents.isEmpty()) {
-            SolverNode::listNodes.removeAll(node);
-            delete node;
-        }
+//        if(node->listChilds.isEmpty() && node->listParents.isEmpty()) {
+//            SolverNode::listNodes.removeAll(node);
+//            delete node;
+//        }
     }
 
     //unwrap loops
@@ -153,7 +153,9 @@ void PathSolver::Resolve(hashCables cables)
 
     //put the nodes in an ordered map
     foreach(SolverNode* node, SolverNode::listNodes) {
-        renderingOrder.insert(node->maxRenderOrder,node);
+        QSharedPointer<Connectables::Object>objPtr = node->objectPtr;
+        if(!objPtr.isNull() && objPtr->info().nodeType!=NodeType::container)
+            renderingOrder.insert(node->maxRenderOrder,node);
     }
 
     UpdateModel();
