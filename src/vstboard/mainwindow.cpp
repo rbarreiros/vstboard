@@ -125,9 +125,6 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     readSettings();
-
-
-
 }
 
 MainWindow::~MainWindow()

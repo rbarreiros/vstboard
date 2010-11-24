@@ -16,8 +16,6 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 
-BUILDNO = $$system("git describe")
-#DEFINES += APP_VERSION=\\\"$${BUILDNO}\\\"
 DEFINES += APP_NAME=\\\"VstBoard\\\"
 
 top_srcdir = ..
@@ -29,6 +27,7 @@ TEMPLATE = app
 #QT += sql
 
 #update version number
+BUILDNO = $$system("git describe")
 SRCDIR_WIN = $${_PRO_FILE_PWD_}
 SRCDIR_WIN ~= s,/,\\,g
 versionmk.target = version
