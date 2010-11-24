@@ -243,7 +243,9 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                 switch(info.objType) {
                     case ObjType::MainContainer :
                     {
-                        if(index.data().toString().startsWith("hostContainer")) {
+                        int objId = index.data(UserRoles::value).toInt();
+
+                        if(objId == FixedObjId::hostContainer) {
                             MainContainerView *cntView = new MainContainerView(model());
                             objView=cntView;
                             cntView->setParentItem(rootObjHost);
@@ -252,7 +254,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                             QTimer::singleShot(0, viewHost, SLOT(ForceResize()));
                         }
 
-                        if(index.data().toString().startsWith("projectContainer")) {
+                        if(objId == FixedObjId::projectContainer) {
                             MainContainerView *cntView = new MainContainerView(model());
                             objView=cntView;
                             cntView->setParentItem(rootObjProject);
@@ -261,7 +263,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                             QTimer::singleShot(0, viewProject, SLOT(ForceResize()));
                         }
 
-                        if(index.data().toString().startsWith("programContainer")) {
+                        if(objId == FixedObjId::programContainer) {
                             MainContainerView *cntView = new MainContainerView(model());
                             objView=cntView;
                             cntView->setParentItem(rootObjProgram);
