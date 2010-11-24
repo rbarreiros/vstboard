@@ -31,7 +31,6 @@ TEMPLATE = app
 #update version number (forced rebuild of the files using it)
     SRCDIR_WIN = $${_PRO_FILE_PWD_}
     SRCDIR_WIN ~= s,/,\\,g
-    QMAKE_POST_LINK += del \"$${SRCDIR_WIN}\\version.h\" $$escape_expand(\n\t)
     QMAKE_POST_LINK += echo $${LITERAL_HASH}define APP_VERSION \"$${BUILDNO}\" > \"$${SRCDIR_WIN}\\_version.h\" $$escape_expand(\n\t)
 
 
@@ -252,7 +251,8 @@ HEADERS += mainwindow.h \
     views/grouplistview.h \
     views/proglistview.h \
     models/programsmodel.h \
-    imagecollection.h
+    imagecollection.h \
+    _version.h
 FORMS += mainwindow.ui \
     views/filebrowser.ui \
     views/configdialog.ui \
