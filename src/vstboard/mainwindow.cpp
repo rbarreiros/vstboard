@@ -109,6 +109,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->listParking->setModel(mainHost->GetParkingModel());
     ui->listParking->setRootIndex(mainHost->GetParkingModel()->invisibleRootItem()->child(0)->index());
 
+    readSettings();
+
     //load default setup file
     currentSetupFile = ConfigDialog::defaultSetupFile();
     if(!currentSetupFile.isEmpty()) {
@@ -124,7 +126,7 @@ MainWindow::MainWindow(QWidget *parent) :
             currentProjectFile = "";
     }
 
-    readSettings();
+
 }
 
 MainWindow::~MainWindow()

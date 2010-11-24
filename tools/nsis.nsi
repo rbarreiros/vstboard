@@ -10,9 +10,9 @@ CRCCheck on
 XPStyle on
 InstallDir "$LOCALAPPDATA\VstBoard"
 
-!define START_LINK_DIR "$STARTMENU\Programs\VstBoard"
-!define START_LINK_RUN "$STARTMENU\Programs\VstBoard\VstBoard.lnk"
-!define START_LINK_UNINSTALLER "$STARTMENU\Programs\VstBoard\Uninstall VstBoard.lnk"
+!define START_LINK_DIR "$SMPROGRAMS\VstBoard"
+!define START_LINK_RUN "$SMPROGRAMS\VstBoard\VstBoard.lnk"
+!define START_LINK_UNINSTALLER "$SMPROGRAMS\VstBoard\Uninstall VstBoard.lnk"
 !define REG_UNINSTALL "Software\Microsoft\Windows\CurrentVersion\Uninstall\VstBoard"
 !define REG_SETTINGS "Software\CtrlBrk\VstBoard"
 !define UNINSTALLER_NAME "uninst.exe"

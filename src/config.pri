@@ -16,8 +16,9 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 
-#NSIS_PATH = D:\\Program Files\\NSIS\\makensis.exe
-#UPX_PATH = $${_PRO_FILE_PWD_}\\..\\..\\tools\\upx.exe
+#INSTALLER_UPDATEQTDLL = 1
+INSTALLER_NSIS_PATH = D:\\Program Files\\NSIS\\makensis.exe
+INSTALLER_UPX_PATH = $${_PRO_FILE_PWD_}\\..\\..\\tools\\upx.exe
 
 PORTAUDIO_PATH 	= ../libs/portaudio
 PORTMIDI_PATH 	= ../libs/portmidi

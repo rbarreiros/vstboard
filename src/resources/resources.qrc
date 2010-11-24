@@ -17,5 +17,6 @@
         <file>img16x16/delete.png</file>
         <file>vst.png</file>
         <file>asio.png</file>
+        <file>lgplv3-88x31.png</file>
     </qresource>
 </RCC>

@@ -54,8 +54,10 @@ PRE_TARGETDEPS = version
     }
 
     win32 {
-        EXTRA_FILES += $$[QT_INSTALL_BINS]/QtCore4.dll \
+        $${INSTALLER_UPDATEQTDLL} {
+            EXTRA_FILES += $$[QT_INSTALL_BINS]/QtCore4.dll \
                     $$[QT_INSTALL_BINS]/QtGui4.dll
+        }
 
         EXTRA_FILES_WIN = $${EXTRA_FILES}
         EXTRA_FILES_WIN ~= s,/,\\,g
@@ -66,13 +68,17 @@ PRE_TARGETDEPS = version
         }
 
     #run upx
-        exists($$UPX_PATH) {
-            QMAKE_POST_LINK += \"$$UPX_PATH\" --best \"$$DESTDIR_WIN\\*.exe\" \"$$DESTDIR_WIN\\*.dll\" $$escape_expand(\n\t)
+        exists($$INSTALLER_UPX_PATH) {
+            QMAKE_POST_LINK += \"$$INSTALLER_UPX_PATH\" -q --best \"$$DESTDIR_WIN\\VstBoard.exe\" $$escape_expand(\n\t)
+
+            $${INSTALLER_UPDATEQTDLL} {
+                QMAKE_POST_LINK += \"$$INSTALLER_UPX_PATH\" -q --best \"$$DESTDIR_WIN\\*.dll\" $$escape_expand(\n\t)
+            }
         }
 
     #build installer
-        exists($$NSIS_PATH) {
-            QMAKE_POST_LINK += \"$$NSIS_PATH\" \"$$DESTDIR_WIN\\nsis.nsi\" $$escape_expand(\n\t)
+        exists($$INSTALLER_NSIS_PATH) {
+            QMAKE_POST_LINK += \"$$INSTALLER_NSIS_PATH\" /V1 \"$$DESTDIR_WIN\\nsis.nsi\" $$escape_expand(\n\t)
         }
     }
 }
