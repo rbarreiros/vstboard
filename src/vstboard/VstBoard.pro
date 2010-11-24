@@ -28,11 +28,14 @@ TEMPLATE = app
 
 #QT += sql
 
-#update version number (forced rebuild of the files using it)
-    SRCDIR_WIN = $${_PRO_FILE_PWD_}
-    SRCDIR_WIN ~= s,/,\\,g
-    QMAKE_POST_LINK += echo $${LITERAL_HASH}define APP_VERSION \"$${BUILDNO}\" > \"$${SRCDIR_WIN}\\_version.h\" $$escape_expand(\n\t)
-
+#update version number
+SRCDIR_WIN = $${_PRO_FILE_PWD_}
+SRCDIR_WIN ~= s,/,\\,g
+versionmk.target = version
+versionmk.commands = echo $${LITERAL_HASH}define APP_VERSION \"$${BUILDNO}\" > \"$${SRCDIR_WIN}\\_version.h\" $$escape_expand(\n\t)
+versionmk.depends =
+QMAKE_EXTRA_TARGETS += versionmk
+PRE_TARGETDEPS = version
 
 !CONFIG(debug, debug|release) {
 
