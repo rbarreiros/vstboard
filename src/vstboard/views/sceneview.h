@@ -30,22 +30,22 @@ namespace View {
     {
         Q_OBJECT
     public:
-        explicit SceneView(MainGraphicsView *viewHost, MainGraphicsView *viewProject, MainGraphicsView *viewProgram,QWidget *parent = 0);
+        explicit SceneView(MainGraphicsView *viewHost, MainGraphicsView *viewProgram, MainGraphicsView *viewInsert,QWidget *parent = 0);
 
         QRect visualRect(const QModelIndex &index) const {return QRect();}
         void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible) {}
         QModelIndex indexAt(const QPoint &point) const {return QModelIndex();}
 
         MainGraphicsView *viewHost;
-        MainGraphicsView *viewProject;
         MainGraphicsView *viewProgram;
+        MainGraphicsView *viewInsert;
 
     protected:
 
         //we need parent objects to avoid a bug in qgraphicssene
         QGraphicsRectItem *rootObjHost;
-        QGraphicsRectItem *rootObjProject;
         QGraphicsRectItem *rootObjProgram;
+        QGraphicsRectItem *rootObjInsert;
 
         QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers) {return QModelIndex();}
         int horizontalOffset() const {return 0;}
@@ -60,21 +60,21 @@ namespace View {
         QMap<ConnectionInfo,QPersistentModelIndex>mapConnectionInfo;
 
         QGraphicsScene *sceneHost;
-        QGraphicsScene *sceneProject;
         QGraphicsScene *sceneProgram;
+        QGraphicsScene *sceneInsert;
         QTimer *timerFalloff;
 
     signals:
         void hostShown(bool shown);
-        void projectShown(bool shown);
         void programShown(bool shown);
+        void insertShown(bool shown);
 
     public slots:
         void ConnectPins(ConnectionInfo pinOut,ConnectionInfo pinIn);
         void RemoveCablesFromPin(ConnectionInfo pin);
         void ToggleHostView(bool show);
-        void ToggleProjectView(bool show);
         void ToggleProgramView(bool show);
+        void ToggleInsertView(bool show);
 
     protected slots:
         void dataChanged ( const QModelIndex & topLeft, const QModelIndex & bottomRight  );
