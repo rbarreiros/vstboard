@@ -27,10 +27,19 @@ AboutDialog::AboutDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::AboutDialog)
 {
+    QString ver = APP_VERSION;
+    ver=ver.section("-",0,1);
+    QString build = APP_VERSION;
+    build=build.section("-",2,2);
+
     ui->setupUi(this);
     ui->labelApp->setText(APP_NAME);
-    ui->labelVersion->setText(APP_VERSION);
+    ui->labelVersion->setText(" "+ver);
+    ui->labelBuild->setText(" "+build);
+
     setWindowTitle(QString("About %1").arg(APP_NAME));
+
+    setFixedSize(size());
 }
 
 AboutDialog::~AboutDialog()
