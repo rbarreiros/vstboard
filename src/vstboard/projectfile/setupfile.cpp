@@ -46,7 +46,6 @@ void SetupFile::SaveToFile(QString filePath)
     MainHost *host = MainHost::Get();
 
     host->EnableSolverUpdate(false);
-
     host->hostContainer->SaveProgram();
 
     for(MainHost::Get()->filePass=0; MainHost::Get()->filePass<LOADSAVE_STAGES ; MainHost::Get()->filePass++) {
