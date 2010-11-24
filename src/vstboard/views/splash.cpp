@@ -1,14 +1,9 @@
-#include "splash.h"
-#include "ui_splash.h"
 #include "precomp.h"
 
-#ifndef APP_NAME
-#define APP_NAME "noname ?"
-#endif
+#include "../_version.h"
 
-#ifndef APP_VERSION
-#define APP_VERSION "local-dev"
-#endif
+#include "splash.h"
+#include "ui_splash.h"
 
 Splash::Splash(QWidget *parent) :
     QDialog(parent),

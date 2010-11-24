@@ -29,6 +29,10 @@
 #include "views/solverscene.h"
 #include "views/sceneview.h"
 
+#ifndef APP_NAME
+#define APP_NAME "noname ?"
+#endif
+
 namespace Ui {
     class MainWindow;
 }

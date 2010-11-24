@@ -21,7 +21,13 @@
 #include "aboutdialog.h"
 #include "ui_aboutdialog.h"
 
-#include "../_version.h"
+#ifndef APP_NAME
+#define APP_NAME "noname ?"
+#endif
+
+#ifndef APP_VERSION
+#define APP_VERSION "local-dev"
+#endif
 
 AboutDialog::AboutDialog(QWidget *parent) :
     QDialog(parent),
@@ -37,3 +43,4 @@ AboutDialog::~AboutDialog()
 {
     delete ui;
 }
+

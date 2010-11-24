@@ -16,6 +16,10 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 
+BUILDNO = $$system("git describe")
+#DEFINES += APP_VERSION=\\\"$${BUILDNO}\\\"
+DEFINES += APP_NAME=\\\"VstBoard\\\"
+
 top_srcdir = ..
 srcdir = vstboard
 
@@ -24,37 +28,17 @@ TEMPLATE = app
 
 #QT += sql
 
+#update version number (forced rebuild of the files using it)
+    SRCDIR_WIN = $${_PRO_FILE_PWD_}
+    SRCDIR_WIN ~= s,/,\\,g
+    QMAKE_POST_LINK += del \"$${SRCDIR_WIN}\\version.h\" $$escape_expand(\n\t)
+    QMAKE_POST_LINK += echo $${LITERAL_HASH}define APP_VERSION \"$${BUILDNO}\" > \"$${SRCDIR_WIN}\\_version.h\" $$escape_expand(\n\t)
+
 
 !CONFIG(debug, debug|release) {
 
     targetdir = $$OUT_PWD/../../bin/$$build_postfix
     builddir = $$OUT_PWD/../../build/$$build_postfix
-
-#force rebuild (objects including the version number)
-    FORCE_REBUILD = \
-        splash \
-        aboutdialog
-
-    win32 {
-        win32-msvc2008 {
-            OBJEXT = obj
-        } else {
-            OBJEXT = o
-        }
-
-        FORCE_REBUILD_WIN = $${FORCE_REBUILD}
-        FORCE_REBUILD_WIN ~= s,/,\\,g
-        BUILDDIR_WIN = $${builddir}
-        BUILDDIR_WIN ~= s,/,\\,g
-        for(FILE,FORCE_REBUILD_WIN){
-            system(del \"$${BUILDDIR_WIN}\\$${FILE}.$${OBJEXT}\")
-        }
-    } else {
-        for(FILE,FORCE_REBUILD){
-            system(rm -f $${targetdir}/$${FILE}.o\")
-        }
-    }
-
 
 #other files included in the release
     EXTRA_FILES = \
@@ -77,7 +61,7 @@ TEMPLATE = app
         DESTDIR_WIN = $${targetdir}
         DESTDIR_WIN ~= s,/,\\,g
         for(FILE,EXTRA_FILES_WIN){
-            QMAKE_POST_LINK += copy /y \"$$FILE\" \"$$DESTDIR_WIN\" $$escape_expand(\n\t)
+            QMAKE_POST_LINK += copy /y \"$${FILE}\" \"$${DESTDIR_WIN}\" $$escape_expand(\n\t)
         }
 
     #run upx
