@@ -15,5 +15,7 @@
         <file>img16x16/documentinfo.png</file>
         <file>img32x32/agt_action_fail.png</file>
         <file>img16x16/delete.png</file>
+        <file>vst.png</file>
+        <file>asio.png</file>
     </qresource>
 </RCC>

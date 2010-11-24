@@ -14,4 +14,6 @@ APPLICABLE LICENSES
 * PortAudio Portable Real-Time Audio Library Copyright (c) 1999-2000 Ross Bencina and Phil Burk
 * PortMidi Copyright (c) 1999-2000 Ross Bencina and Phil Burk, Copyright (c) 2001-2009 Roger B. Dannenberg.
 * The Crystal Project Copyright (c) Everaldo Coelho, released under LGPL.
-
+* VST Plug-In Technology by Steinberg.
+* ASIO Interface Technology by Steinberg Media Technologies GmbH.
+* VST and ASIO are trademarks of Steinberg Media Technologies GmbH.

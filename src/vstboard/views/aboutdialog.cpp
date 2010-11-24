@@ -21,11 +21,22 @@
 #include "aboutdialog.h"
 #include "ui_aboutdialog.h"
 
+#ifndef APP_NAME
+#define APP_NAME "noname ?"
+#endif
+
+#ifndef APP_VERSION
+#define APP_VERSION "local-dev"
+#endif
+
 AboutDialog::AboutDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::AboutDialog)
 {
     ui->setupUi(this);
+    ui->labelApp->setText(APP_NAME);
+    ui->labelVersion->setText(APP_VERSION);
+    setWindowTitle(QString("About %1").arg(APP_NAME));
 }
 
 AboutDialog::~AboutDialog()

@@ -45,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     MainWindow::theMainWindow=this;
     ui->setupUi(this);
+    setWindowTitle(APP_NAME);
 
     mainHost = MainHost::Create(this);
 

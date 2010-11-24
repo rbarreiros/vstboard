@@ -23,6 +23,10 @@ TEMPLATE = app
 
 #QT += sql
 
+BUILDNO = $$system("git describe")
+DEFINES += APP_VERSION=\\\"$${BUILDNO}\\\"
+DEFINES += APP_NAME=\\\"VstBoard\\\"
+
 vstsdk { 
     DEFINES += VSTSDK
     INCLUDEPATH += $$top_srcdir/$$VSTSDK_PATH \
