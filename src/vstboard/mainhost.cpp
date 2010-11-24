@@ -45,12 +45,11 @@ MainHost::MainHost(QObject *parent) :
     QObject(parent),
     mainContainer(0),
     hostContainer(0),
-    projectContainer(0),
     programContainer(0),
+    insertContainer(0),
     filePass(0),
     solverNeedAnUpdate(false),
     solverUpdateEnabled(true),
-//    listAudioDevices(0),
     mutexListCables(QMutex::Recursive),
     progToChange(-1)
 {
@@ -62,8 +61,6 @@ MainHost::MainHost(QObject *parent) :
 
     Connectables::ObjectFactory::Create(this);
 
-    //init variables
-//    cpuLoad = .0f;
     sampleRate = 44100.0;
     bufferSize = 512;
 
@@ -72,7 +69,6 @@ MainHost::MainHost(QObject *parent) :
             this, SLOT(SetProgram(QModelIndex)));
 
     listMidiDevices = new MidiDevices();
-//    listAudioDevices = new AudioDevices();
     AudioDevices * devices = AudioDevices::Create(this);
     connect(this,SIGNAL(OnAudioDeviceToggleInUse(ObjectInfo,bool)),
             devices,SLOT(OnToggleDeviceInUse(ObjectInfo,bool)));
@@ -112,15 +108,12 @@ MainHost::~MainHost()
 
     mainContainer.clear();
     hostContainer.clear();
-    projectContainer.clear();
+    insertContainer.clear();
     programContainer.clear();
     parkingContainer.clear();
 
     delete listMidiDevices;
-//    delete listAudioDevices;
-
     delete Connectables::ObjectFactory::Get();
-
     theHost = 0;
 }
 
@@ -130,19 +123,12 @@ void MainHost::Open()
 
     SetupMainContainer();
     SetupHostContainer();
-    SetupProjectContainer();
+    SetupInsertContainer();
     SetupProgramContainer();
     SetupParking();
 
     EnableSolverUpdate(true);
-
-
-
-
-
     programList->BuildModel();
-    //programList->ChangeProg(0);
-    //SetProgram(0);
 }
 
 void MainHost::SetupMainContainer()
@@ -168,7 +154,7 @@ void MainHost::SetupHostContainer()
         hostContainer.clear();
         UpdateSolver(true);
     }
-//debug("MainHost::SetupHostContainer")
+
     ObjectInfo info;
     info.nodeType = NodeType::container;
     info.objType = ObjType::MainContainer;
@@ -183,7 +169,6 @@ void MainHost::SetupHostContainer()
 
 
     //send bridge
-
     ObjectInfo send;
     send.name = "send";
     send.nodeType = NodeType::bridge;
@@ -194,8 +179,8 @@ void MainHost::SetupHostContainer()
     hostContainer->AddObject( bridge );
     bridge->SetBridgePinsOutVisible(false);
     hostContainer->bridgeSend = bridge;
-    //return bridge
 
+    //return bridge
     ObjectInfo retrn;
     retrn.name = "return";
     retrn.nodeType = NodeType::bridge;
@@ -207,100 +192,14 @@ void MainHost::SetupHostContainer()
     bridge->SetBridgePinsInVisible(false);
     hostContainer->bridgeReturn = bridge;
 
-    if(!projectContainer.isNull()) {
-        mainContainer->ConnectBridges(hostContainer->bridgeSend, projectContainer->bridgeIn);
-        mainContainer->ConnectBridges(projectContainer->bridgeOut, hostContainer->bridgeReturn);
+    //connect with programContainer
+    if(!programContainer.isNull()) {
+        mainContainer->ConnectBridges(hostContainer->bridgeSend, programContainer->bridgeIn);
+        mainContainer->ConnectBridges(programContainer->bridgeOut, hostContainer->bridgeReturn);
     }
     hostContainer->listenProgramChanges=false;
 }
 
-void MainHost::SetupProjectContainer()
-{
-    if(!projectContainer.isNull()) {
-        mainContainer->RemoveObject( projectContainer );
-        projectContainer.clear();
-        UpdateSolver(true);
-    }
-
-    ObjectInfo info;
-    info.nodeType = NodeType::container;
-    info.objType = ObjType::MainContainer;
-    info.name = "projectContainer";
-    info.forcedObjId = FixedObjId::projectContainer;
-
-    projectContainer = Connectables::ObjectFactory::Get()->NewObject(info).staticCast<Connectables::MainContainer>();
-    projectContainer->LoadProgram(0);
-    mainContainer->AddObject(projectContainer);
-
-    QSharedPointer<Connectables::Object> bridge;
-
-    //bridge in
-
-    ObjectInfo in;
-    in.name="in";
-    in.nodeType = NodeType::bridge;
-    in.objType = ObjType::BridgeIn;
-    in.forcedObjId = FixedObjId::projectContainerIn;
-
-    bridge = Connectables::ObjectFactory::Get()->NewObject(in);
-    projectContainer->AddObject( bridge );
-    bridge->SetBridgePinsInVisible(false);
-    projectContainer->bridgeIn = bridge;
-
-    //bridge out
-
-    ObjectInfo out;
-    out.name="out";
-    out.nodeType = NodeType::bridge;
-    out.objType = ObjType::BridgeOut;
-    out.forcedObjId = FixedObjId::projectContainerOut;
-
-    bridge = Connectables::ObjectFactory::Get()->NewObject(out);
-    projectContainer->AddObject( bridge );
-    bridge->SetBridgePinsOutVisible(false);
-    projectContainer->bridgeOut = bridge;
-
-    if(!hostContainer.isNull()) {
-        mainContainer->ConnectBridges(hostContainer->bridgeSend, projectContainer->bridgeIn);
-        mainContainer->ConnectBridges(projectContainer->bridgeOut, hostContainer->bridgeReturn);
-    }
-
-    //bridge send
-
-    ObjectInfo send;
-    send.name="send";
-    send.nodeType = NodeType::bridge;
-    send.objType = ObjType::BridgeSend;
-    send.forcedObjId = FixedObjId::projectContainerSend;
-
-    bridge = Connectables::ObjectFactory::Get()->NewObject(send);
-    projectContainer->AddObject( bridge );
-    bridge->SetBridgePinsOutVisible(false);
-    projectContainer->bridgeSend = bridge;
-
-    //bridge return
-
-    ObjectInfo retrn;
-    retrn.name="return";
-    retrn.nodeType = NodeType::bridge;
-    retrn.objType = ObjType::BridgeReturn;
-    retrn.forcedObjId = FixedObjId::projectContainerReturn;
-
-    bridge = Connectables::ObjectFactory::Get()->NewObject(retrn);
-    projectContainer->AddObject( bridge );
-    bridge->SetBridgePinsInVisible(false);
-    projectContainer->bridgeReturn = bridge;
-
-    if(!programContainer.isNull()) {
-        mainContainer->ConnectBridges(projectContainer->bridgeSend, programContainer->bridgeIn);
-        mainContainer->ConnectBridges(programContainer->bridgeOut, projectContainer->bridgeReturn);
-    }
-
-    projectContainer->ConnectBridges(projectContainer->bridgeIn, projectContainer->bridgeSend,false);
-    projectContainer->ConnectBridges(projectContainer->bridgeReturn, projectContainer->bridgeOut,false);
-
-    projectContainer->listenProgramChanges=false;
-}
 
 void MainHost::SetupProgramContainer()
 {
@@ -325,7 +224,6 @@ void MainHost::SetupProgramContainer()
     QSharedPointer<Connectables::Object> bridge;
 
     //bridge in
-
     ObjectInfo in;
     in.name="in";
     in.nodeType = NodeType::bridge;
@@ -338,7 +236,6 @@ void MainHost::SetupProgramContainer()
     programContainer->bridgeIn = bridge;
 
     //bridge out
-
     ObjectInfo out;
     out.name="out";
     out.nodeType = NodeType::bridge;
@@ -350,11 +247,97 @@ void MainHost::SetupProgramContainer()
     bridge->SetBridgePinsOutVisible(false);
     programContainer->bridgeOut = bridge;
 
-    if(!projectContainer.isNull()) {
-        mainContainer->ConnectBridges(projectContainer->bridgeSend, programContainer->bridgeIn);
-        mainContainer->ConnectBridges(programContainer->bridgeOut, projectContainer->bridgeReturn);
+    //connect with hostContainer
+    if(!hostContainer.isNull()) {
+        mainContainer->ConnectBridges(hostContainer->bridgeSend, programContainer->bridgeIn);
+        mainContainer->ConnectBridges(programContainer->bridgeOut, hostContainer->bridgeReturn);
+    }
+
+
+    //bridge send
+    ObjectInfo send;
+    send.name="send";
+    send.nodeType = NodeType::bridge;
+    send.objType = ObjType::BridgeSend;
+    send.forcedObjId = FixedObjId::programContainerSend;
+
+    bridge = Connectables::ObjectFactory::Get()->NewObject(send);
+    programContainer->AddObject( bridge );
+    bridge->SetBridgePinsOutVisible(false);
+    programContainer->bridgeSend = bridge;
+
+    //bridge return
+    ObjectInfo retrn;
+    retrn.name="return";
+    retrn.nodeType = NodeType::bridge;
+    retrn.objType = ObjType::BridgeReturn;
+    retrn.forcedObjId = FixedObjId::programContainerReturn;
+
+    bridge = Connectables::ObjectFactory::Get()->NewObject(retrn);
+    programContainer->AddObject( bridge );
+    bridge->SetBridgePinsInVisible(false);
+    programContainer->bridgeReturn = bridge;
+
+    //connect with insertContainer
+    if(!insertContainer.isNull()) {
+        mainContainer->ConnectBridges(programContainer->bridgeSend, insertContainer->bridgeIn);
+        mainContainer->ConnectBridges(insertContainer->bridgeOut, programContainer->bridgeReturn);
     }
 }
+
+void MainHost::SetupInsertContainer()
+{
+    if(!insertContainer.isNull()) {
+        mainContainer->RemoveObject( insertContainer );
+        insertContainer.clear();
+        UpdateSolver(true);
+    }
+
+    ObjectInfo info;
+    info.nodeType = NodeType::container;
+    info.objType = ObjType::MainContainer;
+    info.name = "insertContainer";
+    info.forcedObjId = FixedObjId::insertContainer;
+
+    insertContainer = Connectables::ObjectFactory::Get()->NewObject(info).staticCast<Connectables::MainContainer>();
+    insertContainer->LoadProgram(0);
+    mainContainer->AddObject(insertContainer);
+
+    QSharedPointer<Connectables::Object> bridge;
+
+    //bridge in
+    ObjectInfo in;
+    in.name="in";
+    in.nodeType = NodeType::bridge;
+    in.objType = ObjType::BridgeIn;
+    in.forcedObjId = FixedObjId::insertContainerIn;
+
+    bridge = Connectables::ObjectFactory::Get()->NewObject(in);
+    insertContainer->AddObject( bridge );
+    bridge->SetBridgePinsInVisible(false);
+    insertContainer->bridgeIn = bridge;
+
+    //bridge out
+    ObjectInfo out;
+    out.name="out";
+    out.nodeType = NodeType::bridge;
+    out.objType = ObjType::BridgeOut;
+    out.forcedObjId = FixedObjId::insertContainerOut;
+
+    bridge = Connectables::ObjectFactory::Get()->NewObject(out);
+    insertContainer->AddObject( bridge );
+    bridge->SetBridgePinsOutVisible(false);
+    insertContainer->bridgeOut = bridge;
+
+    //connect with programContainer
+    if(!programContainer.isNull()) {
+        mainContainer->ConnectBridges(programContainer->bridgeSend, insertContainer->bridgeIn);
+        mainContainer->ConnectBridges(insertContainer->bridgeOut, programContainer->bridgeReturn);
+    }
+
+    insertContainer->listenProgramChanges=false;
+}
+
 
 void MainHost::SetupParking()
 {
@@ -377,7 +360,7 @@ void MainHost::ClearHost()
 {
     EnableSolverUpdate(false);
 
-    SetupProjectContainer();
+    SetupInsertContainer();
     SetupProgramContainer();
     SetupParking();
 
@@ -619,13 +602,13 @@ QDataStream & operator<< (QDataStream& out, MainHost& value)
 {
     value.EnableSolverUpdate(false);
 
-    value.projectContainer->SaveProgram();
+    value.insertContainer->SaveProgram();
     value.programContainer->SaveProgram();
     value.parkingContainer->SaveProgram();
 
     for(MainHost::Get()->filePass=0; MainHost::Get()->filePass<LOADSAVE_STAGES ; MainHost::Get()->filePass++) {
         out << *value.parkingContainer;
-        out << *value.projectContainer;
+        out << *value.insertContainer;
         out << *value.programContainer;
     }
 
@@ -640,13 +623,13 @@ QDataStream & operator>> (QDataStream& in, MainHost& value)
 {
     value.EnableSolverUpdate(false);
 
-    value.SetupProjectContainer();
+    value.SetupInsertContainer();
     value.SetupProgramContainer();
     value.SetupParking();
 
     for(MainHost::Get()->filePass=0; MainHost::Get()->filePass<LOADSAVE_STAGES ; MainHost::Get()->filePass++) {
         in >> *value.parkingContainer;
-        in >> *value.projectContainer;
+        in >> *value.insertContainer;
         in >> *value.programContainer;
     }
 
