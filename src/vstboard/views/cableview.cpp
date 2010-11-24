@@ -31,27 +31,29 @@ CableView::CableView(ConnectionInfo pinOut, ConnectionInfo pinIn, QGraphicsItem 
 //    setObjectName("cable");
 }
 
-void CableView::UpdatePosition(const ConnectionInfo &pinInfo, const QPointF &pt)
+void CableView::UpdatePosition(const ConnectionInfo &pinInfo, const float angle, const QPointF &pt)
 {
-    QPainterPath p(path());
-
-    QPointF pt1(path().pointAtPercent(0));
-    QPointF pt2(path().pointAtPercent(1));
-
+    //move one end of the cable
     if(pinInfo == pinOut)
-        pt1=mapFromScene(pt);
+        PtOut=mapFromScene(pt);
     if(pinInfo == pinIn)
-        pt2=mapFromScene(pt);
+        PtIn=mapFromScene(pt);
 
-    QPointF ctrlPt1(pt1);
-    QPointF ctrlPt2(pt2);
-    ctrlPt1+=QPointF(50,0);
-    ctrlPt2+=QPointF(-50,0);
+    if(pinInfo == pinOut) {
+        CtrlPtOut = PtOut;
+        CtrlPtOut.rx()+=50*cos(angle);
+        CtrlPtOut.ry()+=50*sin(angle);
+    }
+    if(pinInfo == pinIn) {
+        CtrlPtIn = PtIn;
+        CtrlPtIn.rx()+=50*cos(angle);
+        CtrlPtIn.ry()+=50*sin(angle);
+    }
 
-    QPainterPath p2;
-    p2.moveTo(pt1);
-    p2.cubicTo(ctrlPt1,ctrlPt2,pt2);
+    QPainterPath newPath;
+    newPath.moveTo(PtOut);
+    newPath.cubicTo(CtrlPtOut,CtrlPtIn,PtIn);
 
-    setPath(p2);
+    setPath(newPath);
 }
 

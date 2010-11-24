@@ -23,8 +23,8 @@
 using namespace View;
 #define PINSIZE 12
 
-BridgePinView::BridgePinView(QAbstractItemModel *model,QGraphicsItem * parent, Connectables::Pin *pin) :
-        PinView(model,parent, pin)
+BridgePinView::BridgePinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, Connectables::Pin *pin) :
+        PinView(angle, model,parent, pin)
 {
     setGeometry(0,0,PINSIZE,PINSIZE);
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);

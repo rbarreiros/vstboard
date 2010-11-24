@@ -436,13 +436,23 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                 }
 
                 PinView *pinView;
+                ObjectInfo parentInfo = parent.parent().data(UserRoles::objInfo).value<ObjectInfo>();
+                float angle=0;
 
-                ObjectInfo info = parent.parent().data(UserRoles::objInfo).value<ObjectInfo>();
+                if(parentInfo.nodeType == NodeType::bridge) {
+                    if(parentInfo.objType==ObjType::BridgeIn || parentInfo.objType==ObjType::BridgeOut)
+                        angle=3.1416/2;
+                    if(parentInfo.objType==ObjType::BridgeSend || parentInfo.objType==ObjType::BridgeReturn)
+                        angle=-3.1416/2;
 
-                if(info.nodeType == NodeType::bridge) {
-                    pinView = static_cast<PinView*>(new BridgePinView(model(),parentList,pin));
+                    pinView = static_cast<PinView*>( new BridgePinView(angle, model(), parentList, pin) );
                 } else {
-                    ConnectablePinView *p = new ConnectablePinView(model(),parentList,pin);
+                    if(pinInfo.direction==PinDirection::Input)
+                        angle=3.1416;
+                    if(pinInfo.direction==PinDirection::Output)
+                        angle=0;
+
+                    ConnectablePinView *p = new ConnectablePinView(angle, model(), parentList, pin);
                     pinView = static_cast<PinView*>(p);
                     connect(timerFalloff,SIGNAL(timeout()),
                             pinView,SLOT(updateVu()));

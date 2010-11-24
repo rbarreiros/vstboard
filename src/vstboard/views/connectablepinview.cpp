@@ -26,8 +26,8 @@ using namespace View;
 QBrush ConnectablePinView::normalBrush;
 QBrush ConnectablePinView::highBrush;
 
-ConnectablePinView::ConnectablePinView(QAbstractItemModel *model, QGraphicsItem * parent, Connectables::Pin *pin) :
-       PinView(model,parent,pin),
+ConnectablePinView::ConnectablePinView(float angle, QAbstractItemModel *model, QGraphicsItem * parent, Connectables::Pin *pin) :
+       PinView(angle,model,parent,pin),
        value(0),
        isParameter(false)
 {

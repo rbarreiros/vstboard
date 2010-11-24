@@ -29,7 +29,7 @@ namespace View {
     {
     Q_OBJECT
     public:
-        BridgePinView(QAbstractItemModel *model,QGraphicsItem * parent, Connectables::Pin *pin);
+        BridgePinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, Connectables::Pin *pin);
         const QPointF pinPos() const;
     };
 

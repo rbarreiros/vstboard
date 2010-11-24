@@ -38,7 +38,7 @@ namespace View {
 
     public:
 
-        explicit PinView(QAbstractItemModel *model,QGraphicsItem * parent, Connectables::Pin *pin);
+        explicit PinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, Connectables::Pin *pin);
         const ConnectionInfo GetConnectionInfo() const {return connectInfo;}
         virtual const QPointF pinPos() const;
         void AddCable(CableView *cable);
@@ -75,6 +75,8 @@ namespace View {
 
         QAbstractItemModel *model;
         QPersistentModelIndex pinIndex;
+
+        float pinAngle;
 
     signals:
         void ConnectPins(ConnectionInfo outputPin, ConnectionInfo inputPin);

@@ -33,10 +33,16 @@ namespace View {
     public:
         CableView(ConnectionInfo pinOut, ConnectionInfo pinIn, QGraphicsItem *parent = 0);
 
-        void UpdatePosition(const ConnectionInfo &pinInfo, const QPointF &pt);
+        void UpdatePosition(const ConnectionInfo &pinInfo, const float angle, const QPointF &pt);
 
         const ConnectionInfo pinOut;
         const ConnectionInfo pinIn;
+
+    protected:
+        QPointF PtOut;
+        QPointF PtIn;
+        QPointF CtrlPtOut;
+        QPointF CtrlPtIn;
 
     };
 }

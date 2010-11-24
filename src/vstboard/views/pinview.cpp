@@ -30,10 +30,11 @@ QBrush PinView::highlightBrush(QColor(100,0,200,100),Qt::SolidPattern);
 
 QGraphicsLineItem *PinView::currentLine = 0;
 
-PinView::PinView(QAbstractItemModel *model,QGraphicsItem * parent, Connectables::Pin *pin) :
+PinView::PinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, Connectables::Pin *pin) :
         QGraphicsWidget(parent),
         connectInfo(pin->GetConnectionInfo()),
-        model(model)
+        model(model),
+        pinAngle(angle)
 {
 //    setObjectName(QString("PinView%1").arg((long)pin,0,16));
     setAcceptDrops(true);
@@ -43,13 +44,13 @@ PinView::PinView(QAbstractItemModel *model,QGraphicsItem * parent, Connectables:
 void PinView::UpdateCablesPosition()
 {
     foreach (CableView *cable, connectedCables) {
-        cable->UpdatePosition(connectInfo, mapToScene(pinPos()) );
+        cable->UpdatePosition(connectInfo, pinAngle, mapToScene(pinPos()) );
     }
 }
 
 void PinView::polishEvent()
 {
-    UpdateCablesPosition();
+//    UpdateCablesPosition();
 }
 
 QVariant PinView::itemChange ( GraphicsItemChange change, const QVariant & value )
@@ -189,7 +190,7 @@ void PinView::ReadMimeData(QByteArray &bytes, ConnectionInfo &data)
 
 void PinView::AddCable(CableView *cable)
 {
-    cable->UpdatePosition(connectInfo, mapToScene(pinPos()) );
+    cable->UpdatePosition(connectInfo, pinAngle, mapToScene(pinPos()) );
     connectedCables.append(cable);
     setFlag(QGraphicsItem::ItemSendsScenePositionChanges, true);
 }
