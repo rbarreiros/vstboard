@@ -60,8 +60,9 @@ CEffect::~CEffect()
 bool CEffect::Load(const QString &name)
 {
     pluginLib = new QLibrary(name);
-    if(!pluginLib->load())
-        return false;
+
+//    if(!pluginLib->load())
+//        return false;
 
     vstPluginFuncPtr entryPoint = (vstPluginFuncPtr)pluginLib->resolve("VSTPluginMain");
     if(!entryPoint)

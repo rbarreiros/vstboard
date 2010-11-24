@@ -98,16 +98,6 @@ namespace Connectables {
         inline void Unlock() { objMutex.unlock();}
 
         bool GetLearningMode();
-//        inline short GetLearningMode() {return parameterLearning;}
-//        void SetPosition(const QPointF &pos);
-//        QPointF GetPosition() {return position;}
-//        void SetSize(QSizeF s);
-//        QSizeF GetSize() {return size;}
-//        void SetEditorVisible(bool visible);
-//        bool GetEditorVisible() {return editorVisible;}
-//        QPointF position;
-//        QSizeF size;
-//        bool editorVisible;
         bool hasEditor;
         bool canLearn;
 
@@ -125,11 +115,12 @@ namespace Connectables {
         virtual void CopyProgram(int ori, int dest);
         virtual void RemoveProgram(int prg);
 
-//        QStandardItem *modelNode;
         QPersistentModelIndex modelIndex;
 
         virtual void SetContainerAttribs(const ObjectConatinerAttribs &attr);
         virtual void GetContainerAttribs(ObjectConatinerAttribs &attr);
+
+        QString errorMessage;
 
     protected:
         QList<AudioPinIn*>listAudioPinIn;
@@ -170,9 +161,6 @@ namespace Connectables {
         QPersistentModelIndex modelBridgeIn;
         QPersistentModelIndex modelBridgeOut;
 
-//        QStandardItem *modelEditor;
-//        QStandardItem *modelLearningMode;
-
         int currentProgId;
 
         ObjectInfo objInfo;
@@ -181,15 +169,12 @@ namespace Connectables {
         void LearningModeChanged(bool learn);
         void UnLearningModeChanged(bool unlearn);
         void CpuLoad(float load);
-        void Loaded();
         void CloseEditorWindow();
 
     public slots:
         virtual void SaveProgram();
         virtual void UnloadProgram();
         virtual void LoadProgram(int prog);
-//        void SetLearningMode(bool learning);
-//        void SetUnLearningMode(bool unlearning);
         void OnProgramDirty() {progIsDirty=true;}
 
         virtual void SetBufferSize(long size) {}

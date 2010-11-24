@@ -233,7 +233,7 @@ void VstPlugin::Render()
 
 bool VstPlugin::Open()
 {
-    closed=false;
+
 
     {
         QMutexLocker lock(&objMutex);
@@ -241,8 +241,11 @@ bool VstPlugin::Open()
 
         if(!Load( objInfo.filename )) {
             VstPlugin::pluginLoading = 0;
-            return false;
+            errorMessage=tr("Error while loading plugin");
+            return true;
         }
+
+        closed=false;
 
         VstPlugin::pluginLoading = 0;
 
@@ -264,6 +267,8 @@ bool VstPlugin::Open()
                 VstPlugin::shellSelectView = new View::VstShellSelect();
                 VstPlugin::shellSelectView->SetListPlugins(objInfo.name, listPlugins);
                 VstPlugin::shellSelectView->show();
+
+                //this is a shell, return false to delete this object
                 return false;
             } //else {
                 //if not, why did he asked for shellCategory capability !?

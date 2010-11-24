@@ -81,17 +81,32 @@ void Pin::SendMsg(int msgType,void *data)
 //    txtMutex.unlock();
 //}
 
-void Pin::SetParentModelIndex(const QModelIndex &parentIndex)
+void Pin::SetParentModelIndex(const QModelIndex &newParent)
 {
     closed=false;
 
-    bool wasVisible=visible;
-    SetVisible(false);
+    if(parentIndex.isValid()) {
+        if(visible) {
+        //should be visible
+            if(parentIndex == newParent) {
+                //same parent : update existing model node (happens when a errorenous device becomes available)
+                UpdateModelNode();
+                return;
+            } else {
+                //moving from another parent (when does it happen ?)
+                SetVisible(false);
+                parentIndex=newParent;
+                SetVisible(true);
+                return;
+            }
+        }
+    }
 
-    this->parentIndex = parentIndex;
-
-    if(wasVisible)
+    parentIndex=newParent;
+    if(visible) {
+        visible=false;
         SetVisible(true);
+    }
 }
 
 void Pin::SetContainerId(quint16 id)
@@ -132,11 +147,14 @@ void Pin::SetVisible(bool vis)
         item->setData( QVariant::fromValue(ObjectInfo(NodeType::pin)),UserRoles::objInfo);
         item->setData(QVariant::fromValue(connectInfo),UserRoles::connectionInfo);
         item->setData(stepSize,UserRoles::stepSize);
-        MainHost::GetModel()->itemFromIndex(parentIndex)->appendRow(item);
+
+        QStandardItem *parentItem = MainHost::GetModel()->itemFromIndex(parentIndex);
+        parentItem->appendRow(item);
         modelIndex = item->index();
         if(connectInfo.type!=PinType::Bridge) {
             connect(MainHost::Get()->updateViewTimer,SIGNAL(timeout()),
-                    this,SLOT(updateView()));
+                    this,SLOT(updateView()),
+                    Qt::UniqueConnection);
         }
     } else {
         if(modelIndex.isValid()) {
@@ -156,6 +174,24 @@ void Pin::SetVisible(bool vis)
                 MainHost::GetModel()->removeRow(modelIndex.row(), modelIndex.parent());
             modelIndex=QModelIndex();
         }
+    }
+}
+
+void Pin::UpdateModelNode()
+{
+    QStandardItem *item = MainHost::GetModel()->itemFromIndex(parentIndex)->child(connectInfo.pinNumber,0);
+    item->setData(objectName(),Qt::DisplayRole);
+    item->setData(falloff,UserRoles::falloff);
+    item->setData(GetValue(),UserRoles::value);
+    item->setData(QVariant::fromValue(ObjectInfo(NodeType::pin)),UserRoles::objInfo);
+    item->setData(QVariant::fromValue(connectInfo),UserRoles::connectionInfo);
+    item->setData(stepSize,UserRoles::stepSize);
+    //MainHost::GetModel()->itemFromIndex(parentIndex)->appendRow(item);
+    modelIndex = item->index();
+    if(connectInfo.type!=PinType::Bridge) {
+        connect(MainHost::Get()->updateViewTimer,SIGNAL(timeout()),
+                this,SLOT(updateView()),
+                Qt::UniqueConnection);
     }
 }
 

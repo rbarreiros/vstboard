@@ -80,6 +80,8 @@ void ParkingContainer::SetParentModeIndex(const QModelIndex &parentIndex)
 QDataStream & ParkingContainer::toStream (QDataStream &out)
 {
     switch(MainHost::Get()->filePass) {
+
+        //save all the parked objects
         case 0:
         {
             foreach(QWeakPointer<Object> objPtr, listStaticObjects) {
@@ -96,7 +98,6 @@ QDataStream & ParkingContainer::toStream (QDataStream &out)
                     tmp << *objPtr.data();
 
                     out << objPtr->info();
-                    out << (qint16)objPtr->GetIndex();
                     out << (quint16)tmpStream.size();
                     out << tmpStream;
                 } else {
@@ -106,20 +107,12 @@ QDataStream & ParkingContainer::toStream (QDataStream &out)
             }
             break;
         }
-        case 1:
-        {
-            out << (quint16)listStaticObjects.size();
-            foreach(QSharedPointer<Object> objPtr, listStaticObjects) {
-                if(!objPtr.isNull()) {
-                    out<<(quint16)objPtr->GetIndex();
-                    out<<*objPtr.data();
-                } else {
-                    debug("ParkingContainer::toStream pass2 skip deleted object")
-                    out<<(quint16)-1;
-                }
-            }
-            break;
-        }
+
+        //do nothing : no program to save
+//        case 1:
+//            break;
+//        case 2:
+//            break;
     }
     return out;
 }
@@ -127,20 +120,20 @@ QDataStream & ParkingContainer::toStream (QDataStream &out)
 QDataStream & ParkingContainer::fromStream (QDataStream &in)
 {
     switch(MainHost::Get()->filePass) {
+
+        //load all the parked objects
         case 0:
         {
             quint16 nbObj;
             in >> nbObj;
             for(quint16 i=0; i<nbObj; i++) {
                 ObjectInfo info;
-                qint16 savedIndex;
-                quint16 size;
+                quint16 streamSize;
                 QByteArray tmpStream;
                 QDataStream tmp( &tmpStream , QIODevice::ReadWrite);
 
                 in >> info;
-                in >> savedIndex;
-                in >> size;
+                in >> streamSize;
                 in >> tmpStream;
 
                 if(info.objType != ObjType::dummy) {
@@ -149,6 +142,10 @@ QDataStream & ParkingContainer::fromStream (QDataStream &in)
                     if(!objPtr.isNull()) {
                         AddObject(objPtr);
                         tmp >> *objPtr.data();
+
+                        //keep the object alive while loading
+                        listLoadingObjects << objPtr;
+
                     } else {
                         //error while creating the object, build a dummy object with the same saved id
                         info.objType=ObjType::dummy;
@@ -157,6 +154,10 @@ QDataStream & ParkingContainer::fromStream (QDataStream &in)
                         if(!objPtr.isNull()) {
                             AddObject(objPtr);
                             tmp2 >> *objPtr.data();
+
+                            //keep the object alive while loading
+                            listLoadingObjects << objPtr;
+
                         } else {
                             //can't even create a dummy object ?
                             debug("Container::fromStream dummy object not created")
@@ -166,23 +167,15 @@ QDataStream & ParkingContainer::fromStream (QDataStream &in)
             }
             break;
         }
-        case 1:
-        {
-            quint16 nbObj;
-            in >> nbObj;
-            for(quint16 i=0; i<nbObj; i++) {
-                quint16 objId;
-                in>>objId;
-                if(objId!=(quint16)-1) {
-                    int id = ObjectFactory::Get()->IdFromSavedId(objId);
-                    QSharedPointer<Object> objPtr = ObjectFactory::Get()->GetObjectFromId(id);
-                    if(!objPtr.isNull()) {
-                        in>>*objPtr.data();
-                   }
-                }
-            }
+
+        //do nothing : no program to load
+//        case 1:
+//            break;
+
+        //clear the loading list, delete unused objects
+        case 2:
+            listLoadingObjects.clear();
             break;
-        }
     }
     return in;
 }

@@ -30,6 +30,7 @@ ObjectView::ObjectView(QAbstractItemModel *model, QGraphicsItem * parent, Qt::Wi
     titleText(0),
     border(0),
     selectBorder(0),
+    errorMessage(0),
     layout(0),
     model(model)
 
@@ -98,14 +99,7 @@ void ObjectView::SetModelIndex(QPersistentModelIndex index)
 {
     ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
     if(info.objType == ObjType::dummy) {
-        QPixmap pix(":/img32x32/agt_action_fail.png");
-        backgroundImg = new QGraphicsPixmapItem(pix,this,scene());
-        backgroundImg->setToolTip(tr("Unable to load this item"));
-        QPointF pt = geometry().center();
-        pt.rx()-=pix.width()/2;
-        pt.ry()-=pix.height()/2;
-        backgroundImg->setPos( pt );
-
+        SetErrorMessage("object not loaded");
     }
 
     actEditor->setEnabled( objIndex.data(UserRoles::hasEditor).toBool() );
@@ -148,9 +142,36 @@ void ObjectView::UpdateModelIndex()
         actLearn->setChecked( objIndex.data(UserRoles::paramLearning).toBool() );
     }
 
+    if(objIndex.data(UserRoles::errorMessage).isValid()) {
+        QString err = objIndex.data(UserRoles::errorMessage).toString();
+        SetErrorMessage( err );
+    }
+
 //    if(objIndex.data(UserRoles::editorImage).isValid()) {
 //        SetBackground( objIndex.data(UserRoles::editorImage).toString() );
 //    }
+}
+
+void ObjectView::SetErrorMessage(const QString & msg)
+{
+    if(msg.isEmpty()) {
+        if(errorMessage) {
+            delete errorMessage;
+            errorMessage=0;
+            setToolTip("");
+        }
+    } else {
+        if(!errorMessage) {
+            QPixmap pix(":/img32x32/agt_action_fail.png");
+            errorMessage = new QGraphicsPixmapItem(pix,this,scene());
+//            QPointF pt = geometry().center();
+//            pt.rx() -= pix.width()/2;
+//            pt.ry() -= pix.height()/2;
+//            errorMessage->setPos(pt);
+            errorMessage->setPos(0,0);
+        }
+        setToolTip(msg);
+    }
 }
 
 //void ObjectView::SetBackground(const QString & imgName)

@@ -25,7 +25,7 @@
 using namespace Connectables;
 
 //parameter is a float
-ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int number, float defaultValue, bool defaultVisible, QString name, bool nameCanChange, bool bridge) :
+ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int number, float defaultValue, bool defaultVisible, const QString &name, bool nameCanChange, bool bridge) :
         Pin(parent,PinType::Parameter,direction,number,bridge),
         listValues(0),
         stepIndex(0),
@@ -36,38 +36,34 @@ ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int num
         nameCanChange(nameCanChange),
         dirty(false)
 {
-//    visible=false;
     SetVisible(false);
 
     value = defaultValue;
     falloff = 0.0f;
-
     setObjectName(name);
 
     loading=true;
-    OnValueChanged(value);
+    OnValueChanged( defaultValue );
     loading=false;
 }
 
 //parameter is a int with a list of possible values
-ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int number, QVariant defaultValue, QList<QVariant> *listValues, bool defaultVisible, QString name, bool nameCanChange, bool bridge) :
+ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int number, const QVariant &defaultVariantValue, QList<QVariant> *listValues, bool defaultVisible, const QString &name, bool nameCanChange, bool bridge) :
         Pin(parent,PinType::Parameter,direction,number,bridge),
         listValues(listValues),
-        defaultValue(.0f),
+        defaultValue( .0f ),
         defaultVisible(defaultVisible),
         nameCanChange(nameCanChange)
 {
-    visible=false;
-    stepSize=1.0f/(listValues->size()-1);
+    SetVisible(false);
     falloff = 0.0f;
-
-    stepIndex=listValues->indexOf(defaultValue);
-    defaultIndex=stepIndex;
-
     setObjectName(name);
 
     loading=true;
-    OnValueChanged(value);
+    stepSize=1.0f/(listValues->size()-1);
+    stepIndex=listValues->indexOf(defaultVariantValue);
+    defaultIndex=stepIndex;
+    OnValueChanged( stepIndex*stepSize );
     loading=false;
 }
 

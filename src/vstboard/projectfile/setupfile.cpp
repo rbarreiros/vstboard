@@ -18,7 +18,7 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#define SETUP_FILE_VERSION 1
+#define SETUP_FILE_VERSION 3
 #define SETUP_FILE_KEY 0x7575e711
 
 #include "setupfile.h"
@@ -49,11 +49,9 @@ void SetupFile::SaveToFile(QString filePath)
 
     host->hostContainer->SaveProgram();
 
-    MainHost::Get()->filePass=0;
-    stream << *host->hostContainer;
-
-    MainHost::Get()->filePass=1;
-    stream << *host->hostContainer;
+    for(MainHost::Get()->filePass=0; MainHost::Get()->filePass<LOADSAVE_STAGES ; MainHost::Get()->filePass++) {
+        stream << *host->hostContainer;
+    }
 
     host->EnableSolverUpdate(true);
 }
@@ -63,7 +61,6 @@ void SetupFile::Clear()
     MainHost *host = MainHost::Get();
     host->EnableSolverUpdate(false);
     host->SetupHostContainer();
-    host->hostContainer->listenProgramChanges=false;
     host->EnableSolverUpdate(true);
 }
 
@@ -99,18 +96,12 @@ bool SetupFile::LoadFromFile(QString filePath)
     MainHost *host = MainHost::Get();
     host->EnableSolverUpdate(false);
     host->SetupHostContainer();
-    host->hostContainer->LoadProgram(TEMP_PROGRAM);
 
-    MainHost::Get()->filePass=0;
-    stream >> *host->hostContainer;
-    MainHost::Get()->filePass=1;
-    stream >> *host->hostContainer;
+    for(MainHost::Get()->filePass=0; MainHost::Get()->filePass<LOADSAVE_STAGES ; MainHost::Get()->filePass++) {
+        stream >> *host->hostContainer;
+    }
 
     Connectables::ObjectFactory::Get()->ResetSavedId();
-
-    host->hostContainer->listenProgramChanges=false;
-    host->hostContainer->LoadProgram(0);
-
     host->EnableSolverUpdate(true);
     return true;
 }

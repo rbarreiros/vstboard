@@ -93,6 +93,11 @@ bool AudioDevice::SetObjectInput(AudioDeviceIn *obj)
 {
     QMutexLocker l(&devicesMutex);
 
+    if(devIn && devIn == obj) {
+        //it's the same object
+        return true;
+    }
+
     if(devIn && obj) {
         debug("AudioDevice::SetObjectInput already used")
         return false;
@@ -116,6 +121,11 @@ bool AudioDevice::SetObjectInput(AudioDeviceIn *obj)
 bool AudioDevice::SetObjectOutput(AudioDeviceOut *obj)
 {
     QMutexLocker l(&devicesMutex);
+
+    if(devOut && devOut == obj) {
+        //it's the same object
+        return true;
+    }
 
     devOutClosing=false;
 
@@ -142,7 +152,7 @@ void AudioDevice::SetSampleRate(float rate)
     }
 }
 
-bool AudioDevice::FindDeviceFromName(ObjectInfo &objInfo, PaDeviceInfo *devInfo)
+bool AudioDevice::FindDeviceByName(ObjectInfo &objInfo, PaDeviceInfo *devInfo)
 {
     int cptDuplicateNames=0;
     int canBe=-1;
@@ -350,12 +360,18 @@ bool AudioDevice::OpenStream(double sampleRate)
 
 bool AudioDevice::Open()
 {
+    //already opened
+    if(!closed) {
+        debug("AudioDevice::Open already opened")
+        return true;
+    }
+
     isClosing=false;
 
 //    debug("%s open",objectName().toAscii().constData())
 
     //find the corresponding device
-    if(!FindDeviceFromName(objInfo,&devInfo)) {
+    if(!FindDeviceByName(objInfo,&devInfo)) {
         return false;
     }
 
@@ -405,10 +421,12 @@ bool AudioDevice::CloseStream()
 {
     devicesMutex.lock();
     if(isClosing) {
-        debug("already closing")
+        devicesMutex.unlock();
+        debug("AudioDevice::CloseStream already closing")
         return false;
     }
     isClosing=true;
+    closed=true;
 
     emit InUseChanged(objInfo,false);
 
@@ -554,7 +572,11 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
 {
     AudioDevice* device = (AudioDevice*)userData;
 
-    unsigned int hostBuffSize = MainHost::Get()->GetBufferSize();
+    MainHost *host = MainHost::Get();
+    if(!host)
+        return paComplete;
+
+    unsigned int hostBuffSize = host->GetBufferSize();
     if(framesPerBuffer > hostBuffSize) {
        MainHost::Get()->SetBufferSize((long)framesPerBuffer);
        hostBuffSize = framesPerBuffer;

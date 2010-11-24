@@ -62,11 +62,12 @@ namespace Connectables {
         const ConnectionInfo &GetConnectionInfo() const {return connectInfo;}
         bool event(QEvent *event);
 
-        void SetParentModelIndex(const QModelIndex &parentIndex);
+        void SetParentModelIndex(const QModelIndex &newParent);
         void SetContainerId(quint16 id);
 
         inline bool GetVisible() {return visible;}
         void SetVisible(bool vis);
+        void UpdateModelNode();
         void Close();
 
     protected:

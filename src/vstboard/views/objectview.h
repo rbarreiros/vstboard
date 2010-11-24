@@ -43,6 +43,7 @@ namespace View {
         virtual void UpdateModelIndex();
 
     protected:
+        void SetErrorMessage(const QString & msg);
         void SetBackground(const QString & imgName);
         virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
         void resizeEvent ( QGraphicsSceneResizeEvent * event );
@@ -56,6 +57,7 @@ namespace View {
         QGraphicsRectItem *border;
         QGraphicsPixmapItem *backgroundImg;
         QGraphicsRectItem *selectBorder;
+        QGraphicsPixmapItem *errorMessage;
 
         QMap<ConnectionInfo, PinView*>listPins;
 

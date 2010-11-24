@@ -61,7 +61,7 @@ namespace Connectables {
 
         bool bufferReady;
 
-        static bool FindDeviceFromName(ObjectInfo &objInfo, PaDeviceInfo *devInfo=0);
+        static bool FindDeviceByName(ObjectInfo &objInfo, PaDeviceInfo *devInfo=0);
 
         static int countDevicesReady;
         static int countInputDevices;

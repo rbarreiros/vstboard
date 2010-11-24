@@ -25,6 +25,8 @@
 #include "bridge.h"
 #include "containerprogram.h"
 
+#define LOADSAVE_STAGES 3
+
 namespace Connectables {
 
     class Container : public Object
@@ -65,8 +67,10 @@ namespace Connectables {
         QHash<int,ContainerProgram*>listContainerPrograms;
 
         ContainerProgram* currentProgram;
-//        QStandardItem *cablesNode;
         QPersistentModelIndex cablesNode;
+
+        //store the objects while loading preventing them from being deleted since the objects are loaded before the programs using them
+        QList< QSharedPointer< Object > >listLoadingObjects;
 
     signals:
 

@@ -104,6 +104,10 @@ MainWindow::MainWindow(QWidget *parent) :
     mainHost->SetSampleRate( ConfigDialog::defaultSampleRate() );
     mainHost->Open();
 
+    ui->treeHostModel->setModel(mainHost->GetModel());
+    ui->listParking->setModel(mainHost->GetParkingModel());
+    ui->listParking->setRootIndex(mainHost->GetParkingModel()->invisibleRootItem()->child(0)->index());
+
     //load default setup file
     currentSetupFile = ConfigDialog::defaultSetupFile();
     if(!currentSetupFile.isEmpty()) {
@@ -121,9 +125,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     readSettings();
 
-    ui->treeHostModel->setModel(mainHost->GetModel());
-    ui->listParking->setModel(mainHost->GetParkingModel());
-    ui->listParking->setRootIndex(mainHost->GetParkingModel()->invisibleRootItem()->child(0)->index());
+
 
 }
 

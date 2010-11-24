@@ -136,9 +136,9 @@ void MainHost::Open()
 
     EnableSolverUpdate(true);
 
-    mainContainer->listenProgramChanges=false;
-    hostContainer->listenProgramChanges=false;
-    projectContainer->listenProgramChanges=false;
+
+
+
 
     programList->BuildModel();
     //programList->ChangeProg(0);
@@ -158,6 +158,7 @@ void MainHost::SetupMainContainer()
     OnObjectAdded(mainContainer);
     mainContainer->SetParentModeIndex( model->invisibleRootItem()->index() );
 
+    mainContainer->listenProgramChanges=false;
 }
 
 void MainHost::SetupHostContainer()
@@ -210,6 +211,7 @@ void MainHost::SetupHostContainer()
         mainContainer->ConnectBridges(hostContainer->bridgeSend, projectContainer->bridgeIn);
         mainContainer->ConnectBridges(projectContainer->bridgeOut, hostContainer->bridgeReturn);
     }
+    hostContainer->listenProgramChanges=false;
 }
 
 void MainHost::SetupProjectContainer()
@@ -297,6 +299,7 @@ void MainHost::SetupProjectContainer()
     projectContainer->ConnectBridges(projectContainer->bridgeIn, projectContainer->bridgeSend,false);
     projectContainer->ConnectBridges(projectContainer->bridgeReturn, projectContainer->bridgeOut,false);
 
+    projectContainer->listenProgramChanges=false;
 }
 
 void MainHost::SetupProgramContainer()
@@ -379,12 +382,7 @@ void MainHost::ClearHost()
     SetupParking();
 
     EnableSolverUpdate(true);
-
-    projectContainer->listenProgramChanges=false;
-
     programList->BuildModel();
-    //programList->ChangeProg(0);
-    //SetProgram(0);
 }
 
 void MainHost::EnableSolverUpdate(bool enable)
@@ -625,15 +623,11 @@ QDataStream & operator<< (QDataStream& out, MainHost& value)
     value.programContainer->SaveProgram();
     value.parkingContainer->SaveProgram();
 
-    MainHost::Get()->filePass=0;
-    out << *value.parkingContainer;
-    out << *value.projectContainer;
-    out << *value.programContainer;
-
-    MainHost::Get()->filePass=1;
-    out << *value.parkingContainer;
-    out << *value.projectContainer;
-    out << *value.programContainer;
+    for(MainHost::Get()->filePass=0; MainHost::Get()->filePass<LOADSAVE_STAGES ; MainHost::Get()->filePass++) {
+        out << *value.parkingContainer;
+        out << *value.projectContainer;
+        out << *value.programContainer;
+    }
 
     out << *value.programList;
 
@@ -649,29 +643,15 @@ QDataStream & operator>> (QDataStream& in, MainHost& value)
     value.SetupProjectContainer();
     value.SetupProgramContainer();
     value.SetupParking();
-    value.projectContainer->LoadProgram(TEMP_PROGRAM);
-    value.programContainer->LoadProgram(TEMP_PROGRAM);
 
-    MainHost::Get()->filePass=0;
-    in >> *value.parkingContainer;
-    in >> *value.projectContainer;
-    in >> *value.programContainer;
-
-    MainHost::Get()->filePass=1;
-    in >> *value.parkingContainer;
-    in >> *value.projectContainer;
-    in >> *value.programContainer;
+    for(MainHost::Get()->filePass=0; MainHost::Get()->filePass<LOADSAVE_STAGES ; MainHost::Get()->filePass++) {
+        in >> *value.parkingContainer;
+        in >> *value.projectContainer;
+        in >> *value.programContainer;
+    }
 
     Connectables::ObjectFactory::Get()->ResetSavedId();
-
-    value.projectContainer->LoadProgram(0);
-    value.projectContainer->listenProgramChanges=false;
-
     in >> *value.programList;
-
     value.EnableSolverUpdate(true);
-
-//    value.programList->ChangeGroup(0);
-
     return in;
 }

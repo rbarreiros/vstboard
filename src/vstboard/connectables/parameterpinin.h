@@ -30,7 +30,7 @@ namespace Connectables {
     {
     public:
         ParameterPinIn(Object *parent, int number, float defaultValue, bool defaultVisible, QString name="", bool nameCanChange=false);
-        ParameterPinIn(Object *parent, int number, QVariant defaultVariantValue, QList<QVariant> *listValues, bool defaultVisible, QString name="", bool nameCanChange=false);
+        ParameterPinIn(Object *parent, int number, const QVariant &defaultVariantValue, QList<QVariant> *listValues, bool defaultVisible, QString name="", bool nameCanChange=false);
 
         virtual void ReceiveMsg(const int msgType=0,void *data=0);
     };

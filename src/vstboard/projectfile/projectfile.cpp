@@ -18,7 +18,7 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#define PROJECT_FILE_VERSION 2
+#define PROJECT_FILE_VERSION 3
 #define PROJECT_FILE_KEY 0x757b0a5d
 
 #include "projectfile.h"

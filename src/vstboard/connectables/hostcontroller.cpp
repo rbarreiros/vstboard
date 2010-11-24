@@ -54,7 +54,7 @@ HostController::HostController(int index):
 
     listMidiPinIn << new MidiPinIn(this);
 
-    listParameterPinIn.insert(Param_Tempo, new ParameterPinIn(this,Param_Tempo,120,&listTempo,true,"bpm"));
+    listParameterPinIn.insert(Param_Tempo, new ParameterPinIn(this,Param_Tempo,QVariant::fromValue<int>(120),&listTempo,true,"bpm"));
     listParameterPinIn.insert(Param_Sign1, new ParameterPinIn(this,Param_Sign1,4,&listSign1,true,"sign1"));
     listParameterPinIn.insert(Param_Sign2, new ParameterPinIn(this,Param_Sign2,4,&listSign2,true,"sign2"));
     listParameterPinIn.insert(Param_Group, new ParameterPinIn(this,Param_Group,0,&listGrp,true,"ProgGrp"));

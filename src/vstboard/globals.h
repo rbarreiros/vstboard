@@ -50,7 +50,8 @@ namespace UserRoles {
         editorPos,
         editorSize,
         canLearn,
-        paramLearning
+        paramLearning,
+        errorMessage
     };
 }
 namespace NodeType {

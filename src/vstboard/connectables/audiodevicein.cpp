@@ -58,7 +58,9 @@ void AudioDeviceIn::Render()
         pin->buffer->ConsumeStack();
         pin->SendAudioBuffer();
     }
-    listParameterPinOut.value(0)->ChangeValue(parentDevice->GetCpuUsage());
+
+    if(parentDevice)
+        listParameterPinOut.value(0)->ChangeValue(parentDevice->GetCpuUsage());
 }
 
 void AudioDeviceIn::SetBufferSize(long size)
@@ -74,26 +76,24 @@ void AudioDeviceIn::SetBufferSize(long size)
 bool AudioDeviceIn::Open()
 {
     //can we find this device on this computer ?
-    if(!AudioDevice::FindDeviceFromName(objInfo)) {
-        debug("AudioDeviceIn::Open device not found")
-        return false;
+    if(!AudioDevice::FindDeviceByName(objInfo)) {
+    errorMessage = tr("Device not found");
+        return true;
     }
 
     closed=false;
 
     //create the audiodevice if needed
-    {
+    if(!parentDevice) {
         QMutexLocker l(&AudioDevice::listDevMutex);
 
         if(!AudioDevices::listAudioDevices.contains(objInfo.id)) {
-    //        parentDevice = new AudioDevice(objInfo);
             AudioDevice *dev = new AudioDevice(objInfo);
             parentDevice = QSharedPointer<AudioDevice>(dev);
             if(!parentDevice->Open()) {
-    //            delete parentDevice;
-    //            parentDevice=0;
                 parentDevice.clear();
-                return false;
+                errorMessage=tr("Error while opening the interface");
+                return true;
             }
             AudioDevices::listAudioDevices.insert(objInfo.id, parentDevice);
         } else {
@@ -101,26 +101,33 @@ bool AudioDeviceIn::Open()
         }
     }
 
-    if(!parentDevice)
-        return false;
+    if(!parentDevice) {
+        errorMessage=tr("Error : device was deleted");
+        return true;
+    }
 
     //if no input channels
     if(parentDevice->devInfo.maxInputChannels==0) {
         parentDevice.clear();
+        //should be deleted : return false
         return false;
     }
 
     for(int i=0;i<parentDevice->devInfo.maxInputChannels;i++) {
-//        AudioPinOut *pin = new AudioPinOut(this,i,true);
-        AudioPinOut *pin = new AudioPinOut(this,i);
+        AudioPinOut *pin=0;
+        if(listAudioPinOut.size()>i) {
+            pin = listAudioPinOut.at(i);
+        } else {
+            pin = new AudioPinOut(this,i);
+            listAudioPinOut << pin;
+        }
         pin->buffer->SetSize(MainHost::Get()->GetBufferSize());
         pin->setObjectName(QString("Input %1").arg(i));
-        listAudioPinOut << pin;
+
     }
 
     //device already has a child
     if(!parentDevice->SetObjectInput(this)) {
-//        parentDevice = 0;
         parentDevice.clear();
         return false;
     }

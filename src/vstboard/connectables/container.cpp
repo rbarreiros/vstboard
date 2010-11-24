@@ -164,7 +164,7 @@ void Container::LoadProgram(int prog)
     }
 
     //if a program is loaded, unload it without saving
-    int progWas = currentProgId;
+//    int progWas = currentProgId;
     if(currentProgId!=EMPTY_PROGRAM && currentProgram)
         UnloadProgram();
 
@@ -179,13 +179,13 @@ void Container::LoadProgram(int prog)
     UpdateModelNode();
 
     //if the loaded program was a temporary prog, delete it
-    if(progWas==TEMP_PROGRAM)
-        listContainerPrograms.remove(TEMP_PROGRAM);
+//    if(progWas==TEMP_PROGRAM)
+//        listContainerPrograms.remove(TEMP_PROGRAM);
 }
 
 void Container::SaveProgram()
 {
-    if(!currentProgram)
+    if(!currentProgram && currentProgId==TEMP_PROGRAM)
         return;
 
     currentProgram->Save();
@@ -259,7 +259,7 @@ void Container::AddObject(QSharedPointer<Object> objPtr)
 
 void Container::RemoveObject(QSharedPointer<Object> objPtr)
 {
-    //containers not listening to program changes : delete the object from the only program
+    //the containers is not programmable : delete it from the save program too
     if(!listenProgramChanges) {
         foreach(ContainerProgram *prg, listContainerPrograms) {
             prg->RemoveObject(objPtr);
@@ -330,6 +330,8 @@ void Container::RemoveCableFromObj(int objId)
 QDataStream & Container::toStream (QDataStream& out) const
 {
     switch(MainHost::Get()->filePass) {
+
+        //save the objects used in the current program
         case 0:
         {
             out << (qint16)index;
@@ -346,7 +348,6 @@ QDataStream & Container::toStream (QDataStream& out) const
                         tmp << *objPtr.data();
 
                         out << objPtr->info();
-                        out << (qint16)objPtr->GetIndex();
                         out << (quint16)tmpStream.size();
                         out << tmpStream;
                     } else {
@@ -359,9 +360,9 @@ QDataStream & Container::toStream (QDataStream& out) const
             break;
         }
 
+        //save all programs
         case 1:
         {
-
             out << (quint32)listContainerPrograms.size();
             QHash<int,ContainerProgram*>::const_iterator i = listContainerPrograms.constBegin();
             while(i!=listContainerPrograms.constEnd()) {
@@ -369,24 +370,11 @@ QDataStream & Container::toStream (QDataStream& out) const
                 out << *(i.value());
                 ++i;
             }
-
-            out << (quint32)currentProgId;
-
-            if(currentProgram) {
-                out << (quint16)currentProgram->listObjects.size();
-                foreach(QSharedPointer<Object> objPtr, currentProgram->listObjects) {
-                    if(!objPtr.isNull()) {
-                        out<<(quint16)objPtr->GetIndex();
-                        out<<*objPtr.data();
-                    } else {
-                        out<<(quint16)-1;
-                    }
-                }
-            } else {
-                out << (quint16)0;
-            }
             break;
         }
+        case 2:
+            out << (quint32)currentProgId;
+            break;
     }
 
     return out;
@@ -396,8 +384,12 @@ QDataStream & Container::toStream (QDataStream& out) const
 QDataStream & Container::fromStream (QDataStream& in)
 {
     switch(MainHost::Get()->filePass) {
+
+        //load the object used by the current program
         case 0:
         {
+            LoadProgram(TEMP_PROGRAM);
+
             qint16 id;
             in >> id;
             savedIndex = id;
@@ -411,20 +403,21 @@ QDataStream & Container::fromStream (QDataStream& in)
             for(quint16 i=0; i<nbObj; i++) {
 
                     ObjectInfo info;
-                    qint16 savedIndex;
-                    quint16 size;
+                    quint16 streamSize;
                     QByteArray tmpStream;
                     QDataStream tmp( &tmpStream , QIODevice::ReadWrite);
 
                     in >> info;
-                    in >> savedIndex;
-                    in >> size;
+                    in >> streamSize;
                     in >> tmpStream;
 
                     QSharedPointer<Object> objPtr = ObjectFactory::Get()->NewObject(info);
                     if(!objPtr.isNull()) {
                         AddObject(objPtr);
                         tmp >> *objPtr.data();
+
+                        //keep the object alive while loading
+                        listLoadingObjects << objPtr;
                     } else {
                         //error while creating the object, build a dummy object with the same saved id
                         info.objType=ObjType::dummy;
@@ -433,6 +426,9 @@ QDataStream & Container::fromStream (QDataStream& in)
                         if(!objPtr.isNull()) {
                             AddObject(objPtr);
                             tmp2 >> *objPtr.data();
+
+                            //keep the object alive while loading
+                            listLoadingObjects << objPtr;
                         } else {
                             //can't even create a dummy object ?
                             debug("Container::fromStream dummy object not created")
@@ -442,9 +438,9 @@ QDataStream & Container::fromStream (QDataStream& in)
             break;
         }
 
+        //load the programs
         case 1:
         {
-
             quint32 nbProg;
             in >> nbProg;
             for(quint32 i=0; i<nbProg; i++) {
@@ -460,28 +456,18 @@ QDataStream & Container::fromStream (QDataStream& in)
                 }
 
                 in >> *prog;
-
-            }
-
-            quint32 progId;
-            in >> progId;
-
-           quint16 nbObj;
-
-            in >> nbObj;
-            for(quint16 i=0; i<nbObj; i++) {
-                quint16 objId;
-                in>>objId;
-                if(objId!=(quint16)-1) {
-                    int id = ObjectFactory::Get()->IdFromSavedId(objId);
-                    QSharedPointer<Object> objPtr = ObjectFactory::Get()->GetObjectFromId(id);
-                    if(!objPtr.isNull()) {
-                        in>>*objPtr.data();
-                   }
-                }
             }
             break;
         }
+
+        //clear the loading list : delete unused objects
+        case 2:
+            quint32 prog;
+            in >> prog;
+            LoadProgram(prog);
+            listLoadingObjects.clear();
+            listContainerPrograms.remove(TEMP_PROGRAM);
+            break;
     }
     return in;
 }

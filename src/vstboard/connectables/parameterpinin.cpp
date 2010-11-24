@@ -31,8 +31,8 @@ ParameterPinIn::ParameterPinIn(Object *parent, int number, float defaultValue, b
 }
 
 //parameter is a int, index in a list of values
-ParameterPinIn::ParameterPinIn(Object *parent, int number, QVariant defaultValue, QList<QVariant> *listValues, bool defaultVisible, QString name, bool nameCanChange) :
-        ParameterPin(parent, PinDirection::Input, number, defaultValue, listValues, defaultVisible, name, nameCanChange)
+ParameterPinIn::ParameterPinIn(Object *parent, int number, const QVariant &defaultVariantValue, QList<QVariant> *listValues, bool defaultVisible, QString name, bool nameCanChange) :
+        ParameterPin(parent, PinDirection::Input, number, defaultVariantValue, listValues, defaultVisible, name, nameCanChange)
 {
 }
 

@@ -71,7 +71,7 @@ Object::~Object()
 bool Object::Open()
 {
     closed=false;
-    emit Loaded();
+    errorMessage="";
     return true;
 }
 
@@ -251,8 +251,8 @@ Pin * Object::GetPin(const ConnectionInfo &pinInfo)
         case PinType::Audio :
             if(pinInfo.direction==PinDirection::Input) {
                 if(pinInfo.pinNumber >= listAudioPinIn.size()) {
-                    if(objInfo.objType == ObjType::dummy) {
-                        while(listAudioPinIn.size() <= pinInfo.pinNumber ) {
+                    if(objInfo.objType == ObjType::dummy || !errorMessage.isEmpty()) {
+                        while(pinInfo.pinNumber >= listAudioPinIn.size()) {
                             listAudioPinIn.append(new AudioPinIn(this, listAudioPinIn.size()));
                         }
                     } else
@@ -261,8 +261,8 @@ Pin * Object::GetPin(const ConnectionInfo &pinInfo)
                 return listAudioPinIn.at(pinInfo.pinNumber);
             } else {
                 if(pinInfo.pinNumber >= listAudioPinOut.size()) {
-                    if(objInfo.objType == ObjType::dummy) {
-                        while(listAudioPinOut.size() <= pinInfo.pinNumber ) {
+                    if(objInfo.objType == ObjType::dummy || !errorMessage.isEmpty()) {
+                        while(pinInfo.pinNumber >= listAudioPinOut.size()) {
                             listAudioPinOut.append(new AudioPinOut(this, listAudioPinOut.size()));
                         }
                     } else
@@ -271,10 +271,21 @@ Pin * Object::GetPin(const ConnectionInfo &pinInfo)
                 return listAudioPinOut.at(pinInfo.pinNumber);
             }
         case PinType::Midi :
-            if(pinInfo.direction==PinDirection::Input)
-                return listMidiPinIn.at(pinInfo.pinNumber);
-            else
-                return listMidiPinOut.at(pinInfo.pinNumber);
+            if(pinInfo.direction==PinDirection::Input) {
+                if(pinInfo.pinNumber<listMidiPinIn.size()) {
+                    return listMidiPinIn.at(pinInfo.pinNumber);
+                } else {
+                    debug("Object::GetPin midipinin out of range")
+                    return 0;
+                }
+            } else {
+                if(pinInfo.pinNumber<listMidiPinOut.size()) {
+                    return listMidiPinOut.at(pinInfo.pinNumber);
+                } else {
+                    debug("Object::GetPin midipinout out of range")
+                    return 0;
+                }
+            }
 
         case PinType::Parameter :
             if(pinInfo.direction==PinDirection::Input)
@@ -309,6 +320,7 @@ void Object::SetParentModeIndex(const QModelIndex &parentIndex)
     modelNode->setData(objInfo.name, Qt::DisplayRole);
     modelNode->setData(hasEditor, UserRoles::hasEditor);
     modelNode->setData(canLearn,UserRoles::canLearn);
+    modelNode->setData(errorMessage, UserRoles::errorMessage);
 
     if(parentIndex.isValid()) {
         MainHost::GetModel()->itemFromIndex(parentIndex)->appendRow(modelNode);
@@ -385,6 +397,8 @@ void Object::UpdateModelNode()
     QStandardItem *modelNode = MainHost::GetModel()->itemFromIndex(modelIndex);
 
     modelNode->setData(QVariant::fromValue(objInfo), UserRoles::objInfo);
+
+    modelNode->setData(errorMessage, UserRoles::errorMessage);
 
 //    if(hasEditor) {
 //        modelNode->setData(editorVisible,UserRoles::editorVisible);

@@ -73,6 +73,8 @@ ListAudioInterfacesModel * AudioDevices::GetModel()
         ad->SetSleep(true);
     }
 
+
+
     if(model) {
         debug("AudioDevices::GetModel pa_terminate")
         PaError err=Pa_Terminate();
@@ -94,6 +96,14 @@ ListAudioInterfacesModel * AudioDevices::GetModel()
         ad->SetSleep(false);
     }
 //    Connectables::AudioDevice::listDevMutex.unlock();
+
+    foreach(QSharedPointer<Connectables::Object>obj, Connectables::ObjectFactory::Get()->GetListObjects()) {
+        if(obj->info().objType == ObjType::AudioInterfaceIn || obj->info().objType == ObjType::AudioInterfaceOut) {
+//            if(!obj->errorMessage.isEmpty())
+                obj->Open();
+            obj->UpdateModelNode();
+        }
+    }
 
     return model;
 }
