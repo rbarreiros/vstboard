@@ -39,6 +39,8 @@ linux-g++ {
     SOURCES += $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/alsa/pa_linux_alsa.c
     SOURCES += $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/jack/pa_jack.c
     #SOURCES += $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/oss/pa_unix_oss.c
+    SOURCES += $$top_srcdir/$$PORTAUDIO_PATH/src/os/unix/pa_unix_hostapis.c
+    SOURCES += $$top_srcdir/$$PORTAUDIO_PATH/src/os/unix/pa_unix_util.c
 }
 
 win32 {
@@ -111,15 +113,6 @@ win32 {
         $$top_srcdir/$$PORTAUDIO_PATH/src/common/pa_cpuload.c \
         $$top_srcdir/$$PORTAUDIO_PATH/src/common/pa_converters.c \
         $$top_srcdir/$$PORTAUDIO_PATH/src/common/pa_allocation.c
-
-
-
-    unix {
-        INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/src/os/unix
-
-        SOURCES += $$top_srcdir/$$PORTAUDIO_PATH/src/os/unix/pa_unix_hostapis.c \
-        $$top_srcdir/$$PORTAUDIO_PATH/src/os/unix/pa_unix_util.c
-    }
 }
 
 mac {

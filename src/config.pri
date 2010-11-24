@@ -20,7 +20,8 @@ BUILDNO = $$system("git describe")
 DEFINES += APP_VERSION=\\\"$${BUILDNO}\\\"
 DEFINES += APP_NAME=\\\"VstBoard\\\"
 
-NSIS_DIR = D:\\Program Files\\NSIS
+#NSIS_PATH = D:\\Program Files\\NSIS\\makensis.exe
+#UPX_PATH = $${_PRO_FILE_PWD_}\\..\\..\\tools\\upx.exe
 
 PORTAUDIO_PATH 	= ../libs/portaudio
 PORTMIDI_PATH 	= ../libs/portmidi
@@ -65,19 +66,14 @@ win32 {
     LIBS += -ldsound
 }
 
-linux-g++ {
-    message("linux-g++")
-
-} else:win32-g++ {
-    message("win32-g++")
+win32-g++ {
     DEFINES += WINVER=0x0501
     DEFINES += _WIN32_WINNT=0x0501
     LIBS += -L$$quote($$MINGW_PATH/lib)
     INCLUDEPATH += $$quote($$MINGW_PATH/include)
+}
 
-
-} else:win32-msvc2008 {
-    message("win32-msvc2008")
+win32-msvc2008 {
     DEFINES += _CRT_SECURE_NO_WARNINGS
     INCLUDEPATH += $$quote($$(INCLUDE))
     LIBS += -L$$quote($$(LIB))
@@ -87,6 +83,4 @@ linux-g++ {
 #    QMAKE_CFLAGS_RELEASE +=  -Zi
 #    QMAKE_LFLAGS_RELEASE += /DEBUG
 
-} #else {
-  #  error("compiler not configured in config.pri")
-  #}
+}

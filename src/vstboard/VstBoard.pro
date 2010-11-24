@@ -27,11 +27,40 @@ TEMPLATE = app
 
 !CONFIG(debug, debug|release) {
 
-    EXTRA_FILES = $${_PRO_FILE_PWD_}/../../*.txt \
+    targetdir = $$OUT_PWD/../../bin/$$build_postfix
+    builddir = $$OUT_PWD/../../build/$$build_postfix
+
+#force rebuild (objects including the version number)
+    FORCE_REBUILD = \
+        splash \
+        aboutdialog
+
+    win32 {
+        win32-msvc2008 {
+            OBJEXT = obj
+        } else {
+            OBJEXT = o
+        }
+
+        FORCE_REBUILD_WIN = $${FORCE_REBUILD}
+        FORCE_REBUILD_WIN ~= s,/,\\,g
+        BUILDDIR_WIN = $${builddir}
+        BUILDDIR_WIN ~= s,/,\\,g
+        for(FILE,FORCE_REBUILD_WIN){
+            system(del \"$${BUILDDIR_WIN}\\$${FILE}.$${OBJEXT}\")
+        }
+    } else {
+        for(FILE,FORCE_REBUILD){
+            system(rm -f $${targetdir}/$${FILE}.o\")
+        }
+    }
+
+
+#other files included in the release
+    EXTRA_FILES = \
+        $${_PRO_FILE_PWD_}/../../*.txt \
         $${_PRO_FILE_PWD_}/../../tools/*.nsi \
         $${_PRO_FILE_PWD_}/../../tools/*.qm \
-
-    targetdir  =$$OUT_PWD/../../bin/$$build_postfix
 
     linux-g++{
         for(FILE,EXTRA_FILES){
@@ -48,11 +77,18 @@ TEMPLATE = app
         DESTDIR_WIN = $${targetdir}
         DESTDIR_WIN ~= s,/,\\,g
         for(FILE,EXTRA_FILES_WIN){
-            QMAKE_POST_LINK += copy /y \"$${FILE}\" \"$${DESTDIR_WIN}\" $$escape_expand(\n\t)
+            QMAKE_POST_LINK += copy /y \"$$FILE\" \"$$DESTDIR_WIN\" $$escape_expand(\n\t)
         }
 
-        QMAKE_POST_LINK += \"$${_PRO_FILE_PWD_}\\..\\..\\tools\\upx.exe\" --best \"$${DESTDIR_WIN}\\*.exe\" \"$${DESTDIR_WIN}\\*.dll\" $$escape_expand(\n\t)
-        QMAKE_POST_LINK += \"$$NSIS_DIR\\makensis.exe\" \"$${DESTDIR_WIN}\\nsis.nsi\" $$escape_expand(\n\t)
+    #run upx
+        exists($$UPX_PATH) {
+            QMAKE_POST_LINK += \"$$UPX_PATH\" --best \"$$DESTDIR_WIN\\*.exe\" \"$$DESTDIR_WIN\\*.dll\" $$escape_expand(\n\t)
+        }
+
+    #build installer
+        exists($$NSIS_PATH) {
+            QMAKE_POST_LINK += \"$$NSIS_PATH\" \"$$DESTDIR_WIN\\nsis.nsi\" $$escape_expand(\n\t)
+        }
     }
 }
 
