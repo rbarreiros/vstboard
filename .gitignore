@@ -1,5 +1,5 @@
 *.pdb
 *.pro.user*
-/tools/*
 Thumbs.db
 .DS_Store
+upx.exe

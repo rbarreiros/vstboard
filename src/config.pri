@@ -16,6 +16,12 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 
+BUILDNO = $$system("git describe")
+DEFINES += APP_VERSION=\\\"$${BUILDNO}\\\"
+DEFINES += APP_NAME=\\\"VstBoard\\\"
+
+NSIS_DIR = D:\\Program Files\\NSIS
+
 PORTAUDIO_PATH 	= ../libs/portaudio
 PORTMIDI_PATH 	= ../libs/portmidi
 
@@ -81,6 +87,6 @@ linux-g++ {
 #    QMAKE_CFLAGS_RELEASE +=  -Zi
 #    QMAKE_LFLAGS_RELEASE += /DEBUG
 
-} else {
-    error("compiler not configured in config.pri")
-}
+} #else {
+  #  error("compiler not configured in config.pri")
+  #}

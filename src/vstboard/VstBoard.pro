@@ -18,14 +18,43 @@
 
 top_srcdir = ..
 srcdir = vstboard
+
 include($$top_srcdir/config.pri)
 TEMPLATE = app
 
 #QT += sql
 
-BUILDNO = $$system("git describe")
-DEFINES += APP_VERSION=\\\"$${BUILDNO}\\\"
-DEFINES += APP_NAME=\\\"VstBoard\\\"
+
+!CONFIG(debug, debug|release) {
+
+    EXTRA_FILES = $${_PRO_FILE_PWD_}/../../*.txt \
+        $${_PRO_FILE_PWD_}/../../tools/*.nsi \
+        $${_PRO_FILE_PWD_}/../../tools/*.qm \
+
+    targetdir  =$$OUT_PWD/../../bin/$$build_postfix
+
+    linux-g++{
+        for(FILE,EXTRA_FILES){
+            QMAKE_POST_LINK += $$quote(cp $${FILE} $${targetdir} $$escape_expand(\n\t))
+        }
+    }
+
+    win32 {
+        EXTRA_FILES += $$[QT_INSTALL_BINS]/QtCore4.dll \
+                    $$[QT_INSTALL_BINS]/QtGui4.dll
+
+        EXTRA_FILES_WIN = $${EXTRA_FILES}
+        EXTRA_FILES_WIN ~= s,/,\\,g
+        DESTDIR_WIN = $${targetdir}
+        DESTDIR_WIN ~= s,/,\\,g
+        for(FILE,EXTRA_FILES_WIN){
+            QMAKE_POST_LINK += copy /y \"$${FILE}\" \"$${DESTDIR_WIN}\" $$escape_expand(\n\t)
+        }
+
+        QMAKE_POST_LINK += \"$${_PRO_FILE_PWD_}\\..\\..\\tools\\upx.exe\" --best \"$${DESTDIR_WIN}\\*.exe\" \"$${DESTDIR_WIN}\\*.dll\" $$escape_expand(\n\t)
+        QMAKE_POST_LINK += \"$$NSIS_DIR\\makensis.exe\" \"$${DESTDIR_WIN}\\nsis.nsi\" $$escape_expand(\n\t)
+    }
+}
 
 vstsdk { 
     DEFINES += VSTSDK
@@ -212,6 +241,12 @@ FORMS += mainwindow.ui \
     views/programlist.ui
 PRECOMPILED_HEADER = precomp.h
 RESOURCES += ../resources/resources.qrc
-OTHER_FILES += 
+OTHER_FILES += \ 
+    ../nsis.nsi \
+    ../../README.txt \
+    ../../license.txt \
+    ../../LGPL.txt \
+    ../../GPL.txt \
+    ../../tools/nsis.nsi
 
 TRANSLATIONS = vstboard_fr.ts

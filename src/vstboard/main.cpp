@@ -98,26 +98,23 @@ int main(int argc, char *argv[])
     qInstallMsgHandler(myMessageOutput);
 #endif
 
+    QCoreApplication::setOrganizationName("CtrlBrk");
+    QCoreApplication::setApplicationName(APP_NAME);
 
-        QCoreApplication::setOrganizationName("CtrlBrk");
-        QCoreApplication::setApplicationName("VstBoard");
+    MyApp app(argc, argv);
 
-        MyApp app(argc, argv);
+    QTranslator qtTranslator;
+    qtTranslator.load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+    app.installTranslator(&qtTranslator);
 
-        QTranslator qtTranslator;
-        qtTranslator.load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
-        app.installTranslator(&qtTranslator);
+    QTranslator myappTranslator;
+    myappTranslator.load("vstboard_" + QLocale::system().name());
+    app.installTranslator(&myappTranslator);
 
-        QTranslator myappTranslator;
-        myappTranslator.load("vstboard_" + QLocale::system().name());
-        app.installTranslator(&myappTranslator);
-
-        MainConfig::Get(&app);
-        MainWindow *w = MainWindow::Get();
-        w->setAttribute(Qt::WA_DeleteOnClose);
-        w->show();
-        app.exec();
-
-
+    MainConfig::Get(&app);
+    MainWindow *w = MainWindow::Get();
+    w->setAttribute(Qt::WA_DeleteOnClose);
+    w->show();
+    app.exec();
     return 0;
 }

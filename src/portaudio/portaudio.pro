@@ -135,3 +135,5 @@ mac {
     $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host/mac/asioshlib.cpp \
     $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host/mac/codefragements.cpp
 }
+
+OTHER_FILES +=
