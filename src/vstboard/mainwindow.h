@@ -25,7 +25,6 @@
 
 #include "mainhost.h"
 #include "models/listtoolsmodel.h"
-#include "projectfile/projectfile.h"
 #include "views/solverscene.h"
 #include "views/sceneview.h"
 
@@ -77,10 +76,6 @@ private:
     Ui::MainWindow *ui;
 
     MainHost *mainHost;
-    Project::ProjectFile *project;
-
-//public slots:
-//    void UpdateCpuLoad();
 
 private slots:
     void on_actionRestore_default_layout_triggered();

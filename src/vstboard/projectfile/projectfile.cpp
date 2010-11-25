@@ -18,67 +18,113 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#define PROJECT_FILE_VERSION 3
+#define PROJECT_FILE_VERSION 4
 #define PROJECT_FILE_KEY 0x757b0a5d
 
 #include "projectfile.h"
 #include "../mainhost.h"
 
-using namespace Project;
-
-ProjectFile *ProjectFile::theProjectFile=0;
-
-ProjectFile::ProjectFile(QObject *parent) :
-    QObject(parent)
+bool ProjectFile::SaveToFile(QString filePath)
 {
-    theProjectFile = this;
-    fileName = "session.dat";
+    QFile file(filePath);
+    if(!file.open(QIODevice::WriteOnly)) {
+        QMessageBox msgBox;
+        msgBox.setText(tr("Unable to open %1").arg(filePath));
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.exec();
+        return false;
+    }
+    QDataStream out(&file);
+
+    out << (quint32)PROJECT_FILE_KEY;
+    out << (quint32)PROJECT_FILE_VERSION;
+    out.setVersion(QDataStream::Qt_4_6);
+
+    MainHost *host = MainHost::Get();
+
+    host->EnableSolverUpdate(false);
+
+    host->insertContainer->SaveProgram();
+    host->programContainer->SaveProgram();
+    host->parkingContainer->SaveProgram();
+
+    for(host->filePass=0; host->filePass<LOADSAVE_STAGES ; host->filePass++) {
+        out << *host->parkingContainer;
+        out << *host->insertContainer;
+        out << *host->programContainer;
+    }
+
+    out << *host->programList;
+
+    host->EnableSolverUpdate(true);
+
+    return true;
 }
 
-void ProjectFile::SaveToFile(QString filePath)
+void ProjectFile::Clear()
 {
-    if(filePath.isNull())
-        filePath = fileName;
-
-    QFile file(filePath);
-    file.open(QIODevice::WriteOnly);
-    QDataStream stream(&file);
-
-    stream << (quint32)PROJECT_FILE_KEY;
-    stream << (quint32)PROJECT_FILE_VERSION;
-    stream.setVersion(QDataStream::Qt_4_6);
-    stream << *MainHost::Get();
+    MainHost *host = MainHost::Get();
+    host->EnableSolverUpdate(false);
+    host->SetupInsertContainer();
+    host->SetupProgramContainer();
+    host->SetupParking();
+    host->EnableSolverUpdate(true);
+    host->programList->BuildModel();
 }
 
 bool ProjectFile::LoadFromFile(QString filePath)
 {
-    if(filePath.isNull())
-        filePath = fileName;
-
     QFile file(filePath);
-    file.open(QIODevice::ReadOnly);
-    QDataStream stream(&file);
+    if(!file.open(QIODevice::ReadOnly)) {
+        QMessageBox msgBox;
+        msgBox.setText(tr("Unable to open %1").arg(filePath));
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.exec();
+        return false;
+    }
+
+    QDataStream in(&file);
 
     quint32 magic;
-    stream >> magic;
+    in >> magic;
     if(magic != PROJECT_FILE_KEY) {
         QMessageBox msgBox;
-        msgBox.setText(tr("Not a project file."));
+        msgBox.setText(tr("%1 is not a project file.").arg(filePath));
+        msgBox.setIcon(QMessageBox::Critical);
         msgBox.exec();
         return false;
     }
 
     quint32 version;
-    stream >> version;
+    in >> version;
     if(version != PROJECT_FILE_VERSION) {
         QMessageBox msgBox;
-        msgBox.setText(tr("Wrong file version."));
+        msgBox.setText(tr("%1 : wrong file version.").arg(filePath));
+        msgBox.setIcon(QMessageBox::Critical);
         msgBox.exec();
         return false;
     }
 
-    stream.setVersion(QDataStream::Qt_4_6);
-    stream >> *MainHost::Get();
+    in.setVersion(QDataStream::Qt_4_6);
+
+    MainHost *host = MainHost::Get();
+
+    host->EnableSolverUpdate(false);
+
+    host->SetupInsertContainer();
+    host->SetupProgramContainer();
+    host->SetupParking();
+
+    for(host->filePass=0; host->filePass<LOADSAVE_STAGES ; host->filePass++) {
+        in >> *host->parkingContainer;
+        in >> *host->insertContainer;
+        in >> *host->programContainer;
+    }
+
+    Connectables::ObjectFactory::Get()->ResetSavedId();
+    in >> *host->programList;
+    host->EnableSolverUpdate(true);
+
     return true;
 }
 

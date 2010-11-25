@@ -50,9 +50,7 @@ namespace View {
         void resizeEvent ( QResizeEvent * event );
         void showEvent ( QShowEvent * event );
         void closeEvent ( QCloseEvent * event );
-//        void moveEvent ( QMoveEvent * event );
         Connectables::VstPlugin *plugin;
-//        void changeEvent(QEvent *e);
 
         QModelIndex modelIndex;
 
@@ -66,7 +64,7 @@ namespace View {
 
     public slots:
         void SetWindowSize(int newWidth, int newHeight);
-//        void SetLearningMode(bool learning);
+        void SetScrollValue(int Hscroll, int Vscroll);
 
 
     };

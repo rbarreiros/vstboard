@@ -61,7 +61,7 @@ namespace Connectables {
         QList< QSharedPointer<Object> >listObjects;
         QList<Cable*>listCables;
 
-        QMap<int,ObjectConatinerAttribs>mapObjAttribs;
+        QMap<int,ObjectContainerAttribs>mapObjAttribs;
 
         friend class Container;
         friend class ParkingContainer;

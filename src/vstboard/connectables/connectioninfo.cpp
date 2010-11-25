@@ -73,52 +73,58 @@ bool ConnectionInfo::CanConnectTo(const ConnectionInfo &c) {
     return false;
 }
 
-QDataStream & ConnectionInfo::toStream(QDataStream& stream) const
+QDataStream & ConnectionInfo::toStream(QDataStream& out) const
 {
-    stream << bridge;
-    stream << container;
-    stream << objId;
-    stream << type;
-    stream << direction;
-    stream << pinNumber;
-    return stream;
+    const quint16 file_version = 1;
+    out << file_version;
+
+    out << bridge;
+    out << container;
+    out << objId;
+    out << type;
+    out << direction;
+    out << pinNumber;
+    return out;
 }
 
-QDataStream & ConnectionInfo::fromStream(QDataStream& stream)
+QDataStream & ConnectionInfo::fromStream(QDataStream& in)
 {
-    stream >> bridge;
+    quint16 file_version;
+    in >> file_version;
+
+    in >> bridge;
     quint16 savedContainerId;
-    stream >> savedContainerId;
+    in >> savedContainerId;
     int id = Connectables::ObjectFactory::Get()->IdFromSavedId(savedContainerId);
     if(id==-1) {
         debug("ConnectionInfo::fromStream : container not found")
-        return stream;
+        return in;
     }
     container = id;
 
     quint16 savedId;
-    stream >> savedId;
+    in >> savedId;
     id = Connectables::ObjectFactory::Get()->IdFromSavedId(savedId);
     if(id==-1) {
         debug("ConnectionInfo::fromStream : obj not found")
-        return stream;
+        return in;
     }
     objId = id;
 
-    stream >> type;
-    stream >> direction;
-    stream >> pinNumber;
+    in >> type;
+    in >> direction;
+    in >> pinNumber;
 
-    return stream;
+    return in;
 }
 
-QDataStream & operator<< (QDataStream& stream, const ConnectionInfo& connInfo)
+QDataStream & operator<< (QDataStream& out, const ConnectionInfo& connInfo)
 {
-   return connInfo.toStream(stream);
+   return connInfo.toStream(out);
 }
 
-QDataStream & operator>> (QDataStream& stream, ConnectionInfo& connInfo)
+QDataStream & operator>> (QDataStream& in, ConnectionInfo& connInfo)
 {
-    return connInfo.fromStream(stream);
+    return connInfo.fromStream(in);
 }
 

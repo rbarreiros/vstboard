@@ -27,15 +27,9 @@ class SetupFile : public QObject
 {
 Q_OBJECT
 public:
-    explicit SetupFile(QObject *parent = 0);
-
-    void SaveToFile(QString filePath=0);
-    bool LoadFromFile(QString filePath=0);
-    void Clear();
-
-protected:
-    QString fileName;
-
+    static bool SaveToFile(QString filePath);
+    static bool LoadFromFile(QString filePath);
+    static void Clear();
 
 };
 

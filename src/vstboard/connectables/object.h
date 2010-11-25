@@ -117,8 +117,8 @@ namespace Connectables {
 
         QPersistentModelIndex modelIndex;
 
-        virtual void SetContainerAttribs(const ObjectConatinerAttribs &attr);
-        virtual void GetContainerAttribs(ObjectConatinerAttribs &attr);
+        virtual void SetContainerAttribs(const ObjectContainerAttribs &attr);
+        virtual void GetContainerAttribs(ObjectContainerAttribs &attr);
 
         QString errorMessage;
 

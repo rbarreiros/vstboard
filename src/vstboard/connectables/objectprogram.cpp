@@ -75,50 +75,56 @@ void ObjectProgram::Save(const hashListParamPin& listIn, const hashListParamPin&
 }
 
 
-QDataStream & ObjectProgram::toStream(QDataStream& stream) const
+QDataStream & ObjectProgram::toStream(QDataStream& out) const
 {
-    stream << (qint16)progId;
+    const quint16 file_version = 1;
+    out << file_version;
 
-    stream << (qint16)listParametersIn.size();
+    out << (qint16)progId;
+
+    out << (qint16)listParametersIn.size();
     foreach(ObjectParameter param, listParametersIn) {
-        stream << param;
+        out << param;
     }
-    stream << (qint16)listParametersOut.size();
+    out << (qint16)listParametersOut.size();
     foreach(ObjectParameter param, listParametersOut) {
-        stream << param;
+        out << param;
     }
 
-    return stream;
+    return out;
 }
 
-QDataStream & ObjectProgram::fromStream(QDataStream& stream)
+QDataStream & ObjectProgram::fromStream(QDataStream& in)
 {
-    stream >> (qint16&)progId;
+    quint16 file_version;
+    in >> file_version;
+
+    in >> (qint16&)progId;
 
     qint16 nbParam;
-    stream >> nbParam;
+    in >> nbParam;
     for(int i=0; i<nbParam; i++) {
         ObjectParameter param;
-        stream >> param;
+        in >> param;
         listParametersIn << param;
     }
-    stream >> nbParam;
+    in >> nbParam;
     for(int i=0; i<nbParam; i++) {
         ObjectParameter param;
-        stream >> param;
+        in >> param;
         listParametersOut << param;
     }
 
-    return stream;
+    return in;
 }
 
 
-QDataStream & operator<< (QDataStream& stream, const Connectables::ObjectProgram& prog)
+QDataStream & operator<< (QDataStream& out, const Connectables::ObjectProgram& prog)
 {
-    return prog.toStream(stream);
+    return prog.toStream(out);
 }
 
-QDataStream & operator>> (QDataStream& stream, Connectables::ObjectProgram& prog)
+QDataStream & operator>> (QDataStream& in, Connectables::ObjectProgram& prog)
 {
-    return prog.fromStream(stream);
+    return prog.fromStream(in);
 }

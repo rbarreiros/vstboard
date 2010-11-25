@@ -10,11 +10,108 @@
     <height>570</height>
    </rect>
   </property>
+  <property name="palette">
+   <palette>
+    <active>
+     <colorrole role="Light">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>248</red>
+        <green>248</green>
+        <blue>248</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Base">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>236</red>
+        <green>236</green>
+        <blue>236</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Window">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>212</red>
+        <green>212</green>
+        <blue>212</blue>
+       </color>
+      </brush>
+     </colorrole>
+    </active>
+    <inactive>
+     <colorrole role="Light">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>248</red>
+        <green>248</green>
+        <blue>248</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Base">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>236</red>
+        <green>236</green>
+        <blue>236</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Window">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>212</red>
+        <green>212</green>
+        <blue>212</blue>
+       </color>
+      </brush>
+     </colorrole>
+    </inactive>
+    <disabled>
+     <colorrole role="Light">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>248</red>
+        <green>248</green>
+        <blue>248</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Base">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>212</red>
+        <green>212</green>
+        <blue>212</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Window">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>212</red>
+        <green>212</green>
+        <blue>212</blue>
+       </color>
+      </brush>
+     </colorrole>
+    </disabled>
+   </palette>
+  </property>
+  <property name="contextMenuPolicy">
+   <enum>Qt::DefaultContextMenu</enum>
+  </property>
   <property name="windowTitle">
    <string>VstBoard</string>
   </property>
   <property name="locale">
    <locale language="English" country="UnitedStates"/>
+  </property>
+  <property name="toolButtonStyle">
+   <enum>Qt::ToolButtonFollowStyle</enum>
   </property>
   <property name="dockNestingEnabled">
    <bool>true</bool>
@@ -64,7 +161,7 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QPushButton" name="pushZoomIn_2">
+           <widget class="QPushButton" name="pushZoomInHost">
             <property name="toolTip">
              <string>Zoom In</string>
             </property>
@@ -78,7 +175,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushZoomReset_2">
+           <widget class="QPushButton" name="pushZoomResetHost">
             <property name="toolTip">
              <string>Reset Zoom</string>
             </property>
@@ -89,7 +186,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushZoomOut_2">
+           <widget class="QPushButton" name="pushZoomOutHost">
             <property name="toolTip">
              <string>Zoom Out</string>
             </property>
@@ -119,12 +216,6 @@
         </item>
         <item>
          <widget class="MainGraphicsView" name="hostView">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
           <property name="whatsThis">
            <string>The Host panel is where you normally put your audio and midi interfaces.</string>
           </property>
@@ -173,7 +264,7 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QPushButton" name="pushZoomIn_4">
+           <widget class="QPushButton" name="pushZoomInProg">
             <property name="toolTip">
              <string>Zoom In</string>
             </property>
@@ -187,7 +278,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushZoomReset_4">
+           <widget class="QPushButton" name="pushZoomResetProg">
             <property name="toolTip">
              <string>Reset Zoom</string>
             </property>
@@ -198,7 +289,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushZoomOut_4">
+           <widget class="QPushButton" name="pushZoomOutProg">
             <property name="toolTip">
              <string>Zoom Out</string>
             </property>
@@ -268,12 +359,12 @@
          <number>0</number>
         </property>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_11">
+         <layout class="QVBoxLayout" name="verticalLayoutBoutInsert">
           <property name="spacing">
            <number>0</number>
           </property>
           <item>
-           <widget class="QPushButton" name="pushZoomIn_3">
+           <widget class="QPushButton" name="pushZoomInIns">
             <property name="toolTip">
              <string>Zoom In</string>
             </property>
@@ -287,7 +378,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushZoomReset_3">
+           <widget class="QPushButton" name="pushZoomResetIns">
             <property name="toolTip">
              <string>Reset Zoom</string>
             </property>
@@ -298,7 +389,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushZoomOut_3">
+           <widget class="QPushButton" name="pushZoomOutIns">
             <property name="toolTip">
              <string>Zoom Out</string>
             </property>
@@ -328,12 +419,6 @@
         </item>
         <item>
          <widget class="MainGraphicsView" name="insertView">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
           </property>
@@ -378,6 +463,9 @@
     <addaction name="actionProgram_panel"/>
     <addaction name="separator"/>
     <addaction name="actionRestore_default_layout"/>
+    <addaction name="actionStatus_bar"/>
+    <addaction name="actionTool_bar"/>
+    <addaction name="actionZoom_buttons"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -1101,6 +1189,30 @@
     <string>Restore default layout</string>
    </property>
   </action>
+  <action name="actionStatus_bar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Status bar</string>
+   </property>
+  </action>
+  <action name="actionTool_bar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Tool bar</string>
+   </property>
+  </action>
+  <action name="actionZoom_buttons">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Zoom buttons</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -1132,7 +1244,7 @@
  </resources>
  <connections>
   <connection>
-   <sender>pushZoomIn_4</sender>
+   <sender>pushZoomInProg</sender>
    <signal>pressed()</signal>
    <receiver>programView</receiver>
    <slot>zoomIn()</slot>
@@ -1148,7 +1260,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushZoomReset_4</sender>
+   <sender>pushZoomResetProg</sender>
    <signal>clicked()</signal>
    <receiver>programView</receiver>
    <slot>zoomReset()</slot>
@@ -1164,7 +1276,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushZoomOut_4</sender>
+   <sender>pushZoomOutProg</sender>
    <signal>pressed()</signal>
    <receiver>programView</receiver>
    <slot>zoomOut()</slot>
@@ -1180,7 +1292,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushZoomIn_3</sender>
+   <sender>pushZoomInIns</sender>
    <signal>pressed()</signal>
    <receiver>insertView</receiver>
    <slot>zoomIn()</slot>
@@ -1196,7 +1308,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushZoomReset_3</sender>
+   <sender>pushZoomResetIns</sender>
    <signal>clicked()</signal>
    <receiver>insertView</receiver>
    <slot>zoomReset()</slot>
@@ -1212,7 +1324,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushZoomOut_3</sender>
+   <sender>pushZoomOutIns</sender>
    <signal>pressed()</signal>
    <receiver>insertView</receiver>
    <slot>zoomOut()</slot>
@@ -1228,7 +1340,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushZoomIn_2</sender>
+   <sender>pushZoomInHost</sender>
    <signal>pressed()</signal>
    <receiver>hostView</receiver>
    <slot>zoomIn()</slot>
@@ -1244,7 +1356,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushZoomReset_2</sender>
+   <sender>pushZoomResetHost</sender>
    <signal>clicked()</signal>
    <receiver>hostView</receiver>
    <slot>zoomReset()</slot>
@@ -1260,7 +1372,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushZoomOut_2</sender>
+   <sender>pushZoomOutHost</sender>
    <signal>pressed()</signal>
    <receiver>hostView</receiver>
    <slot>zoomOut()</slot>
@@ -1320,6 +1432,38 @@
     <hint type="destinationlabel">
      <x>422</x>
      <y>449</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionStatus_bar</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>statusBar</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>422</x>
+     <y>559</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionTool_bar</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>mainToolBar</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>422</x>
+     <y>37</y>
     </hint>
    </hints>
   </connection>

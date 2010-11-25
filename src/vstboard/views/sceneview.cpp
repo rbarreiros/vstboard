@@ -37,11 +37,11 @@ using namespace View;
 SceneView::SceneView(MainGraphicsView *viewHost, MainGraphicsView *viewProgram, MainGraphicsView *viewInsert,QWidget *parent) :
         QAbstractItemView(parent),
         viewHost(viewHost),
-        viewInsert(viewInsert),
         viewProgram(viewProgram),
+        viewInsert(viewInsert),
         sceneHost(0),
-        sceneInsert(0),
-        sceneProgram(0)
+        sceneProgram(0),
+        sceneInsert(0)
 {
     setHidden(true);
     timerFalloff = new QTimer(this);

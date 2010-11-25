@@ -23,6 +23,7 @@
 #include "globals.h"
 #include "mainconfig.h"
 #include "projectfile/setupfile.h"
+#include "projectfile/projectfile.h"
 #include "views/configdialog.h"
 #include "views/aboutdialog.h"
 #include "connectables/objectinfo.h"
@@ -50,6 +51,9 @@ MainWindow::MainWindow(QWidget *parent) :
     mainHost = MainHost::Create(this);
 
 //    ImageCollection::Create(this);
+
+    connect(ui->mainToolBar, SIGNAL(visibilityChanged(bool)),
+            ui->actionTool_bar, SLOT(setChecked(bool)));
 
     //audio devices
     ui->treeAudioInterfaces->setModel(AudioDevices::Get()->GetModel());
@@ -114,19 +118,16 @@ MainWindow::MainWindow(QWidget *parent) :
     //load default setup file
     currentSetupFile = ConfigDialog::defaultSetupFile();
     if(!currentSetupFile.isEmpty()) {
-        SetupFile file(this);
-        if(!file.LoadFromFile(currentSetupFile))
+        if(!SetupFile::LoadFromFile(currentSetupFile))
             currentSetupFile = "";
     }
 
     //load default project file
     currentProjectFile = ConfigDialog::defaultProjectFile();
     if(!currentProjectFile.isEmpty()) {
-        if(!project->LoadFromFile(currentProjectFile))
+        if(!ProjectFile::LoadFromFile(currentProjectFile))
             currentProjectFile = "";
     }
-
-
 }
 
 MainWindow::~MainWindow()
@@ -218,7 +219,7 @@ void MainWindow::on_actionLoad_triggered()
         return;
 
     if(fileName.endsWith(PROJECT_FILE_EXTENSION, Qt::CaseInsensitive)) {
-        if(project->LoadFromFile(fileName)) {
+        if(ProjectFile::LoadFromFile(fileName)) {
             ConfigDialog::AddRecentProjectFile(fileName);
             currentProjectFile = fileName;
             updateRecentFileActions();
@@ -227,8 +228,7 @@ void MainWindow::on_actionLoad_triggered()
     }
 
     if(fileName.endsWith(SETUP_FILE_EXTENSION, Qt::CaseInsensitive)) {
-        SetupFile file(this);
-        if(file.LoadFromFile(fileName)) {
+        if(SetupFile::LoadFromFile(fileName)) {
             ConfigDialog::AddRecentSetupFile(fileName);
             currentSetupFile = fileName;
             updateRecentFileActions();
@@ -244,7 +244,7 @@ void MainWindow::on_actionLoad_triggered()
 
 void MainWindow::on_actionNew_triggered()
 {
-    MainHost::Get()->ClearHost();
+    ProjectFile::Clear();
     ConfigDialog::AddRecentProjectFile("");
     currentProjectFile = "";
     updateRecentFileActions();
@@ -256,8 +256,7 @@ void MainWindow::on_actionSave_triggered()
         on_actionSave_Project_As_triggered();
         return;
     }
-
-    project->SaveToFile(currentProjectFile);
+    ProjectFile::SaveToFile(currentProjectFile);
 }
 
 void MainWindow::on_actionSave_Project_As_triggered()
@@ -274,17 +273,17 @@ void MainWindow::on_actionSave_Project_As_triggered()
         fileName += PROJECT_FILE_EXTENSION;
     }
 
-    project->SaveToFile(fileName);
-    settings.setValue("lastProjectDir",QFileInfo(fileName).absolutePath());
-    ConfigDialog::AddRecentProjectFile(fileName);
-    currentProjectFile = fileName;
-    updateRecentFileActions();
+    if(ProjectFile::SaveToFile(fileName)) {
+        settings.setValue("lastProjectDir",QFileInfo(fileName).absolutePath());
+        ConfigDialog::AddRecentProjectFile(fileName);
+        currentProjectFile = fileName;
+        updateRecentFileActions();
+    }
 }
 
 void MainWindow::on_actionNew_Setup_triggered()
 {
-    SetupFile file;
-    file.Clear();
+    SetupFile::Clear();
     ConfigDialog::AddRecentSetupFile("");
     currentSetupFile = "";
     updateRecentFileActions();
@@ -297,8 +296,7 @@ void MainWindow::on_actionSave_Setup_triggered()
         return;
     }
 
-    SetupFile file;
-    file.SaveToFile(currentSetupFile);
+    SetupFile::SaveToFile(currentSetupFile);
 }
 
 void MainWindow::on_actionSave_Setup_As_triggered()
@@ -315,12 +313,13 @@ void MainWindow::on_actionSave_Setup_As_triggered()
         fileName += SETUP_FILE_EXTENSION;
     }
 
-    SetupFile file;
-    file.SaveToFile(fileName);
-    settings.setValue("lastSetupDir",QFileInfo(fileName).absolutePath());
-    ConfigDialog::AddRecentSetupFile(fileName);
-    currentSetupFile = fileName;
-    updateRecentFileActions();
+
+    if(SetupFile::SaveToFile(fileName)) {
+        settings.setValue("lastSetupDir",QFileInfo(fileName).absolutePath());
+        ConfigDialog::AddRecentSetupFile(fileName);
+        currentSetupFile = fileName;
+        updateRecentFileActions();
+    }
 }
 
 void MainWindow::on_actionShortcuts_toggled(bool onOff)
@@ -341,6 +340,7 @@ void MainWindow::writeSettings()
     settings.beginGroup("MainWindow");
     settings.setValue("geometry", saveGeometry());
     settings.setValue("state", saveState());
+    settings.setValue("statusBar", ui->statusBar->isVisible());
     settings.endGroup();
     settings.setValue("lastVstPath", ui->VstBrowser->path());
     ui->Programs->writeSettings();
@@ -406,6 +406,9 @@ void MainWindow::readSettings()
     if(settings.contains("geometry") && settings.contains("state")) {
         restoreGeometry(settings.value("geometry").toByteArray());
         restoreState(settings.value("state").toByteArray());
+        bool statusb = settings.value("statusBar",false).toBool();
+        ui->actionStatus_bar->setChecked( statusb );
+        ui->statusBar->setVisible(statusb);
     } else {
         resetSettings();
     }
@@ -457,12 +460,14 @@ void MainWindow::resetSettings()
     ui->actionProgram_panel->setChecked(true);
     ui->actionInsert_panel->setChecked(true);
 
+    ui->actionTool_bar->setChecked(false);
+    ui->actionStatus_bar->setChecked(false);
+    ui->statusBar->setVisible(false);
+
     int h = ui->splitterPanels->height();
     QList<int>heights;
     heights << h << h << h;
     ui->splitterPanels->setSizes(heights);
-
-
 
 }
 
@@ -518,8 +523,7 @@ void MainWindow::openRecentSetup()
 
      QString fileName = action->data().toString();
 
-     SetupFile file(this);
-     if(file.LoadFromFile(fileName)) {
+     if(SetupFile::LoadFromFile(fileName)) {
          ConfigDialog::AddRecentSetupFile(fileName);
          currentSetupFile=fileName;
          updateRecentFileActions();
@@ -534,7 +538,7 @@ void MainWindow::openRecentProject()
 
      QString fileName = action->data().toString();
 
-     if(project->LoadFromFile(fileName)) {
+     if(ProjectFile::LoadFromFile(fileName)) {
          ConfigDialog::AddRecentProjectFile(fileName);
          currentProjectFile=fileName;
          updateRecentFileActions();

@@ -22,43 +22,15 @@
 #define PROJECTFILE_H
 
 #include "../precomp.h"
-//#include "../connectables/connectioninfo.h"
 
+class ProjectFile : public QObject
+{
+Q_OBJECT
+public:
+    static bool SaveToFile(QString filePath);
+    static bool LoadFromFile(QString filePath);
+    static void Clear();
+};
 
-//namespace Connectables {
-//    class Object;
-//}
-
-namespace Project {
-    class Program;
-    class ProjectFile : public QObject
-    {
-    Q_OBJECT
-    public:
-        explicit ProjectFile(QObject *parent = 0);
-
-      //  Program* GetProgram(int program);
-
-     //   QStandardItemModel programModel;
-      //  QStandardItem *ItemFromProgId(int progId);
-
-      //  QMap<int,Program*>listPrograms;
-
-        static ProjectFile *theProjectFile;
-
-    protected:
-      //  void BuildModel();
-        QString fileName;
-
-    signals:
-
-
-    public slots:
-        void SaveToFile(QString filePath);
-        bool LoadFromFile(QString filePath);
-
-    };
-
-}
 #endif // PROJECTFILE_H
 

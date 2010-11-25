@@ -64,8 +64,8 @@ namespace Connectables {
 
         static View::VstShellSelect *shellSelectView;
 
-        void SetContainerAttribs(const ObjectConatinerAttribs &attr);
-        void GetContainerAttribs(ObjectConatinerAttribs &attr);
+        void SetContainerAttribs(const ObjectContainerAttribs &attr);
+        void GetContainerAttribs(ObjectContainerAttribs &attr);
 
     protected:
         float sampleRate;

@@ -40,6 +40,7 @@ ObjectView::ObjectView(QAbstractItemModel *model, QGraphicsItem * parent, Qt::Wi
     setFocusPolicy(Qt::StrongFocus);
 //    setAutoFillBackground(true);
 
+
     actDel = new QAction(QIcon(":/img16x16/delete.png"),tr("Delete"),this);
     actDel->setShortcut( Qt::Key_Delete );
     actDel->setShortcutContext(Qt::WidgetShortcut);

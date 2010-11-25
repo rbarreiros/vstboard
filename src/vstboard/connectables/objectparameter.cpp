@@ -22,31 +22,37 @@
 
 using namespace Connectables;
 
-QDataStream & ObjectParameter::toStream(QDataStream& stream) const
+QDataStream & ObjectParameter::toStream(QDataStream& out) const
 {
-    stream << value;
-    stream << (qint16)index;
-    stream << visible;
+    const quint16 file_version = 1;
+    out << file_version;
 
-    return stream;
+    out << value;
+    out << (qint16)index;
+    out << visible;
+
+    return out;
 }
 
-QDataStream & ObjectParameter::fromStream(QDataStream& stream)
+QDataStream & ObjectParameter::fromStream(QDataStream& in)
 {
-    stream >> value;
-    stream >> (qint16&)index;
-    stream >> visible;
+    quint16 file_version;
+    in >> file_version;
 
-    return stream;
+    in >> value;
+    in >> (qint16&)index;
+    in >> visible;
+
+    return in;
 }
 
 
-QDataStream & operator<< (QDataStream& stream, const Connectables::ObjectParameter& param)
+QDataStream & operator<< (QDataStream& out, const Connectables::ObjectParameter& param)
 {
-    return param.toStream(stream);
+    return param.toStream(out);
 }
 
-QDataStream & operator>> (QDataStream& stream, Connectables::ObjectParameter& param)
+QDataStream & operator>> (QDataStream& in, Connectables::ObjectParameter& param)
 {
-    return param.fromStream(stream);
+    return param.fromStream(in);
 }

@@ -32,8 +32,8 @@ public:
 
     bool CanConnectTo(const ConnectionInfo &c);
 
-    QDataStream & toStream(QDataStream& stream) const;
-    QDataStream & fromStream(QDataStream& stream);
+    QDataStream & toStream(QDataStream& out) const;
+    QDataStream & fromStream(QDataStream& in);
 
     quint16 container;
     quint16 objId;
@@ -95,8 +95,8 @@ inline bool operator<(const ConnectionInfo &c1, const ConnectionInfo &c2)
 
 
 
-QDataStream & operator<< (QDataStream& stream, const ConnectionInfo& connInfo);
-QDataStream & operator>> (QDataStream& stream, ConnectionInfo& connInfo);
+QDataStream & operator<< (QDataStream& out, const ConnectionInfo& connInfo);
+QDataStream & operator>> (QDataStream& in, ConnectionInfo& connInfo);
 
 typedef QMultiMap < ConnectionInfo, ConnectionInfo > hashCables;
 

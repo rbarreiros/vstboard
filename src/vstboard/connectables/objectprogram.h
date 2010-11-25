@@ -49,13 +49,13 @@ namespace Connectables {
         QList<ObjectParameter> listParametersIn;
         QList<ObjectParameter> listParametersOut;
 
-        QDataStream & toStream(QDataStream& stream) const;
-        QDataStream & fromStream(QDataStream& stream);
+        QDataStream & toStream(QDataStream& out) const;
+        QDataStream & fromStream(QDataStream& in);
     };
 
 }
 
-QDataStream & operator<< (QDataStream& stream, const Connectables::ObjectProgram& prog);
-QDataStream & operator>> (QDataStream& stream, Connectables::ObjectProgram& prog);
+QDataStream & operator<< (QDataStream& out, const Connectables::ObjectProgram& prog);
+QDataStream & operator>> (QDataStream& in, Connectables::ObjectProgram& prog);
 
 #endif // OBJECTPROGRAM_H

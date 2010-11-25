@@ -507,7 +507,7 @@ bool Object::GetLearningMode()
     return MainHost::GetModel()->data(modelIndex, UserRoles::paramLearning).toBool();
 }
 
-void Object::SetContainerAttribs(const ObjectConatinerAttribs &attr)
+void Object::SetContainerAttribs(const ObjectContainerAttribs &attr)
 {
     if(!modelIndex.isValid())
         return;
@@ -519,10 +519,12 @@ void Object::SetContainerAttribs(const ObjectConatinerAttribs &attr)
     item->setData(attr.editorVisible, UserRoles::editorVisible);
     item->setData(attr.editorPosition, UserRoles::editorPos);
     item->setData(attr.editorSize, UserRoles::editorSize);
+    item->setData(attr.editorHScroll, UserRoles::editorHScroll);
+    item->setData(attr.editorVScroll, UserRoles::editorVScroll);
     item->setData(attr.paramLearning, UserRoles::paramLearning);
 }
 
-void Object::GetContainerAttribs(ObjectConatinerAttribs &attr)
+void Object::GetContainerAttribs(ObjectContainerAttribs &attr)
 {
     if(!modelIndex.isValid())
         return;
@@ -532,72 +534,17 @@ void Object::GetContainerAttribs(ObjectConatinerAttribs &attr)
     attr.editorVisible = modelIndex.data(UserRoles::editorVisible).toBool();
     attr.editorPosition = modelIndex.data(UserRoles::editorPos).toPoint();
     attr.editorSize = modelIndex.data(UserRoles::editorSize).toSize();
+    attr.editorHScroll = modelIndex.data(UserRoles::editorHScroll).toInt();
+    attr.editorVScroll = modelIndex.data(UserRoles::editorVScroll).toInt();
     attr.paramLearning = modelIndex.data(UserRoles::paramLearning).toBool();
+
 }
-
-//void Object::OnEditorVisibilityChanged(bool visible)
-//{
-//    editorVisible = visible;
-//}
-
-//void Object::SetLearningMode(bool learning)
-//{
-////    if(modelLearningMode)
-////        modelLearningMode->setData(learning,UserRoles::value);
-
-//    if(learning) {
-//        UnLearningModeChanged(false);
-//        parameterLearning = 1;
-//    } else {
-//        parameterLearning=0;
-//    }
-
-////    if(modelNode)
-////        modelNode->setData(learning,UserRoles::paramLearning);
-//}
-
-//void Object::SetUnLearningMode(bool unlearning)
-//{
-//    if(unlearning) {
-////        modelLearningMode->setData(false,UserRoles::value);
-//        if(modelNode)
-//            modelNode->setData(false,UserRoles::paramLearning);
-
-//        LearningModeChanged(false);
-//        parameterLearning = -1;
-//    } else {
-//        parameterLearning=0;
-//    }
-//}
-
-//void Object::SetEditorVisible(bool visible)
-//{
-//    if(editorVisible==visible)
-//        return;
-
-//    editorVisible=visible;
-////    if(modelEditor)
-////        modelEditor->setData(visible ,UserRoles::value);
-//    if(modelNode)
-//        modelNode->setData(editorVisible, UserRoles::editorVisible);
-//}
-
-//void Object::SetPosition(const QPointF &pos)
-//{
-//    position=pos;
-//    if(modelNode)
-//        modelNode->setData(pos,UserRoles::position);
-//}
-
-//void Object::SetSize(QSizeF s)
-//{
-//    size=s;
-//    if(modelNode)
-//        modelNode->setData(s,UserRoles::size);
-//}
 
 QDataStream & Object::toStream(QDataStream & out) const
 {
+    const quint16 file_version = 1;
+    out << file_version;
+
     out << (qint16)index;
     out << sleep;
     out << listenProgramChanges;
@@ -620,6 +567,9 @@ QDataStream & Object::toStream(QDataStream & out) const
 
 QDataStream & Object::fromStream(QDataStream & in)
 {
+    quint16 file_version;
+    in >> file_version;
+
     qint16 id;
     in >> id;
     savedIndex=id;

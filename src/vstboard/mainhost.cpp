@@ -356,18 +356,6 @@ void MainHost::SetupParking()
     parkingContainer->SetParentModeIndex( modelParking->invisibleRootItem()->index() );
 }
 
-void MainHost::ClearHost()
-{
-    EnableSolverUpdate(false);
-
-    SetupInsertContainer();
-    SetupProgramContainer();
-    SetupParking();
-
-    EnableSolverUpdate(true);
-    programList->BuildModel();
-}
-
 void MainHost::EnableSolverUpdate(bool enable)
 {
     mutexProgChange.lock();
@@ -424,8 +412,6 @@ void MainHost::UpdateSolver(bool forceUpdate)
         programContainer->SaveProgram();
         programContainer->UnloadProgram();
         programContainer->LoadProgram(prg);
-//        emit ProgramChanged(prg);
-//        programList->ChangeProg(prg);
     }
 
     mutexListCables.lock();
@@ -449,8 +435,6 @@ void MainHost::SetProgram(const QModelIndex &prgIndex)
     progToChange=prgIndex.data(UserRoles::value).toInt();
     mutexProgChange.unlock();
     solverNeedAnUpdate=true;
-//    emit SolverToUpdate();
-
 }
 
 void MainHost::SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum msgType,void *data)
@@ -502,12 +486,6 @@ void MainHost::Render(unsigned long samples)
     renderer.StartRender();
     mutexRender.unlock();
 
-//    mutexProgChange.lock();
-//    bool b = solverNeedAnUpdate;
-//    mutexProgChange.unlock();
-//    if(b)
-//        emit SolverToUpdate();
-
     if(solverNeedAnUpdate && solverUpdateEnabled)
         emit SolverToUpdate();
 }
@@ -533,7 +511,6 @@ void MainHost::OnObjectAdded(QSharedPointer<Connectables::Object> objPtr)
     objPtr->SetSleep(false);
 
     solverNeedAnUpdate = true;
-//    emit SolverToUpdate();
 }
 
 void MainHost::OnObjectRemoved(QSharedPointer<Connectables::Object> objPtr, Connectables::Object *container)
@@ -554,7 +531,6 @@ void MainHost::OnObjectRemoved(QSharedPointer<Connectables::Object> objPtr, Conn
         parkingContainer->AddObject(objPtr);
 
     solverNeedAnUpdate = true;
-//    emit SolverToUpdate();
 }
 
 void MainHost::OnCableAdded(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
@@ -564,7 +540,6 @@ void MainHost::OnCableAdded(const ConnectionInfo &outputPin, const ConnectionInf
     mutexListCables.unlock();
 
     solverNeedAnUpdate = true;
-//    emit SolverToUpdate();
 }
 
 void MainHost::OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
@@ -574,20 +549,7 @@ void MainHost::OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionI
     mutexListCables.unlock();
 
     solverNeedAnUpdate = true;
-//    emit SolverToUpdate();
 }
-
-//float MainHost::GetCpuLoad()
-//{
-//    float c=cpuLoad;
-//    cpuLoad=.0f;
-//    return c;
-//}
-
-//void MainHost::UpdateCpuLoad(float load)
-//{
-//    cpuLoad=std::max(cpuLoad, load);
-//}
 
 void MainHost::SetTempo(int tempo, int sign1, int sign2)
 {
@@ -598,43 +560,4 @@ void MainHost::SetTempo(int tempo, int sign1, int sign2)
 #endif
 }
 
-QDataStream & operator<< (QDataStream& out, MainHost& value)
-{
-    value.EnableSolverUpdate(false);
 
-    value.insertContainer->SaveProgram();
-    value.programContainer->SaveProgram();
-    value.parkingContainer->SaveProgram();
-
-    for(MainHost::Get()->filePass=0; MainHost::Get()->filePass<LOADSAVE_STAGES ; MainHost::Get()->filePass++) {
-        out << *value.parkingContainer;
-        out << *value.insertContainer;
-        out << *value.programContainer;
-    }
-
-    out << *value.programList;
-
-    value.EnableSolverUpdate(true);
-
-    return out;
-}
-
-QDataStream & operator>> (QDataStream& in, MainHost& value)
-{
-    value.EnableSolverUpdate(false);
-
-    value.SetupInsertContainer();
-    value.SetupProgramContainer();
-    value.SetupParking();
-
-    for(MainHost::Get()->filePass=0; MainHost::Get()->filePass<LOADSAVE_STAGES ; MainHost::Get()->filePass++) {
-        in >> *value.parkingContainer;
-        in >> *value.insertContainer;
-        in >> *value.programContainer;
-    }
-
-    Connectables::ObjectFactory::Get()->ResetSavedId();
-    in >> *value.programList;
-    value.EnableSolverUpdate(true);
-    return in;
-}

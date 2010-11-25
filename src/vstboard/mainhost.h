@@ -26,7 +26,6 @@
 #include "connectables/object.h"
 #include "connectables/maincontainer.h"
 #include "connectables/parkingcontainer.h"
-//#include "projectfile/program.h"
 #include "pathsolver.h"
 #include "renderer.h"
 #include "globals.h"
@@ -35,7 +34,7 @@
 #include "audiodevices.h"
 #include "mididevices.h"
 #include "programs.h"
-#include "projectfile/setupfile.h"
+//#include "projectfile/setupfile.h"
 
 #ifdef VSTSDK
     #include "vst/cvsthost.h"
@@ -58,7 +57,6 @@ public:
     void SetSampleRate(float rate=44100.0);
     int GetBufferSize() {return (int)bufferSize;}
     float GetSampleRate() {return sampleRate;}
-//    float GetCpuLoad();
 
     void OnObjectAdded(QSharedPointer<Connectables::Object> objPtr);
     void OnObjectRemoved(QSharedPointer<Connectables::Object> objPtr, Connectables::Object *container=0);
@@ -66,8 +64,6 @@ public:
     void EnableSolverUpdate(bool enable);
     bool IsSolverUpdateEnabled();
 
-    QDataStream & toStream(QDataStream& stream) const;
-    QDataStream & fromStream(QDataStream& stream);
 
     QSharedPointer<Connectables::MainContainer> mainContainer;
     QSharedPointer<Connectables::MainContainer> hostContainer;
@@ -75,7 +71,6 @@ public:
     QSharedPointer<Connectables::MainContainer> insertContainer;
     QSharedPointer<Connectables::ParkingContainer> parkingContainer;
 
-//    ListAudioInterfacesModel * GetAudioDevicesModel() {return listAudioDevices->GetModel();}
     ListMidiInterfacesModel * GetMidiDeviceModel() {return listMidiDevices->GetModel();}
 
     PathSolver solver;
@@ -91,17 +86,16 @@ public:
     Programs *programList;
 
 private:
-    bool solverNeedAnUpdate;
-    bool solverUpdateEnabled;
-
     void SetupMainContainer();
     void SetupHostContainer();
     void SetupProgramContainer();
     void SetupInsertContainer();
     void SetupParking();
 
+    bool solverNeedAnUpdate;
+    bool solverUpdateEnabled;
+
     MidiDevices *listMidiDevices;
-//    AudioDevices *listAudioDevices;
 
     QMap<int,Connectables::Object*>listContainers;
     QMap<ConnectionInfo,Connectables::Pin*>listPins;
@@ -119,7 +113,6 @@ private:
     float sampleRate;
     long bufferSize;
     QTime timeFromStart;
-//    float cpuLoad;
 
     QList<Connectables::Object*>listObjToRemove;
 
@@ -128,10 +121,6 @@ private:
 
     MainHost(QObject *parent = 0);
     static MainHost *theHost;
-
-    friend QDataStream & operator<< (QDataStream&, MainHost&);
-    friend QDataStream & operator>> (QDataStream&, MainHost&);
-
     static HostModel *model;
     static HostModel *modelParking;
 
@@ -139,7 +128,6 @@ signals:
     void SampleRateChanged(float rate);
     void BufferSizeChanged(long size);
     void NewSolver(orderedNodes *renderLines);
-//    void ProgramChanged(const QModelIndex &progIndex);
     void ObjectRemoved(int contrainerId, int obj);
     void SolverToUpdate();
     void OnAudioDeviceToggleInUse(const ObjectInfo &objInfo, bool inUse);
@@ -150,9 +138,7 @@ public slots:
 
     void SetProgram(const QModelIndex &prgIndex);
     void UpdateSolver(bool forceUpdate=false);
-    void ClearHost();
 
-//    void UpdateCpuLoad(float load);
     void SetTempo(int tempo=120, int sign1=4, int sign2=4);
     void OnNewRenderingOrder(orderedNodes *renderLines);
     void Render(unsigned long samples=0);
@@ -161,10 +147,8 @@ public slots:
 private slots:
 
     friend class SetupFile;
+    friend class ProjectFile;
 };
-
-QDataStream & operator<< (QDataStream& out, MainHost& value);
-QDataStream & operator>> (QDataStream& in, MainHost& value);
 
 #endif // MAINHOST_H
 

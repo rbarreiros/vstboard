@@ -18,30 +18,27 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#define SETUP_FILE_VERSION 3
+#define SETUP_FILE_VERSION 4
 #define SETUP_FILE_KEY 0x7575e711
 
 #include "setupfile.h"
 #include "../mainhost.h"
 
-SetupFile::SetupFile(QObject *parent) :
-        QObject(parent)
+bool SetupFile::SaveToFile(QString filePath)
 {
-    fileName = "setup.dat";
-}
-
-void SetupFile::SaveToFile(QString filePath)
-{
-    if(filePath.isNull())
-        filePath = fileName;
-
     QFile file(filePath);
-    file.open(QIODevice::WriteOnly);
-    QDataStream stream(&file);
+    if(!file.open(QIODevice::WriteOnly)) {
+        QMessageBox msgBox;
+        msgBox.setText(tr("Unable to open %1").arg(filePath));
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.exec();
+        return false;
+    }
+    QDataStream out(&file);
 
-    stream << (quint32)SETUP_FILE_KEY;
-    stream << (quint32)SETUP_FILE_VERSION;
-    stream.setVersion(QDataStream::Qt_4_6);
+    out << (quint32)SETUP_FILE_KEY;
+    out << (quint32)SETUP_FILE_VERSION;
+    out.setVersion(QDataStream::Qt_4_6);
 
     MainHost *host = MainHost::Get();
 
@@ -49,10 +46,12 @@ void SetupFile::SaveToFile(QString filePath)
     host->hostContainer->SaveProgram();
 
     for(MainHost::Get()->filePass=0; MainHost::Get()->filePass<LOADSAVE_STAGES ; MainHost::Get()->filePass++) {
-        stream << *host->hostContainer;
+        out << *host->hostContainer;
     }
 
     host->EnableSolverUpdate(true);
+
+    return true;
 }
 
 void SetupFile::Clear()
@@ -65,39 +64,44 @@ void SetupFile::Clear()
 
 bool SetupFile::LoadFromFile(QString filePath)
 {
-    if(filePath.isNull())
-        filePath = fileName;
-
     QFile file(filePath);
-    file.open(QIODevice::ReadOnly);
-    QDataStream stream(&file);
+    if(!file.open(QIODevice::ReadOnly)) {
+        QMessageBox msgBox;
+        msgBox.setText(tr("Unable to open %1").arg(filePath));
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.exec();
+        return false;
+    }
+    QDataStream in(&file);
 
     quint32 magic;
-    stream >> magic;
+    in >> magic;
     if(magic != SETUP_FILE_KEY) {
         QMessageBox msgBox;
-        msgBox.setText(tr("Not a setup file."));
+        msgBox.setText(tr("%1 is not a setup file.").arg(filePath));
+        msgBox.setIcon(QMessageBox::Critical);
         msgBox.exec();
         return false;
     }
 
     quint32 version;
-    stream >> version;
+    in >> version;
     if(version != SETUP_FILE_VERSION) {
         QMessageBox msgBox;
-        msgBox.setText(tr("Wrong file version."));
+        msgBox.setText(tr("%1 : wrong file version.").arg(filePath));
+        msgBox.setIcon(QMessageBox::Critical);
         msgBox.exec();
         return false;
     }
 
-    stream.setVersion(QDataStream::Qt_4_6);
+    in.setVersion(QDataStream::Qt_4_6);
 
     MainHost *host = MainHost::Get();
     host->EnableSolverUpdate(false);
     host->SetupHostContainer();
 
     for(MainHost::Get()->filePass=0; MainHost::Get()->filePass<LOADSAVE_STAGES ; MainHost::Get()->filePass++) {
-        stream >> *host->hostContainer;
+        in >> *host->hostContainer;
     }
 
     Connectables::ObjectFactory::Get()->ResetSavedId();

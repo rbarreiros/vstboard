@@ -49,6 +49,8 @@ namespace UserRoles {
         editorImage,
         editorPos,
         editorSize,
+        editorVScroll,
+        editorHScroll,
         canLearn,
         paramLearning,
         errorMessage

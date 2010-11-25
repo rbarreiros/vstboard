@@ -474,17 +474,18 @@ void VstPlugin::OnEditorVisibilityChanged(bool visible)
     }
 }
 
-void VstPlugin::SetContainerAttribs(const ObjectConatinerAttribs &attr)
+void VstPlugin::SetContainerAttribs(const ObjectContainerAttribs &attr)
 {
     Object::SetContainerAttribs(attr);
 
     if(editorWnd && editorWnd->isVisible()) {
         editorWnd->move(attr.editorPosition);
         editorWnd->resize(attr.editorSize);
+        editorWnd->SetScrollValue(attr.editorHScroll,attr.editorVScroll);
     }
 }
 
-void VstPlugin::GetContainerAttribs(ObjectConatinerAttribs &attr)
+void VstPlugin::GetContainerAttribs(ObjectContainerAttribs &attr)
 {
     if(editorWnd && editorWnd->isVisible())
         editorWnd->SavePosSize();

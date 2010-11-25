@@ -43,7 +43,7 @@ ContainerProgram::ContainerProgram(const ContainerProgram& c)
         listCables << new Cable(*cab);
     }
 
-    QMap<int,ObjectConatinerAttribs>::ConstIterator i = c.mapObjAttribs.constBegin();
+    QMap<int,ObjectContainerAttribs>::ConstIterator i = c.mapObjAttribs.constBegin();
     while(i!=c.mapObjAttribs.constEnd()) {
         mapObjAttribs.insert(i.key(),i.value());
         ++i;
@@ -100,7 +100,7 @@ void ContainerProgram::Load(int progId)
         }
     }
 
-    QMap<int,ObjectConatinerAttribs>::Iterator i = mapObjAttribs.begin();
+    QMap<int,ObjectContainerAttribs>::Iterator i = mapObjAttribs.begin();
     while(i!=mapObjAttribs.end()) {
         QSharedPointer<Object> obj = ObjectFactory::Get()->GetObjectFromId(i.key());
         if(!obj.isNull()) {
@@ -139,7 +139,7 @@ void ContainerProgram::Save()
     mapObjAttribs.clear();
     foreach(QSharedPointer<Object> obj, listObjects) {
         if(!obj.isNull()) {
-            ObjectConatinerAttribs attr;
+            ObjectContainerAttribs attr;
             obj->GetContainerAttribs(attr);
             mapObjAttribs.insert(obj->GetIndex(),attr);
         }
@@ -152,7 +152,7 @@ void ContainerProgram::Save()
                 continue;
             }
 
-            ObjectConatinerAttribs attr;
+            ObjectContainerAttribs attr;
             obj->GetContainerAttribs(attr);
             mapObjAttribs.insert(obj->GetIndex(),attr);
         }
@@ -252,6 +252,9 @@ bool ContainerProgram::CableExists(const ConnectionInfo &outputPin, const Connec
 
 QDataStream & ContainerProgram::toStream (QDataStream& out) const
 {
+    const quint16 file_version = 1;
+    out << file_version;
+
     out << (quint16)listObjects.size();
     foreach(QSharedPointer<Object> objPtr, listObjects) {
         out << (qint16)objPtr->GetIndex();
@@ -264,7 +267,7 @@ QDataStream & ContainerProgram::toStream (QDataStream& out) const
     }
 
     out << (quint16)mapObjAttribs.size();
-    QMap<int,ObjectConatinerAttribs>::ConstIterator i = mapObjAttribs.constBegin();
+    QMap<int,ObjectContainerAttribs>::ConstIterator i = mapObjAttribs.constBegin();
     while(i!=mapObjAttribs.constEnd()) {
         out << i.key();
         out << i.value();
@@ -275,6 +278,9 @@ QDataStream & ContainerProgram::toStream (QDataStream& out) const
 
 QDataStream & ContainerProgram::fromStream (QDataStream& in)
 {
+    quint16 file_version;
+    in >> file_version;
+
     quint16 nbobj;
     in >> nbobj;
     for(quint16 i=0; i<nbobj; i++) {
@@ -305,7 +311,7 @@ QDataStream & ContainerProgram::fromStream (QDataStream& in)
     in >> nbPos;
     for(quint16 i=0; i<nbPos; i++) {
         int objId;
-        ObjectConatinerAttribs attr;
+        ObjectContainerAttribs attr;
         in >> objId;
         in >> attr;
         objId=ObjectFactory::Get()->IdFromSavedId(objId);
