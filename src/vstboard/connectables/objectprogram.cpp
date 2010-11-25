@@ -30,14 +30,14 @@ ObjectProgram::ObjectProgram(int progId,const hashListParamPin& listIn, const ha
     hashListParamPin::const_iterator i = listIn.constBegin();
     while(i!=listIn.constEnd()) {
         i.value()->GetDefault(param);
-        listParametersIn << param;
+        listParametersIn.insert(i.key(), param);
         ++i;
     }
 
     hashListParamPin::const_iterator j = listOut.constBegin();
     while(j!=listOut.constEnd()) {
         j.value()->GetDefault(param);
-        listParametersOut << param;
+        listParametersOut.insert(j.key(), param);
         ++j;
     }
 }
@@ -46,29 +46,35 @@ void ObjectProgram::Load(hashListParamPin& listIn, hashListParamPin& listOut)
 {
     hashListParamPin::iterator i = listIn.begin();
     while(i!=listIn.end()) {
-        if(i.key()<listParametersIn.size())
-            i.value()->Load(&listParametersIn.at(i.key()));
+        if(listParametersIn.contains(i.key())) {
+            i.value()->Load(listParametersIn.value(i.key()));
+        } else {
+            debug2(<< "ObjectProgram::Load paramIn not found" << i.key())
+        }
         ++i;
     }
 
     hashListParamPin::iterator j = listOut.begin();
     while(j!=listOut.end()) {
-        if(j.key()<listParametersOut.size())
-        j.value()->Load(&listParametersOut.at(j.key()));
+        if(listParametersOut.contains(j.key())) {
+            j.value()->Load(listParametersOut.value(j.key()));
+        } else {
+            debug2(<< "ObjectProgram::Load paramOut not found" << j.key())
+        }
         ++j;
     }
 }
 
 void ObjectProgram::Save(const hashListParamPin& listIn, const hashListParamPin& listOut)
 {
-    hashListParamPin::const_iterator i = listIn.constBegin();
-    while(i!=listIn.constEnd() && i.key()<listParametersIn.size()) {
+    hashListParamPin::ConstIterator i = listIn.constBegin();
+    while(i!=listIn.constEnd()) {
         i.value()->GetValues( listParametersIn[i.key()] );
         ++i;
     }
 
-    hashListParamPin::const_iterator j = listOut.constBegin();
-    while(j!=listOut.constEnd() && j.key()<listParametersOut.size()) {
+    hashListParamPin::ConstIterator j = listOut.constBegin();
+    while(j!=listOut.constEnd()) {
         j.value()->GetValues( listParametersOut[j.key()] );
         ++j;
     }
@@ -80,15 +86,30 @@ QDataStream & ObjectProgram::toStream(QDataStream& out) const
     const quint16 file_version = 1;
     out << file_version;
 
-    out << (qint16)progId;
+    out << (quint16)progId;
 
-    out << (qint16)listParametersIn.size();
-    foreach(ObjectParameter param, listParametersIn) {
-        out << param;
+    out << (quint16)listParametersIn.size();
+    QMap<ushort,ObjectParameter>::ConstIterator i = listParametersIn.constBegin();
+    while(i!=listParametersIn.constEnd()) {
+        out << (quint16)i.key();
+        out << i.value();
+        ++i;
     }
-    out << (qint16)listParametersOut.size();
-    foreach(ObjectParameter param, listParametersOut) {
-        out << param;
+
+    out << (quint16)listParametersOut.size();
+    QMap<ushort,ObjectParameter>::ConstIterator j = listParametersOut.constBegin();
+    while(j!=listParametersOut.constEnd()) {
+        out << (quint16)j.key();
+        out << j.value();
+        ++j;
+    }
+
+    out << (quint16)listOtherValues.size();
+    QMap<int, QVariant>::ConstIterator k = listOtherValues.constBegin();
+    while(k!=listOtherValues.constEnd()) {
+        out << (quint16)k.key();
+        out << k.value();
+        ++k;
     }
 
     return out;
@@ -99,21 +120,36 @@ QDataStream & ObjectProgram::fromStream(QDataStream& in)
     quint16 file_version;
     in >> file_version;
 
-    in >> (qint16&)progId;
+    in >> (quint16&)progId;
 
-    qint16 nbParam;
+    quint16 nbParam;
     in >> nbParam;
     for(int i=0; i<nbParam; i++) {
         ObjectParameter param;
+        quint16 id;
+        in >> id;
         in >> param;
-        listParametersIn << param;
+        listParametersIn.insert(id, param);
     }
     in >> nbParam;
     for(int i=0; i<nbParam; i++) {
         ObjectParameter param;
+        quint16 id;
+        in >> id;
         in >> param;
-        listParametersOut << param;
+        listParametersOut.insert(id, param);
     }
+
+    in >> nbParam;
+    for(int i=0; i<nbParam; i++) {
+        quint16 id;
+        in >> id;
+        QVariant value;
+        in >> value;
+
+        listOtherValues.insert(id,value);
+    }
+
 
     return in;
 }

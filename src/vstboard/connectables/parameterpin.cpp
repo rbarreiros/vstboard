@@ -134,16 +134,16 @@ void ParameterPin::OnStep(int delta)
 }
 
 //load from program
-void ParameterPin::Load(const ObjectParameter *param)
+void ParameterPin::Load(const ObjectParameter &param)
 {
     loading = true;
 
     if(listValues)
-        ChangeValue(param->index);
+        ChangeValue(param.index);
     else
-        ChangeValue(param->value);
+        ChangeValue(param.value);
 
-    SetVisible(param->visible);
+    SetVisible(param.visible);
 
     dirty = false;
     loading = false;

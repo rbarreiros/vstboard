@@ -43,6 +43,11 @@ VstPlugin::VstPlugin(int index, const ObjectInfo & info) :
     isShell(false)
 {
     listPlugins << this;
+
+    for(int i=0;i<128;i++) {
+        listValues << i;
+    }
+    listParameterPinIn.insert(VstPlugin::vstProgNumber, new ParameterPinIn(this,VstPlugin::vstProgNumber,0,&listValues,true,"Prog"));
 }
 
 VstPlugin::~VstPlugin()
@@ -624,11 +629,37 @@ long VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr,
 void VstPlugin::OnParameterChanged(ConnectionInfo pinInfo, float value)
 {
     if(pinInfo.direction == PinDirection::Input) {
-        if(EffCanBeAutomated(pinInfo.pinNumber)!=1) {
-            debug(QString("vst parameter can't be automated %1").arg(pinInfo.pinNumber).toAscii())
-            return;
+        if(pinInfo.pinNumber==VstPlugin::vstProgNumber) {
+            //program pin
+            EffSetProgram( listParameterPinIn.value(VstPlugin::vstProgNumber)->GetIndex() );
+        } else {
+            if(EffCanBeAutomated(pinInfo.pinNumber)!=1) {
+                debug2(<< "vst parameter can't be automated " << pinInfo.pinNumber)
+                return;
+            }
+            EffSetParameter(pinInfo.pinNumber,value);
         }
-        EffSetParameter(pinInfo.pinNumber,value);
     }
 }
 
+void VstPlugin::SaveProgram()
+{
+    Object::SaveProgram();
+
+    //save prog number
+    //currentProgram->listOtherValues.insert( vstProgNumber, (int)EffGetProgram() );
+}
+
+void VstPlugin::UnloadProgram()
+{
+    Object::UnloadProgram();
+}
+
+void VstPlugin::LoadProgram(int prog)
+{
+    Object::LoadProgram(prog);
+
+    //load prog number
+    //if(currentProgram->listOtherValues.contains(vstProgNumber))
+    //    EffSetProgram( currentProgram->listOtherValues.value(vstProgNumber).toInt() );
+}
