@@ -560,7 +560,7 @@ float AudioDevice::GetCpuUsage()
 
 void AudioDevice::paStreamFinished( void* userData )
 {
-    AudioDevice* device = (AudioDevice*)userData;
+//    AudioDevice* device = (AudioDevice*)userData;
     debug("paStreamFinished %s",device->objectName().toAscii().constData())
 }
 
@@ -583,7 +583,7 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
     }
 
     {
-        QMutexLocker devLock(&device->devicesMutex);
+//        QMutexLocker devLock(&device->devicesMutex);
 
         if(device->isClosing)
             return paComplete;
@@ -614,7 +614,7 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
                 if(!device->bufferReady) {
                     device->bufferReady=true;
 
-                    QMutexLocker locker(&listDevMutex);
+//                    QMutexLocker locker(&listDevMutex);
                     countDevicesReady++;
                 }
             }
@@ -623,7 +623,7 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
 
 
     {
-        QMutexLocker locker(&listDevMutex);
+//        QMutexLocker locker(&listDevMutex);
 
         //all devices are ready : render
         if(countDevicesReady>=countInputDevices) {
@@ -635,7 +635,7 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
                 if(dev.isNull())
                     continue;
 
-                QMutexLocker devLock(&dev->devicesMutex);
+//                QMutexLocker devLock(&dev->devicesMutex);
 
                 if(dev->isClosing)
                     continue;
@@ -659,7 +659,7 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
 
 
     {
-        QMutexLocker devLock(&device->devicesMutex);
+//        QMutexLocker devLock(&device->devicesMutex);
         if(device->isClosing)
             return paComplete;
 
