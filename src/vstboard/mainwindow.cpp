@@ -67,7 +67,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //    ui->treeAudioInterfaces->expandAll();
 
     //midi devices
-    ui->treeMidiInterfaces->setModel(mainHost->GetMidiDeviceModel());
+    ui->treeMidiInterfaces->setModel(MidiDevices::Get()->GetModel());
     ui->treeMidiInterfaces->header()->setResizeMode(0,QHeaderView::Stretch);
     ui->treeMidiInterfaces->header()->setResizeMode(1,QHeaderView::Fixed);
     ui->treeMidiInterfaces->header()->setResizeMode(2,QHeaderView::Fixed);
@@ -552,7 +552,7 @@ void MainWindow::on_actionRefresh_Audio_devices_triggered()
 
 void MainWindow::on_actionRefresh_Midi_devices_triggered()
 {
-    ui->treeMidiInterfaces->setModel(mainHost->GetMidiDeviceModel());
+    ui->treeMidiInterfaces->setModel(MidiDevices::Get()->GetModel());
 }
 
 

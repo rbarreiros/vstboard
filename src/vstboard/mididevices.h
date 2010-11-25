@@ -7,10 +7,12 @@
 #include "models/listmidiinterfacesmodel.h"
 #include "connectables/mididevice.h"
 
-class MidiDevices
+class MidiDevices : public QObject
 {
+Q_OBJECT
 public:
-    MidiDevices();
+    inline static MidiDevices *Get() {return theMidiDevices;}
+    static MidiDevices *MidiDevices::Create(QObject *parent=0);
     ~MidiDevices();
 
     ListMidiInterfacesModel* GetModel();
@@ -19,6 +21,7 @@ public:
     static void CloseDevice(QSharedPointer<Connectables::Object> objPtr);
 
 private:
+    explicit MidiDevices(QObject *parent=0);
     void BuildModel();
     static void MidiReceive_poll(PtTimestamp timestamp, void *userData);
     static QList< QSharedPointer<Connectables::MidiDevice> >listOpenedMidiDevices;
@@ -26,6 +29,7 @@ private:
     ListMidiInterfacesModel *model;
 
     static QMutex mutexListMidi;
+    static MidiDevices *theMidiDevices;
 };
 
 #endif // MIDIDEVICES_H

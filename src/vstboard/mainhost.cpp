@@ -68,7 +68,9 @@ MainHost::MainHost(QObject *parent) :
     connect(programList, SIGNAL(ProgChanged(QModelIndex)),
             this, SLOT(SetProgram(QModelIndex)));
 
-    listMidiDevices = new MidiDevices();
+//    MidiDevices * mididev =
+            MidiDevices::Create(this);
+
     AudioDevices * devices = AudioDevices::Create(this);
     connect(this,SIGNAL(OnAudioDeviceToggleInUse(ObjectInfo,bool)),
             devices,SLOT(OnToggleDeviceInUse(ObjectInfo,bool)));
@@ -112,7 +114,7 @@ MainHost::~MainHost()
     programContainer.clear();
     parkingContainer.clear();
 
-    delete listMidiDevices;
+//    delete listMidiDevices;
     delete Connectables::ObjectFactory::Get();
     theHost = 0;
 }
@@ -499,7 +501,7 @@ void MainHost::OnObjectAdded(QSharedPointer<Connectables::Object> objPtr)
         parkingContainer->RemoveObject(objPtr);
 
     if(objPtr->info().objType == ObjType::MidiInterface)
-        listMidiDevices->OpenDevice(objPtr);
+        MidiDevices::OpenDevice(objPtr);
 
     connect(this,SIGNAL(SampleRateChanged(float)),
             objPtr.data(),SLOT(SetSampleRate(float)));
@@ -523,7 +525,7 @@ void MainHost::OnObjectRemoved(QSharedPointer<Connectables::Object> objPtr, Conn
     disconnect(this,SIGNAL(BufferSizeChanged(long)),
             objPtr.data(),SLOT(SetBufferSize(long)));
 
-    listMidiDevices->CloseDevice(objPtr);
+    MidiDevices::CloseDevice(objPtr);
 
     //if the object comes from a programmable container : don't delete it, store it in the parking container
     if(container && container->listenProgramChanges && parkingContainer

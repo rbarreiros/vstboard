@@ -71,8 +71,6 @@ public:
     QSharedPointer<Connectables::MainContainer> insertContainer;
     QSharedPointer<Connectables::ParkingContainer> parkingContainer;
 
-    ListMidiInterfacesModel * GetMidiDeviceModel() {return listMidiDevices->GetModel();}
-
     PathSolver solver;
 
     QTimer *updateViewTimer;
@@ -94,8 +92,6 @@ private:
 
     bool solverNeedAnUpdate;
     bool solverUpdateEnabled;
-
-    MidiDevices *listMidiDevices;
 
     QMap<int,Connectables::Object*>listContainers;
     QMap<ConnectionInfo,Connectables::Pin*>listPins;
