@@ -137,13 +137,14 @@ bool MidiDevice::CloseStream()
     PmError err = pmNoError;
 
     err = Pm_Close(stream);
-    if(err!=pmNoError)
+    if(err!=pmNoError) {
         debug("MidiDevice::Close error closing midi port");
-
+    }
 
     err = Pm_QueueDestroy(queue);
-    if(err!=pmNoError)
+    if(err!=pmNoError) {
         debug("error closing midi queue");
+    }
 
     deviceOpened=false;
 

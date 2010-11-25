@@ -2,13 +2,23 @@
 #include "connectables/objectinfo.h"
 #include "mainhost.h"
 
+MidiDevices * MidiDevices::theMidiDevices=0;
 QList< QSharedPointer<Connectables::MidiDevice> >MidiDevices::listOpenedMidiDevices;
 QMutex MidiDevices::mutexListMidi;
 
-MidiDevices::MidiDevices():
+MidiDevices *MidiDevices::Create(QObject *parent)
+{
+    if(!theMidiDevices)
+        theMidiDevices = new MidiDevices(parent);
+
+    return theMidiDevices;
+}
+
+MidiDevices::MidiDevices(QObject *parent) :
+        QObject(parent),
         model(0)
 {
-    GetModel();
+    //GetModel();
 }
 
 MidiDevices::~MidiDevices()
@@ -40,12 +50,22 @@ ListMidiInterfacesModel* MidiDevices::GetModel()
     }
 
     PmError pmRet = Pm_Initialize();
-    if(pmRet!=pmNoError)
-        debug(Pm_GetErrorText(pmRet));
+    if(pmRet!=pmNoError) {
+        QMessageBox msgBox;
+        msgBox.setText(tr("Unable to initialize midi engine : %1").arg( Pm_GetErrorText(pmRet) ));
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.exec();
+        return 0;
+    }
 
     PtError ptRet = Pt_Start(1, MidiDevices::MidiReceive_poll,0);
-    if(ptRet!=ptNoError)
-        debug(QString("pterror %1").arg(ptRet).toAscii());
+    if(ptRet!=ptNoError) {
+        QMessageBox msgBox;
+        msgBox.setText(tr("Unable to start midi engine"));
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.exec();
+        return 0;
+    }
 
     BuildModel();
 

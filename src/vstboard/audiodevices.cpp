@@ -40,7 +40,7 @@ AudioDevices::AudioDevices(QObject *parent) :
         model(0),
         countActiveDevices(0)
 {
-    GetModel();
+    //GetModel();
 
     fakeRenderTimer.start(FAKE_RENDER_TIMER_MS);
 
@@ -53,7 +53,7 @@ AudioDevices::~AudioDevices()
     }
 
     if(model) {
-        debug("AudioDevices::~AudioDevices pa_terminate")
+//        debug("AudioDevices::~AudioDevices pa_terminate")
         PaError err=Pa_Terminate();
         if(err!=paNoError) {
             debug("AudioDevices::~AudioDevices Pa_Terminate %s",Pa_GetErrorText( err ))
@@ -73,10 +73,8 @@ ListAudioInterfacesModel * AudioDevices::GetModel()
         ad->SetSleep(true);
     }
 
-
-
     if(model) {
-        debug("AudioDevices::GetModel pa_terminate")
+//        debug("AudioDevices::GetModel pa_terminate")
         PaError err=Pa_Terminate();
         if(err!=paNoError) {
             debug("AudioDevices::GetModel Pa_Terminate %s",Pa_GetErrorText( err ))
@@ -87,7 +85,11 @@ ListAudioInterfacesModel * AudioDevices::GetModel()
 
     PaError paRet =Pa_Initialize();
     if(paRet!=paNoError) {
-        debug("AudioDevices::GetModel Pa_Initialize %s",Pa_GetErrorText(paRet))
+        QMessageBox msgBox;
+        msgBox.setText(tr("Unable to initialize audio engine : %1").arg( Pa_GetErrorText(paRet) ));
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.exec();
+        return 0;
     }
     BuildModel();
 
@@ -125,7 +127,6 @@ void AudioDevices::BuildModel()
     //APIs
     for (int i = 0; i < Pa_GetHostApiCount(); ++i) {
         QStandardItem *api = new QStandardItem(Pa_GetHostApiInfo(i)->name);
-       // api->setColumnCount(1);
         parentItem->appendRow(api);
     }
 
@@ -199,16 +200,12 @@ void AudioDevices::OnToggleDeviceInUse(const ObjectInfo &objInfo, bool opened)
                     //the renderer is normally launched when all the audio devices are ready,
                     //if there is no audio device we have to run it a "fake engine"
                     if(countActiveDevices==1) {
-//                        disconnect(&fakeRenderTimer,SIGNAL(timeout()),
-//                                MainHost::Get(), SLOT(Render()));
-                        debug("AudioDevices::OnToggleDeviceInUse fakeRender off")
+//                        debug("AudioDevices::OnToggleDeviceInUse fakeRender off")
                         fakeRenderTimer.stop();
                     }
                     if(countActiveDevices==0) {
-                        debug("AudioDevices::OnToggleDeviceInUse fakeRender on")
+//                        debug("AudioDevices::OnToggleDeviceInUse fakeRender on")
                         fakeRenderTimer.start(FAKE_RENDER_TIMER_MS);
-//                        connect(&fakeRenderTimer,SIGNAL(timeout()),
-//                                MainHost::Get(), SLOT(Render()));
                     }
                     return;
                 }
