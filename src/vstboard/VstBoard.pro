@@ -26,10 +26,10 @@ TEMPLATE = app
 
 #QT += sql
 
+BUILDNO = $$system("git describe")
+
 !CONFIG(debug, debug|release) {
 
-#update version number
-    BUILDNO = $$system("git describe")
     SRCDIR_WIN = $${_PRO_FILE_PWD_}
     SRCDIR_WIN ~= s,/,\\,g
     versionmk.target = version
