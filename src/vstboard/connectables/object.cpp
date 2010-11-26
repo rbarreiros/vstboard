@@ -30,8 +30,8 @@ Object::Object(int index, const ObjectInfo &info) :
 //    position(QPointF(0,0)),
 //    size(QSize(0,0)),
 //    editorVisible(false),
-    hasEditor(false),
-    canLearn(false),
+//    hasEditor(false),
+//    canLearn(false),
 //    modelNode(0),
     listenProgramChanges(true),
     parked(false),
@@ -58,6 +58,19 @@ Object::Object(int index, const ObjectInfo &info) :
     objInfo(info)
 {
     setObjectName(QString("%1.%2").arg(objInfo.name).arg(index));
+
+    if(objInfo.nodeType != NodeType::container) {
+        //editor pin
+        listEditorVisible << "hide";
+        listEditorVisible << "show";
+        listParameterPinIn.insert(FixedPinNumber::editorVisible, new ParameterPinIn(this,FixedPinNumber::editorVisible,"hide",&listEditorVisible,false,"Editor"));
+
+        //learning pin
+        listIsLearning << "off";
+        listIsLearning << "learn";
+        listIsLearning << "unlearn";
+        listParameterPinIn.insert(FixedPinNumber::learningMode, new ParameterPinIn(this,FixedPinNumber::learningMode,"off",&listIsLearning,false,"Learn"));
+    }
 }
 
 
@@ -318,8 +331,8 @@ void Object::SetParentModeIndex(const QModelIndex &parentIndex)
     modelNode->setData(QVariant::fromValue(objInfo), UserRoles::objInfo);
     modelNode->setData(index, UserRoles::value);
     modelNode->setData(objInfo.name, Qt::DisplayRole);
-    modelNode->setData(hasEditor, UserRoles::hasEditor);
-    modelNode->setData(canLearn,UserRoles::canLearn);
+//    modelNode->setData(hasEditor, UserRoles::hasEditor);
+//    modelNode->setData(canLearn,UserRoles::canLearn);
     modelNode->setData(errorMessage, UserRoles::errorMessage);
 
     if(parentIndex.isValid()) {
@@ -500,11 +513,29 @@ void Object::UpdateModelNode()
     }
 }
 
-bool Object::GetLearningMode()
+void Object::OnParameterChanged(ConnectionInfo pinInfo, float value)
 {
-    if(!modelIndex.isValid())
-        return false;
-    return MainHost::GetModel()->data(modelIndex, UserRoles::paramLearning).toBool();
+    //editor pin
+    if(pinInfo.pinNumber==FixedPinNumber::editorVisible) {
+        OnEditorVisibilityChanged( listParameterPinIn.value(FixedPinNumber::editorVisible)->GetIndex() );
+    }
+
+//    //learning pin
+//    if(pinInfo.pinNumber==FixedPinNumber::learningMode) {
+//    }
+}
+
+void Object::ToggleEditor(bool visible)
+{
+    listParameterPinIn.value(FixedPinNumber::editorVisible)->ChangeValue(visible);
+}
+
+int Object::GetLearningMode()
+{
+//    if(!modelIndex.isValid())
+//        return false;
+//    return MainHost::GetModel()->data(modelIndex, UserRoles::paramLearning).toBool();
+    return ( listParameterPinIn.value(FixedPinNumber::learningMode)->GetIndex());
 }
 
 void Object::SetContainerAttribs(const ObjectContainerAttribs &attr)
@@ -515,13 +546,13 @@ void Object::SetContainerAttribs(const ObjectContainerAttribs &attr)
     QStandardItem *item = MainHost::GetModel()->itemFromIndex(modelIndex);
 
     item->setData(attr.position, UserRoles::position);
-    item->setData(attr.size, UserRoles::size);
-    item->setData(attr.editorVisible, UserRoles::editorVisible);
+//    item->setData(attr.size, UserRoles::size);
+//    item->setData(attr.editorVisible, UserRoles::editorVisible);
     item->setData(attr.editorPosition, UserRoles::editorPos);
     item->setData(attr.editorSize, UserRoles::editorSize);
     item->setData(attr.editorHScroll, UserRoles::editorHScroll);
     item->setData(attr.editorVScroll, UserRoles::editorVScroll);
-    item->setData(attr.paramLearning, UserRoles::paramLearning);
+//    item->setData(attr.paramLearning, UserRoles::paramLearning);
 }
 
 void Object::GetContainerAttribs(ObjectContainerAttribs &attr)
@@ -530,13 +561,13 @@ void Object::GetContainerAttribs(ObjectContainerAttribs &attr)
         return;
 
     attr.position = modelIndex.data(UserRoles::position).toPointF();
-    attr.size = modelIndex.data(UserRoles::size).toSizeF();
-    attr.editorVisible = modelIndex.data(UserRoles::editorVisible).toBool();
+//    attr.size = modelIndex.data(UserRoles::size).toSizeF();
+//    attr.editorVisible = modelIndex.data(UserRoles::editorVisible).toBool();
     attr.editorPosition = modelIndex.data(UserRoles::editorPos).toPoint();
     attr.editorSize = modelIndex.data(UserRoles::editorSize).toSize();
     attr.editorHScroll = modelIndex.data(UserRoles::editorHScroll).toInt();
     attr.editorVScroll = modelIndex.data(UserRoles::editorVScroll).toInt();
-    attr.paramLearning = modelIndex.data(UserRoles::paramLearning).toBool();
+//    attr.paramLearning = modelIndex.data(UserRoles::paramLearning).toBool();
 
 }
 

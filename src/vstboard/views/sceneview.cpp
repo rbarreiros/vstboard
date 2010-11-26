@@ -144,13 +144,13 @@ QModelIndex SceneView::traverseTroughIndexes ( QModelIndex index ) {
 void SceneView::rowsAboutToBeRemoved ( const QModelIndex & parent, int start, int end  )
 {
     for ( int i = start; i <= end; ++i ) {
-        const QModelIndex item = parent.child(i,0);
+        const QModelIndex index = parent.child(i,0);
 
-        ObjectInfo info = item.data(UserRoles::objInfo).value<ObjectInfo>();
+        ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
         switch(info.nodeType) {
         case NodeType::object :
             {
-                ObjectView *obj = static_cast<ObjectView*>(hashItems.value(item,0));
+                ObjectView *obj = static_cast<ObjectView*>(hashItems.value(index,0));
                 if(!obj) {
                     debug("SceneView::rowsAboutToBeRemoved obj not found")
                             continue;
@@ -162,7 +162,7 @@ void SceneView::rowsAboutToBeRemoved ( const QModelIndex & parent, int start, in
             }
         case NodeType::container :
             {
-                QGraphicsWidget *obj = static_cast<QGraphicsWidget*>( hashItems.value(item,0) );
+                QGraphicsWidget *obj = static_cast<QGraphicsWidget*>( hashItems.value(index,0) );
                 if(!obj) {
                     debug("SceneView::rowsAboutToBeRemoved container not found")
                             continue;
@@ -174,7 +174,7 @@ void SceneView::rowsAboutToBeRemoved ( const QModelIndex & parent, int start, in
             }
         case NodeType::pin :
             {
-                PinView *pin = static_cast<PinView*>(hashItems.value(item,0));
+                PinView *pin = static_cast<PinView*>(hashItems.value(index,0));
                 if(!pin) {
                     debug("SceneView::rowsAboutToBeRemoved pin not found")
                             continue;
@@ -185,20 +185,26 @@ void SceneView::rowsAboutToBeRemoved ( const QModelIndex & parent, int start, in
                 list->layout->removeItem(pin);
                 pin->scene()->removeItem(pin);
                 pin->deleteLater();
+
+                ObjectView *obj = static_cast<ObjectView*>( hashItems.value(index.parent().parent(),0) );
+                if(obj) {
+                    obj->Shrink();
+                }
+
                 mapConnectionInfo.remove(pin->GetConnectionInfo());
                 break;
             }
         case NodeType::cable :
             {
-                ConnectionInfo infoOut = item.data(UserRoles::value).value<ConnectionInfo>();
-                ConnectionInfo infoIn = item.data(UserRoles::connectionInfo).value<ConnectionInfo>();
+                ConnectionInfo infoOut = index.data(UserRoles::value).value<ConnectionInfo>();
+                ConnectionInfo infoIn = index.data(UserRoles::connectionInfo).value<ConnectionInfo>();
 
                 QPersistentModelIndex ixOut =  mapConnectionInfo.value(infoOut);
                 QPersistentModelIndex ixIn =  mapConnectionInfo.value(infoIn);
                 PinView* pinOut = static_cast<PinView*>(hashItems.value( ixOut,0 ));
                 PinView* pinIn = static_cast<PinView*>(hashItems.value( ixIn,0 ));
 
-                CableView *cable = static_cast<CableView*>(hashItems.value(item,0));
+                CableView *cable = static_cast<CableView*>(hashItems.value(index,0));
                 if(!cable) {
                     debug("SceneView::rowsAboutToBeRemoved cable not found")
                             continue;
@@ -217,7 +223,7 @@ void SceneView::rowsAboutToBeRemoved ( const QModelIndex & parent, int start, in
         default:
             break;
         }
-        hashItems.remove(item);
+        hashItems.remove(index);
     }
     QAbstractItemView::rowsAboutToBeRemoved(parent, start, end);
 }
@@ -431,6 +437,10 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                         continue;
                 }
 
+                if(!v) {
+                    debug("SceneView::rowsInserted listpin not found")
+                    continue;
+                }
                 hashItems.insert(index, v);
                 connect(v,SIGNAL(destroyed(QObject*)),
                         this,SLOT(graphicObjectRemoved(QObject*)));
@@ -478,7 +488,9 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                 connect(pinView,SIGNAL(destroyed(QObject*)),
                         this,SLOT(graphicObjectRemoved(QObject*)));
                 mapConnectionInfo.insert(pinInfo,index);
+
                 parentList->layout->addItem(pinView);
+                parentList->layout->setAlignment(pinView,Qt::AlignTop);
                 connect(pinView, SIGNAL(ConnectPins(ConnectionInfo,ConnectionInfo)),
                         this, SLOT(ConnectPins(ConnectionInfo,ConnectionInfo)));
                 connect(pinView,SIGNAL(RemoveCablesFromPin(ConnectionInfo)),

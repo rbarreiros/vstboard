@@ -47,7 +47,7 @@ VstPlugin::VstPlugin(int index, const ObjectInfo & info) :
     for(int i=0;i<128;i++) {
         listValues << i;
     }
-    listParameterPinIn.insert(VstPlugin::vstProgNumber, new ParameterPinIn(this,VstPlugin::vstProgNumber,0,&listValues,true,"Prog"));
+    listParameterPinIn.insert(FixedPinNumber::vstProgNumber, new ParameterPinIn(this,FixedPinNumber::vstProgNumber,0,&listValues,true,"Prog"));
 }
 
 VstPlugin::~VstPlugin()
@@ -432,8 +432,10 @@ void VstPlugin::CreateEditorWindow()
     if((pEffect->flags & effFlagsHasEditor) == 0)
         return;
 
-    hasEditor=true;
-    canLearn=true;
+//    hasEditor=true;
+//    canLearn=true;
+    listParameterPinIn.value(FixedPinNumber::editorVisible)->SetAlwaysVisible(true);
+    listParameterPinIn.value(FixedPinNumber::learningMode)->SetAlwaysVisible(true);
 
     editorWnd = new View::VstPluginWindow(MainWindow::theMainWindow);
     connect(this,SIGNAL(CloseEditorWindow()),
@@ -501,9 +503,8 @@ void VstPlugin::GetContainerAttribs(ObjectContainerAttribs &attr)
 void VstPlugin::EditorDestroyed()
 {
     editorWnd = 0;
-//    modelNode->setData(false, UserRoles::editorVisible);
-    MainHost::GetModel()->setData(modelIndex, false, UserRoles::editorVisible);
-//    editorVisible = false;
+//    MainHost::GetModel()->setData(modelIndex, false, UserRoles::editorVisible);
+    listParameterPinIn.value(FixedPinNumber::editorVisible)->SetVisible(false);
 }
 
 void VstPlugin::EditIdle()
@@ -531,18 +532,18 @@ void VstPlugin::SetParentModeIndex(const QModelIndex &parentIndex)
 {
     Object::SetParentModeIndex(parentIndex);
 
-    if(hasEditor) {
-        QStandardItem *item = MainHost::GetModel()->itemFromIndex(modelIndex);
-        item->setData(editorWnd->isVisible(), UserRoles::editorVisible);
-        item->setData(false,UserRoles::paramLearning);
-        item->setData(pEffect->uniqueID, UserRoles::editorImage);
-    }
+//    if(hasEditor) {
+//        QStandardItem *item = MainHost::GetModel()->itemFromIndex(modelIndex);
+//        item->setData(editorWnd->isVisible(), UserRoles::editorVisible);
+//        item->setData(false,UserRoles::paramLearning);
+//        item->setData(pEffect->uniqueID, UserRoles::editorImage);
+//    }
 }
 
 void VstPlugin::SetParkingIndex(const QModelIndex &parentIndex)
 {
-    if(editorWnd && editorWnd->isVisible())
-        editorWnd->close();
+//    if(editorWnd && editorWnd->isVisible())
+//        editorWnd->close();
     Object::SetParkingIndex(parentIndex);
 }
 
@@ -628,10 +629,12 @@ long VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr,
 
 void VstPlugin::OnParameterChanged(ConnectionInfo pinInfo, float value)
 {
+    Object::OnParameterChanged(pinInfo,value);
+
     if(pinInfo.direction == PinDirection::Input) {
-        if(pinInfo.pinNumber==VstPlugin::vstProgNumber) {
+        if(pinInfo.pinNumber==FixedPinNumber::vstProgNumber) {
             //program pin
-            EffSetProgram( listParameterPinIn.value(VstPlugin::vstProgNumber)->GetIndex() );
+            EffSetProgram( listParameterPinIn.value(FixedPinNumber::vstProgNumber)->GetIndex() );
         } else {
             if(EffCanBeAutomated(pinInfo.pinNumber)!=1) {
                 debug2(<< "vst parameter can't be automated " << pinInfo.pinNumber)
@@ -642,24 +645,3 @@ void VstPlugin::OnParameterChanged(ConnectionInfo pinInfo, float value)
     }
 }
 
-void VstPlugin::SaveProgram()
-{
-    Object::SaveProgram();
-
-    //save prog number
-    //currentProgram->listOtherValues.insert( vstProgNumber, (int)EffGetProgram() );
-}
-
-void VstPlugin::UnloadProgram()
-{
-    Object::UnloadProgram();
-}
-
-void VstPlugin::LoadProgram(int prog)
-{
-    Object::LoadProgram(prog);
-
-    //load prog number
-    //if(currentProgram->listOtherValues.contains(vstProgNumber))
-    //    EffSetProgram( currentProgram->listOtherValues.value(vstProgNumber).toInt() );
-}

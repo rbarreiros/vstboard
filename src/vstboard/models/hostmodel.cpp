@@ -290,8 +290,8 @@ bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int
                 return false;
             }
 
-            if(role == UserRoles::editorVisible)
-                objPtr->OnEditorVisibilityChanged( value.toBool() );
+//            if(role == UserRoles::editorVisible)
+//                objPtr->OnEditorVisibilityChanged( value.toBool() );
             break;
         }
 
@@ -302,14 +302,17 @@ bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int
                 if(role==UserRoles::value) {
                     bool ok=true;
                     float newVal = value.toFloat(&ok);// item->data(Qt::DisplayRole).toFloat(&ok);
-                    if(!ok)
+                    if(!ok) {
+                        debug("HostModel::setData pin can't convert value to float")
                         return false;
+                    }
 
                     if(newVal>1.0f) newVal=1.0f;
                     if(newVal<.0f) newVal=.0f;
                     Connectables::ParameterPin* pin = static_cast<Connectables::ParameterPin*>(Connectables::ObjectFactory::Get()->GetPin(pinInfo));
-                    if(!pin)
+                    if(!pin) {
                         return false;
+                    }
                     pin->ChangeValue( newVal );
                     item->setData(newVal,role);
                     return true;

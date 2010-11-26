@@ -52,6 +52,7 @@ namespace Connectables {
         void SetDefaultVisible(bool visible) {defaultVisible = visible;}
         void SetFixedName(QString fixedName);
         void SetNameCanChange(bool canChange) {nameCanChange = canChange;}
+        void SetAlwaysVisible(bool visible);
 
     protected:
         QList<QVariant> *listValues;
@@ -62,6 +63,7 @@ namespace Connectables {
         bool loading;
         bool nameCanChange;
         bool dirty;
+        bool visibilityCanChange;
 
     signals:
         void ParameterChanged(ConnectionInfo pinInfo, float value);

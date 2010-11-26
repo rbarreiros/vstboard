@@ -109,6 +109,8 @@ void HostController::MidiMsgFromInput(long msg)
 
 void HostController::OnParameterChanged(ConnectionInfo pinInfo, float value)
 {
+    Object::OnParameterChanged(pinInfo,value);
+
     switch(pinInfo.pinNumber) {
         case Param_Tempo :
         case Param_Sign1 :

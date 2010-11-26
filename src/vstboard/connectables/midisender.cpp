@@ -89,7 +89,9 @@ void MidiSender::Render()
     listMidiPinOut.first()->SendMsg(PinMessage::MidiMsg, (void*)&midiMsg);
 }
 
-void MidiSender::OnParameterChanged(ConnectionInfo /*pinInfo*/, float /*value*/)
+void MidiSender::OnParameterChanged(ConnectionInfo pinInfo, float value)
 {
+    Object::OnParameterChanged(pinInfo,value);
+
     msgChanged=true;
 }

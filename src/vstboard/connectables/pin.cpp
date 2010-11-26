@@ -31,7 +31,8 @@ Pin::Pin(Object *parent,PinType::Enum type, PinDirection::Enum direction, int nu
     stepSize(.1f),
     parent(parent),
     visible(false),
-    closed(false)
+    closed(false),
+    valueChanged(false)
 {
 //    setObjectName(QString("pin:%1:%2:%3:%4").arg(connectInfo.objId).arg(connectInfo.type).arg(connectInfo.direction).arg(connectInfo.pinNumber));
 }
@@ -199,8 +200,17 @@ void Pin::updateView()
 {
     QMutexLocker l(&objMutex);
 
-    if(!closed && visible && modelIndex.isValid()) {
-        MainHost::GetModel()->setData(modelIndex, GetValue(), UserRoles::value);
-        if(!displayedText.isEmpty()) MainHost::GetModel()->setData(modelIndex, displayedText, Qt::DisplayRole);
+    if(closed || !visible | !modelIndex.isValid()) {
+        return;
     }
+
+    float newVu = GetValue();
+    if(!valueChanged)
+        return;
+
+    valueChanged=false;
+
+    MainHost::GetModel()->setData(modelIndex, newVu, UserRoles::value);
+    if(!displayedText.isEmpty()) MainHost::GetModel()->setData(modelIndex, displayedText, Qt::DisplayRole);
+
 }

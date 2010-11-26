@@ -34,7 +34,8 @@ ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int num
         defaultVisible(defaultVisible),
         loading(false),
         nameCanChange(nameCanChange),
-        dirty(false)
+        dirty(false),
+        visibilityCanChange(true)
 {
     SetVisible(false);
 
@@ -53,7 +54,10 @@ ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int num
         listValues(listValues),
         defaultValue( .0f ),
         defaultVisible(defaultVisible),
-        nameCanChange(nameCanChange)
+        loading(false),
+        nameCanChange(nameCanChange),
+        dirty(false),
+        visibilityCanChange(true)
 {
     SetVisible(false);
     falloff = 0.0f;
@@ -67,6 +71,11 @@ ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int num
     loading=false;
 }
 
+void ParameterPin::SetAlwaysVisible(bool visible)
+{
+    defaultVisible=true;
+    visibilityCanChange=false;
+}
 
 void ParameterPin::GetDefault(ObjectParameter &param)
 {
@@ -151,13 +160,22 @@ void ParameterPin::Load(const ObjectParameter &param)
 
 void ParameterPin::OnValueChanged(float val)
 {
+    if(value!=val)
+        valueChanged=true;
+
     value=val;
 
     if(!loading) {
-        if(parent->GetLearningMode()==1)
-            SetVisible(true);
-//        if(parent->GetLearningMode()==-1)
-//            SetVisible(false);
+
+        if(visibilityCanChange) {
+            //parent is learning
+            if(parent->GetLearningMode()==1)
+                SetVisible(true);
+
+            //parent is unlearning
+            if(parent->GetLearningMode()==2)
+                SetVisible(false);
+        }
 
         if(!dirty) {
             dirty=true;

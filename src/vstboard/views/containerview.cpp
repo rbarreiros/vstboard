@@ -57,8 +57,8 @@ void ContainerView::UpdateModelIndex()
 
     ObjectView::UpdateModelIndex();
 
-    if(objIndex.data(UserRoles::position).isValid())
-        resize(objIndex.data(UserRoles::size).toSizeF() );
+//    if(objIndex.data(UserRoles::size).isValid())
+//        resize(objIndex.data(UserRoles::size).toSizeF() );
 }
 
 void ContainerView::resizeEvent ( QGraphicsSceneResizeEvent * event )

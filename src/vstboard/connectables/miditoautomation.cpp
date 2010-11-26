@@ -42,13 +42,15 @@ MidiToAutomation::MidiToAutomation(int index) :
     for(int i=0;i<128;i++) {
         listParameterPinOut.insert(i,new ParameterPinOut(this,i,0,&listValues,false,QString::number(i)));
     }
+
+    listParameterPinIn.value(FixedPinNumber::learningMode)->SetAlwaysVisible(true);
 //    debug("MidiAuomation::New")
 }
 
 void MidiToAutomation::SetParentModeIndex(const QModelIndex &parentIndex)
 {
     Object::SetParentModeIndex(parentIndex);
-    MainHost::GetModel()->setData(modelIndex, true, UserRoles::paramLearning);
+//    MainHost::GetModel()->setData(modelIndex, true, UserRoles::paramLearning);
 }
 
 MidiToAutomation::~MidiToAutomation()

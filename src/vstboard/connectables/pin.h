@@ -83,6 +83,7 @@ namespace Connectables {
         QMutex objMutex;
         bool closed;
         QString displayedText;
+        bool valueChanged;
 
     private:
 //        QMutex txtMutex;

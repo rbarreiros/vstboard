@@ -561,7 +561,7 @@ float AudioDevice::GetCpuUsage()
 void AudioDevice::paStreamFinished( void* userData )
 {
 //    AudioDevice* device = (AudioDevice*)userData;
-    debug("paStreamFinished %s",device->objectName().toAscii().constData())
+//    debug("paStreamFinished %s",device->objectName().toAscii().constData())
 }
 
 int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,

@@ -111,8 +111,9 @@ void VstPluginWindow::closeEvent( QCloseEvent * event )
     SavePosSize();
 
     hide();
-    if(plugin->modelIndex.isValid())
-        MainHost::GetModel()->setData(plugin->modelIndex,false,UserRoles::editorVisible);
+//    if(plugin->modelIndex.isValid())
+//        MainHost::GetModel()->setData(plugin->modelIndex,false,UserRoles::editorVisible);
+    plugin->ToggleEditor(false);
 
     event->ignore();
 }

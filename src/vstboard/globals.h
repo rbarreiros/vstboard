@@ -40,19 +40,19 @@ namespace UserRoles {
         stepSize,
         falloff,
         position,
-        size,
+//        size,
         parking,
         objInfo,
         nodeType,
-        hasEditor,
-        editorVisible,
+//        hasEditor,
+//        editorVisible,
         editorImage,
         editorPos,
         editorSize,
         editorVScroll,
         editorHScroll,
-        canLearn,
-        paramLearning,
+//        canLearn,
+//        paramLearning,
         errorMessage
     };
 }
@@ -151,6 +151,14 @@ namespace PinMessage {
         ClearAudioBuffer,
         MidiMsg,
         ParameterValue
+    };
+}
+
+namespace FixedPinNumber {
+    enum Enum {
+        editorVisible = 0xf000,
+        learningMode,
+        vstProgNumber
     };
 }
 

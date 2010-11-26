@@ -41,6 +41,7 @@ namespace View {
 
         virtual void SetModelIndex(QPersistentModelIndex index);
         virtual void UpdateModelIndex();
+        void Shrink();
 
     protected:
         void SetErrorMessage(const QString & msg);
@@ -70,9 +71,12 @@ namespace View {
         QAction *actEditor;
         QAction *actLearn;
 
+        bool shrinkAsked;
+
     public slots:
-        void ShowEditor(bool show);
-        void ToggleLearningMode(bool learn);
+        void ShrinkNow();
+//        void ShowEditor(bool show);
+//        void ToggleLearningMode(bool learn);
 
     friend class PinView;
     };

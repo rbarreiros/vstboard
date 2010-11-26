@@ -97,9 +97,8 @@ namespace Connectables {
         inline void Lock() { objMutex.lock();}
         inline void Unlock() { objMutex.unlock();}
 
-        bool GetLearningMode();
-        bool hasEditor;
-        bool canLearn;
+        int GetLearningMode();
+
 
         virtual void SetContainerId(quint16 id);
         virtual void SetParentModeIndex(const QModelIndex &parentIndex);
@@ -165,9 +164,14 @@ namespace Connectables {
 
         ObjectInfo objInfo;
 
+        QList<QVariant>listEditorVisible;
+        QList<QVariant>listIsLearning;
+//        bool hasEditor;
+//        bool canLearn;
+
     signals:
-        void LearningModeChanged(bool learn);
-        void UnLearningModeChanged(bool unlearn);
+//        void LearningModeChanged(int learn);
+//        void UnLearningModeChanged(bool unlearn);
         void CpuLoad(float load);
         void CloseEditorWindow();
 
@@ -179,7 +183,9 @@ namespace Connectables {
 
         virtual void SetBufferSize(long size) {}
         virtual void SetSampleRate(float rate=44100.0) {}
-        virtual void OnParameterChanged(ConnectionInfo pinInfo, float value) {}
+        virtual void OnParameterChanged(ConnectionInfo pinInfo, float value);
+
+        void ToggleEditor(bool visible);
         virtual void OnEditorVisibilityChanged(bool visible) {}
 
         void CloseSlot() {Close();}

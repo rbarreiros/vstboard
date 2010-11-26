@@ -60,14 +60,14 @@ ConnectableObjectView::ConnectableObjectView(QAbstractItemModel *model,QGraphics
     listBridgeIn = new ListPinsView(this);
     listBridgeOut = new ListPinsView(this);
 
-    layout->addItem(listAudioIn,0,0,Qt::AlignLeft);
-    layout->addItem(listAudioOut,0,1,Qt::AlignRight);
-    layout->addItem(listMidiIn,1,0,Qt::AlignLeft);
-    layout->addItem(listMidiOut,1,1,Qt::AlignRight);
-    layout->addItem(listParametersIn,2,0,Qt::AlignLeft);
-    layout->addItem(listParametersOut,2,1,Qt::AlignRight);
-    layout->addItem(listBridgeIn,3,0,Qt::AlignLeft);
-    layout->addItem(listBridgeOut,3,1,Qt::AlignRight);
+    layout->addItem(listAudioIn,0,0,Qt::AlignLeft | Qt::AlignTop);
+    layout->addItem(listAudioOut,0,1,Qt::AlignRight | Qt::AlignTop);
+    layout->addItem(listMidiIn,1,0,Qt::AlignLeft | Qt::AlignTop);
+    layout->addItem(listMidiOut,1,1,Qt::AlignRight | Qt::AlignTop);
+    layout->addItem(listParametersIn,2,0,Qt::AlignLeft | Qt::AlignTop);
+    layout->addItem(listParametersOut,2,1,Qt::AlignRight | Qt::AlignTop);
+    layout->addItem(listBridgeIn,3,0,Qt::AlignLeft | Qt::AlignTop);
+    layout->addItem(listBridgeOut,3,1,Qt::AlignRight | Qt::AlignTop);
 }
 
 

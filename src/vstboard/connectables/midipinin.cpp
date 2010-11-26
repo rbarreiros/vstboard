@@ -43,6 +43,7 @@ void MidiPinIn::ReceiveMsg(const int msgType,void* data)
     if(msgType==PinMessage::MidiMsg) {
         parent->MidiMsgFromInput(*(long*)data);
         value+=.2f;
+        valueChanged=true;
     }
 }
 

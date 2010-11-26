@@ -36,6 +36,7 @@ MidiPinOut::MidiPinOut(Object *parent, int number, bool bridge)
 void MidiPinOut::SendMsg(int msgType,void *data) {
     Pin::SendMsg(msgType,data);
     value+=.2f;
+    valueChanged=true;
 }
 
 float MidiPinOut::GetValue()

@@ -41,6 +41,11 @@ PinView::PinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, 
     setCursor(Qt::OpenHandCursor);
 }
 
+PinView::~PinView()
+{
+    debug("pin deleted")
+}
+
 void PinView::UpdateCablesPosition()
 {
     foreach (CableView *cable, connectedCables) {

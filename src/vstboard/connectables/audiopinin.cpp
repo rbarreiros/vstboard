@@ -59,7 +59,11 @@ void AudioPinIn::ReceiveMsg(const int msgType,void *data)
 
 float AudioPinIn::GetValue()
 {
-    return buffer->GetVu();
+    float newVu = buffer->GetVu();
+    if(newVu != value) {
+        valueChanged=true;
+    }
+    return newVu;
 }
 
 

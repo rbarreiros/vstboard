@@ -32,7 +32,8 @@ ObjectView::ObjectView(QAbstractItemModel *model, QGraphicsItem * parent, Qt::Wi
     selectBorder(0),
     errorMessage(0),
     layout(0),
-    model(model)
+    model(model),
+    shrinkAsked(false)
 
 {
 //    setObjectName("objView");
@@ -48,23 +49,23 @@ ObjectView::ObjectView(QAbstractItemModel *model, QGraphicsItem * parent, Qt::Wi
             this,SLOT(close()));
     addAction(actDel);
 
-    actEditor = new QAction(QIcon(":/img16x16/configure.png"), tr("Show editor"),this);
-    actEditor->setEnabled(false);
-    actEditor->setCheckable(true);
-    actEditor->setShortcut( Qt::Key_Asterisk );
-    actEditor->setShortcutContext(Qt::WidgetShortcut);
-    connect(actEditor, SIGNAL(toggled(bool)),
-            this,SLOT(ShowEditor(bool)));
-    addAction(actEditor);
+//    actEditor = new QAction(QIcon(":/img16x16/configure.png"), tr("Show editor"),this);
+//    actEditor->setEnabled(false);
+//    actEditor->setCheckable(true);
+//    actEditor->setShortcut( Qt::Key_Asterisk );
+//    actEditor->setShortcutContext(Qt::WidgetShortcut);
+//    connect(actEditor, SIGNAL(toggled(bool)),
+//            this,SLOT(ShowEditor(bool)));
+//    addAction(actEditor);
 
-    actLearn = new QAction(tr("Learning mode"),this);
-    actLearn->setEnabled(false);
-    actLearn->setCheckable(true);
-    actLearn->setShortcut( Qt::Key_Plus );
-    actLearn->setShortcutContext(Qt::WidgetShortcut);
-    connect(actLearn, SIGNAL(toggled(bool)),
-            this,SLOT(ToggleLearningMode(bool)));
-    addAction(actLearn);
+//    actLearn = new QAction(tr("Learning mode"),this);
+//    actLearn->setEnabled(false);
+//    actLearn->setCheckable(true);
+//    actLearn->setShortcut( Qt::Key_Plus );
+//    actLearn->setShortcutContext(Qt::WidgetShortcut);
+//    connect(actLearn, SIGNAL(toggled(bool)),
+//            this,SLOT(ToggleLearningMode(bool)));
+//    addAction(actLearn);
 
     backgroundImg = new QGraphicsPixmapItem(this,scene());
 }
@@ -80,21 +81,15 @@ void ObjectView::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     menu.exec(actions(),event->screenPos(),actions().at(0),event->widget());
 }
 
-void ObjectView::ShowEditor(bool show)
-{
-//    if(!editorIndex.isValid())
-//        return;
-//    model->setData(editorIndex,show,UserRoles::value);
-    model->setData(objIndex,show,UserRoles::editorVisible);
-}
+//void ObjectView::ShowEditor(bool show)
+//{
+//    model->setData(objIndex,show,UserRoles::editorVisible);
+//}
 
-void ObjectView::ToggleLearningMode(bool learn)
-{
-//    if(!learningIndex.isValid())
-//        return;
-//    model->setData(learningIndex,learn,UserRoles::value);
-    model->setData(objIndex,learn,UserRoles::paramLearning);
-}
+//void ObjectView::ToggleLearningMode(bool learn)
+//{
+//    model->setData(objIndex,learn,UserRoles::paramLearning);
+//}
 
 void ObjectView::SetModelIndex(QPersistentModelIndex index)
 {
@@ -103,8 +98,8 @@ void ObjectView::SetModelIndex(QPersistentModelIndex index)
         SetErrorMessage("object not loaded");
     }
 
-    actEditor->setEnabled( objIndex.data(UserRoles::hasEditor).toBool() );
-    actLearn->setEnabled( objIndex.data(UserRoles::canLearn).toBool() );
+//    actEditor->setEnabled( objIndex.data(UserRoles::hasEditor).toBool() );
+//    actLearn->setEnabled( objIndex.data(UserRoles::canLearn).toBool() );
 
     if(info.nodeType == NodeType::bridge) {
         actDel->setEnabled(false);
@@ -132,16 +127,16 @@ void ObjectView::UpdateModelIndex()
         titleText->setText(objIndex.data(Qt::DisplayRole).toString());
     }
 
-    actEditor->setEnabled( objIndex.data(UserRoles::hasEditor).toBool() );
-    actLearn->setEnabled( objIndex.data(UserRoles::canLearn).toBool() );
+//    actEditor->setEnabled( objIndex.data(UserRoles::hasEditor).toBool() );
+//    actLearn->setEnabled( objIndex.data(UserRoles::canLearn).toBool() );
 
-    if(objIndex.data(UserRoles::editorVisible).isValid()) {
-        actEditor->setChecked( objIndex.data(UserRoles::editorVisible).toBool() );
-    }
+//    if(objIndex.data(UserRoles::editorVisible).isValid()) {
+//        actEditor->setChecked( objIndex.data(UserRoles::editorVisible).toBool() );
+//    }
 
-    if(objIndex.data(UserRoles::paramLearning).isValid()) {
-        actLearn->setChecked( objIndex.data(UserRoles::paramLearning).toBool() );
-    }
+//    if(objIndex.data(UserRoles::paramLearning).isValid()) {
+//        actLearn->setChecked( objIndex.data(UserRoles::paramLearning).toBool() );
+//    }
 
     if(objIndex.data(UserRoles::errorMessage).isValid()) {
         QString err = objIndex.data(UserRoles::errorMessage).toString();
@@ -227,12 +222,29 @@ QVariant ObjectView::itemChange ( GraphicsItemChange  change, const QVariant & v
 
 void ObjectView::resizeEvent ( QGraphicsSceneResizeEvent * event )
 {
-    if(model)
-        model->setData(objIndex,event->newSize(),UserRoles::size);
+    if(selectBorder)
+        selectBorder->setRect( -2, -2, event->newSize().width()+4, event->newSize().height()+4);
+//    if(model)
+//        model->setData(objIndex,event->newSize(),UserRoles::size);
 }
 
 void ObjectView::mouseReleaseEvent ( QGraphicsSceneMouseEvent * event )
 {
     QGraphicsWidget::mouseReleaseEvent(event);
     model->setData(objIndex,pos(),UserRoles::position);
+}
+
+void ObjectView::Shrink()
+{
+    if(shrinkAsked)
+        return;
+
+    shrinkAsked=true;
+    QTimer::singleShot(100, this, SLOT(ShrinkNow()));
+}
+
+void ObjectView::ShrinkNow()
+{
+    shrinkAsked=false;
+    resize(0,0);
 }

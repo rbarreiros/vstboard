@@ -52,6 +52,10 @@ void AudioPinOut::SendAudioBuffer()
 
 float AudioPinOut::GetValue()
 {
-    return buffer->GetVu();
+    float newVu = buffer->GetVu();
+    if(newVu != value) {
+        valueChanged=true;
+    }
+    return newVu;
 }
 
