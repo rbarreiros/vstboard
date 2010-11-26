@@ -461,13 +461,13 @@ void MainWindow::resetSettings()
     ui->actionProgram_panel->setChecked(true);
     ui->actionInsert_panel->setChecked(true);
 
-    ui->actionTool_bar->setChecked(false);
+    ui->actionTool_bar->setChecked(true);
     ui->actionStatus_bar->setChecked(false);
     ui->statusBar->setVisible(false);
 
-    int h = ui->splitterPanels->height();
+    int h = ui->splitterPanels->height()/4;
     QList<int>heights;
-    heights << h << h << h;
+    heights << h << h << h << h;
     ui->splitterPanels->setSizes(heights);
 
 }

@@ -20,6 +20,11 @@
 INSTALLER_NSIS_PATH = D:\\Program Files\\NSIS\\makensis.exe
 INSTALLER_UPX_PATH = $${_PRO_FILE_PWD_}\\..\\..\\tools\\upx.exe
 
+
+!CONFIG(debug, debug|release) {
+    BUILDNO = $$system("git describe")
+}
+
 PORTAUDIO_PATH 	= ../libs/portaudio
 PORTMIDI_PATH 	= ../libs/portmidi
 
