@@ -45,6 +45,7 @@ MainHost::MainHost(QObject *parent) :
     QObject(parent),
     mainContainer(0),
     hostContainer(0),
+    projectContainer(0),
     programContainer(0),
     insertContainer(0),
     filePass(0),
@@ -110,6 +111,7 @@ MainHost::~MainHost()
 
     mainContainer.clear();
     hostContainer.clear();
+    projectContainer.clear();
     insertContainer.clear();
     programContainer.clear();
     parkingContainer.clear();
@@ -125,8 +127,9 @@ void MainHost::Open()
 
     SetupMainContainer();
     SetupHostContainer();
-    SetupInsertContainer();
+    SetupProjectContainer();
     SetupProgramContainer();
+    SetupInsertContainer();
     SetupParking();
 
     EnableSolverUpdate(true);
@@ -142,6 +145,9 @@ void MainHost::SetupMainContainer()
     info.forcedObjId = FixedObjId::mainContainer;
 
     mainContainer = Connectables::ObjectFactory::Get()->NewObject(info).staticCast< Connectables::MainContainer >();
+    if(mainContainer.isNull())
+        return;
+
     mainContainer->LoadProgram(0);
     OnObjectAdded(mainContainer);
     mainContainer->SetParentModeIndex( model->invisibleRootItem()->index() );
@@ -164,6 +170,9 @@ void MainHost::SetupHostContainer()
     info.forcedObjId = FixedObjId::hostContainer;
 
     hostContainer = Connectables::ObjectFactory::Get()->NewObject(info).staticCast<Connectables::MainContainer>();
+    if(hostContainer.isNull())
+        return;
+
     hostContainer->LoadProgram(0);
     mainContainer->AddObject(hostContainer);
 
@@ -202,6 +211,98 @@ void MainHost::SetupHostContainer()
     hostContainer->listenProgramChanges=false;
 }
 
+void MainHost::SetupProjectContainer()
+{
+    if(!projectContainer.isNull()) {
+        mainContainer->RemoveObject( projectContainer );
+        projectContainer.clear();
+        UpdateSolver(true);
+    }
+
+    timeFromStart.restart();
+
+    ObjectInfo info;
+    info.nodeType = NodeType::container;
+    info.objType = ObjType::MainContainer;
+    info.name = "projectContainer";
+    info.forcedObjId = FixedObjId::projectContainer;
+
+    projectContainer = Connectables::ObjectFactory::Get()->NewObject(info).staticCast<Connectables::MainContainer>();
+    if(projectContainer.isNull())
+        return;
+
+    projectContainer->LoadProgram(0);
+    mainContainer->AddObject(projectContainer);
+
+    QSharedPointer<Connectables::Object> bridge;
+
+    //bridge in
+    ObjectInfo in;
+    in.name="in";
+    in.nodeType = NodeType::bridge;
+    in.objType = ObjType::BridgeIn;
+    in.forcedObjId = FixedObjId::projectContainerIn;
+
+    bridge = Connectables::ObjectFactory::Get()->NewObject(in);
+    projectContainer->AddObject( bridge );
+    bridge->SetBridgePinsInVisible(false);
+    projectContainer->bridgeIn = bridge;
+
+    //bridge out
+    ObjectInfo out;
+    out.name="out";
+    out.nodeType = NodeType::bridge;
+    out.objType = ObjType::BridgeOut;
+    out.forcedObjId = FixedObjId::projectContainerOut;
+
+    bridge = Connectables::ObjectFactory::Get()->NewObject(out);
+    projectContainer->AddObject( bridge );
+    bridge->SetBridgePinsOutVisible(false);
+    projectContainer->bridgeOut = bridge;
+
+    //connect with hostContainer
+    if(!hostContainer.isNull()) {
+        mainContainer->ConnectBridges(hostContainer->bridgeSend, projectContainer->bridgeIn);
+        mainContainer->ConnectBridges(projectContainer->bridgeOut, hostContainer->bridgeReturn);
+    }
+
+
+    //bridge send
+    ObjectInfo send;
+    send.name="send";
+    send.nodeType = NodeType::bridge;
+    send.objType = ObjType::BridgeSend;
+    send.forcedObjId = FixedObjId::projectContainerSend;
+
+    bridge = Connectables::ObjectFactory::Get()->NewObject(send);
+    projectContainer->AddObject( bridge );
+    bridge->SetBridgePinsOutVisible(false);
+    projectContainer->bridgeSend = bridge;
+
+    //bridge return
+    ObjectInfo retrn;
+    retrn.name="return";
+    retrn.nodeType = NodeType::bridge;
+    retrn.objType = ObjType::BridgeReturn;
+    retrn.forcedObjId = FixedObjId::projectContainerReturn;
+
+    bridge = Connectables::ObjectFactory::Get()->NewObject(retrn);
+    projectContainer->AddObject( bridge );
+    bridge->SetBridgePinsInVisible(false);
+    projectContainer->bridgeReturn = bridge;
+
+    //connect with programContainer
+    if(!programContainer.isNull()) {
+        mainContainer->ConnectBridges(projectContainer->bridgeSend, programContainer->bridgeIn);
+        mainContainer->ConnectBridges(programContainer->bridgeOut, projectContainer->bridgeReturn);
+    }
+
+    //connect with itself (pass-though cables)
+    projectContainer->ConnectBridges(projectContainer->bridgeIn, projectContainer->bridgeSend,false);
+    projectContainer->ConnectBridges(projectContainer->bridgeReturn, projectContainer->bridgeOut,false);
+
+    projectContainer->listenProgramChanges=false;
+}
 
 void MainHost::SetupProgramContainer()
 {
@@ -211,8 +312,6 @@ void MainHost::SetupProgramContainer()
         UpdateSolver(true);
     }
 
-    timeFromStart.restart();
-
     ObjectInfo info;
     info.nodeType = NodeType::container;
     info.objType = ObjType::MainContainer;
@@ -220,6 +319,9 @@ void MainHost::SetupProgramContainer()
     info.forcedObjId = FixedObjId::programContainer;
 
     programContainer = Connectables::ObjectFactory::Get()->NewObject(info).staticCast<Connectables::MainContainer>();
+    if(programContainer.isNull())
+        return;
+
     programContainer->LoadProgram(0);
     mainContainer->AddObject(programContainer);
 
@@ -249,10 +351,10 @@ void MainHost::SetupProgramContainer()
     bridge->SetBridgePinsOutVisible(false);
     programContainer->bridgeOut = bridge;
 
-    //connect with hostContainer
-    if(!hostContainer.isNull()) {
-        mainContainer->ConnectBridges(hostContainer->bridgeSend, programContainer->bridgeIn);
-        mainContainer->ConnectBridges(programContainer->bridgeOut, hostContainer->bridgeReturn);
+    //connect with projectContainer
+    if(!projectContainer.isNull()) {
+        mainContainer->ConnectBridges(projectContainer->bridgeSend, programContainer->bridgeIn);
+        mainContainer->ConnectBridges(programContainer->bridgeOut, projectContainer->bridgeReturn);
     }
 
 
@@ -302,6 +404,9 @@ void MainHost::SetupInsertContainer()
     info.forcedObjId = FixedObjId::insertContainer;
 
     insertContainer = Connectables::ObjectFactory::Get()->NewObject(info).staticCast<Connectables::MainContainer>();
+    if(insertContainer.isNull())
+        return;
+
     insertContainer->LoadProgram(0);
     mainContainer->AddObject(insertContainer);
 

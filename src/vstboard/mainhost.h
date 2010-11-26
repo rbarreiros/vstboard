@@ -67,6 +67,7 @@ public:
 
     QSharedPointer<Connectables::MainContainer> mainContainer;
     QSharedPointer<Connectables::MainContainer> hostContainer;
+    QSharedPointer<Connectables::MainContainer> projectContainer;
     QSharedPointer<Connectables::MainContainer> programContainer;
     QSharedPointer<Connectables::MainContainer> insertContainer;
     QSharedPointer<Connectables::ParkingContainer> parkingContainer;
@@ -86,6 +87,7 @@ public:
 private:
     void SetupMainContainer();
     void SetupHostContainer();
+    void SetupProjectContainer();
     void SetupProgramContainer();
     void SetupInsertContainer();
     void SetupParking();

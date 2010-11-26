@@ -12,7 +12,7 @@ class MidiDevices : public QObject
 Q_OBJECT
 public:
     inline static MidiDevices *Get() {return theMidiDevices;}
-    static MidiDevices *MidiDevices::Create(QObject *parent=0);
+    static MidiDevices *Create(QObject *parent=0);
     ~MidiDevices();
 
     ListMidiInterfacesModel* GetModel();

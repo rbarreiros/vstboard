@@ -101,7 +101,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //    connect(timerCpuLoad, SIGNAL(timeout()),
 //            this, SLOT(UpdateCpuLoad()));
 
-    mySceneView = new View::SceneView(ui->hostView, ui->programView, ui->insertView, this);
+    mySceneView = new View::SceneView(ui->hostView, ui->projectView, ui->programView, ui->insertView, this);
     mySceneView->setModel(mainHost->GetModel());
 
     ui->solverView->setModel(&mainHost->solver.model);
@@ -457,6 +457,7 @@ void MainWindow::resetSettings()
     tabifyDockWidget(ui->dockSolver,ui->dockParking);
 
     ui->actionHost_panel->setChecked(true);
+    ui->actionProject_panel->setChecked(true);
     ui->actionProgram_panel->setChecked(true);
     ui->actionInsert_panel->setChecked(true);
 

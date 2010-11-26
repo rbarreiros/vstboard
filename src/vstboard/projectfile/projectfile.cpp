@@ -46,12 +46,14 @@ bool ProjectFile::SaveToFile(QString filePath)
 
     host->insertContainer->SaveProgram();
     host->programContainer->SaveProgram();
+    host->projectContainer->SaveProgram();
     host->parkingContainer->SaveProgram();
 
     for(host->filePass=0; host->filePass<LOADSAVE_STAGES ; host->filePass++) {
         out << *host->parkingContainer;
-        out << *host->insertContainer;
+        out << *host->projectContainer;
         out << *host->programContainer;
+        out << *host->insertContainer;
     }
 
     out << *host->programList;
@@ -65,8 +67,9 @@ void ProjectFile::Clear()
 {
     MainHost *host = MainHost::Get();
     host->EnableSolverUpdate(false);
-    host->SetupInsertContainer();
+    host->SetupProjectContainer();
     host->SetupProgramContainer();
+    host->SetupInsertContainer();
     host->SetupParking();
     host->EnableSolverUpdate(true);
     host->programList->BuildModel();
@@ -111,14 +114,16 @@ bool ProjectFile::LoadFromFile(QString filePath)
 
     host->EnableSolverUpdate(false);
 
+    host->SetupProjectContainer();
     host->SetupInsertContainer();
     host->SetupProgramContainer();
     host->SetupParking();
 
     for(host->filePass=0; host->filePass<LOADSAVE_STAGES ; host->filePass++) {
         in >> *host->parkingContainer;
-        in >> *host->insertContainer;
+        in >> *host->projectContainer;
         in >> *host->programContainer;
+        in >> *host->insertContainer;
     }
 
     Connectables::ObjectFactory::Get()->ResetSavedId();

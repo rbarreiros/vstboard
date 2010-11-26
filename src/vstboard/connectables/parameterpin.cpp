@@ -156,8 +156,8 @@ void ParameterPin::OnValueChanged(float val)
     if(!loading) {
         if(parent->GetLearningMode()==1)
             SetVisible(true);
-        if(parent->GetLearningMode()==-1)
-            SetVisible(false);
+//        if(parent->GetLearningMode()==-1)
+//            SetVisible(false);
 
         if(!dirty) {
             dirty=true;

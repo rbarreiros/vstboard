@@ -241,6 +241,106 @@
         </item>
        </layout>
       </widget>
+      <widget class="QGroupBox" name="ProjectBox">
+       <property name="title">
+        <string>Project Panel</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="margin">
+         <number>0</number>
+        </property>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_13">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QPushButton" name="pushZoomInProj">
+            <property name="toolTip">
+             <string>Zoom In</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resources/resources.qrc">
+              <normaloff>:/img16x16/viewmag+.png</normaloff>:/img16x16/viewmag+.png</iconset>
+            </property>
+            <property name="autoRepeat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushZoomResetProj">
+            <property name="toolTip">
+             <string>Reset Zoom</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resources/resources.qrc">
+              <normaloff>:/img16x16/viewmagfit.png</normaloff>:/img16x16/viewmagfit.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushZoomOutProj">
+            <property name="toolTip">
+             <string>Zoom Out</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resources/resources.qrc">
+              <normaloff>:/img16x16/viewmag-.png</normaloff>:/img16x16/viewmag-.png</iconset>
+            </property>
+            <property name="autoRepeat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="MainGraphicsView" name="projectView">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="verticalScrollBarPolicy">
+           <enum>Qt::ScrollBarAlwaysOff</enum>
+          </property>
+          <property name="horizontalScrollBarPolicy">
+           <enum>Qt::ScrollBarAlwaysOff</enum>
+          </property>
+          <property name="renderHints">
+           <set>QPainter::Antialiasing|QPainter::TextAntialiasing</set>
+          </property>
+          <property name="dragMode">
+           <enum>QGraphicsView::ScrollHandDrag</enum>
+          </property>
+          <property name="resizeAnchor">
+           <enum>QGraphicsView::AnchorUnderMouse</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
       <widget class="QGroupBox" name="ProgramBox">
        <property name="title">
         <string>Program Panel</string>
@@ -459,8 +559,9 @@
      <string>View</string>
     </property>
     <addaction name="actionHost_panel"/>
-    <addaction name="actionInsert_panel"/>
+    <addaction name="actionProject_panel"/>
     <addaction name="actionProgram_panel"/>
+    <addaction name="actionInsert_panel"/>
     <addaction name="separator"/>
     <addaction name="actionRestore_default_layout"/>
     <addaction name="actionStatus_bar"/>
@@ -529,6 +630,7 @@
    <addaction name="actionConfig"/>
    <addaction name="separator"/>
    <addaction name="actionHost_panel"/>
+   <addaction name="actionProject_panel"/>
    <addaction name="actionProgram_panel"/>
    <addaction name="actionInsert_panel"/>
   </widget>
@@ -1213,6 +1315,21 @@
     <string>Zoom buttons</string>
    </property>
   </action>
+  <action name="actionProject_panel">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/img16x16/file_setup.png</normaloff>:/img16x16/file_setup.png</iconset>
+   </property>
+   <property name="text">
+    <string>Toggle Project panel</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -1464,6 +1581,70 @@
     <hint type="destinationlabel">
      <x>422</x>
      <y>37</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushZoomInProj</sender>
+   <signal>pressed()</signal>
+   <receiver>projectView</receiver>
+   <slot>zoomIn()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>291</x>
+     <y>220</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>507</x>
+     <y>256</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushZoomOutProj</sender>
+   <signal>pressed()</signal>
+   <receiver>projectView</receiver>
+   <slot>zoomOut()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>291</x>
+     <y>268</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>507</x>
+     <y>256</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushZoomResetProj</sender>
+   <signal>clicked()</signal>
+   <receiver>projectView</receiver>
+   <slot>zoomReset()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>291</x>
+     <y>244</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>507</x>
+     <y>256</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionProject_panel</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ProjectBox</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>510</x>
+     <y>239</y>
     </hint>
    </hints>
   </connection>

@@ -34,9 +34,10 @@
 
 using namespace View;
 
-SceneView::SceneView(MainGraphicsView *viewHost, MainGraphicsView *viewProgram, MainGraphicsView *viewInsert,QWidget *parent) :
+SceneView::SceneView(MainGraphicsView *viewHost, MainGraphicsView *viewProject, MainGraphicsView *viewProgram, MainGraphicsView *viewInsert,QWidget *parent) :
         QAbstractItemView(parent),
         viewHost(viewHost),
+        viewProject(viewProject),
         viewProgram(viewProgram),
         viewInsert(viewInsert),
         sceneHost(0),
@@ -48,17 +49,20 @@ SceneView::SceneView(MainGraphicsView *viewHost, MainGraphicsView *viewProgram, 
     timerFalloff->start(50);
 
     sceneHost = new QGraphicsScene(this);
-    sceneInsert = new QGraphicsScene(this);
+    sceneProject = new QGraphicsScene(this);
     sceneProgram = new QGraphicsScene(this);
+    sceneInsert = new QGraphicsScene(this);
 
     //we need a root object to avoid a bug when the scene is empty
     rootObjHost = new QGraphicsRectItem(0, sceneHost);
-    rootObjInsert = new QGraphicsRectItem(0, sceneInsert);
+    rootObjProject = new QGraphicsRectItem(0, sceneProject);
     rootObjProgram = new QGraphicsRectItem(0, sceneProgram);
+    rootObjInsert = new QGraphicsRectItem(0, sceneInsert);
 
     viewHost->setScene(sceneHost);
-    viewInsert->setScene(sceneInsert);
+    viewProject->setScene(sceneProject);
     viewProgram->setScene(sceneProgram);
+    viewInsert->setScene(sceneInsert);
 }
 
 void SceneView::dataChanged ( const QModelIndex & topLeft, const QModelIndex & bottomRight  )
@@ -252,6 +256,15 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                             connect(viewHost,SIGNAL(viewResized(QRectF)),
                                     cntView,SLOT(OnViewChanged(QRectF)));
                             QTimer::singleShot(0, viewHost, SLOT(ForceResize()));
+                        }
+
+                        if(objId == FixedObjId::projectContainer) {
+                            MainContainerView *cntView = new MainContainerView(model());
+                            objView=cntView;
+                            cntView->setParentItem(rootObjProject);
+                            connect(viewProject,SIGNAL(viewResized(QRectF)),
+                                    cntView,SLOT(OnViewChanged(QRectF)));
+                            QTimer::singleShot(0, viewProject, SLOT(ForceResize()));
                         }
 
                         if(objId == FixedObjId::programContainer) {
@@ -555,17 +568,23 @@ void SceneView::RemoveCablesFromPin(ConnectionInfo pin)
 void SceneView::ToggleHostView(bool show)
 {
     viewHost->setVisible(show);
-    emit hostShown(show);
+//    emit hostShown(show);
 }
 
-void SceneView::ToggleInsertView(bool show)
+void SceneView::ToggleProjectView(bool show)
 {
-    viewInsert->setVisible(show);
-    emit insertShown(show);
+    viewProject->setVisible(show);
+//    emit projectShown(show);
 }
 
 void SceneView::ToggleProgramView(bool show)
 {
     viewProgram->setVisible(show);
-    emit programShown(show);
+//    emit programShown(show);
+}
+
+void SceneView::ToggleInsertView(bool show)
+{
+    viewInsert->setVisible(show);
+//    emit insertShown(show);
 }
