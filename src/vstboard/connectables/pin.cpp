@@ -33,7 +33,7 @@ Pin::Pin(Object *parent,PinType::Enum type, PinDirection::Enum direction, int nu
     visible(false),
     closed(false)
 {
-    setObjectName(QString("pin:%1:%2:%3:%4").arg(connectInfo.objId).arg(connectInfo.type).arg(connectInfo.direction).arg(connectInfo.pinNumber));
+//    setObjectName(QString("pin:%1:%2:%3:%4").arg(connectInfo.objId).arg(connectInfo.type).arg(connectInfo.direction).arg(connectInfo.pinNumber));
 }
 
 Pin::~Pin()

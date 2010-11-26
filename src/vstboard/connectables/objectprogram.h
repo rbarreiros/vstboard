@@ -46,8 +46,10 @@ namespace Connectables {
 
         int progId;
 
-        QList<ObjectParameter> listParametersIn;
-        QList<ObjectParameter> listParametersOut;
+        QMap<ushort,ObjectParameter> listParametersIn;
+        QMap<ushort,ObjectParameter> listParametersOut;
+
+        QMap<int, QVariant> listOtherValues;
 
         QDataStream & toStream(QDataStream& out) const;
         QDataStream & fromStream(QDataStream& in);

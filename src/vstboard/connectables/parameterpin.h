@@ -38,7 +38,7 @@ namespace Connectables {
         void ChangeValue(float val);
         void ChangeValue(int index);
         void ChangeValue(QVariant variant);
-        void Load(const ObjectParameter *param);
+        void Load(const ObjectParameter &param);
 
         virtual void OnValueChanged(float val);
 

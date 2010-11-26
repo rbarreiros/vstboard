@@ -76,7 +76,11 @@ namespace Connectables {
         QMutex midiEventsMutex;
         QList<VstMidiEvent*>listVstMidiEvents;
 
+        enum otherProgParameters {
+            vstProgNumber = 0xffff
+        };
 
+        QList<QVariant>listValues;
 
     signals:
         void WindowSizeChange(int newWidth, int newHeight);
@@ -89,6 +93,10 @@ namespace Connectables {
         void EditIdle();
         void OnParameterChanged(ConnectionInfo pinInfo, float value);
         void OnEditorVisibilityChanged(bool visible);
+
+        void SaveProgram();
+        void UnloadProgram();
+        void LoadProgram(int prog);
 
 //        void TakeScreenshot();
 
