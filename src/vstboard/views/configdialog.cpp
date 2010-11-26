@@ -29,10 +29,9 @@ ConfigDialog::ConfigDialog(QWidget *parent) :
     ui(new Ui::ConfigDialog)
 {
     ui->setupUi(this);
-    ui->treeShortcuts->setModel(MainConfig::Get()->GetShortcutsModel());
-    ui->treeShortcuts->setItemDelegateForColumn(0,new ShortcutDelegate(this));
-
-    ui->treeActions->setModel(MainConfig::Get()->GetAllActionsModel());
+//    ui->treeShortcuts->setModel(MainConfig::Get()->GetShortcutsModel());
+//    ui->treeShortcuts->setItemDelegateForColumn(0,new ShortcutDelegate(this));
+//    ui->treeActions->setModel(MainConfig::Get()->GetAllActionsModel());
 
     QSettings settings;
 
