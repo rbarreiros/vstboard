@@ -63,7 +63,7 @@ MainHost::MainHost(QObject *parent) :
     Connectables::ObjectFactory::Create(this);
 
     sampleRate = 44100.0;
-    bufferSize = 512;
+    bufferSize = 1;
 
     programList = new Programs(this);
     connect(programList, SIGNAL(ProgChanged(QModelIndex)),

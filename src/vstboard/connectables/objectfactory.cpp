@@ -19,7 +19,7 @@
 ******************************************************************************/
 
 #include "objectfactory.h"
-#include "audiodevice.h"
+//#include "audiodevice.h"
 #include "audiodevicein.h"
 #include "audiodeviceout.h"
 #include "mididevice.h"

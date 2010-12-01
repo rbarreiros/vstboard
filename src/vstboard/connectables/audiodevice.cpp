@@ -112,7 +112,7 @@ bool AudioDevice::SetObjectInput(AudioDeviceIn *obj)
     devIn = obj;
 
     if(!obj) {
-        QTimer::singleShot(5000,this,SLOT(DeleteIfUnused()));
+        QTimer::singleShot(2000,this,SLOT(DeleteIfUnused()));
     }
 
     return true;
@@ -137,7 +137,7 @@ bool AudioDevice::SetObjectOutput(AudioDeviceOut *obj)
     devOut = obj;
 
     if(!obj) {
-        QTimer::singleShot(5000,this,SLOT(DeleteIfUnused()));
+        QTimer::singleShot(2000,this,SLOT(DeleteIfUnused()));
         devOutClosing=true;
     }
 
@@ -497,6 +497,9 @@ bool AudioDevice::CloseStream()
     }
 
     DeleteCircualBuffers();
+
+    if(MainHost::Get())
+        MainHost::Get()->SetBufferSize(1);
     return true;
 }
 
@@ -589,25 +592,38 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
             return paComplete;
 
         if(device->devIn) {
+
+            bool readyToRender=true;
+
             //fill circular buffer with device audio
             int cpt=0;
             foreach(CircularBuffer *buf, device->listCircularBuffersIn) {
+
                 buf->Put( ((float **) inputBuffer)[cpt], framesPerBuffer );
+
+                if(buf->filledSize < hostBuffSize )
+                    readyToRender=false;
+
                 cpt++;
             }
 
             //if we filled enough buffer
-            if(device->listCircularBuffersIn.at(0)->filledSize >= hostBuffSize ) {
-
+            //if(device->listCircularBuffersIn.at(0)->filledSize >= hostBuffSize ) {
+            if(readyToRender) {
                 //put circular buffers into pins buffers
                 cpt=0;
                 foreach(CircularBuffer *buf, device->listCircularBuffersIn) {
                     AudioBuffer *pinBuf = device->devIn->listAudioPinOut.at(cpt)->buffer;
+
                     if(pinBuf->GetSize() < hostBuffSize) {
-                        debug("AudioDevice::paCallback pin buffer too small")
+                        pinBuf->SetSize(hostBuffSize);
+//                        debug("AudioDevice::paCallback pin buffer too small")
                         continue;
                     }
-                    buf->Get( pinBuf->GetPointer(true), hostBuffSize );
+
+                    if(buf->filledSize >= hostBuffSize)
+                        buf->Get( pinBuf->GetPointer(true), hostBuffSize );
+
                     cpt++;
                 }
 
@@ -667,6 +683,12 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
             //send circular buffer to device if there's enough data
             int cpt=0;
             foreach(CircularBuffer *buf, device->listCircularBuffersOut) {
+//                while(buf->filledSize >= hostBuffSize+framesPerBuffer ) {
+//                    debug2(<< "AudioDevice::paCallback skip buffer filled:" << buf->filledSize << " host:" << hostBuffSize << " frame:" << framesPerBuffer )
+//                    buf->Skip(framesPerBuffer);
+//                    debug2(<< buf->filledSize)
+//                }
+
                 if(buf->filledSize>=framesPerBuffer)
                     buf->Get( ((float **) outputBuffer)[cpt], framesPerBuffer );
                 cpt++;

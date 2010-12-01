@@ -100,6 +100,9 @@ ListAudioInterfacesModel * AudioDevices::GetModel()
 //    Connectables::AudioDevice::listDevMutex.unlock();
 
     foreach(QSharedPointer<Connectables::Object>obj, Connectables::ObjectFactory::Get()->GetListObjects()) {
+        if(obj.isNull())
+            continue;
+
         if(obj->info().objType == ObjType::AudioInterfaceIn || obj->info().objType == ObjType::AudioInterfaceOut) {
 //            if(!obj->errorMessage.isEmpty())
                 obj->Open();
