@@ -18,10 +18,10 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#include "hostcontroller.h"
-#include "../globals.h"
-#include "../mainhost.h"
-#include "../projectfile/projectfile.h"
+#include "connectables/hostcontroller.h"
+#include "globals.h"
+#include "mainhost.h"
+#include "projectfile/projectfile.h"
 
 using namespace Connectables;
 

@@ -19,7 +19,7 @@
 ******************************************************************************/
 
 #include "maingraphicsview.h"
-#include "../globals.h"
+#include "globals.h"
 
 //using namespace View;
 

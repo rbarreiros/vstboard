@@ -19,7 +19,7 @@
 ******************************************************************************/
 
 #include "mididevice.h"
-#include "../globals.h"
+#include "globals.h"
 
 using namespace Connectables;
 

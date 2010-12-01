@@ -21,10 +21,9 @@
 #ifndef MIDIDEVICE_H
 #define MIDIDEVICE_H
 
-#include "../precomp.h"
-//#include "portmidi.h"
+#include "precomp.h"
 //#include "pmutil.h"
-#include "object.h"
+#include "connectables/object.h"
 
 #define QUEUE_SIZE 1024
 

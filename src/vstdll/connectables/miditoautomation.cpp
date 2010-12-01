@@ -18,9 +18,9 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#include "miditoautomation.h"
+#include "connectables/miditoautomation.h"
 #include "midipinin.h"
-#include "../globals.h"
+#include "globals.h"
 #include "mainhost.h"
 
 using namespace Connectables;

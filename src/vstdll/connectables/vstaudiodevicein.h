@@ -18,38 +18,42 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#ifndef MIDISENDER_H
-#define MIDISENDER_H
+#ifndef VSTAUDIODEVICEIN_H
+#define VSTAUDIODEVICEIN_H
 
-#include "../precomp.h"
-#include "object.h"
+#include "../vstboard/precomp.h"
+#include "../vstboard/connectables/object.h"
+#include "../vstboard/connectables/objectinfo.h"
+
+class AudioBuffer;
 
 namespace Connectables {
 
-    class MidiSender : public Object
+    class VstAudioDevice;
+    class VstAudioDeviceIn : public Object
     {
     Q_OBJECT
-        enum Param {
-            Param_MsgType = 0,
-            Param_Value1 = 1,
-            Param_Value2 = 2,
-            Param_Channel = 3
-        };
-
     public:
-        MidiSender(int index);
+        VstAudioDeviceIn(int index, const ObjectInfo &info);
+        ~VstAudioDeviceIn();
+
+        bool Open();
+        bool Close();
         void Render();
+//        int GetProcessingTime() {return 10;}
+
+        bool bufferReady;
+
+        void SetBuffers(float **buf);
 
     protected:
-        long midiMsg;
-        bool msgChanged;
-
-        QList<QVariant> listMsgType;
-        QList<QVariant> listValues;
-        QList<QVariant> listChannels;
+//        QSharedPointer<AudioDevice>parentDevice;
 
     public slots:
-        virtual void OnParameterChanged(ConnectionInfo pinInfo, float value);
+        void SetBufferSize(long size);
+
+//    friend class AudioDevice;
     };
 }
-#endif // MIDISENDER_H
+
+#endif // VSTAUDIODEVICEIN_H

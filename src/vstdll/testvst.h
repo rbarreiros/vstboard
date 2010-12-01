@@ -26,8 +26,8 @@
 #include "mainwindow.h"
 #include "public.sdk/source/vst2.x/audioeffectx.h"
 #include "gui.h"
-#include "connectables/audiodevicein.h"
-#include "connectables/audiodeviceout.h"
+#include "connectables/vstaudiodevicein.h"
+#include "connectables/vstaudiodeviceout.h"
 
 AudioEffect* createEffectInstance (audioMasterCallback audioMaster);
 
@@ -60,8 +60,8 @@ public:
         virtual bool getProductString (char* text);
         virtual VstInt32 getVendorVersion ();
 
-        bool setDeviceIn(Connectables::AudioDeviceIn *dev);
-        bool setDeviceOut(Connectables::AudioDeviceOut *dev);
+        bool setDeviceIn(Connectables::VstAudioDeviceIn *dev);
+        bool setDeviceOut(Connectables::VstAudioDeviceOut *dev);
 
         void open();
         void close();
@@ -75,8 +75,8 @@ protected:
 //        float fGain;
         char programName[kVstMaxProgNameLen + 1];
 
-        Connectables::AudioDeviceIn *deviceIn;
-        Connectables::AudioDeviceOut *deviceOut;
+        Connectables::VstAudioDeviceIn *deviceIn;
+        Connectables::VstAudioDeviceOut *deviceOut;
         VstInt32 bufferSize;
 
         QApplication *app;

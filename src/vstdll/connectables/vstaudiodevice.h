@@ -18,19 +18,14 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#ifndef AUDIODEVICE_H
-#define AUDIODEVICE_H
+#ifndef VSTAUDIODEVICE_H
+#define VSTAUDIODEVICE_H
 
 #include <QWaitCondition>
 
-#include "../precomp.h"
-#include "object.h"
-#include "objectinfo.h"
-//#include "portaudio.h"
-//#include "pa_win_wmme.h"
-//#include "pa_win_ds.h"
-
-#include "../circularbuffer.h"
+#include "precomp.h"
+#include "connectables/object.h"
+#include "connectables/objectinfo.h"
 
 #ifndef bzero
 #define bzero(memArea, len)  memset((memArea), 0, (len))
@@ -38,78 +33,38 @@
 
 namespace Connectables {
 
-    class AudioDeviceIn;
-    class AudioDeviceOut;
-    class AudioDevice : public QObject
+    class VstAudioDeviceIn;
+    class VstAudioDeviceOut;
+    class VstAudioDevice : public QObject
     {
         Q_OBJECT
     public:
-        AudioDevice(const ObjectInfo &info, QObject *parent=0);
-        ~AudioDevice();
+        VstAudioDevice(const ObjectInfo &info, QObject *parent=0);
+        ~VstAudioDevice();
 
         bool Open();
         bool Close();
-
-//        float GetCpuUsage();
-
-        bool SetObjectInput(AudioDeviceIn *obj);
-        bool SetObjectOutput(AudioDeviceOut *obj);
-
-//        static QHash<qint32,QSharedPointer<AudioDevice> >listAudioDevices;
-
+        bool SetObjectInput(VstAudioDeviceIn *obj);
+        bool SetObjectOutput(VstAudioDeviceOut *obj);
         void SetSleep(bool sleeping);
-
         bool bufferReady;
-
-//        static bool FindDeviceByName(ObjectInfo &objInfo, PaDeviceInfo *devInfo=0);
-
         static int countDevicesReady;
         static int countInputDevices;
-
-//        QWeakPointer<AudioDevice> GetSharedPointer() {return this->sharedPointer;}
-
         static QMutex listDevMutex;
 
     protected:
-//        QWeakPointer<AudioDevice>sharedPointer;
-
-//        static int paCallback( const void *inputBuffer, void *outputBuffer,
-//                               unsigned long framesPerBuffer,
-//                               const PaStreamCallbackTimeInfo* timeInfo,
-//                               PaStreamCallbackFlags statusFlags,
-//                               void *userData );
-
-//        static void paStreamFinished( void* userData );
-
         bool OpenStream(double sampleRate);
         bool CloseStream();
-
         void DeleteCircualBuffers();
-
         bool isClosing;
         bool devOutClosing;
-
         float sampleRate;
         unsigned long bufferSize;
-
-//        PaStream *stream;
-//        PaDeviceInfo devInfo;
-
-        AudioDeviceIn *devIn;
-        AudioDeviceOut *devOut;
-
+        VstAudioDeviceIn *devIn;
+        VstAudioDeviceOut *devOut;
         bool closed;
-
         QMutex devicesMutex;
         ObjectInfo objInfo;
-
-//        PaWinMmeStreamInfo wmmeStreamInfo;
-//        PaWinDirectSoundStreamInfo directSoundStreamInfo;
-
-        QList<CircularBuffer*>listCircularBuffersIn;
-        QList<CircularBuffer*>listCircularBuffersOut;
-
-        float cpuUsage;
 
     signals:
         void InUseChanged(const ObjectInfo &objInfo, bool inUse);
@@ -117,11 +72,11 @@ namespace Connectables {
     public slots:
         void SetSampleRate(float rate=44100.0);
 
-        friend class AudioDeviceIn;
-        friend class AudioDeviceOut;
+//        friend class VstAudioDeviceIn;
+//        friend class VstAudioDeviceOut;
 
         void DeleteIfUnused();
     };
 }
 
-#endif // AUDIODEVICE_H
+#endif // VSTAUDIODEVICE_H

@@ -23,9 +23,9 @@
 
 #include <QMainWindow>
 
-#include "mainhost.h"
-#include "views/sceneview.h"
-#include "models/listtoolsmodel.h"
+#include "../vstboard/mainhost.h"
+#include "../vstboard/views/sceneview.h"
+#include "../vstboard/models/listtoolsmodel.h"
 
 
 namespace Ui {

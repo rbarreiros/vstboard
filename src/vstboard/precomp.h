@@ -94,10 +94,5 @@
     #define debug2(...) {qDebug()__VA_ARGS__;}
 #endif
 
-//#include "porttime.h"
-//#include "portmidi.h"
-//#include "pmutil.h"
-//#include "portaudio.h"
-
 #endif
 #endif // PRECOMP_H

@@ -22,7 +22,7 @@
 #include "pinview.h"
 #include "../globals.h"
 #include "mainwindow.h"
-#include "imagecollection.h"
+
 using namespace View;
 
 ObjectView::ObjectView(QAbstractItemModel *model, QGraphicsItem * parent, Qt::WindowFlags wFlags ) :

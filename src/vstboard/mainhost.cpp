@@ -22,7 +22,9 @@
 #include "connectables/mididevice.h"
 #include "mainwindow.h"
 #include "connectables/container.h"
-#include "connectables/audiodevice.h"
+#ifndef VST_PLUGIN
+    #include "connectables/audiodevice.h"
+#endif
 
 #ifdef VSTSDK
 #include "connectables/vstplugin.h"
@@ -31,7 +33,6 @@
 MainHost *MainHost::theHost = 0;
 HostModel *MainHost::model = 0;
 HostModel *MainHost::modelParking = 0;
-HostModelProxy *MainHost::modelProxy = 0;
 
 MainHost* MainHost::Create(QObject *parent)
 {
@@ -58,8 +59,6 @@ MainHost::MainHost(QObject *parent) :
     model->setColumnCount(1);
     modelParking = new HostModel(this);
     modelParking->setColumnCount(1);
-    modelProxy = new HostModelProxy(model);
-
     Connectables::ObjectFactory::Create(this);
 
     sampleRate = 44100.0;
@@ -69,7 +68,7 @@ MainHost::MainHost(QObject *parent) :
     connect(programList, SIGNAL(ProgChanged(QModelIndex)),
             this, SLOT(SetProgram(QModelIndex)));
 
-//    MidiDevices * mididev =
+#ifndef VST_PLUGIN
             MidiDevices::Create(this);
 
     AudioDevices * devices = AudioDevices::Create(this);
@@ -77,6 +76,7 @@ MainHost::MainHost(QObject *parent) :
             devices,SLOT(OnToggleDeviceInUse(ObjectInfo,bool)));
     connect(&devices->fakeRenderTimer,SIGNAL(timeout()),
             this, SLOT(Render()));
+#endif
 
     //timer
     timeFromStart.start();
@@ -605,8 +605,10 @@ void MainHost::OnObjectAdded(QSharedPointer<Connectables::Object> objPtr)
     if(parkingContainer)
         parkingContainer->RemoveObject(objPtr);
 
+#ifndef VST_PLUGIN
     if(objPtr->info().objType == ObjType::MidiInterface)
         MidiDevices::OpenDevice(objPtr);
+#endif
 
     connect(this,SIGNAL(SampleRateChanged(float)),
             objPtr.data(),SLOT(SetSampleRate(float)));
@@ -630,7 +632,9 @@ void MainHost::OnObjectRemoved(QSharedPointer<Connectables::Object> objPtr, Conn
     disconnect(this,SIGNAL(BufferSizeChanged(long)),
             objPtr.data(),SLOT(SetBufferSize(long)));
 
+#ifndef VST_PLUGIN
     MidiDevices::CloseDevice(objPtr);
+#endif
 
     //if the object comes from a programmable container : don't delete it, store it in the parking container
     if(container && container->listenProgramChanges && parkingContainer

@@ -21,8 +21,8 @@
 #ifndef SCENEVIEW_H
 #define SCENEVIEW_H
 
-#include "precomp.h"
-#include "connectables/connectioninfo.h"
+#include "../vstboard/precomp.h"
+#include "../vstboard/connectables/connectioninfo.h"
 #include "maingraphicsview.h"
 
 namespace View {

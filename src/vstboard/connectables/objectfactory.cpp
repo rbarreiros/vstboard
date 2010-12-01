@@ -19,9 +19,13 @@
 ******************************************************************************/
 
 #include "objectfactory.h"
-//#include "audiodevice.h"
-#include "audiodevicein.h"
-#include "audiodeviceout.h"
+#ifndef VST_PLUGIN
+    #include "audiodevicein.h"
+    #include "audiodeviceout.h"
+#else
+    #include "connectables/vstaudiodevicein.h"
+    #include "connectables/vstaudiodeviceout.h"
+#endif
 #include "mididevice.h"
 #include "midisender.h"
 #include "miditoautomation.h"
@@ -189,7 +193,7 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
         case NodeType::object :
 
             switch(info.objType) {
-
+#ifndef VST_PLUGIN
                 case ObjType::AudioInterfaceIn:
                     obj = new AudioDeviceIn(objId, info);
                     break;
@@ -197,7 +201,15 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
                 case ObjType::AudioInterfaceOut:
                     obj = new AudioDeviceOut(objId, info);
                     break;
+#else
+            case ObjType::AudioInterfaceIn:
+                obj = new VstAudioDeviceIn(objId, info);
+                break;
 
+            case ObjType::AudioInterfaceOut:
+                obj = new VstAudioDeviceOut(objId, info);
+                break;
+#endif
                 case ObjType::MidiInterface:
                     obj = new MidiDevice(objId, info);
                     break;

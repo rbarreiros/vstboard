@@ -62,13 +62,13 @@ bufferSize(0)
 
         qRegisterMetaTypeStreamOperators<ObjectInfo>("ObjectInfo");
 
-        QCoreApplication::setOrganizationName("CtrlBrk");
-        QCoreApplication::setApplicationName(APP_NAME);
+//        QCoreApplication::setOrganizationName("CtrlBrk");
+//        QCoreApplication::setApplicationName(APP_NAME);
 
-        static int argc=0;
-        static char *argv=0;
-        app = new QApplication(argc,&argv);
-        MainHost::Create(app);
+//        static int argc=0;
+//        static char *argv=0;
+//        app = new QApplication(argc,&argv);
+        MainHost::Create();
 
     //    MainHost::Get()->Open();
         MainWindow::Get();
@@ -94,14 +94,14 @@ bufferSize(0)
 
 TestVst::~TestVst ()
 {
-    app->closeAllWindows();
-    app->processEvents();
-    app->sendPostedEvents();
-    app->exit(0);
+//    app->closeAllWindows();
+//    app->processEvents();
+//    app->sendPostedEvents();
+//    app->exit(0);
 
 }
 
-bool TestVst::setDeviceIn(Connectables::AudioDeviceIn *dev)
+bool TestVst::setDeviceIn(Connectables::VstAudioDeviceIn *dev)
 {
     QMutexLocker l(&mutexDevices);
 
@@ -111,7 +111,7 @@ bool TestVst::setDeviceIn(Connectables::AudioDeviceIn *dev)
     return true;
 }
 
-bool TestVst::setDeviceOut(Connectables::AudioDeviceOut *dev)
+bool TestVst::setDeviceOut(Connectables::VstAudioDeviceOut *dev)
 {
     QMutexLocker l(&mutexDevices);
 

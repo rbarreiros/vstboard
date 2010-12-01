@@ -18,11 +18,11 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#include "configdialog.h"
+#include "views/configdialog.h"
 #include "ui_configdialog.h"
 //#include "../mainconfig.h"
 //#include "../models/shortcutdelegate.h"
-#include "../mainhost.h"
+#include "mainhost.h"
 
 ConfigDialog::ConfigDialog(QWidget *parent) :
     QDialog(parent),

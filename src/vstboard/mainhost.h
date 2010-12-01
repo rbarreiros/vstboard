@@ -30,9 +30,12 @@
 #include "renderer.h"
 #include "globals.h"
 #include "models/hostmodel.h"
-#include "models/hostmodelproxy.h"
-#include "audiodevices.h"
-#include "mididevices.h"
+
+#ifndef VST_PLUGIN
+	#include "audiodevices.h"
+	#include "mididevices.h"
+#endif
+
 #include "programs.h"
 //#include "projectfile/setupfile.h"
 
@@ -76,7 +79,6 @@ public:
 
     QTimer *updateViewTimer;
 
-    static HostModelProxy *modelProxy;
     static HostModel * GetModel() {return model;}
     static HostModel * GetParkingModel() {return modelParking;}
 

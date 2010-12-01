@@ -18,25 +18,41 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#ifndef HOSTMODEL_H
-#define HOSTMODEL_H
+#ifndef VSTAUDIODEVICEOUT_H
+#define VSTAUDIODEVICEOUT_H
 
-#include "../precomp.h"
+#include "../vstboard/precomp.h"
+#include "connectables/object.h"
+#include "connectables/objectinfo.h"
 
-class HostModel : public QStandardItemModel
-{
-Q_OBJECT
-public:
-    HostModel(QObject *parent=0);
+class AudioBuffer;
 
-    QMimeData * mimeData ( const QModelIndexList & indexes ) const;
+namespace Connectables {
 
-    QStringList mimeTypes () const;
-    bool dropMimeData ( const QMimeData * data, Qt::DropAction action, int row, int column, const QModelIndex & parent );
-    bool setData ( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole );
-//    bool setItemData ( const QModelIndex & index, const QMap<int, QVariant> & roles );
-protected:
-    QMap<int,QStandardItem*>mapObjects;
-};
+    class VstAudioDevice;
+    class VstAudioDeviceOut : public Object
+    {
+    Q_OBJECT
+    public:
+        VstAudioDeviceOut(int index, const ObjectInfo &info);
+        ~VstAudioDeviceOut();
 
-#endif // HOSTMODEL_H
+        bool Open();
+        bool Close();
+        void Render();
+//        int GetProcessingTime() {return 10;}
+        void SetBuffers(float **buf);
+
+
+    protected:
+//        QSharedPointer<AudioDevice>parentDevice;
+
+    public slots:
+        void SetBufferSize(long size);
+
+//    friend class AudioDevice;
+    };
+
+}
+
+#endif // VSTAUDIODEVICEOUT_H

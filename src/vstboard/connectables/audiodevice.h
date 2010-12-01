@@ -26,9 +26,11 @@
 #include "../precomp.h"
 #include "object.h"
 #include "objectinfo.h"
-#include "portaudio.h"
-#include "pa_win_wmme.h"
-#include "pa_win_ds.h"
+#ifndef VST_PLUGIN
+    #include "portaudio.h"
+    #include "pa_win_wmme.h"
+    #include "pa_win_ds.h"
+#endif
 
 #include "../circularbuffer.h"
 

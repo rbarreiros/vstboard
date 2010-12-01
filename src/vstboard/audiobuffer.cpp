@@ -40,6 +40,9 @@ AudioBuffer::~AudioBuffer(void)
 
 bool AudioBuffer::SetSize(unsigned long size)
 {
+    if(size==nSize)
+        return true;
+
     if(!bExternalAllocation) {
         if( size <= nAllocatedSize) {
             nSize = size;

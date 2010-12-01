@@ -22,7 +22,7 @@
 #define CONNECTABLEPINVIEW_H
 
 #include "pinview.h"
-#include "outlinedtext.h"
+//#include "outlinedtext.h"
 
 namespace View {
 
