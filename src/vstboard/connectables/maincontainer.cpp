@@ -22,8 +22,8 @@
 
 using namespace Connectables;
 
-MainContainer::MainContainer(int index, const ObjectInfo &info) :
-        Container(index, info),
+MainContainer::MainContainer(MainHost *myHost,int index, const ObjectInfo &info) :
+        Container(myHost,index, info),
         bridgeSend(0),
         bridgeReturn(0)
 {

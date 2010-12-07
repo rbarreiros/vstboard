@@ -18,8 +18,8 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#ifndef TESTVST_H
-#define TESTVST_H
+#ifndef VST_H
+#define VST_H
 
 #include <QObject>
 #include <QtGui/QApplication>
@@ -31,14 +31,30 @@
 
 AudioEffect* createEffectInstance (audioMasterCallback audioMaster);
 
+class MyDllApp : public QApplication
+{
+public:
+    MyDllApp(int &c, char **v) :
+            QApplication(c,v)
+    {
+    }
+
+    bool notify(QObject *rec, QEvent *ev);
+
+    ~MyDllApp()
+    {
+        debug("delete MyDllApp")
+    }
+
+};
+
 //-------------------------------------------------------------------------------------------------------
-class TestVst : public QObject, public AudioEffectX
+class Vst : public QObject, public AudioEffectX
 {
 Q_OBJECT
 public:
-        static TestVst *theVstPlugin;
-        TestVst (audioMasterCallback audioMaster);
-        ~TestVst ();
+        Vst (audioMasterCallback audioMaster);
+        ~Vst ();
 
         // Processing
         virtual void processReplacing (float** inputs, float** outputs, VstInt32 sampleFrames);
@@ -72,6 +88,9 @@ public:
         VstPlugCategory getPlugCategory() {return kPlugCategEffect;}
 
 protected:
+        MainHost *myHost;
+        MainWindow *myWindow;
+
 //        float fGain;
         char programName[kVstMaxProgNameLen + 1];
 
@@ -79,14 +98,20 @@ protected:
         Connectables::VstAudioDeviceOut *deviceOut;
         VstInt32 bufferSize;
 
-        QApplication *app;
-        MainWindow *win;
+
+
+        int argc;
+        char *argv;
+        MyDllApp *app;
+//        MainWindow *win;
 
         QMutex mutexDevices;
+
+        Gui *qEditor;
 
 signals:
         void update(float value);
 };
 
 
-#endif // TESTVST_H
+#endif // VST_H

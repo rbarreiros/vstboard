@@ -26,13 +26,15 @@
 
 using namespace Connectables;
 
-ContainerProgram::ContainerProgram(Container *container) :
-        container(container)
+ContainerProgram::ContainerProgram(MainHost *myHost,Container *container) :
+        container(container),
+        myHost(myHost)
 {
 }
 
 ContainerProgram::ContainerProgram(const ContainerProgram& c)
 {
+    myHost = c.myHost;
     container = c.container;
 
     foreach(QSharedPointer<Object> objPtr, c.listObjects) {
@@ -87,13 +89,13 @@ void ContainerProgram::Load(int progId)
 
     foreach(Cable *cab, listCables) {
 
-        if(ObjectFactory::Get()->GetObjectFromId(cab->GetInfoOut().objId) &&
-           ObjectFactory::Get()->GetObjectFromId(cab->GetInfoIn().objId)) {
+        if(myHost->objFactory->GetObjectFromId(cab->GetInfoOut().objId) &&
+           myHost->objFactory->GetObjectFromId(cab->GetInfoIn().objId)) {
 
             if(container->cablesNode.isValid())
                 cab->AddToParentNode(container->cablesNode);
 
-            MainHost::Get()->OnCableAdded(cab->GetInfoOut(),cab->GetInfoIn());
+            myHost->OnCableAdded(cab->GetInfoOut(),cab->GetInfoIn());
         } else {
             //delete cable if objects are not found
             listCables.removeAll(cab);
@@ -102,7 +104,7 @@ void ContainerProgram::Load(int progId)
 
     QMap<int,ObjectContainerAttribs>::Iterator i = mapObjAttribs.begin();
     while(i!=mapObjAttribs.end()) {
-        QSharedPointer<Object> obj = ObjectFactory::Get()->GetObjectFromId(i.key());
+        QSharedPointer<Object> obj = myHost->objFactory->GetObjectFromId(i.key());
         if(!obj.isNull()) {
             obj->SetContainerAttribs(i.value());
         } else {
@@ -116,7 +118,7 @@ void ContainerProgram::Load(int progId)
 void ContainerProgram::Unload()
 {
     foreach(Cable *cab, listCables) {
-        MainHost::Get()->OnCableRemoved(cab->GetInfoOut(),cab->GetInfoIn());
+        myHost->OnCableRemoved(cab->GetInfoOut(),cab->GetInfoIn());
         cab->RemoveFromParentNode(container->cablesNode);
     }
 
@@ -177,13 +179,13 @@ void ContainerProgram::AddCable(const ConnectionInfo &outputPin, const Connectio
     if(CableExists(outputPin,inputPin))
         return;
 
-    Cable *cab = new Cable(outputPin,inputPin);
+    Cable *cab = new Cable(myHost,outputPin,inputPin);
     listCables << cab;
 
     if(!hidden && container && container->cablesNode.isValid())
         cab->AddToParentNode(container->cablesNode);
 
-    MainHost::Get()->OnCableAdded(outputPin,inputPin);
+    myHost->OnCableAdded(outputPin,inputPin);
 }
 
 
@@ -202,7 +204,7 @@ void ContainerProgram::RemoveCable(const ConnectionInfo &outputPin, const Connec
         if(cab->GetInfoOut()==outputPin && cab->GetInfoIn()==inputPin) {
             listCables.removeAt(i);
             cab->RemoveFromParentNode(container->cablesNode);
-            MainHost::Get()->OnCableRemoved(outputPin,inputPin);
+            myHost->OnCableRemoved(outputPin,inputPin);
             delete cab;
             return;
         }
@@ -218,7 +220,7 @@ void ContainerProgram::RemoveCableFromPin(const ConnectionInfo &pin)
         if(cab->GetInfoOut()==pin || cab->GetInfoIn()==pin) {
             listCables.removeAt(i);
             cab->RemoveFromParentNode(container->cablesNode);
-            MainHost::Get()->OnCableRemoved(cab->GetInfoOut(),cab->GetInfoIn());
+            myHost->OnCableRemoved(cab->GetInfoOut(),cab->GetInfoIn());
             delete cab;
         }
         --i;
@@ -234,7 +236,7 @@ void ContainerProgram::RemoveCableFromObj(int objId)
            cab->GetInfoOut().container==objId || cab->GetInfoIn().container==objId) {
             listCables.removeAt(i);
             cab->RemoveFromParentNode(container->cablesNode);
-            MainHost::Get()->OnCableRemoved(cab->GetInfoOut(),cab->GetInfoIn());
+            myHost->OnCableRemoved(cab->GetInfoOut(),cab->GetInfoIn());
             delete cab;
         }
         --i;
@@ -286,24 +288,26 @@ QDataStream & ContainerProgram::fromStream (QDataStream& in)
     for(quint16 i=0; i<nbobj; i++) {
         quint16 id;
         in >> id;
-        id = ObjectFactory::Get()->IdFromSavedId(id);
-        listObjects << ObjectFactory::Get()->GetObjectFromId(id);
+        id = myHost->objFactory->IdFromSavedId(id);
+        listObjects << myHost->objFactory->GetObjectFromId(id);
     }
 
     quint16 nbCables;
     in >> nbCables;
     for(quint16 i=0; i<nbCables; i++) {
         ConnectionInfo infoOut;
+        infoOut.myHost = myHost;
         in >> infoOut;
 
         ConnectionInfo infoIn;
+        infoIn.myHost = myHost;
         in >> infoIn;
 
         //check if this pin exists
-        ObjectFactory::Get()->GetPin(infoOut);
-        ObjectFactory::Get()->GetPin(infoIn);
+        myHost->objFactory->GetPin(infoOut);
+        myHost->objFactory->GetPin(infoIn);
 
-        Cable *cab = new Cable(infoOut,infoIn);
+        Cable *cab = new Cable(myHost,infoOut,infoIn);
         listCables << cab;
     }
 
@@ -314,7 +318,7 @@ QDataStream & ContainerProgram::fromStream (QDataStream& in)
         ObjectContainerAttribs attr;
         in >> objId;
         in >> attr;
-        objId=ObjectFactory::Get()->IdFromSavedId(objId);
+        objId=myHost->objFactory->IdFromSavedId(objId);
         mapObjAttribs.insert(objId,attr);
     }
 

@@ -30,7 +30,7 @@ namespace Connectables {
         Q_OBJECT
 
     public:
-        Bridge(int index, const ObjectInfo & info);
+        Bridge(MainHost *myHost,int index, const ObjectInfo & info);
         bool Open();
     };
 }

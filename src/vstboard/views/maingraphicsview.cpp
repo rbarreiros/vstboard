@@ -20,16 +20,15 @@
 
 #include "maingraphicsview.h"
 #include "../globals.h"
-#include "../mainconfig.h"
 
 //using namespace View;
 
 MainGraphicsView::MainGraphicsView(QWidget * parent) :
     QGraphicsView(parent)
 {
-    MainConfig::Get()->ListenToAction("sceneZoomIn",this);
-    MainConfig::Get()->ListenToAction("sceneZoomOut",this);
-    MainConfig::Get()->ListenToAction("sceneDrag",this);
+//    MainConfig::Get()->ListenToAction("sceneZoomIn",this);
+//    MainConfig::Get()->ListenToAction("sceneZoomOut",this);
+//    MainConfig::Get()->ListenToAction("sceneDrag",this);
 }
 
 MainGraphicsView::MainGraphicsView(QGraphicsScene * scene, QWidget * parent) :
@@ -56,26 +55,26 @@ void MainGraphicsView::wheelEvent(QWheelEvent * event)
     QGraphicsView::wheelEvent(event);
 }
 
-bool MainGraphicsView::event(QEvent *event)
-{
-    if(event->type() == Event::Shortcut) {
-        ShortcutEvent *e = static_cast<ShortcutEvent*>(event);
-        if(e->value == true) {
-            switch(e->id) {
-                case 0:
-                    zoomIn();
-                    break;
-                case 1:
-                    zoomOut();
-                    break;
-                default :
-                    break;
-            }
-        }
-        return true;
-    }
-    return QGraphicsView::event(event);
-}
+//bool MainGraphicsView::event(QEvent *event)
+//{
+//    if(event->type() == Event::Shortcut) {
+//        ShortcutEvent *e = static_cast<ShortcutEvent*>(event);
+//        if(e->value == true) {
+//            switch(e->id) {
+//                case 0:
+//                    zoomIn();
+//                    break;
+//                case 1:
+//                    zoomOut();
+//                    break;
+//                default :
+//                    break;
+//            }
+//        }
+//        return true;
+//    }
+//    return QGraphicsView::event(event);
+//}
 
 void MainGraphicsView::zoomIn()
 {

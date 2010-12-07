@@ -31,7 +31,7 @@
     public:
         MainGraphicsView(QWidget * parent = 0);
         MainGraphicsView(QGraphicsScene * scene, QWidget * parent = 0);
-        bool event(QEvent *event);
+//        bool event(QEvent *event);
 
     protected:
         void wheelEvent(QWheelEvent * event);

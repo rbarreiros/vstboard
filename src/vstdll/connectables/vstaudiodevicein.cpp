@@ -19,16 +19,15 @@
 ******************************************************************************/
 
 #include "vstaudiodevicein.h"
-#include "vstaudiodevice.h"
 #include "globals.h"
 #include "audiobuffer.h"
 #include "mainhost.h"
-#include "testvst.h"
+#include "vst.h"
 
 using namespace Connectables;
 
-VstAudioDeviceIn::VstAudioDeviceIn(int index, const ObjectInfo &info) :
-    Object(index, info),
+VstAudioDeviceIn::VstAudioDeviceIn(MainHost *myHost, int index, const ObjectInfo &info) :
+    Object(myHost,index, info),
     bufferReady(false)
 {
 }
@@ -40,7 +39,7 @@ VstAudioDeviceIn::~VstAudioDeviceIn()
 
 bool VstAudioDeviceIn::Close()
 {
-    TestVst::theVstPlugin->setDeviceIn(0);
+    myHost->setVstDeviceIn(0);
     if(!Object::Close())
         return false;
     return true;
@@ -66,7 +65,7 @@ void VstAudioDeviceIn::SetBufferSize(long size)
 
 bool VstAudioDeviceIn::Open()
 {
-    if(!TestVst::theVstPlugin->setDeviceIn(this))
+    if(!myHost->setVstDeviceIn(this))
         return false;
 
     AudioPinOut *pin=0;

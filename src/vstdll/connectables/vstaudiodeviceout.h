@@ -29,12 +29,11 @@ class AudioBuffer;
 
 namespace Connectables {
 
-    class VstAudioDevice;
     class VstAudioDeviceOut : public Object
     {
     Q_OBJECT
     public:
-        VstAudioDeviceOut(int index, const ObjectInfo &info);
+        VstAudioDeviceOut(MainHost *myHost, int index, const ObjectInfo &info);
         ~VstAudioDeviceOut();
 
         bool Open();

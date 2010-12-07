@@ -28,12 +28,14 @@
 
 typedef QMultiHash<int, SolverNode*> orderedNodes;
 
+class MainHost;
+
 class PathSolver : public QObject
 {
 Q_OBJECT
 
 public:
-    explicit PathSolver(QObject *parent=0);
+    explicit PathSolver(MainHost *parent);
     ~PathSolver();
 
     void Resolve(hashCables cables);
@@ -56,7 +58,9 @@ protected:
 
     hashCables listCables;
     orderedNodes renderingOrder;
+    MainHost *myHost;
 
+    QList<SolverNode*>listNodes;
 signals:
     void NewRenderingOrder(orderedNodes *order);
 };

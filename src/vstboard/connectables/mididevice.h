@@ -35,7 +35,7 @@ namespace Connectables {
     Q_OBJECT
 
     public:
-        MidiDevice(int index, const ObjectInfo &info);
+        MidiDevice(MainHost *myHost,int index, const ObjectInfo &info);
         ~MidiDevice();
         bool Open();
         bool Close();
@@ -50,7 +50,7 @@ namespace Connectables {
         bool CloseStream();
 
     protected:
-        bool FindDeviceFromName();
+        bool FindDeviceByName();
         bool deviceOpened;
 
     signals:

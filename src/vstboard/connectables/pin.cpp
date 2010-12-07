@@ -25,7 +25,7 @@ using namespace Connectables;
 
 Pin::Pin(Object *parent,PinType::Enum type, PinDirection::Enum direction, int number, bool bridge) :
     QObject(parent),
-    connectInfo(parent->GetIndex(),type,direction,number,bridge),
+    connectInfo(parent->getHost(),parent->GetIndex(),type,direction,number,bridge),
     value(.0f),
     falloff(.05f),
     stepSize(.1f),
@@ -46,7 +46,7 @@ Pin::~Pin()
 void Pin::setObjectName(const QString &name)
 {
     if(modelIndex.isValid())
-        MainHost::GetModel()->setData(modelIndex,name,Qt::DisplayRole);
+        parent->getHost()->GetModel()->setData(modelIndex,name,Qt::DisplayRole);
 
     QObject::setObjectName(name);
 }
@@ -63,7 +63,7 @@ bool Pin::event(QEvent *event)
 
 void Pin::SendMsg(int msgType,void *data)
 {
-    MainHost::Get()->SendMsg(connectInfo,(PinMessage::Enum)msgType,data);
+    parent->getHost()->SendMsg(connectInfo,(PinMessage::Enum)msgType,data);
 }
 
 //QString Pin::GetDisplayedText()
@@ -118,7 +118,7 @@ void Pin::SetContainerId(quint16 id)
 void Pin::Close()
 {
     QMutexLocker l(&objMutex);
-    disconnect(MainHost::Get()->updateViewTimer,SIGNAL(timeout()),
+    disconnect(parent->getHost()->updateViewTimer,SIGNAL(timeout()),
             this,SLOT(updateView()));
     parentIndex=QModelIndex();
     modelIndex=QModelIndex();
@@ -149,30 +149,30 @@ void Pin::SetVisible(bool vis)
         item->setData(QVariant::fromValue(connectInfo),UserRoles::connectionInfo);
         item->setData(stepSize,UserRoles::stepSize);
 
-        QStandardItem *parentItem = MainHost::GetModel()->itemFromIndex(parentIndex);
+        QStandardItem *parentItem = parent->getHost()->GetModel()->itemFromIndex(parentIndex);
         parentItem->appendRow(item);
         modelIndex = item->index();
         if(connectInfo.type!=PinType::Bridge) {
-            connect(MainHost::Get()->updateViewTimer,SIGNAL(timeout()),
+            connect(parent->getHost()->updateViewTimer,SIGNAL(timeout()),
                     this,SLOT(updateView()),
                     Qt::UniqueConnection);
         }
     } else {
         if(modelIndex.isValid()) {
             //remove cables from pin
-            QSharedPointer<Object> cnt = ObjectFactory::Get()->GetObjectFromId(connectInfo.container);
+            QSharedPointer<Object> cnt = parent->getHost()->objFactory->GetObjectFromId(connectInfo.container);
             if(!cnt.isNull()) {
                 static_cast<Container*>(cnt.data())->RemoveCableFromPin(connectInfo);
             }
 
             //remove pin
             if(connectInfo.type!=PinType::Bridge) {
-                disconnect(MainHost::Get()->updateViewTimer,SIGNAL(timeout()),
+                disconnect(parent->getHost()->updateViewTimer,SIGNAL(timeout()),
                         this,SLOT(updateView()));
             }
 
             if(modelIndex.isValid())
-                MainHost::GetModel()->removeRow(modelIndex.row(), modelIndex.parent());
+                parent->getHost()->GetModel()->removeRow(modelIndex.row(), modelIndex.parent());
             modelIndex=QModelIndex();
         }
     }
@@ -180,7 +180,7 @@ void Pin::SetVisible(bool vis)
 
 void Pin::UpdateModelNode()
 {
-    QStandardItem *item = MainHost::GetModel()->itemFromIndex(parentIndex)->child(connectInfo.pinNumber,0);
+    QStandardItem *item = parent->getHost()->GetModel()->itemFromIndex(parentIndex)->child(connectInfo.pinNumber,0);
     item->setData(objectName(),Qt::DisplayRole);
     item->setData(falloff,UserRoles::falloff);
     item->setData(GetValue(),UserRoles::value);
@@ -190,7 +190,7 @@ void Pin::UpdateModelNode()
     //MainHost::GetModel()->itemFromIndex(parentIndex)->appendRow(item);
     modelIndex = item->index();
     if(connectInfo.type!=PinType::Bridge) {
-        connect(MainHost::Get()->updateViewTimer,SIGNAL(timeout()),
+        connect(parent->getHost()->updateViewTimer,SIGNAL(timeout()),
                 this,SLOT(updateView()),
                 Qt::UniqueConnection);
     }
@@ -210,7 +210,7 @@ void Pin::updateView()
 
     valueChanged=false;
 
-    MainHost::GetModel()->setData(modelIndex, newVu, UserRoles::value);
-    if(!displayedText.isEmpty()) MainHost::GetModel()->setData(modelIndex, displayedText, Qt::DisplayRole);
+    parent->getHost()->GetModel()->setData(modelIndex, newVu, UserRoles::value);
+    if(!displayedText.isEmpty()) parent->getHost()->GetModel()->setData(modelIndex, displayedText, Qt::DisplayRole);
 
 }

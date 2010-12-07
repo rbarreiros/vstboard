@@ -30,7 +30,7 @@ namespace Connectables {
     {
     Q_OBJECT
     public:
-        explicit MidiToAutomation(int index);
+        explicit MidiToAutomation(MainHost *myHost,int index);
         ~MidiToAutomation();
         bool Close();
         void Hide();

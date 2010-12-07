@@ -37,13 +37,12 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    static MainWindow *Create(QWidget *parent = 0);
-    inline static MainWindow *Get() {return theMainWindow;}
+    explicit MainWindow(MainHost * myHost, QWidget *parent = 0);
     ~MainWindow();
-    static MainWindow *theMainWindow;
 
 private:
-    explicit MainWindow(QWidget *parent = 0);
+    MainHost * myHost;
+
     void writeSettings();
     void readSettings();
     void resetSettings();
@@ -53,7 +52,7 @@ private:
 
     Ui::MainWindow *ui;
 
-    ListToolsModel listToolsModel;
+    ListToolsModel *listToolsModel;
     void BuildListTools();
 
     QList<QAction*>listRecentProjects;
@@ -73,6 +72,7 @@ private slots:
     void on_actionNew_triggered();
     void on_actionLoad_triggered();
     void on_actionSave_triggered();
+    void on_actionAbout_triggered();
     void openRecentSetup();
     void openRecentProject();
 };

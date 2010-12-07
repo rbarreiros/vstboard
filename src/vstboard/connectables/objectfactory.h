@@ -25,6 +25,7 @@
 #include "../globals.h"
 #include "object.h"
 #include "objectinfo.h"
+class MainHost;
 
 namespace Connectables {
 
@@ -34,8 +35,9 @@ namespace Connectables {
     {
     Q_OBJECT
     public:
-        static ObjectFactory * Create(QObject *parent=0);
-        inline static ObjectFactory * Get() {return theObjFactory;}
+//        static ObjectFactory * Create(QObject *parent=0);
+//        inline static ObjectFactory * Get() {return theObjFactory;}
+        ObjectFactory(MainHost *myHost);
         ~ObjectFactory();
 
         QSharedPointer<Object> NewObject(const ObjectInfo &info);
@@ -52,11 +54,12 @@ namespace Connectables {
         const hashObjects &GetListObjects() {return listObjects;}
 
     private:
-        ObjectFactory(QObject *parent=0);
-        static ObjectFactory *theObjFactory;
+
+//        static ObjectFactory *theObjFactory;
 
         hashObjects listObjects;
         int cptListObjects;
+        MainHost *myHost;
     };
 
 }

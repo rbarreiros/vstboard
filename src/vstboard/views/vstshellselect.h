@@ -27,12 +27,14 @@
 namespace Ui {
     class VstShellSelect;
 }
-
+namespace Connectables {
+    class ObjectFactory;
+}
 namespace View {
     class VstShellSelect : public QWidget {
         Q_OBJECT
     public:
-        VstShellSelect();
+        VstShellSelect(Connectables::ObjectFactory *objFactory);
         ~VstShellSelect();
 
         void SetListPlugins(QString file, QMap<ulong,QString> &listPlugins);
@@ -42,6 +44,7 @@ namespace View {
         void changeEvent(QEvent *e);
         QString vstDll;
         int containerId;
+        Connectables::ObjectFactory *objFactory;
     private:
         Ui::VstShellSelect *ui;
 

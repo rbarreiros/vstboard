@@ -24,7 +24,7 @@
 #include "setupfile.h"
 #include "../mainhost.h"
 
-bool SetupFile::SaveToFile(QString filePath)
+bool SetupFile::SaveToFile(MainHost *myHost, QString filePath)
 {
     QFile file(filePath);
     if(!file.open(QIODevice::WriteOnly)) {
@@ -40,29 +40,26 @@ bool SetupFile::SaveToFile(QString filePath)
     out << (quint32)SETUP_FILE_VERSION;
     out.setVersion(QDataStream::Qt_4_6);
 
-    MainHost *host = MainHost::Get();
+    myHost->EnableSolverUpdate(false);
+    myHost->hostContainer->SaveProgram();
 
-    host->EnableSolverUpdate(false);
-    host->hostContainer->SaveProgram();
-
-    for(MainHost::Get()->filePass=0; MainHost::Get()->filePass<LOADSAVE_STAGES ; MainHost::Get()->filePass++) {
-        out << *host->hostContainer;
+    for(myHost->filePass=0; myHost->filePass<LOADSAVE_STAGES ; myHost->filePass++) {
+        out << *myHost->hostContainer;
     }
 
-    host->EnableSolverUpdate(true);
+    myHost->EnableSolverUpdate(true);
 
     return true;
 }
 
-void SetupFile::Clear()
+void SetupFile::Clear(MainHost *myHost)
 {
-    MainHost *host = MainHost::Get();
-    host->EnableSolverUpdate(false);
-    host->SetupHostContainer();
-    host->EnableSolverUpdate(true);
+    myHost->EnableSolverUpdate(false);
+    myHost->SetupHostContainer();
+    myHost->EnableSolverUpdate(true);
 }
 
-bool SetupFile::LoadFromFile(QString filePath)
+bool SetupFile::LoadFromFile(MainHost *myHost, QString filePath)
 {
     QFile file(filePath);
     if(!file.open(QIODevice::ReadOnly)) {
@@ -96,15 +93,14 @@ bool SetupFile::LoadFromFile(QString filePath)
 
     in.setVersion(QDataStream::Qt_4_6);
 
-    MainHost *host = MainHost::Get();
-    host->EnableSolverUpdate(false);
-    host->SetupHostContainer();
+    myHost->EnableSolverUpdate(false);
+    myHost->SetupHostContainer();
 
-    for(MainHost::Get()->filePass=0; MainHost::Get()->filePass<LOADSAVE_STAGES ; MainHost::Get()->filePass++) {
-        in >> *host->hostContainer;
+    for(myHost->filePass=0; myHost->filePass<LOADSAVE_STAGES ; myHost->filePass++) {
+        in >> *myHost->hostContainer;
     }
 
-    Connectables::ObjectFactory::Get()->ResetSavedId();
-    host->EnableSolverUpdate(true);
+    myHost->objFactory->ResetSavedId();
+    myHost->EnableSolverUpdate(true);
     return true;
 }

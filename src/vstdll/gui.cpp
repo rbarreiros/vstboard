@@ -21,18 +21,40 @@
 #include "gui.h"
 #include <QtGui/QHBoxLayout>
 
+Gui::Gui(AudioEffectX* effect) : widget(0), effect(effect)
+{
+
+}
+
+Gui::~Gui()
+{
+    debug("delete Gui")
+//            QCoreApplication::processEvents();
+//            QCoreApplication::sendPostedEvents();
+//            qApp->removePostedEvents(MainWindow::Get());
+//            if(MainWindow::Create()) {
+//                MainWindow::Get()->deleteLater();
+//                delete MainWindow::Get();
+//                MainWindow::Get()->setParent(0);
+//                delete MainWindow::Get();
+//            }
+    //if(widget)
+      //  delete widget;
+   // if(win)
+   //     delete win;
+
+
+}
+
 bool Gui::open(void* ptr)
 {
-    AEffEditor::open (ptr);
+    AEffEditor::open(ptr);
     widget = new QWinWidget(static_cast<HWND>(ptr));
-//    widget->setAttribute(Qt::WA_DeleteOnClose);
+    widget->setAttribute(Qt::WA_DeleteOnClose);
     widget->setAttribute(Qt::WA_LayoutUsesWidgetRect);
     QHBoxLayout layout(widget);
     layout.setContentsMargins(0,0,0,0);
-    win = MainWindow::Create();
-    layout.addWidget(win);
-
-//    win->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+    layout.addWidget(myWindow);
 
     widget->move( 0, 0 );
     widget->adjustSize();
@@ -40,12 +62,11 @@ bool Gui::open(void* ptr)
     rectangle.left = 0;
     rectangle.bottom = widget->height();
     rectangle.right = widget->width();
-    //  win->setMinimumSize(win->size());
+//    //  win->setMinimumSize(win->size());
 
     widget->show();
-//    win->show();
-    clientResize(static_cast<HWND>(ptr), widget->width(), widget->height());
 
+    clientResize(static_cast<HWND>(ptr), widget->width(), widget->height());
     return true;
 }
 

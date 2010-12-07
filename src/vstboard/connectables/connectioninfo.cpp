@@ -21,19 +21,21 @@
 #include "connectioninfo.h"
 #include "object.h"
 #include "objectfactory.h"
+#include "mainhost.h"
 
 ConnectionInfo::ConnectionInfo()
-    : container(0), objId(0), type(PinType::Audio), direction(PinDirection::Output), pinNumber(0), bridge(false)
+    : container(0), objId(0), type(PinType::Audio), direction(PinDirection::Output), pinNumber(0), bridge(false), myHost(0)
 {
 }
 
-ConnectionInfo::ConnectionInfo(quint16 objId, PinType::Enum type, PinDirection::Enum direction, quint16 pinNumber, bool bridge) :
+ConnectionInfo::ConnectionInfo(MainHost *myHost,quint16 objId, PinType::Enum type, PinDirection::Enum direction, quint16 pinNumber, bool bridge) :
     container(-1),
     objId(objId),
     type(type),
     direction(direction),
     pinNumber(pinNumber),
-    bridge(bridge)
+    bridge(bridge),
+    myHost(myHost)
 {
 }
 
@@ -61,10 +63,10 @@ bool ConnectionInfo::CanConnectTo(const ConnectionInfo &c) {
 
     //if it's a bridge : get the container's container id
     if(bridge)
-        cntA = Connectables::ObjectFactory::Get()->GetObjectFromId( container )->GetContainerId();
+        cntA = myHost->objFactory->GetObjectFromId( container )->GetContainerId();
 
     if(c.bridge)
-        cntB = Connectables::ObjectFactory::Get()->GetObjectFromId( c.container )->GetContainerId();
+        cntB = myHost->objFactory->GetObjectFromId( c.container )->GetContainerId();
 
     //must be in the same container
     if(cntA == cntB)
@@ -95,7 +97,7 @@ QDataStream & ConnectionInfo::fromStream(QDataStream& in)
     in >> bridge;
     quint16 savedContainerId;
     in >> savedContainerId;
-    int id = Connectables::ObjectFactory::Get()->IdFromSavedId(savedContainerId);
+    int id = myHost->objFactory->IdFromSavedId(savedContainerId);
     if(id==-1) {
         debug("ConnectionInfo::fromStream : container not found")
         return in;
@@ -104,7 +106,7 @@ QDataStream & ConnectionInfo::fromStream(QDataStream& in)
 
     quint16 savedId;
     in >> savedId;
-    id = Connectables::ObjectFactory::Get()->IdFromSavedId(savedId);
+    id = myHost->objFactory->IdFromSavedId(savedId);
     if(id==-1) {
         debug("ConnectionInfo::fromStream : obj not found")
         return in;

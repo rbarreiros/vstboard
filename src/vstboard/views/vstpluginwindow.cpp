@@ -99,10 +99,10 @@ bool VstPluginWindow::SetPlugin(Connectables::VstPlugin *plugin)
 void VstPluginWindow::SavePosSize()
 {
     if(plugin->modelIndex.isValid()) {
-        MainHost::GetModel()->setData(plugin->modelIndex, size(), UserRoles::editorSize);
-        MainHost::GetModel()->setData(plugin->modelIndex, pos(), UserRoles::editorPos);
-        MainHost::GetModel()->setData(plugin->modelIndex, ui->scrollArea->verticalScrollBar()->value(), UserRoles::editorVScroll);
-        MainHost::GetModel()->setData(plugin->modelIndex, ui->scrollArea->horizontalScrollBar()->value(), UserRoles::editorHScroll);
+        plugin->myHost->GetModel()->setData(plugin->modelIndex, size(), UserRoles::editorSize);
+        plugin->myHost->GetModel()->setData(plugin->modelIndex, pos(), UserRoles::editorPos);
+        plugin->myHost->GetModel()->setData(plugin->modelIndex, ui->scrollArea->verticalScrollBar()->value(), UserRoles::editorVScroll);
+        plugin->myHost->GetModel()->setData(plugin->modelIndex, ui->scrollArea->horizontalScrollBar()->value(), UserRoles::editorHScroll);
     }
 }
 

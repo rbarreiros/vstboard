@@ -18,13 +18,15 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
+#include "mainhost.h"
 #include "pathsolver.h"
 #include "globals.h"
 #include "projectfile/projectfile.h"
 #include "connectables/objectfactory.h"
 
-PathSolver::PathSolver(QObject *parent) :
-    QObject(parent)
+PathSolver::PathSolver(MainHost *parent) :
+    QObject(parent),
+    myHost(parent)
 {
 }
 
@@ -38,10 +40,10 @@ void PathSolver::Clear()
     model.clear();
 
     renderingOrder.clear();
-    foreach(SolverNode* line, SolverNode::listNodes) {
+    foreach(SolverNode* line, listNodes) {
         delete line;
     }
-    SolverNode::listNodes.clear();
+    listNodes.clear();
 
 }
 
@@ -58,13 +60,14 @@ void PathSolver::Resolve(hashCables cables)
     listCables = cables;
 
     //encapsulate objects in solvernodes
-    const Connectables::hashObjects listObjects = Connectables::ObjectFactory::Get()->GetListObjects();
+    const Connectables::hashObjects listObjects = myHost->objFactory->GetListObjects();
     Connectables::hashObjects::const_iterator i = listObjects.constBegin();
     while(i!=listObjects.constEnd()) {
         QSharedPointer<Connectables::Object> objPtr = i.value();
         if(!objPtr.isNull()) {
             if(objPtr->info().nodeType!=NodeType::bridge) {
                 SolverNode *node = new SolverNode();
+                listNodes << node;
                 node->objectPtr = objPtr;
                 objPtr->SetSolverNode(node);
             }
@@ -73,7 +76,7 @@ void PathSolver::Resolve(hashCables cables)
     }
 
     //list childs and parents of all nodes
-    foreach(SolverNode *node,SolverNode::listNodes) {
+    foreach(SolverNode *node,listNodes) {
         foreach(QSharedPointer<Connectables::Object> parent,GetListParents(node->objectPtr)) {
             if(!parent.isNull())
                 node->listParents << parent->GetSolverNode();
@@ -91,8 +94,11 @@ void PathSolver::Resolve(hashCables cables)
     }
 
     //unwrap loops
-    foreach(SolverNode *node,SolverNode::listNodes) {
-        SolverNode::ResetLoopFlags();
+    foreach(SolverNode *node,listNodes) {
+        foreach(SolverNode *n,listNodes) {
+            n->ResetLoopFlags();
+        }
+
 
         //find loop
         QList<SolverNode*>loop;
@@ -139,20 +145,20 @@ void PathSolver::Resolve(hashCables cables)
 
     //start from each root and set the rendering order of each child nodes
     int maxStep=0;
-    foreach(SolverNode *node, SolverNode::listNodes) {
+    foreach(SolverNode *node, listNodes) {
         if(!node->IsRoot())
             continue;
         maxStep = std::max(maxStep, node->SetMinRenderOrder(0));
     }
 
-    foreach(SolverNode *node, SolverNode::listNodes) {
+    foreach(SolverNode *node, listNodes) {
         if(!node->IsTail())
             continue;
         node->SetMaxRenderOrder(maxStep);
     }
 
     //put the nodes in an ordered map
-    foreach(SolverNode* node, SolverNode::listNodes) {
+    foreach(SolverNode* node, listNodes) {
         QSharedPointer<Connectables::Object>objPtr = node->objectPtr;
         if(!objPtr.isNull() && objPtr->info().nodeType!=NodeType::container)
             renderingOrder.insert(node->maxRenderOrder,node);
@@ -199,7 +205,9 @@ QList<SolverNode*> PathSolver::ListOfGoodStarts(const QList<SolverNode*>&loop)
     int minStep=99999;
 
     foreach(SolverNode *node, loop) {
-        SolverNode::ResetLoopFlags();
+        foreach(SolverNode *n,listNodes) {
+            n->ResetLoopFlags();
+        }
         int steps=0;
 
         if(node->DistanceFromRoot(steps)) {
@@ -234,7 +242,9 @@ QList<SolverNode*> PathSolver::BestStartsInAList(const QList<SolverNode*>&loop, 
             triedEnd = loop.at( loop.indexOf(triedStart)-1 );
         }
 
-        SolverNode::ResetLoopFlags();
+        foreach(SolverNode *n,listNodes) {
+            n->ResetLoopFlags();
+        }
         int steps=0;
 
         if(triedEnd->DistanceFromTail(steps)) {
@@ -259,6 +269,7 @@ QList<SolverNode*> PathSolver::CopyNodesChain(const QList<SolverNode*>&chain)
     SolverNode *parentNode=0;
     foreach(SolverNode *node, chain) {
         SolverNode *copiedNode = new SolverNode();
+        listNodes << copiedNode;
         copiedNode->objectPtr = node->objectPtr;
 
         if(parentNode)
@@ -298,7 +309,7 @@ QList< QSharedPointer<Connectables::Object> >PathSolver::GetListParents( QShared
 
     hashCables::iterator i = listCables.begin();
     while (i != listCables.end()) {
-        QSharedPointer<Connectables::Object> parentPtr = Connectables::ObjectFactory::Get()->GetObjectFromId(i.key().objId);
+        QSharedPointer<Connectables::Object> parentPtr = myHost->objFactory->GetObjectFromId(i.key().objId);
         if(!parentPtr.isNull()) {
             if(i.value().objId == objPtr->GetIndex()) {
                 if(parentPtr->info().nodeType == NodeType::bridge) {
@@ -319,7 +330,7 @@ void PathSolver::GetListParentsOfBridgePin(const ConnectionInfo &info, QList< QS
 {
     hashCables::iterator i = listCables.begin();
     while (i != listCables.end()) {
-        QSharedPointer<Connectables::Object> parentPtr = Connectables::ObjectFactory::Get()->GetObjectFromId(i.key().objId);
+        QSharedPointer<Connectables::Object> parentPtr = myHost->objFactory->GetObjectFromId(i.key().objId);
         if(!parentPtr.isNull()) {
             if(i.value().objId == info.objId && i.value().pinNumber == info.pinNumber && i.value().type == info.type) {
                 if(parentPtr->info().nodeType == NodeType::bridge) {
@@ -341,7 +352,7 @@ QList< QSharedPointer<Connectables::Object> >PathSolver::GetListChildren( QShare
 
     hashCables::iterator i = listCables.begin();
     while (i != listCables.end()) {
-        QSharedPointer<Connectables::Object> childPtr = Connectables::ObjectFactory::Get()->GetObjectFromId(i.value().objId);
+        QSharedPointer<Connectables::Object> childPtr = myHost->objFactory->GetObjectFromId(i.value().objId);
         if(!childPtr.isNull()) {
             if(i.key().objId == objPtr->GetIndex()) {
                 if(childPtr->info().nodeType == NodeType::bridge) {
@@ -362,7 +373,7 @@ void PathSolver::GetListChildrenOfBridgePin(const ConnectionInfo &info, QList< Q
 {
     hashCables::iterator i = listCables.begin();
     while (i != listCables.end()) {
-        QSharedPointer<Connectables::Object> childPtr = Connectables::ObjectFactory::Get()->GetObjectFromId(i.value().objId);
+        QSharedPointer<Connectables::Object> childPtr = myHost->objFactory->GetObjectFromId(i.value().objId);
         if(!childPtr.isNull()) {
             if(i.key().objId == info.objId && i.key().pinNumber == info.pinNumber && i.key().type == info.type) {
                 if(childPtr->info().nodeType == NodeType::bridge) {

@@ -18,18 +18,18 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#include "testvst.h"
+#include "vst.h"
 
 
 extern AudioEffect* createEffectInstance (audioMasterCallback audioMaster);
 
 extern "C" {
 
-#if defined (__GNUC__) && ((__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 1)))
-#define VST_EXPORT	__attribute__ ((visibility ("default")))
-#else
+//#if defined (__GNUC__) && ((__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 1)))
+//#define VST_EXPORT	__attribute__ ((visibility ("default")))
+//#else
 #define VST_EXPORT _declspec(dllexport)
-#endif
+//#endif
 
     //------------------------------------------------------------------------
     /** Prototype of the export function main */

@@ -33,7 +33,7 @@ namespace Connectables {
     {
     Q_OBJECT
     public:
-        Container(int index, const ObjectInfo &info);
+        Container(MainHost *myHost,int index, const ObjectInfo &info);
         virtual ~Container();
 
         virtual bool Close();

@@ -24,8 +24,8 @@
 
 using namespace Connectables;
 
-Container::Container(int index, const ObjectInfo &info) :
-        Object(index, info ),
+Container::Container(MainHost *myHost,int index, const ObjectInfo &info) :
+    Object(myHost,index, info ),
     bridgeIn(0),
     bridgeOut(0),
     currentProgram(0),
@@ -61,9 +61,9 @@ void Container::SetParentModeIndex(const QModelIndex &parentIndex)
 
     QStandardItem *cab = new QStandardItem("cables");
     if(modelIndex.isValid()) {
-        MainHost::GetModel()->itemFromIndex(modelIndex)->appendRow(cab);
+        myHost->GetModel()->itemFromIndex(modelIndex)->appendRow(cab);
     } else {
-        MainHost::GetModel()->appendRow(cab);
+        myHost->GetModel()->appendRow(cab);
     }
     cablesNode = cab->index();
 }
@@ -171,7 +171,7 @@ void Container::LoadProgram(int prog)
     currentProgId=prog;
 
     if(!listContainerPrograms.contains(currentProgId))
-        listContainerPrograms.insert(currentProgId,new ContainerProgram(this));
+        listContainerPrograms.insert(currentProgId,new ContainerProgram(myHost,this));
 
     ContainerProgram *tmp = listContainerPrograms.value(currentProgId);
     currentProgram = new ContainerProgram(*tmp);
@@ -286,7 +286,7 @@ void Container::AddChildObject(QSharedPointer<Object> objPtr)
 {
     objPtr->SetParentModeIndex(modelIndex);
     objPtr->SetContainerId(index);
-    MainHost::Get()->OnObjectAdded(objPtr);
+    myHost->OnObjectAdded(objPtr);
 }
 
 void Container::RemoveChildObject(QSharedPointer<Object> objPtr)
@@ -296,7 +296,7 @@ void Container::RemoveChildObject(QSharedPointer<Object> objPtr)
 
     objPtr->Hide();
     objPtr->SetContainerId(-1);
-    MainHost::Get()->OnObjectRemoved(objPtr, this);
+    myHost->OnObjectRemoved(objPtr, this);
 }
 
 void Container::AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin, bool hidden)
@@ -332,7 +332,7 @@ QDataStream & Container::toStream (QDataStream& out) const
     const quint16 file_version = 1;
     out << file_version;
 
-    switch(MainHost::Get()->filePass) {
+    switch(myHost->filePass) {
 
         //save the objects used in the current program
         case 0:
@@ -389,7 +389,7 @@ QDataStream & Container::fromStream (QDataStream& in)
     quint16 file_version;
     in >> file_version;
 
-    switch(MainHost::Get()->filePass) {
+    switch(myHost->filePass) {
 
         //load the object used by the current program
         case 0:
@@ -417,7 +417,7 @@ QDataStream & Container::fromStream (QDataStream& in)
                     in >> streamSize;
                     in >> tmpStream;
 
-                    QSharedPointer<Object> objPtr = ObjectFactory::Get()->NewObject(info);
+                    QSharedPointer<Object> objPtr = myHost->objFactory->NewObject(info);
                     if(!objPtr.isNull()) {
                         AddObject(objPtr);
                         tmp >> *objPtr.data();
@@ -427,7 +427,7 @@ QDataStream & Container::fromStream (QDataStream& in)
                     } else {
                         //error while creating the object, build a dummy object with the same saved id
                         info.objType=ObjType::dummy;
-                        objPtr = ObjectFactory::Get()->NewObject(info);
+                        objPtr = myHost->objFactory->NewObject(info);
                         QDataStream tmp2( &tmpStream , QIODevice::ReadWrite);
                         if(!objPtr.isNull()) {
                             AddObject(objPtr);
@@ -457,7 +457,7 @@ QDataStream & Container::fromStream (QDataStream& in)
                 if(listContainerPrograms.contains(progId)) {
                     prog = listContainerPrograms.value(progId);
                 } else {
-                    prog = new ContainerProgram(this);
+                    prog = new ContainerProgram(myHost,this);
                     listContainerPrograms.insert(progId,prog);
                 }
 

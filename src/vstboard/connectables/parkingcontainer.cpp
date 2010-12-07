@@ -24,8 +24,8 @@
 
 using namespace Connectables;
 
-ParkingContainer::ParkingContainer(int index, const ObjectInfo &info) :
-    Container(index, info)
+ParkingContainer::ParkingContainer(MainHost *myHost,int index, const ObjectInfo &info) :
+    Container(myHost,index, info)
 {
 }
 
@@ -36,7 +36,7 @@ ParkingContainer::~ParkingContainer()
     listStaticObjects.clear();
 
     if(modelIndex.isValid())
-        MainHost::GetModel()->removeRow(modelIndex.row());
+        myHost->GetParkingModel()->removeRow(modelIndex.row());
 }
 
 void ParkingContainer::AddObject(QSharedPointer<Object> objPtr)
@@ -68,7 +68,7 @@ void ParkingContainer::SetParentModeIndex(const QModelIndex &parentIndex)
     modelNode->setData(QVariant::fromValue(objInfo), UserRoles::objInfo);
     modelNode->setData(index, UserRoles::value);
     modelNode->setData(objInfo.name, Qt::DisplayRole);
-    MainHost::GetParkingModel()->appendRow(modelNode);
+    myHost->GetParkingModel()->appendRow(modelNode);
     modelIndex=modelNode->index();
 
     foreach(QSharedPointer<Object>objPtr, listStaticObjects) {
@@ -79,7 +79,7 @@ void ParkingContainer::SetParentModeIndex(const QModelIndex &parentIndex)
 
 QDataStream & ParkingContainer::toStream (QDataStream &out)
 {
-    switch(MainHost::Get()->filePass) {
+    switch(myHost->filePass) {
 
         //save all the parked objects
         case 0:
@@ -119,7 +119,7 @@ QDataStream & ParkingContainer::toStream (QDataStream &out)
 
 QDataStream & ParkingContainer::fromStream (QDataStream &in)
 {
-    switch(MainHost::Get()->filePass) {
+    switch(myHost->filePass) {
 
         //load all the parked objects
         case 0:
@@ -138,7 +138,7 @@ QDataStream & ParkingContainer::fromStream (QDataStream &in)
 
                 if(info.objType != ObjType::dummy) {
 
-                    QSharedPointer<Object> objPtr = ObjectFactory::Get()->NewObject(info);
+                    QSharedPointer<Object> objPtr = myHost->objFactory->NewObject(info);
                     if(!objPtr.isNull()) {
                         AddObject(objPtr);
                         tmp >> *objPtr.data();
@@ -149,7 +149,7 @@ QDataStream & ParkingContainer::fromStream (QDataStream &in)
                     } else {
                         //error while creating the object, build a dummy object with the same saved id
                         info.objType=ObjType::dummy;
-                        objPtr = ObjectFactory::Get()->NewObject(info);
+                        objPtr = myHost->objFactory->NewObject(info);
                         QDataStream tmp2( &tmpStream , QIODevice::ReadWrite);
                         if(!objPtr.isNull()) {
                             AddObject(objPtr);

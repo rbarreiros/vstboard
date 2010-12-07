@@ -34,7 +34,7 @@ namespace Connectables {
     {
     Q_OBJECT
     public:
-        AudioDeviceOut(int index, const ObjectInfo &info);
+        AudioDeviceOut(MainHost *myHost,int index, const ObjectInfo &info);
         ~AudioDeviceOut();
 
         bool Open();

@@ -22,12 +22,12 @@
 #define CONNECTIONINFO_H
 
 #include "../globals.h"
-
+class MainHost;
 class ConnectionInfo
 {
 public:
     ConnectionInfo();
-    ConnectionInfo(quint16 objId, PinType::Enum type, PinDirection::Enum direction, quint16 pinNumber, bool bridge);
+    ConnectionInfo(MainHost *myHost,quint16 objId, PinType::Enum type, PinDirection::Enum direction, quint16 pinNumber, bool bridge);
     ConnectionInfo(const ConnectionInfo &c);
 
     bool CanConnectTo(const ConnectionInfo &c);
@@ -41,7 +41,7 @@ public:
     quint8 direction;
     quint16 pinNumber;
     bool bridge;
-
+    MainHost *myHost;
     int GetId() const
     {
         return objId*10000 + pinNumber*100 + type*10 + (int)direction;

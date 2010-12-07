@@ -23,12 +23,13 @@
 
 #include "connectioninfo.h"
 
+class MainHost;
 namespace Connectables {
 
     class Cable
     {
     public:
-        Cable(const ConnectionInfo &pinOut, const ConnectionInfo &pinIn);
+        Cable(MainHost *myHost,const ConnectionInfo &pinOut, const ConnectionInfo &pinIn);
         Cable(const Cable & c);
         void AddToParentNode(const QModelIndex &parentIndex);
         void RemoveFromParentNode(const QModelIndex &parentIndex);
@@ -39,6 +40,7 @@ namespace Connectables {
         const ConnectionInfo pinOut;
         const ConnectionInfo pinIn;
         QPersistentModelIndex modelIndex;
+        MainHost *myHost;
     };
 }
 

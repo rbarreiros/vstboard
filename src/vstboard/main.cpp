@@ -24,8 +24,6 @@
 #include <QTranslator>
 
 #include "mainwindow.h"
-#include "mainconfig.h"
-#include "shortcutkeys.h"
 #include "pathsolver.h"
 #include "connectables/objectinfo.h"
 
@@ -87,7 +85,6 @@ int main(int argc, char *argv[])
 {
     qRegisterMetaType<ConnectionInfo>("ConnectionInfo");
     qRegisterMetaType<ObjectInfo>("ObjectInfo");
-    qRegisterMetaType<ShortcutKeys>("ShortcutKeys");
     qRegisterMetaType<int>("ObjType::Enum");
     qRegisterMetaType<orderedNodes>("orderedNodes");
     qRegisterMetaType<QVariant>("QVariant");
@@ -111,10 +108,12 @@ int main(int argc, char *argv[])
     myappTranslator.load("vstboard_" + QLocale::system().name());
     app.installTranslator(&myappTranslator);
 
-    MainConfig::Get(&app);
-    MainWindow *w = MainWindow::Get();
+
+    MainHost *host = new MainHost();
+    MainWindow *w = new MainWindow(host);
     w->setAttribute(Qt::WA_DeleteOnClose);
     w->show();
     app.exec();
+    delete host;
     return 0;
 }

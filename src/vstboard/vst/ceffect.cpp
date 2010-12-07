@@ -20,7 +20,7 @@
 
 #include "ceffect.h"
 #include "cvsthost.h"
-
+#include "../mainhost.h"
 
 using namespace vst;
 
@@ -57,7 +57,7 @@ CEffect::~CEffect()
 /* Load : loads the effect module                                            */
 /*****************************************************************************/
 
-bool CEffect::Load(const QString &name)
+bool CEffect::Load(MainHost *myHost, const QString &name)
 {
     pluginLib = new QLibrary(name);
 
@@ -67,15 +67,22 @@ bool CEffect::Load(const QString &name)
     vstPluginFuncPtr entryPoint = (vstPluginFuncPtr)pluginLib->resolve("VSTPluginMain");
     if(!entryPoint)
         entryPoint = (vstPluginFuncPtr)pluginLib->resolve("main");
-    if(!entryPoint)
+    if(!entryPoint) {
+        QMessageBox msgBox;
+        msgBox.setText(QObject::tr("error loading %1, no entry point").arg(name));
+        msgBox.exec();
         return false;
+    }
 
     try
     {
-        pEffect = entryPoint(CVSTHost::AudioMasterCallback);
+        pEffect = entryPoint(&CVSTHost::AudioMasterCallback);// myHost->vstHost->AudioMasterCallback);
     }
     catch(...)
     {
+        QMessageBox msgBox;
+        msgBox.setText(QObject::tr("error loading %1, failed on entry point").arg(name));
+        msgBox.exec();
         pEffect = NULL;
     }
 
@@ -84,6 +91,9 @@ bool CEffect::Load(const QString &name)
 
     if (pEffect->magic != kEffectMagic) {
         pEffect = NULL;
+        QMessageBox msgBox;
+        msgBox.setText(QObject::tr("error loading %1, not a Vst plugin").arg(name));
+        msgBox.exec();
         return false;
     }
     sName = name;

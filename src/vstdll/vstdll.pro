@@ -8,7 +8,17 @@ top_srcdir  = ..
 srcdir      = vstdll
 #include($$top_srcdir/config.pri)
 
+TARGET = VstBoardPlugin
+TEMPLATE = app
+#CONFIG += dll
+#DEFINES -= QT_DLL
 DEFINES += VST_PLUGIN
+#       CONFIG += output=vstdll.dll
+
+# !! modify Makefile.Release :
+# remove -DQT_DLL
+QMAKE_LFLAGS += /DLL
+
 
 PORTMIDI_PATH 	= ../libs/portmidi
 INCLUDEPATH += $$top_srcdir/$$PORTMIDI_PATH/pm_common
@@ -33,6 +43,10 @@ top_builddir =$$top_srcdir/../build/$$build_postfix
 top_destdir  =$$top_srcdir/../bin/$$build_postfix
 builddir     =$$top_builddir/$$srcdir
 
+#DESTDIR_WIN = $${top_destdir}
+#DESTDIR_WIN ~= s,/,\\,g
+#QMAKE_POST_LINK += ren  \"$${DESTDIR_WIN}$${TARGET}.exe\" \"$${DESTDIR_WIN}$${TARGET}.dll\"
+
 OBJECTS_DIR =$$builddir
 DESTDIR     =$$top_destdir
 TARGET      =$$TARGET
@@ -42,13 +56,15 @@ win32-g++ {
     DEFINES += _WIN32_WINNT=0x0501
     LIBS += -L$$quote($$MINGW_PATH/lib)
     INCLUDEPATH += $$quote($$MINGW_PATH/include)
+    QMAKE_LFLAGS += -static-libgcc
 }
 
-win32-msvc2008 {
+win32-msvc* {
     DEFINES += _CRT_SECURE_NO_WARNINGS
     INCLUDEPATH += $$quote($$(INCLUDE))
     LIBS += -L$$quote($$(LIB))
     QMAKE_CFLAGS += -Fd$$top_destdir/$$TARGET
+
 
 #to add symbols :
 #    QMAKE_CFLAGS_RELEASE +=  -Zi
@@ -57,12 +73,10 @@ win32-msvc2008 {
 
 QT       += core gui
 
-TARGET = vstdll
-TEMPLATE = lib
+
+LIBS += -lqtmain
 
 include($$top_srcdir/$$QTWINMIGRATE_PATH/src/qtwinmigrate.pri)
-#INCLUDEPATH += $$quote($$top_srcdir/$$QTWINMIGRATE_PATH/src)
-#LIBS += -L$$top_destdir -lQtSolutions_MFCMigrationFramework-head
 
 vstsdk {
     DEFINES += VSTSDK
@@ -76,7 +90,6 @@ INCLUDEPATH += ../vstboard
 SOURCES += \
 main.cpp \
 mainwindow.cpp \
-testvst.cpp \
 gui.cpp \
 views/maingraphicsview.cpp \
 connectables/vstaudiodevicein.cpp \
@@ -86,8 +99,7 @@ connectables/midisender.cpp \
 connectables/miditoautomation.cpp \
 connectables/hostcontroller.cpp \
 views/configdialog.cpp \
-views/connectablepinview.cpp \
-connectables/vstaudiodevice.cpp \
+../vstboard/views/connectablepinview.cpp \
 ../../libs/vstsdk2.4/public.sdk/source/vst2.x/audioeffectx.cpp \
 ../../libs/vstsdk2.4/public.sdk/source/vst2.x/audioeffect.cpp \
 ../vstboard/mainhost.cpp \
@@ -144,17 +156,17 @@ connectables/vstaudiodevice.cpp \
 ../vstboard/connectables/parameterpinout.cpp \
 ../vstboard/models/programsmodel.cpp \
 ../vstboard/connectables/bridge.cpp \
+../vstboard/views/aboutdialog.cpp \
+    vst.cpp
 
 
 HEADERS  += \
 mainwindow.h \
-testvst.h \
 gui.h \
 views/maingraphicsview.h \
 connectables/vstaudiodevicein.h \
 connectables/vstaudiodeviceout.h \
 connectables/mididevice.h \
-connectables/vstaudiodevice.h \
 connectables/midipinin.h \
 ../vstboard/globals.h \
 ../vstboard/mainhost.h \
@@ -216,6 +228,8 @@ connectables/midipinin.h \
 ../vstboard/connectables/parameterpinout.h \
 ../vstboard/models/programsmodel.h \
 ../vstboard/connectables/bridge.h \
+../vstboard/views/aboutdialog.h \
+    vst.h
 
 FORMS += \
 ../vstboard/views/configdialog.ui \
@@ -223,7 +237,8 @@ FORMS += \
 ../vstboard/views/filebrowser.ui \
 ../vstboard/views/programlist.ui \
 ../vstboard/views/vstpluginwindow.ui \
-../vstboard/views/vstshellselect.ui
+../vstboard/views/vstshellselect.ui \
+../vstboard/views/aboutdialog.ui
 
 PRECOMPILED_HEADER = ../vstboard/precomp.h
 OTHER_FILES +=

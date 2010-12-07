@@ -38,6 +38,7 @@
 #define bzero(memArea, len)  memset((memArea), 0, (len))
 #endif
 
+class MainHost;
 namespace Connectables {
 
     class AudioDeviceIn;
@@ -46,7 +47,7 @@ namespace Connectables {
     {
         Q_OBJECT
     public:
-        AudioDevice(const ObjectInfo &info, QObject *parent=0);
+        AudioDevice(MainHost *myHost,const ObjectInfo &info, QObject *parent=0);
         ~AudioDevice();
 
         bool Open();
@@ -112,6 +113,7 @@ namespace Connectables {
         QList<CircularBuffer*>listCircularBuffersOut;
 
         float cpuUsage;
+        MainHost *myHost;
 
     signals:
         void InUseChanged(const ObjectInfo &objInfo, bool inUse);

@@ -25,6 +25,7 @@
 #include "cable.h"
 #include "objectinfo.h"
 
+class MainHost;
 namespace Connectables {
 
     class Object;
@@ -33,7 +34,7 @@ namespace Connectables {
     class ContainerProgram
     {
     public:
-        ContainerProgram(Container *container);
+        ContainerProgram(MainHost *myHost, Container *container);
         ContainerProgram(const ContainerProgram & c);
         ~ContainerProgram();
         void Load(int progId);
@@ -62,6 +63,8 @@ namespace Connectables {
         QList<Cable*>listCables;
 
         QMap<int,ObjectContainerAttribs>mapObjAttribs;
+
+        MainHost *myHost;
 
         friend class Container;
         friend class ParkingContainer;

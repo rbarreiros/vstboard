@@ -23,10 +23,11 @@
 
 using namespace Connectables;
 
-Cable::Cable(const ConnectionInfo &pinOut, const ConnectionInfo &pinIn) :
+Cable::Cable(MainHost *myHost, const ConnectionInfo &pinOut, const ConnectionInfo &pinIn) :
         pinOut(pinOut),
         pinIn(pinIn),
-        modelIndex(QModelIndex())
+        modelIndex(QModelIndex()),
+        myHost(myHost)
 {
 
 }
@@ -34,7 +35,8 @@ Cable::Cable(const ConnectionInfo &pinOut, const ConnectionInfo &pinIn) :
 Cable::Cable(const Cable & c) :
         pinOut(c.pinOut),
         pinIn(c.pinIn),
-        modelIndex(c.modelIndex)
+        modelIndex(c.modelIndex),
+        myHost(c.myHost)
 {
 
 }
@@ -46,14 +48,14 @@ void Cable::AddToParentNode(const QModelIndex &parentIndex)
     item->setData(QVariant::fromValue(pinOut),UserRoles::value);
     item->setData(QVariant::fromValue(pinIn),UserRoles::connectionInfo);
 
-    MainHost::GetModel()->itemFromIndex(parentIndex)->appendRow(item);
+    myHost->GetModel()->itemFromIndex(parentIndex)->appendRow(item);
     modelIndex = item->index();
 }
 
 void Cable::RemoveFromParentNode(const QModelIndex &parentIndex)
 {
     if(modelIndex.isValid() && parentIndex.isValid())
-        MainHost::GetModel()->removeRow(modelIndex.row(), parentIndex);
+        myHost->GetModel()->removeRow(modelIndex.row(), parentIndex);
 
     modelIndex=QModelIndex();
 }

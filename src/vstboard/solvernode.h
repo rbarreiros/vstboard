@@ -55,9 +55,9 @@ public:
     QList<SolverNode*>listParents;
     QList<SolverNode*>listChilds;
 
-    static void ResetLoopFlags();
-    static QList<SolverNode*>listNodes;
-    int index;
+    void ResetLoopFlags();
+//    static QList<SolverNode*>listNodes;
+//    int index;
 
 protected:
     int height;

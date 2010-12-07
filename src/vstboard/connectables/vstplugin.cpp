@@ -29,12 +29,12 @@
 using namespace Connectables;
 
 VstPlugin *VstPlugin::pluginLoading = 0;
-QList<VstPlugin*>VstPlugin::listPlugins;
-
+//QList<VstPlugin*>VstPlugin::listPlugins;
+QMap<AEffect*,VstPlugin*>VstPlugin::mapPlugins;
 View::VstShellSelect *VstPlugin::shellSelectView=0;
 
-VstPlugin::VstPlugin(int index, const ObjectInfo & info) :
-    Object(index, info),
+VstPlugin::VstPlugin(MainHost *myHost,int index, const ObjectInfo & info) :
+    Object(myHost,index, info),
     CEffect(),
     editorWnd(0),
     sampleRate(44100.0),
@@ -42,7 +42,8 @@ VstPlugin::VstPlugin(int index, const ObjectInfo & info) :
     listEvnts(0),
     isShell(false)
 {
-    listPlugins << this;
+    mapPlugins.insert(pEffect, this);
+//    listPlugins << this;
 
     for(int i=0;i<128;i++) {
         listValues << i;
@@ -52,6 +53,7 @@ VstPlugin::VstPlugin(int index, const ObjectInfo & info) :
 
 VstPlugin::~VstPlugin()
 {
+
     Close();
 }
 
@@ -72,10 +74,11 @@ bool VstPlugin::Close()
         editorWnd=0;
     }
 
-    if(!Object::Close())
-        return false;
+//    if(!Object::Close())
+//        return false;
 
-    listPlugins.removeAll(this);
+//    listPlugins.removeAll(this);
+    mapPlugins.remove(pEffect);
 
     if(listEvnts) {
         free(listEvnts);
@@ -244,7 +247,7 @@ bool VstPlugin::Open()
         QMutexLocker lock(&objMutex);
         VstPlugin::pluginLoading = this;
 
-        if(!Load( objInfo.filename )) {
+        if(!Load(myHost, objInfo.filename )) {
             VstPlugin::pluginLoading = 0;
             errorMessage=tr("Error while loading plugin");
             return true;
@@ -269,7 +272,7 @@ bool VstPlugin::Open()
                     return false;
                 }
 
-                VstPlugin::shellSelectView = new View::VstShellSelect();
+                VstPlugin::shellSelectView = new View::VstShellSelect(myHost->objFactory);
                 VstPlugin::shellSelectView->SetListPlugins(objInfo.name, listPlugins);
                 VstPlugin::shellSelectView->show();
 
@@ -282,8 +285,8 @@ bool VstPlugin::Open()
 
         long ver = EffGetVstVersion();
 
-        bufferSize = MainHost::Get()->GetBufferSize();
-        sampleRate = MainHost::Get()->GetSampleRate();
+        bufferSize = myHost->GetBufferSize();
+        sampleRate = myHost->GetSampleRate();
 
         EffSetSampleRate(sampleRate);
         EffSetBlockSize(bufferSize);
@@ -437,7 +440,7 @@ void VstPlugin::CreateEditorWindow()
     listParameterPinIn.value(FixedPinNumber::editorVisible)->SetAlwaysVisible(true);
     listParameterPinIn.value(FixedPinNumber::learningMode)->SetAlwaysVisible(true);
 
-    editorWnd = new View::VstPluginWindow(MainWindow::theMainWindow);
+    editorWnd = new View::VstPluginWindow(myHost->mainWindow);
     connect(this,SIGNAL(CloseEditorWindow()),
             editorWnd,SLOT(hide()),
             Qt::QueuedConnection);
@@ -469,12 +472,12 @@ void VstPlugin::OnEditorVisibilityChanged(bool visible)
     if(visible) {
         editorWnd->show();
         editorWnd->raise();
-        connect(MainHost::Get()->updateViewTimer,SIGNAL(timeout()),
+        connect(myHost->updateViewTimer,SIGNAL(timeout()),
                 this,SLOT(EditIdle()));
 
 //        UpdateEditorNode();
     } else {
-        disconnect(MainHost::Get()->updateViewTimer,SIGNAL(timeout()),
+        disconnect(myHost->updateViewTimer,SIGNAL(timeout()),
                 this,SLOT(EditIdle()));
         emit CloseEditorWindow();
 //        UpdateEditorNode();

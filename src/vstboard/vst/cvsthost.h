@@ -33,7 +33,6 @@
 #include "const.h"
 #include "vstbank.h"
 
-
 namespace vst
 {
 
@@ -45,6 +44,7 @@ namespace vst
     {
     friend class CEffect;
     public:
+        static CVSTHost *Get() {return pHost;}
         CVSTHost();
         virtual ~CVSTHost();
 

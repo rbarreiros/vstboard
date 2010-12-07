@@ -40,9 +40,9 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    static MainWindow *Get(QWidget *parent = 0);
+    MainWindow(MainHost * myHost, QWidget *parent = 0);
+//    static MainWindow *Get(QWidget *parent = 0);
     ~MainWindow();
-    static MainWindow *theMainWindow;
 
 
 protected:
@@ -59,7 +59,7 @@ protected:
     View::SceneView *mySceneView;
 
 private:
-    MainWindow(QWidget *parent = 0);
+
     bool userReallyWantsToQuit();
     void BuildListTools();
     void writeSettings();
@@ -75,7 +75,7 @@ private:
 
     Ui::MainWindow *ui;
 
-    MainHost *mainHost;
+    MainHost *myHost;
 
 private slots:
     void on_actionRestore_default_layout_triggered();

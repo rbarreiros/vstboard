@@ -20,15 +20,16 @@
 
 #include "vstshellselect.h"
 #include "ui_vstshellselect.h"
-#include "../mainhost.h"
+//#include "../mainhost.h"
 #include "../connectables/objectfactory.h"
 #include "../connectables/container.h"
 #include "../connectables/vstplugin.h"
 
 using namespace View;
 
-VstShellSelect::VstShellSelect() :
+VstShellSelect::VstShellSelect(Connectables::ObjectFactory *objFactory) :
     cntPtr(0),
+    objFactory(objFactory),
     ui(new Ui::VstShellSelect)
 {
     ui->setupUi(this);
@@ -75,7 +76,7 @@ void View::VstShellSelect::on_buttonOk_clicked()
     info.filename = vstDll;
     info.id = id;
 
-    QSharedPointer<Connectables::Object> objPtr = Connectables::ObjectFactory::Get()->NewObject(info);
+    QSharedPointer<Connectables::Object> objPtr = objFactory->NewObject(info);
     if(objPtr.isNull()) {
         debug("View::VstShellSelect::on_buttonOk_clicked object not loaded")
         close();

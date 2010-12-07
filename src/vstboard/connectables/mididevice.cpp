@@ -23,8 +23,8 @@
 
 using namespace Connectables;
 
-MidiDevice::MidiDevice(int index, const ObjectInfo &info) :
-        Object(index, info),
+MidiDevice::MidiDevice(MainHost *myHost,int index, const ObjectInfo &info) :
+        Object(myHost,index, info),
         stream(0),
         queue(0),
         devInfo(0),
@@ -67,7 +67,7 @@ bool MidiDevice::OpenStream()
 
     QMutexLocker l(&objMutex);
 
-    if(!FindDeviceFromName())
+    if(!FindDeviceByName())
         return false;
 
     queue = Pm_QueueCreate(QUEUE_SIZE, sizeof(PmEvent));
@@ -160,7 +160,7 @@ bool MidiDevice::Close()
 }
 
 
-bool MidiDevice::FindDeviceFromName()
+bool MidiDevice::FindDeviceByName()
 {
     int cptDuplicateNames=0;
     int canBe=-1;

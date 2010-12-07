@@ -27,8 +27,8 @@
 
 using namespace Connectables;
 
-AudioDeviceIn::AudioDeviceIn(int index, const ObjectInfo &info) :
-    Object(index, info),
+AudioDeviceIn::AudioDeviceIn(MainHost *myHost,int index, const ObjectInfo &info) :
+    Object(myHost,index, info),
     bufferReady(false),
     parentDevice(0)
 {
@@ -87,17 +87,17 @@ bool AudioDeviceIn::Open()
     if(!parentDevice) {
         QMutexLocker l(&AudioDevice::listDevMutex);
 
-        if(!AudioDevices::listAudioDevices.contains(objInfo.id)) {
-            AudioDevice *dev = new AudioDevice(objInfo);
+        if(!myHost->audioDevices->listAudioDevices.contains(objInfo.id)) {
+            AudioDevice *dev = new AudioDevice(myHost,objInfo);
             parentDevice = QSharedPointer<AudioDevice>(dev);
             if(!parentDevice->Open()) {
                 parentDevice.clear();
                 errorMessage=tr("Error while opening the interface");
                 return true;
             }
-            AudioDevices::listAudioDevices.insert(objInfo.id, parentDevice);
+            myHost->audioDevices->listAudioDevices.insert(objInfo.id, parentDevice);
         } else {
-            parentDevice = AudioDevices::listAudioDevices.value(objInfo.id);
+            parentDevice = myHost->audioDevices->listAudioDevices.value(objInfo.id);
         }
     }
 
@@ -121,7 +121,7 @@ bool AudioDeviceIn::Open()
             pin = new AudioPinOut(this,i);
             listAudioPinOut << pin;
         }
-        pin->buffer->SetSize(MainHost::Get()->GetBufferSize());
+        pin->buffer->SetSize(myHost->GetBufferSize());
         pin->setObjectName(QString("Input %1").arg(i));
 
     }

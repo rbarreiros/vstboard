@@ -23,11 +23,13 @@
 
 #include "../precomp.h"
 
+class MainHost;
+
 class HostModel : public QStandardItemModel
 {
 Q_OBJECT
 public:
-    HostModel(QObject *parent=0);
+    HostModel(MainHost *parent=0);
 
     QMimeData * mimeData ( const QModelIndexList & indexes ) const;
 
@@ -37,6 +39,7 @@ public:
 //    bool setItemData ( const QModelIndex & index, const QMap<int, QVariant> & roles );
 protected:
     QMap<int,QStandardItem*>mapObjects;
+    MainHost *myHost;
 };
 
 #endif // HOSTMODEL_H

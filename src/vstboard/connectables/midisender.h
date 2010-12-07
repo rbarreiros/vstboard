@@ -37,7 +37,7 @@ namespace Connectables {
         };
 
     public:
-        MidiSender(int index);
+        MidiSender(MainHost *myHost,int index);
         void Render();
 
     protected:

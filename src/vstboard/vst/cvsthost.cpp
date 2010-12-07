@@ -37,7 +37,7 @@ CVSTHost * CVSTHost::pHost = NULL;      /* pointer to the one and only host  */
 CVSTHost::CVSTHost()
 {
     if (pHost)                              /* disallow more than one host!      */
-        throw((int)1);
+        return;//throw((int)1);
     vstTimeInfo.samplePos = 0.0;
     vstTimeInfo.sampleRate = 44100.0;
     vstTimeInfo.nanoSeconds = 0.0;
@@ -224,22 +224,25 @@ VstIntPtr VSTCALLBACK CVSTHost::AudioMasterCallback(AEffect *effect, VstInt32 op
     }
 
     if(!effect) {
-        debug("cvsthost 268 : mastercallback from a null plugin ?")
+        debug("cvsthost : mastercallback from a null plugin ?")
         return 0L;
     }
 
     //send it to the connectable object
-    foreach(Connectables::VstPlugin *plug, Connectables::VstPlugin::listPlugins) {
-        if(plug->GetPlugin() == effect)
-            return plug->OnMasterCallback(opcode,index,value,ptr,opt,retValue);
-    }
+//    foreach(Connectables::VstPlugin *plug, Connectables::VstPlugin::listPlugins) {
+//        if(plug->GetPlugin() == effect)
+//            return plug->OnMasterCallback(opcode,index,value,ptr,opt,retValue);
+//    }
+    Connectables::VstPlugin *obj = Connectables::VstPlugin::mapPlugins.value(effect,0);
+    if(obj)
+        return obj->OnMasterCallback(opcode,index,value,ptr,opt,retValue);
 
     //unknown pointer, it must be the plugin currently loading
     if(Connectables::VstPlugin::pluginLoading) {
         return Connectables::VstPlugin::pluginLoading->OnMasterCallback(opcode,index,value,ptr,opt,retValue);
     }
 
-    debug("cvsthost 278 : plugin not found")
+    debug("cvsthost : plugin not found")
     return 0L;
 
 }

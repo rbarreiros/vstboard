@@ -25,8 +25,8 @@
 
 using namespace Connectables;
 
-HostController::HostController(int index):
-    Object(index, ObjectInfo(NodeType::object, ObjType::HostController, tr("HostController") ) ),
+HostController::HostController(MainHost *myHost,int index):
+    Object(myHost,index, ObjectInfo(NodeType::object, ObjType::HostController, tr("HostController") ) ),
     tempoChanged(false),
     midiProgChanged(false),
     prog(0),
@@ -61,13 +61,13 @@ HostController::HostController(int index):
     listParameterPinIn.insert(Param_Prog, new ParameterPinIn(this,Param_Prog,0,&listPrg,true,"Prog"));
 
     connect(this, SIGNAL(progChange(int)),
-            MainHost::Get()->programList,SLOT(ChangeProg(int)),
+            myHost->programList,SLOT(ChangeProg(int)),
             Qt::QueuedConnection);
     connect(this, SIGNAL(grpChange(int)),
-            MainHost::Get()->programList,SLOT(ChangeGroup(int)),
+            myHost->programList,SLOT(ChangeGroup(int)),
             Qt::QueuedConnection);
     connect(this, SIGNAL(tempoChange(int,int,int)),
-            MainHost::Get(),SLOT(SetTempo(int,int,int)),
+            myHost,SLOT(SetTempo(int,int,int)),
             Qt::QueuedConnection);
 }
 

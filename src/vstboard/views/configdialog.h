@@ -26,11 +26,11 @@
 namespace Ui {
     class ConfigDialog;
 }
-
+class MainHost;
 class ConfigDialog : public QDialog {
     Q_OBJECT
 public:
-    ConfigDialog(QWidget *parent = 0);
+    ConfigDialog(MainHost *myHost, QWidget *parent = 0);
     ~ConfigDialog();
 
     static const QString defaultSetupFile();
@@ -48,6 +48,7 @@ protected:
 
 private:
     Ui::ConfigDialog *ui;
+    MainHost *myHost;
 
 public slots:
     void accept();

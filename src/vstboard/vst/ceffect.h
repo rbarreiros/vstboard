@@ -24,6 +24,7 @@
 #include "../precomp.h"
 #include "audioeffectx.h"
 
+class MainHost;
 namespace vst
 {
     class CVSTHost;
@@ -52,7 +53,7 @@ namespace vst
 
     #endif
 
-        virtual bool Load(const QString &name);
+        virtual bool Load(MainHost *myHost, const QString &name);
         virtual bool Unload();
 
         virtual bool LoadBank(std::string *name);

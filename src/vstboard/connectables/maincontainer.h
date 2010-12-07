@@ -28,7 +28,7 @@ namespace Connectables {
     class MainContainer : public Container
     {
     public:
-        MainContainer(int index, const ObjectInfo &info);
+        MainContainer(MainHost *myHost,int index, const ObjectInfo &info);
         virtual ~MainContainer();
 
         bool Close();

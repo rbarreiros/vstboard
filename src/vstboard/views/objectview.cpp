@@ -190,11 +190,12 @@ void ObjectView::closeEvent ( QCloseEvent * event )
 {
     setActive(false);
 
-    static_cast<Connectables::Container*>(
-            Connectables::ObjectFactory::Get()->GetObj(objIndex.parent()).data()
-        )->RemoveObject(
-            Connectables::ObjectFactory::Get()->GetObj(objIndex)
-        );
+//TODO: tell the host to remove this object
+//    static_cast<Connectables::Container*>(
+//            Connectables::ObjectFactory::Get()->GetObj(objIndex.parent()).data()
+//        )->RemoveObject(
+//            Connectables::ObjectFactory::Get()->GetObj(objIndex)
+//        );
 
     event->ignore();
 }

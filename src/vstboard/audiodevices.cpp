@@ -21,24 +21,13 @@
 #include "audiodevices.h"
 #include "globals.h"
 #include "connectables/objectinfo.h"
-#include "connectables/audiodevice.h"
 #include "mainhost.h"
 
-AudioDevices * AudioDevices::theAudioDevices=0;
-QHash<int,QSharedPointer<Connectables::AudioDevice> >AudioDevices::listAudioDevices;
-
-AudioDevices *AudioDevices::Create(QObject *parent)
-{
-    if(!theAudioDevices)
-        theAudioDevices = new AudioDevices(parent);
-
-    return theAudioDevices;
-}
-
-AudioDevices::AudioDevices(QObject *parent) :
-        QObject(parent),
+AudioDevices::AudioDevices(MainHost *myHost) :
+        QObject(myHost),
         model(0),
-        countActiveDevices(0)
+        countActiveDevices(0),
+        myHost(myHost)
 {
     //GetModel();
 
@@ -99,7 +88,7 @@ ListAudioInterfacesModel * AudioDevices::GetModel()
     }
 //    Connectables::AudioDevice::listDevMutex.unlock();
 
-    foreach(QSharedPointer<Connectables::Object>obj, Connectables::ObjectFactory::Get()->GetListObjects()) {
+    foreach(QSharedPointer<Connectables::Object>obj, myHost->objFactory->GetListObjects()) {
         if(obj.isNull())
             continue;
 

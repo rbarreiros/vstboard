@@ -20,7 +20,7 @@
 
 #include "solvernode.h"
 
-QList<SolverNode*>SolverNode::listNodes;
+//QList<SolverNode*>SolverNode::listNodes;
 
 SolverNode::SolverNode() :
         minRenderOrder(0),
@@ -30,8 +30,8 @@ SolverNode::SolverNode() :
         objectPtr(QSharedPointer<Connectables::Object>()),
         height(0)
 {
-    index = listNodes.size();
-    listNodes << this;
+//    index = listNodes.size();
+//    listNodes << this;
 }
 
 void SolverNode::AddChild(SolverNode *child)
@@ -59,10 +59,8 @@ void SolverNode::RemoveParent(SolverNode *parent)
 }
 
 void SolverNode::ResetLoopFlags() {
-    foreach(SolverNode *node,SolverNode::listNodes) {
-        node->loopFlag=false;
-        node->countSteps = 0;
-    }
+    loopFlag=false;
+    countSteps = 0;
 }
 
 bool SolverNode::IsRoot()

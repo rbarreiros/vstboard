@@ -2,13 +2,14 @@
 #include "globals.h"
 #include "mainhost.h"
 
-Programs::Programs(QObject *parent) :
+Programs::Programs(MainHost *parent) :
     QObject(parent),
     model(0),
     currentPrg(0),
-    nextProgId(0)
+    nextProgId(0),
+    myHost(parent)
 {
-    model=new ProgramsModel(this);
+    model=new ProgramsModel(parent);
 }
 
 void Programs::BuildModel()
@@ -50,7 +51,7 @@ void Programs::BuildModel()
 QStandardItem *Programs::CopyProgram(QStandardItem *progOri)
 {
     int oriId = progOri->data(UserRoles::value).toInt();
-    MainHost::Get()->programContainer->CopyProgram( oriId, nextProgId );
+    myHost->programContainer->CopyProgram( oriId, nextProgId );
 
     QStandardItem *prgItem = new QStandardItem(progOri->text());
     prgItem->setData(NodeType::program,UserRoles::nodeType);
@@ -90,7 +91,7 @@ void Programs::RemoveIndex(const QModelIndex &index)
 {
     if(index.data(UserRoles::nodeType).toInt() == NodeType::program) {
         int prgId = index.data(UserRoles::value).toInt();
-        MainHost::Get()->programContainer->RemoveProgram(prgId);
+        myHost->programContainer->RemoveProgram(prgId);
     }
 
     if(index.data(UserRoles::nodeType).toInt() == NodeType::programGroup) {
@@ -98,7 +99,7 @@ void Programs::RemoveIndex(const QModelIndex &index)
         for(int i=0; i< lstPrg->rowCount(); i++) {
             QStandardItem *prg = lstPrg->child(i);
             int prgId = prg->data(UserRoles::value).toInt();
-            MainHost::Get()->programContainer->RemoveProgram(prgId);
+            myHost->programContainer->RemoveProgram(prgId);
         }
     }
 }

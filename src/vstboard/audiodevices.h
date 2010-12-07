@@ -31,25 +31,22 @@
 #include "connectables/objectinfo.h"
 #include "connectables/audiodevice.h"
 
+class MainHost;
 class AudioDevices : public QObject
 {
     Q_OBJECT
 public:
-    inline static AudioDevices *Get() {return theAudioDevices;}
-    static AudioDevices *Create(QObject *parent=0);
+    explicit AudioDevices(MainHost *myHost);
     ~AudioDevices();
     ListAudioInterfacesModel * GetModel();
-    static QHash<qint32,QSharedPointer<Connectables::AudioDevice> >listAudioDevices;
+    QHash<qint32,QSharedPointer<Connectables::AudioDevice> >listAudioDevices;
     QTimer fakeRenderTimer;
 
 private:
-    explicit AudioDevices(QObject *parent=0);
     void BuildModel();
     ListAudioInterfacesModel *model;
     int countActiveDevices;
-
-    static AudioDevices *theAudioDevices;
-
+    MainHost *myHost;
 public slots:
     void OnToggleDeviceInUse(const ObjectInfo &objInfo, bool opened);
 };

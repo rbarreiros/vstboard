@@ -37,7 +37,7 @@ namespace Connectables {
     Q_OBJECT
 
     public:
-        VstPlugin(int index, const ObjectInfo & info);
+        VstPlugin(MainHost *myHost,int index, const ObjectInfo & info);
         ~VstPlugin();
         bool Open();
         bool Close();
@@ -53,7 +53,8 @@ namespace Connectables {
 
         View::VstPluginWindow *editorWnd;
 
-        static QList<VstPlugin*>listPlugins;
+//        static QList<VstPlugin*>listPlugins;
+        static QMap<AEffect*,VstPlugin*>mapPlugins;
         static VstPlugin *pluginLoading;
 
         void CreateEditorWindow();

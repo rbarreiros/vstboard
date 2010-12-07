@@ -27,8 +27,8 @@ using namespace Connectables;
 
 //QList<QVariant> MidiToAutomation::listValues;
 
-MidiToAutomation::MidiToAutomation(int index) :
-        Object(index, ObjectInfo(NodeType::object, ObjType::MidiToAutomation, tr("MidiCC->Automation")) )
+MidiToAutomation::MidiToAutomation(MainHost *myHost,int index) :
+        Object(myHost,index, ObjectInfo(NodeType::object, ObjType::MidiToAutomation, tr("MidiCC->Automation")) )
 {
 
         for(int i=0;i<128;i++) {

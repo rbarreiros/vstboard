@@ -24,7 +24,7 @@
 #include "projectfile.h"
 #include "../mainhost.h"
 
-bool ProjectFile::SaveToFile(QString filePath)
+bool ProjectFile::SaveToFile(MainHost *myHost,QString filePath)
 {
     QFile file(filePath);
     if(!file.open(QIODevice::WriteOnly)) {
@@ -40,42 +40,39 @@ bool ProjectFile::SaveToFile(QString filePath)
     out << (quint32)PROJECT_FILE_VERSION;
     out.setVersion(QDataStream::Qt_4_6);
 
-    MainHost *host = MainHost::Get();
+    myHost->EnableSolverUpdate(false);
 
-    host->EnableSolverUpdate(false);
+    myHost->insertContainer->SaveProgram();
+    myHost->programContainer->SaveProgram();
+    myHost->projectContainer->SaveProgram();
+    myHost->parkingContainer->SaveProgram();
 
-    host->insertContainer->SaveProgram();
-    host->programContainer->SaveProgram();
-    host->projectContainer->SaveProgram();
-    host->parkingContainer->SaveProgram();
-
-    for(host->filePass=0; host->filePass<LOADSAVE_STAGES ; host->filePass++) {
-        out << *host->parkingContainer;
-        out << *host->projectContainer;
-        out << *host->programContainer;
-        out << *host->insertContainer;
+    for(myHost->filePass=0; myHost->filePass<LOADSAVE_STAGES ; myHost->filePass++) {
+        out << *myHost->parkingContainer;
+        out << *myHost->projectContainer;
+        out << *myHost->programContainer;
+        out << *myHost->insertContainer;
     }
 
-    out << *host->programList;
+    out << *myHost->programList;
 
-    host->EnableSolverUpdate(true);
+    myHost->EnableSolverUpdate(true);
 
     return true;
 }
 
-void ProjectFile::Clear()
+void ProjectFile::Clear(MainHost *myHost)
 {
-    MainHost *host = MainHost::Get();
-    host->EnableSolverUpdate(false);
-    host->SetupProjectContainer();
-    host->SetupProgramContainer();
-    host->SetupInsertContainer();
-    host->SetupParking();
-    host->EnableSolverUpdate(true);
-    host->programList->BuildModel();
+    myHost->EnableSolverUpdate(false);
+    myHost->SetupProjectContainer();
+    myHost->SetupProgramContainer();
+    myHost->SetupInsertContainer();
+    myHost->SetupParking();
+    myHost->EnableSolverUpdate(true);
+    myHost->programList->BuildModel();
 }
 
-bool ProjectFile::LoadFromFile(QString filePath)
+bool ProjectFile::LoadFromFile(MainHost *myHost,QString filePath)
 {
     QFile file(filePath);
     if(!file.open(QIODevice::ReadOnly)) {
@@ -110,25 +107,23 @@ bool ProjectFile::LoadFromFile(QString filePath)
 
     in.setVersion(QDataStream::Qt_4_6);
 
-    MainHost *host = MainHost::Get();
+    myHost->EnableSolverUpdate(false);
 
-    host->EnableSolverUpdate(false);
+    myHost->SetupProjectContainer();
+    myHost->SetupInsertContainer();
+    myHost->SetupProgramContainer();
+    myHost->SetupParking();
 
-    host->SetupProjectContainer();
-    host->SetupInsertContainer();
-    host->SetupProgramContainer();
-    host->SetupParking();
-
-    for(host->filePass=0; host->filePass<LOADSAVE_STAGES ; host->filePass++) {
-        in >> *host->parkingContainer;
-        in >> *host->projectContainer;
-        in >> *host->programContainer;
-        in >> *host->insertContainer;
+    for(myHost->filePass=0; myHost->filePass<LOADSAVE_STAGES ; myHost->filePass++) {
+        in >> *myHost->parkingContainer;
+        in >> *myHost->projectContainer;
+        in >> *myHost->programContainer;
+        in >> *myHost->insertContainer;
     }
 
-    Connectables::ObjectFactory::Get()->ResetSavedId();
-    in >> *host->programList;
-    host->EnableSolverUpdate(true);
+    myHost->objFactory->ResetSavedId();
+    in >> *myHost->programList;
+    myHost->EnableSolverUpdate(true);
 
     return true;
 }

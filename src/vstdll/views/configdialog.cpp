@@ -24,9 +24,10 @@
 //#include "../models/shortcutdelegate.h"
 #include "mainhost.h"
 
-ConfigDialog::ConfigDialog(QWidget *parent) :
+ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::ConfigDialog)
+    ui(new Ui::ConfigDialog),
+    myHost(myHost)
 {
     ui->setupUi(this);
 //    ui->treeShortcuts->setModel(MainConfig::Get()->GetShortcutsModel());
@@ -110,7 +111,7 @@ ConfigDialog::ConfigDialog(QWidget *parent) :
     ui->sampleRate->addItem("48 kHz",48000);
     ui->sampleRate->addItem("88.2 kHz",88200);
     ui->sampleRate->addItem("96 kHz",96000);
-    int index=ui->sampleRate->findData( MainHost::Get()->GetSampleRate() );
+    int index=ui->sampleRate->findData( myHost->GetSampleRate() );
     if(index==-1) {
         debug("ConfigDialog invalid sample rate")
         return;
@@ -119,7 +120,7 @@ ConfigDialog::ConfigDialog(QWidget *parent) :
 
 
     ui->bufferSize->addItem("Auto",0);
-    index = ui->bufferSize->findData( MainHost::Get()->GetBufferSize() );
+    index = ui->bufferSize->findData( myHost->GetBufferSize() );
     if(index==-1) {
         debug("ConfigDialog invalid buffer size")
         return;
@@ -342,7 +343,7 @@ void ConfigDialog::accept()
 
     float rate = ui->sampleRate->itemData(ui->sampleRate->currentIndex()).toFloat();
     settings.setValue("sampleRate", rate);
-    MainHost::Get()->SetSampleRate( rate );
+    myHost->SetSampleRate( rate );
 
     int buffer = ui->bufferSize->itemData(ui->bufferSize->currentIndex()).toInt();
     settings.setValue("bufferSize", buffer);

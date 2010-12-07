@@ -25,7 +25,7 @@
 
 using namespace Connectables;
 
-Object::Object(int index, const ObjectInfo &info) :
+Object::Object(MainHost *host, int index, const ObjectInfo &info) :
     QObject(),
 //    position(QPointF(0,0)),
 //    size(QSize(0,0)),
@@ -55,7 +55,8 @@ Object::Object(int index, const ObjectInfo &info) :
 //    modelEditor(0),
 //    modelLearningMode(0),
     currentProgId(TEMP_PROGRAM),
-    objInfo(info)
+    objInfo(info),
+    myHost(host)
 {
     setObjectName(QString("%1.%2").arg(objInfo.name).arg(index));
 
@@ -134,9 +135,9 @@ void Object::Hide() {
 
     QStandardItemModel *model = 0;
     if(parked)
-        model = MainHost::GetParkingModel();
+        model = myHost->GetParkingModel();
     else
-        model = MainHost::GetModel();
+        model = myHost->GetModel();
 
     if(modelIndex.isValid()) {
         if(modelIndex.parent().isValid())
@@ -164,7 +165,7 @@ void Object::setObjectName(const QString &name)
 //    if(modelNode)
 //        modelNode->setData(name,Qt::DisplayRole);
     if(modelIndex.isValid())
-        MainHost::GetModel()->setData(modelIndex, name, Qt::DisplayRole);
+        myHost->GetModel()->setData(modelIndex, name, Qt::DisplayRole);
 
     QObject::setObjectName(name);
 }
@@ -336,9 +337,9 @@ void Object::SetParentModeIndex(const QModelIndex &parentIndex)
     modelNode->setData(errorMessage, UserRoles::errorMessage);
 
     if(parentIndex.isValid()) {
-        MainHost::GetModel()->itemFromIndex(parentIndex)->appendRow(modelNode);
+        myHost->GetModel()->itemFromIndex(parentIndex)->appendRow(modelNode);
     } else {
-        MainHost::GetModel()->appendRow(modelNode);
+        myHost->GetModel()->appendRow(modelNode);
     }
 
     modelIndex=modelNode->index();
@@ -395,9 +396,9 @@ void Object::SetParkingIndex(const QModelIndex &parentIndex)
     containerId=-1;
 
     if(parentIndex.isValid())
-        MainHost::GetParkingModel()->itemFromIndex(parentIndex)->appendRow(modelNode);
+        myHost->GetParkingModel()->itemFromIndex(parentIndex)->appendRow(modelNode);
     else
-        MainHost::GetParkingModel()->appendRow(modelNode);
+        myHost->GetParkingModel()->appendRow(modelNode);
 
     modelIndex=modelNode->index();
 }
@@ -407,7 +408,7 @@ void Object::UpdateModelNode()
     if(!modelIndex.isValid())
         return;
 
-    QStandardItem *modelNode = MainHost::GetModel()->itemFromIndex(modelIndex);
+    QStandardItem *modelNode = myHost->GetModel()->itemFromIndex(modelIndex);
 
     modelNode->setData(QVariant::fromValue(objInfo), UserRoles::objInfo);
 
@@ -534,7 +535,7 @@ int Object::GetLearningMode()
 {
 //    if(!modelIndex.isValid())
 //        return false;
-//    return MainHost::GetModel()->data(modelIndex, UserRoles::paramLearning).toBool();
+//    return myHost->GetModel()->data(modelIndex, UserRoles::paramLearning).toBool();
     return ( listParameterPinIn.value(FixedPinNumber::learningMode)->GetIndex());
 }
 
@@ -543,7 +544,7 @@ void Object::SetContainerAttribs(const ObjectContainerAttribs &attr)
     if(!modelIndex.isValid())
         return;
 
-    QStandardItem *item = MainHost::GetModel()->itemFromIndex(modelIndex);
+    QStandardItem *item = myHost->GetModel()->itemFromIndex(modelIndex);
 
     item->setData(attr.position, UserRoles::position);
 //    item->setData(attr.size, UserRoles::size);

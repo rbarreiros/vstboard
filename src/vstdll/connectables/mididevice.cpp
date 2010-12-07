@@ -23,8 +23,8 @@
 
 using namespace Connectables;
 
-MidiDevice::MidiDevice(int index, const ObjectInfo &info) :
-        Object(index, info),
+MidiDevice::MidiDevice(MainHost *myHost, int index, const ObjectInfo &info) :
+        Object(myHost,index, info),
 //        stream(0),
 //        queue(0),
 //        devInfo(0),

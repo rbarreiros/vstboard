@@ -71,7 +71,7 @@ ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int num
     loading=false;
 }
 
-void ParameterPin::SetAlwaysVisible(bool visible)
+void ParameterPin::SetAlwaysVisible(bool /*visible*/)
 {
     defaultVisible=true;
     visibilityCanChange=false;

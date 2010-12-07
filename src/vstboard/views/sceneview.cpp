@@ -29,12 +29,13 @@
 #include "connectablepinview.h"
 #include "bridgepinview.h"
 #include "../connectables/container.h"
+#include "../connectables/objectfactory.h"
 
 #include <QSplitter>
 
 using namespace View;
 
-SceneView::SceneView(MainGraphicsView *viewHost, MainGraphicsView *viewProject, MainGraphicsView *viewProgram, MainGraphicsView *viewInsert,QWidget *parent) :
+SceneView::SceneView(Connectables::ObjectFactory *objFactory, MainGraphicsView *viewHost, MainGraphicsView *viewProject, MainGraphicsView *viewProgram, MainGraphicsView *viewInsert,QWidget *parent) :
         QAbstractItemView(parent),
         viewHost(viewHost),
         viewProject(viewProject),
@@ -42,7 +43,8 @@ SceneView::SceneView(MainGraphicsView *viewHost, MainGraphicsView *viewProject, 
         viewInsert(viewInsert),
         sceneHost(0),
         sceneProgram(0),
-        sceneInsert(0)
+        sceneInsert(0),
+        objFactory(objFactory)
 {
     setHidden(true);
     timerFalloff = new QTimer(this);
@@ -454,7 +456,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                             continue;
                 }
                 ConnectionInfo pinInfo = index.data(UserRoles::connectionInfo).value<ConnectionInfo>();
-                Connectables::Pin *pin = Connectables::ObjectFactory::Get()->GetPin(pinInfo);
+                Connectables::Pin *pin = objFactory->GetPin(pinInfo);
                 if(!pin) {
                     debug("SceneView::rowsInserted NodeType::pin pin not found")
                             continue;
@@ -462,13 +464,13 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
 
                 PinView *pinView;
                 ObjectInfo parentInfo = parent.parent().data(UserRoles::objInfo).value<ObjectInfo>();
-                float angle=0;
+                float angle=.0f;
 
                 if(parentInfo.nodeType == NodeType::bridge) {
                     if(parentInfo.objType==ObjType::BridgeIn || parentInfo.objType==ObjType::BridgeOut)
-                        angle=3.1416/2;
+                        angle=3.1416f/2.0f;
                     if(parentInfo.objType==ObjType::BridgeSend || parentInfo.objType==ObjType::BridgeReturn)
-                        angle=-3.1416/2;
+                        angle=-3.1416f/2.0f;
 
                     pinView = static_cast<PinView*>( new BridgePinView(angle, model(), parentList, pin) );
                 } else {
@@ -560,7 +562,7 @@ void SceneView::ConnectPins(ConnectionInfo pinOut,ConnectionInfo pinIn)
     if(pinOut.bridge) parentOut = parentOut.parent();
     if(pinIn.bridge) parentIn = parentIn.parent();
 
-    QSharedPointer<Connectables::Object> cntPtr = Connectables::ObjectFactory::Get()->GetObjectFromId(parentOut.data(UserRoles::value).toInt());
+    QSharedPointer<Connectables::Object> cntPtr = objFactory->GetObjectFromId(parentOut.data(UserRoles::value).toInt());
 
     if(pinOut.direction==PinDirection::Output)
         static_cast<Connectables::Container*>(cntPtr.data())->AddCable(pinOut,pinIn);
@@ -573,7 +575,7 @@ void SceneView::RemoveCablesFromPin(ConnectionInfo pin)
     QPersistentModelIndex ix = mapConnectionInfo.value(pin);
     QModelIndex parent = ix.parent().parent().parent();
     if(pin.bridge) parent = parent.parent();
-    QSharedPointer<Connectables::Object> cntPtr = Connectables::ObjectFactory::Get()->GetObjectFromId(parent.data(UserRoles::value).toInt());
+    QSharedPointer<Connectables::Object> cntPtr = objFactory->GetObjectFromId(parent.data(UserRoles::value).toInt());
     static_cast<Connectables::Container*>(cntPtr.data())->RemoveCableFromPin(pin);
 }
 

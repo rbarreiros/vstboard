@@ -25,10 +25,10 @@
 #include "connectables/objectinfo.h"
 #include "connectables/vstplugin.h"
 
-HostModel::HostModel(QObject *parent) :
+HostModel::HostModel(MainHost *parent) :
         QStandardItemModel(parent)
 {
-
+    myHost = parent;
 }
 
 QMimeData * HostModel::mimeData ( const QModelIndexList & indexes ) const
@@ -73,11 +73,11 @@ QStringList HostModel::mimeTypes () const
 
 bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, int row, int column, const QModelIndex & parent )
 {
-    QSharedPointer<Connectables::Container> cntPtr = MainHost::Get()->parkingContainer;
+    QSharedPointer<Connectables::Container> cntPtr = myHost->parkingContainer;
     QModelIndex rootIndex = parent.sibling(parent.row(),0);
     if(parent.isValid()) {
     //    QSharedPointer<Connectables::Container> cntPtr = Connectables::ObjectFactory::Get()->GetObjectFromId( rootIndex.data(UserRoles::value).toInt() ).staticCast<Connectables::Container>();
-        cntPtr = Connectables::ObjectFactory::Get()->GetObj(rootIndex).staticCast<Connectables::Container>();
+        cntPtr = myHost->objFactory->GetObj(rootIndex).staticCast<Connectables::Container>();
     }
 
     if(cntPtr.isNull()) {
@@ -96,7 +96,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                 mod.dropMimeData(data,action,0,0,QModelIndex());
                 QStandardItem *i = mod.invisibleRootItem()->child(0);
                 if(i->data(UserRoles::value).isValid()) {
-                    QSharedPointer<Connectables::Object> objPtr = Connectables::ObjectFactory::Get()->GetObjectFromId( i->data(UserRoles::value).toInt() );
+                    QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->GetObjectFromId( i->data(UserRoles::value).toInt() );
                     if(objPtr.isNull()) {
                         debug("HostModel::dropMimeData x-qstandarditemmodeldatalist object not found")
                         return false;
@@ -135,7 +135,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                         infoVst.filename = fName;
                         infoVst.name = fName;
 
-                        QSharedPointer<Connectables::Object> objPtr = Connectables::ObjectFactory::Get()->NewObject(infoVst);
+                        QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(infoVst);
                         if(objPtr.isNull()) {
                             if(Connectables::VstPlugin::shellSelectView) {
                                 Connectables::VstPlugin::shellSelectView->cntPtr=cntPtr;
@@ -159,7 +159,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                 stream >> info;
 
                 info.objType=ObjType::AudioInterfaceIn;
-                QSharedPointer<Connectables::Object> objPtr = Connectables::ObjectFactory::Get()->NewObject(info);
+                QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
                 if(objPtr.isNull()) {
                     debug("HostModel::dropMimeData audioin object not found or already used")
                 } else {
@@ -167,7 +167,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                 }
 
                 info.objType=ObjType::AudioInterfaceOut;
-                objPtr = Connectables::ObjectFactory::Get()->NewObject(info);
+                objPtr = myHost->objFactory->NewObject(info);
                 if(objPtr.isNull()) {
                     debug("HostModel::dropMimeData audioout object not found or already used")
                 } else {
@@ -184,7 +184,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                 ObjectInfo info;
                 stream >> info;
 
-                QSharedPointer<Connectables::Object> objPtr = Connectables::ObjectFactory::Get()->NewObject(info);
+                QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
                 if(objPtr.isNull()) {
                     debug("HostModel::dropMimeData midi object not found or already used")
                     return false;
@@ -201,7 +201,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                 ObjectInfo info;
                 stream >> info;
 
-                QSharedPointer<Connectables::Object> objPtr = Connectables::ObjectFactory::Get()->NewObject(info);
+                QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
                 if(objPtr.isNull()) {
                     debug("HostModel::dropMimeData tool object not found")
                     return false;
@@ -211,11 +211,11 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                     ObjectInfo in;
                     in.nodeType = NodeType::bridge;
                     in.objType = ObjType::BridgeIn;
-                    static_cast<Connectables::Container*>(objPtr.data())->AddObject( Connectables::ObjectFactory::Get()->NewObject(in) );
+                    static_cast<Connectables::Container*>(objPtr.data())->AddObject( myHost->objFactory->NewObject(in) );
                     ObjectInfo out;
                     out.nodeType = NodeType::bridge;
                     out.objType = ObjType::BridgeOut;
-                    static_cast<Connectables::Container*>(objPtr.data())->AddObject( Connectables::ObjectFactory::Get()->NewObject(out) );
+                    static_cast<Connectables::Container*>(objPtr.data())->AddObject( myHost->objFactory->NewObject(out) );
                 }
 
 
@@ -238,7 +238,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                     index=index.parent();
 
                 int cntId = index.data(Qt::DisplayRole).toInt();;
-                QSharedPointer<Connectables::Object> cntPtr = Connectables::ObjectFactory::Get()->GetObjectFromId(cntId);
+                QSharedPointer<Connectables::Object> cntPtr = myHost->objFactory->GetObjectFromId(cntId);
                 if(cntPtr.isNull()) {
                     debug(QString("HostModel::dropMimeData NodeType::pin the container %1 is deleted").arg(cntId).toAscii())
                     return false;
@@ -284,7 +284,7 @@ bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int
                 debug("HostModel::setData NodeType::object has no object Id")
                 return false;
             }
-            QSharedPointer<Connectables::Object> objPtr = Connectables::ObjectFactory::Get()->GetObjectFromId(objId);
+            QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->GetObjectFromId(objId);
             if(objPtr.isNull()) {
                 debug(QString("HostModel::setData NodeType::object the object %1 is deleted").arg(objId).toAscii())
                 return false;
@@ -309,7 +309,7 @@ bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int
 
                     if(newVal>1.0f) newVal=1.0f;
                     if(newVal<.0f) newVal=.0f;
-                    Connectables::ParameterPin* pin = static_cast<Connectables::ParameterPin*>(Connectables::ObjectFactory::Get()->GetPin(pinInfo));
+                    Connectables::ParameterPin* pin = static_cast<Connectables::ParameterPin*>(myHost->objFactory->GetPin(pinInfo));
                     if(!pin) {
                         return false;
                     }

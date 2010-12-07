@@ -30,10 +30,12 @@
 #include "renderer.h"
 #include "globals.h"
 #include "models/hostmodel.h"
-
-#ifndef VST_PLUGIN
-	#include "audiodevices.h"
-	#include "mididevices.h"
+#ifdef VST_PLUGIN
+    #include "connectables/vstaudiodevicein.h"
+    #include "connectables/vstaudiodeviceout.h"
+#else
+    #include "audiodevices.h"
+    #include "mididevices.h"
 #endif
 
 #include "programs.h"
@@ -43,13 +45,17 @@
     #include "vst/cvsthost.h"
 #endif
 
-
+class Vst;
+class MainWindow;
+//class AudioDevices;
+//class MainConfig;
 class MainHost : public QObject
 {
 Q_OBJECT
 public:
-    inline static MainHost* Get() {return theHost;}
-    static MainHost* Create(QObject *parent = 0);
+//    inline static MainHost* Get() {return theHost;}
+//    static MainHost* Create(QObject *parent = 0);
+    MainHost(Vst *myVstPlugin = 0, QObject *parent = 0);
     ~MainHost();
 
     void Open();
@@ -75,16 +81,31 @@ public:
     QSharedPointer<Connectables::MainContainer> insertContainer;
     QSharedPointer<Connectables::ParkingContainer> parkingContainer;
 
-    PathSolver solver;
+    PathSolver *solver;
 
     QTimer *updateViewTimer;
 
-    static HostModel * GetModel() {return model;}
-    static HostModel * GetParkingModel() {return modelParking;}
+    HostModel * GetModel() {return model;}
+    HostModel * GetParkingModel() {return modelParking;}
 
     int filePass;
 
     Programs *programList;
+
+#ifdef VST_PLUGIN
+    bool setVstDeviceIn(Connectables::VstAudioDeviceIn *dev);
+    bool setVstDeviceOut(Connectables::VstAudioDeviceOut *dev);
+#else
+    AudioDevices *audioDevices;
+    MidiDevices *midiDevices;
+#endif
+
+    Connectables::ObjectFactory *objFactory;
+    MainWindow *mainWindow;
+
+#ifdef VSTSDK
+    vst::CVSTHost *vstHost;
+#endif
 
 private:
     void SetupMainContainer();
@@ -100,12 +121,9 @@ private:
     QMap<int,Connectables::Object*>listContainers;
     QMap<ConnectionInfo,Connectables::Pin*>listPins;
 
-#ifdef VSTSDK
-    vst::CVSTHost vstHost;
-#endif
 
     hashCables workingListOfCables;
-    QMutex mutexListCables;
+    QMutex *mutexListCables;
     Renderer renderer;
     QMutex mutexRender;
     QMutex mutexProgChange;
@@ -119,10 +137,12 @@ private:
 
     int progToChange;
 
-    MainHost(QObject *parent = 0);
-    static MainHost *theHost;
-    static HostModel *model;
-    static HostModel *modelParking;
+
+    MainHost *theHost;
+    HostModel *model;
+    HostModel *modelParking;
+
+    Vst *myVstPlugin;
 
 signals:
     void SampleRateChanged(float rate);
@@ -131,6 +151,7 @@ signals:
     void ObjectRemoved(int contrainerId, int obj);
     void SolverToUpdate();
     void OnAudioDeviceToggleInUse(const ObjectInfo &objInfo, bool inUse);
+
 
 public slots:
     void OnCableAdded(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);

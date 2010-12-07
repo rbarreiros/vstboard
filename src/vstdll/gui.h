@@ -32,29 +32,26 @@ class Gui : public QObject, public AEffEditor
 {
     Q_OBJECT
     QWinWidget *widget;
-    MainWindow *win;
+//    MainWindow *win;
 
     AudioEffectX* effect;
 
 public:
-    Gui(AudioEffectX* effect)
-        : widget(0), win(0), effect(effect)
-    {
-    }
+    Gui(AudioEffectX* effect);
+    ~Gui();
 
-    ~Gui()
-    {
-    }
 
     virtual bool open(void* ptr);
     virtual bool getRect (ERect** rect);
     virtual void close();
+    void SetMainWindow(MainWindow *win) {myWindow = win;}
 
 signals:
     void update(float value);
 
 protected:
     ERect rectangle;
+    MainWindow *myWindow;
 };
 
 void clientResize(HWND h_parent, int width, int height);

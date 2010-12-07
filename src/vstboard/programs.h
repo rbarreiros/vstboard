@@ -5,11 +5,12 @@
 #include "models/programsmodel.h"
 //#include <QObject>
 
+class MainHost;
 class Programs : public QObject
 {
     Q_OBJECT
 public:
-    explicit Programs(QObject *parent = 0);
+    explicit Programs(MainHost *parent = 0);
     void BuildModel();
     ProgramsModel *GetModel() {return model;}
     QStandardItem *CopyProgram(QStandardItem *progOri);
@@ -24,6 +25,7 @@ private:
     QStandardItem *currentPrg;
 //    unsigned int currentProgId;
     unsigned int nextProgId;
+    MainHost *myHost;
 
 signals:
     void ProgChanged(const QModelIndex &prgIndex);

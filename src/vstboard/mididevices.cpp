@@ -2,21 +2,13 @@
 #include "connectables/objectinfo.h"
 #include "mainhost.h"
 
-MidiDevices * MidiDevices::theMidiDevices=0;
-QList< QSharedPointer<Connectables::MidiDevice> >MidiDevices::listOpenedMidiDevices;
-QMutex MidiDevices::mutexListMidi;
+//QList< QSharedPointer<Connectables::MidiDevice> >MidiDevices::listOpenedMidiDevices;
+//QMutex MidiDevices::mutexListMidi;
 
-MidiDevices *MidiDevices::Create(QObject *parent)
-{
-    if(!theMidiDevices)
-        theMidiDevices = new MidiDevices(parent);
-
-    return theMidiDevices;
-}
-
-MidiDevices::MidiDevices(QObject *parent) :
-        QObject(parent),
-        model(0)
+MidiDevices::MidiDevices(MainHost *myHost) :
+        QObject(myHost),
+        model(0),
+        myHost(myHost)
 {
     //GetModel();
 }
@@ -58,7 +50,7 @@ ListMidiInterfacesModel* MidiDevices::GetModel()
         return 0;
     }
 
-    PtError ptRet = Pt_Start(1, MidiDevices::MidiReceive_poll,0);
+    PtError ptRet = Pt_Start(1, MidiDevices::MidiReceive_poll,this);
     if(ptRet!=ptNoError) {
         QMessageBox msgBox;
         msgBox.setText(tr("Unable to start midi engine"));
@@ -147,8 +139,10 @@ void MidiDevices::MidiReceive_poll(PtTimestamp timestamp, void *userData)
     PmEvent buffer;
     PmError result = pmNoError;
 
-    MidiDevices::mutexListMidi.lock();
-    foreach(QSharedPointer<Connectables::Object> objPtr, MidiDevices::listOpenedMidiDevices) {
+    MidiDevices *devices = static_cast<MidiDevices*>(userData);
+
+    devices->mutexListMidi.lock();
+    foreach(QSharedPointer<Connectables::Object> objPtr, devices->listOpenedMidiDevices) {
         if(objPtr.isNull())
             continue;
         if(objPtr->GetSleep())
@@ -191,5 +185,5 @@ void MidiDevices::MidiReceive_poll(PtTimestamp timestamp, void *userData)
 
         device->Unlock();
     }
-    MidiDevices::mutexListMidi.unlock();
+    devices->mutexListMidi.unlock();
 }

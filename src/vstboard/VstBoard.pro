@@ -144,10 +144,6 @@ SOURCES += main.cpp \
     views/outlinedtext.cpp \
     views/maingraphicsview.cpp \
     views/configdialog.cpp \
-    views/configlineedit.cpp \
-    mainconfig.cpp \
-    models/shortcutdelegate.cpp \
-    shortcutkeys.cpp \
     views/textbutton.cpp \
     views/containerview.cpp \
     connectables/container.cpp \
@@ -223,10 +219,6 @@ HEADERS += mainwindow.h \
     views/outlinedtext.h \
     views/maingraphicsview.h \
     views/configdialog.h \
-    views/configlineedit.h \
-    mainconfig.h \
-    models/shortcutdelegate.h \
-    shortcutkeys.h \
     views/textbutton.h \
     views/containerview.h \
     connectables/container.h \

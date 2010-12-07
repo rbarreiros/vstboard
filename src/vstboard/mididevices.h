@@ -11,25 +11,23 @@ class MidiDevices : public QObject
 {
 Q_OBJECT
 public:
-    inline static MidiDevices *Get() {return theMidiDevices;}
-    static MidiDevices *Create(QObject *parent=0);
+    explicit MidiDevices(MainHost *myHost);
     ~MidiDevices();
 
     ListMidiInterfacesModel* GetModel();
 
-    static void OpenDevice(QSharedPointer<Connectables::Object> objPtr);
-    static void CloseDevice(QSharedPointer<Connectables::Object> objPtr);
+    void OpenDevice(QSharedPointer<Connectables::Object> objPtr);
+    void CloseDevice(QSharedPointer<Connectables::Object> objPtr);
 
 private:
-    explicit MidiDevices(QObject *parent=0);
     void BuildModel();
     static void MidiReceive_poll(PtTimestamp timestamp, void *userData);
-    static QList< QSharedPointer<Connectables::MidiDevice> >listOpenedMidiDevices;
+    QList< QSharedPointer<Connectables::MidiDevice> >listOpenedMidiDevices;
 
     ListMidiInterfacesModel *model;
 
-    static QMutex mutexListMidi;
-    static MidiDevices *theMidiDevices;
+    QMutex mutexListMidi;
+    MainHost *myHost;
 };
 
 #endif // MIDIDEVICES_H

@@ -21,7 +21,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "globals.h"
-#include "mainconfig.h"
 #include "projectfile/setupfile.h"
 #include "projectfile/projectfile.h"
 #include "views/configdialog.h"
@@ -30,25 +29,15 @@
 #include "views/splash.h"
 //#include "imagecollection.h"
 
-MainWindow *MainWindow::theMainWindow=0;
 
-MainWindow *MainWindow::Get(QWidget *parent)
-{
-    if(!theMainWindow)
-        theMainWindow = new MainWindow(parent);
-
-    return theMainWindow;
-}
-
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
         QMainWindow(parent),
-        ui(new Ui::MainWindow)
+        ui(new Ui::MainWindow),
+        myHost(myHost)
 {
-    MainWindow::theMainWindow=this;
+    myHost->mainWindow=this;
     ui->setupUi(this);
     setWindowTitle(APP_NAME);
-
-    mainHost = MainHost::Create(this);
 
 //    ImageCollection::Create(this);
 
@@ -56,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
             ui->actionTool_bar, SLOT(setChecked(bool)));
 
     //audio devices
-    ui->treeAudioInterfaces->setModel(AudioDevices::Get()->GetModel());
+    ui->treeAudioInterfaces->setModel(myHost->audioDevices->GetModel());
     ui->treeAudioInterfaces->header()->setResizeMode(0,QHeaderView::Stretch);
     ui->treeAudioInterfaces->header()->setResizeMode(1,QHeaderView::Fixed);
     ui->treeAudioInterfaces->header()->setResizeMode(2,QHeaderView::Fixed);
@@ -67,7 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //    ui->treeAudioInterfaces->expandAll();
 
     //midi devices
-    ui->treeMidiInterfaces->setModel(MidiDevices::Get()->GetModel());
+    ui->treeMidiInterfaces->setModel(myHost->midiDevices->GetModel());
     ui->treeMidiInterfaces->header()->setResizeMode(0,QHeaderView::Stretch);
     ui->treeMidiInterfaces->header()->setResizeMode(1,QHeaderView::Fixed);
     ui->treeMidiInterfaces->header()->setResizeMode(2,QHeaderView::Fixed);
@@ -78,11 +67,11 @@ MainWindow::MainWindow(QWidget *parent) :
     BuildListTools();
 
     //programs
-    ui->Programs->SetModel(mainHost->programList->GetModel());
-    connect(mainHost->programList, SIGNAL(ProgChanged(QModelIndex)),
+    ui->Programs->SetModel(myHost->programList->GetModel());
+    connect(myHost->programList, SIGNAL(ProgChanged(QModelIndex)),
             ui->Programs,SLOT(OnProgChange(QModelIndex)));
     connect(ui->Programs,SIGNAL(ChangeProg(QModelIndex)),
-            mainHost->programList,SLOT(ChangeProg(QModelIndex)));
+            myHost->programList,SLOT(ChangeProg(QModelIndex)));
 
     //vst plugins browser
     listVstPluginsModel.setReadOnly(true);
@@ -101,31 +90,31 @@ MainWindow::MainWindow(QWidget *parent) :
 //    connect(timerCpuLoad, SIGNAL(timeout()),
 //            this, SLOT(UpdateCpuLoad()));
 
-    mySceneView = new View::SceneView(ui->hostView, ui->projectView, ui->programView, ui->insertView, this);
-    mySceneView->setModel(mainHost->GetModel());
+    mySceneView = new View::SceneView(myHost->objFactory, ui->hostView, ui->projectView, ui->programView, ui->insertView, this);
+    mySceneView->setModel(myHost->GetModel());
 
-    ui->solverView->setModel(&mainHost->solver.model);
+    ui->solverView->setModel(&myHost->solver->model);
 
-    mainHost->SetSampleRate( ConfigDialog::defaultSampleRate() );
-    mainHost->Open();
+    myHost->SetSampleRate( ConfigDialog::defaultSampleRate() );
+    myHost->Open();
 
-    ui->treeHostModel->setModel(mainHost->GetModel());
-    ui->listParking->setModel(mainHost->GetParkingModel());
-    ui->listParking->setRootIndex(mainHost->GetParkingModel()->invisibleRootItem()->child(0)->index());
+    ui->treeHostModel->setModel(myHost->GetModel());
+    ui->listParking->setModel(myHost->GetParkingModel());
+    ui->listParking->setRootIndex(myHost->GetParkingModel()->invisibleRootItem()->child(0)->index());
 
     readSettings();
 
     //load default setup file
     currentSetupFile = ConfigDialog::defaultSetupFile();
     if(!currentSetupFile.isEmpty()) {
-        if(!SetupFile::LoadFromFile(currentSetupFile))
+        if(!SetupFile::LoadFromFile(myHost,currentSetupFile))
             currentSetupFile = "";
     }
 
     //load default project file
     currentProjectFile = ConfigDialog::defaultProjectFile();
     if(!currentProjectFile.isEmpty()) {
-        if(!ProjectFile::LoadFromFile(currentProjectFile))
+        if(!ProjectFile::LoadFromFile(myHost,currentProjectFile))
             currentProjectFile = "";
     }
 }
@@ -134,7 +123,6 @@ MainWindow::~MainWindow()
 {
     if(ui)
         delete ui;
-    theMainWindow = 0;
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -219,7 +207,7 @@ void MainWindow::on_actionLoad_triggered()
         return;
 
     if(fileName.endsWith(PROJECT_FILE_EXTENSION, Qt::CaseInsensitive)) {
-        if(ProjectFile::LoadFromFile(fileName)) {
+        if(ProjectFile::LoadFromFile(myHost,fileName)) {
             ConfigDialog::AddRecentProjectFile(fileName);
             currentProjectFile = fileName;
             updateRecentFileActions();
@@ -228,7 +216,7 @@ void MainWindow::on_actionLoad_triggered()
     }
 
     if(fileName.endsWith(SETUP_FILE_EXTENSION, Qt::CaseInsensitive)) {
-        if(SetupFile::LoadFromFile(fileName)) {
+        if(SetupFile::LoadFromFile(myHost,fileName)) {
             ConfigDialog::AddRecentSetupFile(fileName);
             currentSetupFile = fileName;
             updateRecentFileActions();
@@ -244,7 +232,7 @@ void MainWindow::on_actionLoad_triggered()
 
 void MainWindow::on_actionNew_triggered()
 {
-    ProjectFile::Clear();
+    ProjectFile::Clear(myHost);
     ConfigDialog::AddRecentProjectFile("");
     currentProjectFile = "";
     updateRecentFileActions();
@@ -256,7 +244,7 @@ void MainWindow::on_actionSave_triggered()
         on_actionSave_Project_As_triggered();
         return;
     }
-    ProjectFile::SaveToFile(currentProjectFile);
+    ProjectFile::SaveToFile(myHost,currentProjectFile);
 }
 
 void MainWindow::on_actionSave_Project_As_triggered()
@@ -273,7 +261,7 @@ void MainWindow::on_actionSave_Project_As_triggered()
         fileName += PROJECT_FILE_EXTENSION;
     }
 
-    if(ProjectFile::SaveToFile(fileName)) {
+    if(ProjectFile::SaveToFile(myHost,fileName)) {
         settings.setValue("lastProjectDir",QFileInfo(fileName).absolutePath());
         ConfigDialog::AddRecentProjectFile(fileName);
         currentProjectFile = fileName;
@@ -283,7 +271,7 @@ void MainWindow::on_actionSave_Project_As_triggered()
 
 void MainWindow::on_actionNew_Setup_triggered()
 {
-    SetupFile::Clear();
+    SetupFile::Clear(myHost);
     ConfigDialog::AddRecentSetupFile("");
     currentSetupFile = "";
     updateRecentFileActions();
@@ -296,7 +284,7 @@ void MainWindow::on_actionSave_Setup_triggered()
         return;
     }
 
-    SetupFile::SaveToFile(currentSetupFile);
+    SetupFile::SaveToFile(myHost,currentSetupFile);
 }
 
 void MainWindow::on_actionSave_Setup_As_triggered()
@@ -314,7 +302,7 @@ void MainWindow::on_actionSave_Setup_As_triggered()
     }
 
 
-    if(SetupFile::SaveToFile(fileName)) {
+    if(SetupFile::SaveToFile(myHost,fileName)) {
         settings.setValue("lastSetupDir",QFileInfo(fileName).absolutePath());
         ConfigDialog::AddRecentSetupFile(fileName);
         currentSetupFile = fileName;
@@ -324,13 +312,13 @@ void MainWindow::on_actionSave_Setup_As_triggered()
 
 void MainWindow::on_actionShortcuts_toggled(bool onOff)
 {
-    MainConfig::Get()->shortcutConfig = onOff;
+//    myHost->mainConfig->shortcutConfig = onOff;
     ui->dockMidiDevices->setMouseTracking(onOff);
 }
 
 void MainWindow::on_actionConfig_triggered()
 {
-    ConfigDialog conf(this);
+    ConfigDialog conf(myHost,this);
     conf.exec();
 }
 
@@ -524,7 +512,7 @@ void MainWindow::openRecentSetup()
 
      QString fileName = action->data().toString();
 
-     if(SetupFile::LoadFromFile(fileName)) {
+     if(SetupFile::LoadFromFile(myHost,fileName)) {
          ConfigDialog::AddRecentSetupFile(fileName);
          currentSetupFile=fileName;
          updateRecentFileActions();
@@ -539,7 +527,7 @@ void MainWindow::openRecentProject()
 
      QString fileName = action->data().toString();
 
-     if(ProjectFile::LoadFromFile(fileName)) {
+     if(ProjectFile::LoadFromFile(myHost,fileName)) {
          ConfigDialog::AddRecentProjectFile(fileName);
          currentProjectFile=fileName;
          updateRecentFileActions();
@@ -548,12 +536,12 @@ void MainWindow::openRecentProject()
 
 void MainWindow::on_actionRefresh_Audio_devices_triggered()
 {
-    ui->treeAudioInterfaces->setModel(AudioDevices::Get()->GetModel());
+    ui->treeAudioInterfaces->setModel(myHost->audioDevices->GetModel());
 }
 
 void MainWindow::on_actionRefresh_Midi_devices_triggered()
 {
-    ui->treeMidiInterfaces->setModel(MidiDevices::Get()->GetModel());
+    ui->treeMidiInterfaces->setModel(myHost->midiDevices->GetModel());
 }
 
 

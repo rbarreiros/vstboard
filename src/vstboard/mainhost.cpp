@@ -22,44 +22,52 @@
 #include "connectables/mididevice.h"
 #include "mainwindow.h"
 #include "connectables/container.h"
+//#include "mainconfig.h"
+
 #ifndef VST_PLUGIN
     #include "connectables/audiodevice.h"
+    #include "audiodevices.h"
+#else
+    #include "vst.h"
 #endif
 
 #ifdef VSTSDK
 #include "connectables/vstplugin.h"
 #endif
 
-MainHost *MainHost::theHost = 0;
-HostModel *MainHost::model = 0;
-HostModel *MainHost::modelParking = 0;
+//MainHost *MainHost::theHost = 0;
+//HostModel *MainHost::model = 0;
+//HostModel *MainHost::modelParking = 0;
 
-MainHost* MainHost::Create(QObject *parent)
-{
-    if(!theHost)
-        theHost = new MainHost(parent);
+//MainHost* MainHost::Create(QObject *parent)
+//{
+//    if(!theHost)
+//        theHost = new MainHost(parent);
 
-    return theHost;
-}
+//    return theHost;
+//}
 
-MainHost::MainHost(QObject *parent) :
+MainHost::MainHost(Vst *myVstPlugin, QObject *parent) :
     QObject(parent),
-    mainContainer(0),
-    hostContainer(0),
-    projectContainer(0),
-    programContainer(0),
-    insertContainer(0),
+    solver(new PathSolver(this)),
     filePass(0),
+    objFactory(new Connectables::ObjectFactory(this)),
     solverNeedAnUpdate(false),
     solverUpdateEnabled(true),
-    mutexListCables(QMutex::Recursive),
-    progToChange(-1)
+    mutexListCables(new QMutex(QMutex::Recursive)),
+    progToChange(-1),
+    myVstPlugin(myVstPlugin)
 {
+    if(!vst::CVSTHost::Get())
+        vstHost = new vst::CVSTHost();
+    else
+        vstHost = vst::CVSTHost::Get();
+
     model = new HostModel(this);
     model->setColumnCount(1);
     modelParking = new HostModel(this);
     modelParking->setColumnCount(1);
-    Connectables::ObjectFactory::Create(this);
+//    Connectables::ObjectFactory::Create(this);
 
     sampleRate = 44100.0;
     bufferSize = 1;
@@ -69,12 +77,12 @@ MainHost::MainHost(QObject *parent) :
             this, SLOT(SetProgram(QModelIndex)));
 
 #ifndef VST_PLUGIN
-            MidiDevices::Create(this);
+    midiDevices = new MidiDevices(this);
 
-    AudioDevices * devices = AudioDevices::Create(this);
+    audioDevices = new AudioDevices(this);
     connect(this,SIGNAL(OnAudioDeviceToggleInUse(ObjectInfo,bool)),
-            devices,SLOT(OnToggleDeviceInUse(ObjectInfo,bool)));
-    connect(&devices->fakeRenderTimer,SIGNAL(timeout()),
+            audioDevices,SLOT(OnToggleDeviceInUse(ObjectInfo,bool)));
+    connect(&audioDevices->fakeRenderTimer,SIGNAL(timeout()),
             this, SLOT(Render()));
 #endif
 
@@ -84,10 +92,10 @@ MainHost::MainHost(QObject *parent) :
     updateViewTimer = new QTimer(this);
     updateViewTimer->start(40);
 
-    connect(&solver,SIGNAL(NewRenderingOrder(orderedNodes*)),
+    connect(solver,SIGNAL(NewRenderingOrder(orderedNodes*)),
             &renderer, SLOT(OnNewRenderingOrder(orderedNodes*)));
 
-    connect(&solver,SIGNAL(NewRenderingOrder(orderedNodes*)),
+    connect(solver,SIGNAL(NewRenderingOrder(orderedNodes*)),
             this, SLOT(OnNewRenderingOrder(orderedNodes*)));
 
     connect(this,SIGNAL(SolverToUpdate()),
@@ -102,11 +110,11 @@ MainHost::~MainHost()
     updateViewTimer->stop();
     updateViewTimer->deleteLater();
 
-    mutexListCables.lock();
+    mutexListCables->lock();
     workingListOfCables.clear();
-    mutexListCables.unlock();
+    mutexListCables->unlock();
 
-    solver.Resolve(workingListOfCables);
+    solver->Resolve(workingListOfCables);
     renderer.Clear();
 
     mainContainer.clear();
@@ -117,7 +125,7 @@ MainHost::~MainHost()
     parkingContainer.clear();
 
 //    delete listMidiDevices;
-    delete Connectables::ObjectFactory::Get();
+    delete objFactory;
     theHost = 0;
 }
 
@@ -144,7 +152,7 @@ void MainHost::SetupMainContainer()
     info.name = "mainContainer";
     info.forcedObjId = FixedObjId::mainContainer;
 
-    mainContainer = Connectables::ObjectFactory::Get()->NewObject(info).staticCast< Connectables::MainContainer >();
+    mainContainer = objFactory->NewObject(info).staticCast< Connectables::MainContainer >();
     if(mainContainer.isNull())
         return;
 
@@ -169,7 +177,7 @@ void MainHost::SetupHostContainer()
     info.name = "hostContainer";
     info.forcedObjId = FixedObjId::hostContainer;
 
-    hostContainer = Connectables::ObjectFactory::Get()->NewObject(info).staticCast<Connectables::MainContainer>();
+    hostContainer = objFactory->NewObject(info).staticCast<Connectables::MainContainer>();
     if(hostContainer.isNull())
         return;
 
@@ -186,7 +194,7 @@ void MainHost::SetupHostContainer()
     send.objType = ObjType::BridgeSend;
     send.forcedObjId = FixedObjId::hostContainerSend;
 
-    bridge = Connectables::ObjectFactory::Get()->NewObject(send);
+    bridge = objFactory->NewObject(send);
     hostContainer->AddObject( bridge );
     bridge->SetBridgePinsOutVisible(false);
     hostContainer->bridgeSend = bridge;
@@ -198,7 +206,7 @@ void MainHost::SetupHostContainer()
     retrn.objType = ObjType::BridgeReturn;
     retrn.forcedObjId = FixedObjId::hostContainerReturn;
 
-    bridge = Connectables::ObjectFactory::Get()->NewObject(retrn);
+    bridge = objFactory->NewObject(retrn);
     hostContainer->AddObject( bridge );
     bridge->SetBridgePinsInVisible(false);
     hostContainer->bridgeReturn = bridge;
@@ -227,7 +235,7 @@ void MainHost::SetupProjectContainer()
     info.name = "projectContainer";
     info.forcedObjId = FixedObjId::projectContainer;
 
-    projectContainer = Connectables::ObjectFactory::Get()->NewObject(info).staticCast<Connectables::MainContainer>();
+    projectContainer = objFactory->NewObject(info).staticCast<Connectables::MainContainer>();
     if(projectContainer.isNull())
         return;
 
@@ -243,7 +251,7 @@ void MainHost::SetupProjectContainer()
     in.objType = ObjType::BridgeIn;
     in.forcedObjId = FixedObjId::projectContainerIn;
 
-    bridge = Connectables::ObjectFactory::Get()->NewObject(in);
+    bridge = objFactory->NewObject(in);
     projectContainer->AddObject( bridge );
     bridge->SetBridgePinsInVisible(false);
     projectContainer->bridgeIn = bridge;
@@ -255,7 +263,7 @@ void MainHost::SetupProjectContainer()
     out.objType = ObjType::BridgeOut;
     out.forcedObjId = FixedObjId::projectContainerOut;
 
-    bridge = Connectables::ObjectFactory::Get()->NewObject(out);
+    bridge = objFactory->NewObject(out);
     projectContainer->AddObject( bridge );
     bridge->SetBridgePinsOutVisible(false);
     projectContainer->bridgeOut = bridge;
@@ -274,7 +282,7 @@ void MainHost::SetupProjectContainer()
     send.objType = ObjType::BridgeSend;
     send.forcedObjId = FixedObjId::projectContainerSend;
 
-    bridge = Connectables::ObjectFactory::Get()->NewObject(send);
+    bridge = objFactory->NewObject(send);
     projectContainer->AddObject( bridge );
     bridge->SetBridgePinsOutVisible(false);
     projectContainer->bridgeSend = bridge;
@@ -286,7 +294,7 @@ void MainHost::SetupProjectContainer()
     retrn.objType = ObjType::BridgeReturn;
     retrn.forcedObjId = FixedObjId::projectContainerReturn;
 
-    bridge = Connectables::ObjectFactory::Get()->NewObject(retrn);
+    bridge = objFactory->NewObject(retrn);
     projectContainer->AddObject( bridge );
     bridge->SetBridgePinsInVisible(false);
     projectContainer->bridgeReturn = bridge;
@@ -318,7 +326,7 @@ void MainHost::SetupProgramContainer()
     info.name = "programContainer";
     info.forcedObjId = FixedObjId::programContainer;
 
-    programContainer = Connectables::ObjectFactory::Get()->NewObject(info).staticCast<Connectables::MainContainer>();
+    programContainer = objFactory->NewObject(info).staticCast<Connectables::MainContainer>();
     if(programContainer.isNull())
         return;
 
@@ -334,7 +342,7 @@ void MainHost::SetupProgramContainer()
     in.objType = ObjType::BridgeIn;
     in.forcedObjId = FixedObjId::programContainerIn;
 
-    bridge = Connectables::ObjectFactory::Get()->NewObject(in);
+    bridge = objFactory->NewObject(in);
     programContainer->AddObject( bridge );
     bridge->SetBridgePinsInVisible(false);
     programContainer->bridgeIn = bridge;
@@ -346,7 +354,7 @@ void MainHost::SetupProgramContainer()
     out.objType = ObjType::BridgeOut;
     out.forcedObjId = FixedObjId::programContainerOut;
 
-    bridge = Connectables::ObjectFactory::Get()->NewObject(out);
+    bridge = objFactory->NewObject(out);
     programContainer->AddObject( bridge );
     bridge->SetBridgePinsOutVisible(false);
     programContainer->bridgeOut = bridge;
@@ -365,7 +373,7 @@ void MainHost::SetupProgramContainer()
     send.objType = ObjType::BridgeSend;
     send.forcedObjId = FixedObjId::programContainerSend;
 
-    bridge = Connectables::ObjectFactory::Get()->NewObject(send);
+    bridge = objFactory->NewObject(send);
     programContainer->AddObject( bridge );
     bridge->SetBridgePinsOutVisible(false);
     programContainer->bridgeSend = bridge;
@@ -377,7 +385,7 @@ void MainHost::SetupProgramContainer()
     retrn.objType = ObjType::BridgeReturn;
     retrn.forcedObjId = FixedObjId::programContainerReturn;
 
-    bridge = Connectables::ObjectFactory::Get()->NewObject(retrn);
+    bridge = objFactory->NewObject(retrn);
     programContainer->AddObject( bridge );
     bridge->SetBridgePinsInVisible(false);
     programContainer->bridgeReturn = bridge;
@@ -403,7 +411,7 @@ void MainHost::SetupInsertContainer()
     info.name = "insertContainer";
     info.forcedObjId = FixedObjId::insertContainer;
 
-    insertContainer = Connectables::ObjectFactory::Get()->NewObject(info).staticCast<Connectables::MainContainer>();
+    insertContainer = objFactory->NewObject(info).staticCast<Connectables::MainContainer>();
     if(insertContainer.isNull())
         return;
 
@@ -419,7 +427,7 @@ void MainHost::SetupInsertContainer()
     in.objType = ObjType::BridgeIn;
     in.forcedObjId = FixedObjId::insertContainerIn;
 
-    bridge = Connectables::ObjectFactory::Get()->NewObject(in);
+    bridge = objFactory->NewObject(in);
     insertContainer->AddObject( bridge );
     bridge->SetBridgePinsInVisible(false);
     insertContainer->bridgeIn = bridge;
@@ -431,7 +439,7 @@ void MainHost::SetupInsertContainer()
     out.objType = ObjType::BridgeOut;
     out.forcedObjId = FixedObjId::insertContainerOut;
 
-    bridge = Connectables::ObjectFactory::Get()->NewObject(out);
+    bridge = objFactory->NewObject(out);
     insertContainer->AddObject( bridge );
     bridge->SetBridgePinsOutVisible(false);
     insertContainer->bridgeOut = bridge;
@@ -459,7 +467,7 @@ void MainHost::SetupParking()
     info.name = "parkingContainer";
     info.forcedObjId = FixedObjId::parkingContainer;
 
-    parkingContainer = Connectables::ObjectFactory::Get()->NewObject(info).staticCast< Connectables::ParkingContainer >();
+    parkingContainer = objFactory->NewObject(info).staticCast< Connectables::ParkingContainer >();
     parkingContainer->SetParentModeIndex( modelParking->invisibleRootItem()->index() );
 }
 
@@ -521,9 +529,9 @@ void MainHost::UpdateSolver(bool forceUpdate)
         programContainer->LoadProgram(prg);
     }
 
-    mutexListCables.lock();
-        solver.Resolve(workingListOfCables);
-    mutexListCables.unlock();
+    mutexListCables->lock();
+        solver->Resolve(workingListOfCables);
+    mutexListCables->unlock();
 
     mutexProgChange.lock();
         //solver is up to date
@@ -546,12 +554,12 @@ void MainHost::SetProgram(const QModelIndex &prgIndex)
 
 void MainHost::SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum msgType,void *data)
 {
-    QMutexLocker lock(&mutexListCables);
+    QMutexLocker lock(mutexListCables);
 
 
     hashCables::const_iterator i = workingListOfCables.constFind(senderPin);
     while (i != workingListOfCables.constEnd()  && i.key() == senderPin) {
-        Connectables::Pin *pin = Connectables::ObjectFactory::Get()->GetPin(i.value());
+        Connectables::Pin *pin = objFactory->GetPin(i.value());
         if(!pin) {
             debug("MainHost::SendMsg : unknown pin")
             return;
@@ -586,7 +594,7 @@ void MainHost::Render(unsigned long samples)
         samples=bufferSize;
 
 #ifdef VSTSDK
-    vstHost.UpdateTimeInfo(timeFromStart.elapsed(), samples, sampleRate);
+    vstHost->UpdateTimeInfo(timeFromStart.elapsed(), samples, sampleRate);
 #endif
 
     mutexRender.lock();
@@ -607,7 +615,7 @@ void MainHost::OnObjectAdded(QSharedPointer<Connectables::Object> objPtr)
 
 #ifndef VST_PLUGIN
     if(objPtr->info().objType == ObjType::MidiInterface)
-        MidiDevices::OpenDevice(objPtr);
+        midiDevices->OpenDevice(objPtr);
 #endif
 
     connect(this,SIGNAL(SampleRateChanged(float)),
@@ -633,7 +641,7 @@ void MainHost::OnObjectRemoved(QSharedPointer<Connectables::Object> objPtr, Conn
             objPtr.data(),SLOT(SetBufferSize(long)));
 
 #ifndef VST_PLUGIN
-    MidiDevices::CloseDevice(objPtr);
+    midiDevices->CloseDevice(objPtr);
 #endif
 
     //if the object comes from a programmable container : don't delete it, store it in the parking container
@@ -646,18 +654,18 @@ void MainHost::OnObjectRemoved(QSharedPointer<Connectables::Object> objPtr, Conn
 
 void MainHost::OnCableAdded(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
 {
-    mutexListCables.lock();
+    mutexListCables->lock();
     workingListOfCables.insert(outputPin,inputPin);
-    mutexListCables.unlock();
+    mutexListCables->unlock();
 
     solverNeedAnUpdate = true;
 }
 
 void MainHost::OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
 {
-    mutexListCables.lock();
+    mutexListCables->lock();
     workingListOfCables.remove(outputPin,inputPin);
-    mutexListCables.unlock();
+    mutexListCables->unlock();
 
     solverNeedAnUpdate = true;
 }
@@ -665,10 +673,24 @@ void MainHost::OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionI
 void MainHost::SetTempo(int tempo, int sign1, int sign2)
 {
 #ifdef VSTSDK
-    vstHost.vstTimeInfo.tempo = tempo;
-    vstHost.vstTimeInfo.timeSigNumerator = sign1;
-    vstHost.vstTimeInfo.timeSigDenominator = sign2;
+    vstHost->vstTimeInfo.tempo = tempo;
+    vstHost->vstTimeInfo.timeSigNumerator = sign1;
+    vstHost->vstTimeInfo.timeSigDenominator = sign2;
 #endif
 }
 
+#ifdef VST_PLUGIN
+    bool MainHost::setVstDeviceIn(Connectables::VstAudioDeviceIn *dev)
+    {
+        if(myVstPlugin)
+            return myVstPlugin->setDeviceIn(dev);
+        return false;
+    }
 
+    bool MainHost::setVstDeviceOut(Connectables::VstAudioDeviceOut *dev)
+    {
+        if(myVstPlugin)
+            return myVstPlugin->setDeviceOut(dev);
+        return false;
+    }
+#endif

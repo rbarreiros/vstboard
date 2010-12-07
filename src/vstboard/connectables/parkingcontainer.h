@@ -30,7 +30,7 @@ namespace Connectables {
     class ParkingContainer : public Container
     {
     public:
-        ParkingContainer(int index, const ObjectInfo &info);
+        ParkingContainer(MainHost *myHost,int index, const ObjectInfo &info);
         ~ParkingContainer();
 
         void SetParentModeIndex(const QModelIndex &parentIndex);

@@ -22,14 +22,14 @@
 #define PROJECTFILE_H
 
 #include "../precomp.h"
-
+class MainHost;
 class ProjectFile : public QObject
 {
 Q_OBJECT
 public:
-    static bool SaveToFile(QString filePath);
-    static bool LoadFromFile(QString filePath);
-    static void Clear();
+    static bool SaveToFile(MainHost *myHost,QString filePath);
+    static bool LoadFromFile(MainHost *myHost,QString filePath);
+    static void Clear(MainHost *myHost);
 };
 
 #endif // PROJECTFILE_H

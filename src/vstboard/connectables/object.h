@@ -40,6 +40,7 @@
 #include "objectinfo.h"
 
 class SolverNode;
+class MainHost;
 
 namespace Connectables {
 
@@ -51,7 +52,7 @@ namespace Connectables {
     Q_OBJECT
     public:
 
-        Object(int index, const ObjectInfo &info);
+        Object(MainHost *host, int index, const ObjectInfo &info);
         virtual ~Object();
 
         virtual bool Open();
@@ -120,6 +121,7 @@ namespace Connectables {
         virtual void GetContainerAttribs(ObjectContainerAttribs &attr);
 
         QString errorMessage;
+        inline MainHost *getHost() {return myHost;}
 
     protected:
         QList<AudioPinIn*>listAudioPinIn;
@@ -168,6 +170,8 @@ namespace Connectables {
         QList<QVariant>listIsLearning;
 //        bool hasEditor;
 //        bool canLearn;
+
+        MainHost *myHost;
 
     signals:
 //        void LearningModeChanged(int learn);

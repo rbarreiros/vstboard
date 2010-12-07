@@ -43,26 +43,27 @@
 
 using namespace Connectables;
 
-ObjectFactory *ObjectFactory::theObjFactory=0;
+//ObjectFactory *ObjectFactory::theObjFactory=0;
 
-ObjectFactory * ObjectFactory::Create(QObject *parent)
+//ObjectFactory * ObjectFactory::Create(QObject *parent)
+//{
+//    if(!theObjFactory)
+//        theObjFactory = new ObjectFactory(parent);
+
+//    return theObjFactory;
+//}
+
+ObjectFactory::ObjectFactory(MainHost *myHost) :
+    QObject(myHost),
+    cptListObjects(50),
+    myHost(myHost)
 {
-    if(!theObjFactory)
-        theObjFactory = new ObjectFactory(parent);
 
-    return theObjFactory;
-}
-
-ObjectFactory::ObjectFactory(QObject *parent) :
-    QObject(parent),
-    cptListObjects(50)
-{
 }
 
 ObjectFactory::~ObjectFactory()
 {
     Clear();
-    theObjFactory=0;
 }
 
 void ObjectFactory::Clear()
@@ -169,15 +170,15 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
         case NodeType::container :
             switch(info.objType) {
                 case ObjType::Container:
-                    obj = new Container(objId, info);
+                    obj = new Container(myHost,objId, info);
                     break;
 
                 case ObjType::MainContainer:
-                    obj = new MainContainer(objId, info);
+                    obj = new MainContainer(myHost,objId, info);
                     break;
 
                 case ObjType::ParkingContainer:
-                    obj = new ParkingContainer(objId, info);
+                    obj = new ParkingContainer(myHost,objId, info);
                     break;
 
                 default :
@@ -187,7 +188,7 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
             break;
 
         case NodeType::bridge :
-            obj = new Bridge(objId, info);
+            obj = new Bridge(myHost,objId, info);
             break;
 
         case NodeType::object :
@@ -195,45 +196,45 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
             switch(info.objType) {
 #ifndef VST_PLUGIN
                 case ObjType::AudioInterfaceIn:
-                    obj = new AudioDeviceIn(objId, info);
+                    obj = new AudioDeviceIn(myHost,objId, info);
                     break;
 
                 case ObjType::AudioInterfaceOut:
-                    obj = new AudioDeviceOut(objId, info);
+                    obj = new AudioDeviceOut(myHost,objId, info);
                     break;
 #else
             case ObjType::AudioInterfaceIn:
-                obj = new VstAudioDeviceIn(objId, info);
+                obj = new VstAudioDeviceIn(myHost,objId, info);
                 break;
 
             case ObjType::AudioInterfaceOut:
-                obj = new VstAudioDeviceOut(objId, info);
+                obj = new VstAudioDeviceOut(myHost,objId, info);
                 break;
 #endif
                 case ObjType::MidiInterface:
-                    obj = new MidiDevice(objId, info);
+                    obj = new MidiDevice(myHost,objId, info);
                     break;
 
                 case ObjType::MidiSender:
-                    obj = new MidiSender(objId);
+                    obj = new MidiSender(myHost,objId);
                     break;
 
                 case ObjType::MidiToAutomation:
-                    obj = new MidiToAutomation(objId);
+                    obj = new MidiToAutomation(myHost,objId);
                     break;
 
                 case ObjType::HostController:
-                    obj = new HostController(objId);
+                    obj = new HostController(myHost,objId);
                     break;
 
         #ifdef VSTSDK
                 case ObjType::VstPlugin:
-                    obj = new VstPlugin(objId, info);
+                    obj = new VstPlugin(myHost,objId, info);
                     break;
         #endif
 
                 case ObjType::dummy :
-                    obj = new Object(objId, info);
+                    obj = new Object(myHost, objId, info);
                     break;
 
                 default:

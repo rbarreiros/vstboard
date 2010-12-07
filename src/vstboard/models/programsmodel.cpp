@@ -2,9 +2,10 @@
 #include "globals.h"
 #include "mainhost.h"
 
-ProgramsModel::ProgramsModel(QObject *parent) :
+ProgramsModel::ProgramsModel(MainHost *parent) :
     QStandardItemModel(parent),
-    movingItems(false)
+    movingItems(false),
+    myHost(parent)
 {
 }
 
@@ -17,7 +18,7 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
             QStandardItem *i = mod.invisibleRootItem()->child(0);
 
             if(i->data(UserRoles::nodeType).toInt() == NodeType::program) {
-                QStandardItem *cpy = MainHost::Get()->programList->CopyProgram(i);
+                QStandardItem *cpy = myHost->programList->CopyProgram(i);
                 QStandardItem *par = itemFromIndex(parent);
                 if(row==-1)
                     par->appendRow(cpy);
@@ -27,7 +28,7 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
             }
 
             if(i->data(UserRoles::nodeType).toInt() == NodeType::programGroup) {
-                QStandardItem *cpy = MainHost::Get()->programList->CopyGroup(i);
+                QStandardItem *cpy = myHost->programList->CopyGroup(i);
                 if(row==-1)
                     appendRow(cpy);
                 else
@@ -56,7 +57,7 @@ bool ProgramsModel::removeRows ( int row, int count, const QModelIndex & parent 
         movingItems=false;
     } else {
         QModelIndex idx = index(row,0,parent);
-        MainHost::Get()->programList->RemoveIndex(idx);
+        myHost->programList->RemoveIndex(idx);
     }
     return QStandardItemModel::removeRows(row,count,parent);
 }

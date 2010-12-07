@@ -27,8 +27,8 @@
 
 using namespace Connectables;
 
-Bridge::Bridge(int index, const ObjectInfo & info) :
-        Object(index, info)
+Bridge::Bridge(MainHost *myHost,int index, const ObjectInfo & info) :
+        Object(myHost,index, info)
 {
 
 }

@@ -25,12 +25,16 @@
 #include "../vstboard/connectables/connectioninfo.h"
 #include "maingraphicsview.h"
 
+namespace Connectables {
+    class ObjectFactory;
+}
+
 namespace View {
     class SceneView : public QAbstractItemView
     {
         Q_OBJECT
     public:
-        explicit SceneView(MainGraphicsView *viewHost, MainGraphicsView *viewProject, MainGraphicsView *viewProgram, MainGraphicsView *viewInsert,QWidget *parent = 0);
+        explicit SceneView(Connectables::ObjectFactory *objFactory, MainGraphicsView *viewHost, MainGraphicsView *viewProject, MainGraphicsView *viewProgram, MainGraphicsView *viewInsert,QWidget *parent = 0);
 
         QRect visualRect(const QModelIndex &index) const {return QRect();}
         void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible) {}
@@ -66,7 +70,7 @@ namespace View {
         QGraphicsScene *sceneProgram;
         QGraphicsScene *sceneInsert;
         QTimer *timerFalloff;
-
+        Connectables::ObjectFactory *objFactory;
     signals:
 //        void hostShown(bool shown);
 //        void projectShown(bool shown);

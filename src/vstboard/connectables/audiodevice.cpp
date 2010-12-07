@@ -35,7 +35,7 @@ QMutex AudioDevice::listDevMutex;
 int AudioDevice::countDevicesReady=0;
 int AudioDevice::countInputDevices=0;
 
-AudioDevice::AudioDevice(const ObjectInfo &info, QObject *parent) :
+AudioDevice::AudioDevice(MainHost *myHost,const ObjectInfo &info, QObject *parent) :
     QObject(parent),
     bufferReady(false),
     sampleRate(44100.0f),
@@ -45,7 +45,8 @@ AudioDevice::AudioDevice(const ObjectInfo &info, QObject *parent) :
     devOut(0),
     closed(true),
     objInfo(info),
-    cpuUsage(.0f)
+    cpuUsage(.0f),
+    myHost(myHost)
 {
 //    QSharedPointer<AudioDevice> sptr(this);
 //    sharedPointer=sptr;
@@ -56,11 +57,11 @@ AudioDevice::AudioDevice(const ObjectInfo &info, QObject *parent) :
     setObjectName(objInfo.name);
 
 
-    connect(MainHost::Get(),SIGNAL(SampleRateChanged(float)),
+    connect(myHost,SIGNAL(SampleRateChanged(float)),
             this,SLOT(SetSampleRate(float)));
 
     connect(this,SIGNAL(InUseChanged(ObjectInfo,bool)),
-            MainHost::Get(),SIGNAL(OnAudioDeviceToggleInUse(ObjectInfo,bool)));
+            myHost,SIGNAL(OnAudioDeviceToggleInUse(ObjectInfo,bool)));
 }
 
 AudioDevice::~AudioDevice()
@@ -83,7 +84,7 @@ void AudioDevice::DeleteIfUnused()
     if(del) {
         SetSleep(true);
         listDevMutex.lock();
-        AudioDevices::listAudioDevices.remove(objInfo.id);
+        myHost->audioDevices->listAudioDevices.remove(objInfo.id);
         listDevMutex.unlock();
     }
 
@@ -376,7 +377,7 @@ bool AudioDevice::Open()
     }
 
     //try to open at the host rate
-    double sampleRate = MainHost::Get()->GetSampleRate();
+    double sampleRate = myHost->GetSampleRate();
     if(!OpenStream(sampleRate)) {
 
         //if it fails, try to open with the default rate
@@ -498,8 +499,8 @@ bool AudioDevice::CloseStream()
 
     DeleteCircualBuffers();
 
-    if(MainHost::Get())
-        MainHost::Get()->SetBufferSize(1);
+    if(myHost)
+        myHost->SetBufferSize(1);
     return true;
 }
 
@@ -575,13 +576,12 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
 {
     AudioDevice* device = (AudioDevice*)userData;
 
-    MainHost *host = MainHost::Get();
-    if(!host)
+    if(!device->myHost)
         return paComplete;
 
-    unsigned int hostBuffSize = host->GetBufferSize();
+    unsigned int hostBuffSize = device->myHost->GetBufferSize();
     if(framesPerBuffer > hostBuffSize) {
-       MainHost::Get()->SetBufferSize((long)framesPerBuffer);
+       device->myHost->SetBufferSize((long)framesPerBuffer);
        hostBuffSize = framesPerBuffer;
     }
 
@@ -645,9 +645,9 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
         if(countDevicesReady>=countInputDevices) {
             countDevicesReady=0;
 
-            MainHost::Get()->Render();
+            device->myHost->Render();
 
-            foreach(QSharedPointer<AudioDevice>dev, AudioDevices::listAudioDevices) {
+            foreach(QSharedPointer<AudioDevice>dev, device->myHost->audioDevices->listAudioDevices) {
                 if(dev.isNull())
                     continue;
 
