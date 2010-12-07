@@ -28,13 +28,13 @@
 namespace Connectables {
     class ObjectFactory;
 }
-
+class MainHost;
 namespace View {
     class SceneView : public QAbstractItemView
     {
         Q_OBJECT
     public:
-        explicit SceneView(Connectables::ObjectFactory *objFactory, MainGraphicsView *viewHost, MainGraphicsView *viewProject, MainGraphicsView *viewProgram, MainGraphicsView *viewInsert,QWidget *parent = 0);
+        explicit SceneView(MainHost *myHost,Connectables::ObjectFactory *objFactory, MainGraphicsView *viewHost, MainGraphicsView *viewProject, MainGraphicsView *viewProgram, MainGraphicsView *viewInsert,QWidget *parent = 0);
 
         QRect visualRect(const QModelIndex &index) const {return QRect();}
         void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible) {}
@@ -71,6 +71,7 @@ namespace View {
         QGraphicsScene *sceneInsert;
         QTimer *timerFalloff;
         Connectables::ObjectFactory *objFactory;
+        MainHost *myHost;
     signals:
 //        void hostShown(bool shown);
 //        void projectShown(bool shown);

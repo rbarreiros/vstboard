@@ -31,8 +31,8 @@
 
 using namespace View;
 
-ConnectableObjectView::ConnectableObjectView(QAbstractItemModel *model,QGraphicsItem * parent, Qt::WindowFlags wFlags ) :
-    ObjectView(model,parent,wFlags)
+ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel *model,QGraphicsItem * parent, Qt::WindowFlags wFlags ) :
+    ObjectView(myHost,model,parent,wFlags)
 {
     setGeometry(QRectF(0,0,100,15));
     border = new QGraphicsRectItem(geometry(),this,scene());

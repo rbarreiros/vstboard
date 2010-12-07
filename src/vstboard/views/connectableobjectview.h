@@ -24,13 +24,14 @@
 #include "objectview.h"
 #include "cableview.h"
 
+class MainHost;
 namespace View {
 
     class ConnectableObjectView : public ObjectView
     {
     Q_OBJECT
     public:
-        ConnectableObjectView(QAbstractItemModel *model,QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
+        ConnectableObjectView(MainHost *myHost,QAbstractItemModel *model,QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
 
 
         ListPinsView *listAudioIn;

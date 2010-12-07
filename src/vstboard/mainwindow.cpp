@@ -90,7 +90,7 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
 //    connect(timerCpuLoad, SIGNAL(timeout()),
 //            this, SLOT(UpdateCpuLoad()));
 
-    mySceneView = new View::SceneView(myHost->objFactory, ui->hostView, ui->projectView, ui->programView, ui->insertView, this);
+    mySceneView = new View::SceneView(myHost, myHost->objFactory, ui->hostView, ui->projectView, ui->programView, ui->insertView, this);
     mySceneView->setModel(myHost->GetModel());
 
     ui->solverView->setModel(&myHost->solver->model);

@@ -23,27 +23,27 @@
 
 using namespace View;
 
-MainContainerView::MainContainerView(QAbstractItemModel *model) :
-        ContainerView(model)
+MainContainerView::MainContainerView(MainHost *myHost,QAbstractItemModel *model) :
+        ContainerView(myHost,model)
 {
 //    setObjectName("MainContainerView");
 
     content = new ContainerContent(model,this);
     content->setAcceptDrops(true);
 
-    bridgeIn = new BridgeView(model, this);
+    bridgeIn = new BridgeView(myHost, model, this);
     bridgeIn->listBridgeIn->layout->setOrientation(Qt::Horizontal);
     bridgeIn->listBridgeOut->layout->setOrientation(Qt::Horizontal);
 
-    bridgeOut = new BridgeView(model, this);
+    bridgeOut = new BridgeView(myHost, model, this);
     bridgeOut->listBridgeIn->layout->setOrientation(Qt::Horizontal);
     bridgeOut->listBridgeOut->layout->setOrientation(Qt::Horizontal);
 
-    bridgeSend = new BridgeView(model, this);
+    bridgeSend = new BridgeView(myHost, model, this);
     bridgeSend->listBridgeIn->layout->setOrientation(Qt::Horizontal);
     bridgeSend->listBridgeOut->layout->setOrientation(Qt::Horizontal);
 
-    bridgeReturn = new BridgeView(model, this);
+    bridgeReturn = new BridgeView(myHost, model, this);
     bridgeReturn->listBridgeIn->layout->setOrientation(Qt::Horizontal);
     bridgeReturn->listBridgeOut->layout->setOrientation(Qt::Horizontal);
 

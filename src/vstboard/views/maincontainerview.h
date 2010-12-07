@@ -23,13 +23,14 @@
 
 #include "containerview.h"
 
+class MainHost;
 namespace View {
 
     class MainContainerView : public ContainerView
     {
     Q_OBJECT
     public:
-        explicit MainContainerView(QAbstractItemModel *model);
+        explicit MainContainerView(MainHost *myHost,QAbstractItemModel *model);
         void SetModelIndex(QPersistentModelIndex index);
 
         BridgeView *bridgeSend;

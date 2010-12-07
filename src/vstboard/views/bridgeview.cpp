@@ -19,11 +19,11 @@
 ******************************************************************************/
 
 #include "bridgeview.h"
-
+#include "../mainhost.h"
 using namespace View;
 
-BridgeView::BridgeView(QAbstractItemModel *model, QGraphicsItem * parent, Qt::WindowFlags wFlags) :
-        ConnectableObjectView(model,parent,wFlags)
+BridgeView::BridgeView(MainHost *myHost,QAbstractItemModel *model, QGraphicsItem * parent, Qt::WindowFlags wFlags) :
+        ConnectableObjectView(myHost, model,parent,wFlags)
 {
     setGeometry(QRectF(0,0,0,0));
     border->hide();

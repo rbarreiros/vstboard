@@ -27,6 +27,7 @@
 #include "listpinsview.h"
 //#include "textbutton.h"
 
+class MainHost;
 namespace View {
 
     class ConnectableView;
@@ -35,7 +36,7 @@ namespace View {
     {
     Q_OBJECT
     public:
-        explicit ObjectView(QAbstractItemModel *model, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
+        explicit ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
         virtual ~ObjectView();
         void setPen(const QPen &pen);
 
@@ -72,6 +73,7 @@ namespace View {
         QAction *actLearn;
 
         bool shrinkAsked;
+        MainHost *myHost;
 
     public slots:
         void ShrinkNow();

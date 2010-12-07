@@ -21,11 +21,12 @@
 #include "objectview.h"
 #include "pinview.h"
 #include "../globals.h"
-#include "mainwindow.h"
+//#include "mainwindow.h"
+#include "../mainhost.h"
 
 using namespace View;
 
-ObjectView::ObjectView(QAbstractItemModel *model, QGraphicsItem * parent, Qt::WindowFlags wFlags ) :
+ObjectView::ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsItem * parent, Qt::WindowFlags wFlags ) :
     QGraphicsWidget(parent,wFlags),
     titleText(0),
     border(0),
@@ -33,8 +34,8 @@ ObjectView::ObjectView(QAbstractItemModel *model, QGraphicsItem * parent, Qt::Wi
     errorMessage(0),
     layout(0),
     model(model),
-    shrinkAsked(false)
-
+    shrinkAsked(false),
+    myHost(myHost)
 {
 //    setObjectName("objView");
 
@@ -190,12 +191,11 @@ void ObjectView::closeEvent ( QCloseEvent * event )
 {
     setActive(false);
 
-//TODO: tell the host to remove this object
-//    static_cast<Connectables::Container*>(
-//            Connectables::ObjectFactory::Get()->GetObj(objIndex.parent()).data()
-//        )->RemoveObject(
-//            Connectables::ObjectFactory::Get()->GetObj(objIndex)
-//        );
+    static_cast<Connectables::Container*>(
+            myHost->objFactory->GetObj(objIndex.parent()).data()
+        )->RemoveObject(
+            myHost->objFactory->GetObj(objIndex)
+        );
 
     event->ignore();
 }

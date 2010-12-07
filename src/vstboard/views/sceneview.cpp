@@ -30,12 +30,12 @@
 #include "bridgepinview.h"
 #include "../connectables/container.h"
 #include "../connectables/objectfactory.h"
-
+#include "../mainhost.h"
 #include <QSplitter>
 
 using namespace View;
 
-SceneView::SceneView(Connectables::ObjectFactory *objFactory, MainGraphicsView *viewHost, MainGraphicsView *viewProject, MainGraphicsView *viewProgram, MainGraphicsView *viewInsert,QWidget *parent) :
+SceneView::SceneView(MainHost *myHost,Connectables::ObjectFactory *objFactory, MainGraphicsView *viewHost, MainGraphicsView *viewProject, MainGraphicsView *viewProgram, MainGraphicsView *viewInsert,QWidget *parent) :
         QAbstractItemView(parent),
         viewHost(viewHost),
         viewProject(viewProject),
@@ -44,7 +44,8 @@ SceneView::SceneView(Connectables::ObjectFactory *objFactory, MainGraphicsView *
         sceneHost(0),
         sceneProgram(0),
         sceneInsert(0),
-        objFactory(objFactory)
+        objFactory(objFactory),
+        myHost(myHost)
 {
     setHidden(true);
     timerFalloff = new QTimer(this);
@@ -258,7 +259,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                         int objId = index.data(UserRoles::value).toInt();
 
                         if(objId == FixedObjId::hostContainer) {
-                            MainContainerView *cntView = new MainContainerView(model());
+                            MainContainerView *cntView = new MainContainerView(myHost, model());
                             objView=cntView;
                             cntView->setParentItem(rootObjHost);
                             connect(viewHost,SIGNAL(viewResized(QRectF)),
@@ -267,7 +268,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                         }
 
                         if(objId == FixedObjId::projectContainer) {
-                            MainContainerView *cntView = new MainContainerView(model());
+                            MainContainerView *cntView = new MainContainerView(myHost, model());
                             objView=cntView;
                             cntView->setParentItem(rootObjProject);
                             connect(viewProject,SIGNAL(viewResized(QRectF)),
@@ -276,7 +277,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                         }
 
                         if(objId == FixedObjId::programContainer) {
-                            MainContainerView *cntView = new MainContainerView(model());
+                            MainContainerView *cntView = new MainContainerView(myHost, model());
                             objView=cntView;
                             cntView->setParentItem(rootObjProgram);
                             connect(viewProgram,SIGNAL(viewResized(QRectF)),
@@ -285,7 +286,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                         }
 
                         if(objId == FixedObjId::insertContainer) {
-                            MainContainerView *cntView = new MainContainerView(model());
+                            MainContainerView *cntView = new MainContainerView(myHost, model());
                             objView=cntView;
                             cntView->setParentItem(rootObjInsert);
                             connect(viewInsert,SIGNAL(viewResized(QRectF)),
@@ -303,7 +304,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                             debug("SceneView::rowsInserted parent not found")
                                     continue;
                         }
-                        objView = new ContainerView(model(),parentView);
+                        objView = new ContainerView(myHost, model(),parentView);
                         break;
                     }
                     default:
@@ -362,7 +363,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                             continue;
                 }
 
-                objView = new ConnectableObjectView(model(),parentView);
+                objView = new ConnectableObjectView(myHost, model(),parentView);
                 hashItems.insert( index , objView);
                 objView->SetModelIndex(index);
                 QPointF pos = parentView->GetDropPos();
@@ -475,9 +476,9 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                     pinView = static_cast<PinView*>( new BridgePinView(angle, model(), parentList, pin) );
                 } else {
                     if(pinInfo.direction==PinDirection::Input)
-                        angle=3.1416;
+                        angle=3.1416f;
                     if(pinInfo.direction==PinDirection::Output)
-                        angle=0;
+                        angle=.0f;
 
                     ConnectablePinView *p = new ConnectablePinView(angle, model(), parentList, pin);
                     pinView = static_cast<PinView*>(p);

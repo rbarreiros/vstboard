@@ -26,6 +26,7 @@
 #include "cableview.h"
 #include "bridgeview.h"
 
+class MainHost;
 namespace View {
 
     class BridgePinView;
@@ -33,7 +34,7 @@ namespace View {
     {
     Q_OBJECT
     public:
-        explicit ContainerView(QAbstractItemModel *model, QGraphicsItem *parent = 0);
+        explicit ContainerView(MainHost *myHost,QAbstractItemModel *model, QGraphicsItem *parent = 0);
         virtual ~ContainerView();
 
         CableView * OnAddConnection(ConnectionInfo pinOut, ConnectionInfo pinIn);

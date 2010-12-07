@@ -24,12 +24,13 @@
 #include "connectableobjectview.h"
 #include "cableview.h"
 
+class MainHost;
 namespace View {
     class BridgeView : public ConnectableObjectView
     {
     Q_OBJECT
     public:
-        BridgeView(QAbstractItemModel *model, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
+        BridgeView(MainHost *myHost,QAbstractItemModel *model, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
 
     protected:
         void moveEvent ( QGraphicsSceneMoveEvent * event );

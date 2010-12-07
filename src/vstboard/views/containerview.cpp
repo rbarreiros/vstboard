@@ -26,8 +26,8 @@
 
 using namespace View;
 
-ContainerView::ContainerView(QAbstractItemModel *model, QGraphicsItem *parent) :
-    ObjectView(model, parent)
+ContainerView::ContainerView(MainHost *myHost,QAbstractItemModel *model, QGraphicsItem *parent) :
+    ObjectView(myHost,model, parent)
 {
 //    setObjectName("ContainerView");
 }
