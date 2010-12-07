@@ -62,7 +62,7 @@ MainWindow::MainWindow(MainHost * myHost, QWidget *parent) :
 
 #endif
 
-    mySceneView = new View::SceneView(myHost->objFactory, ui->hostView, ui->projectView, ui->programView, ui->insertView, this);
+    mySceneView = new View::SceneView(myHost, myHost->objFactory, ui->hostView, ui->projectView, ui->programView, ui->insertView, this);
     mySceneView->setModel(myHost->GetModel());
 
     ui->solverView->setModel(&myHost->solver->model);
@@ -97,14 +97,32 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if (userReallyWantsToQuit()) {
+        writeSettings();
+        event->accept();
+    } else {
+        event->ignore();
+    }
+}
+
+bool MainWindow::userReallyWantsToQuit()
+{
+    return true;
+}
+
+
 void MainWindow::BuildListTools()
 {
     QStringList headerLabels;
     headerLabels << "Name";
 
-    listToolsModel = new ListToolsModel();
-    listToolsModel->setHorizontalHeaderLabels(headerLabels);
-    QStandardItem *parentItem = listToolsModel->invisibleRootItem();
+//audio devices (vst in/out)
+//================================
+    listAudioDevModel = new ListToolsModel();
+    listAudioDevModel->setHorizontalHeaderLabels(headerLabels);
+    QStandardItem *parentItem = listAudioDevModel->invisibleRootItem();
 
     //vst audio in
     QStandardItem *item = new QStandardItem(tr("Vst audio input"));
@@ -122,6 +140,15 @@ void MainWindow::BuildListTools()
     info.name = "Vst audio Out";
     item->setData(QVariant::fromValue(info), UserRoles::objInfo);
     parentItem->appendRow(item);
+
+    ui->treeAudioInterfaces->setModel(listAudioDevModel);
+    ui->treeAudioInterfaces->header()->setResizeMode(0,QHeaderView::Stretch);
+
+//tools
+//================================
+    listToolsModel = new ListToolsModel();
+    listToolsModel->setHorizontalHeaderLabels(headerLabels);
+    parentItem = listToolsModel->invisibleRootItem();
 
     //midi parameters
     item = new QStandardItem(tr("MidiCC to parameter"));

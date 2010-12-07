@@ -40,9 +40,11 @@ public:
     explicit MainWindow(MainHost * myHost, QWidget *parent = 0);
     ~MainWindow();
 
-private:
-    MainHost * myHost;
+protected:
+    void closeEvent(QCloseEvent *event);
 
+private:
+    bool userReallyWantsToQuit();
     void writeSettings();
     void readSettings();
     void resetSettings();
@@ -53,6 +55,7 @@ private:
     Ui::MainWindow *ui;
 
     ListToolsModel *listToolsModel;
+    ListToolsModel *listAudioDevModel;
     void BuildListTools();
 
     QList<QAction*>listRecentProjects;
@@ -61,6 +64,8 @@ private:
 
     QFileSystemModel *listVstPluginsModel;
     View::SceneView *mySceneView;
+
+    MainHost * myHost;
 
 private slots:
     void on_actionRestore_default_layout_triggered();

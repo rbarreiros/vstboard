@@ -110,7 +110,7 @@ protected:
         Gui *qEditor;
 
 signals:
-        void update(float value);
+//        void update(float value);
 };
 
 

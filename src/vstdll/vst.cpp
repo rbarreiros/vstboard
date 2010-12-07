@@ -79,7 +79,7 @@ bool MyDllApp::notify(QObject *rec, QEvent *ev) {
    }
 
 Vst::Vst (audioMasterCallback audioMaster)
-: AudioEffectX (audioMaster, 1, 1),	// 1 program, 1 parameter only
+: AudioEffectX (audioMaster, 1, 0),	// 1 program, 0 parameter
 deviceIn(0),
 deviceOut(0),
 bufferSize(0),
@@ -92,11 +92,12 @@ myWindow(0)
 
         setNumInputs (2);		// stereo in
         setNumOutputs (2);		// stereo out
-        setUniqueID ('CbVb');	// identify
+        setUniqueID ('VbPl');	// identify
         canProcessReplacing ();	// supports replacing output
-        canDoubleReplacing ();	// supports double precision processing
+//        canDoubleReplacing ();	// supports double precision processing
 
         vst_strncpy (programName, "Default", kVstMaxProgNameLen);	// default program name
+
 
         //create a QApplication if needed
         if(!qApp) {
@@ -189,7 +190,7 @@ void Vst::getProgramName (char* name)
 
 void Vst::setParameter (VstInt32 index, float value)
 {
-    emit update(value);
+//    emit update(value);
 }
 
 float Vst::getParameter (VstInt32 index)
@@ -199,7 +200,7 @@ float Vst::getParameter (VstInt32 index)
 
 void Vst::getParameterName (VstInt32 index, char* label)
 {
-        vst_strncpy (label, "Gain", kVstMaxParamStrLen);
+        vst_strncpy (label, "nd", kVstMaxParamStrLen);
 }
 
 void Vst::getParameterDisplay (VstInt32 index, char* text)
@@ -209,7 +210,7 @@ void Vst::getParameterDisplay (VstInt32 index, char* text)
 
 void Vst::getParameterLabel (VstInt32 index, char* label)
 {
-        vst_strncpy (label, "dB", kVstMaxParamStrLen);
+        vst_strncpy (label, "nd", kVstMaxParamStrLen);
 }
 
 bool Vst::getEffectName (char* name)
@@ -232,7 +233,7 @@ bool Vst::getVendorString (char* text)
 
 VstInt32 Vst::getVendorVersion ()
 {
-        return 1000;
+        return 0002;
 }
 
 void Vst::processReplacing (float** inputs, float** outputs, VstInt32 sampleFrames)
@@ -265,22 +266,8 @@ void Vst::open()
 
 void Vst::close()
 {
-//    win->deleteLater();
-//    app->deleteLater();
     setDeviceIn(0);
     setDeviceOut(0);
-//    win->close();
-    //win->deleteLater();
-//    MainWindow::Get()->close();
-//    MainWindow::Get()->deleteLater();
-
-//    delete MainHost::Get();
-//    delete editor;
-//    delete MainWindow::Get();
-//    qApp->processEvents();
-
-
-
 }
 
 void Vst::setSampleRate(float sampleRate)

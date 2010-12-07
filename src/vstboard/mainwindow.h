@@ -59,7 +59,6 @@ protected:
     View::SceneView *mySceneView;
 
 private:
-
     bool userReallyWantsToQuit();
     void BuildListTools();
     void writeSettings();

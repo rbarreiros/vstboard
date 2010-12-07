@@ -69,7 +69,12 @@ BUILDNO = $$system("git describe")
 
     #run upx
         exists($$INSTALLER_UPX_PATH) {
-            QMAKE_POST_LINK += \"$$INSTALLER_UPX_PATH\" -q --best \"$$DESTDIR_WIN\\VstBoard.exe\" $$escape_expand(\n\t)
+            exists($$DESTDIR_WIN/VstBoard.exe) {
+                QMAKE_POST_LINK += \"$$INSTALLER_UPX_PATH\" -q --best \"$$DESTDIR_WIN\\VstBoard.exe\" $$escape_expand(\n\t)
+            }
+            exists($$DESTDIR_WIN/VstBoardPlugin.dll) {
+                QMAKE_POST_LINK += \"$$INSTALLER_UPX_PATH\" -q --best \"$$DESTDIR_WIN\\VstBoardPlugin.dll\" $$escape_expand(\n\t)
+            }
 
             $${INSTALLER_UPDATEQTDLL} {
                 QMAKE_POST_LINK += \"$$INSTALLER_UPX_PATH\" -q --best \"$$DESTDIR_WIN\\*.dll\" $$escape_expand(\n\t)
