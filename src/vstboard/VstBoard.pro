@@ -23,18 +23,8 @@ srcdir = vstboard
 
 include($$top_srcdir/config.pri)
 TEMPLATE = app
-
-BUILDNO = $$system("git describe")
-
+TARGET = $${APP_NAME}
 !CONFIG(debug, debug|release) {
-
-    SRCDIR_WIN = $${_PRO_FILE_PWD_}
-    SRCDIR_WIN ~= s,/,\\,g
-    versionmk.target = version
-    versionmk.commands = echo $${LITERAL_HASH}define APP_VERSION \"$${BUILDNO}\" > \"$${SRCDIR_WIN}\\_version.h\" $$escape_expand(\n\t)
-    versionmk.depends =
-    QMAKE_EXTRA_TARGETS += versionmk
-    PRE_TARGETDEPS = version
 
     targetdir = $$OUT_PWD/../../bin/$$build_postfix
     builddir = $$OUT_PWD/../../build/$$build_postfix
@@ -265,11 +255,13 @@ FORMS += mainwindow.ui \
 PRECOMPILED_HEADER = precomp.h
 RESOURCES += ../resources/resources.qrc
 OTHER_FILES += \ 
-    ../nsis.nsi \
     ../../README.txt \
     ../../license.txt \
     ../../LGPL.txt \
     ../../GPL.txt \
-    ../../tools/nsis.nsi
+    ../../tools/nsis.nsi \
+    vstboard.rc
 
 TRANSLATIONS = vstboard_fr.ts
+
+RC_FILE = vstboard.rc
