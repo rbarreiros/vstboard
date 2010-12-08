@@ -40,7 +40,7 @@ namespace Connectables {
         bool Close();
         void Render();
 //        int GetProcessingTime() {return 10;}
-        void SetBuffers(float **buf);
+        void SetBuffers(float **buf, int &cpt);
 
 
     protected:

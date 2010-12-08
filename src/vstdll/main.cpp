@@ -20,7 +20,6 @@
 
 #include "vst.h"
 
-
 extern AudioEffect* createEffectInstance (audioMasterCallback audioMaster);
 
 extern "C" {
@@ -64,13 +63,18 @@ extern "C" {
 //------------------------------------------------------------------------
 #if WIN32
 #include <windows.h>
-void* hInstance;
+#include <QMfcApp>
 
 //extern "C" {
 BOOL WINAPI DllMain( HINSTANCE hInst, DWORD dwReason, LPVOID /*lpvReserved*/ )
 {
-    hInstance = hInst;
-    return 1;
+//    static bool ownApplication = FALSE;
+//     if ( dwReason == DLL_PROCESS_ATTACH )
+//         ownApplication = QMfcApp::pluginInstance( hInst );
+//     if ( dwReason == DLL_PROCESS_DETACH && ownApplication )
+//         delete qApp;
+
+    return TRUE;
 } // extern "C"
 
 #endif

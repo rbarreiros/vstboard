@@ -77,7 +77,7 @@ Object::Object(MainHost *host, int index, const ObjectInfo &info) :
 
 Object::~Object()
 {
-    debug2(<< "delete Object" << objectName())
+    debug2(<< "delete Object" << objectName() << hex << (long)this)
     Close();
 }
 

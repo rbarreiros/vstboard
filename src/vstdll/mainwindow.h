@@ -42,6 +42,7 @@ public:
 
 protected:
     void closeEvent(QCloseEvent *event);
+    void hideEvent ( QHideEvent * event );
 
 private:
     bool userReallyWantsToQuit();

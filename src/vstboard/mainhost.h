@@ -92,10 +92,7 @@ public:
 
     Programs *programList;
 
-#ifdef VST_PLUGIN
-    bool setVstDeviceIn(Connectables::VstAudioDeviceIn *dev);
-    bool setVstDeviceOut(Connectables::VstAudioDeviceOut *dev);
-#else
+#ifndef VST_PLUGIN
     AudioDevices *audioDevices;
     MidiDevices *midiDevices;
 #endif
@@ -106,6 +103,8 @@ public:
 #ifdef VSTSDK
     vst::CVSTHost *vstHost;
 #endif
+
+Vst *myVstPlugin;
 
 private:
     void SetupMainContainer();
@@ -141,8 +140,6 @@ private:
     MainHost *theHost;
     HostModel *model;
     HostModel *modelParking;
-
-    Vst *myVstPlugin;
 
 signals:
     void SampleRateChanged(float rate);

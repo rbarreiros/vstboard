@@ -52,11 +52,12 @@ MainHost::MainHost(Vst *myVstPlugin, QObject *parent) :
     solver(new PathSolver(this)),
     filePass(0),
     objFactory(new Connectables::ObjectFactory(this)),
+    myVstPlugin(myVstPlugin),
     solverNeedAnUpdate(false),
     solverUpdateEnabled(true),
     mutexListCables(new QMutex(QMutex::Recursive)),
-    progToChange(-1),
-    myVstPlugin(myVstPlugin)
+    progToChange(-1)
+
 {
     if(!vst::CVSTHost::Get())
         vstHost = new vst::CVSTHost();
@@ -679,18 +680,3 @@ void MainHost::SetTempo(int tempo, int sign1, int sign2)
 #endif
 }
 
-#ifdef VST_PLUGIN
-    bool MainHost::setVstDeviceIn(Connectables::VstAudioDeviceIn *dev)
-    {
-        if(myVstPlugin)
-            return myVstPlugin->setDeviceIn(dev);
-        return false;
-    }
-
-    bool MainHost::setVstDeviceOut(Connectables::VstAudioDeviceOut *dev)
-    {
-        if(myVstPlugin)
-            return myVstPlugin->setDeviceOut(dev);
-        return false;
-    }
-#endif

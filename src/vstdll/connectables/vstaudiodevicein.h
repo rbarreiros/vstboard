@@ -43,7 +43,7 @@ namespace Connectables {
 
         bool bufferReady;
 
-        void SetBuffers(float **buf);
+        void SetBuffers(float **buf, int &cpt);
 
     protected:
 //        QSharedPointer<AudioDevice>parentDevice;

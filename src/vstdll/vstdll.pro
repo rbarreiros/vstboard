@@ -6,19 +6,19 @@
 
 top_srcdir  = ..
 srcdir      = vstdll
-#include($$top_srcdir/config.pri)
 
 TARGET = VstBoardPlugin
-TEMPLATE = app
-#CONFIG += dll
-#DEFINES -= QT_DLL
+#make an app, it seems to be the only way to statically link Qt libs
+#TEMPLATE = app
+#but link as a dll instead of the default .exe
+#QMAKE_LFLAGS += /DLL
+#TARGET_EXT = .dll
+
+TEMPLATE = lib
+CONFIG += dll
+DEFINES += QT_NODLL
+
 DEFINES += VST_PLUGIN
-#       CONFIG += output=vstdll.dll
-
-# !! modify Makefile.Release :
-# remove -DQT_DLL
-QMAKE_LFLAGS += /DLL
-
 
 PORTMIDI_PATH 	= ../libs/portmidi
 INCLUDEPATH += $$top_srcdir/$$PORTMIDI_PATH/pm_common
@@ -27,8 +27,8 @@ QTWINMIGRATE_PATH = ../libs/qtwinmigrate
 
 DEFINES += APP_NAME=\\\"VstBoardPlugin\\\"
 
-    VSTSDK_PATH	= ../libs/vstsdk2.4
-    CONFIG += vstsdk
+VSTSDK_PATH	= ../libs/vstsdk2.4
+CONFIG += vstsdk
 
 CONFIG(debug, debug|release) {
     POST =
@@ -42,10 +42,6 @@ CONFIG(debug, debug|release) {
 top_builddir =$$top_srcdir/../build/$$build_postfix
 top_destdir  =$$top_srcdir/../bin/$$build_postfix
 builddir     =$$top_builddir/$$srcdir
-
-#DESTDIR_WIN = $${top_destdir}
-#DESTDIR_WIN ~= s,/,\\,g
-#QMAKE_POST_LINK += ren  \"$${DESTDIR_WIN}$${TARGET}.exe\" \"$${DESTDIR_WIN}$${TARGET}.dll\"
 
 OBJECTS_DIR =$$builddir
 DESTDIR     =$$top_destdir
@@ -71,8 +67,8 @@ win32-msvc* {
 #    QMAKE_LFLAGS_RELEASE += /DEBUG
 }
 
-QT       += core gui
 
+QT       += core gui
 
 LIBS += -lqtmain
 

@@ -24,8 +24,6 @@ srcdir = vstboard
 include($$top_srcdir/config.pri)
 TEMPLATE = app
 
-#QT += sql
-
 BUILDNO = $$system("git describe")
 
 !CONFIG(debug, debug|release) {

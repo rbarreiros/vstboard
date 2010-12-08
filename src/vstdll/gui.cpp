@@ -28,29 +28,16 @@ Gui::Gui(AudioEffectX* effect) : widget(0), effect(effect)
 
 Gui::~Gui()
 {
-    debug("delete Gui")
-//            QCoreApplication::processEvents();
-//            QCoreApplication::sendPostedEvents();
-//            qApp->removePostedEvents(MainWindow::Get());
-//            if(MainWindow::Create()) {
-//                MainWindow::Get()->deleteLater();
-//                delete MainWindow::Get();
-//                MainWindow::Get()->setParent(0);
-//                delete MainWindow::Get();
-//            }
-    //if(widget)
-      //  delete widget;
-   // if(win)
-   //     delete win;
-
-
+    if(widget) {
+        delete widget;
+        widget=0;
+    }
 }
 
 bool Gui::open(void* ptr)
 {
     AEffEditor::open(ptr);
     widget = new QWinWidget(static_cast<HWND>(ptr));
-    widget->setAttribute(Qt::WA_DeleteOnClose);
     widget->setAttribute(Qt::WA_LayoutUsesWidgetRect);
     QHBoxLayout layout(widget);
     layout.setContentsMargins(0,0,0,0);
@@ -62,7 +49,7 @@ bool Gui::open(void* ptr)
     rectangle.left = 0;
     rectangle.bottom = widget->height();
     rectangle.right = widget->width();
-//    //  win->setMinimumSize(win->size());
+//    win->setMinimumSize(win->size());
 
     widget->show();
 
@@ -72,9 +59,11 @@ bool Gui::open(void* ptr)
 
 void Gui::close()
 {
-    //  disconnect(this, SIGNAL(update(float)), win, SLOT(update(float)));
-    //  delete win;
-//    win->hide();
+    myWindow->setParent(0);
+    if(widget) {
+        delete widget;
+        widget=0;
+    }
 }
 
 bool Gui::getRect (ERect** rect)

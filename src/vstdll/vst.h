@@ -31,23 +31,6 @@
 
 AudioEffect* createEffectInstance (audioMasterCallback audioMaster);
 
-class MyDllApp : public QApplication
-{
-public:
-    MyDllApp(int &c, char **v) :
-            QApplication(c,v)
-    {
-    }
-
-    bool notify(QObject *rec, QEvent *ev);
-
-    ~MyDllApp()
-    {
-        debug("delete MyDllApp")
-    }
-
-};
-
 //-------------------------------------------------------------------------------------------------------
 class Vst : public QObject, public AudioEffectX
 {
@@ -76,8 +59,10 @@ public:
         virtual bool getProductString (char* text);
         virtual VstInt32 getVendorVersion ();
 
-        bool setDeviceIn(Connectables::VstAudioDeviceIn *dev);
-        bool setDeviceOut(Connectables::VstAudioDeviceOut *dev);
+        bool addDeviceIn(Connectables::VstAudioDeviceIn *dev);
+        bool addDeviceOut(Connectables::VstAudioDeviceOut *dev);
+        bool removeDeviceIn(Connectables::VstAudioDeviceIn *dev);
+        bool removeDeviceOut(Connectables::VstAudioDeviceOut *dev);
 
         void open();
         void close();
@@ -88,29 +73,20 @@ public:
         VstPlugCategory getPlugCategory() {return kPlugCategEffect;}
 
 protected:
+        QApplication *myApp;
         MainHost *myHost;
         MainWindow *myWindow;
 
-//        float fGain;
         char programName[kVstMaxProgNameLen + 1];
 
-        Connectables::VstAudioDeviceIn *deviceIn;
-        Connectables::VstAudioDeviceOut *deviceOut;
+        QList<Connectables::VstAudioDeviceIn*>lstDeviceIn;
+        QList<Connectables::VstAudioDeviceOut*>lstDeviceOut;
         VstInt32 bufferSize;
-
-
-
-        int argc;
-        char *argv;
-        MyDllApp *app;
-//        MainWindow *win;
 
         QMutex mutexDevices;
 
         Gui *qEditor;
 
-signals:
-//        void update(float value);
 };
 
 

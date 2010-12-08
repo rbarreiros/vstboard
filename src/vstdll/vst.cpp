@@ -18,78 +18,24 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-
 #include "vst.h"
 #include "connectables/connectioninfo.h"
 #include "connectables/objectinfo.h"
-
-
-#ifndef QT_NO_DEBUG
-
-    void myMessageOutput(QtMsgType type, const char *msg)
-     {
-        qInstallMsgHandler(0);
-        qDebug(msg);
-        qInstallMsgHandler(myMessageOutput);
-
-         switch (type) {
-
-         case QtWarningMsg:
-#ifdef _MSC_VER
-                __asm int 3
-#else
-                __asm("int3");
-#endif
-            break;
-
-         case QtCriticalMsg:
-         case QtFatalMsg:
-#ifdef _MSC_VER
-                __asm int 3
-#else
-                __asm("int3");
-#endif
-             abort();
-             break;
-
-         case QtDebugMsg:
-             break;
-         }
-     }
-#endif
+#include "mainhost.h"
+#include "mainwindow.h"
 
 AudioEffect* createEffectInstance (audioMasterCallback audioMaster)
 {
    return new Vst (audioMaster);
 }
 
-bool MyDllApp::notify(QObject *rec, QEvent *ev) {
-       try {
-           return QApplication::notify(rec, ev);
-       }
-       catch (...) {
-           debug("Unknown exception!")
-#ifdef _MSC_VER
-            __asm int 3
-#else
-            __asm("int3");
-#endif
-           abort();
-       }
-   }
-
 Vst::Vst (audioMasterCallback audioMaster)
 : AudioEffectX (audioMaster, 1, 0),	// 1 program, 0 parameter
-deviceIn(0),
-deviceOut(0),
 bufferSize(0),
+myApp(0),
 myHost(0),
 myWindow(0)
 {
-#ifndef QT_NO_DEBUG
-    qInstallMsgHandler(myMessageOutput);
-#endif
-
         setNumInputs (2);		// stereo in
         setNumOutputs (2);		// stereo out
         setUniqueID ('VbPl');	// identify
@@ -97,16 +43,6 @@ myWindow(0)
 //        canDoubleReplacing ();	// supports double precision processing
 
         vst_strncpy (programName, "Default", kVstMaxProgNameLen);	// default program name
-
-
-        //create a QApplication if needed
-        if(!qApp) {
-            argc=0;
-            argv="";
-            app = new MyDllApp(argc,&argv);
-        } else {
-            app=0;
-        }
 
         qEditor = new Gui(this);
         setEditor(qEditor);
@@ -119,8 +55,14 @@ myWindow(0)
 
         qRegisterMetaTypeStreamOperators<ObjectInfo>("ObjectInfo");
 
-        QCoreApplication::setOrganizationName("CtrlBrk");
-        QCoreApplication::setApplicationName(APP_NAME);
+        if(!qApp) {
+            int argc=0;
+            char *argv=0;
+            myApp = new QApplication(argc,&argv);
+        }
+
+        //QCoreApplication::setOrganizationName("CtrlBrk");
+        //QCoreApplication::setApplicationName(APP_NAME);
 
         myHost = new MainHost(this);
         myWindow = new MainWindow(myHost);
@@ -129,52 +71,62 @@ myWindow(0)
 
 Vst::~Vst ()
 {
-    debug("delete TestVst")
+    debug2(<< "delete Vst" << hex << (long)this)
 
-
-    //crash at deletion if we don't open the mainwindow once
-    if(app) {
-        setEditor(0);
-        qApp->removePostedEvents(myHost);
-        delete myHost;
-
-        myWindow->resize(0,0);
-        myWindow->show();
-        qApp->removePostedEvents(myWindow);
-        qApp->processEvents();
-
-        delete myWindow;
-        delete qEditor;
-
-        delete app;
-    } else {
-//        MainWindow::Get()->setParent(0);
-//        delete qEditor;
-//        MainHost::Get()->deleteLater();
-//        MainWindow::Get()->deleteLater();
-//        qEditor->deleteLater();
-//        qApp->removePostedEvents(MainHost::Get());
-//        qApp->processEvents();
-    }
+    setEditor(0);
+    myHost->mainWindow=0;
+    myWindow->setParent(0);
+    qApp->removePostedEvents(myWindow);
+    delete myWindow;
+    qApp->removePostedEvents(myHost);
+    delete myHost;
+    qApp->removePostedEvents(qEditor);
+    delete qEditor;
+    if(myApp)
+        delete myApp;
 }
 
-bool Vst::setDeviceIn(Connectables::VstAudioDeviceIn *dev)
+bool Vst::addDeviceIn(Connectables::VstAudioDeviceIn *dev)
 {
     QMutexLocker l(&mutexDevices);
 
-    if(deviceIn && dev)
-        return false;
-    deviceIn=dev;
+    if(lstDeviceIn.contains(dev))
+        return true;
+
+    lstDeviceIn << dev;
+    setNumInputs(lstDeviceIn.count()*2);
+    ioChanged();
     return true;
 }
 
-bool Vst::setDeviceOut(Connectables::VstAudioDeviceOut *dev)
+bool Vst::addDeviceOut(Connectables::VstAudioDeviceOut *dev)
 {
     QMutexLocker l(&mutexDevices);
 
-    if(deviceOut && dev)
-        return false;
-    deviceOut=dev;
+    if(lstDeviceOut.contains(dev))
+        return true;
+
+    lstDeviceOut << dev;
+    setNumOutputs(lstDeviceOut.count()*2);
+    ioChanged();
+    return true;
+}
+
+bool Vst::removeDeviceIn(Connectables::VstAudioDeviceIn *dev)
+{
+    QMutexLocker l(&mutexDevices);
+    lstDeviceIn.removeAll(dev);
+    setNumInputs(lstDeviceIn.count()*2);
+    ioChanged();
+    return true;
+}
+
+bool Vst::removeDeviceOut(Connectables::VstAudioDeviceOut *dev)
+{
+    QMutexLocker l(&mutexDevices);
+    lstDeviceOut.removeAll(dev);
+    setNumInputs(lstDeviceOut.count()*2);
+    ioChanged();
     return true;
 }
 
@@ -244,10 +196,17 @@ void Vst::processReplacing (float** inputs, float** outputs, VstInt32 sampleFram
     }
 
     mutexDevices.lock();
-    if(deviceIn)
-        deviceIn->SetBuffers(inputs);
-    if(deviceOut)
-        deviceOut->SetBuffers(outputs);
+
+    int cpt=0;
+    foreach(Connectables::VstAudioDeviceIn* dev, lstDeviceIn) {
+        dev->SetBuffers(inputs,cpt);
+    }
+
+    cpt=0;
+    foreach(Connectables::VstAudioDeviceOut* dev, lstDeviceOut) {
+        dev->SetBuffers(outputs,cpt);
+    }
+
     mutexDevices.unlock();
 
     myHost->Render();
@@ -266,8 +225,8 @@ void Vst::open()
 
 void Vst::close()
 {
-    setDeviceIn(0);
-    setDeviceOut(0);
+    addDeviceIn(0);
+    addDeviceOut(0);
 }
 
 void Vst::setSampleRate(float sampleRate)

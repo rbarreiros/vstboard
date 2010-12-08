@@ -93,18 +93,23 @@ MainWindow::MainWindow(MainHost * myHost, QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    debug("delete MainWindow")
+    debug2(<< "delete MainWindow" << hex << (long)this)
     delete ui;
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     if (userReallyWantsToQuit()) {
-        writeSettings();
+//        writeSettings();
         event->accept();
     } else {
         event->ignore();
     }
+}
+
+void MainWindow::hideEvent ( QHideEvent * event )
+{
+
 }
 
 bool MainWindow::userReallyWantsToQuit()
