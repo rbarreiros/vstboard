@@ -69,6 +69,7 @@ namespace Connectables {
         void GetContainerAttribs(ObjectContainerAttribs &attr);
 
     protected:
+        void UpdatePinNumber();
         float sampleRate;
         long bufferSize;
         VstEvents *listEvnts;

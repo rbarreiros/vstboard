@@ -39,7 +39,7 @@ Pin::Pin(Object *parent,PinType::Enum type, PinDirection::Enum direction, int nu
 
 Pin::~Pin()
 {
-//    SetVisible(false);
+    SetVisible(false);
     Close();
 }
 
@@ -181,6 +181,10 @@ void Pin::SetVisible(bool vis)
 void Pin::UpdateModelNode()
 {
     QStandardItem *item = parent->getHost()->GetModel()->itemFromIndex(parentIndex)->child(connectInfo.pinNumber,0);
+    if(!item) {
+        debug("Pin::UpdateModelNode can't find item")
+        return;
+    }
     item->setData(objectName(),Qt::DisplayRole);
     item->setData(falloff,UserRoles::falloff);
     item->setData(GetValue(),UserRoles::value);

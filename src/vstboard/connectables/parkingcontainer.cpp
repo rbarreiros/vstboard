@@ -67,7 +67,7 @@ void ParkingContainer::SetParentModeIndex(const QModelIndex &parentIndex)
     QStandardItem *modelNode = new QStandardItem();
     modelNode->setData(QVariant::fromValue(objInfo), UserRoles::objInfo);
     modelNode->setData(index, UserRoles::value);
-    modelNode->setData(objInfo.name, Qt::DisplayRole);
+    modelNode->setData(objectName(), Qt::DisplayRole);
     myHost->GetParkingModel()->appendRow(modelNode);
     modelIndex=modelNode->index();
 

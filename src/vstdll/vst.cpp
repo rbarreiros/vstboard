@@ -31,10 +31,10 @@ AudioEffect* createEffectInstance (audioMasterCallback audioMaster)
 
 Vst::Vst (audioMasterCallback audioMaster)
 : AudioEffectX (audioMaster, 1, 0),	// 1 program, 0 parameter
-bufferSize(0),
 myApp(0),
 myHost(0),
-myWindow(0)
+myWindow(0),
+bufferSize(0)
 {
         setNumInputs (2);		// stereo in
         setNumOutputs (2);		// stereo out
@@ -94,6 +94,7 @@ bool Vst::addDeviceIn(Connectables::VstAudioDeviceIn *dev)
         return true;
 
     lstDeviceIn << dev;
+    dev->setObjectName( QString("Vst audio in %1").arg(lstDeviceIn.count()) );
     setNumInputs(lstDeviceIn.count()*2);
     ioChanged();
     return true;
@@ -107,6 +108,7 @@ bool Vst::addDeviceOut(Connectables::VstAudioDeviceOut *dev)
         return true;
 
     lstDeviceOut << dev;
+    dev->setObjectName( QString("Vst audio out %1").arg(lstDeviceOut.count()) );
     setNumOutputs(lstDeviceOut.count()*2);
     ioChanged();
     return true;
@@ -125,7 +127,7 @@ bool Vst::removeDeviceOut(Connectables::VstAudioDeviceOut *dev)
 {
     QMutexLocker l(&mutexDevices);
     lstDeviceOut.removeAll(dev);
-    setNumInputs(lstDeviceOut.count()*2);
+    setNumOutputs(lstDeviceOut.count()*2);
     ioChanged();
     return true;
 }
@@ -225,8 +227,12 @@ void Vst::open()
 
 void Vst::close()
 {
-    addDeviceIn(0);
-    addDeviceOut(0);
+    foreach(Connectables::VstAudioDeviceIn* dev, lstDeviceIn) {
+        removeDeviceIn(dev);
+    }
+    foreach(Connectables::VstAudioDeviceOut* dev, lstDeviceOut) {
+        removeDeviceOut(dev);
+    }
 }
 
 void Vst::setSampleRate(float sampleRate)

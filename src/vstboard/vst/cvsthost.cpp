@@ -239,6 +239,7 @@ VstIntPtr VSTCALLBACK CVSTHost::AudioMasterCallback(AEffect *effect, VstInt32 op
 
     //unknown pointer, it must be the plugin currently loading
     if(Connectables::VstPlugin::pluginLoading) {
+        debug("cvsthost : callback from the loading plugin")
         return Connectables::VstPlugin::pluginLoading->OnMasterCallback(opcode,index,value,ptr,opt,retValue);
     }
 

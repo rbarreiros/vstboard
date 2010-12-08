@@ -167,6 +167,7 @@ void Object::setObjectName(const QString &name)
     if(modelIndex.isValid())
         myHost->GetModel()->setData(modelIndex, name, Qt::DisplayRole);
 
+    //objInfo.name=QString("%1.%2").arg(objInfo.name).arg(index);
     QObject::setObjectName(name);
 }
 
@@ -331,7 +332,7 @@ void Object::SetParentModeIndex(const QModelIndex &parentIndex)
     QStandardItem *modelNode = new QStandardItem();
     modelNode->setData(QVariant::fromValue(objInfo), UserRoles::objInfo);
     modelNode->setData(index, UserRoles::value);
-    modelNode->setData(objInfo.name, Qt::DisplayRole);
+    modelNode->setData(objectName(), Qt::DisplayRole);
 //    modelNode->setData(hasEditor, UserRoles::hasEditor);
 //    modelNode->setData(canLearn,UserRoles::canLearn);
     modelNode->setData(errorMessage, UserRoles::errorMessage);
@@ -391,7 +392,7 @@ void Object::SetParkingIndex(const QModelIndex &parentIndex)
     QStandardItem *modelNode=new QStandardItem();
     modelNode->setData(QVariant::fromValue(objInfo), UserRoles::objInfo);
     modelNode->setData(index,UserRoles::value);
-    modelNode->setData(objInfo.name, Qt::DisplayRole);
+    modelNode->setData(objectName(), Qt::DisplayRole);
     modelNode->setData(true,UserRoles::parking);
     containerId=-1;
 

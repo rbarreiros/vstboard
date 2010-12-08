@@ -29,7 +29,6 @@
 using namespace Connectables;
 
 VstPlugin *VstPlugin::pluginLoading = 0;
-//QList<VstPlugin*>VstPlugin::listPlugins;
 QMap<AEffect*,VstPlugin*>VstPlugin::mapPlugins;
 View::VstShellSelect *VstPlugin::shellSelectView=0;
 
@@ -42,9 +41,6 @@ VstPlugin::VstPlugin(MainHost *myHost,int index, const ObjectInfo & info) :
     listEvnts(0),
     isShell(false)
 {
-    mapPlugins.insert(pEffect, this);
-//    listPlugins << this;
-
     for(int i=0;i<128;i++) {
         listValues << i;
     }
@@ -66,18 +62,10 @@ bool VstPlugin::Close()
         objMutex.lock();
         EffEditClose();
         objMutex.unlock();
-
-//        modelEditor=0;
-//        modelLearningMode=0;
         editorWnd->close();
         editorWnd->deleteLater();
         editorWnd=0;
     }
-
-//    if(!Object::Close())
-//        return false;
-
-//    listPlugins.removeAll(this);
     mapPlugins.remove(pEffect);
 
     if(listEvnts) {
@@ -239,6 +227,49 @@ void VstPlugin::Render()
     EffIdle();
 }
 
+void VstPlugin::UpdatePinNumber()
+{
+    int nbIn = listAudioPinIn.count();
+    int newNbIn = pEffect->numInputs;
+    int nbOut = listAudioPinOut.count();
+    int newNbOut = pEffect->numOutputs;
+
+    if(nbIn==newNbIn && nbOut==newNbOut)
+        return;
+
+    //QMutexLocker lock(&objMutex);
+
+    if(newNbIn<nbIn) {
+        for(int i=newNbIn; i<nbIn; i++) {
+            delete listAudioPinIn.takeLast();
+        }
+    }
+    if(newNbIn>nbIn){
+        for(int i=nbIn;i<newNbIn;i++) {
+            AudioPinIn *pin = new AudioPinIn(this,i);
+            pin->buffer->SetSize(bufferSize);
+            pin->SetContainerId(containerId);
+            listAudioPinIn << pin;
+        }
+    }
+
+    if(newNbOut<nbOut) {
+        for(int i=newNbOut; i<nbOut; i++) {
+            delete listAudioPinOut.takeLast();
+        }
+    }
+    if(newNbOut>nbOut){
+        for(int i=nbOut;i<newNbOut;i++) {
+            AudioPinOut *pin = new AudioPinOut(this,i);
+            pin->buffer->SetSize(bufferSize);
+            pin->SetContainerId(containerId);
+            listAudioPinOut << pin;
+        }
+    }
+
+    UpdateModelNode();
+}
+
 bool VstPlugin::Open()
 {
 
@@ -254,7 +285,7 @@ bool VstPlugin::Open()
         }
 
         closed=false;
-
+        mapPlugins.insert(pEffect, this);
         VstPlugin::pluginLoading = 0;
 
         //a shell plugin should have asked for shellCategory capability before we get there (or else what are they waiting for ?)
@@ -360,18 +391,6 @@ bool VstPlugin::Open()
         }
         objInfo.name=objectName();
 
-
-        for(int i=0;i<pEffect->numInputs;i++) {
-            AudioPinIn *pin = new AudioPinIn(this,i);
-            pin->buffer->SetSize(bufferSize);
-            listAudioPinIn << pin;
-        }
-        for(int i=0;i<pEffect->numOutputs;i++) {
-            AudioPinOut *pin = new AudioPinOut(this,i);
-            pin->buffer->SetSize(bufferSize);
-            listAudioPinOut << pin;
-        }
-
         if(bWantMidi) {
             MidiPinIn *pinin = new MidiPinIn(this);
             pinin->setObjectName(QString("Midi in"));
@@ -381,6 +400,8 @@ bool VstPlugin::Open()
             listMidiPinOut << pinout;
         }
     }
+
+    UpdatePinNumber();
 
     int nbParam = pEffect->numParams;
     bool nameCanChange=false;
@@ -609,6 +630,7 @@ long VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr,
             break;
 
         case audioMasterIOChanged : //13
+            UpdatePinNumber();
             return  1L;
             break;
 
