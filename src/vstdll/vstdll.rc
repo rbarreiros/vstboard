@@ -1,6 +1,6 @@
 #include <winver.h>
 #include <verrsrc.h>
-#include "_version.h"
+#include "../vstboard/_version.h"
 
 VS_VERSION_INFO VERSIONINFO
 FILEVERSION APP_VERSION_MAJOR,APP_VERSION_MINOR,APP_VERSION_BUILD //,APP_VERSION_PATCH
@@ -24,7 +24,7 @@ BEGIN
             VALUE "FileDescription", APP_NAME
             VALUE "FileVersion", APP_VERSION
             VALUE "InternalName", APP_NAME
-            VALUE "OriginalFilename", APP_NAME ".exe"
+            VALUE "OriginalFilename", APP_NAME ".dll"
             VALUE "ProductName", "VstBoard"
             VALUE "ProductVersion", APP_VERSION
         END

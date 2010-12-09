@@ -7,12 +7,8 @@
 top_srcdir  = ..
 srcdir      = vstdll
 
-TARGET = VstBoardPlugin
-#make an app, it seems to be the only way to statically link Qt libs
-#TEMPLATE = app
-#but link as a dll instead of the default .exe
-#QMAKE_LFLAGS += /DLL
-#TARGET_EXT = .dll
+DEFINES += APP_NAME=\\\"VstBoardPlugin\\\"
+TARGET = "VstBoardPlugin"
 
 TEMPLATE = lib
 CONFIG += dll
@@ -237,6 +233,8 @@ FORMS += \
 ../vstboard/views/aboutdialog.ui
 
 PRECOMPILED_HEADER = ../vstboard/precomp.h
-OTHER_FILES +=
+OTHER_FILES += \
+    vstdll.rc
 
 RESOURCES += ../resources/resources.qrc
+RC_FILE = vstdll.rc
