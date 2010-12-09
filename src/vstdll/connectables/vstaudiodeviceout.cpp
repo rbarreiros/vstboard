@@ -38,7 +38,7 @@ VstAudioDeviceOut::~VstAudioDeviceOut()
 
 bool VstAudioDeviceOut::Close()
 {
-    myHost->myVstPlugin->removeDeviceOut(this);
+    myHost->myVstPlugin->removeAudioOut(this);
     if(!Object::Close())
         return false;
     return true;
@@ -51,7 +51,7 @@ void VstAudioDeviceOut::Render()
     }
 }
 
-void VstAudioDeviceOut::SetBufferSize(long size)
+void VstAudioDeviceOut::SetBufferSize(unsigned long size)
 {
     foreach(AudioPinIn *pin, listAudioPinIn) {
         pin->buffer->SetSize(size);
@@ -60,7 +60,7 @@ void VstAudioDeviceOut::SetBufferSize(long size)
 
 bool VstAudioDeviceOut::Open()
 {
-    if(!myHost->myVstPlugin->addDeviceOut(this))
+    if(!myHost->myVstPlugin->addAudioOut(this))
         return false;
 
     AudioPinIn *pin=0;

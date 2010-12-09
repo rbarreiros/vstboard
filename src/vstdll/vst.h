@@ -21,6 +21,8 @@
 #ifndef VST_H
 #define VST_H
 
+#define VSTEVENTBUFFERSIZE 1000
+
 #include <QObject>
 #include <QtGui/QApplication>
 #include "mainwindow.h"
@@ -28,6 +30,7 @@
 #include "gui.h"
 #include "connectables/vstaudiodevicein.h"
 #include "connectables/vstaudiodeviceout.h"
+#include "connectables/mididevice.h"
 
 AudioEffect* createEffectInstance (audioMasterCallback audioMaster);
 
@@ -39,30 +42,42 @@ public:
         Vst (audioMasterCallback audioMaster);
         ~Vst ();
 
+        VstInt32 canDo(char* text);
+        VstInt32 processEvents(VstEvents* events);
+
         // Processing
-        virtual void processReplacing (float** inputs, float** outputs, VstInt32 sampleFrames);
-        virtual void processDoubleReplacing (double** inputs, double** outputs, VstInt32 sampleFrames);
+        void processReplacing (float** inputs, float** outputs, VstInt32 sampleFrames);
+        void processDoubleReplacing (double** inputs, double** outputs, VstInt32 sampleFrames);
 
         // Program
-        virtual void setProgramName (char* name);
-        virtual void getProgramName (char* name);
+        void setProgramName (char* name);
+        void getProgramName (char* name);
 
         // Parameters
-        virtual void setParameter (VstInt32 index, float value);
-        virtual float getParameter (VstInt32 index);
-        virtual void getParameterLabel (VstInt32 index, char* label);
-        virtual void getParameterDisplay (VstInt32 index, char* text);
-        virtual void getParameterName (VstInt32 index, char* text);
+        void setParameter (VstInt32 index, float value);
+        float getParameter (VstInt32 index);
+        void getParameterLabel (VstInt32 index, char* label);
+        void getParameterDisplay (VstInt32 index, char* text);
+        void getParameterName (VstInt32 index, char* text);
 
-        virtual bool getEffectName (char* name);
-        virtual bool getVendorString (char* text);
-        virtual bool getProductString (char* text);
-        virtual VstInt32 getVendorVersion ();
+        bool getEffectName (char* name);
+        bool getVendorString (char* text);
+        bool getProductString (char* text);
+        VstInt32 getVendorVersion ();
 
-        bool addDeviceIn(Connectables::VstAudioDeviceIn *dev);
-        bool addDeviceOut(Connectables::VstAudioDeviceOut *dev);
-        bool removeDeviceIn(Connectables::VstAudioDeviceIn *dev);
-        bool removeDeviceOut(Connectables::VstAudioDeviceOut *dev);
+
+        bool addAudioIn(Connectables::VstAudioDeviceIn *dev);
+        bool addAudioOut(Connectables::VstAudioDeviceOut *dev);
+        bool removeAudioIn(Connectables::VstAudioDeviceIn *dev);
+        bool removeAudioOut(Connectables::VstAudioDeviceOut *dev);
+
+        void addMidiIn(Connectables::MidiDevice *dev);
+        void addMidiOut(Connectables::MidiDevice *dev);
+        void removeMidiIn(Connectables::MidiDevice *dev);
+        void removeMidiOut(Connectables::MidiDevice *dev);
+
+        VstInt32 getNumMidiInputChannels();
+        VstInt32 getNumMidiOutputChannels();
 
         void open();
         void close();
@@ -79,14 +94,17 @@ protected:
 
         char programName[kVstMaxProgNameLen + 1];
 
-        QList<Connectables::VstAudioDeviceIn*>lstDeviceIn;
-        QList<Connectables::VstAudioDeviceOut*>lstDeviceOut;
+        QList<Connectables::VstAudioDeviceIn*>lstAudioIn;
+        QList<Connectables::VstAudioDeviceOut*>lstAudioOut;
+        QList<Connectables::MidiDevice*>lstMidiIn;
+        QList<Connectables::MidiDevice*>lstMidiOut;
         VstInt32 bufferSize;
 
         QMutex mutexDevices;
 
         Gui *qEditor;
 
+        VstEvents *listEvnts;
 };
 
 

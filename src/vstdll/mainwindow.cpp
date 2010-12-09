@@ -24,6 +24,7 @@
 #include "projectfile/setupfile.h"
 #include "projectfile/projectfile.h"
 #include "views/aboutdialog.h"
+#include "globals.h"
 
 MainWindow::MainWindow(MainHost * myHost, QWidget *parent) :
     QMainWindow(parent),
@@ -131,23 +132,54 @@ void MainWindow::BuildListTools()
 
     //vst audio in
     QStandardItem *item = new QStandardItem(tr("Vst audio input"));
-    ObjectInfo info;
-    info.nodeType = NodeType::object;
-    info.objType = ObjType::AudioInterfaceIn;
-    info.name = "Vst audio In";
-    item->setData(QVariant::fromValue(info), UserRoles::objInfo);
+    ObjectInfo infoai;
+    infoai.nodeType = NodeType::object;
+    infoai.objType = ObjType::AudioInterfaceIn;
+    infoai.name = "Vst audio In";
+    item->setData(QVariant::fromValue(infoai), UserRoles::objInfo);
     parentItem->appendRow(item);
 
     //vst audio out
     item = new QStandardItem(tr("Vst audio output"));
-    info.nodeType = NodeType::object;
-    info.objType = ObjType::AudioInterfaceOut;
-    info.name = "Vst audio Out";
-    item->setData(QVariant::fromValue(info), UserRoles::objInfo);
+    ObjectInfo infoao;
+    infoao.nodeType = NodeType::object;
+    infoao.objType = ObjType::AudioInterfaceOut;
+    infoao.name = "Vst audio Out";
+    item->setData(QVariant::fromValue(infoao), UserRoles::objInfo);
     parentItem->appendRow(item);
 
     ui->treeAudioInterfaces->setModel(listAudioDevModel);
     ui->treeAudioInterfaces->header()->setResizeMode(0,QHeaderView::Stretch);
+
+//midi devices (vst in/out)
+//================================
+    listMidiDevModel = new ListToolsModel();
+    listMidiDevModel->setHorizontalHeaderLabels(headerLabels);
+    parentItem = listMidiDevModel->invisibleRootItem();
+
+    //vst midi in
+    item = new QStandardItem(tr("Vst midi input"));
+    ObjectInfo infomi;
+    infomi.nodeType = NodeType::object;
+    infomi.objType = ObjType::MidiInterface;
+    infomi.inputs = 1;
+    infomi.name = "Vst midi In";
+    item->setData(QVariant::fromValue(infomi), UserRoles::objInfo);
+    parentItem->appendRow(item);
+
+    //vst midi out
+    item = new QStandardItem(tr("Vst midi output"));
+    ObjectInfo infomo;
+    infomo.nodeType = NodeType::object;
+    infomo.objType = ObjType::MidiInterface;
+    infomo.outputs = 1;
+    infomo.name = "Vst midi Out";
+    item->setData(QVariant::fromValue(infomo), UserRoles::objInfo);
+    parentItem->appendRow(item);
+
+    ui->treeMidiInterfaces->setModel(listMidiDevModel);
+    ui->treeMidiInterfaces->header()->setResizeMode(0,QHeaderView::Stretch);
+
 
 //tools
 //================================
@@ -157,6 +189,7 @@ void MainWindow::BuildListTools()
 
     //midi parameters
     item = new QStandardItem(tr("MidiCC to parameter"));
+    ObjectInfo info;
     info.nodeType = NodeType::object;
     info.objType = ObjType::MidiToAutomation;
     item->setData(QVariant::fromValue(info), UserRoles::objInfo);

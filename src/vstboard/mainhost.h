@@ -62,9 +62,9 @@ public:
 
     void SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum msgType,void *data);
 
-    void SetBufferSize(long size);
+    void SetBufferSize(unsigned long size);
     void SetSampleRate(float rate=44100.0);
-    int GetBufferSize() {return (int)bufferSize;}
+    unsigned long GetBufferSize() {return bufferSize;}
     float GetSampleRate() {return sampleRate;}
 
     void OnObjectAdded(QSharedPointer<Connectables::Object> objPtr);
@@ -128,7 +128,7 @@ private:
     QMutex mutexProgChange;
 
     float sampleRate;
-    long bufferSize;
+    unsigned long bufferSize;
     QTime timeFromStart;
 
     QList<Connectables::Object*>listObjToRemove;
@@ -143,7 +143,7 @@ private:
 
 signals:
     void SampleRateChanged(float rate);
-    void BufferSizeChanged(long size);
+    void BufferSizeChanged(unsigned long size);
     void NewSolver(orderedNodes *renderLines);
     void ObjectRemoved(int contrainerId, int obj);
     void SolverToUpdate();

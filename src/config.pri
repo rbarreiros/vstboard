@@ -70,7 +70,7 @@ win32-g++ {
     INCLUDEPATH += $$quote($$MINGW_PATH/include)
 }
 
-win32-msvc2008 {
+win32-msvc* {
     DEFINES += _CRT_SECURE_NO_WARNINGS
     INCLUDEPATH += $$quote($$(INCLUDE))
     LIBS += -L$$quote($$(LIB))

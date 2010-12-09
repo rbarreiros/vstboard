@@ -47,7 +47,7 @@ namespace Connectables {
 //        QSharedPointer<AudioDevice>parentDevice;
 
     public slots:
-        void SetBufferSize(long size);
+        void SetBufferSize(unsigned long size);
 
 //    friend class AudioDevice;
     };

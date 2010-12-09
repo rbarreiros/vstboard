@@ -18,6 +18,7 @@ DEFINES += VST_PLUGIN
 
 PORTMIDI_PATH 	= ../libs/portmidi
 INCLUDEPATH += $$top_srcdir/$$PORTMIDI_PATH/pm_common
+INCLUDEPATH += $$top_srcdir/$$PORTMIDI_PATH/porttime
 
 QTWINMIGRATE_PATH = ../libs/qtwinmigrate
 
@@ -43,6 +44,15 @@ OBJECTS_DIR =$$builddir
 DESTDIR     =$$top_destdir
 TARGET      =$$TARGET
 
+win32 {
+    LIBS += -lwinmm
+#    LIBS += -luser32
+#    LIBS += -ladvapi32
+#    LIBS += -lole32
+#    LIBS += -lsetupapi
+#    LIBS += -ldsound
+}
+
 win32-g++ {
     DEFINES += WINVER=0x0501
     DEFINES += _WIN32_WINNT=0x0501
@@ -56,7 +66,7 @@ win32-msvc* {
     INCLUDEPATH += $$quote($$(INCLUDE))
     LIBS += -L$$quote($$(LIB))
     QMAKE_CFLAGS += -Fd$$top_destdir/$$TARGET
-
+    RC_FILE = vstdll.rc
 
 #to add symbols :
 #    QMAKE_CFLAGS_RELEASE +=  -Zi
@@ -67,6 +77,7 @@ win32-msvc* {
 QT       += core gui
 
 LIBS += -lqtmain
+#LIBS += -L$$top_destdir -lportmidi
 
 include($$top_srcdir/$$QTWINMIGRATE_PATH/src/qtwinmigrate.pri)
 
@@ -87,8 +98,6 @@ views/maingraphicsview.cpp \
 connectables/vstaudiodevicein.cpp \
 connectables/vstaudiodeviceout.cpp \
 connectables/mididevice.cpp \
-connectables/midisender.cpp \
-connectables/miditoautomation.cpp \
 connectables/hostcontroller.cpp \
 views/configdialog.cpp \
 ../vstboard/views/connectablepinview.cpp \
@@ -149,7 +158,15 @@ views/configdialog.cpp \
 ../vstboard/models/programsmodel.cpp \
 ../vstboard/connectables/bridge.cpp \
 ../vstboard/views/aboutdialog.cpp \
-    vst.cpp
+    vst.cpp \
+    ../../libs/portmidi/pm_common/portmidi.c \
+    ../../libs/portmidi/pm_common/pmutil.c \
+    ../../libs/portmidi/pm_win/pmwin.c \
+    ../../libs/portmidi/porttime/porttime.c \
+    ../../libs/portmidi/porttime/ptwinmm.c \
+    ../../libs/portmidi/pm_win/pmwinmm.c \
+    ../vstboard/connectables/miditoautomation.cpp \
+    ../vstboard/connectables/midisender.cpp
 
 
 HEADERS  += \
@@ -221,7 +238,8 @@ connectables/midipinin.h \
 ../vstboard/models/programsmodel.h \
 ../vstboard/connectables/bridge.h \
 ../vstboard/views/aboutdialog.h \
-    vst.h
+    vst.h \
+    ../vstboard/_version.h
 
 FORMS += \
 ../vstboard/views/configdialog.ui \
@@ -237,4 +255,3 @@ OTHER_FILES += \
     vstdll.rc
 
 RESOURCES += ../resources/resources.qrc
-RC_FILE = vstdll.rc

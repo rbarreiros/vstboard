@@ -41,6 +41,10 @@ TARGET = $${APP_NAME}
         }
     }
 
+win32-msvc* {
+    RC_FILE = vstboard.rc
+}
+
     win32 {
         $${INSTALLER_UPDATEQTDLL} {
             EXTRA_FILES += $$[QT_INSTALL_BINS]/QtCore4.dll \
@@ -264,4 +268,3 @@ OTHER_FILES += \
 
 TRANSLATIONS = vstboard_fr.ts
 
-RC_FILE = vstboard.rc

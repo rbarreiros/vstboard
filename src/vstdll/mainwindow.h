@@ -57,6 +57,7 @@ private:
 
     ListToolsModel *listToolsModel;
     ListToolsModel *listAudioDevModel;
+    ListToolsModel *listMidiDevModel;
     void BuildListTools();
 
     QList<QAction*>listRecentProjects;

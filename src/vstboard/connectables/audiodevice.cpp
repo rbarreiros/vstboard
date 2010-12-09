@@ -579,9 +579,9 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
     if(!device->myHost)
         return paComplete;
 
-    unsigned int hostBuffSize = device->myHost->GetBufferSize();
+    unsigned long hostBuffSize = device->myHost->GetBufferSize();
     if(framesPerBuffer > hostBuffSize) {
-       device->myHost->SetBufferSize((long)framesPerBuffer);
+       device->myHost->SetBufferSize(framesPerBuffer);
        hostBuffSize = framesPerBuffer;
     }
 

@@ -571,7 +571,7 @@ void MainHost::SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum ms
     }
 }
 
-void MainHost::SetBufferSize(long size)
+void MainHost::SetBufferSize(unsigned long size)
 {
     debug("MainHost::SetBufferSize %ld",size)
     bufferSize = size;
@@ -621,8 +621,8 @@ void MainHost::OnObjectAdded(QSharedPointer<Connectables::Object> objPtr)
 
     connect(this,SIGNAL(SampleRateChanged(float)),
             objPtr.data(),SLOT(SetSampleRate(float)));
-    connect(this,SIGNAL(BufferSizeChanged(long)),
-            objPtr.data(),SLOT(SetBufferSize(long)));
+    connect(this,SIGNAL(BufferSizeChanged(unsigned long)),
+            objPtr.data(),SLOT(SetBufferSize(unsigned long)));
 
     objPtr->SetSampleRate(sampleRate);
     objPtr->SetBufferSize(bufferSize);
@@ -638,8 +638,8 @@ void MainHost::OnObjectRemoved(QSharedPointer<Connectables::Object> objPtr, Conn
 
     disconnect(this,SIGNAL(SampleRateChanged(float)),
             objPtr.data(),SLOT(SetSampleRate(float)));
-    disconnect(this,SIGNAL(BufferSizeChanged(long)),
-            objPtr.data(),SLOT(SetBufferSize(long)));
+    disconnect(this,SIGNAL(BufferSizeChanged(unsigned long)),
+            objPtr.data(),SLOT(SetBufferSize(unsigned long)));
 
 #ifndef VST_PLUGIN
     midiDevices->CloseDevice(objPtr);

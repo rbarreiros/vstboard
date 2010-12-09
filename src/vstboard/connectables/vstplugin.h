@@ -71,7 +71,7 @@ namespace Connectables {
     protected:
         void UpdatePinNumber();
         float sampleRate;
-        long bufferSize;
+        unsigned long bufferSize;
         VstEvents *listEvnts;
         bool isShell;
 
@@ -83,7 +83,7 @@ namespace Connectables {
         void WindowSizeChange(int newWidth, int newHeight);
 
     public slots:
-        void SetBufferSize(long size);
+        void SetBufferSize(unsigned long size);
         void SetSampleRate(float rate=44100.0);
         void RaiseEditor();
         void EditorDestroyed();

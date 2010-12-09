@@ -120,7 +120,7 @@ ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
 
 
     ui->bufferSize->addItem("Auto",0);
-    index = ui->bufferSize->findData( myHost->GetBufferSize() );
+    index = ui->bufferSize->findData( (uint)myHost->GetBufferSize() );
     if(index==-1) {
         debug("ConfigDialog invalid buffer size")
         return;

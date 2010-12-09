@@ -185,7 +185,7 @@ namespace Connectables {
         virtual void LoadProgram(int prog);
         void OnProgramDirty() {progIsDirty=true;}
 
-        virtual void SetBufferSize(long size) {}
+        virtual void SetBufferSize(unsigned long size) {}
         virtual void SetSampleRate(float rate=44100.0) {}
         virtual void OnParameterChanged(ConnectionInfo pinInfo, float value);
 

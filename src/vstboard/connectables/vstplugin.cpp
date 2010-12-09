@@ -92,7 +92,7 @@ void VstPlugin::SetSleep(bool sleeping)
     Object::SetSleep(sleeping);
 }
 
-void VstPlugin::SetBufferSize(long size)
+void VstPlugin::SetBufferSize(unsigned long size)
 {
     if(!pEffect)
         return;
@@ -111,7 +111,7 @@ void VstPlugin::SetBufferSize(long size)
         pin->buffer->SetSize(size);
     }
 
-    EffSetBlockSize(size);
+    EffSetBlockSize((long)size);
 
     bufferSize = size;
 

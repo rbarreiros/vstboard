@@ -57,7 +57,7 @@ void AudioDeviceOut::Render()
         listParameterPinOut.value(0)->ChangeValue(parentDevice->GetCpuUsage());
 }
 
-void AudioDeviceOut::SetBufferSize(long size)
+void AudioDeviceOut::SetBufferSize(unsigned long size)
 {
     foreach(AudioPinIn *pin, listAudioPinIn) {
         pin->buffer->SetSize(size);
