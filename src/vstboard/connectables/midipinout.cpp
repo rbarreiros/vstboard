@@ -25,7 +25,8 @@
 using namespace Connectables;
 
 MidiPinOut::MidiPinOut(Object *parent, int number, bool bridge)
-    :Pin(parent,PinType::Midi,PinDirection::Output,number,bridge)
+    :Pin(parent,PinType::Midi,PinDirection::Output,number,bridge),
+    vuVal(.0f)
 {
     falloff = 0.05f;
 
@@ -35,14 +36,15 @@ MidiPinOut::MidiPinOut(Object *parent, int number, bool bridge)
 
 void MidiPinOut::SendMsg(int msgType,void *data) {
     Pin::SendMsg(msgType,data);
-    value+=.2f;
-    valueChanged=true;
+    value=1.0f;
 }
 
 float MidiPinOut::GetValue()
 {
-    float v=value;
-    if(v>1.0f) v=1.0f;
+    if(vuVal!=value)
+        valueChanged=true;
+
+    vuVal=value;
     value=.0f;
-    return v;
+    return vuVal;
 }

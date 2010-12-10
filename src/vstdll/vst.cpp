@@ -33,7 +33,7 @@ AudioEffect* createEffectInstance (audioMasterCallback audioMaster)
 }
 
 Vst::Vst (audioMasterCallback audioMaster)
-    : AudioEffectX (audioMaster, 1, 0),	// 1 program, 0 parameter
+    : AudioEffectX (audioMaster, 1, 128),
     myApp(0),
     myHost(0),
     myWindow(0),
@@ -108,9 +108,7 @@ Vst::Vst (audioMasterCallback audioMaster)
 
 Vst::~Vst ()
 {
-    debug2(<< "delete Vst" << hex << (long)this)
-
-            setEditor(0);
+    Pm_Terminate();
     myHost->mainWindow=0;
     myWindow->setParent(0);
     qApp->removePostedEvents(myWindow);
@@ -118,7 +116,8 @@ Vst::~Vst ()
     qApp->removePostedEvents(myHost);
     delete myHost;
     qApp->removePostedEvents(qEditor);
-    delete qEditor;
+//    setEditor(0);
+//    delete qEditor;
     if(myApp)
         delete myApp;
 }
@@ -201,6 +200,16 @@ void Vst::removeMidiOut(Connectables::MidiDevice *dev)
     lstMidiOut.removeAll(dev);
 }
 
+void Vst::addVstAutomation(Connectables::VstAutomation *dev)
+{
+    lstVstAutomation << dev;
+}
+
+void Vst::removeVstAutomation(Connectables::VstAutomation *dev)
+{
+    lstVstAutomation.removeAll(dev);
+}
+
 VstInt32 Vst::getNumMidiInputChannels()
 {
     return 15;
@@ -223,12 +232,15 @@ void Vst::getProgramName (char* name)
 
 void Vst::setParameter (VstInt32 index, float value)
 {
-//    emit update(value);
+    foreach(Connectables::VstAutomation *dev, lstVstAutomation) {
+        dev->ValueFromHost(index,value);
+    }
 }
 
 float Vst::getParameter (VstInt32 index)
 {
-    return 0;
+    if(lstParameters.count()>index)
+        return lstParameters.at(index);
 }
 
 void Vst::getParameterName (VstInt32 index, char* label)

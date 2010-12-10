@@ -1,5 +1,5 @@
-/******************************************************************************
-#    Copyright 2010 Raphaël François
+/**************************************************************************
+#    Copyright 2010 Raphaï¿½l Franï¿½ois
 #    Contact : ctrlbrk76@gmail.com
 #
 #    This file is part of VstBoard.
@@ -16,29 +16,39 @@
 #
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+**************************************************************************/
 
-#ifndef MIDITOAUTOMATION_H
-#define MIDITOAUTOMATION_H
+#ifndef VSTAUTOMATION_H
+#define VSTAUTOMATION_H
 
-#include "../precomp.h"
-#include "object.h"
+#include "../vstboard/precomp.h"
+#include "connectables/object.h"
+
+#define VST_AUTOMATION_DEFAULT_NB_PINS 2
 
 namespace Connectables {
 
-    class MidiToAutomation : public Object
+
+    class VstAutomation : public Object
     {
     Q_OBJECT
     public:
-        explicit MidiToAutomation(MainHost *myHost,int index);
+        explicit VstAutomation(MainHost *myHost,int index);
+        ~VstAutomation();
+        bool Open();
+        bool Close();
         void Render();
-        void MidiMsgFromInput(long msg);
+        void ValueFromHost(int pinNum, float value);
 
     protected:
+        void OnNumberOfPinsChanged(int newNb);
         QList<QVariant> listValues;
-        QHash<quint8,quint8>listChanged;
+        QHash<int,float>listChangedByPin;
+        QHash<int,float>listChangedByHost;
+        int numberOfPins;
 
+    public slots:
+        void OnParameterChanged(ConnectionInfo pinInfo, float value);
     };
 }
-
-#endif // MIDITOAUTOMATION_H
+#endif // VSTAUTOMATION_H

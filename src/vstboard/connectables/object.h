@@ -83,7 +83,7 @@ namespace Connectables {
         virtual void SetSleep(bool sleeping);
         bool GetSleep();
 
-        virtual float SetParameter(int paramId, float value) {return value;}
+        //virtual float SetParameter(int paramId, float value) {return value;}
         virtual void MidiMsgFromInput(long msg) {}
 
         virtual QString GetParameterName(ConnectionInfo pinInfo) {return "";}

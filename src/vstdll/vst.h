@@ -23,8 +23,8 @@
 
 #define kUniqueID CCONST('V','b','P','l')
 #define VST_EVENT_BUFFER_SIZE 1000
-#define DEFAULT_INPUTS 2
-#define DEFAULT_OUTPUTS 2
+#define DEFAULT_INPUTS 1
+#define DEFAULT_OUTPUTS 1
 
 #include <QObject>
 #include <QtGui/QApplication>
@@ -34,6 +34,7 @@
 #include "connectables/vstaudiodevicein.h"
 #include "connectables/vstaudiodeviceout.h"
 #include "connectables/mididevice.h"
+#include "connectables/vstautomation.h"
 
 AudioEffect* createEffectInstance (audioMasterCallback audioMaster);
 
@@ -79,6 +80,9 @@ public:
         void removeMidiIn(Connectables::MidiDevice *dev);
         void removeMidiOut(Connectables::MidiDevice *dev);
 
+        void addVstAutomation(Connectables::VstAutomation *dev);
+        void removeVstAutomation(Connectables::VstAutomation *dev);
+
         VstInt32 getNumMidiInputChannels();
         VstInt32 getNumMidiOutputChannels();
 
@@ -101,6 +105,9 @@ protected:
         QList<Connectables::VstAudioDeviceOut*>lstAudioOut;
         QList<Connectables::MidiDevice*>lstMidiIn;
         QList<Connectables::MidiDevice*>lstMidiOut;
+        QList<Connectables::VstAutomation*>lstVstAutomation;
+        QList<int>lstParameters;
+
         VstInt32 bufferSize;
 
         QMutex mutexDevices;

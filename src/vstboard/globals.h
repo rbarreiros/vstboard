@@ -98,7 +98,8 @@ namespace ObjType {
         listParamOut,
         listBridgeIn,
         listBridgeOut,
-        dummy
+        dummy,
+        VstAutomation
     };
 }
 
@@ -158,7 +159,8 @@ namespace FixedPinNumber {
     enum Enum {
         editorVisible = 0xf000,
         learningMode,
-        vstProgNumber
+        vstProgNumber,
+        numberOfPins
     };
 }
 

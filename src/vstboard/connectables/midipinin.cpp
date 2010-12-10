@@ -27,10 +27,9 @@
 using namespace Connectables;
 
 MidiPinIn::MidiPinIn(Object *parent, int number, bool bridge)
-    :Pin(parent,PinType::Midi,PinDirection::Input,number,bridge)
+    :Pin(parent,PinType::Midi,PinDirection::Input,number,bridge),
+    vuVal(.0f)
 {
-//    activity = 0;
-
     falloff = 0.05f;
 
     setObjectName(QString("MidiIn%1").arg(number));
@@ -42,28 +41,17 @@ void MidiPinIn::ReceiveMsg(const int msgType,void* data)
 {
     if(msgType==PinMessage::MidiMsg) {
         parent->MidiMsgFromInput(*(long*)data);
-        value+=.2f;
-        valueChanged=true;
+        value=1.0f;
     }
 }
 
 
 float MidiPinIn::GetValue()
 {
-    float v=value;
-    if(v>1.0f) v=1.0f;
+    if(vuVal!=value)
+        valueChanged=true;
+
+    vuVal=value;
     value=.0f;
-    return v;
+    return vuVal;
 }
-
-//void MidiPinIn::SetActivity(int channel)
-//{
-//    activity &= 1 << channel;
-//}
-
-//int MidiPinIn::GetActivity()
-//{
-//    int act = activity;
-//    activity = 0;
-//    return act;
-//}

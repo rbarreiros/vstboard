@@ -22,7 +22,6 @@
 #define MIDIPININ_H
 
 #include "pin.h"
-#include "portmidi.h"
 
 namespace Connectables {
 
@@ -32,14 +31,8 @@ namespace Connectables {
         MidiPinIn(Object *parent, int number=0, bool bridge=false);
         void ReceiveMsg(const int msgType=0,void *data=0);
         float GetValue();
-
-//        void SetActivity(int channel);
-//        int GetActivity();
-
-
     protected:
-//        bool activity;
-        QList<PmMessage*>msgBuffer;
+        float vuVal;
     };
 
 }

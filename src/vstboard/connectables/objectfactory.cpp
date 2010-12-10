@@ -25,6 +25,7 @@
 #else
     #include "connectables/vstaudiodevicein.h"
     #include "connectables/vstaudiodeviceout.h"
+    #include "connectables/vstautomation.h"
 #endif
 #include "mididevice.h"
 #include "midisender.h"
@@ -209,6 +210,10 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
 
             case ObjType::AudioInterfaceOut:
                 obj = new VstAudioDeviceOut(myHost,objId, info);
+                break;
+
+            case ObjType::VstAutomation:
+                obj = new VstAutomation(myHost,objId);
                 break;
 #endif
                 case ObjType::MidiInterface:

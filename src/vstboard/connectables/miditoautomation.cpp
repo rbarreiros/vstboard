@@ -22,20 +22,17 @@
 #include "midipinin.h"
 #include "../globals.h"
 #include "mainhost.h"
+#include "portmidi.h"
 
 using namespace Connectables;
-
-//QList<QVariant> MidiToAutomation::listValues;
 
 MidiToAutomation::MidiToAutomation(MainHost *myHost,int index) :
         Object(myHost,index, ObjectInfo(NodeType::object, ObjType::MidiToAutomation, tr("MidiCC->Automation")) )
 {
 
-        for(int i=0;i<128;i++) {
-            listValues << i;
-        }
-
-//    parameterLearning = true;
+    for(int i=0;i<128;i++) {
+        listValues << i;
+    }
 
     listMidiPinIn << new MidiPinIn(this);
 
@@ -44,33 +41,8 @@ MidiToAutomation::MidiToAutomation(MainHost *myHost,int index) :
     }
 
     listParameterPinIn.value(FixedPinNumber::learningMode)->SetAlwaysVisible(true);
-//    debug("MidiAuomation::New")
 }
 
-void MidiToAutomation::SetParentModeIndex(const QModelIndex &parentIndex)
-{
-    Object::SetParentModeIndex(parentIndex);
-//    MainHost::GetModel()->setData(modelIndex, true, UserRoles::paramLearning);
-}
-
-MidiToAutomation::~MidiToAutomation()
-{
-//    debug("MidiToAutomation::Delete")
-}
-
-bool MidiToAutomation::Close()
-{
-//    debug("MidiToAutomation::Close")
-    Object::Close();
-    this->deleteLater();
-    return true;
-}
-
-void MidiToAutomation::Hide()
-{
-//    debug("MidiToAutomation::Hide")
-    Object::Hide();
-}
 
 void MidiToAutomation::Render()
 {

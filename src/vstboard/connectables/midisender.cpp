@@ -20,6 +20,7 @@
 
 #include "midisender.h"
 #include "../globals.h"
+#include "portmidi.h"
 
 using namespace Connectables;
 

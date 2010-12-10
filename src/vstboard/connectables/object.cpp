@@ -64,13 +64,13 @@ Object::Object(MainHost *host, int index, const ObjectInfo &info) :
         //editor pin
         listEditorVisible << "hide";
         listEditorVisible << "show";
-        listParameterPinIn.insert(FixedPinNumber::editorVisible, new ParameterPinIn(this,FixedPinNumber::editorVisible,"hide",&listEditorVisible,false,"Editor"));
+        listParameterPinIn.insert(FixedPinNumber::editorVisible, new ParameterPinIn(this,FixedPinNumber::editorVisible,"hide",&listEditorVisible,false,tr("Editor")));
 
         //learning pin
         listIsLearning << "off";
         listIsLearning << "learn";
         listIsLearning << "unlearn";
-        listParameterPinIn.insert(FixedPinNumber::learningMode, new ParameterPinIn(this,FixedPinNumber::learningMode,"off",&listIsLearning,false,"Learn"));
+        listParameterPinIn.insert(FixedPinNumber::learningMode, new ParameterPinIn(this,FixedPinNumber::learningMode,"off",&listIsLearning,false,tr("Learn")));
     }
 }
 

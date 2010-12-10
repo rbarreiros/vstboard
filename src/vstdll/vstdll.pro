@@ -47,7 +47,7 @@ TARGET      =$$TARGET
 win32 {
     LIBS += -lwinmm
 #    LIBS += -luser32
-#    LIBS += -ladvapi32
+    LIBS += -ladvapi32
 #    LIBS += -lole32
 #    LIBS += -lsetupapi
 #    LIBS += -ldsound
@@ -166,7 +166,8 @@ views/configdialog.cpp \
     ../../libs/portmidi/porttime/ptwinmm.c \
     ../../libs/portmidi/pm_win/pmwinmm.c \
     ../vstboard/connectables/miditoautomation.cpp \
-    ../vstboard/connectables/midisender.cpp
+    ../vstboard/connectables/midisender.cpp \
+    connectables/vstautomation.cpp
 
 
 HEADERS  += \
@@ -176,7 +177,6 @@ views/maingraphicsview.h \
 connectables/vstaudiodevicein.h \
 connectables/vstaudiodeviceout.h \
 connectables/mididevice.h \
-connectables/midipinin.h \
 ../vstboard/globals.h \
 ../vstboard/mainhost.h \
 ../vstboard/connectables/midisender.h \
@@ -239,7 +239,9 @@ connectables/midipinin.h \
 ../vstboard/connectables/bridge.h \
 ../vstboard/views/aboutdialog.h \
     vst.h \
-    ../vstboard/_version.h
+    ../vstboard/_version.h \
+    ../vstboard/connectables/midipinin.h \
+    connectables/vstautomation.h
 
 FORMS += \
 ../vstboard/views/configdialog.ui \

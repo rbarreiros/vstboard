@@ -187,9 +187,16 @@ void MainWindow::BuildListTools()
     listToolsModel->setHorizontalHeaderLabels(headerLabels);
     parentItem = listToolsModel->invisibleRootItem();
 
+    //vst automation
+    item = new QStandardItem(tr("Vst Automation"));
+    ObjectInfo info;
+    info.nodeType = NodeType::object;
+    info.objType = ObjType::VstAutomation;
+    item->setData(QVariant::fromValue(info), UserRoles::objInfo);
+    parentItem->appendRow(item);
+
     //midi parameters
     item = new QStandardItem(tr("MidiCC to parameter"));
-    ObjectInfo info;
     info.nodeType = NodeType::object;
     info.objType = ObjType::MidiToAutomation;
     item->setData(QVariant::fromValue(info), UserRoles::objInfo);
