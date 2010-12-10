@@ -38,15 +38,46 @@ Vst::Vst (audioMasterCallback audioMaster)
     myHost(0),
     myWindow(0),
     bufferSize(0),
-    listEvnts(0)
+    listEvnts(0),
+    hostAcceptIOChanges(0)
 {
+    VstInt32 ver = getMasterVersion();
+    if(ver<2400) {
+        QMessageBox msg;
+        msg.setText(tr("host not supported (Vst version %1)").arg(ver));
+        msg.exec();
+    }
+
+    char str[64];
+    getHostVendorString(str);
+    getHostProductString(str);
+    VstInt32 hostVer = getHostVendorVersion();
+
+    long hostSendVstEvents = canHostDo("sendVstEvents");
+    long hostSendVstMidiEvent = canHostDo("sendVstMidiEvent");
+    long hostSendVstTimeInfo = canHostDo("sendVstTimeInfo");
+    long hostReceiveVstEvents = canHostDo("receiveVstEvents");
+    long hostReceiveVstMidiEvents = canHostDo("receiveVstMidiEvents");
+    long hostReceiveVstTimeInfo = canHostDo("receiveVstTimeInfo");
+    long hostReportConnectionChanges = canHostDo("reportConnectionChanges");
+    hostAcceptIOChanges = canHostDo("acceptIOChanges");
+    long hostSizeWindow = canHostDo("sizeWindow");
+    long hostAsyncProcessing = canHostDo("asyncProcessing");
+    long hostOffline = canHostDo("offline");
+    long hostSupplyIdle = canHostDo("supplyIdle");
+    long hostSupportShell = canHostDo("supportShell");
+    long hostOpenFileSelector = canHostDo("openFileSelector");
+    long hostEditFile = canHostDo("editFile");
+    long hostCloseFileSelector = canHostDo("closeFileSelector");
+
+
     //cEffect.flags |= effFlagsIsSynth;
 
-    setNumInputs (2);		// stereo in
-    setNumOutputs (2);		// stereo out
-    setUniqueID ('VbPl');	// identify
-    canProcessReplacing ();	// supports replacing output
-    //        canDoubleReplacing ();	// supports double precision processing
+    setNumInputs (DEFAULT_INPUTS*2);
+    setNumOutputs (DEFAULT_OUTPUTS*2);
+    setUniqueID (kUniqueID);
+    canProcessReplacing(true);
+    //        canDoubleReplacing ();
 
     vst_strncpy (programName, "Default", kVstMaxProgNameLen);	// default program name
 
@@ -99,10 +130,15 @@ bool Vst::addAudioIn(Connectables::VstAudioDeviceIn *dev)
     if(lstAudioIn.contains(dev))
         return true;
 
+    if(!hostAcceptIOChanges && lstAudioIn.count()>=DEFAULT_INPUTS)
+        return false;
+
     lstAudioIn << dev;
     dev->setObjectName( QString("Vst audio in %1").arg(lstAudioIn.count()) );
     setNumInputs(lstAudioIn.count()*2);
-    ioChanged();
+
+    if(hostAcceptIOChanges)
+        ioChanged();
     return true;
 }
 
@@ -113,10 +149,15 @@ bool Vst::addAudioOut(Connectables::VstAudioDeviceOut *dev)
     if(lstAudioOut.contains(dev))
         return true;
 
+    if(!hostAcceptIOChanges && lstAudioOut.count()>=DEFAULT_OUTPUTS)
+        return false;
+
     lstAudioOut << dev;
     dev->setObjectName( QString("Vst audio out %1").arg(lstAudioOut.count()) );
     setNumOutputs(lstAudioOut.count()*2);
-    ioChanged();
+
+    if(hostAcceptIOChanges)
+        ioChanged();
     return true;
 }
 
@@ -125,7 +166,8 @@ bool Vst::removeAudioIn(Connectables::VstAudioDeviceIn *dev)
     QMutexLocker l(&mutexDevices);
     lstAudioIn.removeAll(dev);
     setNumInputs(lstAudioIn.count()*2);
-    ioChanged();
+    if(hostAcceptIOChanges)
+        ioChanged();
     return true;
 }
 
@@ -134,7 +176,8 @@ bool Vst::removeAudioOut(Connectables::VstAudioDeviceOut *dev)
     QMutexLocker l(&mutexDevices);
     lstAudioOut.removeAll(dev);
     setNumOutputs(lstAudioOut.count()*2);
-    ioChanged();
+    if(hostAcceptIOChanges)
+        ioChanged();
     return true;
 }
 
@@ -228,17 +271,16 @@ VstInt32 Vst::getVendorVersion ()
 
 VstInt32 Vst::canDo(char* text)
 {
-//    "sendVstEvents", plug-in will send Vst events to Host
-//     "sendVstMidiEvent", plug-in will send MIDI events to Host
-//     "receiveVstEvents", plug-in can receive MIDI events from Host
-//     "receiveVstMidiEvent", plug-in can receive MIDI events from Host
-//     "receiveVstTimeInfo", plug-in can receive Time info from Host
 //     "offline", plug-in supports offline functions (offlineNotify, offlinePrepare, offlineRun)
 //     "midiProgramNames", plug-in supports function getMidiProgramName ()
 //     "bypass", plug-in supports function setBypass ()
 
-    if ((!strcmp(text, "receiveVstEvents")) ||
-         (!strcmp(text, "receiveVstMidiEvent"))
+    if (
+            (!strcmp(text, "sendVstEvents")) ||
+            (!strcmp(text, "sendVstMidiEvent")) ||
+            (!strcmp(text, "receiveVstEvents")) ||
+            (!strcmp(text, "receiveVstMidiEvent") ||
+            (!strcmp(text, "receiveVstTimeInfo")))
          )
          return 1;
 
@@ -303,17 +345,16 @@ void Vst::processReplacing (float** inputs, float** outputs, VstInt32 sampleFram
 
             //allocate a new buffer
             if(!listEvnts)
-                listEvnts = (VstEvents*)malloc(sizeof(VstEvents) + sizeof(VstEvents*)*(VSTEVENTBUFFERSIZE-2));
+                listEvnts = (VstEvents*)malloc(sizeof(VstEvents) + sizeof(VstEvents*)*(VST_EVENT_BUFFER_SIZE-2));
 
             Pm_Dequeue( dev->queue, &msg);
 
             VstMidiEvent *evnt = new VstMidiEvent;
             memset(evnt, 0, sizeof(VstMidiEvent));
             evnt->type = kVstMidiType;
+            evnt->flags = kVstMidiEventIsRealtime;
             evnt->byteSize = sizeof(VstMidiEvent);
             memcpy(evnt->midiData, &msg.message, sizeof(evnt->midiData));
-            evnt->flags = kVstMidiEventIsRealtime;
-
             listEvnts->events[cpt]=(VstEvent*)evnt;
             cpt++;
         }

@@ -21,7 +21,10 @@
 #ifndef VST_H
 #define VST_H
 
-#define VSTEVENTBUFFERSIZE 1000
+#define kUniqueID CCONST('V','b','P','l')
+#define VST_EVENT_BUFFER_SIZE 1000
+#define DEFAULT_INPUTS 2
+#define DEFAULT_OUTPUTS 2
 
 #include <QObject>
 #include <QtGui/QApplication>
@@ -105,6 +108,8 @@ protected:
         Gui *qEditor;
 
         VstEvents *listEvnts;
+
+        long hostAcceptIOChanges;
 };
 
 
