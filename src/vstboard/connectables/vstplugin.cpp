@@ -135,6 +135,9 @@ void VstPlugin::SetSampleRate(float rate)
 
 void VstPlugin::Render()
 {
+    if(parked)
+        return;
+
     if(closed)
         return;
 
@@ -554,8 +557,9 @@ void VstPlugin::EditIdle()
 
 void VstPlugin::SetParentModeIndex(const QModelIndex &parentIndex)
 {
+    EffStartProcess();
     Object::SetParentModeIndex(parentIndex);
-
+//    EffStartProcess();
 //    if(hasEditor) {
 //        QStandardItem *item = MainHost::GetModel()->itemFromIndex(modelIndex);
 //        item->setData(editorWnd->isVisible(), UserRoles::editorVisible);
@@ -566,6 +570,8 @@ void VstPlugin::SetParentModeIndex(const QModelIndex &parentIndex)
 
 void VstPlugin::SetParkingIndex(const QModelIndex &parentIndex)
 {
+    EffStopProcess();
+//    EffStopProcess();
 //    if(editorWnd && editorWnd->isVisible())
 //        editorWnd->close();
     Object::SetParkingIndex(parentIndex);

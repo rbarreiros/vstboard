@@ -624,9 +624,9 @@ void MainHost::OnObjectAdded(QSharedPointer<Connectables::Object> objPtr)
     connect(this,SIGNAL(BufferSizeChanged(unsigned long)),
             objPtr.data(),SLOT(SetBufferSize(unsigned long)));
 
-    objPtr->SetSampleRate(sampleRate);
-    objPtr->SetBufferSize(bufferSize);
-    objPtr->SetSleep(false);
+    //objPtr->SetSampleRate(sampleRate);
+    //objPtr->SetBufferSize(bufferSize);
+    //objPtr->SetSleep(false);
 
     solverNeedAnUpdate = true;
 }

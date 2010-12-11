@@ -264,6 +264,7 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
         sharedObj.clear();
         return QSharedPointer<Object>();
     }
+    obj->SetSleep(false);
 
     if(info.forcedObjId) {
         obj->ResetSavedIndex(info.forcedObjId);
