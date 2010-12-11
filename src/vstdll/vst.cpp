@@ -241,6 +241,7 @@ float Vst::getParameter (VstInt32 index)
 {
     if(lstParameters.count()>index)
         return lstParameters.at(index);
+    return .0f;
 }
 
 void Vst::getParameterName (VstInt32 index, char* label)
