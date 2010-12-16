@@ -66,4 +66,3 @@ float AudioPinIn::GetValue()
     return newVu;
 }
 
-

@@ -87,9 +87,7 @@ void Container::ConnectBridges(QSharedPointer<Object> bridgeA, QSharedPointer<Ob
     if(bridgeA.isNull() || bridgeB.isNull())
         return;
 
-    for(int i=0; i<bridgeB->GetListBridgePinIn().size(); i++) {
-        AddCable(bridgeA->GetListBridgePinOut().at(i)->GetConnectionInfo(), bridgeB->GetListBridgePinIn().at(i)->GetConnectionInfo(), hidden);
-    }
+    bridgeA->GetListBridgePinOut()->ConnectAllTo(bridgeB->GetListBridgePinIn(), hidden);
 }
 
 bool Container::Close()

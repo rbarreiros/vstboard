@@ -44,6 +44,15 @@ namespace View {
         virtual void UpdateModelIndex();
         void Shrink();
 
+        ListPinsView *listAudioIn;
+        ListPinsView *listAudioOut;
+        ListPinsView *listMidiIn;
+        ListPinsView *listMidiOut;
+        ListPinsView *listParametersIn;
+        ListPinsView *listParametersOut;
+        ListPinsView *listBridgeIn;
+        ListPinsView *listBridgeOut;
+
     protected:
         void SetErrorMessage(const QString & msg);
         void SetBackground(const QString & imgName);

@@ -161,7 +161,7 @@ void MainWindow::BuildListTools()
     QStandardItem *parentItem = listToolsModel.invisibleRootItem();
 
     //midi parameters
-    QStandardItem *item = new QStandardItem(tr("MidiCC to parameter"));
+    QStandardItem *item = new QStandardItem(tr("Midi to parameter"));
     ObjectInfo info;
     info.nodeType = NodeType::object;
     info.objType = ObjType::MidiToAutomation;

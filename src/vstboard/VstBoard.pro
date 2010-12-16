@@ -173,7 +173,10 @@ SOURCES += main.cpp \
     views/grouplistview.cpp \
     views/proglistview.cpp \
     models/programsmodel.cpp \
-    imagecollection.cpp
+    imagecollection.cpp \
+    connectables/pinslist.cpp \
+    views/minmaxpinview.cpp \
+    views/cursorview.cpp
 HEADERS += mainwindow.h \
     precomp.h \
     models/listaudiointerfacesmodel.h \
@@ -249,7 +252,10 @@ HEADERS += mainwindow.h \
     views/proglistview.h \
     models/programsmodel.h \
     imagecollection.h \
-    _version.h
+    _version.h \
+    connectables/pinslist.h \
+    views/minmaxpinview.h \
+    views/cursorview.h
 FORMS += mainwindow.ui \
     views/filebrowser.ui \
     views/configdialog.ui \
@@ -267,4 +273,3 @@ OTHER_FILES += \
     vstboard.rc
 
 TRANSLATIONS = vstboard_fr.ts
-

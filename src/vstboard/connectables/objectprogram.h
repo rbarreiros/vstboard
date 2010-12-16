@@ -23,26 +23,24 @@
 
 #include "../precomp.h"
 #include "objectparameter.h"
+#include "pinslist.h"
 
 namespace Connectables {
 
     class ParameterPin;
-
-    typedef QHash<ushort,ParameterPin*> hashListParamPin;
-
     class ObjectProgram
     {
 
     public:
         ObjectProgram(int progId) : progId(progId) {}
-        ObjectProgram(int progId,const hashListParamPin& listIn, const hashListParamPin& listOut);
+        ObjectProgram(int progId,PinsList *in, PinsList *out);
 
         ObjectProgram(const ObjectProgram &c) {
             *this = c;
         }
 
-        void Load(hashListParamPin& listIn, hashListParamPin& listOut);
-        void Save(const hashListParamPin& listIn, const hashListParamPin& listOut);
+        void Load(PinsList *in, PinsList *out);
+        void Save(PinsList *in,PinsList *out);
 
         int progId;
 

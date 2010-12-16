@@ -49,7 +49,7 @@ ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel
     setLayout(layout);
 
     setFlag(QGraphicsItem::ItemIsMovable, true);
-    setFlag(QGraphicsItem::ItemIsSelectable, true);
+//    setFlag(QGraphicsItem::ItemIsSelectable, true);
 
     listAudioIn = new ListPinsView(this);
     listAudioOut = new ListPinsView(this);

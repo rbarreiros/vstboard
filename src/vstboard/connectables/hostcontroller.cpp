@@ -52,13 +52,13 @@ HostController::HostController(MainHost *myHost,int index):
             listGrp << i;
         }
 
-    listMidiPinIn << new MidiPinIn(this);
+    listMidiPinIn->ChangeNumberOfPins(1);
 
-    listParameterPinIn.insert(Param_Tempo, new ParameterPinIn(this,Param_Tempo,QVariant::fromValue<int>(120),&listTempo,true,"bpm"));
-    listParameterPinIn.insert(Param_Sign1, new ParameterPinIn(this,Param_Sign1,4,&listSign1,true,"sign1"));
-    listParameterPinIn.insert(Param_Sign2, new ParameterPinIn(this,Param_Sign2,4,&listSign2,true,"sign2"));
-    listParameterPinIn.insert(Param_Group, new ParameterPinIn(this,Param_Group,0,&listGrp,true,"ProgGrp"));
-    listParameterPinIn.insert(Param_Prog, new ParameterPinIn(this,Param_Prog,0,&listPrg,true,"Prog"));
+    listParameterPinIn->listPins.insert(Param_Tempo, new ParameterPinIn(this,Param_Tempo,QVariant::fromValue<int>(120),&listTempo,true,"bpm"));
+    listParameterPinIn->listPins.insert(Param_Sign1, new ParameterPinIn(this,Param_Sign1,4,&listSign1,true,"sign1"));
+    listParameterPinIn->listPins.insert(Param_Sign2, new ParameterPinIn(this,Param_Sign2,4,&listSign2,true,"sign2"));
+    listParameterPinIn->listPins.insert(Param_Group, new ParameterPinIn(this,Param_Group,0,&listGrp,true,"ProgGrp"));
+    listParameterPinIn->listPins.insert(Param_Prog, new ParameterPinIn(this,Param_Prog,0,&listPrg,true,"Prog"));
 
     connect(this, SIGNAL(progChange(int)),
             myHost->programList,SLOT(ChangeProg(int)),
@@ -76,9 +76,9 @@ void HostController::Render()
     if(tempoChanged) {
         tempoChanged=false;
 
-        int tempo = listParameterPinIn.value(Param_Tempo)->GetVariantValue().toInt();
-        int sign1 = listParameterPinIn.value(Param_Sign1)->GetVariantValue().toInt();
-        int sign2 = listParameterPinIn.value(Param_Sign2)->GetVariantValue().toInt();
+        int tempo = static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(Param_Tempo))->GetVariantValue().toInt();
+        int sign1 = static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(Param_Sign1))->GetVariantValue().toInt();
+        int sign2 = static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(Param_Sign2))->GetVariantValue().toInt();
 
         emit tempoChange(tempo,sign1,sign2);
     }
@@ -90,11 +90,11 @@ void HostController::Render()
 
     if(progChanged) {
         progChanged=false;
-        emit progChange( listParameterPinIn.value(Param_Prog)->GetVariantValue().toInt() );
+        emit progChange( static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(Param_Prog))->GetVariantValue().toInt() );
     }
     if(grpChanged) {
         grpChanged=false;
-        emit grpChange( listParameterPinIn.value(Param_Group)->GetVariantValue().toInt() );
+        emit grpChange( static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(Param_Group))->GetVariantValue().toInt() );
     }
 }
 

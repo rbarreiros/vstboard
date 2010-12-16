@@ -613,7 +613,7 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
                 //put circular buffers into pins buffers
                 cpt=0;
                 foreach(CircularBuffer *buf, device->listCircularBuffersIn) {
-                    AudioBuffer *pinBuf = device->devIn->listAudioPinOut.at(cpt)->buffer;
+                    AudioBuffer *pinBuf = device->devIn->listAudioPinOut->GetBuffer(cpt);
 
                     if(pinBuf->GetSize() < hostBuffSize) {
                         pinBuf->SetSize(hostBuffSize);
@@ -660,7 +660,7 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
                     int cpt=0;
                     //put pins buffer into circular buffers
                     foreach(CircularBuffer *buf, dev->listCircularBuffersOut) {
-                        AudioBuffer *pinBuf = dev->devOut->listAudioPinIn.at(cpt)->buffer;
+                        AudioBuffer *pinBuf = dev->devOut->listAudioPinIn->GetBuffer(cpt);
     //                    if(!pinBuf->IsEmpty()) {
                             buf->Put( pinBuf->ConsumeStack(), pinBuf->GetSize() );
                             pinBuf->ResetStackCounter();

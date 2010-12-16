@@ -115,9 +115,6 @@ MainHost::~MainHost()
     workingListOfCables.clear();
     mutexListCables->unlock();
 
-    solver->Resolve(workingListOfCables);
-    renderer.Clear();
-
     mainContainer.clear();
     hostContainer.clear();
     projectContainer.clear();
@@ -125,9 +122,13 @@ MainHost::~MainHost()
     programContainer.clear();
     parkingContainer.clear();
 
-//    delete listMidiDevices;
+    solver->Resolve(workingListOfCables);
+    renderer.Clear();
+
+    delete audioDevices;
+    delete midiDevices;
+
     delete objFactory;
-    theHost = 0;
 }
 
 void MainHost::Open()
@@ -213,9 +214,9 @@ void MainHost::SetupHostContainer()
     hostContainer->bridgeReturn = bridge;
 
     //connect with programContainer
-    if(!programContainer.isNull()) {
-        mainContainer->ConnectBridges(hostContainer->bridgeSend, programContainer->bridgeIn);
-        mainContainer->ConnectBridges(programContainer->bridgeOut, hostContainer->bridgeReturn);
+    if(!projectContainer.isNull()) {
+        mainContainer->ConnectBridges(hostContainer->bridgeSend, projectContainer->bridgeIn);
+        mainContainer->ConnectBridges(projectContainer->bridgeOut, hostContainer->bridgeReturn);
     }
     hostContainer->listenProgramChanges=false;
 }

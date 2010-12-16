@@ -167,7 +167,8 @@ views/configdialog.cpp \
     ../../libs/portmidi/pm_win/pmwinmm.c \
     ../vstboard/connectables/miditoautomation.cpp \
     ../vstboard/connectables/midisender.cpp \
-    connectables/vstautomation.cpp
+    connectables/vstautomation.cpp \
+    ../vstboard/connectables/pinslist.cpp
 
 
 HEADERS  += \
@@ -241,7 +242,8 @@ connectables/mididevice.h \
     vst.h \
     ../vstboard/_version.h \
     ../vstboard/connectables/midipinin.h \
-    connectables/vstautomation.h
+    connectables/vstautomation.h \
+    ../vstboard/connectables/pinslist.h
 
 FORMS += \
 ../vstboard/views/configdialog.ui \

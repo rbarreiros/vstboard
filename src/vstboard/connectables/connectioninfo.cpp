@@ -83,8 +83,8 @@ QDataStream & ConnectionInfo::toStream(QDataStream& out) const
     out << bridge;
     out << container;
     out << objId;
-    out << type;
-    out << direction;
+    out << (quint8)type;
+    out << (quint8)direction;
     out << pinNumber;
     return out;
 }
@@ -113,8 +113,8 @@ QDataStream & ConnectionInfo::fromStream(QDataStream& in)
     }
     objId = id;
 
-    in >> type;
-    in >> direction;
+    in >> (quint8&)type;
+    in >> (quint8&)direction;
     in >> pinNumber;
 
     return in;

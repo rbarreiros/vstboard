@@ -68,7 +68,8 @@ namespace NodeType {
 //        editor,
 //        learning,
         program,
-        programGroup
+        programGroup,
+        pinLimit
     };
 }
 
@@ -99,7 +100,11 @@ namespace ObjType {
         listBridgeIn,
         listBridgeOut,
         dummy,
-        VstAutomation
+        VstAutomation,
+        limitInMin,
+        limitInMax,
+        limitOutMin,
+        limitOutMax,
     };
 }
 
@@ -169,10 +174,14 @@ namespace MidiConst {
         codeMask = 0xf0,
         channelMask = 0x0f,
 
-        noteOff =   0x80,
-        noteOn =    0x90,
-        ctrl =      0xb0,
-        prog =      0xc0,
+        noteOff =   0x80, //key, velocity
+        noteOn =    0x90, //key, velocity
+        aftertouch = 0xa0, //key, value
+        ctrl =      0xb0, //ctrl, value
+        prog =      0xc0, //prog, nd
+        chanpressure = 0xd0, //value, nd
+        pitchbend = 0xe0, //lsb, msb
+        other = 0xf0 //nd,nd
     };
 }
 

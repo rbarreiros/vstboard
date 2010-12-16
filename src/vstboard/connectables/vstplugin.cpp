@@ -44,7 +44,9 @@ VstPlugin::VstPlugin(MainHost *myHost,int index, const ObjectInfo & info) :
     for(int i=0;i<128;i++) {
         listValues << i;
     }
-    listParameterPinIn.insert(FixedPinNumber::vstProgNumber, new ParameterPinIn(this,FixedPinNumber::vstProgNumber,0,&listValues,true,"Prog"));
+
+//    listParameterPinIn->listPins.insert(FixedPinNumber::vstProgNumber, new ParameterPinIn(this,FixedPinNumber::vstProgNumber,0,&listValues,true,"Prog"));
+    listParameterPinIn->AddPin(FixedPinNumber::vstProgNumber,"Prog");
 }
 
 VstPlugin::~VstPlugin()
@@ -104,11 +106,11 @@ void VstPlugin::SetBufferSize(unsigned long size)
     SetSleep(true);
 
     debug("VstPlugin::SetBufferSize %d size %ld -> %ld",index,bufferSize,size)
-    foreach(AudioPinIn *pin, listAudioPinIn) {
-        pin->buffer->SetSize(size);
+    foreach(Pin *pin, listAudioPinIn->listPins) {
+        static_cast<AudioPinIn*>(pin)->buffer->SetSize(size);
     }
-    foreach(AudioPinOut *pin, listAudioPinOut) {
-        pin->buffer->SetSize(size);
+    foreach(Pin *pin, listAudioPinOut->listPins) {
+        static_cast<AudioPinOut*>(pin)->buffer->SetSize(size);
     }
 
     EffSetBlockSize((long)size);
@@ -171,24 +173,24 @@ void VstPlugin::Render()
 
     //audio buffers
     //=========================
-    float **tmpBufOut = new float*[listAudioPinOut.size()];
+    float **tmpBufOut = new float*[listAudioPinOut->listPins.size()];
 
     int cpt=0;
-    foreach(AudioPinOut* pin,listAudioPinOut) {
-        tmpBufOut[cpt] = pin->buffer->GetPointer(true);
+    foreach(Pin* pin,listAudioPinOut->listPins) {
+        tmpBufOut[cpt] = static_cast<AudioPinOut*>(pin)->buffer->GetPointer(true);
         cpt++;
     }
 
     float **tmpBufIn;
-    if(listAudioPinIn.size()==0) {
+    if(listAudioPinIn->listPins.size()==0) {
         //no input, use outputs as fake buffers... don't know what we're supposed to do...
         tmpBufIn = tmpBufOut;
     } else {
-        tmpBufIn = new float*[listAudioPinIn.size()];
+        tmpBufIn = new float*[listAudioPinIn->listPins.size()];
 
         cpt=0;
-        foreach(AudioPinIn* pin,listAudioPinIn) {
-            tmpBufIn[cpt] = pin->buffer->ConsumeStack();
+        foreach(Pin* pin,listAudioPinIn->listPins) {
+            tmpBufIn[cpt] = static_cast<AudioPinOut*>(pin)->buffer->ConsumeStack();
             cpt++;
         }
     }
@@ -220,9 +222,9 @@ void VstPlugin::Render()
 
     //send result
     //=========================
-    foreach(AudioPinOut* pin,listAudioPinOut) {
-        pin->buffer->ConsumeStack();
-        pin->SendAudioBuffer();
+    foreach(Pin* pin,listAudioPinOut->listPins) {
+        static_cast<AudioPinOut*>(pin)->buffer->ConsumeStack();
+        static_cast<AudioPinOut*>(pin)->SendAudioBuffer();
     }
 
 
@@ -230,53 +232,8 @@ void VstPlugin::Render()
     EffIdle();
 }
 
-void VstPlugin::UpdatePinNumber()
-{
-    int nbIn = listAudioPinIn.count();
-    int newNbIn = pEffect->numInputs;
-    int nbOut = listAudioPinOut.count();
-    int newNbOut = pEffect->numOutputs;
-
-    if(nbIn==newNbIn && nbOut==newNbOut)
-        return;
-
-    //QMutexLocker lock(&objMutex);
-
-    if(newNbIn<nbIn) {
-        for(int i=newNbIn; i<nbIn; i++) {
-            delete listAudioPinIn.takeLast();
-        }
-    }
-    if(newNbIn>nbIn){
-        for(int i=nbIn;i<newNbIn;i++) {
-            AudioPinIn *pin = new AudioPinIn(this,i);
-            pin->buffer->SetSize(bufferSize);
-            pin->SetContainerId(containerId);
-            listAudioPinIn << pin;
-        }
-    }
-
-    if(newNbOut<nbOut) {
-        for(int i=newNbOut; i<nbOut; i++) {
-            delete listAudioPinOut.takeLast();
-        }
-    }
-    if(newNbOut>nbOut){
-        for(int i=nbOut;i<newNbOut;i++) {
-            AudioPinOut *pin = new AudioPinOut(this,i);
-            pin->buffer->SetSize(bufferSize);
-            pin->SetContainerId(containerId);
-            listAudioPinOut << pin;
-        }
-    }
-
-    UpdateModelNode();
-}
-
 bool VstPlugin::Open()
 {
-
-
     {
         QMutexLocker lock(&objMutex);
         VstPlugin::pluginLoading = this;
@@ -395,16 +352,13 @@ bool VstPlugin::Open()
         objInfo.name=objectName();
 
         if(bWantMidi) {
-            MidiPinIn *pinin = new MidiPinIn(this);
-            pinin->setObjectName(QString("Midi in"));
-            listMidiPinIn << pinin;
-
-            MidiPinOut *pinout = new MidiPinOut(this);
-            listMidiPinOut << pinout;
+            listMidiPinIn->ChangeNumberOfPins(1);
+            listMidiPinOut->ChangeNumberOfPins(1);
         }
     }
 
-    UpdatePinNumber();
+    listAudioPinIn->ChangeNumberOfPins(pEffect->numInputs);
+    listAudioPinOut->ChangeNumberOfPins(pEffect->numOutputs);
 
     int nbParam = pEffect->numParams;
     bool nameCanChange=false;
@@ -421,11 +375,13 @@ bool VstPlugin::Open()
 
     //create all parameters pins
     for(int i=0;i<nbParam;i++) {
-        if(listParameterPinIn.contains(i)) {
-            listParameterPinIn.value(i)->SetDefaultVisible(defVisible);
-            listParameterPinIn.value(i)->SetNameCanChange(nameCanChange);
+        if(listParameterPinIn->listPins.contains(i)) {
+            ParameterPinIn *pin = static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(i));
+            pin->SetDefaultVisible(defVisible);
+            pin->SetNameCanChange(nameCanChange);
         } else {
-            listParameterPinIn.insert(i, new ParameterPinIn(this, i, EffGetParameter(i), defVisible, EffGetParamName(i), nameCanChange) );
+            listParameterPinIn->AddPin(i,EffGetParamName(i),EffGetParameter(i),nameCanChange,0,defVisible);
+//            listParameterPinIn->listPins.insert(i, new ParameterPinIn(this, i, EffGetParameter(i), defVisible, EffGetParamName(i), nameCanChange) );
         }
     }
 
@@ -459,10 +415,8 @@ void VstPlugin::CreateEditorWindow()
     if((pEffect->flags & effFlagsHasEditor) == 0)
         return;
 
-//    hasEditor=true;
-//    canLearn=true;
-    listParameterPinIn.value(FixedPinNumber::editorVisible)->SetAlwaysVisible(true);
-    listParameterPinIn.value(FixedPinNumber::learningMode)->SetAlwaysVisible(true);
+    static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::editorVisible))->SetAlwaysVisible(true);
+    static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::learningMode))->SetAlwaysVisible(true);
 
     editorWnd = new View::VstPluginWindow(myHost->mainWindow);
     connect(this,SIGNAL(CloseEditorWindow()),
@@ -531,7 +485,7 @@ void VstPlugin::EditorDestroyed()
 {
     editorWnd = 0;
 //    MainHost::GetModel()->setData(modelIndex, false, UserRoles::editorVisible);
-    listParameterPinIn.value(FixedPinNumber::editorVisible)->SetVisible(false);
+    listParameterPinIn->listPins.value(FixedPinNumber::editorVisible)->SetVisible(false);
 }
 
 void VstPlugin::EditIdle()
@@ -603,7 +557,7 @@ long VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr,
     switch(opcode) {
         case audioMasterAutomate : //0
             //create the parameter pin if needed
-            if(!listParameterPinIn.contains(index)) {
+            if(!listParameterPinIn->listPins.contains(index)) {
 //                float v=.0f;
 //                QString n="";
 //                try {
@@ -612,10 +566,10 @@ long VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr,
 //                } catch(...) {
 //                    debug("VstPlugin::OnMasterCallback exception")
 //                }
-
-                listParameterPinIn.insert(index, new ParameterPinIn(this, index, (float)opt, false, "n/d", true) );
+                listParameterPinIn->AddPin(index,"nd",(float)opt,true);
+//                listParameterPinIn->listPins.insert(index, new ParameterPinIn(this, index, (float)opt, false, "n/d", true) );
             }
-            listParameterPinIn.value(index)->OnValueChanged(opt);
+            static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(index))->OnValueChanged(opt);
             break;
 
         case audioMasterCurrentId : //2
@@ -632,7 +586,9 @@ long VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr,
             break;
 
         case audioMasterIOChanged : //13
-            UpdatePinNumber();
+            listAudioPinIn->ChangeNumberOfPins(pEffect->numInputs);
+            listAudioPinOut->ChangeNumberOfPins(pEffect->numOutputs);
+            UpdateModelNode();
             return  1L;
             break;
 
@@ -661,7 +617,7 @@ void VstPlugin::OnParameterChanged(ConnectionInfo pinInfo, float value)
     if(pinInfo.direction == PinDirection::Input) {
         if(pinInfo.pinNumber==FixedPinNumber::vstProgNumber) {
             //program pin
-            EffSetProgram( listParameterPinIn.value(FixedPinNumber::vstProgNumber)->GetIndex() );
+            EffSetProgram( static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::vstProgNumber))->GetIndex() );
         } else {
             if(EffCanBeAutomated(pinInfo.pinNumber)!=1) {
                 debug2(<< "vst parameter can't be automated " << pinInfo.pinNumber)

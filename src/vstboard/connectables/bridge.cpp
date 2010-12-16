@@ -37,18 +37,15 @@ bool Bridge::Open()
 {
     closed=false;
 
+    listBridgePinIn->ChangeNumberOfPins(8);
+    listBridgePinOut->ChangeNumberOfPins(8);
+
     if(objInfo.objType == ObjType::BridgeIn || objInfo.objType == ObjType::BridgeReturn) {
-        for(int i=0; i<8; i++) {
-            listBridgePinIn << new BridgePinIn(this, i, true );
-            listBridgePinOut << new BridgePinOut(this,i );
-        }
+        listBridgePinIn->SetBridge(true);
     }
 
     if(objInfo.objType == ObjType::BridgeOut || objInfo.objType == ObjType::BridgeSend) {
-        for(int i=0; i<8; i++) {
-            listBridgePinIn << new BridgePinIn(this, i );
-            listBridgePinOut << new BridgePinOut(this, i, true );
-        }
+        listBridgePinOut->SetBridge(true);
     }
 
     Object::Open();

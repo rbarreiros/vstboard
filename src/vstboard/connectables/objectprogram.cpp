@@ -23,41 +23,41 @@
 
 using namespace Connectables;
 
-ObjectProgram::ObjectProgram(int progId,const hashListParamPin& listIn, const hashListParamPin& listOut) :
+ObjectProgram::ObjectProgram(int progId,PinsList *in, PinsList *out) :
     progId(progId)
 {
     ObjectParameter param;
-    hashListParamPin::const_iterator i = listIn.constBegin();
-    while(i!=listIn.constEnd()) {
-        i.value()->GetDefault(param);
+    QMap<quint16,Pin*>::const_iterator i = in->listPins.constBegin();
+    while(i!=in->listPins.constEnd()) {
+        static_cast<ParameterPin*>(i.value())->GetDefault(param);
         listParametersIn.insert(i.key(), param);
         ++i;
     }
 
-    hashListParamPin::const_iterator j = listOut.constBegin();
-    while(j!=listOut.constEnd()) {
-        j.value()->GetDefault(param);
+    QMap<quint16,Pin*>::const_iterator j = out->listPins.constBegin();
+    while(j!=out->listPins.constEnd()) {
+        static_cast<ParameterPin*>(j.value())->GetDefault(param);
         listParametersOut.insert(j.key(), param);
         ++j;
     }
 }
 
-void ObjectProgram::Load(hashListParamPin& listIn, hashListParamPin& listOut)
+void ObjectProgram::Load(PinsList *in, PinsList *out)
 {
-    hashListParamPin::iterator i = listIn.begin();
-    while(i!=listIn.end()) {
+    QMap<quint16,Pin*>::iterator i = in->listPins.begin();
+    while(i!=in->listPins.end()) {
         if(listParametersIn.contains(i.key())) {
-            i.value()->Load(listParametersIn.value(i.key()));
+            static_cast<ParameterPin*>(i.value())->Load(listParametersIn.value(i.key()));
         } else {
             debug2(<< "ObjectProgram::Load paramIn not found" << i.key())
         }
         ++i;
     }
 
-    hashListParamPin::iterator j = listOut.begin();
-    while(j!=listOut.end()) {
+    QMap<quint16,Pin*>::iterator j = out->listPins.begin();
+    while(j!=out->listPins.end()) {
         if(listParametersOut.contains(j.key())) {
-            j.value()->Load(listParametersOut.value(j.key()));
+            static_cast<ParameterPin*>(j.value())->Load(listParametersOut.value(j.key()));
         } else {
             debug2(<< "ObjectProgram::Load paramOut not found" << j.key())
         }
@@ -65,17 +65,17 @@ void ObjectProgram::Load(hashListParamPin& listIn, hashListParamPin& listOut)
     }
 }
 
-void ObjectProgram::Save(const hashListParamPin& listIn, const hashListParamPin& listOut)
+void ObjectProgram::Save(PinsList *in,PinsList *out)
 {
-    hashListParamPin::ConstIterator i = listIn.constBegin();
-    while(i!=listIn.constEnd()) {
-        i.value()->GetValues( listParametersIn[i.key()] );
+    QMap<quint16,Pin*>::ConstIterator i = in->listPins.constBegin();
+    while(i!=in->listPins.constEnd()) {
+        static_cast<ParameterPin*>(i.value())->GetValues( listParametersIn[i.key()] );
         ++i;
     }
 
-    hashListParamPin::ConstIterator j = listOut.constBegin();
-    while(j!=listOut.constEnd()) {
-        j.value()->GetValues( listParametersOut[j.key()] );
+    QMap<quint16,Pin*>::ConstIterator j = out->listPins.constBegin();
+    while(j!=out->listPins.constEnd()) {
+        static_cast<ParameterPin*>(j.value())->GetValues( listParametersOut[j.key()] );
         ++j;
     }
 }

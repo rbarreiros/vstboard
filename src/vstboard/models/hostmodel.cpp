@@ -320,6 +320,18 @@ bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int
             }
             break;
         }
+        case NodeType::pinLimit :
+        {
+            ConnectionInfo pinInfo = index.parent().data(UserRoles::connectionInfo).value<ConnectionInfo>();
+            if(pinInfo.type==PinType::Parameter) {
+                if(role==UserRoles::value) {
+                    Connectables::ParameterPin* pin = static_cast<Connectables::ParameterPin*>(myHost->objFactory->GetPin(pinInfo));
+                    ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
+                    pin->SetLimit(info.objType,value.toFloat());
+                    item->setData(value,role);
+                }
+            }
+        }
         default:
             break;
 

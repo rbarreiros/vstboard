@@ -23,8 +23,9 @@
 
 using namespace Connectables;
 
-BridgePinIn::BridgePinIn(Object *parent, int number, bool bridge)
-    :Pin(parent,PinType::Bridge,PinDirection::Input,number,bridge)
+BridgePinIn::BridgePinIn(Object *parent, int number, bool bridge) :
+    Pin(parent,PinType::Bridge,PinDirection::Input,number,bridge),
+    vuVal(.0f)
 {
     setObjectName(QString("BIn%1").arg(number));
     visible=true;
@@ -36,4 +37,15 @@ void BridgePinIn::ReceiveMsg(const int msgType,void *data)
     ConnectionInfo info = connectInfo;
     info.direction=PinDirection::Output;
     parent->GetPin(info)->SendMsg(msgType,data);
+    value=1.0f;
+}
+
+float BridgePinIn::GetValue()
+{
+    if(vuVal!=value)
+        valueChanged=true;
+
+    vuVal=value;
+    value=.0f;
+    return vuVal;
 }

@@ -45,7 +45,7 @@ namespace View {
         void RemoveCable(CableView *cable);
 
         virtual void UpdateModelIndex(const QModelIndex &index) {}
-        void SetPinModelIndex(QPersistentModelIndex index) {pinIndex = index; UpdateModelIndex(index);}
+        virtual void SetPinModelIndex(QPersistentModelIndex index) {pinIndex = index; UpdateModelIndex(index);}
         void UpdateCablesPosition();
 
     protected:

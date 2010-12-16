@@ -37,8 +37,8 @@ public:
 
     quint16 container;
     quint16 objId;
-    quint8 type;
-    quint8 direction;
+    PinType::Enum type;
+    PinDirection::Enum direction;
     quint16 pinNumber;
     bool bridge;
     MainHost *myHost;

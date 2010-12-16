@@ -35,9 +35,9 @@ namespace Connectables {
 
         void SetBuffer(AudioBuffer *buffer);
         void SendAudioBuffer();
-        AudioBuffer *buffer;
         float GetValue();
-    protected:
+        void SetBufferSize(unsigned long size);
+        AudioBuffer *buffer;
 
     };
 }

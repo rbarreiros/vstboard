@@ -40,5 +40,5 @@ ParameterPinOut::ParameterPinOut(Object *parent, int number, const QVariant &def
 void ParameterPinOut::OnValueChanged(float val)
 {
     ParameterPin::OnValueChanged(val);
-    SendMsg(PinMessage::ParameterValue,(void*)&value);
+    SendMsg(PinMessage::ParameterValue,(void*)&outValue);
 }

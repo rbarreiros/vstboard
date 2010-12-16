@@ -196,7 +196,7 @@ void MainWindow::BuildListTools()
     parentItem->appendRow(item);
 
     //midi parameters
-    item = new QStandardItem(tr("MidiCC to parameter"));
+    item = new QStandardItem(tr("Midi to parameter"));
     info.nodeType = NodeType::object;
     info.objType = ObjType::MidiToAutomation;
     item->setData(QVariant::fromValue(info), UserRoles::objInfo);

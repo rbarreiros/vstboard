@@ -21,6 +21,7 @@
 #include "parameterpin.h"
 #include "object.h"
 #include "../globals.h"
+#include "mainhost.h"
 
 using namespace Connectables;
 
@@ -35,7 +36,13 @@ ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int num
         loading(false),
         nameCanChange(nameCanChange),
         dirty(false),
-        visibilityCanChange(true)
+        visibilityCanChange(true),
+        limitInMin(.0f),
+        limitInMax(1.0f),
+        limitOutMin(.0f),
+        limitOutMax(1.0f),
+        outStepIndex(0),
+        outValue(.0f)
 {
     SetVisible(false);
 
@@ -57,7 +64,13 @@ ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int num
         loading(false),
         nameCanChange(nameCanChange),
         dirty(false),
-        visibilityCanChange(true)
+        visibilityCanChange(true),
+        limitInMin(.0f),
+        limitInMax(1.0f),
+        limitOutMin(.0f),
+        limitOutMax(1.0f),
+        outStepIndex(0),
+        outValue(.0f)
 {
     SetVisible(false);
     falloff = 0.0f;
@@ -101,14 +114,13 @@ void ParameterPin::ChangeValue(float val)
     }
 
     val = std::min(val,1.0f);
-    val = std::max(val,0.0f);
+    val = std::max(val,.0f);
 
     if(val==value)
         return;
 
     OnValueChanged(val);
-
-    parent->OnParameterChanged(connectInfo,value);
+    parent->OnParameterChanged(connectInfo,outValue);
 }
 
 //from int
@@ -123,13 +135,17 @@ void ParameterPin::ChangeValue(int index)
     stepIndex=index;
     OnValueChanged(stepSize*index);
 
-    parent->OnParameterChanged(connectInfo,value);
+    outStepIndex=(int)( 0.5f + outValue/stepSize );
+    parent->OnParameterChanged(connectInfo,outValue);
 }
 
 //from variant
 void ParameterPin::ChangeValue(QVariant variant)
 {
-    ChangeValue(listValues->indexOf(variant));
+    if(listValues)
+        ChangeValue(listValues->indexOf(variant));
+    else
+        ChangeValue(variant.toFloat());
 }
 
 void ParameterPin::OnStep(int delta)
@@ -165,16 +181,30 @@ void ParameterPin::OnValueChanged(float val)
 
     value=val;
 
+    //scale value
+    if(val>limitInMax)
+        val=limitInMax;
+    if(val<limitInMin)
+        val=limitInMin;
+    val-=limitInMin;
+    val/=(limitInMax-limitInMin);
+    val*=(limitOutMax-limitOutMin);
+    val+=limitOutMin;
+    outValue=val;
+
     if(!loading) {
 
         if(visibilityCanChange) {
             //parent is learning
-            if(parent->GetLearningMode()==1)
-                SetVisible(true);
+            if(parent->GetLearningMode()==1) {
+                if(!visible)
+                    SetVisible(true);
+            }
 
             //parent is unlearning
             if(parent->GetLearningMode()==2)
-                SetVisible(false);
+                if(visible)
+                    SetVisible(false);
         }
 
         if(!dirty) {
@@ -198,4 +228,67 @@ void ParameterPin::SetFixedName(QString fixedName)
 {
     setObjectName(fixedName);
     nameCanChange=false;
+}
+
+void ParameterPin::SetLimit(ObjType::Enum type, float newVal)
+{
+    switch(type) {
+        case ObjType::limitInMin:
+            limitInMin = newVal;
+            break;
+        case ObjType::limitInMax:
+            limitInMax = newVal;
+            break;
+        case ObjType::limitOutMin:
+            limitOutMin = newVal;
+            break;
+        case ObjType::limitOutMax:
+            limitOutMax = newVal;
+            break;
+        default:
+            debug("ParameterPin::SetLimit unknown type")
+            break;
+    }
+}
+
+void ParameterPin::SetVisible(bool vis)
+{
+    if(visible==vis)
+        return;
+
+    Pin::SetVisible(vis);
+
+    if(visible) {
+        QStandardItem *pinItem = parent->getHost()->GetModel()->itemFromIndex(modelIndex);
+        if(!pinItem)
+            return;
+
+        ObjectInfo info;
+        info.nodeType=NodeType::pinLimit;
+
+
+        QStandardItem *item = new QStandardItem("limitInMin");
+        info.objType=ObjType::limitInMin;
+        item->setData(QVariant::fromValue(info),UserRoles::objInfo);
+        item->setData(limitInMin,UserRoles::value);
+        pinItem->appendRow(item);
+
+        item = new QStandardItem("limitInMax");
+        info.objType=ObjType::limitInMax;
+        item->setData(QVariant::fromValue(info),UserRoles::objInfo);
+        item->setData(limitInMax,UserRoles::value);
+        pinItem->appendRow(item);
+
+        item = new QStandardItem("limitOutMin");
+        info.objType=ObjType::limitOutMin;
+        item->setData(QVariant::fromValue(info),UserRoles::objInfo);
+        item->setData(limitOutMin,UserRoles::value);
+        pinItem->appendRow(item);
+
+        item = new QStandardItem("limitOutMax");
+        info.objType=ObjType::limitOutMax;
+        item->setData(QVariant::fromValue(info),UserRoles::objInfo);
+        item->setData(limitOutMax,UserRoles::value);
+        pinItem->appendRow(item);
+    }
 }

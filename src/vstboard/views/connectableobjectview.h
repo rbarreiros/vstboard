@@ -34,15 +34,6 @@ namespace View {
         ConnectableObjectView(MainHost *myHost,QAbstractItemModel *model,QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
 
 
-        ListPinsView *listAudioIn;
-        ListPinsView *listAudioOut;
-        ListPinsView *listMidiIn;
-        ListPinsView *listMidiOut;
-        ListPinsView *listParametersIn;
-        ListPinsView *listParametersOut;
-        ListPinsView *listBridgeIn;
-        ListPinsView *listBridgeOut;
-
     protected:
 //        WId backOri;
 

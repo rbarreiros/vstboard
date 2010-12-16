@@ -31,7 +31,8 @@ AudioDeviceOut::AudioDeviceOut(MainHost *myHost,int index, const ObjectInfo &inf
     Object(myHost,index, info),
     parentDevice(0)
 {
-    listParameterPinOut.insert(0, new ParameterPinOut(this,0,0,true,"cpu%"));
+    listParameterPinOut->AddPin(0,"cpu%");
+//    listParameterPinOut->listPins.insert(0, new ParameterPinOut(this,0,0,true,"cpu%"));
 }
 
 AudioDeviceOut::~AudioDeviceOut()
@@ -54,13 +55,13 @@ bool AudioDeviceOut::Close()
 void AudioDeviceOut::Render()
 {
     if(parentDevice)
-        listParameterPinOut.value(0)->ChangeValue(parentDevice->GetCpuUsage());
+        static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(0))->ChangeValue(parentDevice->GetCpuUsage());
 }
 
 void AudioDeviceOut::SetBufferSize(unsigned long size)
 {
-    foreach(AudioPinIn *pin, listAudioPinIn) {
-        pin->buffer->SetSize(size);
+    foreach(Pin *pin, listAudioPinIn->listPins) {
+        static_cast<AudioPinIn*>(pin)->buffer->SetSize(size);
     }
 }
 
@@ -104,16 +105,22 @@ bool AudioDeviceOut::Open()
         return false;
     }
 
+
+    listAudioPinIn->ChangeNumberOfPins(parentDevice->devInfo.maxOutputChannels);
+    int cpt=0;
+    foreach(Pin *pin, listAudioPinIn->listPins) {
+        static_cast<AudioPinIn*>(pin)->buffer->SetSize(myHost->GetBufferSize());
+        pin->setObjectName(QString("Output %1").arg(cpt));
+        cpt++;
+    }
+
     for(int i=0;i<parentDevice->devInfo.maxOutputChannels;i++) {
         AudioPinIn *pin=0;
-        if(listAudioPinIn.size()>i) {
-            pin = listAudioPinIn.at(i);
-        } else {
-            pin = new AudioPinIn(this,i);
-            listAudioPinIn << pin;
+        pin = static_cast<AudioPinIn*>(listAudioPinIn->GetPin(i,true));
+        if(pin) {
+            pin->buffer->SetSize(myHost->GetBufferSize());
+            pin->setObjectName(QString("Output %1").arg(i));
         }
-        pin->buffer->SetSize(myHost->GetBufferSize());
-        pin->setObjectName(QString("Output %1").arg(i));
     }
 
     //device already has a child

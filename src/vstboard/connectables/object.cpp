@@ -27,56 +27,86 @@ using namespace Connectables;
 
 Object::Object(MainHost *host, int index, const ObjectInfo &info) :
     QObject(),
-//    position(QPointF(0,0)),
-//    size(QSize(0,0)),
-//    editorVisible(false),
-//    hasEditor(false),
-//    canLearn(false),
-//    modelNode(0),
     listenProgramChanges(true),
+    listAudioPinIn(new PinsList(host,this)),
+    listAudioPinOut(new PinsList(host,this)),
+    listMidiPinIn(new PinsList(host,this)),
+    listMidiPinOut(new PinsList(host,this)),
+    listBridgePinIn(new PinsList(host,this)),
+    listBridgePinOut(new PinsList(host,this)),
+    listParameterPinIn(new PinsList(host,this)),
+    listParameterPinOut(new PinsList(host,this)),
     parked(false),
     solverNode(0),
     index(index),
     savedIndex(-2),
     sleep(true),
-//    parameterLearning(0),
     currentProgram(0),
     progIsDirty(false),
     closed(true),
     containerId(-1),
-    modelAudioIn(QModelIndex()),
-    modelAudioOut(QModelIndex()),
-    modelMidiIn(QModelIndex()),
-    modelMidiOut(QModelIndex()),
-    modelParamIn(QModelIndex()),
-    modelParamOut(QModelIndex()),
-    modelBridgeIn(QModelIndex()),
-    modelBridgeOut(QModelIndex()),
-//    modelEditor(0),
-//    modelLearningMode(0),
     currentProgId(TEMP_PROGRAM),
     objInfo(info),
     myHost(host)
 {
     setObjectName(QString("%1.%2").arg(objInfo.name).arg(index));
 
+    //init pins lists
+    ConnectionInfo i;
+    i.objId=index;
+    i.myHost=myHost;
+
+    i.type=PinType::Audio;
+    i.direction=PinDirection::Input;
+    listAudioPinIn->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listAudioIn));
+    i.direction=PinDirection::Output;
+    listAudioPinOut->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listAudioOut));
+
+    i.type=PinType::Midi;
+    i.direction=PinDirection::Input;
+    listMidiPinIn->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listMidiIn));
+    i.direction=PinDirection::Output;
+    listMidiPinOut->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listMidiOut));
+
+    i.type=PinType::Bridge;
+    i.direction=PinDirection::Input;
+    listBridgePinIn->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listBridgeIn));
+    i.direction=PinDirection::Output;
+    listBridgePinOut->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listBridgeOut));
+
+    i.type=PinType::Parameter;
+    i.direction=PinDirection::Input;
+    listParameterPinIn->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listParamIn));
+    i.direction=PinDirection::Output;
+    listParameterPinOut->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listParamOut));
+
+    pinLists.insert("audioin", listAudioPinIn);
+    pinLists.insert("audioout", listAudioPinOut);
+    pinLists.insert("midiin", listMidiPinIn);
+    pinLists.insert("midiout", listMidiPinOut);
+    pinLists.insert("bridgein", listBridgePinIn);
+    pinLists.insert("bridgeout", listBridgePinOut);
+    pinLists.insert("parameterin",listParameterPinIn);
+    pinLists.insert("parameterout",listParameterPinOut);
+
     if(objInfo.nodeType != NodeType::container) {
         //editor pin
         listEditorVisible << "hide";
         listEditorVisible << "show";
-        listParameterPinIn.insert(FixedPinNumber::editorVisible, new ParameterPinIn(this,FixedPinNumber::editorVisible,"hide",&listEditorVisible,false,tr("Editor")));
+        listParameterPinIn->listPins.insert(FixedPinNumber::editorVisible, new ParameterPinIn(this,FixedPinNumber::editorVisible,"hide",&listEditorVisible,false,tr("Editor")));
 
         //learning pin
         listIsLearning << "off";
         listIsLearning << "learn";
         listIsLearning << "unlearn";
-        listParameterPinIn.insert(FixedPinNumber::learningMode, new ParameterPinIn(this,FixedPinNumber::learningMode,"off",&listIsLearning,false,tr("Learn")));
+        listParameterPinIn->listPins.insert(FixedPinNumber::learningMode, new ParameterPinIn(this,FixedPinNumber::learningMode,"off",&listIsLearning,false,tr("Learn")));
     }
 }
 
 
 Object::~Object()
 {
+    pinLists.clear();
     debug2(<< "delete Object" << objectName() << hex << (long)this)
     Close();
 }
@@ -108,30 +138,10 @@ bool Object::Close()
 
 void Object::Hide() {
 //    SetSleep(true);
-    modelAudioIn=QModelIndex();
-    foreach(AudioPinIn *pin, listAudioPinIn)
-        pin->Close();
-    modelAudioOut=QModelIndex();
-    foreach(AudioPinOut *pin, listAudioPinOut)
-        pin->Close();
-    modelMidiIn=QModelIndex();
-    foreach(MidiPinIn *pin, listMidiPinIn)
-        pin->Close();
-    modelMidiOut=QModelIndex();
-    foreach(MidiPinOut *pin, listMidiPinOut)
-        pin->Close();
-    modelBridgeIn=QModelIndex();
-    foreach(BridgePinIn *pin, listBridgePinIn)
-        pin->Close();
-    modelBridgeOut=QModelIndex();
-    foreach(BridgePinOut *pin, listBridgePinOut)
-        pin->Close();
-    modelParamIn=QModelIndex();
-    foreach(ParameterPin *pin, listParameterPinIn)
-        pin->Close();
-    modelParamOut=QModelIndex();
-    foreach(ParameterPin *pin, listParameterPinOut)
-        pin->Close();
+
+    foreach(PinsList *lst, pinLists) {
+        lst->Hide();
+    }
 
     QStandardItemModel *model = 0;
     if(parked)
@@ -150,14 +160,12 @@ void Object::Hide() {
 
 void Object::SetBridgePinsInVisible(bool visible)
 {
-    foreach(BridgePinIn *pin, listBridgePinIn)
-        pin->SetVisible(visible);
+    listBridgePinIn->SetVisible(visible);
 }
 
 void Object::SetBridgePinsOutVisible(bool visible)
 {
-    foreach(BridgePinOut *pin, listBridgePinOut)
-        pin->SetVisible(visible);
+    listBridgePinOut->SetVisible(visible);
 }
 
 void Object::setObjectName(const QString &name)
@@ -254,66 +262,27 @@ void Object::RemoveProgram(int prg)
 
 void Object::NewRenderLoop()
 {
-    foreach(AudioPinIn *pin, listAudioPinIn) {
-        pin->NewRenderLoop();
+    foreach(Pin *pin, listAudioPinIn->listPins) {
+        static_cast<AudioPinIn*>(pin)->NewRenderLoop();
     }
 }
 
 
 Pin * Object::GetPin(const ConnectionInfo &pinInfo)
 {
-    switch(pinInfo.type) {
-        case PinType::Audio :
-            if(pinInfo.direction==PinDirection::Input) {
-                if(pinInfo.pinNumber >= listAudioPinIn.size()) {
-                    if(objInfo.objType == ObjType::dummy || !errorMessage.isEmpty()) {
-                        while(pinInfo.pinNumber >= listAudioPinIn.size()) {
-                            listAudioPinIn.append(new AudioPinIn(this, listAudioPinIn.size()));
-                        }
-                    } else
-                        return 0;
-                }
-                return listAudioPinIn.at(pinInfo.pinNumber);
-            } else {
-                if(pinInfo.pinNumber >= listAudioPinOut.size()) {
-                    if(objInfo.objType == ObjType::dummy || !errorMessage.isEmpty()) {
-                        while(pinInfo.pinNumber >= listAudioPinOut.size()) {
-                            listAudioPinOut.append(new AudioPinOut(this, listAudioPinOut.size()));
-                        }
-                    } else
-                        return 0;
-                }
-                return listAudioPinOut.at(pinInfo.pinNumber);
-            }
-        case PinType::Midi :
-            if(pinInfo.direction==PinDirection::Input) {
-                if(pinInfo.pinNumber<listMidiPinIn.size()) {
-                    return listMidiPinIn.at(pinInfo.pinNumber);
-                } else {
-                    debug("Object::GetPin midipinin out of range")
-                    return 0;
-                }
-            } else {
-                if(pinInfo.pinNumber<listMidiPinOut.size()) {
-                    return listMidiPinOut.at(pinInfo.pinNumber);
-                } else {
-                    debug("Object::GetPin midipinout out of range")
-                    return 0;
-                }
-            }
+    Pin* pin=0;
+    bool autoCreate=false;
 
-        case PinType::Parameter :
-            if(pinInfo.direction==PinDirection::Input)
-                return listParameterPinIn.value(pinInfo.pinNumber);
-            else
-                return listParameterPinOut.value(pinInfo.pinNumber);
+    if(objInfo.objType == ObjType::dummy || !errorMessage.isEmpty())
+        autoCreate=true;
 
-        case PinType::Bridge :
-            if(pinInfo.direction==PinDirection::Input)
-                return listBridgePinIn.at(pinInfo.pinNumber);
-            else
-                return listBridgePinOut.at(pinInfo.pinNumber);
+    foreach(PinsList *lst, pinLists) {
+        if(lst->connInfo.type == pinInfo.type && lst->connInfo.direction == pinInfo.direction) {
+            pin=lst->GetPin(pinInfo.pinNumber,autoCreate);
+            if(pin)
+                return pin;
         }
+    }
 
     return 0;
 }
@@ -350,33 +319,8 @@ void Object::SetContainerId(quint16 id)
 {
     containerId = id;
 
-    foreach(AudioPinIn* pin, listAudioPinIn) {
-        pin->SetContainerId(containerId);
-    }
-    foreach(AudioPinOut* pin, listAudioPinOut) {
-        pin->SetContainerId(containerId);
-    }
-    foreach(MidiPinIn* pin, listMidiPinIn) {
-        pin->SetContainerId(containerId);
-    }
-    foreach(MidiPinOut* pin, listMidiPinOut) {
-        pin->SetContainerId(containerId);
-    }
-    hashListParamPin::iterator i = listParameterPinIn.begin();
-    while(i!=listParameterPinIn.end()) {
-        i.value()->SetContainerId(containerId);
-        ++i;
-    }
-    hashListParamPin::iterator j = listParameterPinOut.begin();
-    while(j!=listParameterPinOut.end()) {
-        j.value()->SetContainerId(containerId);
-        ++j;
-    }
-    foreach(BridgePinIn* pin, listBridgePinIn) {
-        pin->SetContainerId(containerId);
-    }
-    foreach(BridgePinOut* pin, listBridgePinOut) {
-        pin->SetContainerId(containerId);
+    foreach(PinsList *lst, pinLists) {
+        lst->SetContainerId(containerId);
     }
 }
 
@@ -412,106 +356,10 @@ void Object::UpdateModelNode()
     QStandardItem *modelNode = myHost->GetModel()->itemFromIndex(modelIndex);
 
     modelNode->setData(QVariant::fromValue(objInfo), UserRoles::objInfo);
-
     modelNode->setData(errorMessage, UserRoles::errorMessage);
 
-//    if(hasEditor) {
-//        modelNode->setData(editorVisible,UserRoles::editorVisible);
-//    }
-//    if(canLearn) {
-//        modelNode->setData(parameterLearning,UserRoles::paramLearning);
-//    }
-
-    //audio in
-    if(!modelAudioIn.isValid() && listAudioPinIn.size()>0) {
-        QStandardItem *item = new QStandardItem("AudioIn");
-        item->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listAudioIn)) , UserRoles::objInfo);
-        modelNode->appendRow(item);
-        modelAudioIn=item->index();
-    }
-    foreach(AudioPinIn* pin, listAudioPinIn) {
-        pin->SetParentModelIndex(modelAudioIn);
-    }
-
-    //audio out
-    if(!modelAudioOut.isValid() && listAudioPinOut.size()>0) {
-        QStandardItem *item = new QStandardItem("AudioOut");
-        item->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listAudioOut)) , UserRoles::objInfo);
-        modelNode->appendRow(item);
-        modelAudioOut=item->index();
-    }
-    foreach(AudioPinOut* pin, listAudioPinOut) {
-        pin->SetParentModelIndex(modelAudioOut);
-    }
-
-    //midi in
-    if(!modelMidiIn.isValid() && listMidiPinIn.size()>0) {
-        QStandardItem *item = new QStandardItem("MidiIn");
-        item->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listMidiIn)) , UserRoles::objInfo);
-        modelNode->appendRow(item);
-        modelMidiIn=item->index();
-    }
-    foreach(MidiPinIn* pin, listMidiPinIn) {
-        pin->SetParentModelIndex(modelMidiIn);
-    }
-
-    //midi out
-    if(!modelMidiOut.isValid() && listMidiPinOut.size()>0) {
-        QStandardItem *item = new QStandardItem("MidiOut");
-        item->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listMidiOut)) , UserRoles::objInfo);
-        modelNode->appendRow(item);
-        modelMidiOut=item->index();
-    }
-    foreach(MidiPinOut* pin, listMidiPinOut) {
-        pin->SetParentModelIndex(modelMidiOut);
-    }
-
-    //param in
-    if(!modelParamIn.isValid() && listParameterPinIn.size()>0) {
-        QStandardItem *item = new QStandardItem("ParamIn");
-        item->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listParamIn)) , UserRoles::objInfo);
-        modelNode->appendRow(item);
-        modelParamIn=item->index();
-    }
-    hashListParamPin::iterator i = listParameterPinIn.begin();
-    while(i!=listParameterPinIn.end()) {
-        i.value()->SetParentModelIndex(modelParamIn);
-        ++i;
-    }
-
-    //param out
-    if(!modelParamOut.isValid() && listParameterPinOut.size()>0) {
-        QStandardItem *item = new QStandardItem("ParamOut");
-        item->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listParamOut)) , UserRoles::objInfo);
-        modelNode->appendRow(item);
-        modelParamOut=item->index();
-    }
-    hashListParamPin::iterator j = listParameterPinOut.begin();
-    while(j!=listParameterPinOut.end()) {
-        j.value()->SetParentModelIndex(modelParamOut);
-        ++j;
-    }
-
-    //bridge in
-    if(!modelBridgeIn.isValid() && listBridgePinIn.size()>0) {
-        QStandardItem *item = new QStandardItem("BridgeIn");
-        item->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listBridgeIn)) , UserRoles::objInfo);
-        modelNode->appendRow(item);
-        modelBridgeIn=item->index();
-    }
-    foreach(BridgePinIn* pin, listBridgePinIn) {
-        pin->SetParentModelIndex(modelBridgeIn);
-    }
-
-    //bridge out
-    if(!modelBridgeOut.isValid() && listBridgePinOut.size()>0) {
-        QStandardItem *item = new QStandardItem("BridgeOut");
-        item->setData( QVariant::fromValue(ObjectInfo(NodeType::listPin, ObjType::listBridgeOut)) , UserRoles::objInfo);
-        modelNode->appendRow(item);
-        modelBridgeOut=item->index();
-    }
-    foreach(BridgePinOut* pin, listBridgePinOut) {
-        pin->SetParentModelIndex(modelBridgeOut);
+    foreach(PinsList *lst, pinLists) {
+        lst->UpdateModelNode(modelNode);
     }
 }
 
@@ -519,7 +367,7 @@ void Object::OnParameterChanged(ConnectionInfo pinInfo, float value)
 {
     //editor pin
     if(pinInfo.pinNumber==FixedPinNumber::editorVisible) {
-        OnEditorVisibilityChanged( listParameterPinIn.value(FixedPinNumber::editorVisible)->GetIndex() );
+        OnEditorVisibilityChanged( static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::editorVisible))->GetIndex() );
     }
 
 //    //learning pin
@@ -529,7 +377,7 @@ void Object::OnParameterChanged(ConnectionInfo pinInfo, float value)
 
 void Object::ToggleEditor(bool visible)
 {
-    listParameterPinIn.value(FixedPinNumber::editorVisible)->ChangeValue(visible);
+    static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::editorVisible))->ChangeValue(visible);
 }
 
 int Object::GetLearningMode()
@@ -537,7 +385,7 @@ int Object::GetLearningMode()
 //    if(!modelIndex.isValid())
 //        return false;
 //    return myHost->GetModel()->data(modelIndex, UserRoles::paramLearning).toBool();
-    return ( listParameterPinIn.value(FixedPinNumber::learningMode)->GetIndex());
+    return ( static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::learningMode))->GetIndex());
 }
 
 void Object::SetContainerAttribs(const ObjectContainerAttribs &attr)

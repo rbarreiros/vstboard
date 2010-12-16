@@ -43,12 +43,12 @@ MidiSender::MidiSender(MainHost *myHost,int index) :
             listChannels << (i+1);
         }
 
-    listMidiPinOut << new MidiPinOut(this);
+    listMidiPinOut->ChangeNumberOfPins(1);
 
-    listParameterPinIn.insert(Param_MsgType, new ParameterPinIn(this,Param_MsgType,"Ctrl",&listMsgType,true,"MsgType"));
-    listParameterPinIn.insert(Param_Value1, new ParameterPinIn(this,Param_Value1,0,&listValues,true,"Value1"));
-    listParameterPinIn.insert(Param_Value2, new ParameterPinIn(this,Param_Value2,0,&listValues,true,"Value2"));
-    listParameterPinIn.insert(Param_Channel, new ParameterPinIn(this,Param_Channel,1,&listChannels,true,"Channel"));
+    listParameterPinIn->listPins.insert(Param_MsgType, new ParameterPinIn(this,Param_MsgType,"Ctrl",&listMsgType,true,"MsgType"));
+    listParameterPinIn->listPins.insert(Param_Value1, new ParameterPinIn(this,Param_Value1,0,&listValues,true,"Value1"));
+    listParameterPinIn->listPins.insert(Param_Value2, new ParameterPinIn(this,Param_Value2,0,&listValues,true,"Value2"));
+    listParameterPinIn->listPins.insert(Param_Channel, new ParameterPinIn(this,Param_Channel,1,&listChannels,true,"Channel"));
 
 
 }
@@ -63,10 +63,10 @@ void MidiSender::Render()
 
     unsigned char status=0;
 
-    unsigned char msgType = listParameterPinIn.value(Param_MsgType)->GetIndex();
-    unsigned char value1 = listParameterPinIn.value(Param_Value1)->GetVariantValue().toInt();
-    unsigned char value2 = listParameterPinIn.value(Param_Value2)->GetVariantValue().toInt();
-    unsigned char channel = listParameterPinIn.value(Param_Channel)->GetVariantValue().toInt();
+    unsigned char msgType = static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(Param_MsgType))->GetIndex();
+    unsigned char value1 = static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(Param_Value1))->GetVariantValue().toInt();
+    unsigned char value2 = static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(Param_Value2))->GetVariantValue().toInt();
+    unsigned char channel = static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(Param_Channel))->GetVariantValue().toInt();
 
     switch(msgType) {
         case 0:
@@ -87,7 +87,7 @@ void MidiSender::Render()
 
     midiMsg = Pm_Message(status, value1, value2);
 
-    listMidiPinOut.first()->SendMsg(PinMessage::MidiMsg, (void*)&midiMsg);
+    listMidiPinOut->GetPin(0)->SendMsg(PinMessage::MidiMsg, (void*)&midiMsg);
 }
 
 void MidiSender::OnParameterChanged(ConnectionInfo pinInfo, float value)

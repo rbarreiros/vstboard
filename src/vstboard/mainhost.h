@@ -136,8 +136,6 @@ private:
 
     int progToChange;
 
-
-    MainHost *theHost;
     HostModel *model;
     HostModel *modelParking;
 

@@ -35,10 +35,9 @@ namespace Connectables {
 
         void SetBuffer(AudioBuffer *buffer);
         void ReceiveMsg(const int msgType=0,void *data=0);
-        AudioBuffer *buffer;
         float GetValue();
         void NewRenderLoop();
-    protected:
+        AudioBuffer *buffer;
 
     };
 }

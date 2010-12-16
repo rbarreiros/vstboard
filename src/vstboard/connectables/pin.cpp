@@ -125,6 +125,11 @@ void Pin::Close()
     closed=true;
 }
 
+void Pin::SetBridge(bool bridge)
+{
+    connectInfo.bridge=bridge;
+}
+
 void Pin::SetVisible(bool vis)
 {
     if(visible==vis)

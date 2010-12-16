@@ -38,6 +38,7 @@
 #include "bridgepinout.h"
 #include "objectprogram.h"
 #include "objectinfo.h"
+#include "pinslist.h"
 
 class SolverNode;
 class MainHost;
@@ -71,8 +72,8 @@ namespace Connectables {
         SolverNode *GetSolverNode() const {return solverNode;}
         void SetSolverNode(SolverNode *node) {solverNode=node;}
 
-        QList<BridgePinIn*> GetListBridgePinIn() {return listBridgePinIn;}
-        QList<BridgePinOut*> GetListBridgePinOut() {return listBridgePinOut;}
+        PinsList* GetListBridgePinIn() {return listBridgePinIn;}
+        PinsList* GetListBridgePinOut() {return listBridgePinOut;}
 
         void SetIndex(int i) {index=i;}
         inline const int GetIndex() const {return index;}
@@ -124,14 +125,16 @@ namespace Connectables {
         inline MainHost *getHost() {return myHost;}
 
     protected:
-        QList<AudioPinIn*>listAudioPinIn;
-        QList<AudioPinOut*>listAudioPinOut;
-        QList<MidiPinIn*>listMidiPinIn;
-        QList<MidiPinOut*>listMidiPinOut;
-        hashListParamPin listParameterPinIn;
-        hashListParamPin listParameterPinOut;
-        QList<BridgePinIn*>listBridgePinIn;
-        QList<BridgePinOut*>listBridgePinOut;
+        QMap<QString, PinsList*>pinLists;
+        PinsList *listAudioPinIn;
+        PinsList *listAudioPinOut;
+        PinsList *listMidiPinIn;
+        PinsList *listMidiPinOut;
+        PinsList *listBridgePinIn;
+        PinsList *listBridgePinOut;
+        PinsList *listParameterPinIn;
+        PinsList *listParameterPinOut;
+
 
         QMutex objMutex;
 
@@ -152,16 +155,6 @@ namespace Connectables {
 
         bool closed;
         quint16 containerId;
-
-        QPersistentModelIndex modelAudioIn;
-        QPersistentModelIndex modelAudioOut;
-        QPersistentModelIndex modelMidiIn;
-        QPersistentModelIndex modelMidiOut;
-        QPersistentModelIndex modelParamIn;
-        QPersistentModelIndex modelParamOut;
-        QPersistentModelIndex modelBridgeIn;
-        QPersistentModelIndex modelBridgeOut;
-
         int currentProgId;
 
         ObjectInfo objInfo;
@@ -178,6 +171,7 @@ namespace Connectables {
 //        void UnLearningModeChanged(bool unlearn);
         void CpuLoad(float load);
         void CloseEditorWindow();
+
 
     public slots:
         virtual void SaveProgram();

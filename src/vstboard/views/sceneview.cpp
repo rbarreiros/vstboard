@@ -27,6 +27,7 @@
 #include "maincontainerview.h"
 #include "bridgeview.h"
 #include "connectablepinview.h"
+#include "minmaxpinview.h"
 #include "bridgepinview.h"
 #include "../connectables/container.h"
 #include "../connectables/objectfactory.h"
@@ -118,6 +119,16 @@ void SceneView::dataChanged ( const QModelIndex & topLeft, const QModelIndex & b
 //                view->SetLearningIndex(tmpIndex);
 //                break;
 //            }
+        case NodeType::pinLimit :
+            {
+                PinView *view = static_cast<PinView*>(hashItems.value(tmpIndex.parent(),0));
+                if(!view) {
+                    debug("SceneView::dataChanged pin not found")
+                            return;
+                }
+                static_cast<MinMaxPinView*>(view)->UpdateLimitModelIndex(tmpIndex.parent());
+                break;
+            }
         default:
             break;
         }
@@ -147,7 +158,7 @@ QModelIndex SceneView::traverseTroughIndexes ( QModelIndex index ) {
 void SceneView::rowsAboutToBeRemoved ( const QModelIndex & parent, int start, int end  )
 {
     for ( int i = start; i <= end; ++i ) {
-        const QModelIndex index = parent.child(i,0);
+        const QPersistentModelIndex index = parent.child(i,0);
 
         ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
         switch(info.nodeType) {
@@ -441,7 +452,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                 }
 
                 if(!v) {
-                    debug("SceneView::rowsInserted listpin not found")
+                    //debug("SceneView::rowsInserted listpin not found")
                     continue;
                 }
                 hashItems.insert(index, v);
@@ -480,7 +491,12 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                     if(pinInfo.direction==PinDirection::Output)
                         angle=.0f;
 
-                    ConnectablePinView *p = new ConnectablePinView(angle, model(), parentList, pin);
+                    ConnectablePinView *p=0;
+                    if(pinInfo.type==PinType::Parameter) {
+                        p = new MinMaxPinView(angle,model(),parentList,pin);
+                    } else {
+                        p = new ConnectablePinView(angle, model(), parentList, pin);
+                    }
                     pinView = static_cast<PinView*>(p);
                     connect(timerFalloff,SIGNAL(timeout()),
                             pinView,SLOT(updateVu()));
@@ -502,8 +518,19 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                 pinView->UpdateModelIndex(index);
                 break;
             }
+            case NodeType::pinLimit :
+            {
+                MinMaxPinView* pin = static_cast<MinMaxPinView*>(hashItems.value( index.parent(),0 ));
+                if(!pin) {
+                    debug("SceneView::rowsInserted add pinLimit, pin not found")
+                    continue;
+                }
+                ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
+                pin->SetLimitModelIndex(info.objType, index);
+                break;
+            }
             case NodeType::cable :
-                {
+            {
                 ContainerView *cnt = static_cast<ContainerView*>(hashItems.value(parent.parent(),0));
                 if(!cnt) {
                     debug("SceneView::rowsInserted add cable, container not found")

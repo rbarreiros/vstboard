@@ -38,7 +38,7 @@ PinView::PinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, 
 {
 //    setObjectName(QString("PinView%1").arg((long)pin,0,16));
     setAcceptDrops(true);
-    setCursor(Qt::OpenHandCursor);
+    setCursor(Qt::PointingHandCursor);
 }
 
 void PinView::UpdateCablesPosition()
@@ -170,8 +170,8 @@ void PinView::CreateMimeData(QByteArray &bytes)
     QDataStream stream(&bytes,QIODevice::WriteOnly);
     stream << connectInfo.container;
     stream << connectInfo.objId;
-    stream << connectInfo.type;
-    stream << connectInfo.direction;
+    stream << (quint8)connectInfo.type;
+    stream << (quint8)connectInfo.direction;
     stream << connectInfo.pinNumber;
     stream << connectInfo.bridge;
 }
@@ -181,8 +181,8 @@ void PinView::ReadMimeData(QByteArray &bytes, ConnectionInfo &data)
     QDataStream stream(&bytes,QIODevice::ReadOnly);
     stream >> data.container;
     stream >> data.objId;
-    stream >> data.type;
-    stream >> data.direction;
+    stream >> (quint8&)data.type;
+    stream >> (quint8&)data.direction;
     stream >> data.pinNumber;
     stream >> data.bridge;
 }

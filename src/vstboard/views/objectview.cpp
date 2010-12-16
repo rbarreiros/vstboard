@@ -35,13 +35,17 @@ ObjectView::ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsIte
     layout(0),
     model(model),
     shrinkAsked(false),
-    myHost(myHost)
+    myHost(myHost),
+    listAudioIn(0),
+    listAudioOut(0),
+    listMidiIn(0),
+    listMidiOut(0),
+    listParametersIn(0),
+    listParametersOut(0),
+    listBridgeIn(0),
+    listBridgeOut(0)
 {
-//    setObjectName("objView");
-
-    setFocusPolicy(Qt::StrongFocus);
-//    setAutoFillBackground(true);
-
+//    setFocusPolicy(Qt::StrongFocus);
 
     actDel = new QAction(QIcon(":/img16x16/delete.png"),tr("Delete"),this);
     actDel->setShortcut( Qt::Key_Delete );

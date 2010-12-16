@@ -42,8 +42,8 @@ namespace Connectables {
 
         virtual void OnValueChanged(float val);
 
-        inline int GetIndex() {return stepIndex;}
-        inline QVariant GetVariantValue() {return listValues->at(stepIndex);}
+        inline int GetIndex() {return outStepIndex;}
+        inline QVariant GetVariantValue() {return listValues->at(outStepIndex);}
 
         void GetDefault(ObjectParameter &param);
         void GetValues(ObjectParameter &param);
@@ -53,6 +53,9 @@ namespace Connectables {
         void SetFixedName(QString fixedName);
         void SetNameCanChange(bool canChange) {nameCanChange = canChange;}
         void SetAlwaysVisible(bool visible);
+        void SetVisible(bool vis);
+
+        void SetLimit(ObjType::Enum type, float newVal);
 
     protected:
         QList<QVariant> *listValues;
@@ -64,6 +67,13 @@ namespace Connectables {
         bool nameCanChange;
         bool dirty;
         bool visibilityCanChange;
+        float limitInMin;
+        float limitInMax;
+        float limitOutMin;
+        float limitOutMax;
+
+        int outStepIndex;
+        float outValue;
 
     signals:
         void ParameterChanged(ConnectionInfo pinInfo, float value);
