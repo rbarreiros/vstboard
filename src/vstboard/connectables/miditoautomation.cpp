@@ -65,30 +65,30 @@ void MidiToAutomation::MidiMsgFromInput(long msg)
             break;
         }
         case MidiConst::prog : {
-            ChangeValue(128, Pm_MessageData1(msg) );
+            ChangeValue(para_prog, Pm_MessageData1(msg) );
             break;
         }
         case MidiConst::noteOn : {
-            ChangeValue(129, Pm_MessageData2(msg) );
-            ChangeValue(200+Pm_MessageData1(msg), Pm_MessageData2(msg) );
+            ChangeValue(para_velocity, Pm_MessageData2(msg) );
+            ChangeValue(para_notes+Pm_MessageData1(msg), Pm_MessageData2(msg) );
             break;
         }
         case MidiConst::noteOff : {
-//            ChangeValue(129, Pm_MessageData2(msg) );
-            ChangeValue(200+Pm_MessageData1(msg), Pm_MessageData2(msg) );
+//            ChangeValue(para_notepitch, Pm_MessageData2(msg) );
+            ChangeValue(para_notes+Pm_MessageData1(msg), Pm_MessageData2(msg) );
             break;
         }
         case MidiConst::pitchbend : {
-            ChangeValue(132, Pm_MessageData2(msg) );
+            ChangeValue(para_pitchbend, Pm_MessageData2(msg) );
             break;
         }
         case MidiConst::chanpressure : {
-            ChangeValue(133, Pm_MessageData1(msg) );
+            ChangeValue(para_chanpress, Pm_MessageData1(msg) );
             break;
         }
         case MidiConst::aftertouch : {
-            ChangeValue(129, Pm_MessageData1(msg) );
-            ChangeValue(134, Pm_MessageData2(msg) );
+            ChangeValue(para_velocity, Pm_MessageData1(msg) );
+            ChangeValue(para_aftertouch, Pm_MessageData2(msg) );
         }
     }
 }
@@ -103,5 +103,40 @@ void MidiToAutomation::ChangeValue(int ctrl, int value) {
     listChanged.insert(ctrl,value);
 
     if(!listParameterPinOut->listPins.contains(ctrl))
-        listParameterPinOut->AddPin(ctrl,QString::number(ctrl),0,false,&listValues);
+        listParameterPinOut->AsyncAddPin(ctrl);
+}
+
+Pin* MidiToAutomation::CreatePin(const ConnectionInfo &info, quint16 nb)
+{
+    Pin *newPin = Object::CreatePin(info,nb);
+    if(newPin)
+        return newPin;
+
+    switch(info.direction) {
+        case PinDirection::Output :
+            if(nb<128)
+                newPin = new ParameterPinOut(this,nb,0,&listValues,true,QString("CC%1").arg(nb),false);
+            if(nb==para_prog)
+                newPin = new ParameterPinOut(this,nb,0,&listValues,true,"prog",false);
+            if(nb==para_velocity)
+                newPin = new ParameterPinOut(this,nb,0,&listValues,true,"vel",false);
+            if(nb==para_pitchbend)
+                newPin = new ParameterPinOut(this,nb,0,&listValues,true,"p.bend",false);
+            if(nb==para_chanpress)
+                newPin = new ParameterPinOut(this,nb,0,&listValues,true,"pressr",false);
+            if(nb==para_aftertouch)
+                newPin = new ParameterPinOut(this,nb,0,&listValues,true,"aftr.t",false);
+            if(nb>=para_notes)
+                newPin = new ParameterPinOut(this,nb,0,&listValues,true,QString("note%1").arg(nb),false);
+            break;
+
+        default :
+            debug("MidiToAutomation::CreatePin PinDirection")
+            return 0;
+            break;
+    }
+
+    if(newPin)
+        newPin->SetContainerId(containerId);
+    return newPin;
 }

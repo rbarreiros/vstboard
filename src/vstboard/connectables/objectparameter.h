@@ -29,10 +29,10 @@ namespace Connectables {
     {
 
     public:
-        ObjectParameter() : value(.0f), index(0), visible(false) {}
-        ObjectParameter(float value, bool visible=false) : value(value), index(0), visible(visible) {}
-        ObjectParameter(int index, bool visible=false) : value(.0f), index(index), visible(visible) {}
-        ObjectParameter(bool visible) : value(.0f), index(0), visible(visible) {}
+        ObjectParameter() : value(.0f), index(0), visible(false), limitInMin(.0f), limitInMax(1.0f), limitOutMin(.0f), limitOutMax(1.0f) {}
+        ObjectParameter(float value, bool visible=false) : value(value), index(0), visible(visible), limitInMin(.0f), limitInMax(1.0f), limitOutMin(.0f), limitOutMax(1.0f) {}
+        ObjectParameter(int index, bool visible=false) : value(.0f), index(index), visible(visible), limitInMin(.0f), limitInMax(1.0f), limitOutMin(.0f), limitOutMax(1.0f) {}
+        ObjectParameter(bool visible) : value(.0f), index(0), visible(visible), limitInMin(.0f), limitInMax(1.0f), limitOutMin(.0f), limitOutMax(1.0f) {}
 
         ObjectParameter(const ObjectParameter &c) {
             *this = c;
@@ -41,6 +41,11 @@ namespace Connectables {
         float value;
         int index;
         bool visible;
+
+        float limitInMin;
+        float limitInMax;
+        float limitOutMin;
+        float limitOutMax;
 
         QDataStream & toStream(QDataStream& out) const;
         QDataStream & fromStream(QDataStream& in);

@@ -44,24 +44,39 @@ ObjectProgram::ObjectProgram(int progId,PinsList *in, PinsList *out) :
 
 void ObjectProgram::Load(PinsList *in, PinsList *out)
 {
-    QMap<quint16,Pin*>::iterator i = in->listPins.begin();
-    while(i!=in->listPins.end()) {
-        if(listParametersIn.contains(i.key())) {
-            static_cast<ParameterPin*>(i.value())->Load(listParametersIn.value(i.key()));
-        } else {
-            debug2(<< "ObjectProgram::Load paramIn not found" << i.key())
+    QMap<ushort,ObjectParameter>::ConstIterator i=listParametersIn.constBegin();
+    while(i!=listParametersIn.constEnd()) {
+        if(!in->listPins.contains(i.key())) {
+            in->AddPin(i.key());
         }
+        static_cast<ParameterPin*>( in->listPins.value(i.key()) )->Load(i.value());
         ++i;
     }
 
-    QMap<quint16,Pin*>::iterator j = out->listPins.begin();
-    while(j!=out->listPins.end()) {
-        if(listParametersOut.contains(j.key())) {
-            static_cast<ParameterPin*>(j.value())->Load(listParametersOut.value(j.key()));
-        } else {
-            debug2(<< "ObjectProgram::Load paramOut not found" << j.key())
+    QMap<ushort,ObjectParameter>::ConstIterator j=listParametersOut.constBegin();
+    while(j!=listParametersOut.constEnd()) {
+        if(!out->listPins.contains(j.key())) {
+            out->AddPin(j.key());
         }
+        static_cast<ParameterPin*>( out->listPins.value(j.key()) )->Load(j.value());
         ++j;
+    }
+
+    //no parameters ? hide the pin :
+    QMap<quint16,Pin*>::iterator k = in->listPins.begin();
+    while(k!=in->listPins.end()) {
+        if(!listParametersIn.contains(k.key())) {
+            k.value()->SetVisible(false);
+        }
+        ++k;
+    }
+
+    QMap<quint16,Pin*>::iterator l = out->listPins.begin();
+    while(l!=out->listPins.end()) {
+        if(!listParametersOut.contains(l.key())) {
+            l.value()->SetVisible(false);
+        }
+        ++l;
     }
 }
 

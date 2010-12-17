@@ -24,6 +24,7 @@
 #include "../precomp.h"
 #include "pin.h"
 #include "objectprogram.h"
+#include "objectparameter.h"
 
 namespace Connectables {
 
@@ -74,6 +75,11 @@ namespace Connectables {
 
         int outStepIndex;
         float outValue;
+
+        QPersistentModelIndex indexLimitInMin;
+        QPersistentModelIndex indexLimitInMax;
+        QPersistentModelIndex indexLimitOutMin;
+        QPersistentModelIndex indexLimitOutMax;
 
     signals:
         void ParameterChanged(ConnectionInfo pinInfo, float value);

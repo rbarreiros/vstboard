@@ -44,9 +44,7 @@ VstPlugin::VstPlugin(MainHost *myHost,int index, const ObjectInfo & info) :
     for(int i=0;i<128;i++) {
         listValues << i;
     }
-
-//    listParameterPinIn->listPins.insert(FixedPinNumber::vstProgNumber, new ParameterPinIn(this,FixedPinNumber::vstProgNumber,0,&listValues,true,"Prog"));
-    listParameterPinIn->AddPin(FixedPinNumber::vstProgNumber,"Prog");
+    listParameterPinIn->AddPin(FixedPinNumber::vstProgNumber);
 }
 
 VstPlugin::~VstPlugin()
@@ -374,17 +372,16 @@ bool VstPlugin::Open()
     }
 
     //create all parameters pins
-    for(int i=0;i<nbParam;i++) {
+  /*  for(int i=0;i<nbParam;i++) {
         if(listParameterPinIn->listPins.contains(i)) {
             ParameterPinIn *pin = static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(i));
             pin->SetDefaultVisible(defVisible);
             pin->SetNameCanChange(nameCanChange);
         } else {
-            listParameterPinIn->AddPin(i,EffGetParamName(i),EffGetParameter(i),nameCanChange,0,defVisible);
-//            listParameterPinIn->listPins.insert(i, new ParameterPinIn(this, i, EffGetParameter(i), defVisible, EffGetParamName(i), nameCanChange) );
+            listParameterPinIn->AddPin(i);
         }
     }
-
+*/
     Object::Open();
     CreateEditorWindow();
     return true;
@@ -558,18 +555,12 @@ long VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr,
         case audioMasterAutomate : //0
             //create the parameter pin if needed
             if(!listParameterPinIn->listPins.contains(index)) {
-//                float v=.0f;
-//                QString n="";
-//                try {
-//                    v=EffGetParameter(index);
-//                    n=EffGetParamName(index);
-//                } catch(...) {
-//                    debug("VstPlugin::OnMasterCallback exception")
-//                }
-                listParameterPinIn->AddPin(index,"nd",(float)opt,true);
-//                listParameterPinIn->listPins.insert(index, new ParameterPinIn(this, index, (float)opt, false, "n/d", true) );
+                if(!listParameterPinIn->AddPin(index)) {
+                    debug("VstPlugin::OnMasterCallback pin not created")
+                        return 0;
+                }
             }
-            static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(index))->OnValueChanged(opt);
+            static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(index))->ChangeValue(opt);
             break;
 
         case audioMasterCurrentId : //2
@@ -628,3 +619,27 @@ void VstPlugin::OnParameterChanged(ConnectionInfo pinInfo, float value)
     }
 }
 
+Pin* VstPlugin::CreatePin(const ConnectionInfo &info, quint16 nb)
+{
+    Pin *newPin = Object::CreatePin(info,nb);
+    if(newPin)
+        return newPin;
+
+    switch(info.direction) {
+        case PinDirection::Input :
+            if(nb==FixedPinNumber::vstProgNumber)
+                newPin = new ParameterPinIn(this,nb,0,&listValues,true,"prog",false);
+            else
+                newPin = new ParameterPinIn(this,nb,EffGetParameter(nb),&listValues,true,EffGetParamName(nb),true);
+            break;
+
+        default :
+            debug("VstPlugin::CreatePin PinDirection")
+            return 0;
+            break;
+    }
+
+    if(newPin)
+        newPin->SetContainerId(containerId);
+    return newPin;
+}

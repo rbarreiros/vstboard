@@ -23,20 +23,36 @@
 
 using namespace View;
 
-CursorView::CursorView(QAbstractItemModel *model,bool upsideDown,QGraphicsItem *parent) :
+CursorView::CursorView(QAbstractItemModel *model,bool isMaxi,bool upsideDown,QGraphicsItem *parent) :
         QGraphicsWidget(parent),
+        isMaxi(isMaxi),
         upsideDown(upsideDown),
         drag(false),
         value(.0f),
-        model(model)
+        model(model),
+        offset(QPointF(0,0))
 {
     QPolygonF pol;
+
     if(upsideDown) {
-        pol << QPointF(5,0) << QPointF(-5,0) << QPointF(0,-7);
+        if(isMaxi) {
+            pol << QPointF(5,7) << QPointF(0,7) << QPointF(5,0);
+            offset.setX(5);
+            offset.setY(7);
+        } else {
+            pol << QPointF(5,7) << QPointF(0,7) << QPointF(0,0);
+            offset.setY(7);
+        }
     } else {
-        pol << QPointF(-5,0) << QPointF(5,0) << QPointF(0,7);
+        if(isMaxi) {
+            pol << QPointF(0,0) << QPointF(5,0) << QPointF(5,7);
+            offset.setX(5);
+        } else {
+            pol << QPointF(0,0) << QPointF(5,0) << QPointF(0,7);
+        }
     }
     cursor = new QGraphicsPolygonItem(pol,this);
+    cursor->setBrush(Qt::black);
 
     setFlag(QGraphicsItem::ItemIsMovable, true);
 //    setFlag(QGraphicsItem::ItemIsSelectable, true);
@@ -45,24 +61,53 @@ CursorView::CursorView(QAbstractItemModel *model,bool upsideDown,QGraphicsItem *
     resize(cursor->boundingRect().size());
 }
 
-QRectF CursorView::boundingRect() const
+void CursorView::setPos ( const QPointF & pos )
+{
+    QPointF p( pos);
+
+    if(upsideDown) {
+        p.setY(parentWidget()->rect().height());
+    } else {
+        p.setY(.0f);
+    }
+
+    p-=offset;
+    QGraphicsWidget::setPos(p);
+}
+
+void CursorView::setPos ( qreal x, qreal y )
 {
     if(upsideDown) {
-        return QRectF(-5,-7,10,7);
+        y=parentWidget()->rect().height();
     } else {
-        return QRectF(-5,0,10,7);
+        y=.0f;
     }
-//    return QGraphicsWidget::boundingRect();
+
+    x-=offset.x();
+    y-=offset.y();
+    QGraphicsWidget::setPos(x,y);
+}
+
+QRectF CursorView::boundingRect() const
+{
+//    if(upsideDown) {
+//        return QRectF(-5,-7,10,7);
+//    } else {
+//        return QRectF(-5,0,10,7);
+//    }
+    return QGraphicsWidget::boundingRect();
 }
 
 void CursorView::mousePressEvent ( QGraphicsSceneMouseEvent * event )
 {
     drag=true;
+    QGraphicsWidget::mousePressEvent(event);
 }
 
 void CursorView::mouseReleaseEvent ( QGraphicsSceneMouseEvent * event )
 {
     drag=false;
+    QGraphicsWidget::mouseReleaseEvent(event);
 }
 
 void CursorView::SetValue(float newVal)
@@ -76,7 +121,13 @@ void CursorView::SetValue(float newVal)
         return;
     value=newVal;
 
-    setPos(value*parentWidget()->rect().width(),pos().y());
+    setPos(value*parentWidget()->rect().width(),0);
+}
+
+void CursorView::SetModelIndex(QPersistentModelIndex index)
+{
+    modelIndex=index;
+    SetValue(modelIndex.data(UserRoles::value).toFloat());
 }
 
 void CursorView::ValueChanged(float newVal)
@@ -91,13 +142,18 @@ QVariant CursorView::itemChange(GraphicsItemChange change, const QVariant &value
 {
     if (change == ItemPositionChange && scene() && drag) {
         QPointF newPos = value.toPointF();
-        SetValue(newPos.x());
-        if(newPos.x()<.0f)
-            newPos.setX(.0f);
-        if(newPos.x()>parentWidget()->rect().width())
-            newPos.setX(parentWidget()->rect().width());
-        newPos.setY(pos().y());
-        ValueChanged(newPos.x()/parentWidget()->rect().width());
+        //SetValue(newPos.x());
+        if(newPos.x()<-offset.x())
+            newPos.setX(-offset.x());
+        if(newPos.x()>parentWidget()->rect().width()-offset.x())
+            newPos.setX(parentWidget()->rect().width()-offset.x());
+        if(upsideDown) {
+            newPos.setY(parentWidget()->rect().height()-offset.y());
+        } else {
+            newPos.setY(-offset.y());
+        }
+        if(parentWidget()->rect().width()!=0)
+            ValueChanged((newPos.x()+offset.x())/parentWidget()->rect().width());
         return newPos;
     }
     return QGraphicsWidget::itemChange(change, value);

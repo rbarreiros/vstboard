@@ -491,15 +491,19 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                     if(pinInfo.direction==PinDirection::Output)
                         angle=.0f;
 
-                    ConnectablePinView *p=0;
+
                     if(pinInfo.type==PinType::Parameter) {
-                        p = new MinMaxPinView(angle,model(),parentList,pin);
+                        MinMaxPinView *p = new MinMaxPinView(angle,model(),parentList,pin);
+                        connect(timerFalloff,SIGNAL(timeout()),
+                                p,SLOT(updateVu()));
+                        pinView = static_cast<PinView*>(p);
                     } else {
-                        p = new ConnectablePinView(angle, model(), parentList, pin);
+                        ConnectablePinView *p = new ConnectablePinView(angle, model(), parentList, pin);
+                        connect(timerFalloff,SIGNAL(timeout()),
+                                p,SLOT(updateVu()));
+                        pinView = static_cast<PinView*>(p);
                     }
-                    pinView = static_cast<PinView*>(p);
-                    connect(timerFalloff,SIGNAL(timeout()),
-                            pinView,SLOT(updateVu()));
+
                 }
                 pinView->SetPinModelIndex(index);
 

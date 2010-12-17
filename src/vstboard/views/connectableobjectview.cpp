@@ -34,7 +34,7 @@ using namespace View;
 ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel *model,QGraphicsItem * parent, Qt::WindowFlags wFlags ) :
     ObjectView(myHost,model,parent,wFlags)
 {
-    setGeometry(QRectF(0,0,100,15));
+    setGeometry(QRectF(0,0,105,15));
     border = new QGraphicsRectItem(geometry(),this,scene());
 
     titleText = new QGraphicsSimpleTextItem(QString("Title"),this);
@@ -45,6 +45,7 @@ ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel
 
     layout = new QGraphicsGridLayout() ;
     layout->setSpacing(0);
+    layout->setHorizontalSpacing(5);
     layout->setContentsMargins(0,15,0,0);
     setLayout(layout);
 

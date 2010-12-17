@@ -25,20 +25,27 @@ using namespace View;
 MinMaxPinView::MinMaxPinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, Connectables::Pin *pin) :
         ConnectablePinView(angle,model,parent,pin)
 {
-    inMin=new CursorView(model,false,this);
+    QLinearGradient grd(0, 0, geometry().right(), 0);
+    grd.setColorAt(0, QColor::fromRgbF(1, 0.5, 0.5, 0.2));
+    grd.setColorAt(1, QColor::fromRgbF(1, 0, 1, 0.2));
+
+    scaledView = new QGraphicsPolygonItem(this);
+    scaledView->setBrush(QBrush(grd));
+
+    inMin=new CursorView(model,false,false,this);
     inMin->setPos(rect().topLeft());
     inMin->SetValue(.0f);
 
-    inMax=new CursorView(model,false,this);
-    inMax->setPos(rect().topLeft());
+    inMax=new CursorView(model,true,false,this);
+    inMax->setPos(rect().topRight());
     inMax->SetValue(1.0f);
 
-    outMin=new CursorView(model,true,this);
+    outMin=new CursorView(model,false,true,this);
     outMin->setPos(rect().bottomLeft());
     outMin->SetValue(.0f);
 
-    outMax=new CursorView(model,true,this);
-    outMax->setPos(rect().bottomLeft());
+    outMax=new CursorView(model,true,true,this);
+    outMax->setPos(rect().bottomRight());
     outMax->SetValue(1.0f);
 }
 
@@ -69,4 +76,35 @@ void MinMaxPinView::UpdateLimitModelIndex(const QModelIndex &index)
     inMax->SetValue( index.child(1,0).data(UserRoles::value).toFloat() );
     outMin->SetValue( index.child(2,0).data(UserRoles::value).toFloat() );
     outMax->SetValue( index.child(3,0).data(UserRoles::value).toFloat() );
+    UpdateScaleView();
+}
+
+void MinMaxPinView::UpdateModelIndex(const QModelIndex &index)
+{
+    ConnectablePinView::UpdateModelIndex(index);
+    UpdateScaleView();
+}
+
+void MinMaxPinView::UpdateScaleView()
+{
+    float limitVal=value;
+    if(limitVal<inMin->GetValue())
+        limitVal=inMin->GetValue();
+    if(limitVal>inMax->GetValue())
+        limitVal=inMax->GetValue();
+
+    float outVal=limitVal;
+    outVal-=inMin->GetValue();
+
+    if(inMax->GetValue()!=inMin->GetValue())
+        outVal/=(inMax->GetValue()-inMin->GetValue());
+    outVal*=(outMax->GetValue()-outMin->GetValue());
+    outVal+=outMin->GetValue();
+
+    limitVal*=rect().width();
+    outVal*=rect().width();
+
+    QPolygonF pol;
+    pol << QPointF(limitVal,0) << QPointF(inMin->GetValue(),0)  << QPointF(outMin->GetValue(),rect().height()) << QPointF(outVal,rect().height());
+    scaledView->setPolygon(pol);
 }

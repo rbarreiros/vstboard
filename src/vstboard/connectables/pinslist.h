@@ -36,7 +36,7 @@ namespace Connectables {
     {
         Q_OBJECT
     public:
-        PinsList(MainHost *myHost, QObject *parent=0);
+        PinsList(MainHost *myHost, Object *parent);
         void SetContainerId(const quint16 id);
         void Hide();
         void SetVisible(bool visible);
@@ -46,7 +46,7 @@ namespace Connectables {
         Pin * GetPin(int pinNumber, bool autoCreate=false);
         void UpdateModelNode(QStandardItem *parentNode=0);
         void ConnectAllTo(PinsList *other, bool hidden=false);
-        void AddPin(int nb, const QString &name="", QVariant value=.0f, bool nameCanChange=false, QList<QVariant> *listValues =0, bool defaultVisible=true);
+        void AsyncAddPin(int nb);
 
         AudioBuffer *GetBuffer(int pinNumber);
 
@@ -64,10 +64,10 @@ namespace Connectables {
         MainHost *myHost;
 
     signals :
-        void PinAdded(int nb, const QString &name="", QVariant value=.0f, bool nameCanChange=false, QList<QVariant> *listValues =0, bool defaultVisible=true);
+        void PinAdded(int nb);
 
-    private slots:
-        void AsyncAddPin(int nb, const QString &name="", QVariant value=.0f, bool nameCanChange=false, QList<QVariant> *listValues =0, bool defaultVisible=true);
+    public slots:
+        Pin * AddPin(int nb);
     };
 }
 

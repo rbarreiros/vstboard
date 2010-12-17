@@ -33,11 +33,20 @@ namespace Connectables {
         explicit MidiToAutomation(MainHost *myHost,int index);
         void Render();
         void MidiMsgFromInput(long msg);
-
+        Pin* CreatePin(const ConnectionInfo &info, quint16 nb);
     protected:
         void ChangeValue(int ctrl, int value);
         QList<QVariant> listValues;
         QHash<quint16,quint8>listChanged;
+
+        enum paramNumbers {
+            para_prog=128,
+            para_velocity,
+            para_pitchbend,
+            para_chanpress,
+            para_aftertouch,
+            para_notes=200
+        };
 
     };
 }

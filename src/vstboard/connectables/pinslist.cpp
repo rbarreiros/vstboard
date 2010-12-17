@@ -31,12 +31,13 @@
 
 using namespace Connectables;
 
-PinsList::PinsList(MainHost *myHost, QObject *parent) :
+PinsList::PinsList(MainHost *myHost, Object *parent) :
         QObject(parent),
+        parent(parent),
         myHost(myHost)
 {
-    connect(this,SIGNAL(PinAdded(int,QString,QVariant,bool,QList<QVariant>*,bool)),
-            this,SLOT(AsyncAddPin(int,QString,QVariant,bool,QList<QVariant>*,bool)));
+    connect(this,SIGNAL(PinAdded(int)),
+            this,SLOT(AddPin(int)));
 }
 
 void PinsList::SetContainerId(quint16 id)
@@ -54,71 +55,22 @@ void PinsList::Hide()
     }
 }
 
-bool PinsList::ChangeNumberOfPins(int newNbIn)
+bool PinsList::ChangeNumberOfPins(int newNb)
 {
-    int nbIn=listPins.count();
+    int nbPins=listPins.count();
 
-    if(newNbIn==nbIn)
+    if(newNb==nbPins)
         return true;
 
-    if(newNbIn<nbIn) {
+    if(newNb<nbPins) {
         QMap<quint16,Pin*>::Iterator i = listPins.end();
-        for(int nb=newNbIn; nb<nbIn; nb++) {
+        for(int nb=newNb; nb<nbPins; nb++) {
             i=listPins.erase(i);
         }
     }
-    if(newNbIn>nbIn){
-        Pin *newPin=0;
-
-        int bufferSize = myHost->GetBufferSize();
-        for(int nb=nbIn;nb<newNbIn;nb++) {
-            if(connInfo.direction==PinDirection::Input) {
-                switch(connInfo.type) {
-                    case PinType::Audio :
-                        newPin = new AudioPinIn(parent,nb,connInfo.bridge);
-                        static_cast<AudioPinIn*>(newPin)->buffer->SetSize(bufferSize);
-                        break;
-                    case PinType::Midi :
-                        newPin = new MidiPinIn(parent,nb,connInfo.bridge);
-                        break;
-                    case PinType::Bridge :
-                        newPin = new BridgePinIn(parent,nb,connInfo.bridge);
-                        break;
-                    case PinType::Parameter :
-                        newPin = new ParameterPinIn(parent,nb,0,true);
-                        break;
-                    case PinType::ND :
-                        debug("PinsList::ChangeNumberOfPins PinType::ND")
-                        return false;
-                }
-            } else {
-                switch(connInfo.type) {
-                    case PinType::Audio :
-                        newPin = new AudioPinOut(parent,nb,connInfo.bridge);
-                        static_cast<AudioPinOut*>(newPin)->buffer->SetSize(bufferSize);
-                        break;
-                    case PinType::Midi :
-                        newPin = new MidiPinOut(parent,nb,connInfo.bridge);
-                        break;
-                    case PinType::Bridge :
-                        newPin = new BridgePinOut(parent,nb,connInfo.bridge);
-                        break;
-                    case PinType::Parameter :
-                        newPin = new ParameterPinOut(parent,nb,0,true);
-                        break;
-                    case PinType::ND :
-                        debug("PinsList::ChangeNumberOfPins PinType::ND")
-                        return false;
-                }
-            }
-
-            if(!newPin) {
-                debug("PinsList::ChangeNumberOfPins pin not created")
-                return false;
-            }
-
-            newPin->SetContainerId(containerId);
-            listPins.insert(nb, newPin);
+    if(newNb>nbPins){
+        for(int nb=nbPins;nb<newNb;nb++) {
+            AsyncAddPin(nb);
         }
     }
 
@@ -206,95 +158,88 @@ void PinsList::UpdateModelNode(QStandardItem *parentNode)
     }
 }
 
-void PinsList::AddPin(int nb, const QString &name, QVariant value, bool nameCanChange, QList<QVariant> *listValues, bool defaultVisible)
+void PinsList::AsyncAddPin(int nb)
 {
     if(listPins.contains(nb))
         return;
-    emit PinAdded(nb,name,value,nameCanChange,listValues,defaultVisible);
+    emit PinAdded(nb);
 }
 
-void PinsList::AsyncAddPin(int nb, const QString &name, QVariant value, bool nameCanChange, QList<QVariant> *listValues, bool defaultVisible)
+Pin * PinsList::AddPin(int nb)
 {
     if(listPins.contains(nb))
-        return;
+        return listPins.value(nb);
 
-    Pin *newPin=0;
-    int bufferSize = myHost->GetBufferSize();
-
-    if(connInfo.direction==PinDirection::Input) {
-        switch(connInfo.type) {
-            case PinType::Audio :
-                newPin = new AudioPinIn(parent,nb,connInfo.bridge);
-                static_cast<AudioPinIn*>(newPin)->buffer->SetSize(bufferSize);
-                break;
-            case PinType::Midi :
-                newPin = new MidiPinIn(parent,nb,connInfo.bridge);
-                break;
-            case PinType::Bridge :
-                newPin = new BridgePinIn(parent,nb,connInfo.bridge);
-                break;
-            case PinType::Parameter :
-                if(listValues)
-                    newPin = new ParameterPinIn(parent,nb,value,listValues,defaultVisible,name,nameCanChange);
-                else
-                    newPin = new ParameterPinIn(parent,nb,value.toFloat(),defaultVisible,name,nameCanChange);
-                break;
-            case PinType::ND :
-                debug("PinsList::AsyncAddPin PinType::ND")
-                return;
-        }
-    } else {
-        switch(connInfo.type) {
-            case PinType::Audio :
-                newPin = new AudioPinOut(parent,nb,connInfo.bridge);
-                static_cast<AudioPinOut*>(newPin)->buffer->SetSize(bufferSize);
-                break;
-            case PinType::Midi :
-                newPin = new MidiPinOut(parent,nb,connInfo.bridge);
-                break;
-            case PinType::Bridge :
-                newPin = new BridgePinOut(parent,nb,connInfo.bridge);
-                break;
-            case PinType::Parameter :
-                if(listValues)
-                    newPin = new ParameterPinOut(parent,nb,value,listValues,defaultVisible,name,nameCanChange);
-                else
-                    newPin = new ParameterPinOut(parent,nb,value.toFloat(),defaultVisible,name,nameCanChange);
-                break;
-            case PinType::ND :
-                debug("PinsList::AsyncAddPin PinType::ND")
-                return;
-        }
-    }
+    Pin *newPin = parent->CreatePin(connInfo,nb);
 
     if(!newPin) {
-        debug("PinsList::AddPin pin not created")
-        return;
+        debug("PinsList::AsyncAddPin pin not created")
+        return 0;
     }
 
-    newPin->SetContainerId(containerId);
     listPins.insert(nb, newPin);
 
     if(modelList.isValid())
         newPin->SetParentModelIndex(modelList);
+
+    return newPin;
 }
 
 QDataStream & PinsList::toStream(QDataStream & out) const
 {
+    const quint16 file_version = 1;
+    out << file_version;
 
+    out << connInfo;
+    out << objInfo;
+
+    out << (quint16)listPins.count();
+
+    QMap<quint16,Pin*>::ConstIterator i = listPins.constBegin();
+    while(i!=listPins.constEnd()) {
+        Pin *pin=i.value();
+        out << i.key();
+        out << pin->GetValue();
+        ++i;
+    }
+
+    return out;
 }
 
 QDataStream & PinsList::fromStream(QDataStream & in)
 {
+    quint16 file_version;
+    in >> file_version;
 
+    in >> connInfo;
+    in >> objInfo;
+
+    quint16 nbPins;
+    in >> nbPins;
+
+    for(quint16 i=0; i<nbPins; i++) {
+        quint16 id;
+        in >> id;
+        QVariant value;
+        in >> value;
+        Pin *newPin = parent->CreatePin(connInfo,id);
+        if(!newPin) {
+            debug("PinsList::fromStream pin not created")
+            return in;
+        }
+        listPins.insert(id,newPin);
+
+    }
+
+    return in;
 }
 
-QDataStream & operator<< (QDataStream & out, const PinsList::Object& value)
+QDataStream & operator<< (QDataStream & out, const Connectables::PinsList& value)
 {
     return value.toStream(out);
 }
 
-QDataStream & operator>> (QDataStream & in, PinsList::Object& value)
+QDataStream & operator>> (QDataStream & in, Connectables::PinsList& value)
 {
     return value.fromStream(in);
 }

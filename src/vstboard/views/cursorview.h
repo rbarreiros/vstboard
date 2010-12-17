@@ -29,10 +29,13 @@ namespace View {
     {
         Q_OBJECT
     public:
-        explicit CursorView(QAbstractItemModel *model,bool upsideDown,QGraphicsItem *parent = 0);
+        explicit CursorView(QAbstractItemModel *model,bool isMaxi,bool upsideDown,QGraphicsItem *parent = 0);
         QRectF	boundingRect () const;
         void SetValue(float newVal);
-        void SetModelIndex(QPersistentModelIndex index) {modelIndex=index;}
+        void SetModelIndex(QPersistentModelIndex index);
+        inline float GetValue() const {return value;}
+        void setPos ( const QPointF & pos );
+        void setPos ( qreal x, qreal y );
 
     protected:
         void ValueChanged(float newVal);
@@ -40,11 +43,13 @@ namespace View {
         void mousePressEvent ( QGraphicsSceneMouseEvent * event );
         void mouseReleaseEvent ( QGraphicsSceneMouseEvent * event );
         QGraphicsPolygonItem *cursor;
+        bool isMaxi;
         bool upsideDown;
         bool drag;
         float value;
         QAbstractItemModel *model;
         QPersistentModelIndex modelIndex;
+        QPointF offset;
 
     signals:
 

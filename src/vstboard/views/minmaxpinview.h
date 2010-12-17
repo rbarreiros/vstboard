@@ -27,16 +27,21 @@
 namespace View {
     class MinMaxPinView : public ConnectablePinView
     {
+
     public:
         MinMaxPinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, Connectables::Pin *pin);
         void SetLimitModelIndex(ObjType::Enum type, QPersistentModelIndex index);
         void UpdateLimitModelIndex(const QModelIndex &index);
+        void UpdateModelIndex(const QModelIndex &index);
 
     protected:
+        void UpdateScaleView();
         CursorView *inMin;
         CursorView *inMax;
         CursorView *outMin;
         CursorView *outMax;
+        QGraphicsPolygonItem *scaledView;
+
     };
 }
 #endif // MINMAXPINVIEW_H

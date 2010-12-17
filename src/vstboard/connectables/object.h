@@ -124,6 +124,10 @@ namespace Connectables {
         QString errorMessage;
         inline MainHost *getHost() {return myHost;}
 
+        virtual Pin* CreatePin(const ConnectionInfo &info, quint16 nb);
+
+        MainHost *myHost;
+
     protected:
         QMap<QString, PinsList*>pinLists;
         PinsList *listAudioPinIn;
@@ -164,7 +168,7 @@ namespace Connectables {
 //        bool hasEditor;
 //        bool canLearn;
 
-        MainHost *myHost;
+
 
     signals:
 //        void LearningModeChanged(int learn);

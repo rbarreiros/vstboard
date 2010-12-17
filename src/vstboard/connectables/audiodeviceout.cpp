@@ -31,8 +31,7 @@ AudioDeviceOut::AudioDeviceOut(MainHost *myHost,int index, const ObjectInfo &inf
     Object(myHost,index, info),
     parentDevice(0)
 {
-    listParameterPinOut->AddPin(0,"cpu%");
-//    listParameterPinOut->listPins.insert(0, new ParameterPinOut(this,0,0,true,"cpu%"));
+    listParameterPinOut->AddPin(0);
 }
 
 AudioDeviceOut::~AudioDeviceOut()
@@ -131,4 +130,25 @@ bool AudioDeviceOut::Open()
 
     Object::Open();
     return true;
+}
+
+Pin* AudioDeviceOut::CreatePin(const ConnectionInfo &info, quint16 nb)
+{
+    Pin *newPin = Object::CreatePin(info,nb);
+    if(newPin)
+        return newPin;
+
+    switch(info.direction) {
+        case PinDirection::Output :
+            if(nb==0)
+                return new ParameterPinOut(this,nb,0,true,"cpu%",false);
+            break;
+
+        default :
+            debug("AudioDeviceIn::CreatePin PinDirection")
+            return 0;
+            break;
+    }
+
+    return 0;
 }

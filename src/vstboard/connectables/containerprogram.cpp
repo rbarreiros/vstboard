@@ -304,8 +304,8 @@ QDataStream & ContainerProgram::fromStream (QDataStream& in)
         in >> infoIn;
 
         //check if this pin exists
-        myHost->objFactory->GetPin(infoOut);
-        myHost->objFactory->GetPin(infoIn);
+        //myHost->objFactory->GetPin(infoOut);
+        //myHost->objFactory->GetPin(infoIn);
 
         Cable *cab = new Cable(myHost,infoOut,infoIn);
         listCables << cab;

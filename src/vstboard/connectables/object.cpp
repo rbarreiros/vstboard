@@ -93,13 +93,13 @@ Object::Object(MainHost *host, int index, const ObjectInfo &info) :
         //editor pin
         listEditorVisible << "hide";
         listEditorVisible << "show";
-        listParameterPinIn->listPins.insert(FixedPinNumber::editorVisible, new ParameterPinIn(this,FixedPinNumber::editorVisible,"hide",&listEditorVisible,false,tr("Editor")));
+        listParameterPinIn->AddPin(FixedPinNumber::editorVisible);
 
         //learning pin
         listIsLearning << "off";
         listIsLearning << "learn";
         listIsLearning << "unlearn";
-        listParameterPinIn->listPins.insert(FixedPinNumber::learningMode, new ParameterPinIn(this,FixedPinNumber::learningMode,"off",&listIsLearning,false,tr("Learn")));
+        listParameterPinIn->AddPin(FixedPinNumber::learningMode);
     }
 }
 
@@ -419,6 +419,64 @@ void Object::GetContainerAttribs(ObjectContainerAttribs &attr)
     attr.editorVScroll = modelIndex.data(UserRoles::editorVScroll).toInt();
 //    attr.paramLearning = modelIndex.data(UserRoles::paramLearning).toBool();
 
+}
+
+Pin* Object::CreatePin(const ConnectionInfo &info, quint16 nb)
+{
+    Pin *newPin=0;
+
+    switch(info.direction) {
+        case PinDirection::Input :
+            switch(info.type) {
+                case PinType::Audio :
+                    newPin = new AudioPinIn(this,nb);
+                    static_cast<AudioPinIn*>(newPin)->buffer->SetSize(myHost->GetBufferSize());
+                    break;
+                case PinType::Midi :
+                    newPin = new MidiPinIn(this,nb);
+                    break;
+                case PinType::Bridge :
+                    newPin = new BridgePinIn(this,nb,info.bridge);
+                    break;
+                case PinType::Parameter :
+                    switch(nb) {
+                        case FixedPinNumber::editorVisible :
+                            newPin = new ParameterPinIn(this,FixedPinNumber::editorVisible,"hide",&listEditorVisible,false,tr("Editor"));
+                            break;
+                        case FixedPinNumber::learningMode :
+                            newPin = new ParameterPinIn(this,FixedPinNumber::learningMode,"off",&listIsLearning,false,tr("Learn"));
+                            break;
+                    }
+                    break;
+                default :
+                    return 0;
+            }
+            break;
+
+        case PinDirection::Output :
+            switch(info.type) {
+                case PinType::Audio :
+                    newPin = new AudioPinOut(this,nb);
+                    static_cast<AudioPinOut*>(newPin)->buffer->SetSize(myHost->GetBufferSize());
+                    break;
+                case PinType::Midi :
+                    newPin = new MidiPinOut(this,nb);
+                    break;
+                case PinType::Bridge :
+                    newPin = new BridgePinOut(this,nb,info.bridge);
+                    break;
+                default :
+                    return 0;
+            }
+            break;
+
+        default :
+            return 0;
+    }
+
+    if(newPin)
+        newPin->SetContainerId(containerId);
+    return newPin;
 }
 
 QDataStream & Object::toStream(QDataStream & out) const

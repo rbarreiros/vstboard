@@ -67,6 +67,7 @@ namespace Connectables {
 
         void SetContainerAttribs(const ObjectContainerAttribs &attr);
         void GetContainerAttribs(ObjectContainerAttribs &attr);
+        Pin* CreatePin(const ConnectionInfo &info, quint16 nb);
 
     protected:
         float sampleRate;

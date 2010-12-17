@@ -102,6 +102,10 @@ void ParameterPin::GetValues(ObjectParameter &param)
     param.index=stepIndex;
     param.value=value;
     param.visible=visible;
+    param.limitInMin=limitInMin;
+    param.limitInMax=limitInMax;
+    param.limitOutMin=limitOutMin;
+    param.limitOutMax=limitOutMax;
 }
 
 //from float
@@ -163,6 +167,11 @@ void ParameterPin::Load(const ObjectParameter &param)
 {
     loading = true;
 
+    limitInMin=param.limitInMin;
+    limitInMax=param.limitInMax;
+    limitOutMin=param.limitOutMin;
+    limitOutMax=param.limitOutMax;
+
     if(listValues)
         ChangeValue(param.index);
     else
@@ -187,7 +196,8 @@ void ParameterPin::OnValueChanged(float val)
     if(val<limitInMin)
         val=limitInMin;
     val-=limitInMin;
-    val/=(limitInMax-limitInMin);
+    if(limitInMax!=limitInMin)
+        val/=(limitInMax-limitInMin);
     val*=(limitOutMax-limitOutMin);
     val+=limitOutMin;
     outValue=val;
@@ -235,9 +245,19 @@ void ParameterPin::SetLimit(ObjType::Enum type, float newVal)
     switch(type) {
         case ObjType::limitInMin:
             limitInMin = newVal;
+            if(limitInMax<=limitInMin) {
+                limitInMax=limitInMin+0.005;
+                if(indexLimitInMax.isValid())
+                    parent->myHost->GetModel()->setData( indexLimitInMax, limitInMax, UserRoles::value);
+            }
             break;
         case ObjType::limitInMax:
             limitInMax = newVal;
+            if(limitInMax<=limitInMin) {
+                limitInMin=limitInMax-0.005;
+                if(indexLimitInMin.isValid())
+                    parent->myHost->GetModel()->setData( indexLimitInMin, limitInMin, UserRoles::value);
+            }
             break;
         case ObjType::limitOutMin:
             limitOutMin = newVal;
@@ -247,7 +267,12 @@ void ParameterPin::SetLimit(ObjType::Enum type, float newVal)
             break;
         default:
             debug("ParameterPin::SetLimit unknown type")
-            break;
+            return;
+    }
+
+    if(!dirty) {
+        dirty=true;
+        parent->OnProgramDirty();
     }
 }
 
@@ -272,23 +297,27 @@ void ParameterPin::SetVisible(bool vis)
         item->setData(QVariant::fromValue(info),UserRoles::objInfo);
         item->setData(limitInMin,UserRoles::value);
         pinItem->appendRow(item);
+        indexLimitInMin=item->index();
 
         item = new QStandardItem("limitInMax");
         info.objType=ObjType::limitInMax;
         item->setData(QVariant::fromValue(info),UserRoles::objInfo);
         item->setData(limitInMax,UserRoles::value);
         pinItem->appendRow(item);
+        indexLimitInMax=item->index();
 
         item = new QStandardItem("limitOutMin");
         info.objType=ObjType::limitOutMin;
         item->setData(QVariant::fromValue(info),UserRoles::objInfo);
         item->setData(limitOutMin,UserRoles::value);
         pinItem->appendRow(item);
+        indexLimitOutMin=item->index();
 
         item = new QStandardItem("limitOutMax");
         info.objType=ObjType::limitOutMax;
         item->setData(QVariant::fromValue(info),UserRoles::objInfo);
         item->setData(limitOutMax,UserRoles::value);
         pinItem->appendRow(item);
+        indexLimitOutMax=item->index();
     }
 }
