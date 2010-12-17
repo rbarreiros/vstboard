@@ -125,8 +125,10 @@ MainHost::~MainHost()
     solver->Resolve(workingListOfCables);
     renderer.Clear();
 
+#ifndef VST_PLUGIN
     delete audioDevices;
     delete midiDevices;
+#endif
 
     delete objFactory;
 }

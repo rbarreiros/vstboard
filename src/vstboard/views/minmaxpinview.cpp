@@ -25,12 +25,8 @@ using namespace View;
 MinMaxPinView::MinMaxPinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, Connectables::Pin *pin) :
         ConnectablePinView(angle,model,parent,pin)
 {
-    QLinearGradient grd(0, 0, geometry().right(), 0);
-    grd.setColorAt(0, QColor::fromRgbF(1, 0.5, 0.5, 0.2));
-    grd.setColorAt(1, QColor::fromRgbF(1, 0, 1, 0.2));
-
     scaledView = new QGraphicsPolygonItem(this);
-    scaledView->setBrush(QBrush(grd));
+    scaledView->setBrush(QBrush(QColor(255,127,127,100)));
 
     inMin=new CursorView(model,false,false,this);
     inMin->setPos(rect().topLeft());

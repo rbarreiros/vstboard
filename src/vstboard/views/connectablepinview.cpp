@@ -39,12 +39,13 @@ ConnectablePinView::ConnectablePinView(float angle, QAbstractItemModel *model, Q
 
     rectBgnd = new QGraphicsRectItem(geometry(), this);
 
+    rectVu = new QGraphicsRectItem(this);
+    rectBgnd->setBrush(Qt::NoBrush);
+
 //    textItem = new OutlinedText("", this, Qt::black, QColor(255,255,255,150));
     textItem = new QGraphicsSimpleTextItem(this);
     textItem->moveBy(2,1);
-
-    rectVu = new QGraphicsRectItem(this);
-    rectBgnd->setBrush(Qt::NoBrush);
+    textItem->setZValue(1);
 
     QLinearGradient normalgradient(0, 0, geometry().right(), 0);
     normalgradient.setColorAt(0, QColor::fromRgbF(0, 0, 0, 0));

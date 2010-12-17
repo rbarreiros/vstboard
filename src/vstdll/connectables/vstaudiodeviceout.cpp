@@ -46,15 +46,15 @@ bool VstAudioDeviceOut::Close()
 
 void VstAudioDeviceOut::Render()
 {
-    foreach(AudioPinIn* pin,listAudioPinIn) {
-        pin->buffer->ConsumeStack();
+    foreach(Pin *pin, listAudioPinIn->listPins) {
+        static_cast<AudioPinIn*>(pin)->buffer->ConsumeStack();
     }
 }
 
 void VstAudioDeviceOut::SetBufferSize(unsigned long size)
 {
-    foreach(AudioPinIn *pin, listAudioPinIn) {
-        pin->buffer->SetSize(size);
+    foreach(Pin *pin, listAudioPinIn->listPins) {
+        static_cast<AudioPinIn*>(pin)->buffer->SetSize(size);
     }
 }
 
@@ -63,21 +63,15 @@ bool VstAudioDeviceOut::Open()
     if(!myHost->myVstPlugin->addAudioOut(this))
         return false;
 
-    AudioPinIn *pin=0;
-    for(int i=0; i<2; i++) {
-        pin = new AudioPinIn(this,i,true);
-        listAudioPinIn << pin;
-        pin->buffer->SetSize(512);
-        pin->setObjectName(QString("Output %1").arg(i));
-    }
+    listAudioPinIn->ChangeNumberOfPins(2);
     Object::Open();
     return true;
 }
 
 void VstAudioDeviceOut::SetBuffers(float **buf, int &cpt)
 {
-    foreach(AudioPinIn* pin,listAudioPinIn) {
-        pin->buffer->SetPointer(buf[cpt],true);
+    foreach(Pin *pin, listAudioPinIn->listPins) {
+        static_cast<AudioPinIn*>(pin)->buffer->SetPointer(buf[cpt],true);
         cpt++;
     }
 }

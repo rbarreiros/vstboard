@@ -43,8 +43,9 @@ void MidiDevice::Render()
         Lock();
 
         while (Pm_Dequeue(queue, &buffer) == 1) {
-            foreach(MidiPinOut *pin,listMidiPinOut) {
-                pin->SendMsg(PinMessage::MidiMsg,(void*)&buffer.message);
+
+            foreach(Pin *pin,listMidiPinOut->listPins) {
+                static_cast<MidiPinOut*>(pin)->SendMsg(PinMessage::MidiMsg,(void*)&buffer.message);
             }
         }
         Unlock();
@@ -86,15 +87,8 @@ bool MidiDevice::Open()
                 return false;
     }
 
-    for(int i=0;i<objInfo.inputs;i++) {
-        MidiPinOut *pin = new MidiPinOut(this);
-        listMidiPinOut << pin;
-    }
-
-    for(int i=0;i<objInfo.outputs;i++) {
-        MidiPinIn *pin = new MidiPinIn(this);
-        listMidiPinIn << pin;
-    }
+    listMidiPinOut->ChangeNumberOfPins(objInfo.inputs);
+    listMidiPinIn->ChangeNumberOfPins(objInfo.outputs);
 
     Object::Open();
     return true;

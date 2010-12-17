@@ -168,7 +168,9 @@ views/configdialog.cpp \
     ../vstboard/connectables/miditoautomation.cpp \
     ../vstboard/connectables/midisender.cpp \
     connectables/vstautomation.cpp \
-    ../vstboard/connectables/pinslist.cpp
+    ../vstboard/connectables/pinslist.cpp \
+    ../vstboard/views/minmaxpinview.cpp \
+    ../vstboard/views/cursorview.cpp
 
 
 HEADERS  += \
@@ -243,7 +245,9 @@ connectables/mididevice.h \
     ../vstboard/_version.h \
     ../vstboard/connectables/midipinin.h \
     connectables/vstautomation.h \
-    ../vstboard/connectables/pinslist.h
+    ../vstboard/connectables/pinslist.h \
+    ../vstboard/views/minmaxpinview.h \
+    ../vstboard/views/cursorview.h
 
 FORMS += \
 ../vstboard/views/configdialog.ui \
