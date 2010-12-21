@@ -69,6 +69,7 @@ bool VstAudioDeviceIn::Open()
         return false;
 
     listAudioPinOut->ChangeNumberOfPins(2);
+    SetBufferSize(myHost->GetBufferSize());
     Object::Open();
     return true;
 }
@@ -82,4 +83,10 @@ void VstAudioDeviceIn::SetBuffers(float **buf, int &cpt)
     }
 }
 
-
+Pin* VstAudioDeviceIn::CreatePin(const ConnectionInfo &info, quint16 nb)
+{
+    AudioPinOut *newPin = new AudioPinOut(this,nb,true);
+    if(newPin)
+        newPin->SetContainerId(containerId);
+    return newPin;
+}

@@ -64,6 +64,7 @@ bool VstAudioDeviceOut::Open()
         return false;
 
     listAudioPinIn->ChangeNumberOfPins(2);
+    SetBufferSize(myHost->GetBufferSize());
     Object::Open();
     return true;
 }
