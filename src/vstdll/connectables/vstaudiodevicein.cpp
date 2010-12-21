@@ -75,9 +75,11 @@ bool VstAudioDeviceIn::Open()
 
 void VstAudioDeviceIn::SetBuffers(float **buf, int &cpt)
 {
-    foreach(Pin *pin, listAudioPinIn->listPins) {
+    foreach(Pin *pin, listAudioPinOut->listPins) {
         static_cast<AudioPinIn*>(pin)->buffer->ResetStackCounter();
         static_cast<AudioPinIn*>(pin)->buffer->SetPointer(buf[cpt]);
         cpt++;
     }
 }
+
+

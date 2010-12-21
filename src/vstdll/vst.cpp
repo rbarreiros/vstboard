@@ -53,14 +53,16 @@ Vst::Vst (audioMasterCallback audioMaster)
     getHostProductString(str);
     VstInt32 hostVer = getHostVendorVersion();
 
-    long hostSendVstEvents = canHostDo("sendVstEvents");
+   /* long hostSendVstEvents = canHostDo("sendVstEvents");
     long hostSendVstMidiEvent = canHostDo("sendVstMidiEvent");
     long hostSendVstTimeInfo = canHostDo("sendVstTimeInfo");
     long hostReceiveVstEvents = canHostDo("receiveVstEvents");
     long hostReceiveVstMidiEvents = canHostDo("receiveVstMidiEvents");
     long hostReceiveVstTimeInfo = canHostDo("receiveVstTimeInfo");
     long hostReportConnectionChanges = canHostDo("reportConnectionChanges");
+    */
     hostAcceptIOChanges = canHostDo("acceptIOChanges");
+    /*
     long hostSizeWindow = canHostDo("sizeWindow");
     long hostAsyncProcessing = canHostDo("asyncProcessing");
     long hostOffline = canHostDo("offline");
@@ -69,7 +71,7 @@ Vst::Vst (audioMasterCallback audioMaster)
     long hostOpenFileSelector = canHostDo("openFileSelector");
     long hostEditFile = canHostDo("editFile");
     long hostCloseFileSelector = canHostDo("closeFileSelector");
-
+*/
 
     //cEffect.flags |= effFlagsIsSynth;
 
@@ -409,6 +411,7 @@ void Vst::setBlockSize (VstInt32 blockSize)
     bufferSize=blockSize;
     myHost->SetBufferSize((unsigned long)blockSize);
 }
+
 void Vst::suspend()
 {
 

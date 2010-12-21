@@ -5,7 +5,9 @@
 Programs::Programs(MainHost *parent) :
     QObject(parent),
     model(0),
+    currentGrp(0),
     currentPrg(0),
+    nextGroupId(0),
     nextProgId(0),
     myHost(parent)
 {
@@ -20,6 +22,8 @@ void Programs::BuildModel()
     for(unsigned int grp=0; grp<1; grp++) {
         QStandardItem *grpItem = new QStandardItem(QString("Grp%1").arg(grp));
         grpItem->setData(NodeType::programGroup,UserRoles::nodeType);
+        grpItem->setData(nextGroupId,UserRoles::value);
+        nextGroupId++;
         grpItem->setDragEnabled(true);
         grpItem->setDropEnabled(false);
         grpItem->setEditable(true);
@@ -33,7 +37,7 @@ void Programs::BuildModel()
             QStandardItem *prgItem = new QStandardItem(QString("Prg%1").arg(prg));
             prgItem->setData(NodeType::program,UserRoles::nodeType);
             prgItem->setData(nextProgId,UserRoles::value);
-            prgItem->setData(nextProgId,Qt::ToolTipRole);
+//            prgItem->setData(nextProgId,Qt::ToolTipRole);
             nextProgId++;
             prgItem->setDragEnabled(true);
             prgItem->setDropEnabled(false);
@@ -44,19 +48,23 @@ void Programs::BuildModel()
         grpItem->appendRow(prgList);
         model->invisibleRootItem()->appendRow(grpItem);
     }
+    currentGrp = model->item(0);
     currentPrg = model->item(0)->child(0)->child(0);
+
+    emit GroupChanged( currentGrp->index() );
     emit ProgChanged( currentPrg->index() );
 }
 
 QStandardItem *Programs::CopyProgram(QStandardItem *progOri)
 {
     int oriId = progOri->data(UserRoles::value).toInt();
-    myHost->programContainer->CopyProgram( oriId, nextProgId );
+    emit ProgCopy(oriId,nextProgId);
+//    myHost->programContainer->CopyProgram( oriId, nextProgId );
 
     QStandardItem *prgItem = new QStandardItem(progOri->text());
     prgItem->setData(NodeType::program,UserRoles::nodeType);
     prgItem->setData(nextProgId,UserRoles::value);
-    prgItem->setData(nextProgId,Qt::ToolTipRole);
+//    prgItem->setData(nextProgId,Qt::ToolTipRole);
     nextProgId++;
     prgItem->setDragEnabled(true);
     prgItem->setDropEnabled(false);
@@ -67,8 +75,13 @@ QStandardItem *Programs::CopyProgram(QStandardItem *progOri)
 
 QStandardItem *Programs::CopyGroup(QStandardItem *grpOri)
 {
+    int oriId = grpOri->data(UserRoles::value).toInt();
+    emit GroupCopy(oriId,nextGroupId);
+
     QStandardItem *grpItem = new QStandardItem(grpOri->text());
     grpItem->setData(NodeType::programGroup,UserRoles::nodeType);
+    grpItem->setData(nextGroupId,UserRoles::value);
+    nextGroupId++;
     grpItem->setDragEnabled(true);
     grpItem->setDropEnabled(false);
     grpItem->setEditable(true);
@@ -109,8 +122,16 @@ void Programs::ChangeProg(const QModelIndex &prgIndex)
     QStandardItem *newPrg = model->itemFromIndex( prgIndex );
     if(!newPrg || newPrg==currentPrg)
         return;
+
     currentPrg = newPrg;
-    emit ProgChanged( prgIndex );
+
+    QStandardItem *newgrp = newPrg->parent()->parent();
+    if(newgrp!=currentGrp) {
+        currentGrp=newgrp;
+        emit GroupChanged( currentGrp->index() );
+    }
+
+    emit ProgChanged( currentPrg->index() );
 }
 
 void Programs::ChangeProg(int midiProgNum) {
@@ -118,7 +139,14 @@ void Programs::ChangeProg(int midiProgNum) {
     if(!newPrg || newPrg==currentPrg)
         return;
     currentPrg = newPrg;
-    emit ProgChanged( newPrg->index() );
+
+    QStandardItem *newgrp = newPrg->parent()->parent();
+    if(newgrp!=currentGrp) {
+        currentGrp=newgrp;
+        emit GroupChanged( currentGrp->index() );
+    }
+
+    emit ProgChanged( currentPrg->index() );
 }
 
 void Programs::ChangeGroup(int grpNum)
@@ -127,17 +155,24 @@ void Programs::ChangeGroup(int grpNum)
     if(!newGrp)
         return;
 
+    if(newGrp==currentGrp)
+        return;
+
+    currentGrp=newGrp;
+
+
     int prg = currentPrg->row();
-    QStandardItem *newPrg = newGrp->child(0,0)->child( prg );
+    QStandardItem *newPrg = currentGrp->child(0,0)->child( prg );
     if(!newPrg) {
-        newPrg = newGrp->child(0)->child(0);
+        newPrg = currentGrp->child(0)->child(0);
         if(!newPrg)
             return;
     }
 
     currentPrg = newPrg;
 
-    emit ProgChanged( newPrg->index() );
+    emit GroupChanged( currentGrp->index() );
+    emit ProgChanged( currentPrg->index() );
 }
 
 
@@ -149,6 +184,7 @@ QDataStream & operator<< (QDataStream& out, const Programs& value)
     for(int i=0; i<root->rowCount(); i++) {
         QStandardItem *grpItem = root->child(i);
         out << grpItem->text();
+        out << (quint32)grpItem->data(UserRoles::value).toInt();
 
         QStandardItem *prgList = grpItem->child(0);
         out << (quint16)prgList->rowCount();
@@ -182,6 +218,9 @@ QDataStream & operator>> (QDataStream& in, Programs& value)
         QString str;
         in >> str;
         grpItem->setText(str);
+        quint32 prgId;
+        in >> prgId;
+        grpItem->setData(prgId,UserRoles::value);
 
         QStandardItem *prgList = new QStandardItem();
         prgList->setDragEnabled(false);
@@ -202,7 +241,7 @@ QDataStream & operator>> (QDataStream& in, Programs& value)
             quint32 prgId;
             in >> prgId;
             prgItem->setData(prgId,UserRoles::value);
-            prgItem->setData(prgId,Qt::ToolTipRole);
+//            prgItem->setData(prgId,Qt::ToolTipRole);
 
             if(prgId>=value.nextProgId)
                 value.nextProgId=prgId+1;

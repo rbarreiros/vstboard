@@ -358,7 +358,7 @@ bool VstPlugin::Open()
     listAudioPinIn->ChangeNumberOfPins(pEffect->numInputs);
     listAudioPinOut->ChangeNumberOfPins(pEffect->numOutputs);
 
-    int nbParam = pEffect->numParams;
+    //int nbParam = pEffect->numParams;
     bool nameCanChange=false;
     bool defVisible = true;
 

@@ -29,7 +29,8 @@ Container::Container(MainHost *myHost,int index, const ObjectInfo &info) :
     bridgeIn(0),
     bridgeOut(0),
     currentProgram(0),
-    cablesNode(QModelIndex())
+    cablesNode(QModelIndex()),
+    progToSet(-1)
 {
     LoadProgram(TEMP_PROGRAM);
 }
@@ -87,7 +88,7 @@ void Container::ConnectBridges(QSharedPointer<Object> bridgeA, QSharedPointer<Ob
     if(bridgeA.isNull() || bridgeB.isNull())
         return;
 
-    bridgeA->GetListBridgePinOut()->ConnectAllTo(bridgeB->GetListBridgePinIn(), hidden);
+    bridgeA->GetListBridgePinOut()->ConnectAllTo(this,bridgeB->GetListBridgePinIn(), hidden);
 }
 
 bool Container::Close()
@@ -153,6 +154,23 @@ void Container::Hide()
 
 }
 
+void Container::SetProgram(const QModelIndex &prg)
+{
+    progToSet=prg.data(UserRoles::value).toInt();
+}
+
+void Container::Render()
+{
+    if(progToSet!=-1) {
+        if(progToSet != currentProgId) {
+            SaveProgram();
+            UnloadProgram();
+            LoadProgram(progToSet);
+        }
+        progToSet=-1;
+    }
+}
+
 void Container::LoadProgram(int prog)
 {
     //if prog is already loaded, update model
@@ -215,6 +233,11 @@ void Container::CopyProgram(int ori, int dest)
     if(listContainerPrograms.contains(dest)) {
         debug("Container::CopyProgram dest already exists")
         return;
+    }
+
+    //we need to save first
+    if(ori==currentProgId) {
+        SaveProgram();
     }
 
     ContainerProgram* progOri = listContainerPrograms.value(ori);

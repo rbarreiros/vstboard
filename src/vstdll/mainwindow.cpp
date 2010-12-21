@@ -63,7 +63,7 @@ MainWindow::MainWindow(MainHost * myHost, QWidget *parent) :
 
 #endif
 
-    mySceneView = new View::SceneView(myHost, myHost->objFactory, ui->hostView, ui->projectView, ui->programView, ui->insertView, this);
+    mySceneView = new View::SceneView(myHost, myHost->objFactory, ui->hostView, ui->projectView, ui->programView, ui->groupView, this);
     mySceneView->setModel(myHost->GetModel());
 
     ui->solverView->setModel(&myHost->solver->model);
@@ -345,7 +345,7 @@ void MainWindow::resetSettings()
     ui->actionHost_panel->setChecked(true);
     ui->actionProject_panel->setChecked(true);
     ui->actionProgram_panel->setChecked(true);
-    ui->actionInsert_panel->setChecked(true);
+    ui->actionGroup_panel->setChecked(true);
 
     ui->actionTool_bar->setChecked(true);
     ui->actionStatus_bar->setChecked(false);

@@ -21,14 +21,18 @@ public:
 
 private:
     ProgramsModel *model;
-//    QStandardItem *currentGrp;
+    QStandardItem *currentGrp;
     QStandardItem *currentPrg;
 //    unsigned int currentProgId;
+    unsigned int nextGroupId;
     unsigned int nextProgId;
     MainHost *myHost;
 
 signals:
     void ProgChanged(const QModelIndex &prgIndex);
+    void GroupChanged(const QModelIndex &grpIndex);
+    void ProgCopy(int ori, int dest);
+    void GroupCopy(int ori, int dest);
 
 public slots:
     void ChangeProg(int midiPrgId);

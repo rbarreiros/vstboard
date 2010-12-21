@@ -296,7 +296,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                             QTimer::singleShot(0, viewProgram, SLOT(ForceResize()));
                         }
 
-                        if(objId == FixedObjId::insertContainer) {
+                        if(objId == FixedObjId::groupContainer) {
                             MainContainerView *cntView = new MainContainerView(myHost, model());
                             objView=cntView;
                             cntView->setParentItem(rootObjInsert);

@@ -24,7 +24,7 @@ using namespace Connectables;
 
 QDataStream & ObjectParameter::toStream(QDataStream& out) const
 {
-    const quint16 file_version = 2;
+    const quint16 file_version = 1;
     out << file_version;
 
     out << value;
@@ -47,18 +47,10 @@ QDataStream & ObjectParameter::fromStream(QDataStream& in)
     in >> (qint16&)index;
     in >> visible;
 
-    if(file_version==1) {
-        limitInMin=.0f;
-        limitInMax=1.0f;
-        limitOutMin=.0f;
-        limitOutMax=1.0f;
-    } else {
-        in >> limitInMin;
-        in >> limitInMax;
-        in >> limitOutMin;
-        in >> limitOutMax;
-    }
-
+    in >> limitInMin;
+    in >> limitInMax;
+    in >> limitOutMin;
+    in >> limitOutMax;
     return in;
 }
 

@@ -31,6 +31,7 @@ namespace Connectables {
 
     class Pin;
     class Object;
+    class Container;
 
     class PinsList : public QObject
     {
@@ -45,7 +46,7 @@ namespace Connectables {
         void SetInfo(Object *parent,const ConnectionInfo &connInfo, const ObjectInfo &objInfo);
         Pin * GetPin(int pinNumber, bool autoCreate=false);
         void UpdateModelNode(QStandardItem *parentNode=0);
-        void ConnectAllTo(PinsList *other, bool hidden=false);
+        void ConnectAllTo(Container* container,PinsList *other, bool hidden=false);
         void AsyncAddPin(int nb);
 
         AudioBuffer *GetBuffer(int pinNumber);

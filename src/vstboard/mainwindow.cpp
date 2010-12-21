@@ -90,7 +90,7 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
 //    connect(timerCpuLoad, SIGNAL(timeout()),
 //            this, SLOT(UpdateCpuLoad()));
 
-    mySceneView = new View::SceneView(myHost, myHost->objFactory, ui->hostView, ui->projectView, ui->programView, ui->insertView, this);
+    mySceneView = new View::SceneView(myHost, myHost->objFactory, ui->hostView, ui->projectView, ui->programView, ui->groupView, this);
     mySceneView->setModel(myHost->GetModel());
 
     ui->solverView->setModel(&myHost->solver->model);
@@ -117,6 +117,8 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
         if(!ProjectFile::LoadFromFile(myHost,currentProjectFile))
             currentProjectFile = "";
     }
+
+    updateRecentFileActions();
 }
 
 MainWindow::~MainWindow()
@@ -447,7 +449,7 @@ void MainWindow::resetSettings()
     ui->actionHost_panel->setChecked(true);
     ui->actionProject_panel->setChecked(true);
     ui->actionProgram_panel->setChecked(true);
-    ui->actionInsert_panel->setChecked(true);
+    ui->actionGroup_panel->setChecked(true);
 
     ui->actionTool_bar->setChecked(true);
     ui->actionStatus_bar->setChecked(false);

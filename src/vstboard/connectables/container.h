@@ -53,8 +53,6 @@ namespace Connectables {
 
         void SetContainerId(quint16 id);
         void SetParentModeIndex(const QModelIndex &parentIndex);
-        void CopyProgram(int ori, int dest);
-        void RemoveProgram(int prg);
 
     protected:
         QList< QSharedPointer< Object > >listStaticObjects;
@@ -72,6 +70,8 @@ namespace Connectables {
         //store the objects while loading preventing them from being deleted since the objects are loaded before the programs using them
         QList< QSharedPointer< Object > >listLoadingObjects;
 
+        int progToSet;
+
     signals:
 
     public slots:
@@ -84,8 +84,12 @@ namespace Connectables {
         void UnloadProgram();
         void LoadProgram(int prog);
 
-
         void SetSleep(bool sleeping);
+
+        void SetProgram(const QModelIndex &prg);
+        void CopyProgram(int ori, int dest);
+        void RemoveProgram(int prg);
+        void Render();
 
         friend class ContainerProgram;
     };

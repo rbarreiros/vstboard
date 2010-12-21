@@ -78,7 +78,7 @@ public:
     QSharedPointer<Connectables::MainContainer> hostContainer;
     QSharedPointer<Connectables::MainContainer> projectContainer;
     QSharedPointer<Connectables::MainContainer> programContainer;
-    QSharedPointer<Connectables::MainContainer> insertContainer;
+    QSharedPointer<Connectables::MainContainer> groupContainer;
     QSharedPointer<Connectables::ParkingContainer> parkingContainer;
 
     PathSolver *solver;
@@ -111,7 +111,7 @@ private:
     void SetupHostContainer();
     void SetupProjectContainer();
     void SetupProgramContainer();
-    void SetupInsertContainer();
+    void SetupGroupContainer();
     void SetupParking();
 
     bool solverNeedAnUpdate;
@@ -125,16 +125,13 @@ private:
     QMutex *mutexListCables;
     Renderer renderer;
     QMutex mutexRender;
-    QMutex mutexProgChange;
+    QMutex solverMutex;
 
     float sampleRate;
     unsigned long bufferSize;
     QTime timeFromStart;
 
     QList<Connectables::Object*>listObjToRemove;
-
-
-    int progToChange;
 
     HostModel *model;
     HostModel *modelParking;
@@ -146,13 +143,12 @@ signals:
     void ObjectRemoved(int contrainerId, int obj);
     void SolverToUpdate();
     void OnAudioDeviceToggleInUse(const ObjectInfo &objInfo, bool inUse);
-
+    void Rendered();
 
 public slots:
     void OnCableAdded(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
     void OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
 
-    void SetProgram(const QModelIndex &prgIndex);
     void UpdateSolver(bool forceUpdate=false);
 
     void SetTempo(int tempo=120, int sign1=4, int sign2=4);

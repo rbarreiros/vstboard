@@ -55,9 +55,7 @@ MainHost::MainHost(Vst *myVstPlugin, QObject *parent) :
     myVstPlugin(myVstPlugin),
     solverNeedAnUpdate(false),
     solverUpdateEnabled(true),
-    mutexListCables(new QMutex(QMutex::Recursive)),
-    progToChange(-1)
-
+    mutexListCables(new QMutex(QMutex::Recursive))
 {
     if(!vst::CVSTHost::Get())
         vstHost = new vst::CVSTHost();
@@ -74,8 +72,6 @@ MainHost::MainHost(Vst *myVstPlugin, QObject *parent) :
     bufferSize = 1;
 
     programList = new Programs(this);
-    connect(programList, SIGNAL(ProgChanged(QModelIndex)),
-            this, SLOT(SetProgram(QModelIndex)));
 
 #ifndef VST_PLUGIN
     midiDevices = new MidiDevices(this);
@@ -118,7 +114,7 @@ MainHost::~MainHost()
     mainContainer.clear();
     hostContainer.clear();
     projectContainer.clear();
-    insertContainer.clear();
+    groupContainer.clear();
     programContainer.clear();
     parkingContainer.clear();
 
@@ -141,7 +137,7 @@ void MainHost::Open()
     SetupHostContainer();
     SetupProjectContainer();
     SetupProgramContainer();
-    SetupInsertContainer();
+    SetupGroupContainer();
     SetupParking();
 
     EnableSolverUpdate(true);
@@ -190,6 +186,36 @@ void MainHost::SetupHostContainer()
 
     QSharedPointer<Connectables::Object> bridge;
 
+
+    //bridge in
+    ObjectInfo in;
+    in.name="in";
+    in.nodeType = NodeType::bridge;
+    in.objType = ObjType::BridgeIn;
+    in.forcedObjId = FixedObjId::hostContainerIn;
+
+    bridge = objFactory->NewObject(in);
+    hostContainer->AddObject( bridge );
+    bridge->SetBridgePinsInVisible(false);
+    hostContainer->bridgeIn = bridge;
+
+    //bridge out
+    ObjectInfo out;
+    out.name="out";
+    out.nodeType = NodeType::bridge;
+    out.objType = ObjType::BridgeOut;
+    out.forcedObjId = FixedObjId::hostContainerOut;
+
+    bridge = objFactory->NewObject(out);
+    hostContainer->AddObject( bridge );
+    bridge->SetBridgePinsOutVisible(false);
+    hostContainer->bridgeOut = bridge;
+
+    //connect with groupContainer
+    if(!programContainer.isNull()) {
+        mainContainer->ConnectBridges(groupContainer->bridgeSend, hostContainer->bridgeIn);
+        mainContainer->ConnectBridges(hostContainer->bridgeOut, groupContainer->bridgeReturn);
+    }
 
     //send bridge
     ObjectInfo send;
@@ -394,33 +420,40 @@ void MainHost::SetupProgramContainer()
     bridge->SetBridgePinsInVisible(false);
     programContainer->bridgeReturn = bridge;
 
-    //connect with insertContainer
-    if(!insertContainer.isNull()) {
-        mainContainer->ConnectBridges(programContainer->bridgeSend, insertContainer->bridgeIn);
-        mainContainer->ConnectBridges(insertContainer->bridgeOut, programContainer->bridgeReturn);
+    //connect with groupContainer
+    if(!groupContainer.isNull()) {
+        mainContainer->ConnectBridges(programContainer->bridgeSend, groupContainer->bridgeIn);
+        mainContainer->ConnectBridges(groupContainer->bridgeOut, programContainer->bridgeReturn);
     }
+
+    connect(programList, SIGNAL(ProgChanged(QModelIndex)),
+            programContainer.data(), SLOT(SetProgram(QModelIndex)));
+    connect(programList, SIGNAL(ProgCopy(int,int)),
+            programContainer.data(), SLOT(CopyProgram(int,int)));
+    connect(this,SIGNAL(Rendered()),
+            programContainer.data(), SLOT(Render()));
 }
 
-void MainHost::SetupInsertContainer()
+void MainHost::SetupGroupContainer()
 {
-    if(!insertContainer.isNull()) {
-        mainContainer->RemoveObject( insertContainer );
-        insertContainer.clear();
+    if(!groupContainer.isNull()) {
+        mainContainer->RemoveObject( groupContainer );
+        groupContainer.clear();
         UpdateSolver(true);
     }
 
     ObjectInfo info;
     info.nodeType = NodeType::container;
     info.objType = ObjType::MainContainer;
-    info.name = "insertContainer";
-    info.forcedObjId = FixedObjId::insertContainer;
+    info.name = "groupContainer";
+    info.forcedObjId = FixedObjId::groupContainer;
 
-    insertContainer = objFactory->NewObject(info).staticCast<Connectables::MainContainer>();
-    if(insertContainer.isNull())
+    groupContainer = objFactory->NewObject(info).staticCast<Connectables::MainContainer>();
+    if(groupContainer.isNull())
         return;
 
-    insertContainer->LoadProgram(0);
-    mainContainer->AddObject(insertContainer);
+    groupContainer->LoadProgram(0);
+    mainContainer->AddObject(groupContainer);
 
     QSharedPointer<Connectables::Object> bridge;
 
@@ -429,32 +462,67 @@ void MainHost::SetupInsertContainer()
     in.name="in";
     in.nodeType = NodeType::bridge;
     in.objType = ObjType::BridgeIn;
-    in.forcedObjId = FixedObjId::insertContainerIn;
+    in.forcedObjId = FixedObjId::groupContainerIn;
 
     bridge = objFactory->NewObject(in);
-    insertContainer->AddObject( bridge );
+    groupContainer->AddObject( bridge );
     bridge->SetBridgePinsInVisible(false);
-    insertContainer->bridgeIn = bridge;
+    groupContainer->bridgeIn = bridge;
 
     //bridge out
     ObjectInfo out;
     out.name="out";
     out.nodeType = NodeType::bridge;
     out.objType = ObjType::BridgeOut;
-    out.forcedObjId = FixedObjId::insertContainerOut;
+    out.forcedObjId = FixedObjId::groupContainerOut;
 
     bridge = objFactory->NewObject(out);
-    insertContainer->AddObject( bridge );
+    groupContainer->AddObject( bridge );
     bridge->SetBridgePinsOutVisible(false);
-    insertContainer->bridgeOut = bridge;
+    groupContainer->bridgeOut = bridge;
 
     //connect with programContainer
     if(!programContainer.isNull()) {
-        mainContainer->ConnectBridges(programContainer->bridgeSend, insertContainer->bridgeIn);
-        mainContainer->ConnectBridges(insertContainer->bridgeOut, programContainer->bridgeReturn);
+        mainContainer->ConnectBridges(programContainer->bridgeSend, groupContainer->bridgeIn);
+        mainContainer->ConnectBridges(groupContainer->bridgeOut, programContainer->bridgeReturn);
     }
 
-    insertContainer->listenProgramChanges=false;
+    //bridge send
+    ObjectInfo send;
+    send.name="send";
+    send.nodeType = NodeType::bridge;
+    send.objType = ObjType::BridgeSend;
+    send.forcedObjId = FixedObjId::groupContainerSend;
+
+    bridge = objFactory->NewObject(send);
+    groupContainer->AddObject( bridge );
+    bridge->SetBridgePinsOutVisible(false);
+    groupContainer->bridgeSend = bridge;
+
+    //bridge return
+    ObjectInfo retrn;
+    retrn.name="return";
+    retrn.nodeType = NodeType::bridge;
+    retrn.objType = ObjType::BridgeReturn;
+    retrn.forcedObjId = FixedObjId::groupContainerReturn;
+
+    bridge = objFactory->NewObject(retrn);
+    groupContainer->AddObject( bridge );
+    bridge->SetBridgePinsInVisible(false);
+    groupContainer->bridgeReturn = bridge;
+
+    //connect with hostContainer
+    if(!hostContainer.isNull()) {
+        mainContainer->ConnectBridges(groupContainer->bridgeSend, hostContainer->bridgeIn);
+        mainContainer->ConnectBridges(hostContainer->bridgeOut, groupContainer->bridgeReturn);
+    }
+
+    connect(programList, SIGNAL(GroupChanged(QModelIndex)),
+            groupContainer.data(), SLOT(SetProgram(QModelIndex)));
+    connect(programList, SIGNAL(GroupCopy(int,int)),
+            groupContainer.data(), SLOT(CopyProgram(int,int)));
+    connect(this,SIGNAL(Rendered()),
+            groupContainer.data(), SLOT(Render()));
 }
 
 
@@ -477,20 +545,20 @@ void MainHost::SetupParking()
 
 void MainHost::EnableSolverUpdate(bool enable)
 {
-    mutexProgChange.lock();
+    solverMutex.lock();
         solverUpdateEnabled = enable;
-    mutexProgChange.unlock();
+    solverMutex.unlock();
 }
 
 bool MainHost::IsSolverUpdateEnabled()
 {
-    QMutexLocker l(&mutexProgChange);
+    QMutexLocker l(&solverMutex);
     return solverUpdateEnabled;
 }
 
 void MainHost::UpdateSolver(bool forceUpdate)
 {
-    mutexProgChange.lock();
+    solverMutex.lock();
 
         //solver needs an update
         solverNeedAnUpdate = true;
@@ -499,14 +567,14 @@ void MainHost::UpdateSolver(bool forceUpdate)
 
         //return if solver update was disabled
         if(!solverUpdateEnabled && !forceUpdate) {
-            mutexProgChange.unlock();
+            solverMutex.unlock();
             return;
         }
 
         //disable other solver updates
         solverUpdateEnabled = false;
 
-    mutexProgChange.unlock();
+    solverMutex.unlock();
 
     //if forced : wait the end of rendering
     if(forceUpdate)
@@ -519,41 +587,19 @@ void MainHost::UpdateSolver(bool forceUpdate)
         }
     }
 
-    mutexProgChange.lock();
-        //do we need to load a program ?
-        int prg = progToChange;
-        //mark as loaded
-        progToChange=-1;
-    mutexProgChange.unlock();
-
-    //load prog if asked
-    if(prg!=-1) {
-        programContainer->SaveProgram();
-        programContainer->UnloadProgram();
-        programContainer->LoadProgram(prg);
-    }
-
     mutexListCables->lock();
         solver->Resolve(workingListOfCables);
     mutexListCables->unlock();
 
-    mutexProgChange.lock();
+    solverMutex.lock();
         //solver is up to date
         solverNeedAnUpdate = false;
-    mutexProgChange.unlock();
+    solverMutex.unlock();
 
     //allow rendering
     mutexRender.unlock();
 
     EnableSolverUpdate(solverWasEnabled);
-}
-
-void MainHost::SetProgram(const QModelIndex &prgIndex)
-{
-    mutexProgChange.lock();
-    progToChange=prgIndex.data(UserRoles::value).toInt();
-    mutexProgChange.unlock();
-    solverNeedAnUpdate=true;
 }
 
 void MainHost::SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum msgType,void *data)
@@ -607,6 +653,8 @@ void MainHost::Render(unsigned long samples)
 
     if(solverNeedAnUpdate && solverUpdateEnabled)
         emit SolverToUpdate();
+
+    emit Rendered();
 }
 
 void MainHost::OnObjectAdded(QSharedPointer<Connectables::Object> objPtr)

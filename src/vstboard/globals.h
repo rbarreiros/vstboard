@@ -112,6 +112,8 @@ namespace FixedObjId {
     enum Enum {
         mainContainer=1,
         hostContainer,
+        hostContainerIn,
+        hostContainerOut,
         hostContainerSend,
         hostContainerReturn,
         projectContainer,
@@ -124,9 +126,11 @@ namespace FixedObjId {
         programContainerOut,
         programContainerSend,
         programContainerReturn,
-        insertContainer,
-        insertContainerIn,
-        insertContainerOut,
+        groupContainer,
+        groupContainerIn,
+        groupContainerOut,
+        groupContainerSend,
+        groupContainerReturn,
         parkingContainer
     };
 }

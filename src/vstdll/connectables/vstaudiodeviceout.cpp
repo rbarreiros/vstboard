@@ -76,3 +76,10 @@ void VstAudioDeviceOut::SetBuffers(float **buf, int &cpt)
     }
 }
 
+Pin* VstAudioDeviceOut::CreatePin(const ConnectionInfo &info, quint16 nb)
+{
+    AudioPinIn *newPin = new AudioPinIn(this,nb,true);
+    if(newPin)
+        newPin->SetContainerId(containerId);
+    return newPin;
+}

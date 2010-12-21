@@ -156,65 +156,6 @@
          <number>0</number>
         </property>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout">
-          <property name="spacing">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QPushButton" name="pushZoomInHost">
-            <property name="toolTip">
-             <string>Zoom In</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resources/resources.qrc">
-              <normaloff>:/img16x16/viewmag+.png</normaloff>:/img16x16/viewmag+.png</iconset>
-            </property>
-            <property name="autoRepeat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushZoomResetHost">
-            <property name="toolTip">
-             <string>Reset Zoom</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resources/resources.qrc">
-              <normaloff>:/img16x16/viewmagfit.png</normaloff>:/img16x16/viewmagfit.png</iconset>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushZoomOutHost">
-            <property name="toolTip">
-             <string>Zoom Out</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resources/resources.qrc">
-              <normaloff>:/img16x16/viewmag-.png</normaloff>:/img16x16/viewmag-.png</iconset>
-            </property>
-            <property name="autoRepeat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="verticalSpacer">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </item>
-        <item>
          <widget class="MainGraphicsView" name="hostView">
           <property name="whatsThis">
            <string>The Host panel is where you normally put your audio and midi interfaces.</string>
@@ -259,65 +200,6 @@
          <number>0</number>
         </property>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_13">
-          <property name="spacing">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QPushButton" name="pushZoomInProj">
-            <property name="toolTip">
-             <string>Zoom In</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resources/resources.qrc">
-              <normaloff>:/img16x16/viewmag+.png</normaloff>:/img16x16/viewmag+.png</iconset>
-            </property>
-            <property name="autoRepeat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushZoomResetProj">
-            <property name="toolTip">
-             <string>Reset Zoom</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resources/resources.qrc">
-              <normaloff>:/img16x16/viewmagfit.png</normaloff>:/img16x16/viewmagfit.png</iconset>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushZoomOutProj">
-            <property name="toolTip">
-             <string>Zoom Out</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resources/resources.qrc">
-              <normaloff>:/img16x16/viewmag-.png</normaloff>:/img16x16/viewmag-.png</iconset>
-            </property>
-            <property name="autoRepeat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_4">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </item>
-        <item>
          <widget class="MainGraphicsView" name="projectView">
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
@@ -359,65 +241,6 @@
          <number>0</number>
         </property>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_12">
-          <property name="spacing">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QPushButton" name="pushZoomInProg">
-            <property name="toolTip">
-             <string>Zoom In</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resources/resources.qrc">
-              <normaloff>:/img16x16/viewmag+.png</normaloff>:/img16x16/viewmag+.png</iconset>
-            </property>
-            <property name="autoRepeat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushZoomResetProg">
-            <property name="toolTip">
-             <string>Reset Zoom</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resources/resources.qrc">
-              <normaloff>:/img16x16/viewmagfit.png</normaloff>:/img16x16/viewmagfit.png</iconset>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushZoomOutProg">
-            <property name="toolTip">
-             <string>Zoom Out</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resources/resources.qrc">
-              <normaloff>:/img16x16/viewmag-.png</normaloff>:/img16x16/viewmag-.png</iconset>
-            </property>
-            <property name="autoRepeat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </item>
-        <item>
          <widget class="MainGraphicsView" name="programView">
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
@@ -441,9 +264,9 @@
         </item>
        </layout>
       </widget>
-      <widget class="QGroupBox" name="InsertBox">
+      <widget class="QGroupBox" name="groupBox">
        <property name="title">
-        <string>Insert Panel</string>
+        <string>Group Panel</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
@@ -459,66 +282,7 @@
          <number>0</number>
         </property>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayoutBoutInsert">
-          <property name="spacing">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QPushButton" name="pushZoomInIns">
-            <property name="toolTip">
-             <string>Zoom In</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resources/resources.qrc">
-              <normaloff>:/img16x16/viewmag+.png</normaloff>:/img16x16/viewmag+.png</iconset>
-            </property>
-            <property name="autoRepeat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushZoomResetIns">
-            <property name="toolTip">
-             <string>Reset Zoom</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resources/resources.qrc">
-              <normaloff>:/img16x16/viewmagfit.png</normaloff>:/img16x16/viewmagfit.png</iconset>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushZoomOutIns">
-            <property name="toolTip">
-             <string>Zoom Out</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resources/resources.qrc">
-              <normaloff>:/img16x16/viewmag-.png</normaloff>:/img16x16/viewmag-.png</iconset>
-            </property>
-            <property name="autoRepeat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="MainGraphicsView" name="insertView">
+         <widget class="MainGraphicsView" name="groupView">
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
           </property>
@@ -561,12 +325,11 @@
     <addaction name="actionHost_panel"/>
     <addaction name="actionProject_panel"/>
     <addaction name="actionProgram_panel"/>
-    <addaction name="actionInsert_panel"/>
+    <addaction name="actionGroup_panel"/>
     <addaction name="separator"/>
     <addaction name="actionRestore_default_layout"/>
     <addaction name="actionStatus_bar"/>
     <addaction name="actionTool_bar"/>
-    <addaction name="actionZoom_buttons"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -632,7 +395,7 @@
    <addaction name="actionHost_panel"/>
    <addaction name="actionProject_panel"/>
    <addaction name="actionProgram_panel"/>
-   <addaction name="actionInsert_panel"/>
+   <addaction name="actionGroup_panel"/>
   </widget>
   <widget class="QStatusBar" name="statusBar">
    <property name="enabled">
@@ -1231,7 +994,7 @@
     <string>Alt+Shift+S</string>
    </property>
   </action>
-  <action name="actionInsert_panel">
+  <action name="actionGroup_panel">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -1243,16 +1006,16 @@
      <normaloff>:/img16x16/file_setup.png</normaloff>:/img16x16/file_setup.png</iconset>
    </property>
    <property name="text">
-    <string>Toggle Insert panel</string>
+    <string>Toggle Group panel</string>
    </property>
    <property name="toolTip">
-    <string>Toggle Insert panel</string>
+    <string>Toggle Group panel</string>
    </property>
    <property name="statusTip">
     <string>Show or hide the insert panel</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+I</string>
+    <string>Ctrl+G</string>
    </property>
   </action>
   <action name="actionProgram_panel">
@@ -1307,14 +1070,6 @@
     <string>Tool bar</string>
    </property>
   </action>
-  <action name="actionZoom_buttons">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Zoom buttons</string>
-   </property>
-  </action>
   <action name="actionProject_panel">
    <property name="checkable">
     <bool>true</bool>
@@ -1361,150 +1116,6 @@
  </resources>
  <connections>
   <connection>
-   <sender>pushZoomInProg</sender>
-   <signal>pressed()</signal>
-   <receiver>programView</receiver>
-   <slot>zoomIn()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>285</x>
-     <y>410</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>340</x>
-     <y>414</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushZoomResetProg</sender>
-   <signal>clicked()</signal>
-   <receiver>programView</receiver>
-   <slot>zoomReset()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>285</x>
-     <y>440</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>350</x>
-     <y>457</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushZoomOutProg</sender>
-   <signal>pressed()</signal>
-   <receiver>programView</receiver>
-   <slot>zoomOut()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>285</x>
-     <y>470</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>329</x>
-     <y>496</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushZoomInIns</sender>
-   <signal>pressed()</signal>
-   <receiver>insertView</receiver>
-   <slot>zoomIn()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>286</x>
-     <y>282</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>341</x>
-     <y>258</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushZoomResetIns</sender>
-   <signal>clicked()</signal>
-   <receiver>insertView</receiver>
-   <slot>zoomReset()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>265</x>
-     <y>294</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>340</x>
-     <y>297</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushZoomOutIns</sender>
-   <signal>pressed()</signal>
-   <receiver>insertView</receiver>
-   <slot>zoomOut()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>286</x>
-     <y>252</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>339</x>
-     <y>343</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushZoomInHost</sender>
-   <signal>pressed()</signal>
-   <receiver>hostView</receiver>
-   <slot>zoomIn()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>285</x>
-     <y>140</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>334</x>
-     <y>97</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushZoomResetHost</sender>
-   <signal>clicked()</signal>
-   <receiver>hostView</receiver>
-   <slot>zoomReset()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>285</x>
-     <y>92</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>323</x>
-     <y>134</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushZoomOutHost</sender>
-   <signal>pressed()</signal>
-   <receiver>hostView</receiver>
-   <slot>zoomOut()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>285</x>
-     <y>116</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>331</x>
-     <y>176</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>actionHost_panel</sender>
    <signal>toggled(bool)</signal>
    <receiver>HostBox</receiver>
@@ -1521,9 +1132,9 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionInsert_panel</sender>
+   <sender>actionGroup_panel</sender>
    <signal>toggled(bool)</signal>
-   <receiver>InsertBox</receiver>
+   <receiver>groupBox</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -1581,54 +1192,6 @@
     <hint type="destinationlabel">
      <x>422</x>
      <y>37</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushZoomInProj</sender>
-   <signal>pressed()</signal>
-   <receiver>projectView</receiver>
-   <slot>zoomIn()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>291</x>
-     <y>220</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>507</x>
-     <y>256</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushZoomOutProj</sender>
-   <signal>pressed()</signal>
-   <receiver>projectView</receiver>
-   <slot>zoomOut()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>291</x>
-     <y>268</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>507</x>
-     <y>256</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushZoomResetProj</sender>
-   <signal>clicked()</signal>
-   <receiver>projectView</receiver>
-   <slot>zoomReset()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>291</x>
-     <y>244</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>507</x>
-     <y>256</y>
     </hint>
    </hints>
   </connection>

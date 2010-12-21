@@ -126,7 +126,7 @@ AudioBuffer *PinsList::GetBuffer(int pinNumber)
     return 0;
 }
 
-void PinsList::ConnectAllTo(PinsList *other, bool hidden)
+void PinsList::ConnectAllTo(Container* container, PinsList *other, bool hidden)
 {
     QSharedPointer<Object>cntPtr = myHost->objFactory->GetObj(modelList.parent().parent());
 
@@ -134,7 +134,7 @@ void PinsList::ConnectAllTo(PinsList *other, bool hidden)
     while(i!=listPins.end()) {
         Pin *otherPin = other->listPins.value(i.key(),0);
         if(otherPin)
-            static_cast<Container*>(cntPtr.data())->AddCable(i.value()->GetConnectionInfo(),otherPin->GetConnectionInfo(),hidden);
+            container->AddCable(i.value()->GetConnectionInfo(),otherPin->GetConnectionInfo(),hidden);
         ++i;
     }
 }
@@ -173,7 +173,7 @@ Pin * PinsList::AddPin(int nb)
     Pin *newPin = parent->CreatePin(connInfo,nb);
 
     if(!newPin) {
-        debug("PinsList::AsyncAddPin pin not created")
+        debug("PinsList::AddPin pin not created")
         return 0;
     }
 

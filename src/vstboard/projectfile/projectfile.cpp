@@ -18,7 +18,7 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#define PROJECT_FILE_VERSION 4
+#define PROJECT_FILE_VERSION 5
 #define PROJECT_FILE_KEY 0x757b0a5d
 
 #include "projectfile.h"
@@ -42,7 +42,7 @@ bool ProjectFile::SaveToFile(MainHost *myHost,QString filePath)
 
     myHost->EnableSolverUpdate(false);
 
-    myHost->insertContainer->SaveProgram();
+    myHost->groupContainer->SaveProgram();
     myHost->programContainer->SaveProgram();
     myHost->projectContainer->SaveProgram();
     myHost->parkingContainer->SaveProgram();
@@ -51,7 +51,7 @@ bool ProjectFile::SaveToFile(MainHost *myHost,QString filePath)
         out << *myHost->parkingContainer;
         out << *myHost->projectContainer;
         out << *myHost->programContainer;
-        out << *myHost->insertContainer;
+        out << *myHost->groupContainer;
     }
 
     out << *myHost->programList;
@@ -66,7 +66,7 @@ void ProjectFile::Clear(MainHost *myHost)
     myHost->EnableSolverUpdate(false);
     myHost->SetupProjectContainer();
     myHost->SetupProgramContainer();
-    myHost->SetupInsertContainer();
+    myHost->SetupGroupContainer();
     myHost->SetupParking();
     myHost->EnableSolverUpdate(true);
     myHost->programList->BuildModel();
@@ -110,7 +110,7 @@ bool ProjectFile::LoadFromFile(MainHost *myHost,QString filePath)
     myHost->EnableSolverUpdate(false);
 
     myHost->SetupProjectContainer();
-    myHost->SetupInsertContainer();
+    myHost->SetupGroupContainer();
     myHost->SetupProgramContainer();
     myHost->SetupParking();
 
@@ -118,7 +118,7 @@ bool ProjectFile::LoadFromFile(MainHost *myHost,QString filePath)
         in >> *myHost->parkingContainer;
         in >> *myHost->projectContainer;
         in >> *myHost->programContainer;
-        in >> *myHost->insertContainer;
+        in >> *myHost->groupContainer;
     }
 
     myHost->objFactory->ResetSavedId();
