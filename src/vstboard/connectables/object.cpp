@@ -372,12 +372,13 @@ void Object::OnParameterChanged(ConnectionInfo pinInfo, float value)
 {
     //editor pin
     if(pinInfo.pinNumber==FixedPinNumber::editorVisible) {
-        OnEditorVisibilityChanged( static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::editorVisible))->GetIndex() );
+        int val = static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::editorVisible))->GetIndex();
+        if(val)
+            QTimer::singleShot(0, this, SLOT(OnShowEditor()));
+        else
+            OnHideEditor();
+            //QTimer::singleShot(0, this, SLOT(OnHideEditor()));
     }
-
-//    //learning pin
-//    if(pinInfo.pinNumber==FixedPinNumber::learningMode) {
-//    }
 }
 
 void Object::ToggleEditor(bool visible)

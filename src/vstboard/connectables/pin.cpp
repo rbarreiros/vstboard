@@ -89,8 +89,8 @@ void Pin::SetParentModelIndex(const QModelIndex &newParent)
     if(parentIndex.isValid()) {
         if(visible) {
         //should be visible
-            if(parentIndex == newParent) {
-                //same parent : update existing model node (happens when a errorenous device becomes available)
+            if(parentIndex == newParent && modelIndex.isValid()) {
+                //same parent : update existing model node
                 UpdateModelNode();
                 return;
             } else {
@@ -185,7 +185,8 @@ void Pin::SetVisible(bool vis)
 
 void Pin::UpdateModelNode()
 {
-    QStandardItem *item = parent->getHost()->GetModel()->itemFromIndex(parentIndex)->child(connectInfo.pinNumber,0);
+//    QStandardItem *item = parent->getHost()->GetModel()->itemFromIndex(parentIndex)->child(connectInfo.pinNumber,0);
+    QStandardItem *item = parent->getHost()->GetModel()->itemFromIndex(modelIndex);
     if(!item) {
         debug("Pin::UpdateModelNode can't find item")
         return;

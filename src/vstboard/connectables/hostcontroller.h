@@ -61,7 +61,9 @@ namespace Connectables {
         void tempoChange(int tempo, int sign1, int sign2);
 
     public slots:
-        virtual void OnParameterChanged(ConnectionInfo pinInfo, float value);
+        void OnHostProgChanged(const QModelIndex &index);
+        void OnHostGroupChanged(const QModelIndex &index);
+        void OnParameterChanged(ConnectionInfo pinInfo, float value);
     };
 
 }

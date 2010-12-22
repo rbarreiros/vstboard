@@ -183,10 +183,24 @@ void Container::Render()
     if(progToSet!=-1) {
         if(progToSet != currentProgId) {
             SaveProgram();
-            UnloadProgram();
+            //UnloadProgram();
             LoadProgram(progToSet);
         }
         progToSet=-1;
+    }
+}
+
+void Container::SetBufferSize(unsigned long size)
+{
+    foreach(Object *obj, listLoadedObjects) {
+        obj->SetBufferSize(size);
+    }
+}
+
+void Container::SetSampleRate(float rate)
+{
+    foreach(Object *obj, listLoadedObjects) {
+        obj->SetSampleRate(rate);
     }
 }
 
@@ -198,24 +212,50 @@ void Container::LoadProgram(int prog)
         return;
     }
 
-    //if a program is loaded, unload it without saving
-//    int progWas = currentProgId;
-    if(currentProgId!=EMPTY_PROGRAM && currentProgram)
-        UnloadProgram();
+
+
+    if(!listContainerPrograms.contains(prog))
+        listContainerPrograms.insert(prog,new ContainerProgram(myHost,this));
+
+    ContainerProgram *oldProg = currentProgram;
+    ContainerProgram *newProg = listContainerPrograms.value(prog);
+
+
+    if(oldProg) {
+        //remove objects from the old program if not needed anymore
+        foreach(QSharedPointer<Object>objPtr, oldProg->listObjects) {
+            if(!newProg->listObjects.contains(objPtr)) {
+                ParkChildObject(objPtr);
+//                QTimer::singleShot(0, objPtr.data(), SLOT(OnHideEditor()));
+                objPtr->OnHideEditor();
+            }
+        }
+
+        //unload old prog
+        if(currentProgId!=EMPTY_PROGRAM ) {
+            oldProg->Unload();
+        } else {
+            oldProg = 0;
+        }
+    }
+
 
     currentProgId=prog;
+    currentProgram = new ContainerProgram(*newProg);
 
-    if(!listContainerPrograms.contains(currentProgId))
-        listContainerPrograms.insert(currentProgId,new ContainerProgram(myHost,this));
+    //add new objects
+    foreach(QSharedPointer<Object>objPtr, newProg->listObjects) {
+        if(!oldProg->listObjects.contains(objPtr)) {
+            AddChildObject(objPtr);
+        }
+    }
 
-    ContainerProgram *tmp = listContainerPrograms.value(currentProgId);
-    currentProgram = new ContainerProgram(*tmp);
     currentProgram->Load(prog);
     UpdateModelNode();
 
-    //if the loaded program was a temporary prog, delete it
-//    if(progWas==TEMP_PROGRAM)
-//        listContainerPrograms.remove(TEMP_PROGRAM);
+    if(oldProg)
+        delete oldProg;
+
 }
 
 void Container::SaveProgram()

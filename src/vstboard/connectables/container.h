@@ -101,6 +101,9 @@ namespace Connectables {
         void RemoveProgram(int prg);
         void Render();
 
+        void SetBufferSize(unsigned long size);
+        void SetSampleRate(float rate=44100.0);
+
         friend class ContainerProgram;
     };
 

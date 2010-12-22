@@ -56,22 +56,18 @@ public:
     ObjectContainerAttribs() :
         position(QPointF(0,0)),
         size(QSizeF(0,0)),
-        editorVisible(false),
         editorPosition(QPoint(0,0)),
         editorSize(QSize(0,0)),
         editorHScroll(0),
-        editorVScroll(0),
-        paramLearning(false)
+        editorVScroll(0)
         {}
 
     QPointF position;
     QSizeF size;
-    bool editorVisible;
     QPoint editorPosition;
     QSize editorSize;
     quint16 editorHScroll;
     quint16 editorVScroll;
-    bool paramLearning;
 
     QDataStream & toStream (QDataStream &) const;
     QDataStream & fromStream (QDataStream &);

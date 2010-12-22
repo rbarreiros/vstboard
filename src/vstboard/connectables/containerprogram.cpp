@@ -81,7 +81,7 @@ void ContainerProgram::Load(int progId)
 {
     foreach(QSharedPointer<Object> objPtr, listObjects) {
         if(objPtr) {
-            container->AddChildObject(objPtr);
+//            container->AddChildObject(objPtr);
             objPtr->LoadProgram(progId);
         }
     }
@@ -125,9 +125,9 @@ void ContainerProgram::Unload()
             obj->UnloadProgram();
     }
 
-    foreach(QSharedPointer<Object> obj, listObjects) {
-        container->ParkChildObject(obj);
-    }
+//    foreach(QSharedPointer<Object> obj, listObjects) {
+//        container->ParkChildObject(obj);
+//    }
 }
 
 void ContainerProgram::Save()

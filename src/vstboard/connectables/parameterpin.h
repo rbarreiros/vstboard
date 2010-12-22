@@ -36,9 +36,9 @@ namespace Connectables {
         ParameterPin(Object *parent, PinDirection::Enum direction, int number, float defaultValue, bool defaultVisible, const QString &name="", bool nameCanChange=false, bool bridge=false);
         ParameterPin(Object *parent, PinDirection::Enum direction, int number, const QVariant &defaultVariantValue, QList<QVariant> *listValues, bool defaultVisible, const QString &name="", bool nameCanChange=false, bool bridge=false);
 
-        void ChangeValue(float val);
-        void ChangeValue(int index);
-        void ChangeValue(QVariant variant);
+        void ChangeValue(float val, bool fromObj=false);
+        void ChangeValue(int index, bool fromObj=false);
+        void ChangeValue(QVariant variant, bool fromObj=false);
         void Load(const ObjectParameter &param);
 
         virtual void OnValueChanged(float val);

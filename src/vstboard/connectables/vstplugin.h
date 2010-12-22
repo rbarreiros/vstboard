@@ -83,7 +83,8 @@ namespace Connectables {
         void EditorDestroyed();
         void EditIdle();
         void OnParameterChanged(ConnectionInfo pinInfo, float value);
-        void OnEditorVisibilityChanged(bool visible);
+        void OnShowEditor();
+        void OnHideEditor();
 
 //        void TakeScreenshot();
 

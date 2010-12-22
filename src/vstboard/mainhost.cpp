@@ -648,10 +648,10 @@ void MainHost::OnObjectAdded(QSharedPointer<Connectables::Object> objPtr)
         midiDevices->OpenDevice(objPtr);
 #endif
 
-    connect(this,SIGNAL(SampleRateChanged(float)),
-            objPtr.data(),SLOT(SetSampleRate(float)));
-    connect(this,SIGNAL(BufferSizeChanged(unsigned long)),
-            objPtr.data(),SLOT(SetBufferSize(unsigned long)));
+//    connect(this,SIGNAL(SampleRateChanged(float)),
+//            objPtr.data(),SLOT(SetSampleRate(float)));
+//    connect(this,SIGNAL(BufferSizeChanged(unsigned long)),
+//            objPtr.data(),SLOT(SetBufferSize(unsigned long)));
 
     solverNeedAnUpdate = true;
 }
@@ -661,10 +661,10 @@ void MainHost::OnObjectRemoved(QSharedPointer<Connectables::Object> objPtr, Conn
     if(objPtr.isNull())
         return;
 
-    disconnect(this,SIGNAL(SampleRateChanged(float)),
-            objPtr.data(),SLOT(SetSampleRate(float)));
-    disconnect(this,SIGNAL(BufferSizeChanged(unsigned long)),
-            objPtr.data(),SLOT(SetBufferSize(unsigned long)));
+//    disconnect(this,SIGNAL(SampleRateChanged(float)),
+//            objPtr.data(),SLOT(SetSampleRate(float)));
+//    disconnect(this,SIGNAL(BufferSizeChanged(unsigned long)),
+//            objPtr.data(),SLOT(SetBufferSize(unsigned long)));
 
 #ifndef VST_PLUGIN
     midiDevices->CloseDevice(objPtr);

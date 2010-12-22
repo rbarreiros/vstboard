@@ -424,7 +424,7 @@ void VstPlugin::CreateEditorWindow()
 
     if(!editorWnd->SetPlugin(this)) {
         editorWnd=0;
-        OnEditorVisibilityChanged(false);
+        OnHideEditor();
         return;
     }
 
@@ -437,33 +437,32 @@ void VstPlugin::CreateEditorWindow()
 //    }
 }
 
-void VstPlugin::OnEditorVisibilityChanged(bool visible)
+void VstPlugin::OnShowEditor()
 {
-    Object::OnEditorVisibilityChanged(visible);
-
     if(!editorWnd)
         return;
 
-    if(visible) {
-        editorWnd->show();
-        editorWnd->raise();
-        connect(myHost->updateViewTimer,SIGNAL(timeout()),
-                this,SLOT(EditIdle()));
+    editorWnd->show();
+    editorWnd->raise();
+    connect(myHost->updateViewTimer,SIGNAL(timeout()),
+            this,SLOT(EditIdle()));
+}
 
-//        UpdateEditorNode();
-    } else {
-        disconnect(myHost->updateViewTimer,SIGNAL(timeout()),
-                this,SLOT(EditIdle()));
-        emit CloseEditorWindow();
-//        UpdateEditorNode();
-    }
+void VstPlugin::OnHideEditor()
+{
+    if(!editorWnd)
+        return;
+
+    disconnect(myHost->updateViewTimer,SIGNAL(timeout()),
+            this,SLOT(EditIdle()));
+    emit CloseEditorWindow();
 }
 
 void VstPlugin::SetContainerAttribs(const ObjectContainerAttribs &attr)
 {
     Object::SetContainerAttribs(attr);
 
-    if(editorWnd && editorWnd->isVisible()) {
+    if(editorWnd){// && editorWnd->isVisible()) {
         editorWnd->move(attr.editorPosition);
         editorWnd->resize(attr.editorSize);
         editorWnd->SetScrollValue(attr.editorHScroll,attr.editorVScroll);

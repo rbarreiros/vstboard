@@ -109,7 +109,7 @@ void ParameterPin::GetValues(ObjectParameter &param)
 }
 
 //from float
-void ParameterPin::ChangeValue(float val)
+void ParameterPin::ChangeValue(float val, bool fromObj)
 {
     if(listValues) {
         //we got a float, but we need a int
@@ -120,36 +120,40 @@ void ParameterPin::ChangeValue(float val)
     val = std::min(val,1.0f);
     val = std::max(val,.0f);
 
-    if(val==value)
+    if(!loading && val==value)
         return;
 
     OnValueChanged(val);
-    parent->OnParameterChanged(connectInfo,outValue);
+
+    if(!fromObj)
+        parent->OnParameterChanged(connectInfo,outValue);
 }
 
 //from int
-void ParameterPin::ChangeValue(int index)
+void ParameterPin::ChangeValue(int index, bool fromObj)
 {
     index = std::min(index,listValues->size()-1);
     index = std::max(index,0);
 
-    if(index==stepIndex)
+    if(!loading && index==stepIndex)
         return;
 
     stepIndex=index;
     OnValueChanged(stepSize*index);
 
     outStepIndex=(int)( 0.5f + outValue/stepSize );
-    parent->OnParameterChanged(connectInfo,outValue);
+
+    if(!fromObj)
+        parent->OnParameterChanged(connectInfo,outValue);
 }
 
 //from variant
-void ParameterPin::ChangeValue(QVariant variant)
+void ParameterPin::ChangeValue(QVariant variant, bool fromObj)
 {
     if(listValues)
-        ChangeValue(listValues->indexOf(variant));
+        ChangeValue(listValues->indexOf(variant),fromObj);
     else
-        ChangeValue(variant.toFloat());
+        ChangeValue(variant.toFloat(),fromObj);
 }
 
 void ParameterPin::OnStep(int delta)

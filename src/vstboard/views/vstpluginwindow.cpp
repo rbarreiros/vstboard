@@ -108,7 +108,7 @@ void VstPluginWindow::SavePosSize()
 
 void VstPluginWindow::closeEvent( QCloseEvent * event )
 {
-    SavePosSize();
+    //SavePosSize();
 
     hide();
 //    if(plugin->modelIndex.isValid())

@@ -57,7 +57,7 @@ HostController::HostController(MainHost *myHost,int index):
     listParameterPinIn->listPins.insert(Param_Tempo, new ParameterPinIn(this,Param_Tempo,QVariant::fromValue<int>(120),&listTempo,true,"bpm"));
     listParameterPinIn->listPins.insert(Param_Sign1, new ParameterPinIn(this,Param_Sign1,4,&listSign1,true,"sign1"));
     listParameterPinIn->listPins.insert(Param_Sign2, new ParameterPinIn(this,Param_Sign2,4,&listSign2,true,"sign2"));
-    listParameterPinIn->listPins.insert(Param_Group, new ParameterPinIn(this,Param_Group,0,&listGrp,true,"ProgGrp"));
+    listParameterPinIn->listPins.insert(Param_Group, new ParameterPinIn(this,Param_Group,0,&listGrp,true,"Group"));
     listParameterPinIn->listPins.insert(Param_Prog, new ParameterPinIn(this,Param_Prog,0,&listPrg,true,"Prog"));
 
     connect(this, SIGNAL(progChange(int)),
@@ -69,6 +69,11 @@ HostController::HostController(MainHost *myHost,int index):
     connect(this, SIGNAL(tempoChange(int,int,int)),
             myHost,SLOT(SetTempo(int,int,int)),
             Qt::QueuedConnection);
+
+    connect(myHost->programList,SIGNAL(ProgChanged(QModelIndex)),
+           this,SLOT(OnHostProgChanged(QModelIndex)));
+    connect(myHost->programList,SIGNAL(GroupChanged(QModelIndex)),
+           this,SLOT(OnHostGroupChanged(QModelIndex)));
 }
 
 void HostController::Render()
@@ -124,4 +129,14 @@ void HostController::OnParameterChanged(ConnectionInfo pinInfo, float value)
             progChanged=true;
             break;
     }
+}
+
+void HostController::OnHostProgChanged(const QModelIndex &index)
+{
+    static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Prog))->ChangeValue( index.row(), true );
+}
+
+void HostController::OnHostGroupChanged(const QModelIndex &index)
+{
+    static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Group))->ChangeValue( index.row(), true );
 }

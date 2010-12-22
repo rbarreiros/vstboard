@@ -167,8 +167,6 @@ namespace Connectables {
 //        bool hasEditor;
 //        bool canLearn;
 
-
-
     signals:
 //        void LearningModeChanged(int learn);
 //        void UnLearningModeChanged(bool unlearn);
@@ -187,7 +185,8 @@ namespace Connectables {
         virtual void OnParameterChanged(ConnectionInfo pinInfo, float value);
 
         void ToggleEditor(bool visible);
-        virtual void OnEditorVisibilityChanged(bool visible) {}
+        virtual void OnShowEditor() {}
+        virtual void OnHideEditor() {}
 
         void CloseSlot() {Close();}
 

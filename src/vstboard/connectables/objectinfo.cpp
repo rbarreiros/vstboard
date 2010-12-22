@@ -98,15 +98,12 @@ QDataStream & ObjectContainerAttribs::toStream (QDataStream& out) const
 {
     const quint16 file_version = 1;
     out << file_version;
-
     out << position;
     out << size;
-    out << editorVisible;
     out << editorPosition;
     out << editorSize;
     out << editorHScroll;
     out << editorVScroll;
-    out << paramLearning;
 
     return out;
 }
@@ -115,15 +112,12 @@ QDataStream & ObjectContainerAttribs::fromStream (QDataStream& in)
 {
     quint16 file_version;
     in >> file_version;
-
     in >> position;
     in >> size;
-    in >> editorVisible;
     in >> editorPosition;
     in >> editorSize;
     in >> editorHScroll;
     in >> editorVScroll;
-    in >> paramLearning;
     return in;
 }
 
