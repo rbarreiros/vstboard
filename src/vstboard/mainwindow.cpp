@@ -342,6 +342,9 @@ void MainWindow::writeSettings()
     settings.setValue("geometry", saveGeometry());
     settings.setValue("state", saveState());
     settings.setValue("statusBar", ui->statusBar->isVisible());
+    settings.setValue("splitPan", ui->splitterPanels->saveState());
+    settings.setValue("splitProg", ui->splitterProg->saveState());
+    settings.setValue("splitGroup", ui->splitterGroup->saveState());
     settings.endGroup();
     settings.setValue("lastVstPath", ui->VstBrowser->path());
     ui->Programs->writeSettings();
@@ -416,9 +419,21 @@ void MainWindow::readSettings()
         resetSettings();
     }
 
+    ui->splitterProg->setStretchFactor(0,100);
+    ui->splitterGroup->setStretchFactor(0,100);
+
+    if(settings.contains("splitPan"))
+        ui->splitterPanels->restoreState(settings.value("splitPan").toByteArray());
+    if(settings.contains("splitProg"))
+        ui->splitterProg->restoreState(settings.value("splitProg").toByteArray());
+    if(settings.contains("splitGroup"))
+        ui->splitterGroup->restoreState(settings.value("splitGroup").toByteArray());
+
     settings.endGroup();
 
     ui->Programs->readSettings();
+
+
 }
 
 void MainWindow::resetSettings()
@@ -475,6 +490,13 @@ void MainWindow::resetSettings()
     heights << h << h << h << h;
     ui->splitterPanels->setSizes(heights);
 
+    QList<int> szProg;
+    szProg << 1000 << 100;
+    ui->splitterProg->setSizes(szProg);
+
+    QList<int> szGrp;
+    szGrp << 1000 << 100;
+    ui->splitterGroup->setSizes(szGrp);
 }
 
 void MainWindow::on_actionAbout_triggered()
