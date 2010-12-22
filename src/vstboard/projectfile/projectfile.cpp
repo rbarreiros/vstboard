@@ -18,7 +18,7 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#define PROJECT_FILE_VERSION 5
+#define PROJECT_FILE_VERSION 6
 #define PROJECT_FILE_KEY 0x757b0a5d
 
 #include "projectfile.h"
@@ -45,10 +45,8 @@ bool ProjectFile::SaveToFile(MainHost *myHost,QString filePath)
     myHost->groupContainer->SaveProgram();
     myHost->programContainer->SaveProgram();
     myHost->projectContainer->SaveProgram();
-    myHost->parkingContainer->SaveProgram();
 
     for(myHost->filePass=0; myHost->filePass<LOADSAVE_STAGES ; myHost->filePass++) {
-        out << *myHost->parkingContainer;
         out << *myHost->projectContainer;
         out << *myHost->programContainer;
         out << *myHost->groupContainer;
@@ -67,7 +65,6 @@ void ProjectFile::Clear(MainHost *myHost)
     myHost->SetupProjectContainer();
     myHost->SetupProgramContainer();
     myHost->SetupGroupContainer();
-    myHost->SetupParking();
     myHost->EnableSolverUpdate(true);
     myHost->programList->BuildModel();
 }
@@ -112,10 +109,8 @@ bool ProjectFile::LoadFromFile(MainHost *myHost,QString filePath)
     myHost->SetupProjectContainer();
     myHost->SetupGroupContainer();
     myHost->SetupProgramContainer();
-    myHost->SetupParking();
 
     for(myHost->filePass=0; myHost->filePass<LOADSAVE_STAGES ; myHost->filePass++) {
-        in >> *myHost->parkingContainer;
         in >> *myHost->projectContainer;
         in >> *myHost->programContainer;
         in >> *myHost->groupContainer;

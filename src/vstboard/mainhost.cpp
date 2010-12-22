@@ -64,9 +64,6 @@ MainHost::MainHost(Vst *myVstPlugin, QObject *parent) :
 
     model = new HostModel(this);
     model->setColumnCount(1);
-    modelParking = new HostModel(this);
-    modelParking->setColumnCount(1);
-//    Connectables::ObjectFactory::Create(this);
 
     sampleRate = 44100.0;
     bufferSize = 1;
@@ -116,7 +113,6 @@ MainHost::~MainHost()
     projectContainer.clear();
     groupContainer.clear();
     programContainer.clear();
-    parkingContainer.clear();
 
     solver->Resolve(workingListOfCables);
     renderer.Clear();
@@ -138,7 +134,6 @@ void MainHost::Open()
     SetupProjectContainer();
     SetupProgramContainer();
     SetupGroupContainer();
-    SetupParking();
 
     EnableSolverUpdate(true);
     programList->BuildModel();
@@ -166,7 +161,7 @@ void MainHost::SetupMainContainer()
 void MainHost::SetupHostContainer()
 {
     if(!hostContainer.isNull()) {
-        mainContainer->RemoveObject( hostContainer );
+        mainContainer->ParkObject( hostContainer );
         hostContainer.clear();
         UpdateSolver(true);
     }
@@ -252,7 +247,7 @@ void MainHost::SetupHostContainer()
 void MainHost::SetupProjectContainer()
 {
     if(!projectContainer.isNull()) {
-        mainContainer->RemoveObject( projectContainer );
+        mainContainer->ParkObject( projectContainer );
         projectContainer.clear();
         UpdateSolver(true);
     }
@@ -345,7 +340,7 @@ void MainHost::SetupProjectContainer()
 void MainHost::SetupProgramContainer()
 {
     if(!programContainer.isNull()) {
-        mainContainer->RemoveObject( programContainer );
+        mainContainer->ParkObject( programContainer );
         programContainer.clear();
         UpdateSolver(true);
     }
@@ -432,12 +427,14 @@ void MainHost::SetupProgramContainer()
             programContainer.data(), SLOT(CopyProgram(int,int)));
     connect(this,SIGNAL(Rendered()),
             programContainer.data(), SLOT(Render()));
+
+    emit programParkingModelChanged(&programContainer->parkModel);
 }
 
 void MainHost::SetupGroupContainer()
 {
     if(!groupContainer.isNull()) {
-        mainContainer->RemoveObject( groupContainer );
+        mainContainer->ParkObject( groupContainer );
         groupContainer.clear();
         UpdateSolver(true);
     }
@@ -523,24 +520,8 @@ void MainHost::SetupGroupContainer()
             groupContainer.data(), SLOT(CopyProgram(int,int)));
     connect(this,SIGNAL(Rendered()),
             groupContainer.data(), SLOT(Render()));
-}
 
-
-void MainHost::SetupParking()
-{
-    if(parkingContainer) {
-        parkingContainer->Clear();
-        return;
-    }
-
-    ObjectInfo info;
-    info.nodeType = NodeType::container;
-    info.objType = ObjType::ParkingContainer;
-    info.name = "parkingContainer";
-    info.forcedObjId = FixedObjId::parkingContainer;
-
-    parkingContainer = objFactory->NewObject(info).staticCast< Connectables::ParkingContainer >();
-    parkingContainer->SetParentModeIndex( modelParking->invisibleRootItem()->index() );
+    emit groupParkingModelChanged(&groupContainer->parkModel);
 }
 
 void MainHost::EnableSolverUpdate(bool enable)
@@ -662,9 +643,6 @@ void MainHost::OnObjectAdded(QSharedPointer<Connectables::Object> objPtr)
     if(objPtr.isNull())
         return;
 
-    if(parkingContainer)
-        parkingContainer->RemoveObject(objPtr);
-
 #ifndef VST_PLUGIN
     if(objPtr->info().objType == ObjType::MidiInterface)
         midiDevices->OpenDevice(objPtr);
@@ -674,10 +652,6 @@ void MainHost::OnObjectAdded(QSharedPointer<Connectables::Object> objPtr)
             objPtr.data(),SLOT(SetSampleRate(float)));
     connect(this,SIGNAL(BufferSizeChanged(unsigned long)),
             objPtr.data(),SLOT(SetBufferSize(unsigned long)));
-
-    //objPtr->SetSampleRate(sampleRate);
-    //objPtr->SetBufferSize(bufferSize);
-    //objPtr->SetSleep(false);
 
     solverNeedAnUpdate = true;
 }
@@ -695,11 +669,6 @@ void MainHost::OnObjectRemoved(QSharedPointer<Connectables::Object> objPtr, Conn
 #ifndef VST_PLUGIN
     midiDevices->CloseDevice(objPtr);
 #endif
-
-    //if the object comes from a programmable container : don't delete it, store it in the parking container
-    if(container && container->listenProgramChanges && parkingContainer
-       && objPtr->info().nodeType!=NodeType::bridge )
-        parkingContainer->AddObject(objPtr);
 
     solverNeedAnUpdate = true;
 }

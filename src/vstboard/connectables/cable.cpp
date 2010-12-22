@@ -48,7 +48,12 @@ void Cable::AddToParentNode(const QModelIndex &parentIndex)
     item->setData(QVariant::fromValue(pinOut),UserRoles::value);
     item->setData(QVariant::fromValue(pinIn),UserRoles::connectionInfo);
 
-    myHost->GetModel()->itemFromIndex(parentIndex)->appendRow(item);
+    QStandardItem *parentItem = myHost->GetModel()->itemFromIndex(parentIndex);
+    if(!parentItem) {
+        debug("Cable::AddToParentNode parent item not found")
+        return;
+    }
+    parentItem->appendRow(item);
     modelIndex = item->index();
 }
 

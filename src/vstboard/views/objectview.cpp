@@ -197,7 +197,7 @@ void ObjectView::closeEvent ( QCloseEvent * event )
 
     static_cast<Connectables::Container*>(
             myHost->objFactory->GetObj(objIndex.parent()).data()
-        )->RemoveObject(
+        )->ParkObject(
             myHost->objFactory->GetObj(objIndex)
         );
 

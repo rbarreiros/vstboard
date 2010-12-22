@@ -57,7 +57,7 @@ QMimeData * HostModel::mimeData ( const QModelIndexList & indexes ) const
 
     return QStandardItemModel::mimeData(indexes);
 }
-
+/*
 QStringList HostModel::mimeTypes () const
 {
     QStringList list;
@@ -70,10 +70,10 @@ QStringList HostModel::mimeTypes () const
 
     return list;
 }
-
+*/
 bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, int row, int column, const QModelIndex & parent )
 {
-    QSharedPointer<Connectables::Container> cntPtr = myHost->parkingContainer;
+    QSharedPointer<Connectables::Container> cntPtr;
     QModelIndex rootIndex = parent.sibling(parent.row(),0);
     if(parent.isValid()) {
     //    QSharedPointer<Connectables::Container> cntPtr = Connectables::ObjectFactory::Get()->GetObjectFromId( rootIndex.data(UserRoles::value).toInt() ).staticCast<Connectables::Container>();

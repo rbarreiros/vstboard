@@ -30,7 +30,6 @@ namespace Connectables {
 
     class Object;
     class Container;
-    class ParkingContainer;
     class ContainerProgram
     {
     public:

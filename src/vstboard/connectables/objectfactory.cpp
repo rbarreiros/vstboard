@@ -33,7 +33,6 @@
 #include "hostcontroller.h"
 #include "container.h"
 #include "maincontainer.h"
-#include "parkingcontainer.h"
 #include "bridge.h"
 #include "mainhost.h"
 
@@ -176,10 +175,6 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
 
                 case ObjType::MainContainer:
                     obj = new MainContainer(myHost,objId, info);
-                    break;
-
-                case ObjType::ParkingContainer:
-                    obj = new ParkingContainer(myHost,objId, info);
                     break;
 
                 default :

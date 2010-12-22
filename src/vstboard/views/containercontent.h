@@ -32,6 +32,7 @@ namespace View {
         explicit ContainerContent(QAbstractItemModel *model, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
         void SetModelIndex(QPersistentModelIndex index);
         QPointF GetDropPos();
+        QWidget *myParking;
     protected:
         void dragEnterEvent( QGraphicsSceneDragDropEvent *event);
         void dropEvent( QGraphicsSceneDragDropEvent *event);

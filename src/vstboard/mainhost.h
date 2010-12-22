@@ -25,7 +25,6 @@
 #include "connectables/objectfactory.h"
 #include "connectables/object.h"
 #include "connectables/maincontainer.h"
-#include "connectables/parkingcontainer.h"
 #include "pathsolver.h"
 #include "renderer.h"
 #include "globals.h"
@@ -79,14 +78,12 @@ public:
     QSharedPointer<Connectables::MainContainer> projectContainer;
     QSharedPointer<Connectables::MainContainer> programContainer;
     QSharedPointer<Connectables::MainContainer> groupContainer;
-    QSharedPointer<Connectables::ParkingContainer> parkingContainer;
 
     PathSolver *solver;
 
     QTimer *updateViewTimer;
 
     HostModel * GetModel() {return model;}
-    HostModel * GetParkingModel() {return modelParking;}
 
     int filePass;
 
@@ -112,7 +109,6 @@ private:
     void SetupProjectContainer();
     void SetupProgramContainer();
     void SetupGroupContainer();
-    void SetupParking();
 
     bool solverNeedAnUpdate;
     bool solverUpdateEnabled;
@@ -134,7 +130,6 @@ private:
     QList<Connectables::Object*>listObjToRemove;
 
     HostModel *model;
-    HostModel *modelParking;
 
 signals:
     void SampleRateChanged(float rate);
@@ -144,6 +139,8 @@ signals:
     void SolverToUpdate();
     void OnAudioDeviceToggleInUse(const ObjectInfo &objInfo, bool inUse);
     void Rendered();
+    void programParkingModelChanged(QStandardItemModel *model);
+    void groupParkingModelChanged(QStandardItemModel *model);
 
 public slots:
     void OnCableAdded(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);

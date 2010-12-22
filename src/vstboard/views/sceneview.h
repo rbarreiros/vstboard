@@ -30,6 +30,8 @@ namespace Connectables {
 }
 class MainHost;
 namespace View {
+    class MainContainerView;
+
     class SceneView : public QAbstractItemView
     {
         Q_OBJECT
@@ -39,6 +41,8 @@ namespace View {
         QRect visualRect(const QModelIndex &index) const {return QRect();}
         void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible) {}
         QModelIndex indexAt(const QPoint &point) const {return QModelIndex();}
+
+        void SetParkings(QWidget *progPark, QWidget *groupPark);
 
         MainGraphicsView *viewHost;
         MainGraphicsView *viewProject;
@@ -69,6 +73,15 @@ namespace View {
         QGraphicsScene *sceneProject;
         QGraphicsScene *sceneProgram;
         QGraphicsScene *sceneInsert;
+
+        MainContainerView *hostContainerView;
+        MainContainerView *projectContainerView;
+        MainContainerView *programContainerView;
+        MainContainerView *groupContainerView;
+
+        QWidget *progParking;
+        QWidget *groupParking;
+
         QTimer *timerFalloff;
         Connectables::ObjectFactory *objFactory;
         MainHost *myHost;

@@ -22,6 +22,7 @@
 #include "../globals.h"
 #include "../mainhost.h"
 #include "../pathsolver.h"
+#include "container.h"
 
 using namespace Connectables;
 
@@ -108,6 +109,10 @@ Object::~Object()
 {
     pinLists.clear();
     debug2(<< "delete Object" << objectName() << hex << (long)this)
+    QSharedPointer<Object>cntPtr = myHost->objFactory->GetObjectFromId( containerId );
+    if(cntPtr) {
+        static_cast<Container*>(cntPtr.data())->OnChildDeleted(this);
+    }
     Close();
 }
 
@@ -142,7 +147,7 @@ void Object::Hide() {
     foreach(PinsList *lst, pinLists) {
         lst->Hide();
     }
-
+/*
     QStandardItemModel *model = 0;
     if(parked)
         model = myHost->GetParkingModel();
@@ -156,6 +161,7 @@ void Object::Hide() {
             model->removeRow(modelIndex.row());
     }
     modelIndex=QModelIndex();
+    */
 }
 
 void Object::SetBridgePinsInVisible(bool visible)
@@ -287,6 +293,25 @@ Pin * Object::GetPin(const ConnectionInfo &pinInfo)
     return 0;
 }
 
+
+QStandardItem *Object::GetParkingItem()
+{
+    QStandardItem *modelNode=new QStandardItem();
+    modelNode->setData(index,UserRoles::value);
+    modelNode->setData(objectName(), Qt::DisplayRole);
+    return modelNode;
+}
+
+QStandardItem *Object::GetFullItem()
+{
+    QStandardItem *modelNode = new QStandardItem();
+    modelNode->setData(QVariant::fromValue(objInfo), UserRoles::objInfo);
+    modelNode->setData(index, UserRoles::value);
+    modelNode->setData(objectName(), Qt::DisplayRole);
+    modelNode->setData(errorMessage, UserRoles::errorMessage);
+    return modelNode;
+}
+
 void Object::SetParentModeIndex(const QModelIndex &parentIndex)
 {
     if(modelIndex.isValid()) {
@@ -324,36 +349,16 @@ void Object::SetContainerId(quint16 id)
     }
 }
 
-void Object::SetParkingIndex(const QModelIndex &parentIndex)
-{
-//    if(modelNode)
-//        Hide();
-    if(modelIndex.isValid())
-        Hide();
-
-    parked=true;
-
-    QStandardItem *modelNode=new QStandardItem();
-    modelNode->setData(QVariant::fromValue(objInfo), UserRoles::objInfo);
-    modelNode->setData(index,UserRoles::value);
-    modelNode->setData(objectName(), Qt::DisplayRole);
-    modelNode->setData(true,UserRoles::parking);
-    containerId=-1;
-
-    if(parentIndex.isValid())
-        myHost->GetParkingModel()->itemFromIndex(parentIndex)->appendRow(modelNode);
-    else
-        myHost->GetParkingModel()->appendRow(modelNode);
-
-    modelIndex=modelNode->index();
-}
-
 void Object::UpdateModelNode()
 {
     if(!modelIndex.isValid())
         return;
 
     QStandardItem *modelNode = myHost->GetModel()->itemFromIndex(modelIndex);
+    if(!modelNode) {
+        debug("Object::UpdateModelNode node not found")
+        return;
+    }
 
     modelNode->setData(QVariant::fromValue(objInfo), UserRoles::objInfo);
     modelNode->setData(errorMessage, UserRoles::errorMessage);

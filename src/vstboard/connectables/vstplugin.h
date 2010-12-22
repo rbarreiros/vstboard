@@ -42,7 +42,6 @@ namespace Connectables {
         bool Open();
         bool Close();
         void Render();
-        void SetParkingIndex(const QModelIndex &parentIndex);
         int GetProcessingTime() {return 20;}
         long OnGetUniqueId() { return index; }
         long OnMasterCallback(long opcode, long index, long value, void *ptr, float opt, long currentReturnCode);
@@ -53,15 +52,10 @@ namespace Connectables {
 
         View::VstPluginWindow *editorWnd;
 
-//        static QList<VstPlugin*>listPlugins;
         static QMap<AEffect*,VstPlugin*>mapPlugins;
         static VstPlugin *pluginLoading;
 
         void CreateEditorWindow();
-
-        void SetParentModeIndex(const QModelIndex &parentIndex);
-//        void UpdateModelNode();
-//        void UpdateEditorNode();
 
         static View::VstShellSelect *shellSelectView;
 

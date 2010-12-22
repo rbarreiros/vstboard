@@ -69,6 +69,12 @@ SceneView::SceneView(MainHost *myHost,Connectables::ObjectFactory *objFactory, M
     viewInsert->setScene(sceneInsert);
 }
 
+void SceneView::SetParkings(QWidget *progPark, QWidget *groupPark)
+{
+    progParking = progPark;
+    groupParking = groupPark;
+}
+
 void SceneView::dataChanged ( const QModelIndex & topLeft, const QModelIndex & bottomRight  )
 {
     QAbstractItemView::dataChanged(topLeft, bottomRight);
@@ -270,39 +276,41 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                         int objId = index.data(UserRoles::value).toInt();
 
                         if(objId == FixedObjId::hostContainer) {
-                            MainContainerView *cntView = new MainContainerView(myHost, model());
-                            objView=cntView;
-                            cntView->setParentItem(rootObjHost);
+                            hostContainerView = new MainContainerView(myHost, model());
+                            objView=hostContainerView;
+                            hostContainerView->setParentItem(rootObjHost);
                             connect(viewHost,SIGNAL(viewResized(QRectF)),
-                                    cntView,SLOT(OnViewChanged(QRectF)));
+                                    hostContainerView,SLOT(OnViewChanged(QRectF)));
                             QTimer::singleShot(0, viewHost, SLOT(ForceResize()));
                         }
 
                         if(objId == FixedObjId::projectContainer) {
-                            MainContainerView *cntView = new MainContainerView(myHost, model());
-                            objView=cntView;
-                            cntView->setParentItem(rootObjProject);
+                            projectContainerView = new MainContainerView(myHost, model());
+                            objView=projectContainerView;
+                            projectContainerView->setParentItem(rootObjProject);
                             connect(viewProject,SIGNAL(viewResized(QRectF)),
-                                    cntView,SLOT(OnViewChanged(QRectF)));
+                                    projectContainerView,SLOT(OnViewChanged(QRectF)));
                             QTimer::singleShot(0, viewProject, SLOT(ForceResize()));
                         }
 
                         if(objId == FixedObjId::programContainer) {
-                            MainContainerView *cntView = new MainContainerView(myHost, model());
-                            objView=cntView;
-                            cntView->setParentItem(rootObjProgram);
+                            programContainerView = new MainContainerView(myHost, model());
+                            objView=programContainerView;
+                            programContainerView->setParentItem(rootObjProgram);
                             connect(viewProgram,SIGNAL(viewResized(QRectF)),
-                                    cntView,SLOT(OnViewChanged(QRectF)));
+                                    programContainerView,SLOT(OnViewChanged(QRectF)));
                             QTimer::singleShot(0, viewProgram, SLOT(ForceResize()));
+                            programContainerView->SetParking(progParking);
                         }
 
                         if(objId == FixedObjId::groupContainer) {
-                            MainContainerView *cntView = new MainContainerView(myHost, model());
-                            objView=cntView;
-                            cntView->setParentItem(rootObjInsert);
+                            MainContainerView *groupContainerView = new MainContainerView(myHost, model());
+                            objView=groupContainerView;
+                            groupContainerView->setParentItem(rootObjInsert);
                             connect(viewInsert,SIGNAL(viewResized(QRectF)),
-                                    cntView,SLOT(OnViewChanged(QRectF)));
+                                    groupContainerView,SLOT(OnViewChanged(QRectF)));
                             QTimer::singleShot(0, viewInsert, SLOT(ForceResize()));
+                            groupContainerView->SetParking(groupParking);
                         }
 
 

@@ -39,7 +39,7 @@ Container::~Container()
 {
     Close();
 }
-
+/*
 void Container::SetParentModeIndex(const QModelIndex &parentIndex)
 {
     if(modelIndex.isValid()) {
@@ -67,6 +67,25 @@ void Container::SetParentModeIndex(const QModelIndex &parentIndex)
         myHost->GetModel()->appendRow(cab);
     }
     cablesNode = cab->index();
+}
+*/
+const QModelIndex &Container::GetCablesIndex()
+{
+    if(cablesNode.isValid())
+        return cablesNode;
+
+    if(modelIndex.isValid()) {
+        QStandardItem *item = myHost->GetModel()->itemFromIndex(modelIndex);
+        if(!item) {
+            debug("Container::GetCablesIndex modelindex not found")
+            return cablesNode;
+        }
+        QStandardItem *cab = new QStandardItem("cables");
+        item->appendRow(cab);
+        cablesNode = cab->index();
+        return cablesNode;
+    }
+    return cablesNode;
 }
 
 void Container::SetContainerId(quint16 id)
@@ -99,7 +118,7 @@ bool Container::Close()
     foreach(QSharedPointer<Object> objPtr, listStaticObjects) {
         if(objPtr.isNull())
             continue;
-        RemoveObject(objPtr);
+        ParkObject(objPtr);
     }
     listStaticObjects.clear();
 
@@ -274,13 +293,21 @@ void Container::AddObject(QSharedPointer<Object> objPtr)
         return;
     }
 
+    if(!listLoadedObjects.contains(objPtr.data()))
+        listLoadedObjects << objPtr.data();
     currentProgram->AddObject(objPtr);
     objPtr->LoadProgram(currentProgId);
 }
 
-void Container::RemoveObject(QSharedPointer<Object> objPtr)
+void Container::AddParkedObject(QSharedPointer<Object> objPtr)
 {
-    //the containers is not programmable : delete it from the save program too
+    listLoadedObjects << objPtr.data();
+    ParkChildObject(objPtr);
+}
+
+void Container::ParkObject(QSharedPointer<Object> objPtr)
+{
+    //this container is not programmable : delete the object from the saved program too
     if(!listenProgramChanges) {
         foreach(ContainerProgram *prg, listContainerPrograms) {
             prg->RemoveObject(objPtr);
@@ -298,26 +325,59 @@ void Container::RemoveObject(QSharedPointer<Object> objPtr)
     listStaticObjects.removeAll(objPtr);
 }
 
-void Container::RemoveCable(QModelIndex & index)
-{
-    currentProgram->RemoveCable(index);
-}
-
 void Container::AddChildObject(QSharedPointer<Object> objPtr)
 {
-    objPtr->SetParentModeIndex(modelIndex);
+//    for(int i=0; i<parkModel.invisibleRootItem()->rowCount(); i++) {
+//        QStandardItem *item = parkModel.invisibleRootItem()->child(i,0);
+//        if(item->data(UserRoles::value).toInt() == objPtr)
+//    }
+    if(objPtr->modelIndex.isValid() && objPtr->modelIndex.model()==&parkModel)
+        parkModel.removeRow(objPtr->modelIndex.row());
+
+    QStandardItem *item = objPtr->GetFullItem();
+    myHost->GetModel()->itemFromIndex( modelIndex )->appendRow(item);
+    objPtr->modelIndex=item->index();
     objPtr->SetContainerId(index);
+    objPtr->parked=false;
     myHost->OnObjectAdded(objPtr);
 }
 
-void Container::RemoveChildObject(QSharedPointer<Object> objPtr)
+void Container::ParkChildObject(QSharedPointer<Object> objPtr)
 {
     if(objPtr.isNull())
         return;
 
-    objPtr->Hide();
-    objPtr->SetContainerId(-1);
+//    objPtr->Hide();
+    if(objPtr->modelIndex.isValid() && objPtr->modelIndex.model()==myHost->GetModel())
+        myHost->GetModel()->removeRow(objPtr->modelIndex.row(), objPtr->modelIndex.parent());
+
+    QStandardItem *item = objPtr->GetParkingItem();
+    parkModel.invisibleRootItem()->appendRow(item);
+    objPtr->modelIndex=item->index();
+   // objPtr->SetContainerId(-1);
+    objPtr->parked=true;
     myHost->OnObjectRemoved(objPtr, this);
+}
+
+void Container::OnChildDeleted(Object *obj)
+{
+    listLoadedObjects.removeAll(obj);
+
+    if(!obj->modelIndex.isValid())
+        return;
+
+    if(obj->parked) {
+        if(obj->modelIndex.model()==&parkModel)
+            parkModel.removeRow(obj->modelIndex.row());
+    } else {
+        if(obj->modelIndex.model()==myHost->GetModel())
+            myHost->GetModel()->removeRow(obj->modelIndex.row(), obj->modelIndex.parent());
+    }
+}
+
+void Container::RemoveCable(QModelIndex & index)
+{
+    currentProgram->RemoveCable(index);
 }
 
 void Container::AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin, bool hidden)
@@ -362,7 +422,7 @@ QDataStream & Container::toStream (QDataStream& out) const
             out << objectName();
             out << sleep;
 
-            if(currentProgram) {
+            /*if(currentProgram) {
                 out << (quint16)currentProgram->listObjects.size();
                 foreach(QSharedPointer<Object> objPtr, currentProgram->listObjects) {
                     if(!objPtr.isNull()) {
@@ -380,6 +440,17 @@ QDataStream & Container::toStream (QDataStream& out) const
                 }
             } else {
                 out << (quint16)0;
+            }*/
+
+            out << (quint16)listLoadedObjects.size();
+            foreach(Object* obj, listLoadedObjects) {
+                QByteArray tmpStream;
+                QDataStream tmp( &tmpStream , QIODevice::ReadWrite);
+                tmp << *obj;
+
+                out << obj->info();
+                out << (quint16)tmpStream.size();
+                out << tmpStream;
             }
             break;
         }
@@ -440,7 +511,7 @@ QDataStream & Container::fromStream (QDataStream& in)
 
                     QSharedPointer<Object> objPtr = myHost->objFactory->NewObject(info);
                     if(!objPtr.isNull()) {
-                        AddObject(objPtr);
+                        AddParkedObject(objPtr);
                         tmp >> *objPtr.data();
 
                         //keep the object alive while loading
@@ -451,7 +522,7 @@ QDataStream & Container::fromStream (QDataStream& in)
                         objPtr = myHost->objFactory->NewObject(info);
                         QDataStream tmp2( &tmpStream , QIODevice::ReadWrite);
                         if(!objPtr.isNull()) {
-                            AddObject(objPtr);
+                            AddParkedObject(objPtr);
                             tmp2 >> *objPtr.data();
 
                             //keep the object alive while loading
@@ -491,6 +562,7 @@ QDataStream & Container::fromStream (QDataStream& in)
         case 2:
             quint32 prog;
             in >> prog;
+            //UnloadProgram();
             LoadProgram(prog);
             listLoadingObjects.clear();
             listContainerPrograms.remove(TEMP_PROGRAM);

@@ -160,7 +160,6 @@ SOURCES += main.cpp \
     audiodevices.cpp \
     connectables/bridgepinin.cpp \
     connectables/bridgepinout.cpp \
-    connectables/parkingcontainer.cpp \
     views/combodelegate.cpp \
     connectables/maincontainer.cpp \
     connectables/objectinfo.cpp \
@@ -238,7 +237,6 @@ HEADERS += mainwindow.h \
     audiodevices.h \
     connectables/bridgepinin.h \
     connectables/bridgepinout.h \
-    connectables/parkingcontainer.h \
     views/combodelegate.h \
     connectables/maincontainer.h \
     connectables/objectinfo.h \

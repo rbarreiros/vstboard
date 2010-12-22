@@ -36,6 +36,11 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
         myHost(myHost)
 {
     myHost->mainWindow=this;
+    connect(myHost,SIGNAL(programParkingModelChanged(QStandardItemModel*)),
+            this,SLOT(programParkingModelChanges(QStandardItemModel*)));
+    connect(myHost,SIGNAL(groupParkingModelChanged(QStandardItemModel*)),
+            this,SLOT(groupParkingModelChanges(QStandardItemModel*)));
+
     ui->setupUi(this);
     setWindowTitle(APP_NAME);
 
@@ -91,6 +96,7 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
 //            this, SLOT(UpdateCpuLoad()));
 
     mySceneView = new View::SceneView(myHost, myHost->objFactory, ui->hostView, ui->projectView, ui->programView, ui->groupView, this);
+    mySceneView->SetParkings(ui->programParkList, ui->groupParkList);
     mySceneView->setModel(myHost->GetModel());
 
     ui->solverView->setModel(&myHost->solver->model);
@@ -99,8 +105,8 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     myHost->Open();
 
     ui->treeHostModel->setModel(myHost->GetModel());
-    ui->listParking->setModel(myHost->GetParkingModel());
-    ui->listParking->setRootIndex(myHost->GetParkingModel()->invisibleRootItem()->child(0)->index());
+//    ui->listParking->setModel(myHost->GetParkingModel());
+//    ui->listParking->setRootIndex(myHost->GetParkingModel()->invisibleRootItem()->child(0)->index());
 
     readSettings();
 
@@ -119,6 +125,10 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     }
 
     updateRecentFileActions();
+
+
+
+
 }
 
 MainWindow::~MainWindow()
@@ -126,6 +136,7 @@ MainWindow::~MainWindow()
     if(ui)
         delete ui;
 }
+
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
@@ -352,16 +363,18 @@ void MainWindow::readSettings()
     listDocks << ui->dockMidiDevices;
     listDocks << ui->dockAudioDevices;
     listDocks << ui->dockVstBrowser;
-
     listDocks << ui->dockPrograms;
-    listDocks << ui->dockSolver;
-    listDocks << ui->dockHostModel;
-    listDocks << ui->dockParking;
-
 
     foreach(QDockWidget *dock, listDocks) {
         ui->menuView->addAction(dock->toggleViewAction());
         ui->mainToolBar->addAction(dock->toggleViewAction());
+    }
+
+    QList<QDockWidget*>listDocksNoToolbar;
+    listDocksNoToolbar << ui->dockSolver;
+    listDocksNoToolbar << ui->dockHostModel;
+    foreach(QDockWidget *dock, listDocksNoToolbar) {
+        ui->menuView->addAction(dock->toggleViewAction());
     }
 
     //recent setups
@@ -410,21 +423,25 @@ void MainWindow::readSettings()
 
 void MainWindow::resetSettings()
 {
-    QList<QDockWidget*>listDocks;
-    listDocks << ui->dockTools;
-    listDocks << ui->dockMidiDevices;
-    listDocks << ui->dockAudioDevices;
-    listDocks << ui->dockVstBrowser;
+    QList<QDockWidget*>listDocksVisible;
+    listDocksVisible << ui->dockTools;
+    listDocksVisible << ui->dockMidiDevices;
+    listDocksVisible << ui->dockAudioDevices;
+    listDocksVisible << ui->dockVstBrowser;
 
-    listDocks << ui->dockPrograms;
-    listDocks << ui->dockSolver;
-    listDocks << ui->dockHostModel;
-    listDocks << ui->dockParking;
+    listDocksVisible << ui->dockPrograms;
 
-
-    foreach(QDockWidget *dock, listDocks) {
+    foreach(QDockWidget *dock, listDocksVisible) {
         dock->setFloating(false);
         dock->setVisible(true);
+    }
+
+    QList<QDockWidget*>listDocksHidden;
+    listDocksHidden << ui->dockSolver;
+    listDocksHidden << ui->dockHostModel;
+    foreach(QDockWidget *dock, listDocksHidden) {
+        dock->setFloating(false);
+        dock->setVisible(false);
     }
 
     ui->Programs->resetSettings();
@@ -437,14 +454,12 @@ void MainWindow::resetSettings()
     addDockWidget(Qt::RightDockWidgetArea,  ui->dockPrograms);
     addDockWidget(Qt::RightDockWidgetArea,  ui->dockSolver);
     addDockWidget(Qt::RightDockWidgetArea,  ui->dockHostModel);
-    addDockWidget(Qt::RightDockWidgetArea,  ui->dockParking);
 
     tabifyDockWidget(ui->dockTools,ui->dockMidiDevices);
     tabifyDockWidget(ui->dockMidiDevices,ui->dockAudioDevices);
     tabifyDockWidget(ui->dockAudioDevices,ui->dockVstBrowser);
 
     tabifyDockWidget(ui->dockHostModel,ui->dockSolver);
-    tabifyDockWidget(ui->dockSolver,ui->dockParking);
 
     ui->actionHost_panel->setChecked(true);
     ui->actionProject_panel->setChecked(true);
@@ -535,6 +550,16 @@ void MainWindow::openRecentProject()
          updateRecentFileActions();
      }
  }
+
+void MainWindow::programParkingModelChanges(QStandardItemModel *model)
+{
+    ui->programParkList->setModel(model);
+}
+
+void MainWindow::groupParkingModelChanges(QStandardItemModel *model)
+{
+    ui->groupParkList->setModel(model);
+}
 
 void MainWindow::on_actionRefresh_Audio_devices_triggered()
 {

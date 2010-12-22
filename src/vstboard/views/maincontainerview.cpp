@@ -56,7 +56,10 @@ void MainContainerView::SetModelIndex(QPersistentModelIndex index)
     content->SetModelIndex(index);
 }
 
-
+void MainContainerView::SetParking(QWidget *parking)
+{
+    content->myParking = parking;
+}
 
 void MainContainerView::OnViewChanged(QRectF rect)
 {

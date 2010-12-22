@@ -64,7 +64,12 @@ QPointF ContainerContent::GetDropPos()
 
 void ContainerContent::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
 {
-    QGraphicsWidget::dragEnterEvent(event);
+    //accepts objects from parking
+    if(event->source() == myParking ) {
+        event->setDropAction(Qt::MoveAction);
+        QGraphicsWidget::dragEnterEvent(event);
+        return;
+    }
 
 #ifdef VSTSDK
     //accept DLL files
@@ -76,6 +81,7 @@ void ContainerContent::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
             fName = url.toLocalFile();
             info.setFile( fName );
             if ( info.isFile() && info.isReadable() && info.suffix()=="dll" ) {
+                event->setDropAction(Qt::CopyAction);
                 event->accept();
             }
         }
@@ -89,6 +95,7 @@ void ContainerContent::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
     if(event->mimeData()->hasFormat("application/x-audiointerface") ||
        event->mimeData()->hasFormat("application/x-midiinterface") ||
        event->mimeData()->hasFormat("application/x-tools")) {
+        event->setDropAction(Qt::CopyAction);
         event->accept();
         return;
     }

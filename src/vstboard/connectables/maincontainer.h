@@ -33,7 +33,7 @@ namespace Connectables {
 
         bool Close();
         void AddObject(QSharedPointer<Object> objPtr);
-        void RemoveObject(QSharedPointer<Object> objPtr);
+        void ParkObject(QSharedPointer<Object> objPtr);
 
         QSharedPointer<Object> bridgeSend;
         QSharedPointer<Object> bridgeReturn;

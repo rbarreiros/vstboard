@@ -24,6 +24,7 @@
 #include "object.h"
 #include "bridge.h"
 #include "containerprogram.h"
+#include "../models/hostmodel.h"
 
 #define LOADSAVE_STAGES 3
 
@@ -42,7 +43,8 @@ namespace Connectables {
         void ConnectBridges(QSharedPointer<Object> bridgeA, QSharedPointer<Object> bridgeB, bool hidden=true);
 
         virtual void AddObject(QSharedPointer<Object> objPtr);
-        virtual void RemoveObject(QSharedPointer<Object> objPtr);
+        virtual void AddParkedObject(QSharedPointer<Object> objPtr);
+        virtual void ParkObject(QSharedPointer<Object> objPtr);
         void RemoveCable(QModelIndex & index);
 
         QSharedPointer<Object> bridgeIn;
@@ -52,13 +54,19 @@ namespace Connectables {
         QDataStream & fromStream (QDataStream &);
 
         void SetContainerId(quint16 id);
-        void SetParentModeIndex(const QModelIndex &parentIndex);
+//        void SetParentModeIndex(const QModelIndex &parentIndex);
+
+        const QModelIndex &GetCablesIndex();
+
+        HostModel parkModel;
+
+        void OnChildDeleted(Object *obj);
 
     protected:
         QList< QSharedPointer< Object > >listStaticObjects;
 
         void AddChildObject(QSharedPointer<Object> objPtr);
-        void RemoveChildObject(QSharedPointer<Object> objPtr);
+        void ParkChildObject(QSharedPointer<Object> objPtr);
 
         void LoadFromProgram(ContainerProgram *prog);
         void SaveToProgram(ContainerProgram *prog);
@@ -66,6 +74,8 @@ namespace Connectables {
 
         ContainerProgram* currentProgram;
         QPersistentModelIndex cablesNode;
+
+        QList<Object*>listLoadedObjects;
 
         //store the objects while loading preventing them from being deleted since the objects are loaded before the programs using them
         QList< QSharedPointer< Object > >listLoadingObjects;

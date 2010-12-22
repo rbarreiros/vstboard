@@ -138,7 +138,6 @@ views/configdialog.cpp \
 ../vstboard/connectables/object.cpp \
 ../vstboard/connectables/container.cpp \
 ../vstboard/connectables/maincontainer.cpp \
-../vstboard/connectables/parkingcontainer.cpp \
 ../vstboard/pathsolver.cpp \
 ../vstboard/renderer.cpp \
 ../vstboard/models/hostmodel.cpp \
@@ -220,7 +219,6 @@ connectables/mididevice.h \
 ../vstboard/connectables/object.h \
 ../vstboard/connectables/container.h \
 ../vstboard/connectables/maincontainer.h \
-../vstboard/connectables/parkingcontainer.h \
 ../vstboard/pathsolver.h \
 ../vstboard/renderer.h \
 ../vstboard/models/hostmodel.h \

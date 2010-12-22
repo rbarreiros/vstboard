@@ -91,8 +91,6 @@ namespace Connectables {
 
         void NewRenderLoop();
 
-        virtual void SetParkingIndex(const QModelIndex &parentIndex);
-
         virtual QDataStream & toStream (QDataStream &) const;
         virtual QDataStream & fromStream (QDataStream &);
 
@@ -101,7 +99,8 @@ namespace Connectables {
 
         int GetLearningMode();
 
-
+        QStandardItem *GetParkingItem();
+        QStandardItem *GetFullItem();
         virtual void SetContainerId(quint16 id);
         virtual void SetParentModeIndex(const QModelIndex &parentIndex);
         virtual void UpdateModelNode();
@@ -127,7 +126,7 @@ namespace Connectables {
         virtual Pin* CreatePin(const ConnectionInfo &info, quint16 nb);
 
         MainHost *myHost;
-
+        bool parked;
     protected:
         QMap<QString, PinsList*>pinLists;
         PinsList *listAudioPinIn;
@@ -142,7 +141,7 @@ namespace Connectables {
 
         QMutex objMutex;
 
-        bool parked;
+
 
         //used by pathsolver
         SolverNode *solverNode;

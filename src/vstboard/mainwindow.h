@@ -44,7 +44,6 @@ public:
 //    static MainWindow *Get(QWidget *parent = 0);
     ~MainWindow();
 
-
 protected:
     void closeEvent(QCloseEvent *event);
     void changeEvent(QEvent *e);
@@ -75,6 +74,10 @@ private:
     Ui::MainWindow *ui;
 
     MainHost *myHost;
+
+public slots:
+    void programParkingModelChanges(QStandardItemModel *model);
+    void groupParkingModelChanges(QStandardItemModel *model);
 
 private slots:
     void on_actionRestore_default_layout_triggered();

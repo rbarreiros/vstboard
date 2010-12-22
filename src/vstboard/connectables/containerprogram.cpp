@@ -21,7 +21,6 @@
 #include "containerprogram.h"
 #include "mainhost.h"
 #include "container.h"
-#include "parkingcontainer.h"
 #include "object.h"
 
 using namespace Connectables;
@@ -92,8 +91,7 @@ void ContainerProgram::Load(int progId)
         if(myHost->objFactory->GetObjectFromId(cab->GetInfoOut().objId) &&
            myHost->objFactory->GetObjectFromId(cab->GetInfoIn().objId)) {
 
-            if(container->cablesNode.isValid())
-                cab->AddToParentNode(container->cablesNode);
+            cab->AddToParentNode(container->GetCablesIndex());
 
             myHost->OnCableAdded(cab->GetInfoOut(),cab->GetInfoIn());
         } else {
@@ -119,7 +117,7 @@ void ContainerProgram::Unload()
 {
     foreach(Cable *cab, listCables) {
         myHost->OnCableRemoved(cab->GetInfoOut(),cab->GetInfoIn());
-        cab->RemoveFromParentNode(container->cablesNode);
+        cab->RemoveFromParentNode(container->GetCablesIndex());
     }
 
     foreach(QSharedPointer<Object> obj, listObjects) {
@@ -128,7 +126,7 @@ void ContainerProgram::Unload()
     }
 
     foreach(QSharedPointer<Object> obj, listObjects) {
-        container->RemoveChildObject(obj);
+        container->ParkChildObject(obj);
     }
 }
 
@@ -171,7 +169,7 @@ void ContainerProgram::RemoveObject(QSharedPointer<Object> objPtr)
 {
     RemoveCableFromObj(objPtr->GetIndex());
     listObjects.removeAll(objPtr);
-    container->RemoveChildObject(objPtr);
+    container->ParkChildObject(objPtr);
 }
 
 void ContainerProgram::AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin, bool hidden)
@@ -182,8 +180,8 @@ void ContainerProgram::AddCable(const ConnectionInfo &outputPin, const Connectio
     Cable *cab = new Cable(myHost,outputPin,inputPin);
     listCables << cab;
 
-    if(!hidden && container && container->cablesNode.isValid())
-        cab->AddToParentNode(container->cablesNode);
+    if(!hidden && container)
+        cab->AddToParentNode(container->GetCablesIndex());
 
     myHost->OnCableAdded(outputPin,inputPin);
 }
@@ -203,7 +201,7 @@ void ContainerProgram::RemoveCable(const ConnectionInfo &outputPin, const Connec
         Cable *cab = listCables.at(i);
         if(cab->GetInfoOut()==outputPin && cab->GetInfoIn()==inputPin) {
             listCables.removeAt(i);
-            cab->RemoveFromParentNode(container->cablesNode);
+            cab->RemoveFromParentNode(container->GetCablesIndex());
             myHost->OnCableRemoved(outputPin,inputPin);
             delete cab;
             return;
@@ -219,7 +217,7 @@ void ContainerProgram::RemoveCableFromPin(const ConnectionInfo &pin)
         Cable *cab = listCables.at(i);
         if(cab->GetInfoOut()==pin || cab->GetInfoIn()==pin) {
             listCables.removeAt(i);
-            cab->RemoveFromParentNode(container->cablesNode);
+            cab->RemoveFromParentNode(container->GetCablesIndex());
             myHost->OnCableRemoved(cab->GetInfoOut(),cab->GetInfoIn());
             delete cab;
         }
@@ -235,7 +233,7 @@ void ContainerProgram::RemoveCableFromObj(int objId)
         if(cab->GetInfoOut().objId==objId || cab->GetInfoIn().objId==objId ||
            cab->GetInfoOut().container==objId || cab->GetInfoIn().container==objId) {
             listCables.removeAt(i);
-            cab->RemoveFromParentNode(container->cablesNode);
+            cab->RemoveFromParentNode(container->GetCablesIndex());
             myHost->OnCableRemoved(cab->GetInfoOut(),cab->GetInfoIn());
             delete cab;
         }

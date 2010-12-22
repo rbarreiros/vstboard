@@ -69,6 +69,10 @@ private:
 
     MainHost * myHost;
 
+public slots:
+    void programParkingModelChanges(QStandardItemModel *model);
+    void groupParkingModelChanges(QStandardItemModel *model);
+
 private slots:
     void on_actionRestore_default_layout_triggered();
     void on_actionSave_Setup_As_triggered();

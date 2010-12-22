@@ -491,39 +491,6 @@ void VstPlugin::EditIdle()
         EffEditIdle();
 }
 
-//void VstPlugin::UpdateEditorNode()
-//{
-////    bool vis=false;
-////    if(editorWnd && editorWnd->isVisible())
-////        vis=true;
-
-////    if(modelEditor) {
-////        modelEditor->setData(vis,UserRoles::value);
-////        if(backgroundPic)
-////            modelEditor->setData(objectName(), UserRoles::objInfo);
-////    }
-//    if(modelLearningMode && editorWnd)
-//        modelLearningMode->setData(parameterLearning, UserRoles::value);
-//}
-
-void VstPlugin::SetParentModeIndex(const QModelIndex &parentIndex)
-{
-    Object::SetParentModeIndex(parentIndex);
-//    if(hasEditor) {
-//        QStandardItem *item = MainHost::GetModel()->itemFromIndex(modelIndex);
-//        item->setData(editorWnd->isVisible(), UserRoles::editorVisible);
-//        item->setData(false,UserRoles::paramLearning);
-//        item->setData(pEffect->uniqueID, UserRoles::editorImage);
-//    }
-}
-
-void VstPlugin::SetParkingIndex(const QModelIndex &parentIndex)
-{
-//    if(editorWnd && editorWnd->isVisible())
-//        editorWnd->close();
-    Object::SetParkingIndex(parentIndex);
-}
-
 QString VstPlugin::GetParameterName(ConnectionInfo pinInfo)
 {
     if(pinInfo.pinNumber < pEffect->numParams)

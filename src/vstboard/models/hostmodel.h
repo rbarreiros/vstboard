@@ -33,7 +33,7 @@ public:
 
     QMimeData * mimeData ( const QModelIndexList & indexes ) const;
 
-    QStringList mimeTypes () const;
+//    QStringList mimeTypes () const;
     bool dropMimeData ( const QMimeData * data, Qt::DropAction action, int row, int column, const QModelIndex & parent );
     bool setData ( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole );
 //    bool setItemData ( const QModelIndex & index, const QMap<int, QVariant> & roles );

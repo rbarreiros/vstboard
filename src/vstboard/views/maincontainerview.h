@@ -32,7 +32,7 @@ namespace View {
     public:
         explicit MainContainerView(MainHost *myHost,QAbstractItemModel *model);
         void SetModelIndex(QPersistentModelIndex index);
-
+        void SetParking(QWidget *parking);
         BridgeView *bridgeSend;
         BridgeView *bridgeReturn;
 

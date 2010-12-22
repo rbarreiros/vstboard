@@ -76,9 +76,9 @@ void MainContainer::AddObject(QSharedPointer<Object> objPtr)
 
 }
 
-void MainContainer::RemoveObject(QSharedPointer<Object> objPtr)
+void MainContainer::ParkObject(QSharedPointer<Object> objPtr)
 {
-    Container::RemoveObject(objPtr);
+    Container::ParkObject(objPtr);
 
     if(objPtr==bridgeSend)
         bridgeSend.clear();
