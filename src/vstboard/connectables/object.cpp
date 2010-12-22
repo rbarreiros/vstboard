@@ -386,12 +386,9 @@ void Object::ToggleEditor(bool visible)
     static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::editorVisible))->ChangeValue(visible);
 }
 
-int Object::GetLearningMode()
+LearningMode::Enum Object::GetLearningMode()
 {
-//    if(!modelIndex.isValid())
-//        return false;
-//    return myHost->GetModel()->data(modelIndex, UserRoles::paramLearning).toBool();
-    return ( static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::learningMode))->GetIndex());
+    return (LearningMode::Enum)static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::learningMode))->GetIndex();
 }
 
 void Object::SetContainerAttribs(const ObjectContainerAttribs &attr)
@@ -480,8 +477,6 @@ Pin* Object::CreatePin(const ConnectionInfo &info, quint16 nb)
             return 0;
     }
 
-    if(newPin)
-        newPin->SetContainerId(containerId);
     return newPin;
 }
 

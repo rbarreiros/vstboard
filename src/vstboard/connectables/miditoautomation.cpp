@@ -100,10 +100,16 @@ void MidiToAutomation::ChangeValue(int ctrl, int value) {
         return;
     }
 
-    listChanged.insert(ctrl,value);
-
-    if(!listParameterPinOut->listPins.contains(ctrl))
-        listParameterPinOut->AsyncAddPin(ctrl);
+    switch(GetLearningMode()) {
+        case LearningMode::unlearn :
+            listParameterPinOut->AsyncRemovePin(ctrl);
+            break;
+        case LearningMode::learn :
+            listParameterPinOut->AsyncAddPin(ctrl);
+        case LearningMode::off :
+            listChanged.insert(ctrl,value);
+            break;
+    }
 }
 
 Pin* MidiToAutomation::CreatePin(const ConnectionInfo &info, quint16 nb)
@@ -111,6 +117,11 @@ Pin* MidiToAutomation::CreatePin(const ConnectionInfo &info, quint16 nb)
     Pin *newPin = Object::CreatePin(info,nb);
     if(newPin)
         return newPin;
+
+    if(info.type!=PinType::Parameter) {
+        debug("MidiToAutomation::CreatePin PinType")
+        return 0;
+    }
 
     switch(info.direction) {
         case PinDirection::Output :
@@ -135,8 +146,5 @@ Pin* MidiToAutomation::CreatePin(const ConnectionInfo &info, quint16 nb)
             return 0;
             break;
     }
-
-    if(newPin)
-        newPin->SetContainerId(containerId);
     return newPin;
 }

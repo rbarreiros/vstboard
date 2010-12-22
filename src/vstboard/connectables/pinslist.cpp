@@ -38,6 +38,8 @@ PinsList::PinsList(MainHost *myHost, Object *parent) :
 {
     connect(this,SIGNAL(PinAdded(int)),
             this,SLOT(AddPin(int)));
+    connect(this,SIGNAL(PinRemoved(int)),
+            this,SLOT(RemovePin(int)));
 }
 
 void PinsList::SetContainerId(quint16 id)
@@ -165,6 +167,13 @@ void PinsList::AsyncAddPin(int nb)
     emit PinAdded(nb);
 }
 
+void PinsList::AsyncRemovePin(int nb)
+{
+    if(!listPins.contains(nb))
+        return;
+    emit PinRemoved(nb);
+}
+
 Pin * PinsList::AddPin(int nb)
 {
     if(listPins.contains(nb))
@@ -183,6 +192,14 @@ Pin * PinsList::AddPin(int nb)
         newPin->SetParentModelIndex(modelList);
 
     return newPin;
+}
+
+void PinsList::RemovePin(int nb)
+{
+    if(!listPins.contains(nb))
+        return;
+
+    delete listPins.take(nb);
 }
 
 QDataStream & PinsList::toStream(QDataStream & out) const

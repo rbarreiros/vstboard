@@ -28,21 +28,19 @@ VstAutomation::VstAutomation(MainHost *myHost,int index) :
         Object(myHost,index, ObjectInfo(NodeType::object, ObjType::VstAutomation, tr("VstAutomation")) ),
         numberOfPins(VST_AUTOMATION_DEFAULT_NB_PINS)
 {
+    for(int i=0; i<VST_AUTOMATION_DEFAULT_NB_PINS; i++) {
+        listParameterPinIn->AddPin(i);
+        listParameterPinOut->AddPin(i);
+    }
+
     for(int i=0;i<128;i++) {
         listValues << i;
     }
-
-    bool visible=true;
-    for(int i=0;i<128;i++) {
-        if(i==VST_AUTOMATION_DEFAULT_NB_PINS) visible=false;
-        listParameterPinOut->listPins.insert(i,new ParameterPinOut(this,i,0,&listValues,visible,QString::number(i)));
-        listParameterPinIn->listPins.insert(i,new ParameterPinIn(this,i,0,&listValues,visible,QString::number(i)));
-    }
-
     ParameterPinIn *nbPin = new ParameterPinIn(this,FixedPinNumber::numberOfPins,VST_AUTOMATION_DEFAULT_NB_PINS,&listValues,true,tr("NbPins"));
     nbPin->SetAlwaysVisible(true);
     listParameterPinIn->listPins.insert(FixedPinNumber::numberOfPins, nbPin);
 
+    static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::learningMode))->SetAlwaysVisible(true);
 }
 
 VstAutomation::~VstAutomation()
@@ -55,67 +53,64 @@ void VstAutomation::Render()
 {
 //    QMutexLocker l(&objMutex);
 
-    if(!listChangedByHost.isEmpty()) {
-        QHash<int,float>::const_iterator i = listChangedByHost.constBegin();
-        while(i!=listChangedByHost.constEnd()) {
+    if(!listChanged.isEmpty()) {
+        Vst *vst=myHost->myVstPlugin;
+        QHash<int,float>::const_iterator i = listChanged.constBegin();
+        while(i!=listChanged.constEnd()) {
             if(listParameterPinOut->listPins.contains(i.key())) {
-                static_cast<ParameterPin*>( listParameterPinOut->listPins.value(i.key()) )->OnValueChanged(i.value());
+                static_cast<ParameterPin*>( listParameterPinOut->listPins.value(i.key()) )->ChangeValue(i.value());
             }
+            vst->beginEdit(i.key());
+            vst->setParameterAutomated(i.key(),i.value());
+            vst->endEdit(i.key());
             ++i;
         }
-        listChangedByHost.clear();
-    }
-
-    if(!listChangedByPin.isEmpty()) {
-        Vst *vst=myHost->myVstPlugin;
-        QHash<int,float>::const_iterator j = listChangedByPin.constBegin();
-        while(j!=listChangedByPin.constEnd()) {
-            if(listParameterPinIn->listPins.contains(j.key())) {
-                vst->beginEdit(j.key());
-                vst->setParameterAutomated(j.key(),j.value());
-                vst->endEdit(j.key());
-            }
-            ++j;
-        }
-        listChangedByPin.clear();
+        listChanged.clear();
     }
 }
 
 void VstAutomation::ValueFromHost(int pinNum, float value)
 {
-    listChangedByHost.insert(pinNum,value);
+    switch(GetLearningMode()) {
+        case LearningMode::unlearn :
+            listParameterPinOut->AsyncRemovePin(pinNum);
+            listParameterPinIn->AsyncRemovePin(pinNum);
+            break;
+        case LearningMode::learn :
+            listParameterPinOut->AsyncAddPin(pinNum);
+            listParameterPinIn->AsyncAddPin(pinNum);
+        case LearningMode::off :
+            listChanged.insert(pinNum,value);
+            break;
+    }
 }
 
 void VstAutomation::OnParameterChanged(ConnectionInfo pinInfo, float value)
 {
     Object::OnParameterChanged(pinInfo,value);
     if(pinInfo.pinNumber==FixedPinNumber::numberOfPins) {
-        OnNumberOfPinsChanged( static_cast<ParameterPin*>(listParameterPinIn->listPins.value(FixedPinNumber::numberOfPins) )->GetIndex() );
+        int nbPins=static_cast<ParameterPin*>(listParameterPinIn->listPins.value(FixedPinNumber::numberOfPins) )->GetIndex();
+
+        if(nbPins>numberOfPins) {
+            for(int i=numberOfPins; i<nbPins; i++) {
+                listParameterPinIn->AddPin(i);
+                listParameterPinOut->AddPin(i);
+            }
+        }
+
+        if(nbPins<numberOfPins) {
+            for(int i=nbPins; i<numberOfPins; i++) {
+                listParameterPinIn->RemovePin(i);
+                listParameterPinOut->RemovePin(i);
+            }
+        }
+
+        numberOfPins=nbPins;
         return;
     }
 
-//    if(pinInfo.direction==PinDirection::Input)
-        listChangedByPin.insert(pinInfo.pinNumber,value);
-}
-
-void VstAutomation::OnNumberOfPinsChanged(int newNb)
-{
-    if(numberOfPins==newNb)
-        return;
-
-    if(newNb<numberOfPins) {
-        for(int i=newNb; i<numberOfPins; i++) {
-            listParameterPinOut->listPins.value(i)->SetVisible(false);
-            listParameterPinIn->listPins.value(i)->SetVisible(false);
-        }
-    }
-    if(newNb>numberOfPins){
-        for(int i=numberOfPins;i<newNb;i++) {
-            listParameterPinOut->listPins.value(i)->SetVisible(true);
-            listParameterPinIn->listPins.value(i)->SetVisible(true);
-        }
-    }
-    numberOfPins=newNb;
+    if(pinInfo.direction==PinDirection::Input && pinInfo.pinNumber<200)
+        listChanged.insert(pinInfo.pinNumber,value);
 }
 
 bool VstAutomation::Close()
@@ -128,4 +123,31 @@ bool VstAutomation::Open()
 {
     myHost->myVstPlugin->addVstAutomation(this);
     return Object::Open();
+}
+
+Pin* VstAutomation::CreatePin(const ConnectionInfo &info, quint16 nb)
+{
+    Pin *newPin = Object::CreatePin(info,nb);
+    if(newPin)
+        return newPin;
+
+    if(info.type!=PinType::Parameter) {
+        debug("VstAutomation::CreatePin PinType")
+        return 0;
+    }
+
+    switch(info.direction) {
+        case PinDirection::Output :
+            newPin = new ParameterPinOut(this,nb,0,true,QString("autom%1").arg(nb),false);
+            break;
+        case PinDirection::Input :
+            newPin = new ParameterPinIn(this,nb,0,true,QString("autom%1").arg(nb),false);
+            break;
+
+        default :
+            debug("VstAutomation::CreatePin PinDirection")
+            return 0;
+            break;
+    }
+    return newPin;
 }

@@ -68,6 +68,7 @@ MainWindow::MainWindow(MainHost * myHost, QWidget *parent) :
 #endif
 
     mySceneView = new View::SceneView(myHost, myHost->objFactory, ui->hostView, ui->projectView, ui->programView, ui->groupView, this);
+    mySceneView->SetParkings(ui->programParkList, ui->groupParkList);
     mySceneView->setModel(myHost->GetModel());
 
     ui->solverView->setModel(&myHost->solver->model);

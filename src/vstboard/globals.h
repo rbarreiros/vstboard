@@ -40,19 +40,14 @@ namespace UserRoles {
         stepSize,
         falloff,
         position,
-//        size,
         parking,
         objInfo,
         nodeType,
-//        hasEditor,
-//        editorVisible,
         editorImage,
         editorPos,
         editorSize,
         editorVScroll,
         editorHScroll,
-//        canLearn,
-//        paramLearning,
         errorMessage
     };
 }
@@ -65,8 +60,6 @@ namespace NodeType {
         listPin,
         pin,
         cable,
-//        editor,
-//        learning,
         program,
         programGroup,
         pinLimit
@@ -194,6 +187,14 @@ namespace DefaultLayers {
         host,
         project,
         program,
+    };
+}
+
+namespace LearningMode {
+    enum Enum {
+        off,
+        learn,
+        unlearn
     };
 }
 

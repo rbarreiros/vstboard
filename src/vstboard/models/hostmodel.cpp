@@ -273,7 +273,6 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
 
 bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int role )
 {
-    QStandardItem *item = itemFromIndex(index);
     ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
     switch(info.nodeType) {
         case NodeType::object :
@@ -314,7 +313,10 @@ bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int
                         return false;
                     }
                     pin->ChangeValue( newVal );
-                    item->setData(newVal,role);
+
+                    QStandardItem *item = itemFromIndex(index);
+                    if(item)
+                        item->setData(newVal,role);
                     return true;
                 }
             }
@@ -328,7 +330,10 @@ bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int
                     Connectables::ParameterPin* pin = static_cast<Connectables::ParameterPin*>(myHost->objFactory->GetPin(pinInfo));
                     ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
                     pin->SetLimit(info.objType,value.toFloat());
-                    item->setData(value,role);
+
+                    QStandardItem *item = itemFromIndex(index);
+                    if(item)
+                        item->setData(value,role);
                 }
             }
         }

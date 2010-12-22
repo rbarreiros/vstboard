@@ -39,12 +39,10 @@ namespace Connectables {
         bool Close();
         void Render();
         void ValueFromHost(int pinNum, float value);
-
+        Pin* CreatePin(const ConnectionInfo &info, quint16 nb);
     protected:
-        void OnNumberOfPinsChanged(int newNb);
         QList<QVariant> listValues;
-        QHash<int,float>listChangedByPin;
-        QHash<int,float>listChangedByHost;
+        QHash<int,float>listChanged;
         int numberOfPins;
 
     public slots:

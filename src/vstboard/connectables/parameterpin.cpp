@@ -44,7 +44,7 @@ ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int num
         outStepIndex(0),
         outValue(.0f)
 {
-    SetVisible(false);
+    SetVisible(defaultVisible);
 
     value = defaultValue;
     falloff = 0.0f;
@@ -72,7 +72,7 @@ ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int num
         outStepIndex(0),
         outValue(.0f)
 {
-    SetVisible(false);
+    SetVisible(defaultVisible);
     falloff = 0.0f;
     setObjectName(name);
 
@@ -80,7 +80,7 @@ ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int num
     stepSize=1.0f/(listValues->size()-1);
     stepIndex=listValues->indexOf(defaultVariantValue);
     defaultIndex=stepIndex;
-    OnValueChanged( stepIndex*stepSize );
+    OnValueChanged( .0f);//stepIndex*stepSize );
     loading=false;
 }
 
@@ -120,7 +120,8 @@ void ParameterPin::ChangeValue(float val, bool fromObj)
     val = std::min(val,1.0f);
     val = std::max(val,.0f);
 
-    if(!loading && val==value)
+
+    if(!loading && std::abs(val-value)<0.01f)
         return;
 
     OnValueChanged(val);
@@ -189,7 +190,8 @@ void ParameterPin::Load(const ObjectParameter &param)
 
 void ParameterPin::OnValueChanged(float val)
 {
-    if(value!=val)
+//    float test = std::abs(value-val);
+//    if(std::abs(value-val)>0.001f)
         valueChanged=true;
 
     value=val;

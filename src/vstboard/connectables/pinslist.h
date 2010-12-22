@@ -48,6 +48,7 @@ namespace Connectables {
         void UpdateModelNode(QStandardItem *parentNode=0);
         void ConnectAllTo(Container* container,PinsList *other, bool hidden=false);
         void AsyncAddPin(int nb);
+        void AsyncRemovePin(int nb);
 
         AudioBuffer *GetBuffer(int pinNumber);
 
@@ -66,9 +67,11 @@ namespace Connectables {
 
     signals :
         void PinAdded(int nb);
+        void PinRemoved(int nb);
 
     public slots:
         Pin * AddPin(int nb);
+        void RemovePin(int nb);
     };
 }
 

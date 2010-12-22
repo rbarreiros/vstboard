@@ -97,7 +97,7 @@ namespace Connectables {
         inline void Lock() { objMutex.lock();}
         inline void Unlock() { objMutex.unlock();}
 
-        int GetLearningMode();
+        LearningMode::Enum GetLearningMode();
 
         QStandardItem *GetParkingItem();
         QStandardItem *GetFullItem();
@@ -127,6 +127,7 @@ namespace Connectables {
 
         MainHost *myHost;
         bool parked;
+        quint16 containerId;
     protected:
         QMap<QString, PinsList*>pinLists;
         PinsList *listAudioPinIn;
@@ -157,7 +158,7 @@ namespace Connectables {
         bool progIsDirty;
 
         bool closed;
-        quint16 containerId;
+
         int currentProgId;
 
         ObjectInfo objInfo;

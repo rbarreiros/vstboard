@@ -51,7 +51,7 @@ Vst::Vst (audioMasterCallback audioMaster)
     char str[64];
     getHostVendorString(str);
     getHostProductString(str);
-    VstInt32 hostVer = getHostVendorVersion();
+    //VstInt32 hostVer = getHostVendorVersion();
 
    /* long hostSendVstEvents = canHostDo("sendVstEvents");
     long hostSendVstMidiEvent = canHostDo("sendVstMidiEvent");
@@ -248,7 +248,7 @@ float Vst::getParameter (VstInt32 index)
 
 void Vst::getParameterName (VstInt32 index, char* label)
 {
-    vst_strncpy (label, "nd", kVstMaxParamStrLen);
+    vst_strncpy (label, QString("p%1").arg(index).toAscii(), kVstMaxParamStrLen);
 }
 
 void Vst::getParameterDisplay (VstInt32 index, char* text)

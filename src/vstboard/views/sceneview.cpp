@@ -393,30 +393,6 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                         this,SLOT(graphicObjectRemoved(QObject*)));
                 break;
             }
-//            case NodeType::editor :
-//            {
-//                ObjectView *parentView = static_cast<ObjectView*>(hashItems.value(parent,0));
-//                if(!parentView) {
-//                    debug("SceneView::rowsInserted editor parent not found")
-//                            continue;
-//                }
-
-//                ObjectView *objView = static_cast<ObjectView*>(parentView);
-//                objView->SetEditorIndex(index);
-//                break;
-//            }
-//            case NodeType::learning :
-//            {
-//                ObjectView *parentView = static_cast<ObjectView*>(hashItems.value(parent,0));
-//                if(!parentView) {
-//                    debug("SceneView::rowsInserted learning parent not found")
-//                            continue;
-//                }
-
-//                ObjectView *objView = static_cast<ObjectView*>(parentView);
-//                objView->SetLearningIndex(index);
-//                break;
-//            }
             case NodeType::listPin :
             {
 //                ObjectInfo infoParent = parent.data(UserRoles::objInfo).value<ObjectInfo>();

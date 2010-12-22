@@ -34,6 +34,7 @@ Pin::Pin(Object *parent,PinType::Enum type, PinDirection::Enum direction, int nu
     closed(false),
     valueChanged(false)
 {
+    connectInfo.container = parent->containerId;
 //    setObjectName(QString("pin:%1:%2:%3:%4").arg(connectInfo.objId).arg(connectInfo.type).arg(connectInfo.direction).arg(connectInfo.pinNumber));
 }
 

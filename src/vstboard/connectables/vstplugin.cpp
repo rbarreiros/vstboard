@@ -520,13 +520,19 @@ long VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr,
     switch(opcode) {
         case audioMasterAutomate : //0
             //create the parameter pin if needed
-            if(!listParameterPinIn->listPins.contains(index)) {
-                if(!listParameterPinIn->AddPin(index)) {
-                    debug("VstPlugin::OnMasterCallback pin not created")
-                        return 0;
-                }
+            switch(GetLearningMode()) {
+                case LearningMode::unlearn :
+                    listParameterPinIn->AsyncRemovePin(index);
+                    break;
+                case LearningMode::learn :
+                    listParameterPinIn->AsyncAddPin(index);
+                case LearningMode::off :
+                    if(listParameterPinIn->listPins.contains(index))
+                        static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(index))->ChangeValue(opt);
+                    break;
             }
-            static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(index))->ChangeValue(opt);
+
+
             break;
 
         case audioMasterCurrentId : //2
@@ -596,7 +602,7 @@ Pin* VstPlugin::CreatePin(const ConnectionInfo &info, quint16 nb)
             if(nb==FixedPinNumber::vstProgNumber)
                 newPin = new ParameterPinIn(this,nb,0,&listValues,true,"prog",false);
             else
-                newPin = new ParameterPinIn(this,nb,EffGetParameter(nb),&listValues,true,EffGetParamName(nb),true);
+                newPin = new ParameterPinIn(this,nb,EffGetParameter(nb),true,EffGetParamName(nb),true);
             break;
 
         default :
@@ -605,7 +611,5 @@ Pin* VstPlugin::CreatePin(const ConnectionInfo &info, quint16 nb)
             break;
     }
 
-    if(newPin)
-        newPin->SetContainerId(containerId);
     return newPin;
 }
