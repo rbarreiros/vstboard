@@ -132,25 +132,10 @@ void ObjectView::UpdateModelIndex()
         titleText->setText(objIndex.data(Qt::DisplayRole).toString());
     }
 
-//    actEditor->setEnabled( objIndex.data(UserRoles::hasEditor).toBool() );
-//    actLearn->setEnabled( objIndex.data(UserRoles::canLearn).toBool() );
-
-//    if(objIndex.data(UserRoles::editorVisible).isValid()) {
-//        actEditor->setChecked( objIndex.data(UserRoles::editorVisible).toBool() );
-//    }
-
-//    if(objIndex.data(UserRoles::paramLearning).isValid()) {
-//        actLearn->setChecked( objIndex.data(UserRoles::paramLearning).toBool() );
-//    }
-
     if(objIndex.data(UserRoles::errorMessage).isValid()) {
         QString err = objIndex.data(UserRoles::errorMessage).toString();
         SetErrorMessage( err );
     }
-
-//    if(objIndex.data(UserRoles::editorImage).isValid()) {
-//        SetBackground( objIndex.data(UserRoles::editorImage).toString() );
-//    }
 }
 
 void ObjectView::SetErrorMessage(const QString & msg)

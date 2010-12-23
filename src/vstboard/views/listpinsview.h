@@ -31,6 +31,7 @@ namespace View {
         ListPinsView(QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
         QGraphicsLinearLayout *layout;
         void UpdateCablesPosition();
+        int GetPinPosition(int newPinNumber);
     };
 }
 

@@ -496,7 +496,9 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                         this,SLOT(graphicObjectRemoved(QObject*)));
                 mapConnectionInfo.insert(pinInfo,index);
 
-                parentList->layout->addItem(pinView);
+                int pinPlace = parentList->GetPinPosition(pinInfo.pinNumber);
+                parentList->layout->insertItem(pinPlace, pinView);
+
                 parentList->layout->setAlignment(pinView,Qt::AlignTop);
                 connect(pinView, SIGNAL(ConnectPins(ConnectionInfo,ConnectionInfo)),
                         this, SLOT(ConnectPins(ConnectionInfo,ConnectionInfo)));

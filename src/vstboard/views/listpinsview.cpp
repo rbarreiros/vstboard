@@ -40,3 +40,13 @@ void ListPinsView::UpdateCablesPosition()
         static_cast<PinView*>(layout->itemAt(i))->UpdateCablesPosition();
     }
 }
+
+int ListPinsView::GetPinPosition(int newPinNumber)
+{
+    for(int i=0; i<layout->count(); i++) {
+        if( static_cast<PinView*>(layout->itemAt(i))->GetConnectionInfo().pinNumber > newPinNumber) {
+            return i;
+        }
+    }
+    return layout->count();
+}
