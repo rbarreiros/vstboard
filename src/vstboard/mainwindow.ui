@@ -383,8 +383,6 @@
      <string>Edit</string>
     </property>
     <addaction name="actionConfig"/>
-    <addaction name="actionShortcuts"/>
-    <addaction name="actionDelete"/>
     <addaction name="actionRefresh_Audio_devices"/>
     <addaction name="actionRefresh_Midi_devices"/>
    </widget>

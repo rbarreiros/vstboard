@@ -388,6 +388,9 @@ void Object::ToggleEditor(bool visible)
 
 LearningMode::Enum Object::GetLearningMode()
 {
+    if(!listParameterPinIn->listPins.contains(FixedPinNumber::learningMode))
+        return LearningMode::off;
+
     return (LearningMode::Enum)static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::learningMode))->GetIndex();
 }
 

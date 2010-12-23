@@ -33,6 +33,10 @@ Container::Container(MainHost *myHost,int index, const ObjectInfo &info) :
     progToSet(-1)
 {
     LoadProgram(TEMP_PROGRAM);
+    connect(myHost,SIGNAL(BufferSizeChanged(ulong)),
+            this,SLOT(SetBufferSize(ulong)));
+    connect(myHost,SIGNAL(SampleRateChanged(float)),
+            this,SLOT(SetSampleRate(float)));
 }
 
 Container::~Container()

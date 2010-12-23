@@ -581,7 +581,14 @@ void VstPlugin::OnParameterChanged(ConnectionInfo pinInfo, float value)
         if(pinInfo.pinNumber==FixedPinNumber::vstProgNumber) {
             //program pin
             EffSetProgram( static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::vstProgNumber))->GetIndex() );
-        } else {
+            return;
+        }
+
+        if(pinInfo.pinNumber<200) {
+            if(GetLearningMode() == LearningMode::unlearn) {
+                listParameterPinIn->AsyncRemovePin(pinInfo.pinNumber);
+                return;
+            }
             if(EffCanBeAutomated(pinInfo.pinNumber)!=1) {
                 debug2(<< "vst parameter can't be automated " << pinInfo.pinNumber)
                 return;

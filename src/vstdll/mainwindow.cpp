@@ -36,7 +36,13 @@ MainWindow::MainWindow(MainHost * myHost, QWidget *parent) :
             this,SLOT(programParkingModelChanges(QStandardItemModel*)));
     connect(myHost,SIGNAL(groupParkingModelChanged(QStandardItemModel*)),
             this,SLOT(groupParkingModelChanges(QStandardItemModel*)));
+
     ui->setupUi(this);
+
+    ui->actionConfig->setDisabled(true);
+    ui->actionRefresh_Audio_devices->setDisabled(true);
+    ui->actionRefresh_Midi_devices->setDisabled(true);
+
     setWindowTitle(APP_NAME);
 
     connect(ui->mainToolBar, SIGNAL(visibilityChanged(bool)),

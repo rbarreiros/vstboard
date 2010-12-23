@@ -210,7 +210,7 @@ void ParameterPin::OnValueChanged(float val)
 
     if(!loading) {
 
-        if(visibilityCanChange) {
+        /*if(visibilityCanChange) {
             //parent is learning
             if(parent->GetLearningMode()==1) {
                 if(!visible)
@@ -221,7 +221,7 @@ void ParameterPin::OnValueChanged(float val)
             if(parent->GetLearningMode()==2)
                 if(visible)
                     SetVisible(false);
-        }
+        }*/
 
         if(!dirty) {
             dirty=true;
