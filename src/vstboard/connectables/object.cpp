@@ -427,7 +427,7 @@ void Object::GetContainerAttribs(ObjectContainerAttribs &attr)
 
 }
 
-Pin* Object::CreatePin(const ConnectionInfo &info, quint16 nb)
+Pin* Object::CreatePin(const ConnectionInfo &info)
 {
     Pin *newPin=0;
 
@@ -435,17 +435,17 @@ Pin* Object::CreatePin(const ConnectionInfo &info, quint16 nb)
         case PinDirection::Input :
             switch(info.type) {
                 case PinType::Audio :
-                    newPin = new AudioPinIn(this,nb);
+                    newPin = new AudioPinIn(this,info.pinNumber);
                     static_cast<AudioPinIn*>(newPin)->buffer->SetSize(myHost->GetBufferSize());
                     break;
                 case PinType::Midi :
-                    newPin = new MidiPinIn(this,nb);
+                    newPin = new MidiPinIn(this,info.pinNumber);
                     break;
                 case PinType::Bridge :
-                    newPin = new BridgePinIn(this,nb,info.bridge);
+                    newPin = new BridgePinIn(this,info.pinNumber,info.bridge);
                     break;
                 case PinType::Parameter :
-                    switch(nb) {
+                    switch(info.pinNumber) {
                         case FixedPinNumber::editorVisible :
                             newPin = new ParameterPinIn(this,FixedPinNumber::editorVisible,"hide",&listEditorVisible,false,tr("Editor"));
                             break;
@@ -462,14 +462,14 @@ Pin* Object::CreatePin(const ConnectionInfo &info, quint16 nb)
         case PinDirection::Output :
             switch(info.type) {
                 case PinType::Audio :
-                    newPin = new AudioPinOut(this,nb);
+                    newPin = new AudioPinOut(this,info.pinNumber);
                     static_cast<AudioPinOut*>(newPin)->buffer->SetSize(myHost->GetBufferSize());
                     break;
                 case PinType::Midi :
-                    newPin = new MidiPinOut(this,nb);
+                    newPin = new MidiPinOut(this,info.pinNumber);
                     break;
                 case PinType::Bridge :
-                    newPin = new BridgePinOut(this,nb,info.bridge);
+                    newPin = new BridgePinOut(this,info.pinNumber,info.bridge);
                     break;
                 default :
                     return 0;

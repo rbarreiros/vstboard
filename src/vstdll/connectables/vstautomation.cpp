@@ -125,9 +125,9 @@ bool VstAutomation::Open()
     return Object::Open();
 }
 
-Pin* VstAutomation::CreatePin(const ConnectionInfo &info, quint16 nb)
+Pin* VstAutomation::CreatePin(const ConnectionInfo &info)
 {
-    Pin *newPin = Object::CreatePin(info,nb);
+    Pin *newPin = Object::CreatePin(info);
     if(newPin)
         return newPin;
 
@@ -138,10 +138,10 @@ Pin* VstAutomation::CreatePin(const ConnectionInfo &info, quint16 nb)
 
     switch(info.direction) {
         case PinDirection::Output :
-            newPin = new ParameterPinOut(this,nb,0,true,QString("autom%1").arg(nb),false);
+            newPin = new ParameterPinOut(this,info.pinNumber,0,true,QString("autom%1").arg(info.pinNumber),false);
             break;
         case PinDirection::Input :
-            newPin = new ParameterPinIn(this,nb,0,true,QString("autom%1").arg(nb),false);
+            newPin = new ParameterPinIn(this,info.pinNumber,0,true,QString("autom%1").arg(info.pinNumber),false);
             break;
 
         default :

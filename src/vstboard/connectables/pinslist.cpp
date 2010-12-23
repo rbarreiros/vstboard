@@ -71,7 +71,8 @@ bool PinsList::ChangeNumberOfPins(int newNb)
         }
     }
     if(newNb>nbPins){
-        for(int nb=nbPins;nb<newNb;nb++) {
+        //must start from zero
+        for(int nb=0;nb<newNb;nb++) {
             AsyncAddPin(nb);
         }
     }
@@ -104,8 +105,7 @@ Pin * PinsList::GetPin(int pinNumber, bool autoCreate)
     //resize the list if needed
     if(!listPins.contains(pinNumber)) {
         if(autoCreate) {
-            debug("PinsList::GetPin can't autocreate")
-            ChangeNumberOfPins(pinNumber+1);
+            AddPin(pinNumber);
         } else {
             debug("PinsList::GetPin pin not in list")
             return 0;
@@ -119,6 +119,11 @@ AudioBuffer *PinsList::GetBuffer(int pinNumber)
 {
     if(connInfo.type != PinType::Audio)
         return 0;
+
+    if(!listPins.contains(pinNumber)) {
+        debug2(<<"PinsList::GetBuffer"<< pinNumber <<"not found")
+        return 0;
+    }
 
     if(connInfo.direction == PinDirection::Input)
         return static_cast<AudioPinIn*>(listPins.value(pinNumber))->buffer;
@@ -179,7 +184,8 @@ Pin * PinsList::AddPin(int nb)
     if(listPins.contains(nb))
         return listPins.value(nb);
 
-    Pin *newPin = parent->CreatePin(connInfo,nb);
+    connInfo.pinNumber=nb;
+    Pin *newPin = parent->CreatePin(connInfo);
 
     if(!newPin) {
         debug("PinsList::AddPin pin not created")
@@ -239,7 +245,8 @@ QDataStream & PinsList::fromStream(QDataStream & in)
         in >> id;
         QVariant value;
         in >> value;
-        Pin *newPin = parent->CreatePin(connInfo,id);
+        connInfo.pinNumber=id;
+        Pin *newPin = parent->CreatePin(connInfo);
         if(!newPin) {
             debug("PinsList::fromStream pin not created")
             return in;

@@ -350,8 +350,8 @@ bool VstPlugin::Open()
         objInfo.name=objectName();
 
         if(bWantMidi) {
-            listMidiPinIn->ChangeNumberOfPins(1);
-            listMidiPinOut->ChangeNumberOfPins(1);
+            listMidiPinIn->AddPin(0);
+            listMidiPinOut->AddPin(0);
         }
     }
 
@@ -598,18 +598,18 @@ void VstPlugin::OnParameterChanged(ConnectionInfo pinInfo, float value)
     }
 }
 
-Pin* VstPlugin::CreatePin(const ConnectionInfo &info, quint16 nb)
+Pin* VstPlugin::CreatePin(const ConnectionInfo &info)
 {
-    Pin *newPin = Object::CreatePin(info,nb);
+    Pin *newPin = Object::CreatePin(info);
     if(newPin)
         return newPin;
 
     switch(info.direction) {
         case PinDirection::Input :
-            if(nb==FixedPinNumber::vstProgNumber)
-                newPin = new ParameterPinIn(this,nb,0,&listValues,true,"prog",false);
+            if(info.pinNumber==FixedPinNumber::vstProgNumber)
+                newPin = new ParameterPinIn(this,info.pinNumber,0,&listValues,true,"prog",false);
             else
-                newPin = new ParameterPinIn(this,nb,EffGetParameter(nb),true,EffGetParamName(nb),true);
+                newPin = new ParameterPinIn(this,info.pinNumber,EffGetParameter(info.pinNumber),true,EffGetParamName(info.pinNumber),true);
             break;
 
         default :

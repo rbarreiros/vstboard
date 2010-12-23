@@ -41,7 +41,7 @@ namespace Connectables {
         bool Close();
         void Render();
 //        int GetProcessingTime() {return 10;}
-        Pin* CreatePin(const ConnectionInfo &info, quint16 nb);
+        Pin* CreatePin(const ConnectionInfo &info);
 
         bool bufferReady;
 

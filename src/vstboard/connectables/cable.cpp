@@ -43,6 +43,9 @@ Cable::Cable(const Cable & c) :
 
 void Cable::AddToParentNode(const QModelIndex &parentIndex)
 {
+    myHost->objFactory->GetPin(pinOut);
+    myHost->objFactory->GetPin(pinIn);
+
     QStandardItem *item = new QStandardItem(QString("cable %1:%2").arg(pinOut.objId).arg(pinIn.objId));
     item->setData(QVariant::fromValue(ObjectInfo(NodeType::cable)),UserRoles::objInfo);
     item->setData(QVariant::fromValue(pinOut),UserRoles::value);

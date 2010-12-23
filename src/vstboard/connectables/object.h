@@ -123,7 +123,7 @@ namespace Connectables {
         QString errorMessage;
         inline MainHost *getHost() {return myHost;}
 
-        virtual Pin* CreatePin(const ConnectionInfo &info, quint16 nb);
+        virtual Pin* CreatePin(const ConnectionInfo &info);
 
         MainHost *myHost;
         bool parked;

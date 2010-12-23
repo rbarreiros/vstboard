@@ -112,9 +112,9 @@ void MidiToAutomation::ChangeValue(int ctrl, int value) {
     }
 }
 
-Pin* MidiToAutomation::CreatePin(const ConnectionInfo &info, quint16 nb)
+Pin* MidiToAutomation::CreatePin(const ConnectionInfo &info)
 {
-    Pin *newPin = Object::CreatePin(info,nb);
+    Pin *newPin = Object::CreatePin(info);
     if(newPin)
         return newPin;
 
@@ -125,20 +125,20 @@ Pin* MidiToAutomation::CreatePin(const ConnectionInfo &info, quint16 nb)
 
     switch(info.direction) {
         case PinDirection::Output :
-            if(nb<128)
-                newPin = new ParameterPinOut(this,nb,0,&listValues,true,QString("CC%1").arg(nb),false);
-            if(nb==para_prog)
-                newPin = new ParameterPinOut(this,nb,0,&listValues,true,"prog",false);
-            if(nb==para_velocity)
-                newPin = new ParameterPinOut(this,nb,0,&listValues,true,"vel",false);
-            if(nb==para_pitchbend)
-                newPin = new ParameterPinOut(this,nb,0,&listValues,true,"p.bend",false);
-            if(nb==para_chanpress)
-                newPin = new ParameterPinOut(this,nb,0,&listValues,true,"pressr",false);
-            if(nb==para_aftertouch)
-                newPin = new ParameterPinOut(this,nb,0,&listValues,true,"aftr.t",false);
-            if(nb>=para_notes)
-                newPin = new ParameterPinOut(this,nb,0,&listValues,true,QString("note%1").arg(nb),false);
+            if(info.pinNumber<128)
+                newPin = new ParameterPinOut(this,info.pinNumber,0,&listValues,true,QString("CC%1").arg(info.pinNumber),false);
+            if(info.pinNumber==para_prog)
+                newPin = new ParameterPinOut(this,info.pinNumber,0,&listValues,true,"prog",false);
+            if(info.pinNumber==para_velocity)
+                newPin = new ParameterPinOut(this,info.pinNumber,0,&listValues,true,"vel",false);
+            if(info.pinNumber==para_pitchbend)
+                newPin = new ParameterPinOut(this,info.pinNumber,0,&listValues,true,"p.bend",false);
+            if(info.pinNumber==para_chanpress)
+                newPin = new ParameterPinOut(this,info.pinNumber,0,&listValues,true,"pressr",false);
+            if(info.pinNumber==para_aftertouch)
+                newPin = new ParameterPinOut(this,info.pinNumber,0,&listValues,true,"aftr.t",false);
+            if(info.pinNumber>=para_notes)
+                newPin = new ParameterPinOut(this,info.pinNumber,0,&listValues,true,QString("note%1").arg(info.pinNumber),false);
             break;
 
         default :

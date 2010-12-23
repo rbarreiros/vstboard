@@ -41,7 +41,7 @@ namespace Connectables {
         void Render();
 //        int GetProcessingTime() {return 10;}
         void SetBuffers(float **buf, int &cpt);
-        Pin* CreatePin(const ConnectionInfo &info, quint16 nb);
+        Pin* CreatePin(const ConnectionInfo &info);
     protected:
 //        QSharedPointer<AudioDevice>parentDevice;
 

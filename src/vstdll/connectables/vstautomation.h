@@ -39,7 +39,7 @@ namespace Connectables {
         bool Close();
         void Render();
         void ValueFromHost(int pinNum, float value);
-        Pin* CreatePin(const ConnectionInfo &info, quint16 nb);
+        Pin* CreatePin(const ConnectionInfo &info);
     protected:
         QList<QVariant> listValues;
         QHash<int,float>listChanged;

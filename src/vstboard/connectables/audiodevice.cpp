@@ -187,7 +187,7 @@ bool AudioDevice::FindDeviceByName(ObjectInfo &objInfo, PaDeviceInfo *devInfo)
             if(devInfo)
                 *devInfo = *Pa_GetDeviceInfo(deviceNumber);
         } else {
-            debug("AudioDevice::FindDeviceFromName device not found")
+            debug("AudioDevice::FindDeviceByName device not found")
             return false;
         }
     }
@@ -614,16 +614,17 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
                 cpt=0;
                 foreach(CircularBuffer *buf, device->listCircularBuffersIn) {
                     AudioBuffer *pinBuf = device->devIn->listAudioPinOut->GetBuffer(cpt);
+                    if(pinBuf) {
 
-                    if(pinBuf->GetSize() < hostBuffSize) {
-                        pinBuf->SetSize(hostBuffSize);
-//                        debug("AudioDevice::paCallback pin buffer too small")
-                        continue;
+                        if(pinBuf->GetSize() < hostBuffSize) {
+                            pinBuf->SetSize(hostBuffSize);
+    //                        debug("AudioDevice::paCallback pin buffer too small")
+                            continue;
+                        }
+
+                        if(buf->filledSize >= hostBuffSize)
+                            buf->Get( pinBuf->GetPointer(true), hostBuffSize );
                     }
-
-                    if(buf->filledSize >= hostBuffSize)
-                        buf->Get( pinBuf->GetPointer(true), hostBuffSize );
-
                     cpt++;
                 }
 

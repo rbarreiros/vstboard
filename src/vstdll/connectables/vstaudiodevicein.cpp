@@ -83,8 +83,8 @@ void VstAudioDeviceIn::SetBuffers(float **buf, int &cpt)
     }
 }
 
-Pin* VstAudioDeviceIn::CreatePin(const ConnectionInfo &info, quint16 nb)
+Pin* VstAudioDeviceIn::CreatePin(const ConnectionInfo &info)
 {
-    AudioPinOut *newPin = new AudioPinOut(this,nb,true);
+    AudioPinOut *newPin = new AudioPinOut(this,info.pinNumber,true);
     return newPin;
 }

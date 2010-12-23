@@ -78,7 +78,7 @@ bool AudioDeviceIn::Open()
 {
     //can we find this device on this computer ?
     if(!AudioDevice::FindDeviceByName(objInfo)) {
-    errorMessage = tr("Device not found");
+        errorMessage = tr("Device not found");
         return true;
     }
 
@@ -114,13 +114,7 @@ bool AudioDeviceIn::Open()
         return false;
     }
 
-    listAudioPinOut->ChangeNumberOfPins(parentDevice->devInfo.maxInputChannels);
-    int cpt=0;
-    foreach(Pin *pin, listAudioPinOut->listPins) {
-        static_cast<AudioPinOut*>(pin)->buffer->SetSize(myHost->GetBufferSize());
-        pin->setObjectName(QString("Input %1").arg(cpt));
-        cpt++;
-    }
+    listAudioPinOut->ChangeNumberOfPins( parentDevice->devInfo.maxInputChannels );
 
     //device already has a child
     if(!parentDevice->SetObjectInput(this)) {
@@ -132,16 +126,19 @@ bool AudioDeviceIn::Open()
     return true;
 }
 
-Pin* AudioDeviceIn::CreatePin(const ConnectionInfo &info, quint16 nb)
+Pin* AudioDeviceIn::CreatePin(const ConnectionInfo &info)
 {
-    Pin *newPin = Object::CreatePin(info,nb);
-    if(newPin)
+    Pin *newPin = Object::CreatePin(info);
+    if(newPin) {
+        if(info.type==PinType::Audio)
+            newPin->setObjectName(QString("Input %1").arg(info.pinNumber));
         return newPin;
+    }
 
     switch(info.direction) {
         case PinDirection::Output :
-            if(nb==0)
-                return new ParameterPinOut(this,nb,0,true,"cpu%",false);
+            if(info.pinNumber==0)
+                return new ParameterPinOut(this,0,0,true,"cpu%",false);
             break;
 
         default :
