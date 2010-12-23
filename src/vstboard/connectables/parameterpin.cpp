@@ -42,7 +42,8 @@ ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int num
         limitOutMin(.0f),
         limitOutMax(1.0f),
         outStepIndex(0),
-        outValue(.0f)
+        outValue(.0f),
+        limitsEnabled(true)
 {
     SetVisible(defaultVisible);
 
@@ -289,7 +290,7 @@ void ParameterPin::SetVisible(bool vis)
 
     Pin::SetVisible(vis);
 
-    if(visible) {
+    if(visible && limitsEnabled) {
         QStandardItem *pinItem = parent->getHost()->GetModel()->itemFromIndex(modelIndex);
         if(!pinItem)
             return;

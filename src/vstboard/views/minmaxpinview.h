@@ -35,12 +35,14 @@ namespace View {
         void UpdateModelIndex(const QModelIndex &index);
 
     protected:
+        void CreateCursors();
         void UpdateScaleView();
         CursorView *inMin;
         CursorView *inMax;
         CursorView *outMin;
         CursorView *outMax;
         QGraphicsPolygonItem *scaledView;
+        bool cursorCreated;
 
     };
 }

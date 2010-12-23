@@ -137,8 +137,11 @@ Pin* AudioDeviceIn::CreatePin(const ConnectionInfo &info)
 
     switch(info.direction) {
         case PinDirection::Output :
-            if(info.pinNumber==0)
-                return new ParameterPinOut(this,0,0,true,"cpu%",false);
+            if(info.pinNumber==0) {
+                ParameterPinOut *pin = new ParameterPinOut(this,0,0,true,"cpu%",false);
+                pin->SetLimitsEnabled(false);
+                return pin;
+            }
             break;
 
         default :

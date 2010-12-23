@@ -56,7 +56,10 @@ void ObjectProgram::Load(PinsList *in, PinsList *out)
     QMap<ushort,ObjectParameter>::ConstIterator j=listParametersOut.constBegin();
     while(j!=listParametersOut.constEnd()) {
         if(!out->listPins.contains(j.key())) {
-            out->AddPin(j.key());
+            if(!out->AddPin(j.key())) {
+                ++j;
+                continue;
+            }
         }
         static_cast<ParameterPin*>( out->listPins.value(j.key()) )->Load(j.value());
         ++j;

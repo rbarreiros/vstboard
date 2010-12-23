@@ -57,6 +57,7 @@ namespace Connectables {
         void SetVisible(bool vis);
 
         void SetLimit(ObjType::Enum type, float newVal);
+        void SetLimitsEnabled(bool enable) {limitsEnabled=enable;}
 
     protected:
         QList<QVariant> *listValues;
@@ -80,6 +81,8 @@ namespace Connectables {
         QPersistentModelIndex indexLimitInMax;
         QPersistentModelIndex indexLimitOutMin;
         QPersistentModelIndex indexLimitOutMax;
+
+        bool limitsEnabled;
 
     signals:
         void ParameterChanged(ConnectionInfo pinInfo, float value);

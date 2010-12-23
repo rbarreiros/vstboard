@@ -23,7 +23,13 @@
 using namespace View;
 
 MinMaxPinView::MinMaxPinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, Connectables::Pin *pin) :
-        ConnectablePinView(angle,model,parent,pin)
+        ConnectablePinView(angle,model,parent,pin),
+        cursorCreated(false)
+{
+
+}
+
+void MinMaxPinView::CreateCursors()
 {
     scaledView = new QGraphicsPolygonItem(this);
     scaledView->setBrush(QBrush(QColor(255,127,127,100)));
@@ -47,6 +53,9 @@ MinMaxPinView::MinMaxPinView(float angle, QAbstractItemModel *model,QGraphicsIte
 
 void MinMaxPinView::SetLimitModelIndex(ObjType::Enum type, QPersistentModelIndex index)
 {
+    if(!cursorCreated)
+        CreateCursors();
+
     switch(type) {
         case ObjType::limitInMin:
             inMin->SetModelIndex(index);
@@ -78,7 +87,8 @@ void MinMaxPinView::UpdateLimitModelIndex(const QModelIndex &index)
 void MinMaxPinView::UpdateModelIndex(const QModelIndex &index)
 {
     ConnectablePinView::UpdateModelIndex(index);
-    UpdateScaleView();
+    if(cursorCreated)
+        UpdateScaleView();
 }
 
 void MinMaxPinView::UpdateScaleView()
