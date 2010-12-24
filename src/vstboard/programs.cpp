@@ -59,12 +59,10 @@ QStandardItem *Programs::CopyProgram(QStandardItem *progOri)
 {
     int oriId = progOri->data(UserRoles::value).toInt();
     emit ProgCopy(oriId,nextProgId);
-//    myHost->programContainer->CopyProgram( oriId, nextProgId );
 
     QStandardItem *prgItem = new QStandardItem(progOri->text());
     prgItem->setData(NodeType::program,UserRoles::nodeType);
     prgItem->setData(nextProgId,UserRoles::value);
-//    prgItem->setData(nextProgId,Qt::ToolTipRole);
     nextProgId++;
     prgItem->setDragEnabled(true);
     prgItem->setDropEnabled(false);
@@ -123,14 +121,49 @@ void Programs::ChangeProg(const QModelIndex &prgIndex)
     if(!newPrg || newPrg==currentPrg)
         return;
 
-    currentPrg = newPrg;
+    if(myHost->programContainer->IsDirty()) {
+        QMessageBox msgBox;
+        msgBox.setText(tr("The progarm has been modified."));
+        msgBox.setInformativeText(tr("Do you want to save your changes?"));
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Save);
+        int ret = msgBox.exec();
+
+        switch(ret) {
+            case QMessageBox::Cancel:
+                emit ProgChanged( currentPrg->index() );
+                return;
+            case QMessageBox::Save:
+                myHost->programContainer->SaveProgram();
+        }
+    }
+
 
     QStandardItem *newgrp = newPrg->parent()->parent();
     if(newgrp!=currentGrp) {
+
+        if(myHost->groupContainer->IsDirty()) {
+            QMessageBox msgBox;
+            msgBox.setText(tr("The group has been modified."));
+            msgBox.setInformativeText(tr("Do you want to save your changes?"));
+            msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+            msgBox.setDefaultButton(QMessageBox::Save);
+            int ret = msgBox.exec();
+
+            switch(ret) {
+                case QMessageBox::Cancel:
+                    emit ProgChanged( currentPrg->index() );
+                    return;
+                case QMessageBox::Save:
+                    myHost->groupContainer->SaveProgram();
+            }
+        }
+
         currentGrp=newgrp;
         emit GroupChanged( currentGrp->index() );
     }
 
+    currentPrg = newPrg;
     emit ProgChanged( currentPrg->index() );
 }
 

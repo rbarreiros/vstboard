@@ -55,7 +55,7 @@ namespace View {
 
     protected:
         void SetErrorMessage(const QString & msg);
-        void SetBackground(const QString & imgName);
+//        void SetBackground(const QString & imgName);
         virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
         void resizeEvent ( QGraphicsSceneResizeEvent * event );
         virtual void closeEvent ( QCloseEvent * event );

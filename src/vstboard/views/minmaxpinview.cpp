@@ -31,6 +31,8 @@ MinMaxPinView::MinMaxPinView(float angle, QAbstractItemModel *model,QGraphicsIte
 
 void MinMaxPinView::CreateCursors()
 {
+    cursorCreated=true;
+
     scaledView = new QGraphicsPolygonItem(this);
     scaledView->setBrush(QBrush(QColor(255,127,127,100)));
 

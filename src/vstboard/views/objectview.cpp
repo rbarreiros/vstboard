@@ -128,13 +128,20 @@ void ObjectView::UpdateModelIndex()
     if(objIndex.data(UserRoles::position).isValid())
         setPos( objIndex.data(UserRoles::position).toPointF() );
 
+    QString newTitle=objIndex.data(Qt::DisplayRole).toString();
     if(titleText) {
-        titleText->setText(objIndex.data(Qt::DisplayRole).toString());
+        titleText->setText(newTitle);
     }
 
     if(objIndex.data(UserRoles::errorMessage).isValid()) {
         QString err = objIndex.data(UserRoles::errorMessage).toString();
         SetErrorMessage( err );
+    }
+
+    if(objIndex.data(UserRoles::isDirty).isValid()) {
+        if(objIndex.data(UserRoles::isDirty).toBool()) {
+            titleText->setText(newTitle.prepend("*"));
+        }
     }
 }
 

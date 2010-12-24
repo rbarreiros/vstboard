@@ -43,36 +43,7 @@ Container::~Container()
 {
     Close();
 }
-/*
-void Container::SetParentModeIndex(const QModelIndex &parentIndex)
-{
-    if(modelIndex.isValid()) {
-        if(modelIndex.parent() == parentIndex)
-            return;
-        else
-            Hide();
-    }
 
-    Object::SetParentModeIndex(parentIndex);
-
-    if(currentProgram)
-        foreach(QSharedPointer<Object>objPtr, currentProgram->listObjects) {
-            objPtr->SetParentModeIndex(modelIndex);
-        }
-
-    foreach(QSharedPointer<Object>objPtr, listStaticObjects) {
-        objPtr->SetParentModeIndex(modelIndex);
-    }
-
-    QStandardItem *cab = new QStandardItem("cables");
-    if(modelIndex.isValid()) {
-        myHost->GetModel()->itemFromIndex(modelIndex)->appendRow(cab);
-    } else {
-        myHost->GetModel()->appendRow(cab);
-    }
-    cablesNode = cab->index();
-}
-*/
 const QModelIndex &Container::GetCablesIndex()
 {
     if(cablesNode.isValid())
@@ -177,6 +148,16 @@ void Container::Hide()
 
 }
 
+//void Container::SetProgramDirty()
+//{
+//    currentProgram->dirty=true;
+//}
+
+bool Container::IsDirty()
+{
+    return currentProgram->IsDirty();
+}
+
 void Container::SetProgram(const QModelIndex &prg)
 {
     progToSet=prg.data(UserRoles::value).toInt();
@@ -186,8 +167,6 @@ void Container::Render()
 {
     if(progToSet!=-1) {
         if(progToSet != currentProgId) {
-            SaveProgram();
-            //UnloadProgram();
             LoadProgram(progToSet);
         }
         progToSet=-1;
@@ -216,8 +195,6 @@ void Container::LoadProgram(int prog)
         return;
     }
 
-
-
     if(!listContainerPrograms.contains(prog))
         listContainerPrograms.insert(prog,new ContainerProgram(myHost,this));
 
@@ -242,7 +219,6 @@ void Container::LoadProgram(int prog)
             oldProg = 0;
         }
     }
-
 
     currentProgId=prog;
     currentProgram = new ContainerProgram(*newProg);
@@ -298,14 +274,16 @@ void Container::CopyProgram(int ori, int dest)
         return;
     }
 
-    //we need to save first
     if(ori==currentProgId) {
-        SaveProgram();
+        //copy the current program
+        ContainerProgram* progCpy = currentProgram->CopyTo(dest);
+        listContainerPrograms.insert(dest,progCpy);
+    } else {
+        //copy a saved program
+        ContainerProgram* progOri = listContainerPrograms.value(ori);
+        ContainerProgram* progCpy = progOri->Copy(ori,dest);
+        listContainerPrograms.insert(dest,progCpy);
     }
-
-    ContainerProgram* progOri = listContainerPrograms.value(ori);
-    ContainerProgram* progCpy = progOri->Copy(ori,dest);
-    listContainerPrograms.insert(dest,progCpy);
 }
 
 void Container::RemoveProgram(int prg)

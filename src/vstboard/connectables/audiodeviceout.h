@@ -39,9 +39,9 @@ namespace Connectables {
 
         bool Open();
         bool Close();
-        void Render();
+//        void Render();
 //        int GetProcessingTime() {return 10;}
-        Pin* CreatePin(const ConnectionInfo &info);
+//        Pin* CreatePin(const ConnectionInfo &info);
 
     protected:
         QSharedPointer<AudioDevice>parentDevice;

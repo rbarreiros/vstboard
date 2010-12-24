@@ -198,6 +198,24 @@ bool Object::GetSleep()
     return sleep;
 }
 
+void Object::OnProgramDirty()
+{
+    progIsDirty=true;
+
+//    if(!modelIndex.isValid())
+//        return;
+//    QStandardItem *item=myHost->GetModel()->itemFromIndex(modelIndex);
+//    if(!item)
+//        return;
+//    item->setData(true,UserRoles::isDirty);
+
+
+//    QSharedPointer<Object>objPtr = myHost->objFactory->GetObj(modelIndex.parent());
+//    if(!objPtr)
+//        return;
+//    static_cast<Container*>(objPtr.data())->SetProgramDirty();
+}
+
 void Object::UnloadProgram()
 {
     currentProgId=EMPTY_PROGRAM;
@@ -254,6 +272,16 @@ void Object::CopyProgram(int ori, int dest)
         return;
     }
     ObjectProgram *cpy = new ObjectProgram( *listPrograms.value(ori) );
+    listPrograms.insert(dest,cpy);
+}
+
+void Object::CopyCurrentProgram(int dest)
+{
+    if(listPrograms.contains(dest)) {
+        debug("Object::CopyCurrentProgram dest already exists")
+        return;
+    }
+    ObjectProgram *cpy = new ObjectProgram( *currentProgram );
     listPrograms.insert(dest,cpy);
 }
 
@@ -402,13 +430,10 @@ void Object::SetContainerAttribs(const ObjectContainerAttribs &attr)
     QStandardItem *item = myHost->GetModel()->itemFromIndex(modelIndex);
 
     item->setData(attr.position, UserRoles::position);
-//    item->setData(attr.size, UserRoles::size);
-//    item->setData(attr.editorVisible, UserRoles::editorVisible);
     item->setData(attr.editorPosition, UserRoles::editorPos);
     item->setData(attr.editorSize, UserRoles::editorSize);
     item->setData(attr.editorHScroll, UserRoles::editorHScroll);
     item->setData(attr.editorVScroll, UserRoles::editorVScroll);
-//    item->setData(attr.paramLearning, UserRoles::paramLearning);
 }
 
 void Object::GetContainerAttribs(ObjectContainerAttribs &attr)
@@ -417,43 +442,49 @@ void Object::GetContainerAttribs(ObjectContainerAttribs &attr)
         return;
 
     attr.position = modelIndex.data(UserRoles::position).toPointF();
-//    attr.size = modelIndex.data(UserRoles::size).toSizeF();
-//    attr.editorVisible = modelIndex.data(UserRoles::editorVisible).toBool();
     attr.editorPosition = modelIndex.data(UserRoles::editorPos).toPoint();
     attr.editorSize = modelIndex.data(UserRoles::editorSize).toSize();
     attr.editorHScroll = modelIndex.data(UserRoles::editorHScroll).toInt();
     attr.editorVScroll = modelIndex.data(UserRoles::editorVScroll).toInt();
-//    attr.paramLearning = modelIndex.data(UserRoles::paramLearning).toBool();
-
 }
 
 Pin* Object::CreatePin(const ConnectionInfo &info)
 {
-    Pin *newPin=0;
-
     switch(info.direction) {
         case PinDirection::Input :
             switch(info.type) {
-                case PinType::Audio :
-                    newPin = new AudioPinIn(this,info.pinNumber);
-                    static_cast<AudioPinIn*>(newPin)->buffer->SetSize(myHost->GetBufferSize());
-                    break;
-                case PinType::Midi :
-                    newPin = new MidiPinIn(this,info.pinNumber);
-                    break;
-                case PinType::Bridge :
-                    newPin = new BridgePinIn(this,info.pinNumber,info.bridge);
-                    break;
-                case PinType::Parameter :
+                case PinType::Audio : {
+                    AudioPinIn *newPin = new AudioPinIn(this,info.pinNumber);
+                    newPin->buffer->SetSize(myHost->GetBufferSize());
+                    return newPin;
+                }
+
+                case PinType::Midi : {
+                    MidiPinIn *newPin = new MidiPinIn(this,info.pinNumber);
+                    return newPin;
+                }
+
+                case PinType::Bridge : {
+                    BridgePinIn *newPin = new BridgePinIn(this,info.pinNumber,info.bridge);
+                    return newPin;
+                }
+
+                case PinType::Parameter : {
                     switch(info.pinNumber) {
-                        case FixedPinNumber::editorVisible :
-                            newPin = new ParameterPinIn(this,FixedPinNumber::editorVisible,"hide",&listEditorVisible,false,tr("Editor"));
-                            break;
-                        case FixedPinNumber::learningMode :
-                            newPin = new ParameterPinIn(this,FixedPinNumber::learningMode,"off",&listIsLearning,false,tr("Learn"));
-                            break;
+                        case FixedPinNumber::editorVisible : {
+                            ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::editorVisible,"hide",&listEditorVisible,false,tr("Editor"));
+                            newPin->SetLimitsEnabled(false);
+                            return newPin;
+                        }
+                        case FixedPinNumber::learningMode : {
+                            ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::learningMode,"off",&listIsLearning,false,tr("Learn"));
+                            newPin->SetLimitsEnabled(false);
+                            return newPin;
+                        }
                     }
+
                     break;
+                }
                 default :
                     return 0;
             }
@@ -461,16 +492,22 @@ Pin* Object::CreatePin(const ConnectionInfo &info)
 
         case PinDirection::Output :
             switch(info.type) {
-                case PinType::Audio :
-                    newPin = new AudioPinOut(this,info.pinNumber);
-                    static_cast<AudioPinOut*>(newPin)->buffer->SetSize(myHost->GetBufferSize());
-                    break;
-                case PinType::Midi :
-                    newPin = new MidiPinOut(this,info.pinNumber);
-                    break;
-                case PinType::Bridge :
-                    newPin = new BridgePinOut(this,info.pinNumber,info.bridge);
-                    break;
+                case PinType::Audio : {
+                    AudioPinOut *newPin = new AudioPinOut(this,info.pinNumber);
+                    newPin->buffer->SetSize(myHost->GetBufferSize());
+                    return newPin;
+                }
+
+                case PinType::Midi : {
+                    MidiPinOut *newPin = new MidiPinOut(this,info.pinNumber);
+                    return newPin;
+                }
+
+                case PinType::Bridge : {
+                    BridgePinOut *newPin = new BridgePinOut(this,info.pinNumber,info.bridge);
+                    return newPin;
+                }
+
                 default :
                     return 0;
             }
@@ -480,7 +517,7 @@ Pin* Object::CreatePin(const ConnectionInfo &info)
             return 0;
     }
 
-    return newPin;
+    return 0;
 }
 
 QDataStream & Object::toStream(QDataStream & out) const

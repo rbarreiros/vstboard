@@ -275,8 +275,14 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="acceptDrops">
+            <bool>true</bool>
+           </property>
            <property name="frameShape">
             <enum>QFrame::StyledPanel</enum>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
            </property>
            <property name="dragEnabled">
             <bool>true</bool>
@@ -340,6 +346,12 @@
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
+           </property>
+           <property name="acceptDrops">
+            <bool>true</bool>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
            </property>
            <property name="dragEnabled">
             <bool>true</bool>

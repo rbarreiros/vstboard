@@ -48,7 +48,8 @@ namespace UserRoles {
         editorSize,
         editorVScroll,
         editorHScroll,
-        errorMessage
+        errorMessage,
+        isDirty
     };
 }
 namespace NodeType {

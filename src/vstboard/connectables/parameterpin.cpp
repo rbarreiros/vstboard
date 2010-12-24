@@ -209,25 +209,9 @@ void ParameterPin::OnValueChanged(float val)
     val+=limitOutMin;
     outValue=val;
 
-    if(!loading) {
-
-        /*if(visibilityCanChange) {
-            //parent is learning
-            if(parent->GetLearningMode()==1) {
-                if(!visible)
-                    SetVisible(true);
-            }
-
-            //parent is unlearning
-            if(parent->GetLearningMode()==2)
-                if(visible)
-                    SetVisible(false);
-        }*/
-
-        if(!dirty) {
-            dirty=true;
-            parent->OnProgramDirty();
-        }
+    if(!loading && !dirty) {
+        dirty=true;
+        parent->OnProgramDirty();
     }
 
     if(visible) {
@@ -235,7 +219,6 @@ void ParameterPin::OnValueChanged(float val)
             setObjectName(parent->GetParameterName(connectInfo));
 
         if(listValues) {
-            //SetDisplayedText( QString("%1:%2").arg(objectName()).arg(listValues->at(stepIndex).toString()) );
             displayedText = QString("%1:%2").arg(objectName()).arg(listValues->at(stepIndex).toString());
         }
     }

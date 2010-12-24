@@ -113,6 +113,7 @@ namespace Connectables {
         virtual void SetBridgePinsOutVisible(bool visible);
 
         virtual void CopyProgram(int ori, int dest);
+        virtual void CopyCurrentProgram(int dest);
         virtual void RemoveProgram(int prg);
 
         QPersistentModelIndex modelIndex;
@@ -124,6 +125,8 @@ namespace Connectables {
         inline MainHost *getHost() {return myHost;}
 
         virtual Pin* CreatePin(const ConnectionInfo &info);
+
+        virtual bool IsDirty() {return progIsDirty;}
 
         MainHost *myHost;
         bool parked;
@@ -179,7 +182,7 @@ namespace Connectables {
         virtual void SaveProgram();
         virtual void UnloadProgram();
         virtual void LoadProgram(int prog);
-        void OnProgramDirty() {progIsDirty=true;}
+        void OnProgramDirty();
 
         virtual void SetBufferSize(unsigned long size) {}
         virtual void SetSampleRate(float rate=44100.0) {}

@@ -31,7 +31,7 @@ AudioDeviceOut::AudioDeviceOut(MainHost *myHost,int index, const ObjectInfo &inf
     Object(myHost,index, info),
     parentDevice(0)
 {
-    listParameterPinOut->AddPin(0);
+//    listParameterPinOut->AddPin(0);
 }
 
 AudioDeviceOut::~AudioDeviceOut()
@@ -51,11 +51,11 @@ bool AudioDeviceOut::Close()
     return true;
 }
 
-void AudioDeviceOut::Render()
-{
-    if(parentDevice)
-        static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(0))->ChangeValue(parentDevice->GetCpuUsage());
-}
+//void AudioDeviceOut::Render()
+//{
+//    if(parentDevice)
+//        static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(0))->ChangeValue(parentDevice->GetCpuUsage());
+//}
 
 void AudioDeviceOut::SetBufferSize(unsigned long size)
 {
@@ -116,29 +116,29 @@ bool AudioDeviceOut::Open()
     return true;
 }
 
-Pin* AudioDeviceOut::CreatePin(const ConnectionInfo &info)
-{
-    Pin *newPin = Object::CreatePin(info);
-    if(newPin) {
-        if(info.type==PinType::Audio)
-            newPin->setObjectName(QString("Output %1").arg(info.pinNumber));
-        return newPin;
-    }
+//Pin* AudioDeviceOut::CreatePin(const ConnectionInfo &info)
+//{
+//    Pin *newPin = Object::CreatePin(info);
+//    if(newPin) {
+//        if(info.type==PinType::Audio)
+//            newPin->setObjectName(QString("Output %1").arg(info.pinNumber));
+//        return newPin;
+//    }
 
-    switch(info.direction) {
-        case PinDirection::Output :
-            if(info.pinNumber==0) {
-                ParameterPinOut *pin = new ParameterPinOut(this,0,0,true,"cpu%",false);
-                pin->SetLimitsEnabled(false);
-                return pin;
-            }
-            break;
+//    switch(info.direction) {
+//        case PinDirection::Output :
+//            if(info.pinNumber==0) {
+//                ParameterPinOut *pin = new ParameterPinOut(this,0,0,true,"cpu%",false);
+//                pin->SetLimitsEnabled(false);
+//                return pin;
+//            }
+//            break;
 
-        default :
-            debug("AudioDeviceIn::CreatePin PinDirection")
-            return 0;
-            break;
-    }
+//        default :
+//            debug("AudioDeviceIn::CreatePin PinDirection")
+//            return 0;
+//            break;
+//    }
 
-    return 0;
-}
+//    return 0;
+//}

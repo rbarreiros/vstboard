@@ -40,6 +40,7 @@ namespace Connectables {
         void Unload();
         void Save();
         ContainerProgram * Copy(int fromId, int toId);
+        ContainerProgram * CopyTo(int toId);
         void Remove(int prgId);
 
         void AddObject(QSharedPointer<Object> objPtr);
@@ -51,10 +52,13 @@ namespace Connectables {
         void RemoveCableFromPin(const ConnectionInfo &pin);
         void RemoveCableFromObj(int objId);
 
+        bool IsDirty();
+
         QDataStream & toStream (QDataStream &) const;
         QDataStream & fromStream (QDataStream &);
 
     protected:
+        bool dirty;
         Container *container;
         bool CableExists(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
 

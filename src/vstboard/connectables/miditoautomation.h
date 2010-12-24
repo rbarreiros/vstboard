@@ -42,6 +42,7 @@ namespace Connectables {
         enum paramNumbers {
             para_prog=128,
             para_velocity,
+            para_notepitch,
             para_pitchbend,
             para_chanpress,
             para_aftertouch,

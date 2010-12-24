@@ -55,7 +55,7 @@ class ObjectContainerAttribs
 public:
     ObjectContainerAttribs() :
         position(QPointF(0,0)),
-        size(QSizeF(0,0)),
+//        size(QSizeF(0,0)),
         editorPosition(QPoint(0,0)),
         editorSize(QSize(0,0)),
         editorHScroll(0),
@@ -63,7 +63,7 @@ public:
         {}
 
     QPointF position;
-    QSizeF size;
+//    QSizeF size;
     QPoint editorPosition;
     QSize editorSize;
     quint16 editorHScroll;
@@ -75,5 +75,26 @@ public:
 
 QDataStream & operator<< (QDataStream & out, const ObjectContainerAttribs& value);
 QDataStream & operator>> (QDataStream & in, ObjectContainerAttribs& value);
+
+inline bool operator==(const ObjectContainerAttribs &c1, const ObjectContainerAttribs &c2)
+{
+    if(c1.position != c2.position)
+        return false;
+    if(c1.editorPosition != c2.editorPosition)
+        return false;
+    if(c1.editorSize != c2.editorSize)
+        return false;
+    if(c1.editorHScroll != c2.editorHScroll)
+        return false;
+    if(c1.editorVScroll != c2.editorVScroll)
+        return false;
+
+    return true;
+}
+
+inline bool operator!=(const ObjectContainerAttribs &c1, const ObjectContainerAttribs &c2)
+{
+    return !(c1==c2);
+}
 
 #endif // OBJECTINFO_H

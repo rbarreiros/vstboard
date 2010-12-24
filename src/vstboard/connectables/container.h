@@ -54,13 +54,14 @@ namespace Connectables {
         QDataStream & fromStream (QDataStream &);
 
         void SetContainerId(quint16 id);
-//        void SetParentModeIndex(const QModelIndex &parentIndex);
 
         const QModelIndex &GetCablesIndex();
 
         HostModel parkModel;
 
         void OnChildDeleted(Object *obj);
+//        void SetProgramDirty();
+        virtual bool IsDirty();
 
     protected:
         QList< QSharedPointer< Object > >listStaticObjects;

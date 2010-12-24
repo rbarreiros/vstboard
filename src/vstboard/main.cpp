@@ -60,7 +60,7 @@
          }
      }
 #endif
-
+/*
 class MyApp : public QApplication {
 public:
     MyApp(int &c, char **v): QApplication(c, v) {}
@@ -80,6 +80,7 @@ public:
            }
        }
 };
+*/
 
 int main(int argc, char *argv[])
 {
@@ -98,7 +99,8 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("CtrlBrk");
     QCoreApplication::setApplicationName(APP_NAME);
 
-    MyApp app(argc, argv);
+    //MyApp app(argc, argv);
+    QApplication app(argc, argv);
 
     QTranslator qtTranslator;
     qtTranslator.load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));

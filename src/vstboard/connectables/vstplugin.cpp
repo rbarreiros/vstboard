@@ -606,10 +606,14 @@ Pin* VstPlugin::CreatePin(const ConnectionInfo &info)
 
     switch(info.direction) {
         case PinDirection::Input :
-            if(info.pinNumber==FixedPinNumber::vstProgNumber)
-                newPin = new ParameterPinIn(this,info.pinNumber,0,&listValues,true,"prog",false);
-            else
-                newPin = new ParameterPinIn(this,info.pinNumber,EffGetParameter(info.pinNumber),true,EffGetParamName(info.pinNumber),true);
+            if(info.pinNumber==FixedPinNumber::vstProgNumber) {
+                ParameterPinIn *pin = new ParameterPinIn(this,info.pinNumber,0,&listValues,true,"prog",false);
+                pin->SetLimitsEnabled(false);
+                return pin;
+            } else {
+                ParameterPinIn *pin = new ParameterPinIn(this,info.pinNumber,EffGetParameter(info.pinNumber),true,EffGetParamName(info.pinNumber),true);
+                return pin;
+            }
             break;
 
         default :
@@ -618,5 +622,5 @@ Pin* VstPlugin::CreatePin(const ConnectionInfo &info)
             break;
     }
 
-    return newPin;
+    return 0;
 }
