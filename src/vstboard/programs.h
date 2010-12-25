@@ -2,6 +2,7 @@
 #define PROGRAMS_H
 
 #include "precomp.h"
+#include "globals.h"
 #include "models/programsmodel.h"
 
 class MainHost;
@@ -19,6 +20,9 @@ public:
     friend QDataStream & operator>> (QDataStream&, Programs&);
 
 private:
+    QDataStream & toStream (QDataStream &) const;
+    QDataStream & fromStream (QDataStream &);
+
     ProgramsModel *model;
     QStandardItem *currentGrp;
     QStandardItem *currentPrg;
@@ -26,24 +30,23 @@ private:
     unsigned int nextGroupId;
     unsigned int nextProgId;
     MainHost *myHost;
-    int progAutosaveState;
-    int groupAutosaveState;
+    Autosave::Enum progAutosaveState;
+    Autosave::Enum groupAutosaveState;
 
 signals:
     void ProgChanged(const QModelIndex &prgIndex);
     void GroupChanged(const QModelIndex &grpIndex);
     void ProgCopy(int ori, int dest);
     void GroupCopy(int ori, int dest);
-    void ProgAutosaveChanged(const int state);
-    void GroupAutosaveChanged(const int state);
+    void ProgAutosaveChanged(const Autosave::Enum state);
+    void GroupAutosaveChanged(const Autosave::Enum state);
 
 public slots:
     void ChangeProg(int midiPrgId);
     void ChangeGroup(int grpNum);
     void ChangeProg(const QModelIndex &prgIndex);
-    void SetProgAutosave(const int state);
-    void SetGroupAutosave(const int state);
-
+    void SetProgAutosave(const Autosave::Enum state);
+    void SetGroupAutosave(const Autosave::Enum state);
 };
 
 QDataStream & operator<< (QDataStream& out, const Programs& value);

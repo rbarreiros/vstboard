@@ -75,7 +75,9 @@ bool SetupFile::LoadFromFile(MainHost *myHost, QString filePath)
     in >> magic;
     if(magic != SETUP_FILE_KEY) {
         QMessageBox msgBox;
-        msgBox.setText(tr("%1 is not a setup file.").arg(filePath));
+        msgBox.setWindowTitle(filePath);
+        msgBox.setText( tr("Unknown file format.") );
+        msgBox.setInformativeText( tr("Not a VstBoard setup file") );
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.exec();
         return false;
@@ -85,7 +87,9 @@ bool SetupFile::LoadFromFile(MainHost *myHost, QString filePath)
     in >> version;
     if(version != SETUP_FILE_VERSION) {
         QMessageBox msgBox;
-        msgBox.setText(tr("%1 : wrong file version.").arg(filePath));
+        msgBox.setWindowTitle(filePath);
+        msgBox.setText( tr("Wrong file version.") );
+        msgBox.setInformativeText( tr("Setup file format v%1 can't be converted to the current file format v%2").arg(version).arg(SETUP_FILE_VERSION) );
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.exec();
         return false;

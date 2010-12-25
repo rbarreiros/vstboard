@@ -163,41 +163,41 @@ void ProgramList::resetSettings()
 
 void ProgramList::on_progAutosaveOn_clicked()
 {
-    emit ProgAutoSave(QMessageBox::Save);
+    emit ProgAutoSave(Autosave::save);
 }
 
 void ProgramList::on_progAutosaveAsk_clicked()
 {
-    emit ProgAutoSave(0);
+    emit ProgAutoSave(Autosave::prompt);
 }
 
 void ProgramList::on_progAutosaveOff_clicked()
 {
-    emit ProgAutoSave(QMessageBox::Discard);
+    emit ProgAutoSave(Autosave::discard);
 }
 
 void ProgramList::on_grpAutosaveOn_clicked()
 {
-    emit GroupAutoSave(QMessageBox::Save);
+    emit GroupAutoSave(Autosave::save);
 }
 
 void ProgramList::on_grpAutosaveAsk_clicked()
 {
-    emit GroupAutoSave(0);
+    emit GroupAutoSave(Autosave::prompt);
 }
 
 void ProgramList::on_grpAutosaveOff_clicked()
 {
-    emit GroupAutoSave(QMessageBox::Discard);
+    emit GroupAutoSave(Autosave::discard);
 }
 
-void ProgramList::OnProgAutoSaveChanged(const int state)
+void ProgramList::OnProgAutoSaveChanged(const Autosave::Enum state)
 {
     switch(state) {
-    case QMessageBox::Save :
+    case Autosave::save :
         ui->progAutosaveOn->setChecked(true);
         break;
-    case QMessageBox::Discard :
+    case Autosave::discard :
         ui->progAutosaveOff->setChecked(true);
         break;
     default :
@@ -206,17 +206,17 @@ void ProgramList::OnProgAutoSaveChanged(const int state)
     }
 }
 
-void ProgramList::OnGroupAutoSaveChanged(const int state)
+void ProgramList::OnGroupAutoSaveChanged(const Autosave::Enum state)
 {
     switch(state) {
-    case QMessageBox::Save :
+    case Autosave::save :
         ui->grpAutosaveOn->setChecked(true);
         break;
-    case QMessageBox::Discard:
-        ui->grpAutosaveOn->setChecked(true);
+    case Autosave::discard :
+        ui->grpAutosaveOff->setChecked(true);
         break;
     default :
-        ui->grpAutosaveOn->setChecked(true);
+        ui->grpAutosaveAsk->setChecked(true);
         break;
     }
 }

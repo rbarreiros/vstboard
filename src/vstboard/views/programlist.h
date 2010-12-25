@@ -3,6 +3,7 @@
 
 //#include <QWidget>
 #include "precomp.h"
+#include "globals.h"
 
 namespace Ui {
     class ProgramList;
@@ -30,8 +31,8 @@ private:
 
 signals:
     void ChangeProg(const QModelIndex &index);
-    void ProgAutoSave(const int state);
-    void GroupAutoSave(const int state);
+    void ProgAutoSave(const Autosave::Enum state);
+    void GroupAutoSave(const Autosave::Enum state);
 
 public slots:
     void OnProgChange(const QModelIndex &index);
@@ -39,8 +40,8 @@ public slots:
     void OnGrpStartDrag(const QModelIndex & index);
     void ShowCurrentGroup();
     void rowsInserted ( const QModelIndex & parent, int start, int end );
-    void OnProgAutoSaveChanged(const int state);
-    void OnGroupAutoSaveChanged(const int state);
+    void OnProgAutoSaveChanged(const Autosave::Enum state);
+    void OnGroupAutoSaveChanged(const Autosave::Enum state);
 
 private slots:
     void on_grpAutosaveOff_clicked();

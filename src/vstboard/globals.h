@@ -206,4 +206,12 @@ namespace Event {
     const QEvent::Type Shortcut = QEvent::Type(QEvent::User+3);
 }
 
+namespace Autosave {
+    enum Enum {
+        save,
+        prompt,
+        discard
+    };
+}
+
 #endif // GLOBALS_H

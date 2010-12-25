@@ -10,8 +10,8 @@ Programs::Programs(MainHost *parent) :
     nextGroupId(0),
     nextProgId(0),
     myHost(parent),
-    progAutosaveState(QMessageBox::Save),
-    groupAutosaveState(QMessageBox::Save)
+    progAutosaveState(Autosave::save),
+    groupAutosaveState(Autosave::save)
 {
     model=new ProgramsModel(parent);
 }
@@ -20,6 +20,9 @@ void Programs::BuildModel()
 {
     if(model)
         model->clear();
+
+    groupAutosaveState=Autosave::save;
+    progAutosaveState=Autosave::save;
 
     for(unsigned int grp=0; grp<1; grp++) {
         QStandardItem *grpItem = new QStandardItem(QString("Grp%1").arg(grp));
@@ -55,6 +58,9 @@ void Programs::BuildModel()
 
     emit GroupChanged( currentGrp->index() );
     emit ProgChanged( currentPrg->index() );
+
+    emit GroupAutosaveChanged(groupAutosaveState);
+    emit ProgAutosaveChanged(progAutosaveState);
 }
 
 QStandardItem *Programs::CopyProgram(QStandardItem *progOri)
@@ -124,11 +130,11 @@ void Programs::ChangeProg(const QModelIndex &prgIndex)
         return;
 
 
-    if(progAutosaveState != QMessageBox::Discard && myHost->programContainer->IsDirty()) {
+    if(progAutosaveState != Autosave::discard && myHost->programContainer->IsDirty()) {
 
         int save=0;
 
-        if(progAutosaveState == QMessageBox::Save) {
+        if(progAutosaveState == Autosave::save) {
             //auto save
             save = QMessageBox::Save;
         } else {
@@ -155,11 +161,11 @@ void Programs::ChangeProg(const QModelIndex &prgIndex)
     QStandardItem *newgrp = newPrg->parent()->parent();
     if(newgrp!=currentGrp) {
 
-        if(groupAutosaveState != QMessageBox::Discard && myHost->groupContainer->IsDirty()) {
+        if(groupAutosaveState != Autosave::discard && myHost->groupContainer->IsDirty()) {
 
             int save=0;
 
-            if(groupAutosaveState == QMessageBox::Save) {
+            if(groupAutosaveState == Autosave::save) {
                 //auto save
                 save = QMessageBox::Save;
             } else {
@@ -231,22 +237,22 @@ void Programs::ChangeGroup(int grpNum)
     emit ProgChanged( currentPrg->index() );
 }
 
-void Programs::SetProgAutosave(const int state)
+void Programs::SetProgAutosave(const Autosave::Enum state)
 {
     progAutosaveState=state;
 }
 
-void Programs::SetGroupAutosave(const int state)
+void Programs::SetGroupAutosave(const Autosave::Enum state)
 {
     groupAutosaveState=state;
 }
 
-QDataStream & operator<< (QDataStream& out, const Programs& value)
+QDataStream & Programs::toStream (QDataStream &out) const
 {
     const quint16 file_version = 1;
     out << file_version;
 
-    QStandardItem *root = value.model->invisibleRootItem();
+    QStandardItem *root = model->invisibleRootItem();
     out << (quint16)root->rowCount();
     for(int i=0; i<root->rowCount(); i++) {
         QStandardItem *grpItem = root->child(i);
@@ -263,17 +269,23 @@ QDataStream & operator<< (QDataStream& out, const Programs& value)
         }
     }
 
-    out << (quint16)value.currentPrg->parent()->parent()->row();
-    out << (quint16)value.currentPrg->row();
+    out << (quint16)currentPrg->parent()->parent()->row();
+    out << (quint16)currentPrg->row();
+
+    out << (quint8)groupAutosaveState;
+    out << (quint8)progAutosaveState;
 
     return out;
 }
 
-QDataStream & operator>> (QDataStream& in, Programs& value)
+QDataStream & Programs::fromStream (QDataStream &in)
 {
-    value.model->clear();
-    value.currentPrg=0;
-    QStandardItem *root = value.model->invisibleRootItem();
+    quint16 file_version;
+    in >> file_version;
+
+    model->clear();
+    currentPrg=0;
+    QStandardItem *root = model->invisibleRootItem();
     quint16 nbgrp;
     in >> nbgrp;
     for(unsigned int i=0; i<nbgrp; i++) {
@@ -308,10 +320,9 @@ QDataStream & operator>> (QDataStream& in, Programs& value)
             quint32 prgId;
             in >> prgId;
             prgItem->setData(prgId,UserRoles::value);
-//            prgItem->setData(prgId,Qt::ToolTipRole);
 
-            if(prgId>=value.nextProgId)
-                value.nextProgId=prgId+1;
+            if(prgId>=nextProgId)
+                nextProgId=prgId+1;
 
             prgList->appendRow(prgItem);
         }
@@ -324,9 +335,25 @@ QDataStream & operator>> (QDataStream& in, Programs& value)
     quint16 prg;
     in >> prg;
 
-    value.currentPrg=value.model->item(0)->child(0)->child(0);
-    value.ChangeGroup(grp);
-    value.ChangeProg(prg);
+    currentPrg=model->item(0)->child(0)->child(0);
+    ChangeGroup(grp);
+    ChangeProg(prg);
+
+    in >> (quint8&)groupAutosaveState;
+    emit GroupAutosaveChanged(groupAutosaveState);
+
+    in >> (quint8&)progAutosaveState;
+    emit ProgAutosaveChanged(progAutosaveState);
 
     return in;
+}
+
+QDataStream & operator<< (QDataStream& out, const Programs& value)
+{
+    return value.toStream(out);
+}
+
+QDataStream & operator>> (QDataStream& in, Programs& value)
+{
+    return value.fromStream(in);
 }

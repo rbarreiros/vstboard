@@ -18,7 +18,7 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#define PROJECT_FILE_VERSION 6
+#define PROJECT_FILE_VERSION 7
 #define PROJECT_FILE_KEY 0x757b0a5d
 
 #include "projectfile.h"
@@ -86,7 +86,9 @@ bool ProjectFile::LoadFromFile(MainHost *myHost,QString filePath)
     in >> magic;
     if(magic != PROJECT_FILE_KEY) {
         QMessageBox msgBox;
-        msgBox.setText(tr("%1 is not a project file.").arg(filePath));
+        msgBox.setWindowTitle(filePath);
+        msgBox.setText( tr("Unknown file format.") );
+        msgBox.setInformativeText( tr("Not a VstBoard project file") );
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.exec();
         return false;
@@ -96,7 +98,9 @@ bool ProjectFile::LoadFromFile(MainHost *myHost,QString filePath)
     in >> version;
     if(version != PROJECT_FILE_VERSION) {
         QMessageBox msgBox;
-        msgBox.setText(tr("%1 : wrong file version.").arg(filePath));
+        msgBox.setWindowTitle(filePath);
+        msgBox.setText( tr("Wrong file version.") );
+        msgBox.setInformativeText( tr("Project file format v%1 can't be converted to the current file format v%2").arg(version).arg(PROJECT_FILE_VERSION) );
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.exec();
         return false;
