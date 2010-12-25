@@ -16,22 +16,27 @@ public:
     QStandardItem *CopyProgram(QStandardItem *progOri);
     QStandardItem *CopyGroup(QStandardItem *grpOri);
     void RemoveIndex(const QModelIndex &index);
-    friend QDataStream & operator<< (QDataStream&, const Programs&);
-    friend QDataStream & operator>> (QDataStream&, Programs&);
+    bool userWantsToUnloadGroup();
+    bool userWantsToUnloadProgram();
+    bool isDirty() {return projectDirty;}
 
 private:
-    QDataStream & toStream (QDataStream &) const;
+    void ChangeProg(QStandardItem *newPrg);
+
+    QDataStream & toStream (QDataStream &);
     QDataStream & fromStream (QDataStream &);
 
     ProgramsModel *model;
     QStandardItem *currentGrp;
     QStandardItem *currentPrg;
-//    unsigned int currentProgId;
+
     unsigned int nextGroupId;
     unsigned int nextProgId;
     MainHost *myHost;
     Autosave::Enum progAutosaveState;
     Autosave::Enum groupAutosaveState;
+
+    bool projectDirty;
 
 signals:
     void ProgChanged(const QModelIndex &prgIndex);
@@ -47,9 +52,12 @@ public slots:
     void ChangeProg(const QModelIndex &prgIndex);
     void SetProgAutosave(const Autosave::Enum state);
     void SetGroupAutosave(const Autosave::Enum state);
+
+    friend QDataStream & operator<< (QDataStream&, Programs&);
+    friend QDataStream & operator>> (QDataStream&, Programs&);
 };
 
-QDataStream & operator<< (QDataStream& out, const Programs& value);
+QDataStream & operator<< (QDataStream& out, Programs& value);
 QDataStream & operator>> (QDataStream& in, Programs& value);
 
 #endif // PROGRAMS_H

@@ -58,7 +58,8 @@ protected:
     View::SceneView *mySceneView;
 
 private:
-    bool userReallyWantsToQuit();
+    bool userWantsToUnloadProject();
+    bool userWantsToUnloadSetup();
     void BuildListTools();
     void writeSettings();
     void readSettings();
@@ -80,6 +81,7 @@ public slots:
     void groupParkingModelChanges(QStandardItemModel *model);
 
 private slots:
+    void on_actionLoad_Setup_triggered();
     void on_actionRestore_default_layout_triggered();
     void on_actionRefresh_Midi_devices_triggered();
     void on_actionRefresh_Audio_devices_triggered();

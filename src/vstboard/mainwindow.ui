@@ -413,12 +413,12 @@
      </property>
     </widget>
     <addaction name="actionLoad"/>
-    <addaction name="separator"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_Project_As"/>
     <addaction name="actionNew"/>
     <addaction name="menuRecent_Projects"/>
     <addaction name="separator"/>
+    <addaction name="actionLoad_Setup"/>
     <addaction name="actionSave_Setup"/>
     <addaction name="actionSave_Setup_As"/>
     <addaction name="actionNew_Setup"/>
@@ -442,17 +442,17 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionNew"/>
-   <addaction name="actionNew_Setup"/>
    <addaction name="actionLoad"/>
+   <addaction name="actionNew"/>
    <addaction name="actionSave"/>
-   <addaction name="actionSave_Setup"/>
-   <addaction name="actionConfig"/>
    <addaction name="separator"/>
    <addaction name="actionHost_panel"/>
    <addaction name="actionProject_panel"/>
    <addaction name="actionProgram_panel"/>
    <addaction name="actionGroup_panel"/>
+   <addaction name="separator"/>
+   <addaction name="actionConfig"/>
+   <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar">
    <property name="enabled">
@@ -829,7 +829,7 @@
     <string>Save Project</string>
    </property>
    <property name="statusTip">
-    <string>Save the program and insert panels in a project file</string>
+    <string>Save the Program and Group panels in a project file</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -841,10 +841,13 @@
      <normaloff>:/img16x16/fileopen.png</normaloff>:/img16x16/fileopen.png</iconset>
    </property>
    <property name="text">
-    <string>Open</string>
+    <string>Open Project</string>
+   </property>
+   <property name="toolTip">
+    <string>Open a Project file</string>
    </property>
    <property name="statusTip">
-    <string>Open a project file or a setup file</string>
+    <string>Open a project file</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -859,7 +862,7 @@
     <string>New Project</string>
    </property>
    <property name="statusTip">
-    <string>Clear the program and insert panels</string>
+    <string>Clear the Program and Group panels</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
@@ -912,7 +915,7 @@
     <string>Save Setup</string>
    </property>
    <property name="statusTip">
-    <string>Save the host panel in a setup file</string>
+    <string>Save the Host panel in a setup file</string>
    </property>
    <property name="shortcut">
     <string>Alt+S</string>
@@ -927,7 +930,7 @@
     <string>New Setup</string>
    </property>
    <property name="statusTip">
-    <string>Clear the host panel</string>
+    <string>Clear the Host panel</string>
    </property>
    <property name="shortcut">
     <string>Alt+N</string>
@@ -1085,6 +1088,24 @@
    </property>
    <property name="text">
     <string>Toggle Project panel</string>
+   </property>
+  </action>
+  <action name="actionLoad_Setup">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/img16x16/fileopen.png</normaloff>:/img16x16/fileopen.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open Setup</string>
+   </property>
+   <property name="toolTip">
+    <string>Open a Setup file</string>
+   </property>
+   <property name="statusTip">
+    <string>Open a Setup file</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+O</string>
    </property>
   </action>
  </widget>

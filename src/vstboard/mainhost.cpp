@@ -63,6 +63,7 @@ MainHost::MainHost(Vst *myVstPlugin, QObject *parent) :
         vstHost = vst::CVSTHost::Get();
 
     model = new HostModel(this);
+    model->setObjectName("MainModel");
     model->setColumnCount(1);
 
     sampleRate = 44100.0;

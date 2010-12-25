@@ -209,7 +209,7 @@ void ParameterPin::OnValueChanged(float val)
     val+=limitOutMin;
     outValue=val;
 
-    if(!loading && !dirty) {
+    if(!loading && !dirty && connectInfo.direction==PinDirection::Input) {
         dirty=true;
         parent->OnProgramDirty();
     }

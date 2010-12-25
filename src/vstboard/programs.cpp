@@ -11,7 +11,8 @@ Programs::Programs(MainHost *parent) :
     nextProgId(0),
     myHost(parent),
     progAutosaveState(Autosave::save),
-    groupAutosaveState(Autosave::save)
+    groupAutosaveState(Autosave::save),
+    projectDirty(false)
 {
     model=new ProgramsModel(parent);
 }
@@ -61,6 +62,74 @@ void Programs::BuildModel()
 
     emit GroupAutosaveChanged(groupAutosaveState);
     emit ProgAutosaveChanged(progAutosaveState);
+
+    projectDirty=false;
+}
+
+bool Programs::userWantsToUnloadGroup()
+{
+    if(groupAutosaveState == Autosave::discard)
+        return true;
+
+    if(!myHost->groupContainer->IsDirty())
+        return true;
+
+    if(groupAutosaveState == Autosave::save) {
+        myHost->groupContainer->SaveProgram();
+        projectDirty=true;
+        return true;
+    }
+
+    //prompt
+    QMessageBox msgBox;
+    msgBox.setText(tr("The group has been modified."));
+    msgBox.setInformativeText(tr("Do you want to save your changes?"));
+    msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Save);
+
+    switch(msgBox.exec()) {
+        case QMessageBox::Cancel:
+            return false;
+        case QMessageBox::Save:
+            myHost->groupContainer->SaveProgram();
+            projectDirty=true;
+            return true;
+    }
+
+    return true;
+}
+
+bool Programs::userWantsToUnloadProgram()
+{
+    if(progAutosaveState == Autosave::discard)
+        return true;
+
+    if(!myHost->programContainer->IsDirty())
+        return true;
+
+    if(progAutosaveState == Autosave::save) {
+        myHost->programContainer->SaveProgram();
+        projectDirty=true;
+        return true;
+    }
+
+    //prompt
+    QMessageBox msgBox;
+    msgBox.setText(tr("The progarm has been modified."));
+    msgBox.setInformativeText(tr("Do you want to save your changes?"));
+    msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Save);
+
+    switch(msgBox.exec()) {
+        case QMessageBox::Cancel:
+            return false;
+        case QMessageBox::Save:
+            myHost->programContainer->SaveProgram();
+            projectDirty=true;
+            return true;
+    }
+
+    return true;
 }
 
 QStandardItem *Programs::CopyProgram(QStandardItem *progOri)
@@ -75,6 +144,8 @@ QStandardItem *Programs::CopyProgram(QStandardItem *progOri)
     prgItem->setDragEnabled(true);
     prgItem->setDropEnabled(false);
     prgItem->setEditable(true);
+
+    projectDirty=true;
 
     return prgItem;
 }
@@ -103,112 +174,76 @@ QStandardItem *Programs::CopyGroup(QStandardItem *grpOri)
     }
 
     grpItem->appendRow(prgList);
+
+    projectDirty=true;
+
     return grpItem;
 }
 
 void Programs::RemoveIndex(const QModelIndex &index)
 {
     if(index.data(UserRoles::nodeType).toInt() == NodeType::program) {
+        if(!userWantsToUnloadProgram())
+            return;
+
         int prgId = index.data(UserRoles::value).toInt();
         myHost->programContainer->RemoveProgram(prgId);
+        projectDirty=true;
+        return;
     }
 
     if(index.data(UserRoles::nodeType).toInt() == NodeType::programGroup) {
+        if(!userWantsToUnloadGroup())
+            return;
+
         QStandardItem *lstPrg = model->itemFromIndex(index.child(0,0));
         for(int i=0; i< lstPrg->rowCount(); i++) {
             QStandardItem *prg = lstPrg->child(i);
             int prgId = prg->data(UserRoles::value).toInt();
             myHost->programContainer->RemoveProgram(prgId);
         }
+        projectDirty=true;
+        return;
     }
+}
+
+void Programs::ChangeProg(QStandardItem *newPrg)
+{
+    if(!newPrg || newPrg==currentPrg)
+        return;
+
+    if(!userWantsToUnloadProgram()) {
+        emit ProgChanged( currentPrg->index() );
+        return;
+    }
+
+    QStandardItem *newgrp = newPrg->parent()->parent();
+    if(newgrp!=currentGrp) {
+        if(!userWantsToUnloadGroup()) {
+            emit ProgChanged( currentPrg->index() );
+            return;
+        }
+
+        currentGrp=newgrp;
+        emit GroupChanged( currentGrp->index() );
+    }
+
+    currentPrg = newPrg;
+    emit ProgChanged( currentPrg->index() );
+
+    projectDirty=true;
 }
 
 void Programs::ChangeProg(const QModelIndex &prgIndex)
 {
     QStandardItem *newPrg = model->itemFromIndex( prgIndex );
-    if(!newPrg || newPrg==currentPrg)
-        return;
-
-
-    if(progAutosaveState != Autosave::discard && myHost->programContainer->IsDirty()) {
-
-        int save=0;
-
-        if(progAutosaveState == Autosave::save) {
-            //auto save
-            save = QMessageBox::Save;
-        } else {
-            //prompt
-            QMessageBox msgBox;
-            msgBox.setText(tr("The progarm has been modified."));
-            msgBox.setInformativeText(tr("Do you want to save your changes?"));
-            msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-            msgBox.setDefaultButton(QMessageBox::Save);
-            save = msgBox.exec();
-        }
-
-        switch(save) {
-            case QMessageBox::Cancel:
-                //go back to current program
-                emit ProgChanged( currentPrg->index() );
-                return;
-            case QMessageBox::Save:
-                myHost->programContainer->SaveProgram();
-        }
-
-    }
-
-    QStandardItem *newgrp = newPrg->parent()->parent();
-    if(newgrp!=currentGrp) {
-
-        if(groupAutosaveState != Autosave::discard && myHost->groupContainer->IsDirty()) {
-
-            int save=0;
-
-            if(groupAutosaveState == Autosave::save) {
-                //auto save
-                save = QMessageBox::Save;
-            } else {
-                //prompt
-                QMessageBox msgBox;
-                msgBox.setText(tr("The group has been modified."));
-                msgBox.setInformativeText(tr("Do you want to save your changes?"));
-                msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-                msgBox.setDefaultButton(QMessageBox::Save);
-                save = msgBox.exec();
-            }
-
-            switch(save) {
-                case QMessageBox::Cancel:
-                    //go back to current program
-                    emit ProgChanged( currentPrg->index() );
-                    return;
-                case QMessageBox::Save:
-                    myHost->groupContainer->SaveProgram();
-            }
-        }
-
-        currentGrp=newgrp;
-        emit GroupChanged( currentGrp->index() );
-    }
-
-    currentPrg = newPrg;
-    emit ProgChanged( currentPrg->index() );
+    ChangeProg(newPrg);
 }
 
 void Programs::ChangeProg(int midiProgNum) {
-    QStandardItem *newPrg = currentPrg->parent()->child(midiProgNum);
-    if(!newPrg || newPrg==currentPrg)
+    if(!currentPrg)
         return;
-    currentPrg = newPrg;
-
-    QStandardItem *newgrp = newPrg->parent()->parent();
-    if(newgrp!=currentGrp) {
-        currentGrp=newgrp;
-        emit GroupChanged( currentGrp->index() );
-    }
-
-    emit ProgChanged( currentPrg->index() );
+    ChangeProg(currentPrg->parent()->child(midiProgNum));
 }
 
 void Programs::ChangeGroup(int grpNum)
@@ -220,34 +255,39 @@ void Programs::ChangeGroup(int grpNum)
     if(newGrp==currentGrp)
         return;
 
-    currentGrp=newGrp;
+    QStandardItem *newPrg = newGrp->child(0)->child(0);
 
-
-    int prg = currentPrg->row();
-    QStandardItem *newPrg = currentGrp->child(0,0)->child( prg );
-    if(!newPrg) {
-        newPrg = currentGrp->child(0)->child(0);
-        if(!newPrg)
-            return;
+    if(currentPrg) {
+        int prg = currentPrg->row();
+        newPrg = newGrp->child(0,0)->child( prg );
     }
 
-    currentPrg = newPrg;
+    if(!newPrg) {
+        debug("Programs::ChangeGroup prog not found")
+        newPrg = newGrp->child(0)->child(0);
+    }
 
-    emit GroupChanged( currentGrp->index() );
-    emit ProgChanged( currentPrg->index() );
+    if(!newPrg) {
+        debug("Programs::ChangeGroup prog 0 not found")
+        return;
+    }
+
+    ChangeProg(newPrg);
 }
 
 void Programs::SetProgAutosave(const Autosave::Enum state)
 {
     progAutosaveState=state;
+    projectDirty=true;
 }
 
 void Programs::SetGroupAutosave(const Autosave::Enum state)
 {
     groupAutosaveState=state;
+    projectDirty=true;
 }
 
-QDataStream & Programs::toStream (QDataStream &out) const
+QDataStream & Programs::toStream (QDataStream &out)
 {
     const quint16 file_version = 1;
     out << file_version;
@@ -269,12 +309,15 @@ QDataStream & Programs::toStream (QDataStream &out) const
         }
     }
 
-    out << (quint16)currentPrg->parent()->parent()->row();
-    out << (quint16)currentPrg->row();
+    quint16 grp = currentPrg->parent()->parent()->row();
+    out << grp;
+    quint16 prg = currentPrg->row();
+    out << prg;
 
     out << (quint8)groupAutosaveState;
     out << (quint8)progAutosaveState;
 
+    projectDirty=false;
     return out;
 }
 
@@ -335,9 +378,11 @@ QDataStream & Programs::fromStream (QDataStream &in)
     quint16 prg;
     in >> prg;
 
-    currentPrg=model->item(0)->child(0)->child(0);
+    currentGrp=0;
+    currentPrg=0;
     ChangeGroup(grp);
     ChangeProg(prg);
+
 
     in >> (quint8&)groupAutosaveState;
     emit GroupAutosaveChanged(groupAutosaveState);
@@ -345,10 +390,11 @@ QDataStream & Programs::fromStream (QDataStream &in)
     in >> (quint8&)progAutosaveState;
     emit ProgAutosaveChanged(progAutosaveState);
 
+    projectDirty=false;
     return in;
 }
 
-QDataStream & operator<< (QDataStream& out, const Programs& value)
+QDataStream & operator<< (QDataStream& out, Programs& value)
 {
     return value.toStream(out);
 }

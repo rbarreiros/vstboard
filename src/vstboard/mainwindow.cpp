@@ -150,16 +150,68 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    if (userReallyWantsToQuit()) {
-        writeSettings();
-        event->accept();
-    } else {
+    if(!userWantsToUnloadSetup()) {
         event->ignore();
+        return;
     }
+
+    if(!userWantsToUnloadProject()) {
+        event->ignore();
+        return;
+    }
+
+    writeSettings();
+    event->accept();
 }
 
-bool MainWindow::userReallyWantsToQuit()
+bool MainWindow::userWantsToUnloadSetup()
 {
+    if(myHost->hostContainer->IsDirty()) {
+        QMessageBox msgBox;
+        msgBox.setText(tr("The setup has been modified."));
+        msgBox.setInformativeText(tr("Do you want to save your changes?"));
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Save);
+
+        switch(msgBox.exec()) {
+            case QMessageBox::Cancel :
+                return false;
+            case QMessageBox::Save :
+                MainWindow::on_actionSave_Setup_triggered();
+                break;
+            default :
+                break;
+        }
+    }
+    return true;
+}
+
+bool MainWindow::userWantsToUnloadProject()
+{
+    if(!myHost->programList->userWantsToUnloadProgram())
+        return false;
+
+    if(!myHost->programList->userWantsToUnloadGroup())
+        return false;
+
+    if(!myHost->programList->isDirty())
+        return true;
+
+    //prompt
+    QMessageBox msgBox;
+    msgBox.setText(tr("The project has been modified."));
+    msgBox.setInformativeText(tr("Do you want to save your changes?"));
+    msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Save);
+
+    switch(msgBox.exec()) {
+        case QMessageBox::Cancel :
+            return false;
+        case QMessageBox::Save :
+            MainWindow::on_actionSave_triggered();
+            return true;
+    }
+
     return true;
 }
 
@@ -224,37 +276,26 @@ void MainWindow::BuildListTools()
 
 void MainWindow::on_actionLoad_triggered()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Project or Setup"), "", tr("Supported Files (*.%1 *.%2);;Project Files (*.%1);;Setup Files (*.%2)").arg(PROJECT_FILE_EXTENSION).arg(SETUP_FILE_EXTENSION));
+    if(!userWantsToUnloadProject())
+        return;
+
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open a Project file"), "", tr("Project Files (*.%1)").arg(PROJECT_FILE_EXTENSION));
 
     if(fileName.isEmpty())
         return;
 
-    if(fileName.endsWith(PROJECT_FILE_EXTENSION, Qt::CaseInsensitive)) {
-        if(ProjectFile::LoadFromFile(myHost,fileName)) {
-            ConfigDialog::AddRecentProjectFile(fileName);
-            currentProjectFile = fileName;
-            updateRecentFileActions();
-        }
-        return;
+    if(ProjectFile::LoadFromFile(myHost,fileName)) {
+        ConfigDialog::AddRecentProjectFile(fileName);
+        currentProjectFile = fileName;
+        updateRecentFileActions();
     }
-
-    if(fileName.endsWith(SETUP_FILE_EXTENSION, Qt::CaseInsensitive)) {
-        if(SetupFile::LoadFromFile(myHost,fileName)) {
-            ConfigDialog::AddRecentSetupFile(fileName);
-            currentSetupFile = fileName;
-            updateRecentFileActions();
-        }
-        return;
-    }
-
-    QMessageBox msgBox;
-    msgBox.setText(tr("Unknown file extension."));
-    msgBox.exec();
-
 }
 
 void MainWindow::on_actionNew_triggered()
 {
+    if(!userWantsToUnloadProject())
+        return;
+
     ProjectFile::Clear(myHost);
     ConfigDialog::AddRecentProjectFile("");
     currentProjectFile = "";
@@ -292,8 +333,28 @@ void MainWindow::on_actionSave_Project_As_triggered()
     }
 }
 
+void MainWindow::on_actionLoad_Setup_triggered()
+{
+    if(!userWantsToUnloadSetup())
+        return;
+
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open a Setup file"), "", tr("Setup Files (*.%1)").arg(SETUP_FILE_EXTENSION));
+
+    if(fileName.isEmpty())
+        return;
+
+    if(SetupFile::LoadFromFile(myHost,fileName)) {
+        ConfigDialog::AddRecentSetupFile(fileName);
+        currentSetupFile = fileName;
+        updateRecentFileActions();
+    }
+}
+
 void MainWindow::on_actionNew_Setup_triggered()
 {
+    if(!userWantsToUnloadSetup())
+        return;
+
     SetupFile::Clear(myHost);
     ConfigDialog::AddRecentSetupFile("");
     currentSetupFile = "";
@@ -555,6 +616,9 @@ void MainWindow::updateRecentFileActions()
 
 void MainWindow::openRecentSetup()
  {
+    if(!userWantsToUnloadSetup())
+        return;
+
      QAction *action = qobject_cast<QAction *>(sender());
      if(!action)
          return;
@@ -570,6 +634,9 @@ void MainWindow::openRecentSetup()
 
 void MainWindow::openRecentProject()
  {
+    if(!userWantsToUnloadProject())
+        return;
+
      QAction *action = qobject_cast<QAction *>(sender());
      if(!action)
          return;
@@ -610,3 +677,5 @@ void MainWindow::on_actionRestore_default_layout_triggered()
 {
     resetSettings();
 }
+
+
