@@ -45,7 +45,7 @@ Object::Object(MainHost *host, int index, const ObjectInfo &info) :
     currentProgram(0),
     progIsDirty(false),
     closed(true),
-    containerId(-1),
+    containerId(FixedObjId::noContainer),
     currentProgId(TEMP_PROGRAM),
     objInfo(info),
     myHost(host)
@@ -109,9 +109,12 @@ Object::~Object()
 {
     pinLists.clear();
     debug2(<< "delete Object" << objectName() << hex << (long)this)
-    QSharedPointer<Object>cntPtr = myHost->objFactory->GetObjectFromId( containerId );
-    if(cntPtr) {
-        static_cast<Container*>(cntPtr.data())->OnChildDeleted(this);
+
+    if(containerId!=FixedObjId::noContainer) {
+        QSharedPointer<Object>cntPtr = myHost->objFactory->GetObjectFromId( containerId );
+        if(cntPtr) {
+            static_cast<Container*>(cntPtr.data())->OnChildDeleted(this);
+        }
     }
     Close();
 }

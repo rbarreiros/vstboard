@@ -32,6 +32,7 @@ Container::Container(MainHost *myHost,int index, const ObjectInfo &info) :
     cablesNode(QModelIndex()),
     progToSet(-1)
 {
+    parkModel.setObjectName("parkModel"%objectName());
     LoadProgram(TEMP_PROGRAM);
     connect(myHost,SIGNAL(BufferSizeChanged(ulong)),
             this,SLOT(SetBufferSize(ulong)));
@@ -48,6 +49,9 @@ const QModelIndex &Container::GetCablesIndex()
 {
     if(cablesNode.isValid())
         return cablesNode;
+
+    if(parked)
+        return QModelIndex();
 
     if(modelIndex.isValid()) {
         QStandardItem *item = myHost->GetModel()->itemFromIndex(modelIndex);
@@ -67,13 +71,8 @@ void Container::SetContainerId(quint16 id)
 {
     Object::SetContainerId(id);
 
-    if(currentProgram)
-        foreach(QSharedPointer<Object>objPtr, currentProgram->listObjects) {
-            objPtr->SetContainerId(index);
-        }
-
-    foreach(QSharedPointer<Object>objPtr, listStaticObjects) {
-        objPtr->SetContainerId(index);
+    foreach(Object* obj, listLoadedObjects) {
+        obj->SetContainerId(index);
     }
 }
 
@@ -299,6 +298,8 @@ void Container::RemoveProgram(int prg)
 
 void Container::AddObject(QSharedPointer<Object> objPtr)
 {
+    objPtr->SetContainerId(index);
+
     //bridges are not stored in program
     if(objPtr->info().nodeType==NodeType::bridge ) {
         if(objPtr->info().objType==ObjType::BridgeIn) {
@@ -323,6 +324,8 @@ void Container::AddObject(QSharedPointer<Object> objPtr)
 
 void Container::AddParkedObject(QSharedPointer<Object> objPtr)
 {
+    objPtr->SetContainerId(index);
+
     listLoadedObjects << objPtr.data();
     ParkChildObject(objPtr);
 }
@@ -359,7 +362,6 @@ void Container::AddChildObject(QSharedPointer<Object> objPtr)
     QStandardItem *item = objPtr->GetFullItem();
     myHost->GetModel()->itemFromIndex( modelIndex )->appendRow(item);
     objPtr->modelIndex=item->index();
-    objPtr->SetContainerId(index);
     objPtr->parked=false;
     myHost->OnObjectAdded(objPtr);
 }
@@ -437,32 +439,12 @@ QDataStream & Container::toStream (QDataStream& out) const
 
     switch(myHost->filePass) {
 
-        //save the objects used in the current program
+        //save all loaded objects
         case 0:
         {
             out << (qint16)index;
             out << objectName();
             out << sleep;
-
-            /*if(currentProgram) {
-                out << (quint16)currentProgram->listObjects.size();
-                foreach(QSharedPointer<Object> objPtr, currentProgram->listObjects) {
-                    if(!objPtr.isNull()) {
-
-                        QByteArray tmpStream;
-                        QDataStream tmp( &tmpStream , QIODevice::ReadWrite);
-                        tmp << *objPtr.data();
-
-                        out << objPtr->info();
-                        out << (quint16)tmpStream.size();
-                        out << tmpStream;
-                    } else {
-                        out<<(quint8)ObjType::ND;
-                    }
-                }
-            } else {
-                out << (quint16)0;
-            }*/
 
             out << (quint16)listLoadedObjects.size();
             foreach(Object* obj, listLoadedObjects) {
@@ -505,7 +487,7 @@ QDataStream & Container::fromStream (QDataStream& in)
 
     switch(myHost->filePass) {
 
-        //load the object used by the current program
+        //load all objects
         case 0:
         {
             LoadProgram(TEMP_PROGRAM);

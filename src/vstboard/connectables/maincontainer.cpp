@@ -49,6 +49,8 @@ bool MainContainer::Close()
 
 void MainContainer::AddObject(QSharedPointer<Object> objPtr)
 {
+    objPtr->SetContainerId(index);
+
     //bridges are not stored in program
     if(objPtr->info().nodeType == NodeType::bridge) {
         if(objPtr->info().objType==ObjType::BridgeIn) {

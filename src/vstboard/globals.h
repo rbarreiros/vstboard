@@ -125,7 +125,8 @@ namespace FixedObjId {
         groupContainerOut,
         groupContainerSend,
         groupContainerReturn,
-        parkingContainer
+        parkingContainer,
+        noContainer=65535
     };
 }
 
