@@ -15,6 +15,7 @@ ProgramList::ProgramList(QWidget *parent) :
     ui->listGrps->setDefaultDropAction(Qt::MoveAction);
     ui->listGrps->setFrameShape(QFrame::NoFrame);
     ui->listGrps->setContextMenuPolicy(Qt::CustomContextMenu);
+    ui->listGrps->setMinimumWidth(1);
     connect( ui->listGrps, SIGNAL(DragOverItemFromWidget(QWidget*,QModelIndex)),
              this, SLOT(OnDragOverGroups(QWidget*,QModelIndex)));
     connect( ui->listGrps, SIGNAL(StartDrag(QModelIndex)),
@@ -24,6 +25,7 @@ ProgramList::ProgramList(QWidget *parent) :
     ui->listProgs->setDefaultDropAction(Qt::MoveAction);
     ui->listProgs->setFrameShape(QFrame::NoFrame);
     ui->listProgs->setContextMenuPolicy(Qt::CustomContextMenu);
+    ui->listProgs->setMinimumWidth(1);
 }
 
 ProgramList::~ProgramList()
@@ -157,4 +159,64 @@ void ProgramList::resetSettings()
     QList<int>widths;
     widths << w << w;
     ui->splitter->setSizes(widths);
+}
+
+void ProgramList::on_progAutosaveOn_clicked()
+{
+    emit ProgAutoSave(QMessageBox::Save);
+}
+
+void ProgramList::on_progAutosaveAsk_clicked()
+{
+    emit ProgAutoSave(0);
+}
+
+void ProgramList::on_progAutosaveOff_clicked()
+{
+    emit ProgAutoSave(QMessageBox::Discard);
+}
+
+void ProgramList::on_grpAutosaveOn_clicked()
+{
+    emit GroupAutoSave(QMessageBox::Save);
+}
+
+void ProgramList::on_grpAutosaveAsk_clicked()
+{
+    emit GroupAutoSave(0);
+}
+
+void ProgramList::on_grpAutosaveOff_clicked()
+{
+    emit GroupAutoSave(QMessageBox::Discard);
+}
+
+void ProgramList::OnProgAutoSaveChanged(const int state)
+{
+    switch(state) {
+    case QMessageBox::Save :
+        ui->progAutosaveOn->setChecked(true);
+        break;
+    case QMessageBox::Discard :
+        ui->progAutosaveOff->setChecked(true);
+        break;
+    default :
+        ui->progAutosaveAsk->setChecked(true);
+        break;
+    }
+}
+
+void ProgramList::OnGroupAutoSaveChanged(const int state)
+{
+    switch(state) {
+    case QMessageBox::Save :
+        ui->grpAutosaveOn->setChecked(true);
+        break;
+    case QMessageBox::Discard:
+        ui->grpAutosaveOn->setChecked(true);
+        break;
+    default :
+        ui->grpAutosaveOn->setChecked(true);
+        break;
+    }
 }

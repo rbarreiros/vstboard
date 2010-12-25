@@ -3,7 +3,6 @@
 
 #include "precomp.h"
 #include "models/programsmodel.h"
-//#include <QObject>
 
 class MainHost;
 class Programs : public QObject
@@ -27,17 +26,23 @@ private:
     unsigned int nextGroupId;
     unsigned int nextProgId;
     MainHost *myHost;
+    int progAutosaveState;
+    int groupAutosaveState;
 
 signals:
     void ProgChanged(const QModelIndex &prgIndex);
     void GroupChanged(const QModelIndex &grpIndex);
     void ProgCopy(int ori, int dest);
     void GroupCopy(int ori, int dest);
+    void ProgAutosaveChanged(const int state);
+    void GroupAutosaveChanged(const int state);
 
 public slots:
     void ChangeProg(int midiPrgId);
     void ChangeGroup(int grpNum);
     void ChangeProg(const QModelIndex &prgIndex);
+    void SetProgAutosave(const int state);
+    void SetGroupAutosave(const int state);
 
 };
 

@@ -78,6 +78,16 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     connect(ui->Programs,SIGNAL(ChangeProg(QModelIndex)),
             myHost->programList,SLOT(ChangeProg(QModelIndex)));
 
+    connect(ui->Programs,SIGNAL(ProgAutoSave(int)),
+            myHost->programList, SLOT(SetProgAutosave(int)));
+    connect(myHost->programList,SIGNAL(ProgAutosaveChanged(int)),
+            ui->Programs,SLOT(OnProgAutoSaveChanged(int)));
+
+    connect(ui->Programs,SIGNAL(GroupAutoSave(int)),
+            myHost->programList, SLOT(SetGroupAutosave(int)));
+    connect(myHost->programList,SIGNAL(GroupAutosaveChanged(int)),
+            ui->Programs,SLOT(OnGroupAutoSaveChanged(int)));
+
     //vst plugins browser
     listVstPluginsModel.setReadOnly(true);
     listVstPluginsModel.setResolveSymlinks(true);

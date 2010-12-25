@@ -36,6 +36,7 @@ ContainerProgram::ContainerProgram(const ContainerProgram& c)
 {
     myHost = c.myHost;
     container = c.container;
+    dirty=false;
 
     foreach(QSharedPointer<Object> objPtr, c.listObjects) {
         listObjects << objPtr;
