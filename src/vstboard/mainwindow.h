@@ -41,8 +41,9 @@ class MainWindow : public QMainWindow {
 
 public:
     MainWindow(MainHost * myHost, QWidget *parent = 0);
-//    static MainWindow *Get(QWidget *parent = 0);
     ~MainWindow();
+
+    bool openedPrompt;
 
 protected:
     void closeEvent(QCloseEvent *event);
@@ -75,6 +76,8 @@ private:
     Ui::MainWindow *ui;
 
     MainHost *myHost;
+
+
 
 public slots:
     void programParkingModelChanges(QStandardItemModel *model);

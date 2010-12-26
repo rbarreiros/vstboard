@@ -38,7 +38,6 @@
 #endif
 
 #include "programs.h"
-//#include "projectfile/setupfile.h"
 
 #ifdef VSTSDK
     #include "vst/cvsthost.h"
@@ -46,14 +45,10 @@
 
 class Vst;
 class MainWindow;
-//class AudioDevices;
-//class MainConfig;
 class MainHost : public QObject
 {
 Q_OBJECT
 public:
-//    inline static MainHost* Get() {return theHost;}
-//    static MainHost* Create(QObject *parent = 0);
     MainHost(Vst *myVstPlugin = 0, QObject *parent = 0);
     ~MainHost();
 
@@ -66,12 +61,10 @@ public:
     unsigned long GetBufferSize() {return bufferSize;}
     float GetSampleRate() {return sampleRate;}
 
-    void OnObjectAdded(QSharedPointer<Connectables::Object> objPtr);
-    void OnObjectRemoved(QSharedPointer<Connectables::Object> objPtr, Connectables::Object *container=0);
-
     void EnableSolverUpdate(bool enable);
     bool IsSolverUpdateEnabled();
 
+    void GetTempo(int &tempo, int &sign1, int &sign2);
 
     QSharedPointer<Connectables::MainContainer> mainContainer;
     QSharedPointer<Connectables::MainContainer> hostContainer;

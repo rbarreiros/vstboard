@@ -54,8 +54,6 @@ namespace View {
 
         QModelIndex modelIndex;
 
-        int menuHeight;
-
     private:
         Ui::VstPluginWindow *ui;
 

@@ -36,14 +36,8 @@ MainContainer::~MainContainer()
 
 bool MainContainer::Close()
 {
-    if(closed)
-        return false;
-
     bridgeSend.clear();
     bridgeReturn.clear();
-
-    Container::Close();
-
     return true;
 }
 

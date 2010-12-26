@@ -29,8 +29,10 @@
 MainWindow::MainWindow(MainHost * myHost, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    myHost(myHost)
+    myHost(myHost),
+    openedPrompt(0)
 {
+
     myHost->mainWindow=this;
     connect(myHost,SIGNAL(programParkingModelChanged(QStandardItemModel*)),
             this,SLOT(programParkingModelChanges(QStandardItemModel*)));
@@ -51,11 +53,23 @@ MainWindow::MainWindow(MainHost * myHost, QWidget *parent) :
     BuildListTools();
 
     //programs
+    myHost->programList->SetMainWindow(this);
     ui->Programs->SetModel(myHost->programList->GetModel());
     connect(myHost->programList, SIGNAL(ProgChanged(QModelIndex)),
             ui->Programs,SLOT(OnProgChange(QModelIndex)));
     connect(ui->Programs,SIGNAL(ChangeProg(QModelIndex)),
             myHost->programList,SLOT(ChangeProg(QModelIndex)));
+
+    connect(ui->Programs,SIGNAL(ProgAutoSave(Autosave::Enum)),
+            myHost->programList, SLOT(SetProgAutosave(Autosave::Enum)));
+    connect(myHost->programList,SIGNAL(ProgAutosaveChanged(Autosave::Enum)),
+            ui->Programs,SLOT(OnProgAutoSaveChanged(Autosave::Enum)));
+
+    connect(ui->Programs,SIGNAL(GroupAutoSave(Autosave::Enum)),
+            myHost->programList, SLOT(SetGroupAutosave(Autosave::Enum)));
+    connect(myHost->programList,SIGNAL(GroupAutosaveChanged(Autosave::Enum)),
+            ui->Programs,SLOT(OnGroupAutoSaveChanged(Autosave::Enum)));
+
 
     //vst plugins browser
 #ifndef __GNUC__

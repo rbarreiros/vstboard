@@ -10,20 +10,11 @@
     <height>90</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Frame</string>
-  </property>
   <property name="locale">
    <locale language="English" country="UnitedStates"/>
   </property>
   <property name="frameShape">
    <enum>QFrame::NoFrame</enum>
-  </property>
-  <property name="frameShadow">
-   <enum>QFrame::Raised</enum>
-  </property>
-  <property name="lineWidth">
-   <number>1</number>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <property name="spacing">

@@ -190,13 +190,11 @@ void AudioDevices::OnToggleDeviceInUse(const ObjectInfo &objInfo, bool opened)
                     }
 
                     //the renderer is normally launched when all the audio devices are ready,
-                    //if there is no audio device we have to run it a "fake engine"
+                    //if there is no audio device we have to run a timer
                     if(countActiveDevices==1) {
-//                        debug("AudioDevices::OnToggleDeviceInUse fakeRender off")
                         fakeRenderTimer.stop();
                     }
                     if(countActiveDevices==0) {
-//                        debug("AudioDevices::OnToggleDeviceInUse fakeRender on")
                         fakeRenderTimer.start(FAKE_RENDER_TIMER_MS);
                     }
                     return;

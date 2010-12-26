@@ -43,9 +43,6 @@ AudioDeviceIn::~AudioDeviceIn()
 
 bool AudioDeviceIn::Close()
 {
-    if(!Object::Close())
-        return false;
-
     if(parentDevice) {
         parentDevice->SetObjectInput(0);
         parentDevice.clear();

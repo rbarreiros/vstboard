@@ -5,6 +5,7 @@
 #include "globals.h"
 #include "models/programsmodel.h"
 
+class MainWindow;
 class MainHost;
 class Programs : public QObject
 {
@@ -15,10 +16,13 @@ public:
     ProgramsModel *GetModel() {return model;}
     QStandardItem *CopyProgram(QStandardItem *progOri);
     QStandardItem *CopyGroup(QStandardItem *grpOri);
-    void RemoveIndex(const QModelIndex &index);
+    bool RemoveIndex(const QModelIndex &index);
     bool userWantsToUnloadGroup();
     bool userWantsToUnloadProgram();
     bool isDirty() {return projectDirty;}
+    int GetCurrentGroup();
+    int GetCurrentProg();
+    void SetMainWindow(MainWindow *win) {mainWindow=win;}
 
 private:
     void ChangeProg(QStandardItem *newPrg);
@@ -37,6 +41,8 @@ private:
     Autosave::Enum groupAutosaveState;
 
     bool projectDirty;
+
+    MainWindow *mainWindow;
 
 signals:
     void ProgChanged(const QModelIndex &prgIndex);

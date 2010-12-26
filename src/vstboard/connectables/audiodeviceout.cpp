@@ -41,9 +41,6 @@ AudioDeviceOut::~AudioDeviceOut()
 
 bool AudioDeviceOut::Close()
 {
-    if(!Object::Close())
-        return false;
-
     if(parentDevice) {
         parentDevice->SetObjectOutput(0);
         parentDevice.clear();

@@ -57,7 +57,8 @@ bool ProgramsModel::removeRows ( int row, int count, const QModelIndex & parent 
         movingItems=false;
     } else {
         QModelIndex idx = index(row,0,parent);
-        myHost->programList->RemoveIndex(idx);
+        if(!myHost->programList->RemoveIndex(idx))
+            return false;
     }
     return QStandardItemModel::removeRows(row,count,parent);
 }

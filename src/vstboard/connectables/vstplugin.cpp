@@ -55,9 +55,6 @@ VstPlugin::~VstPlugin()
 
 bool VstPlugin::Close()
 {
-    Object::Close();
-
-
     if(editorWnd) {
         objMutex.lock();
         EffEditClose();
@@ -443,7 +440,7 @@ void VstPlugin::OnShowEditor()
         return;
 
     editorWnd->show();
-    editorWnd->raise();
+//    editorWnd->raise();
     connect(myHost->updateViewTimer,SIGNAL(timeout()),
             this,SLOT(EditIdle()));
 }

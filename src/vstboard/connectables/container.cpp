@@ -98,6 +98,7 @@ bool Container::Close()
 
     if(currentProgram) {
         currentProgram->Unload();
+        currentProgram->ParkAllObj();
         delete currentProgram;
         currentProgram=0;
     }
@@ -109,8 +110,6 @@ bool Container::Close()
 
     bridgeIn.clear();
     bridgeOut.clear();
-
-    Object::Close();
 
     return true;
 }
@@ -291,9 +290,9 @@ void Container::RemoveProgram(int prg)
 //        debug("Container::RemoveProgram not found")
         return;
     }
-    ContainerProgram* prog = listContainerPrograms.value(prg);
+    ContainerProgram* prog = listContainerPrograms.take(prg);
     prog->Remove(prg);
-    listContainerPrograms.remove(prg);
+    delete prog;
 }
 
 void Container::AddObject(QSharedPointer<Object> objPtr)
@@ -352,10 +351,6 @@ void Container::ParkObject(QSharedPointer<Object> objPtr)
 
 void Container::AddChildObject(QSharedPointer<Object> objPtr)
 {
-//    for(int i=0; i<parkModel.invisibleRootItem()->rowCount(); i++) {
-//        QStandardItem *item = parkModel.invisibleRootItem()->child(i,0);
-//        if(item->data(UserRoles::value).toInt() == objPtr)
-//    }
     if(objPtr->modelIndex.isValid() && objPtr->modelIndex.model()==&parkModel)
         parkModel.removeRow(objPtr->modelIndex.row());
 
@@ -363,7 +358,11 @@ void Container::AddChildObject(QSharedPointer<Object> objPtr)
     myHost->GetModel()->itemFromIndex( modelIndex )->appendRow(item);
     objPtr->modelIndex=item->index();
     objPtr->parked=false;
-    myHost->OnObjectAdded(objPtr);
+
+#ifndef VST_PLUGIN
+    if(objPtr->info().objType == ObjType::MidiInterface)
+        myHost->midiDevices->OpenDevice(objPtr);
+#endif
 }
 
 void Container::ParkChildObject(QSharedPointer<Object> objPtr)
@@ -371,16 +370,18 @@ void Container::ParkChildObject(QSharedPointer<Object> objPtr)
     if(objPtr.isNull())
         return;
 
-//    objPtr->Hide();
     if(objPtr->modelIndex.isValid() && objPtr->modelIndex.model()==myHost->GetModel())
         myHost->GetModel()->removeRow(objPtr->modelIndex.row(), objPtr->modelIndex.parent());
 
     QStandardItem *item = objPtr->GetParkingItem();
     parkModel.invisibleRootItem()->appendRow(item);
     objPtr->modelIndex=item->index();
-   // objPtr->SetContainerId(-1);
     objPtr->parked=true;
-    myHost->OnObjectRemoved(objPtr, this);
+
+#ifndef VST_PLUGIN
+    if(objPtr->info().objType == ObjType::MidiInterface)
+        myHost->midiDevices->CloseDevice(objPtr);
+#endif
 }
 
 void Container::OnChildDeleted(Object *obj)

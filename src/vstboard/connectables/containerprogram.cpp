@@ -137,10 +137,13 @@ void ContainerProgram::Unload()
         if(!obj.isNull())
             obj->UnloadProgram();
     }
+}
 
-//    foreach(QSharedPointer<Object> obj, listObjects) {
-//        container->ParkChildObject(obj);
-//    }
+void ContainerProgram::ParkAllObj()
+{
+    foreach(QSharedPointer<Object> obj, listObjects) {
+        container->ParkChildObject(obj);
+    }
 }
 
 bool ContainerProgram::IsDirty()

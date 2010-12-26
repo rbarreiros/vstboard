@@ -1,6 +1,7 @@
 #include "programs.h"
 #include "globals.h"
 #include "mainhost.h"
+#include "mainwindow.h"
 
 Programs::Programs(MainHost *parent) :
     QObject(parent),
@@ -12,7 +13,8 @@ Programs::Programs(MainHost *parent) :
     myHost(parent),
     progAutosaveState(Autosave::save),
     groupAutosaveState(Autosave::save),
-    projectDirty(false)
+    projectDirty(false),
+    mainWindow(0)
 {
     model=new ProgramsModel(parent);
 }
@@ -66,8 +68,25 @@ void Programs::BuildModel()
     projectDirty=false;
 }
 
+int Programs::GetCurrentGroup()
+{
+    if(!currentGrp)
+        return 0;
+    return currentGrp->row();
+}
+
+int Programs::GetCurrentProg()
+{
+    if(!currentPrg)
+        return 0;
+    return currentPrg->row();
+}
+
 bool Programs::userWantsToUnloadGroup()
 {
+    if(mainWindow->openedPrompt)
+        return false;
+
     if(groupAutosaveState == Autosave::discard)
         return true;
 
@@ -82,12 +101,17 @@ bool Programs::userWantsToUnloadGroup()
 
     //prompt
     QMessageBox msgBox;
+    mainWindow->openedPrompt=true;
+    msgBox.setIcon(QMessageBox::Question);
     msgBox.setText(tr("The group has been modified."));
     msgBox.setInformativeText(tr("Do you want to save your changes?"));
     msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
     msgBox.setDefaultButton(QMessageBox::Save);
 
-    switch(msgBox.exec()) {
+    int res = msgBox.exec();
+    mainWindow->openedPrompt=false;
+
+    switch(res) {
         case QMessageBox::Cancel:
             return false;
         case QMessageBox::Save:
@@ -101,6 +125,9 @@ bool Programs::userWantsToUnloadGroup()
 
 bool Programs::userWantsToUnloadProgram()
 {
+    if(mainWindow->openedPrompt)
+        return false;
+
     if(progAutosaveState == Autosave::discard)
         return true;
 
@@ -115,12 +142,17 @@ bool Programs::userWantsToUnloadProgram()
 
     //prompt
     QMessageBox msgBox;
+    mainWindow->openedPrompt=true;
+    msgBox.setIcon(QMessageBox::Question);
     msgBox.setText(tr("The progarm has been modified."));
     msgBox.setInformativeText(tr("Do you want to save your changes?"));
     msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
     msgBox.setDefaultButton(QMessageBox::Save);
 
-    switch(msgBox.exec()) {
+    int res = msgBox.exec();
+    mainWindow->openedPrompt=false;
+
+    switch(res) {
         case QMessageBox::Cancel:
             return false;
         case QMessageBox::Save:
@@ -180,31 +212,66 @@ QStandardItem *Programs::CopyGroup(QStandardItem *grpOri)
     return grpItem;
 }
 
-void Programs::RemoveIndex(const QModelIndex &index)
+bool Programs::RemoveIndex(const QModelIndex &index)
 {
-    if(index.data(UserRoles::nodeType).toInt() == NodeType::program) {
-        if(!userWantsToUnloadProgram())
-            return;
+    if(mainWindow->openedPrompt)
+        return false;
 
+    if(index.data(UserRoles::nodeType).toInt() == NodeType::program) {
+
+        //keep one program
+        if(model->rowCount(index.parent()) == 1)
+            return false;
+
+        //move to another program
+        if(index==currentPrg->index()) {
+            if(currentPrg->row()==0) {
+                ChangeProg(1);
+            }  else {
+                ChangeProg(0);
+            }
+        }
+
+        //delete program
         int prgId = index.data(UserRoles::value).toInt();
         myHost->programContainer->RemoveProgram(prgId);
+
         projectDirty=true;
-        return;
+        return true;
     }
 
     if(index.data(UserRoles::nodeType).toInt() == NodeType::programGroup) {
-        if(!userWantsToUnloadGroup())
-            return;
 
+        //keep one group
+        if(model->rowCount()==1)
+            return false;
+
+        //move to another group
+        if(index==currentGrp->index()) {
+            if(currentGrp->row()==0) {
+                ChangeGroup(1);
+            }  else {
+                ChangeGroup(0);
+            }
+        }
+
+        //delete all programs from group
         QStandardItem *lstPrg = model->itemFromIndex(index.child(0,0));
         for(int i=0; i< lstPrg->rowCount(); i++) {
             QStandardItem *prg = lstPrg->child(i);
             int prgId = prg->data(UserRoles::value).toInt();
             myHost->programContainer->RemoveProgram(prgId);
         }
+
+        //delete group
+        int grpId = index.data(UserRoles::value).toInt();
+        myHost->groupContainer->RemoveProgram(grpId);
+
         projectDirty=true;
-        return;
+        return true;
     }
+
+    return true;
 }
 
 void Programs::ChangeProg(QStandardItem *newPrg)

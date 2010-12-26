@@ -35,18 +35,6 @@
 #include "connectables/vstplugin.h"
 #endif
 
-//MainHost *MainHost::theHost = 0;
-//HostModel *MainHost::model = 0;
-//HostModel *MainHost::modelParking = 0;
-
-//MainHost* MainHost::Create(QObject *parent)
-//{
-//    if(!theHost)
-//        theHost = new MainHost(parent);
-
-//    return theHost;
-//}
-
 MainHost::MainHost(Vst *myVstPlugin, QObject *parent) :
     QObject(parent),
     solver(new PathSolver(this)),
@@ -153,9 +141,7 @@ void MainHost::SetupMainContainer()
         return;
 
     mainContainer->LoadProgram(0);
-    OnObjectAdded(mainContainer);
     mainContainer->SetParentModeIndex( model->invisibleRootItem()->index() );
-
     mainContainer->listenProgramChanges=false;
 }
 
@@ -611,6 +597,9 @@ void MainHost::SetBufferSize(unsigned long size)
 
 void MainHost::SetSampleRate(float rate)
 {
+    if(sampleRate == rate)
+        return;
+
     sampleRate = rate;
     emit SampleRateChanged(sampleRate);
 }
@@ -637,31 +626,6 @@ void MainHost::Render(unsigned long samples)
         emit SolverToUpdate();
 
     emit Rendered();
-}
-
-void MainHost::OnObjectAdded(QSharedPointer<Connectables::Object> objPtr)
-{
-    if(objPtr.isNull())
-        return;
-
-#ifndef VST_PLUGIN
-    if(objPtr->info().objType == ObjType::MidiInterface)
-        midiDevices->OpenDevice(objPtr);
-#endif
-
-    solverNeedAnUpdate = true;
-}
-
-void MainHost::OnObjectRemoved(QSharedPointer<Connectables::Object> objPtr, Connectables::Object *container)
-{
-    if(objPtr.isNull())
-        return;
-
-#ifndef VST_PLUGIN
-    midiDevices->CloseDevice(objPtr);
-#endif
-
-    solverNeedAnUpdate = true;
 }
 
 void MainHost::OnCableAdded(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
@@ -691,3 +655,15 @@ void MainHost::SetTempo(int tempo, int sign1, int sign2)
 #endif
 }
 
+void MainHost::GetTempo(int &tempo, int &sign1, int &sign2)
+{
+#ifdef VSTSDK
+    tempo=vstHost->vstTimeInfo.tempo;
+    sign1=vstHost->vstTimeInfo.timeSigNumerator;
+    sign2=vstHost->vstTimeInfo.timeSigDenominator;
+#else
+    tempo=120;
+    sign1=4;
+    sign2=4;
+#endif
+}

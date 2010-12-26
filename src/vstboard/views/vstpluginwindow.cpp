@@ -27,7 +27,6 @@ using namespace View;
 
 VstPluginWindow::VstPluginWindow(QWidget *parent) :
     QFrame(parent),
-    menuHeight(0),
     ui(new Ui::VstPluginWindow)
 {
     setAttribute(Qt::WA_DeleteOnClose);
@@ -121,7 +120,7 @@ void VstPluginWindow::closeEvent( QCloseEvent * event )
 void VstPluginWindow::SetWindowSize(int newWidth, int newHeight)
 {
     ui->scrollAreaWidgetContents->setFixedSize(newWidth,newHeight);
-    resize(newWidth,newHeight+menuHeight);
+    resize(newWidth,newHeight);
 }
 
 void VstPluginWindow::SetScrollValue(int Hscroll, int Vscroll)

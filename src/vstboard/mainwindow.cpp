@@ -33,7 +33,8 @@
 MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
         QMainWindow(parent),
         ui(new Ui::MainWindow),
-        myHost(myHost)
+        myHost(myHost),
+        openedPrompt(false)
 {
     myHost->mainWindow=this;
     connect(myHost,SIGNAL(programParkingModelChanged(QStandardItemModel*)),
@@ -42,6 +43,7 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
             this,SLOT(groupParkingModelChanges(QStandardItemModel*)));
 
     ui->setupUi(this);
+
     setWindowTitle(APP_NAME);
 
 //    ImageCollection::Create(this);
@@ -58,7 +60,7 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     ui->treeAudioInterfaces->header()->resizeSection(1,30);
     ui->treeAudioInterfaces->header()->resizeSection(2,30);
     ui->treeAudioInterfaces->header()->resizeSection(3,40);
-//    ui->treeAudioInterfaces->expandAll();
+    ui->treeAudioInterfaces->expandAll();
 
     //midi devices
     ui->treeMidiInterfaces->setModel(myHost->midiDevices->GetModel());
@@ -67,11 +69,12 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     ui->treeMidiInterfaces->header()->setResizeMode(2,QHeaderView::Fixed);
     ui->treeMidiInterfaces->header()->resizeSection(1,30);
     ui->treeMidiInterfaces->header()->resizeSection(2,30);
-//    ui->treeMidiInterfaces->expandAll();
+    ui->treeMidiInterfaces->expandAll();
 
     BuildListTools();
 
     //programs
+    myHost->programList->SetMainWindow(this);
     ui->Programs->SetModel(myHost->programList->GetModel());
     connect(myHost->programList, SIGNAL(ProgChanged(QModelIndex)),
             ui->Programs,SLOT(OnProgChange(QModelIndex)));
@@ -99,12 +102,6 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     listVstPluginsModel.setRootPath(ConfigDialog::defaultVstPath());
     ui->VstBrowser->setModel(&listVstPluginsModel);
 
-    //timer
-//    QTimer *timerCpuLoad = new QTimer(this);
-//    timerCpuLoad->start(200);
-//    connect(timerCpuLoad, SIGNAL(timeout()),
-//            this, SLOT(UpdateCpuLoad()));
-
     mySceneView = new View::SceneView(myHost, myHost->objFactory, ui->hostView, ui->projectView, ui->programView, ui->groupView, this);
     mySceneView->SetParkings(ui->programParkList, ui->groupParkList);
     mySceneView->setModel(myHost->GetModel());
@@ -115,8 +112,6 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     myHost->Open();
 
     ui->treeHostModel->setModel(myHost->GetModel());
-//    ui->listParking->setModel(myHost->GetParkingModel());
-//    ui->listParking->setRootIndex(myHost->GetParkingModel()->invisibleRootItem()->child(0)->index());
 
     readSettings();
 
@@ -135,10 +130,6 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     }
 
     updateRecentFileActions();
-
-
-
-
 }
 
 MainWindow::~MainWindow()
@@ -166,28 +157,59 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 bool MainWindow::userWantsToUnloadSetup()
 {
-    if(myHost->hostContainer->IsDirty()) {
-        QMessageBox msgBox;
-        msgBox.setText(tr("The setup has been modified."));
-        msgBox.setInformativeText(tr("Do you want to save your changes?"));
-        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Save);
+    if(openedPrompt)
+        return false;
 
-        switch(msgBox.exec()) {
-            case QMessageBox::Cancel :
-                return false;
-            case QMessageBox::Save :
-                MainWindow::on_actionSave_Setup_triggered();
-                break;
-            default :
-                break;
-        }
+    QSettings settings;
+    int onUnsaved = settings.value("onUnsavedSetup",Autosave::prompt).toInt();
+
+    if(onUnsaved == Autosave::discard)
+        return true;
+
+    if(!myHost->hostContainer->IsDirty())
+        return true;
+
+    if(onUnsaved == Autosave::save) {
+        MainWindow::on_actionSave_Setup_triggered();
+        return true;
     }
+
+    //prompt
+    QMessageBox msgBox;
+    openedPrompt=true;
+    msgBox.setIcon(QMessageBox::Question);
+    msgBox.setText(tr("The setup has been modified."));
+    msgBox.setInformativeText(tr("Do you want to save your changes?"));
+    msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Save);
+
+    int res=msgBox.exec();
+    openedPrompt=false;
+
+    switch(res) {
+        case QMessageBox::Cancel :
+            return false;
+        case QMessageBox::Save :
+            MainWindow::on_actionSave_Setup_triggered();
+            break;
+        default :
+            break;
+    }
+
     return true;
 }
 
 bool MainWindow::userWantsToUnloadProject()
 {
+    if(openedPrompt)
+        return false;
+
+    QSettings settings;
+    int onUnsaved = settings.value("onUnsavedProject",Autosave::prompt).toInt();
+
+    if(onUnsaved == Autosave::discard)
+        return true;
+
     if(!myHost->programList->userWantsToUnloadProgram())
         return false;
 
@@ -197,14 +219,24 @@ bool MainWindow::userWantsToUnloadProject()
     if(!myHost->programList->isDirty())
         return true;
 
+    if(onUnsaved == Autosave::save) {
+        MainWindow::on_actionSave_triggered();
+        return true;
+    }
+
     //prompt
     QMessageBox msgBox;
+    openedPrompt=true;
+    msgBox.setIcon(QMessageBox::Question);
     msgBox.setText(tr("The project has been modified."));
     msgBox.setInformativeText(tr("Do you want to save your changes?"));
     msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
     msgBox.setDefaultButton(QMessageBox::Save);
 
-    switch(msgBox.exec()) {
+    int res=msgBox.exec();
+    openedPrompt=false;
+
+    switch(res) {
         case QMessageBox::Cancel :
             return false;
         case QMessageBox::Save :

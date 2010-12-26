@@ -83,10 +83,10 @@ bool MidiDevice::OpenStream()
                 char msg[20];
                 unsigned int len=20;
                 Pm_GetHostErrorText(msg,len);
-                debug("MidiDevice::OpenStream openInput %s",msg)
-                    } else {
+                debug("MidiDevice::OpenStream openInput host %s",msg)
+            } else {
                 debug("MidiDevice::OpenStream openInput %s",Pm_GetErrorText(err))
-                    }
+            }
             return false;
         }
 
@@ -96,10 +96,10 @@ bool MidiDevice::OpenStream()
                 char msg[20];
                 unsigned int len=20;
                 Pm_GetHostErrorText(msg,len);
-                debug("MidiDevice::OpenStream setFilter %s",msg)
-                    } else {
+                debug("MidiDevice::OpenStream setFilter host %s",msg)
+            } else {
                 debug("MidiDevice::OpenStream setFilter %s",Pm_GetErrorText(err))
-                    }
+            }
             return false;
         }
     }
@@ -111,10 +111,10 @@ bool MidiDevice::OpenStream()
                 char msg[20];
                 unsigned int len=20;
                 Pm_GetHostErrorText(msg,len);
-                debug("MidiDevice::Open openInput %s",msg)
-                    } else {
+                debug("MidiDevice::Open openInput host %s",msg)
+            } else {
                 debug("MidiDevice::Open openInput %s",Pm_GetErrorText(err))
-                    }
+            }
             return false;
         }
     }
@@ -153,8 +153,6 @@ bool MidiDevice::CloseStream()
 
 bool MidiDevice::Close()
 {
-    if(!Object::Close())
-        return false;
     CloseStream();
     return true;
 }
