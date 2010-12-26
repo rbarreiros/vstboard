@@ -30,7 +30,7 @@ MainWindow::MainWindow(MainHost * myHost, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     myHost(myHost),
-    openedPrompt(0)
+    openedPrompt(false)
 {
 
     myHost->mainWindow=this;

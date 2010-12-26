@@ -40,6 +40,8 @@ public:
     explicit MainWindow(MainHost * myHost, QWidget *parent = 0);
     ~MainWindow();
 
+    bool openedPrompt;
+
 protected:
     void closeEvent(QCloseEvent *event);
     void hideEvent ( QHideEvent * event );
