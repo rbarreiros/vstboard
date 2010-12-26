@@ -1017,7 +1017,7 @@
     <string>Toggle Group panel</string>
    </property>
    <property name="statusTip">
-    <string>Show or hide the insert panel</string>
+    <string>Show or hide the group panel</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+G</string>

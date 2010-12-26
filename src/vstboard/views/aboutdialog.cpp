@@ -37,7 +37,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
     ui->labelVersion->setText(" "+ver);
     ui->labelBuild->setText(" "+build);
 
-    setWindowTitle(QString("About %1").arg(APP_NAME));
+    setWindowTitle(QString(tr("About %1")).arg(APP_NAME));
 
     setFixedSize(size());
 }
