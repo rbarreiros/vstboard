@@ -28,7 +28,9 @@ Gui::Gui(AudioEffectX* effect) : widget(0), effect(effect)
 
 Gui::~Gui()
 {
+    debug2(<< "delete Gui" << hex << (long)this)
     if(widget) {
+        debug2(<< "delete widget" << hex << (long)widget)
         delete widget;
         widget=0;
     }

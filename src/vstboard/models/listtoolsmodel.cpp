@@ -21,7 +21,8 @@
 #include "listtoolsmodel.h"
 #include "../connectables/objectinfo.h"
 
-ListToolsModel::ListToolsModel()
+ListToolsModel::ListToolsModel(QObject *parent) :
+        QStandardItemModel(parent)
 {
 }
 

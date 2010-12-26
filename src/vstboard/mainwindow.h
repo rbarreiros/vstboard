@@ -42,18 +42,21 @@ class MainWindow : public QMainWindow {
 public:
     MainWindow(MainHost * myHost, QWidget *parent = 0);
     ~MainWindow();
-
+    void readSettings();
     bool openedPrompt;
 
 protected:
     void closeEvent(QCloseEvent *event);
     void changeEvent(QEvent *e);
-    QGraphicsScene *sceneHostInputs;
-    QGraphicsScene *sceneHostOutputs;
 
-    ListToolsModel listToolsModel;
+    ListToolsModel *listToolsModel;
 
-    QFileSystemModel listVstPluginsModel;
+#ifdef VST_PLUGIN
+    ListToolsModel *listAudioDevModel;
+    ListToolsModel *listMidiDevModel;
+#endif
+
+    QFileSystemModel *listVstPluginsModel;
     View::SolverScene *solverScene;
 
     View::SceneView *mySceneView;
@@ -63,7 +66,6 @@ private:
     bool userWantsToUnloadSetup();
     void BuildListTools();
     void writeSettings();
-    void readSettings();
     void resetSettings();
     void updateRecentFileActions();
 
@@ -74,10 +76,7 @@ private:
     QList<QAction*>listRecentSetups;
 
     Ui::MainWindow *ui;
-
     MainHost *myHost;
-
-
 
 public slots:
     void programParkingModelChanges(QStandardItemModel *model);
@@ -86,8 +85,10 @@ public slots:
 private slots:
     void on_actionLoad_Setup_triggered();
     void on_actionRestore_default_layout_triggered();
+#ifndef VST_PLUGIN
     void on_actionRefresh_Midi_devices_triggered();
     void on_actionRefresh_Audio_devices_triggered();
+#endif
     void on_actionSave_Setup_As_triggered();
     void on_actionSave_Project_As_triggered();
     void on_actionAbout_triggered();

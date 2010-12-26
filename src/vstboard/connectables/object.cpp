@@ -108,7 +108,7 @@ Object::Object(MainHost *host, int index, const ObjectInfo &info) :
 Object::~Object()
 {
     pinLists.clear();
-    debug2(<< "delete Object" << objectName() << hex << (long)this)
+//    debug2(<< "delete Object" << objectName() << hex << (long)this)
 
     if(containerId!=FixedObjId::noContainer) {
         QSharedPointer<Object>cntPtr = myHost->objFactory->GetObjectFromId( containerId );

@@ -546,11 +546,12 @@ long VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr,
             break;
 
         case audioMasterIOChanged : //13
+            if(!pEffect)
+                return 0L;
             listAudioPinIn->ChangeNumberOfPins(pEffect->numInputs);
             listAudioPinOut->ChangeNumberOfPins(pEffect->numOutputs);
             UpdateModelNode();
             return  1L;
-            break;
 
         case audioMasterSizeWindow : //15
             emit WindowSizeChange((int)index,(int)value);

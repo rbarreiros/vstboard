@@ -26,7 +26,7 @@
 class ListToolsModel : public QStandardItemModel
 {
 public:
-    ListToolsModel();
+    ListToolsModel(QObject *parent=0);
     QMimeData  * mimeData ( const QModelIndexList  & indexes ) const ;
 };
 

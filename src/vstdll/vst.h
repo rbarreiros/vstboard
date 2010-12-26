@@ -117,6 +117,7 @@ protected:
         VstEvents *listEvnts;
 
         long hostAcceptIOChanges;
+        bool opened;
 };
 
 

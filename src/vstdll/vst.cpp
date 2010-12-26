@@ -22,7 +22,6 @@
 #include "connectables/connectioninfo.h"
 #include "connectables/objectinfo.h"
 #include "mainhost.h"
-#include "mainwindow.h"
 #include "portmidi.h"
 #include "pmutil.h"
 #include "audioeffectx.h"
@@ -39,14 +38,15 @@ Vst::Vst (audioMasterCallback audioMaster)
     myWindow(0),
     bufferSize(0),
     listEvnts(0),
-    hostAcceptIOChanges(0)
+    hostAcceptIOChanges(0),
+    opened(false)
 {
-    VstInt32 ver = getMasterVersion();
-    if(ver<2400) {
-        QMessageBox msg;
-        msg.setText(tr("host not supported (Vst version %1)").arg(ver));
-        msg.exec();
-    }
+//    VstInt32 ver = getMasterVersion();
+//    if(ver<2400) {
+//        QMessageBox msg;
+//        msg.setText(tr("host not supported (Vst version %1)").arg(ver));
+//        msg.exec();
+//    }
 
     char str[64];
     getHostVendorString(str);
@@ -94,14 +94,14 @@ Vst::Vst (audioMasterCallback audioMaster)
 
     qRegisterMetaTypeStreamOperators<ObjectInfo>("ObjectInfo");
 
-    if(!qApp) {
-        int argc=0;
-        char *argv=0;
-        myApp = new QApplication(argc,&argv);
-    }
+//    if(!qApp) {
+//        int argc=0;
+//        char *argv=0;
+//        myApp = new QApplication(argc,&argv);
+//      }
 
-    //QCoreApplication::setOrganizationName("CtrlBrk");
-    //QCoreApplication::setApplicationName(APP_NAME);
+    QCoreApplication::setOrganizationName("CtrlBrk");
+    QCoreApplication::setApplicationName(APP_NAME);
 
     myHost = new MainHost(this);
     myWindow = new MainWindow(myHost);
@@ -110,6 +110,7 @@ Vst::Vst (audioMasterCallback audioMaster)
 
 Vst::~Vst ()
 {
+    debug2(<< "delete Vst" << hex << (long)this)
     Pm_Terminate();
     myHost->mainWindow=0;
     myWindow->setParent(0);
@@ -120,8 +121,9 @@ Vst::~Vst ()
     qApp->removePostedEvents(qEditor);
 //    setEditor(0);
 //    delete qEditor;
-    if(myApp)
-        delete myApp;
+//    if(myApp)
+//        delete myApp;
+
 }
 
 bool Vst::addAudioIn(Connectables::VstAudioDeviceIn *dev)
@@ -167,7 +169,7 @@ bool Vst::removeAudioIn(Connectables::VstAudioDeviceIn *dev)
     QMutexLocker l(&mutexDevices);
     lstAudioIn.removeAll(dev);
     setNumInputs(lstAudioIn.count()*2);
-    if(hostAcceptIOChanges)
+    if(hostAcceptIOChanges && opened)
         ioChanged();
     return true;
 }
@@ -177,7 +179,7 @@ bool Vst::removeAudioOut(Connectables::VstAudioDeviceOut *dev)
     QMutexLocker l(&mutexDevices);
     lstAudioOut.removeAll(dev);
     setNumOutputs(lstAudioOut.count()*2);
-    if(hostAcceptIOChanges)
+    if(hostAcceptIOChanges && opened)
         ioChanged();
     return true;
 }
@@ -388,11 +390,14 @@ void Vst::processDoubleReplacing (double** inputs, double** outputs, VstInt32 sa
 
 void Vst::open()
 {
-
+    opened=true;
+    myWindow->readSettings();
 }
 
 void Vst::close()
 {
+    opened=false;
+
     foreach(Connectables::VstAudioDeviceIn* dev, lstAudioIn) {
         removeAudioIn(dev);
     }

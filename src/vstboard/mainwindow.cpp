@@ -26,15 +26,25 @@
 #include "views/configdialog.h"
 #include "views/aboutdialog.h"
 #include "connectables/objectinfo.h"
-#include "views/splash.h"
+#ifndef VST_PLUGIN
+    #include "views/splash.h"
+#endif
 //#include "imagecollection.h"
 
 
 MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
         QMainWindow(parent),
+        openedPrompt(false),
+        listToolsModel(0),
+#ifdef VST_PLUGIN
+        listAudioDevModel(0),
+        listMidiDevModel(0),
+#endif
+        listVstPluginsModel(0),
+        solverScene(0),
+        mySceneView(0),
         ui(new Ui::MainWindow),
-        myHost(myHost),
-        openedPrompt(false)
+        myHost(myHost)
 {
     myHost->mainWindow=this;
     connect(myHost,SIGNAL(programParkingModelChanged(QStandardItemModel*)),
@@ -44,6 +54,11 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
 
     ui->setupUi(this);
 
+#ifdef VST_PLUGIN
+    ui->actionRefresh_Audio_devices->setDisabled(true);
+    ui->actionRefresh_Midi_devices->setDisabled(true);
+#endif
+
     setWindowTitle(APP_NAME);
 
 //    ImageCollection::Create(this);
@@ -51,6 +66,7 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     connect(ui->mainToolBar, SIGNAL(visibilityChanged(bool)),
             ui->actionTool_bar, SLOT(setChecked(bool)));
 
+#ifndef VST_PLUGIN
     //audio devices
     ui->treeAudioInterfaces->setModel(myHost->audioDevices->GetModel());
     ui->treeAudioInterfaces->header()->setResizeMode(0,QHeaderView::Stretch);
@@ -70,6 +86,7 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     ui->treeMidiInterfaces->header()->resizeSection(1,30);
     ui->treeMidiInterfaces->header()->resizeSection(2,30);
     ui->treeMidiInterfaces->expandAll();
+#endif
 
     BuildListTools();
 
@@ -92,15 +109,20 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
             ui->Programs,SLOT(OnGroupAutoSaveChanged(Autosave::Enum)));
 
     //vst plugins browser
-    listVstPluginsModel.setReadOnly(true);
-    listVstPluginsModel.setResolveSymlinks(true);
+#if !defined(__GNUC__) || !defined(VST_PLUGIN)
+    //sse2 crash with gcc
 
+    listVstPluginsModel = new QFileSystemModel(this);
+    listVstPluginsModel->setReadOnly(true);
+    listVstPluginsModel->setResolveSymlinks(true);
     QStringList fileFilter;
     fileFilter << "*.dll";
-    listVstPluginsModel.setNameFilters(fileFilter);
-    listVstPluginsModel.setNameFilterDisables(false);
-    listVstPluginsModel.setRootPath(ConfigDialog::defaultVstPath());
-    ui->VstBrowser->setModel(&listVstPluginsModel);
+    listVstPluginsModel->setNameFilters(fileFilter);
+    listVstPluginsModel->setNameFilterDisables(false);
+    listVstPluginsModel->setRootPath(ConfigDialog::defaultVstPath());
+    ui->VstBrowser->setModel(listVstPluginsModel);
+
+#endif
 
     mySceneView = new View::SceneView(myHost, myHost->objFactory, ui->hostView, ui->projectView, ui->programView, ui->groupView, this);
     mySceneView->SetParkings(ui->programParkList, ui->groupParkList);
@@ -108,36 +130,20 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
 
     ui->solverView->setModel(&myHost->solver->model);
 
+#ifndef VST_PLUGIN
     myHost->SetSampleRate( ConfigDialog::defaultSampleRate() );
+#endif
     myHost->Open();
 
     ui->treeHostModel->setModel(myHost->GetModel());
-
-    readSettings();
-
-    //load default setup file
-    currentSetupFile = ConfigDialog::defaultSetupFile();
-    if(!currentSetupFile.isEmpty()) {
-        if(!SetupFile::LoadFromFile(myHost,currentSetupFile))
-            currentSetupFile = "";
-    }
-
-    //load default project file
-    currentProjectFile = ConfigDialog::defaultProjectFile();
-    if(!currentProjectFile.isEmpty()) {
-        if(!ProjectFile::LoadFromFile(myHost,currentProjectFile))
-            currentProjectFile = "";
-    }
-
-    updateRecentFileActions();
 }
 
 MainWindow::~MainWindow()
 {
+    debug2(<< "delete MainWindow" << hex << (long)this)
     if(ui)
         delete ui;
 }
-
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
@@ -264,12 +270,83 @@ void MainWindow::BuildListTools()
     QStringList headerLabels;
     headerLabels << "Name";
 
-    listToolsModel.setHorizontalHeaderLabels(headerLabels);
-    QStandardItem *parentItem = listToolsModel.invisibleRootItem();
+    QStandardItem *parentItem=0;
+    QStandardItem *item=0;
+
+#ifdef VST_PLUGIN
+//audio devices (vst in/out)
+//================================
+    listAudioDevModel = new ListToolsModel();
+    listAudioDevModel->setHorizontalHeaderLabels(headerLabels);
+    parentItem = listAudioDevModel->invisibleRootItem();
+
+    //vst audio in
+    item = new QStandardItem(tr("Vst audio input"));
+    ObjectInfo infoai;
+    infoai.nodeType = NodeType::object;
+    infoai.objType = ObjType::AudioInterfaceIn;
+    infoai.name = "Vst audio In";
+    item->setData(QVariant::fromValue(infoai), UserRoles::objInfo);
+    parentItem->appendRow(item);
+
+    //vst audio out
+    item = new QStandardItem(tr("Vst audio output"));
+    ObjectInfo infoao;
+    infoao.nodeType = NodeType::object;
+    infoao.objType = ObjType::AudioInterfaceOut;
+    infoao.name = "Vst audio Out";
+    item->setData(QVariant::fromValue(infoao), UserRoles::objInfo);
+    parentItem->appendRow(item);
+
+    ui->treeAudioInterfaces->setModel(listAudioDevModel);
+    ui->treeAudioInterfaces->header()->setResizeMode(0,QHeaderView::Stretch);
+
+//midi devices (vst in/out)
+//================================
+    listMidiDevModel = new ListToolsModel();
+    listMidiDevModel->setHorizontalHeaderLabels(headerLabels);
+    parentItem = listMidiDevModel->invisibleRootItem();
+
+    //vst midi in
+    item = new QStandardItem(tr("Vst midi input"));
+    ObjectInfo infomi;
+    infomi.nodeType = NodeType::object;
+    infomi.objType = ObjType::MidiInterface;
+    infomi.inputs = 1;
+    infomi.name = "Vst midi In";
+    item->setData(QVariant::fromValue(infomi), UserRoles::objInfo);
+    parentItem->appendRow(item);
+
+    //vst midi out
+    item = new QStandardItem(tr("Vst midi output"));
+    ObjectInfo infomo;
+    infomo.nodeType = NodeType::object;
+    infomo.objType = ObjType::MidiInterface;
+    infomo.outputs = 1;
+    infomo.name = "Vst midi Out";
+    item->setData(QVariant::fromValue(infomo), UserRoles::objInfo);
+    parentItem->appendRow(item);
+
+    ui->treeMidiInterfaces->setModel(listMidiDevModel);
+    ui->treeMidiInterfaces->header()->setResizeMode(0,QHeaderView::Stretch);
+#endif
+
+//tools
+//================================
+    listToolsModel = new ListToolsModel();
+    listToolsModel->setHorizontalHeaderLabels(headerLabels);
+    parentItem = listToolsModel->invisibleRootItem();
+
+    //vst automation
+    item = new QStandardItem(tr("Vst Automation"));
+    ObjectInfo info;
+    info.nodeType = NodeType::object;
+    info.objType = ObjType::VstAutomation;
+    item->setData(QVariant::fromValue(info), UserRoles::objInfo);
+    parentItem->appendRow(item);
 
     //midi parameters
-    QStandardItem *item = new QStandardItem(tr("Midi to parameter"));
-    ObjectInfo info;
+    item = new QStandardItem(tr("Midi to parameter"));
     info.nodeType = NodeType::object;
     info.objType = ObjType::MidiToAutomation;
     item->setData(QVariant::fromValue(info), UserRoles::objInfo);
@@ -289,22 +366,9 @@ void MainWindow::BuildListTools()
     item->setData(QVariant::fromValue(info),UserRoles::objInfo);
     parentItem->appendRow(item);
 
-    //container
-//    item = new QStandardItem(tr("Container"));
-//    info.nodeType = NodeType::container;
-//    info.objType = ObjType::Container;
-//    item->setData(QVariant::fromValue(info),UserRoles::objInfo);
-//    parentItem->appendRow(item);
-
-    ui->treeTools->setModel(&listToolsModel);
+    ui->treeTools->setModel(listToolsModel);
     ui->treeTools->header()->setResizeMode(0,QHeaderView::Stretch);
 }
-
-
-//void MainWindow::UpdateCpuLoad()
-//{
-//    ui->progressCpuLoad->setValue(mainHost->GetCpuLoad()*100);
-//}
 
 void MainWindow::on_actionLoad_triggered()
 {
@@ -458,10 +522,12 @@ void MainWindow::readSettings()
 {
     QSettings settings;
 
+#ifndef VST_PLUGIN
     if( !settings.value("splashHide",false).toBool() ) {
         Splash spl;
         spl.exec();
     }
+#endif
 
     //add dock visibility to the menu
     QList<QDockWidget*>listDocks;
@@ -536,6 +602,22 @@ void MainWindow::readSettings()
 
     ui->Programs->readSettings();
 
+
+    //load default setup file
+    currentSetupFile = ConfigDialog::defaultSetupFile();
+    if(!currentSetupFile.isEmpty()) {
+        if(!SetupFile::LoadFromFile(myHost,currentSetupFile))
+            currentSetupFile = "";
+    }
+
+    //load default project file
+    currentProjectFile = ConfigDialog::defaultProjectFile();
+    if(!currentProjectFile.isEmpty()) {
+        if(!ProjectFile::LoadFromFile(myHost,currentProjectFile))
+            currentProjectFile = "";
+    }
+
+    updateRecentFileActions();
 
 }
 
@@ -692,6 +774,7 @@ void MainWindow::groupParkingModelChanges(QStandardItemModel *model)
     ui->groupParkList->setModel(model);
 }
 
+#ifndef VST_PLUGIN
 void MainWindow::on_actionRefresh_Audio_devices_triggered()
 {
     ui->treeAudioInterfaces->setModel(myHost->audioDevices->GetModel());
@@ -701,7 +784,7 @@ void MainWindow::on_actionRefresh_Midi_devices_triggered()
 {
     ui->treeMidiInterfaces->setModel(myHost->midiDevices->GetModel());
 }
-
+#endif
 
 
 

@@ -92,8 +92,11 @@ ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
     connect( ui->defaultProject, SIGNAL(currentIndexChanged(int)),
              this, SLOT(onProjectIndexChanged(int)));
 
-
+#ifdef VST_PLUGIN
+    ui->groupSampleFormat->setVisible(false);
+#else
 //sample rate
+
     ui->sampleRate->addItem("44.1 kHz",44100);
     ui->sampleRate->addItem("48 kHz",48000);
     ui->sampleRate->addItem("88.2 kHz",88200);
@@ -125,6 +128,7 @@ ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
         index=0;
     }
     ui->samplePrecision->setCurrentIndex(index);
+#endif
 
 //on unsaved setup
     ui->onUnsavedSetup->addItem(tr("Always ask"),Autosave::prompt);
@@ -353,6 +357,7 @@ void ConfigDialog::accept()
     settings.setValue("defaultSetupFile", setupFile );
     settings.setValue("defaultProjectFile", projectFile );
 
+#ifndef VST_PLUGIN
 //sample format
     float rate = ui->sampleRate->itemData(ui->sampleRate->currentIndex()).toFloat();
     settings.setValue("sampleRate", rate);
@@ -363,6 +368,7 @@ void ConfigDialog::accept()
 
     int precision = ui->samplePrecision->itemData(ui->samplePrecision->currentIndex()).toInt();
     settings.setValue("samplePrecision",precision);
+#endif
 
 //on unsaved changes
     settings.setValue("onUnsavedSetup", ui->onUnsavedSetup->itemData( ui->onUnsavedSetup->currentIndex() ).toInt() );

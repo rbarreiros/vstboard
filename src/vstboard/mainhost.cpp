@@ -88,6 +88,7 @@ MainHost::MainHost(Vst *myVstPlugin, QObject *parent) :
 
 MainHost::~MainHost()
 {
+    debug2(<< "delete MainHost" << hex << (long)this)
     EnableSolverUpdate(false);
 
     updateViewTimer->stop();

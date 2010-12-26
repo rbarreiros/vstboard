@@ -76,7 +76,8 @@ win32-msvc* {
 
 QT       += core gui
 
-LIBS += -lqtmain
+#LIBS += -lqtmain
+
 #LIBS += -L$$top_destdir -lportmidi
 
 include($$top_srcdir/$$QTWINMIGRATE_PATH/src/qtwinmigrate.pri)
@@ -92,14 +93,11 @@ INCLUDEPATH += ../vstboard
 
 SOURCES += \
 main.cpp \
-mainwindow.cpp \
 gui.cpp \
-views/maingraphicsview.cpp \
 connectables/vstaudiodevicein.cpp \
 connectables/vstaudiodeviceout.cpp \
 connectables/mididevice.cpp \
 connectables/hostcontroller.cpp \
-views/configdialog.cpp \
 ../vstboard/views/connectablepinview.cpp \
 ../../libs/vstsdk2.4/public.sdk/source/vst2.x/audioeffectx.cpp \
 ../../libs/vstsdk2.4/public.sdk/source/vst2.x/audioeffect.cpp \
@@ -169,13 +167,14 @@ views/configdialog.cpp \
     connectables/vstautomation.cpp \
     ../vstboard/connectables/pinslist.cpp \
     ../vstboard/views/minmaxpinview.cpp \
-    ../vstboard/views/cursorview.cpp
+    ../vstboard/views/cursorview.cpp \
+    ../vstboard/mainwindow.cpp \
+    ../vstboard/views/configdialog.cpp \
+    ../vstboard/views/maingraphicsview.cpp
 
 
 HEADERS  += \
-mainwindow.h \
 gui.h \
-views/maingraphicsview.h \
 connectables/vstaudiodevicein.h \
 connectables/vstaudiodeviceout.h \
 connectables/mididevice.h \
@@ -245,7 +244,9 @@ connectables/mididevice.h \
     connectables/vstautomation.h \
     ../vstboard/connectables/pinslist.h \
     ../vstboard/views/minmaxpinview.h \
-    ../vstboard/views/cursorview.h
+    ../vstboard/views/cursorview.h \
+    ../vstboard/mainwindow.h \
+    ../vstboard/views/maingraphicsview.h
 
 FORMS += \
 ../vstboard/views/configdialog.ui \
