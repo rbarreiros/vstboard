@@ -314,6 +314,7 @@ QDataStream & ContainerProgram::toStream (QDataStream& out) const
         out << i.value();
         ++i;
     }
+
     return out;
 }
 
@@ -361,6 +362,7 @@ QDataStream & ContainerProgram::fromStream (QDataStream& in)
         mapObjAttribs.insert(objId,attr);
     }
 
+    dirty=false;
     return in;
 }
 

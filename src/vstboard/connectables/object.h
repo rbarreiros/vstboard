@@ -126,7 +126,7 @@ namespace Connectables {
 
         virtual Pin* CreatePin(const ConnectionInfo &info);
 
-        virtual bool IsDirty() {return progIsDirty;}
+        virtual bool IsDirty();
 
         MainHost *myHost;
         bool parked;
@@ -158,7 +158,6 @@ namespace Connectables {
         bool sleep;
         short parameterLearning;
         ObjectProgram *currentProgram;
-        bool progIsDirty;
 
         bool closed;
 

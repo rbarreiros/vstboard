@@ -44,12 +44,14 @@ namespace View {
         WId GetWinId();
 //        const QPixmap GetScreenshot();
 
-        void SavePosSize();
+        void LoadAttribs();
+        void SaveAttribs();
 
     protected:
         void resizeEvent ( QResizeEvent * event );
         void showEvent ( QShowEvent * event );
         void closeEvent ( QCloseEvent * event );
+        void hideEvent ( QHideEvent * event );
         Connectables::VstPlugin *plugin;
 
         QModelIndex modelIndex;
@@ -62,8 +64,6 @@ namespace View {
 
     public slots:
         void SetWindowSize(int newWidth, int newHeight);
-        void SetScrollValue(int Hscroll, int Vscroll);
-
 
     };
 }

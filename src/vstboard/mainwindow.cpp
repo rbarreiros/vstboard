@@ -167,7 +167,7 @@ bool MainWindow::userWantsToUnloadSetup()
         return false;
 
     QSettings settings;
-    int onUnsaved = settings.value("onUnsavedSetup",Autosave::prompt).toInt();
+    Autosave::Enum onUnsaved = (Autosave::Enum)settings.value("onUnsavedSetup",Autosave::prompt).toInt();
 
     if(onUnsaved == Autosave::discard)
         return true;
@@ -211,7 +211,7 @@ bool MainWindow::userWantsToUnloadProject()
         return false;
 
     QSettings settings;
-    int onUnsaved = settings.value("onUnsavedProject",Autosave::prompt).toInt();
+    Autosave::Enum onUnsaved = (Autosave::Enum)settings.value("onUnsavedProject",Autosave::prompt).toInt();
 
     if(onUnsaved == Autosave::discard)
         return true;
@@ -514,6 +514,12 @@ void MainWindow::writeSettings()
     settings.setValue("splitPan", ui->splitterPanels->saveState());
     settings.setValue("splitProg", ui->splitterProg->saveState());
     settings.setValue("splitGroup", ui->splitterGroup->saveState());
+
+    settings.setValue("planelHost", ui->actionHost_panel->isChecked());
+    settings.setValue("planelProject", ui->actionProject_panel->isChecked());
+    settings.setValue("planelProgram", ui->actionProgram_panel->isChecked());
+    settings.setValue("planelGroup", ui->actionGroup_panel->isChecked());
+
     settings.endGroup();
     settings.setValue("lastVstPath", ui->VstBrowser->path());
     ui->Programs->writeSettings();
@@ -600,6 +606,11 @@ void MainWindow::readSettings()
     if(settings.contains("splitGroup"))
         ui->splitterGroup->restoreState(settings.value("splitGroup").toByteArray());
 
+    ui->actionHost_panel->setChecked( settings.value("planelHost",true).toBool() );
+    ui->actionProject_panel->setChecked( settings.value("planelProject",false).toBool() );
+    ui->actionProgram_panel->setChecked( settings.value("planelProgram",true).toBool() );
+    ui->actionGroup_panel->setChecked( settings.value("planelGroup",true).toBool() );
+
     settings.endGroup();
 
     ui->Programs->readSettings();
@@ -664,7 +675,7 @@ void MainWindow::resetSettings()
     tabifyDockWidget(ui->dockHostModel,ui->dockSolver);
 
     ui->actionHost_panel->setChecked(true);
-    ui->actionProject_panel->setChecked(true);
+    ui->actionProject_panel->setChecked(false);
     ui->actionProgram_panel->setChecked(true);
     ui->actionGroup_panel->setChecked(true);
 

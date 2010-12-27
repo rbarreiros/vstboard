@@ -43,7 +43,6 @@ Object::Object(MainHost *host, int index, const ObjectInfo &info) :
     savedIndex(-2),
     sleep(true),
     currentProgram(0),
-    progIsDirty(false),
     closed(true),
     containerId(FixedObjId::noContainer),
     currentProgId(TEMP_PROGRAM),
@@ -201,9 +200,20 @@ bool Object::GetSleep()
     return sleep;
 }
 
+bool Object::IsDirty()
+{
+    if(!currentProgram)
+        return false;
+    return currentProgram->isDirty;
+}
+
 void Object::OnProgramDirty()
 {
-    progIsDirty=true;
+    if(!currentProgram)
+        return;
+
+    currentProgram->isDirty=true;
+
 
 //    if(!modelIndex.isValid())
 //        return;
@@ -229,7 +239,7 @@ void Object::SaveProgram()
     if(!currentProgram)
         return;
 
-    if(!progIsDirty)
+    if(!currentProgram->isDirty)
         return;
 
     currentProgram->Save(listParameterPinIn,listParameterPinOut);
@@ -256,7 +266,7 @@ void Object::LoadProgram(int prog)
 
     currentProgram=listPrograms.value(currentProgId);
     currentProgram->Load(listParameterPinIn,listParameterPinOut);
-    progIsDirty=false;
+
     UpdateModelNode();
 
     //if the loaded program was a temporary prog, delete it

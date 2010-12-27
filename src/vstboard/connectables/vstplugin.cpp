@@ -444,7 +444,7 @@ void VstPlugin::OnShowEditor()
 
 void VstPlugin::OnHideEditor()
 {
-    if(!editorWnd)
+    if(!editorWnd || !editorWnd->isVisible())
         return;
 
     disconnect(myHost->updateViewTimer,SIGNAL(timeout()),
@@ -456,17 +456,18 @@ void VstPlugin::SetContainerAttribs(const ObjectContainerAttribs &attr)
 {
     Object::SetContainerAttribs(attr);
 
-    if(editorWnd){// && editorWnd->isVisible()) {
-        editorWnd->move(attr.editorPosition);
-        editorWnd->resize(attr.editorSize);
-        editorWnd->SetScrollValue(attr.editorHScroll,attr.editorVScroll);
+    if(editorWnd && editorWnd->isVisible()) {
+        editorWnd->LoadAttribs();
+//        editorWnd->move(attr.editorPosition);
+//        editorWnd->resize(attr.editorSize);
+//        editorWnd->SetScrollValue(attr.editorHScroll,attr.editorVScroll);
     }
 }
 
 void VstPlugin::GetContainerAttribs(ObjectContainerAttribs &attr)
 {
     if(editorWnd && editorWnd->isVisible())
-        editorWnd->SavePosSize();
+        editorWnd->SaveAttribs();
 
     Object::GetContainerAttribs(attr);
 }

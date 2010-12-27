@@ -30,6 +30,7 @@ VstPluginWindow::VstPluginWindow(QWidget *parent) :
     ui(new Ui::VstPluginWindow)
 {
     setAttribute(Qt::WA_DeleteOnClose);
+    setWindowFlags(Qt::Tool);
     ui->setupUi(this);
 }
 
@@ -59,7 +60,6 @@ bool VstPluginWindow::SetPlugin(Connectables::VstPlugin *plugin)
 {
     bool windowOk = false;
     this->plugin = plugin;
-    setWindowFlags(Qt::Tool);
 
     long res;
     ERect *rect = 0;
@@ -95,14 +95,34 @@ bool VstPluginWindow::SetPlugin(Connectables::VstPlugin *plugin)
     return true;
 }
 
-void VstPluginWindow::SavePosSize()
+void VstPluginWindow::LoadAttribs()
 {
-    if(plugin->modelIndex.isValid()) {
-        plugin->myHost->GetModel()->setData(plugin->modelIndex, size(), UserRoles::editorSize);
-        plugin->myHost->GetModel()->setData(plugin->modelIndex, pos(), UserRoles::editorPos);
-        plugin->myHost->GetModel()->setData(plugin->modelIndex, ui->scrollArea->verticalScrollBar()->value(), UserRoles::editorVScroll);
-        plugin->myHost->GetModel()->setData(plugin->modelIndex, ui->scrollArea->horizontalScrollBar()->value(), UserRoles::editorHScroll);
-    }
+    if(!plugin->modelIndex.isValid())
+        return;
+    if(!plugin->modelIndex.data(UserRoles::editorPos).isValid())
+        return;
+
+    QSize s = plugin->modelIndex.data(UserRoles::editorSize).toSize();
+    if(s==QSize(-1,-1))
+        return;
+
+    resize( s );
+    move( plugin->modelIndex.data(UserRoles::editorPos).toPoint() );
+    ui->scrollArea->verticalScrollBar()->setValue( plugin->modelIndex.data(UserRoles::editorVScroll).toInt() );
+    ui->scrollArea->horizontalScrollBar()->setValue( plugin->modelIndex.data(UserRoles::editorHScroll).toInt() );
+    ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+}
+
+void VstPluginWindow::SaveAttribs()
+{
+    if(!plugin->modelIndex.isValid())
+        return;
+
+    plugin->myHost->GetModel()->setData(plugin->modelIndex, size(), UserRoles::editorSize);
+    plugin->myHost->GetModel()->setData(plugin->modelIndex, pos(), UserRoles::editorPos);
+    plugin->myHost->GetModel()->setData(plugin->modelIndex, ui->scrollArea->verticalScrollBar()->value(), UserRoles::editorVScroll);
+    plugin->myHost->GetModel()->setData(plugin->modelIndex, ui->scrollArea->horizontalScrollBar()->value(), UserRoles::editorHScroll);
 }
 
 void VstPluginWindow::closeEvent( QCloseEvent * event )
@@ -117,18 +137,15 @@ void VstPluginWindow::closeEvent( QCloseEvent * event )
     event->ignore();
 }
 
+void VstPluginWindow::hideEvent ( QHideEvent * event )
+{
+    SaveAttribs();
+}
+
 void VstPluginWindow::SetWindowSize(int newWidth, int newHeight)
 {
     ui->scrollAreaWidgetContents->setFixedSize(newWidth,newHeight);
     resize(newWidth,newHeight);
-}
-
-void VstPluginWindow::SetScrollValue(int Hscroll, int Vscroll)
-{
-    ui->scrollArea->horizontalScrollBar()->setValue(Hscroll);
-    ui->scrollArea->verticalScrollBar()->setValue(Vscroll);
-    ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 
 void VstPluginWindow::showEvent ( QShowEvent * event )
@@ -139,6 +156,7 @@ void VstPluginWindow::showEvent ( QShowEvent * event )
     int h = ui->scrollAreaWidgetContents->height();
     setMaximumSize(w,h);
     //resize(w,h);
+    LoadAttribs();
 }
 
 void VstPluginWindow::resizeEvent ( QResizeEvent * event )
