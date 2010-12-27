@@ -91,7 +91,7 @@
     <message>
         <location filename="views/configdialog.cpp" line="49"/>
         <source>Empty setup</source>
-        <translation>Setup vide</translation>
+        <translation>Config vide</translation>
     </message>
     <message>
         <location filename="views/configdialog.cpp" line="51"/>
@@ -248,7 +248,7 @@
     <message>
         <location filename="connectables/object.cpp" line="483"/>
         <source>Learn</source>
-        <translation>Ajouter param</translation>
+        <translation>Learn</translation>
     </message>
 </context>
 <context>
@@ -614,12 +614,12 @@
     <message>
         <location filename="mainwindow.ui" line="1090"/>
         <source>Toggle Project panel</source>
-        <translation>Afficher/masquer le volet projet</translation>
+        <translation>Afficher/masquer le volet Projet</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1038"/>
         <source>Toggle Program panel</source>
-        <translation>Afficher/masquer le volet programme</translation>
+        <translation>Afficher/masquer le volet Programme</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="1041"/>

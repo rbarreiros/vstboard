@@ -71,7 +71,8 @@ ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int num
         limitOutMin(.0f),
         limitOutMax(1.0f),
         outStepIndex(0),
-        outValue(.0f)
+        outValue(.0f),
+        limitsEnabled(true)
 {
     SetVisible(defaultVisible);
     falloff = 0.0f;
