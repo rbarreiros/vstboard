@@ -405,7 +405,8 @@ void Object::OnParameterChanged(ConnectionInfo pinInfo, float value)
     if(pinInfo.pinNumber==FixedPinNumber::editorVisible) {
         int val = static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::editorVisible))->GetIndex();
         if(val)
-            QTimer::singleShot(0, this, SLOT(OnShowEditor()));
+            //QTimer::singleShot(0, this, SLOT(OnShowEditor()));
+            OnShowEditor();
         else
             OnHideEditor();
             //QTimer::singleShot(0, this, SLOT(OnHideEditor()));

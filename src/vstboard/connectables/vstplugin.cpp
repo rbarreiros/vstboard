@@ -433,7 +433,7 @@ void VstPlugin::CreateEditorWindow()
 
 void VstPlugin::OnShowEditor()
 {
-    if(!editorWnd)
+    if(!editorWnd || editorWnd->isVisible())
         return;
 
     editorWnd->show();

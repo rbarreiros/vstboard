@@ -127,6 +127,8 @@ void VstPluginWindow::SetScrollValue(int Hscroll, int Vscroll)
 {
     ui->scrollArea->horizontalScrollBar()->setValue(Hscroll);
     ui->scrollArea->verticalScrollBar()->setValue(Vscroll);
+    ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 
 void VstPluginWindow::showEvent ( QShowEvent * event )
@@ -136,7 +138,7 @@ void VstPluginWindow::showEvent ( QShowEvent * event )
     int w = ui->scrollAreaWidgetContents->width();
     int h = ui->scrollAreaWidgetContents->height();
     setMaximumSize(w,h);
-    resize(w,h);
+    //resize(w,h);
 }
 
 void VstPluginWindow::resizeEvent ( QResizeEvent * event )
