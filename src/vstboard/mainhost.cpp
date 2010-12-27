@@ -55,7 +55,7 @@ MainHost::MainHost(Vst *myVstPlugin, QObject *parent) :
     model->setColumnCount(1);
 
     sampleRate = 44100.0;
-    bufferSize = 1;
+    bufferSize = 512;
 
     programList = new Programs(this);
 

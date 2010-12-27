@@ -132,9 +132,6 @@ void VstPlugin::SetSampleRate(float rate)
 
 void VstPlugin::Render()
 {
-    if(parked)
-        return;
-
     if(closed)
         return;
 

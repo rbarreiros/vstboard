@@ -95,6 +95,7 @@ SectionEnd
 
 Section "Start Menu Shortcuts"
 	SetShellVarContext current
+	SetOutPath $InstFolder
 	CreateDirectory "${START_LINK_DIR}"
 	CreateShortCut "${START_LINK_RUN}" "$InstFolder\VstBoard.exe"
 	CreateShortCut "${START_LINK_UNINSTALLER}" "$InstFolder\uninst.exe"

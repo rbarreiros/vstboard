@@ -21,7 +21,7 @@
 #ifndef AUDIODEVICES_H
 #define AUDIODEVICES_H
 
-#define FAKE_RENDER_TIMER_MS 5
+#define FAKE_RENDER_TIMER_MS 10
 
 #include "precomp.h"
 #ifndef VST_PLUGIN

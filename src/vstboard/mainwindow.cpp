@@ -336,14 +336,16 @@ void MainWindow::BuildListTools()
     listToolsModel = new ListToolsModel();
     listToolsModel->setHorizontalHeaderLabels(headerLabels);
     parentItem = listToolsModel->invisibleRootItem();
+    ObjectInfo info;
 
+#ifdef VST_PLUGIN
     //vst automation
     item = new QStandardItem(tr("Vst Automation"));
-    ObjectInfo info;
     info.nodeType = NodeType::object;
     info.objType = ObjType::VstAutomation;
     item->setData(QVariant::fromValue(info), UserRoles::objInfo);
     parentItem->appendRow(item);
+#endif
 
     //midi parameters
     item = new QStandardItem(tr("Midi to parameter"));
@@ -359,7 +361,7 @@ void MainWindow::BuildListTools()
     item->setData(QVariant::fromValue(info),UserRoles::objInfo);
     parentItem->appendRow(item);
 
-    //host controler
+    //host controller
     item = new QStandardItem(tr("Host Controller"));
     info.nodeType = NodeType::object;
     info.objType = ObjType::HostController;

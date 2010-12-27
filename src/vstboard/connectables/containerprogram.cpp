@@ -104,7 +104,6 @@ void ContainerProgram::Load(int progId)
            myHost->objFactory->GetObjectFromId(cab->GetInfoIn().objId)) {
 
             cab->AddToParentNode(container->GetCablesIndex());
-
             myHost->OnCableAdded(cab->GetInfoOut(),cab->GetInfoIn());
         } else {
             //delete cable if objects are not found

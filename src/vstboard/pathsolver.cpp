@@ -64,7 +64,8 @@ void PathSolver::Resolve(hashCables cables)
     Connectables::hashObjects::const_iterator i = listObjects.constBegin();
     while(i!=listObjects.constEnd()) {
         QSharedPointer<Connectables::Object> objPtr = i.value();
-        if(!objPtr.isNull()) {
+        //don't add parked objects
+        if(!objPtr.isNull() && !objPtr->parked) {
             if(objPtr->info().nodeType!=NodeType::bridge) {
                 SolverNode *node = new SolverNode();
                 listNodes << node;

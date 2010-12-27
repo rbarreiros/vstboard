@@ -363,6 +363,8 @@ void Container::AddChildObject(QSharedPointer<Object> objPtr)
     if(objPtr->info().objType == ObjType::MidiInterface)
         myHost->midiDevices->OpenDevice(objPtr);
 #endif
+
+    myHost->UpdateSolver();
 }
 
 void Container::ParkChildObject(QSharedPointer<Object> objPtr)
@@ -382,6 +384,8 @@ void Container::ParkChildObject(QSharedPointer<Object> objPtr)
     if(objPtr->info().objType == ObjType::MidiInterface)
         myHost->midiDevices->CloseDevice(objPtr);
 #endif
+
+    myHost->UpdateSolver();
 }
 
 void Container::OnChildDeleted(Object *obj)
