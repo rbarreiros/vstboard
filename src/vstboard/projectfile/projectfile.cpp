@@ -18,11 +18,12 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#define PROJECT_FILE_VERSION 7
+#define PROJECT_FILE_VERSION 8
 #define PROJECT_FILE_KEY 0x757b0a5d
 
 #include "projectfile.h"
 #include "../mainhost.h"
+#include "../mainwindow.h"
 
 bool ProjectFile::SaveToFile(MainHost *myHost,QString filePath)
 {
@@ -52,6 +53,13 @@ bool ProjectFile::SaveToFile(MainHost *myHost,QString filePath)
         out << *myHost->groupContainer;
     }
 
+    myHost->mainWindow->mySceneView->viewProject->SaveProgram();
+    myHost->mainWindow->mySceneView->viewProgram->SaveProgram();
+    myHost->mainWindow->mySceneView->viewGroup->SaveProgram();
+    out << *myHost->mainWindow->mySceneView->viewProject;
+    out << *myHost->mainWindow->mySceneView->viewProgram;
+    out << *myHost->mainWindow->mySceneView->viewGroup;
+
     out << *myHost->programList;
 
     myHost->EnableSolverUpdate(true);
@@ -66,6 +74,11 @@ void ProjectFile::Clear(MainHost *myHost)
     myHost->SetupProgramContainer();
     myHost->SetupGroupContainer();
     myHost->EnableSolverUpdate(true);
+
+    myHost->mainWindow->mySceneView->viewProject->ClearPrograms();
+    myHost->mainWindow->mySceneView->viewProgram->ClearPrograms();
+    myHost->mainWindow->mySceneView->viewGroup->ClearPrograms();
+
     myHost->programList->BuildModel();
 }
 
@@ -96,7 +109,7 @@ bool ProjectFile::LoadFromFile(MainHost *myHost,QString filePath)
 
     quint32 version;
     in >> version;
-    if(version != PROJECT_FILE_VERSION) {
+    if(version != PROJECT_FILE_VERSION && version != 7) {
         QMessageBox msgBox;
         msgBox.setWindowTitle(filePath);
         msgBox.setText( tr("Wrong file version.") );
@@ -121,7 +134,19 @@ bool ProjectFile::LoadFromFile(MainHost *myHost,QString filePath)
     }
 
     myHost->objFactory->ResetSavedId();
+
+    if(version>7) {
+        myHost->mainWindow->mySceneView->viewProject->SetProgram(EMPTY_PROGRAM);
+        myHost->mainWindow->mySceneView->viewProgram->SetProgram(EMPTY_PROGRAM);
+        myHost->mainWindow->mySceneView->viewGroup->SetProgram(EMPTY_PROGRAM);
+        in >> *myHost->mainWindow->mySceneView->viewProject;
+        myHost->mainWindow->mySceneView->viewProject->SetProgram(0);
+        in >> *myHost->mainWindow->mySceneView->viewProgram;
+        in >> *myHost->mainWindow->mySceneView->viewGroup;
+    }
+
     in >> *myHost->programList;
+
     myHost->EnableSolverUpdate(true);
 
     return true;

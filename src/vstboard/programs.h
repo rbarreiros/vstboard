@@ -20,8 +20,8 @@ public:
     bool userWantsToUnloadGroup();
     bool userWantsToUnloadProgram();
     bool isDirty() {return projectDirty;}
-    int GetCurrentGroup();
-    int GetCurrentProg();
+    int GetCurrentMidiGroup() const;
+    int GetCurrentMidiProg() const;
     void SetMainWindow(MainWindow *win) {mainWindow=win;}
 
 private:
@@ -49,6 +49,8 @@ signals:
     void GroupChanged(const QModelIndex &grpIndex);
     void ProgCopy(int ori, int dest);
     void GroupCopy(int ori, int dest);
+    void ProgDelete(int prg);
+    void GroupDelete(int prg);
     void ProgAutosaveChanged(const Autosave::Enum state);
     void GroupAutosaveChanged(const Autosave::Enum state);
 

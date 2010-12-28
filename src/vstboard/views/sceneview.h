@@ -36,7 +36,7 @@ namespace View {
     {
         Q_OBJECT
     public:
-        explicit SceneView(MainHost *myHost,Connectables::ObjectFactory *objFactory, MainGraphicsView *viewHost, MainGraphicsView *viewProject, MainGraphicsView *viewProgram, MainGraphicsView *viewInsert,QWidget *parent = 0);
+        explicit SceneView(MainHost *myHost,Connectables::ObjectFactory *objFactory, MainGraphicsView *viewHost, MainGraphicsView *viewProject, MainGraphicsView *viewProgram, MainGraphicsView *viewGroup,QWidget *parent = 0);
 
         QRect visualRect(const QModelIndex &index) const {return QRect();}
         void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible) {}
@@ -47,7 +47,7 @@ namespace View {
         MainGraphicsView *viewHost;
         MainGraphicsView *viewProject;
         MainGraphicsView *viewProgram;
-        MainGraphicsView *viewInsert;
+        MainGraphicsView *viewGroup;
 
     protected:
 
@@ -72,7 +72,7 @@ namespace View {
         QGraphicsScene *sceneHost;
         QGraphicsScene *sceneProject;
         QGraphicsScene *sceneProgram;
-        QGraphicsScene *sceneInsert;
+        QGraphicsScene *sceneGroup;
 
         MainContainerView *hostContainerView;
         MainContainerView *projectContainerView;
@@ -106,4 +106,5 @@ namespace View {
         void graphicObjectRemoved ( QObject* obj);
     };
 }
+
 #endif // SCENEVIEW_H

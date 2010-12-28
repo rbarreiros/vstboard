@@ -68,14 +68,14 @@ void Programs::BuildModel()
     projectDirty=false;
 }
 
-int Programs::GetCurrentGroup()
+int Programs::GetCurrentMidiGroup() const
 {
     if(!currentGrp)
         return 0;
     return currentGrp->row();
 }
 
-int Programs::GetCurrentProg()
+int Programs::GetCurrentMidiProg() const
 {
     if(!currentPrg)
         return 0;
@@ -234,7 +234,7 @@ bool Programs::RemoveIndex(const QModelIndex &index)
 
         //delete program
         int prgId = index.data(UserRoles::value).toInt();
-        myHost->programContainer->RemoveProgram(prgId);
+        emit ProgDelete(prgId);
 
         projectDirty=true;
         return true;
@@ -260,12 +260,12 @@ bool Programs::RemoveIndex(const QModelIndex &index)
         for(int i=0; i< lstPrg->rowCount(); i++) {
             QStandardItem *prg = lstPrg->child(i);
             int prgId = prg->data(UserRoles::value).toInt();
-            myHost->programContainer->RemoveProgram(prgId);
+            emit ProgDelete(prgId);
         }
 
         //delete group
         int grpId = index.data(UserRoles::value).toInt();
-        myHost->groupContainer->RemoveProgram(grpId);
+        emit GroupDelete(grpId);
 
         projectDirty=true;
         return true;

@@ -62,8 +62,8 @@ HostController::HostController(MainHost *myHost,int index):
     listParameterPinIn->listPins.insert(Param_Tempo, new ParameterPinIn(this,Param_Tempo,tempo,&listTempo,true,"bpm"));
     listParameterPinIn->listPins.insert(Param_Sign1, new ParameterPinIn(this,Param_Sign1,sign1,&listSign1,true,"sign1"));
     listParameterPinIn->listPins.insert(Param_Sign2, new ParameterPinIn(this,Param_Sign2,sign2,&listSign2,true,"sign2"));
-    listParameterPinIn->listPins.insert(Param_Group, new ParameterPinIn(this,Param_Group, myHost->programList->GetCurrentGroup(),&listGrp,true,"Group"));
-    listParameterPinIn->listPins.insert(Param_Prog, new ParameterPinIn(this,Param_Prog, myHost->programList->GetCurrentProg(),&listPrg,true,"Prog"));
+    listParameterPinIn->listPins.insert(Param_Group, new ParameterPinIn(this,Param_Group, myHost->programList->GetCurrentMidiGroup(),&listGrp,true,"Group"));
+    listParameterPinIn->listPins.insert(Param_Prog, new ParameterPinIn(this,Param_Prog, myHost->programList->GetCurrentMidiProg(),&listPrg,true,"Prog"));
 
     connect(this, SIGNAL(progChange(int)),
             myHost->programList,SLOT(ChangeProg(int)),

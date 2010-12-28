@@ -45,6 +45,8 @@ public:
     void readSettings();
     bool openedPrompt;
 
+    View::SceneView *mySceneView;
+
 protected:
     void closeEvent(QCloseEvent *event);
     void changeEvent(QEvent *e);
@@ -58,8 +60,6 @@ protected:
 
     QFileSystemModel *listVstPluginsModel;
     View::SolverScene *solverScene;
-
-    View::SceneView *mySceneView;
 
 private:
     bool userWantsToUnloadProject();

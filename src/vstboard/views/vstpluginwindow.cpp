@@ -30,7 +30,6 @@ VstPluginWindow::VstPluginWindow(QWidget *parent) :
     ui(new Ui::VstPluginWindow)
 {
     setAttribute(Qt::WA_DeleteOnClose);
-    setWindowFlags(Qt::Tool);
     ui->setupUi(this);
 }
 
@@ -60,6 +59,7 @@ bool VstPluginWindow::SetPlugin(Connectables::VstPlugin *plugin)
 {
     bool windowOk = false;
     this->plugin = plugin;
+    setWindowFlags(Qt::Tool);
 
     long res;
     ERect *rect = 0;
@@ -97,7 +97,7 @@ bool VstPluginWindow::SetPlugin(Connectables::VstPlugin *plugin)
 
 void VstPluginWindow::LoadAttribs()
 {
-    if(!plugin->modelIndex.isValid())
+    if(!plugin || !plugin->modelIndex.isValid())
         return;
     if(!plugin->modelIndex.data(UserRoles::editorPos).isValid())
         return;
@@ -116,7 +116,7 @@ void VstPluginWindow::LoadAttribs()
 
 void VstPluginWindow::SaveAttribs()
 {
-    if(!plugin->modelIndex.isValid())
+    if(!plugin || !plugin->modelIndex.isValid())
         return;
 
     plugin->myHost->GetModel()->setData(plugin->modelIndex, size(), UserRoles::editorSize);

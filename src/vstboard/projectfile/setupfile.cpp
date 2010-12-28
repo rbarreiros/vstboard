@@ -18,11 +18,12 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#define SETUP_FILE_VERSION 5
+#define SETUP_FILE_VERSION 6
 #define SETUP_FILE_KEY 0x7575e711
 
 #include "setupfile.h"
 #include "../mainhost.h"
+#include "../mainwindow.h"
 
 bool SetupFile::SaveToFile(MainHost *myHost, QString filePath)
 {
@@ -47,6 +48,9 @@ bool SetupFile::SaveToFile(MainHost *myHost, QString filePath)
         out << *myHost->hostContainer;
     }
 
+    myHost->mainWindow->mySceneView->viewHost->SaveProgram();
+    out << *myHost->mainWindow->mySceneView->viewHost;
+
     myHost->EnableSolverUpdate(true);
 
     return true;
@@ -57,6 +61,7 @@ void SetupFile::Clear(MainHost *myHost)
     myHost->EnableSolverUpdate(false);
     myHost->SetupHostContainer();
     myHost->EnableSolverUpdate(true);
+    myHost->mainWindow->mySceneView->viewHost->ClearPrograms();
 }
 
 bool SetupFile::LoadFromFile(MainHost *myHost, QString filePath)
@@ -85,7 +90,7 @@ bool SetupFile::LoadFromFile(MainHost *myHost, QString filePath)
 
     quint32 version;
     in >> version;
-    if(version != SETUP_FILE_VERSION) {
+    if(version != SETUP_FILE_VERSION && version!=5) {
         QMessageBox msgBox;
         msgBox.setWindowTitle(filePath);
         msgBox.setText( tr("Wrong file version.") );
@@ -105,6 +110,12 @@ bool SetupFile::LoadFromFile(MainHost *myHost, QString filePath)
     }
 
     myHost->objFactory->ResetSavedId();
+
+    if(version>5) {
+        myHost->mainWindow->mySceneView->viewHost->SetProgram(EMPTY_PROGRAM);
+        in >> *myHost->mainWindow->mySceneView->viewHost;
+        myHost->mainWindow->mySceneView->viewHost->SetProgram(0);
+    }
     myHost->EnableSolverUpdate(true);
     return true;
 }

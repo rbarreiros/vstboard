@@ -24,7 +24,8 @@
 //using namespace View;
 
 MainGraphicsView::MainGraphicsView(QWidget * parent) :
-    QGraphicsView(parent)
+    QGraphicsView(parent),
+    currentProgId(0)
 {
 //    MainConfig::Get()->ListenToAction("sceneZoomIn",this);
 //    MainConfig::Get()->ListenToAction("sceneZoomOut",this);
@@ -53,6 +54,17 @@ void MainGraphicsView::wheelEvent(QWheelEvent * event)
         return;
     }
     QGraphicsView::wheelEvent(event);
+}
+
+void MainGraphicsView::mousePressEvent ( QMouseEvent * event )
+{
+    if(event->modifiers() == Qt::ControlModifier
+       && event->button() == Qt::MidButton) {
+        event->accept();
+        zoomReset();
+        return;
+    }
+    QGraphicsView::mousePressEvent(event);
 }
 
 //bool MainGraphicsView::event(QEvent *event)
@@ -106,3 +118,105 @@ void MainGraphicsView::resizeEvent ( QResizeEvent * event )
     emit viewResized( mapToScene(viewport()->rect()).boundingRect() );
 }
 
+void MainGraphicsView::SaveProgram()
+{
+    SceneProg state;
+    state.scale=transform().m11();
+    state.scrollx=horizontalScrollBar()->value();
+    state.scrolly=verticalScrollBar()->value();
+    listPrograms.insert(currentProgId,state);
+}
+
+
+void MainGraphicsView::SetProgram(const QModelIndex &prg)
+{
+    SetProgram(prg.data(UserRoles::value).toInt());
+}
+
+void MainGraphicsView::SetProgram(int progId)
+{
+    SaveProgram();
+
+    currentProgId = progId;
+    if(!listPrograms.contains(progId)) {
+        setTransform( QTransform() );
+        horizontalScrollBar()->setValue( 0 );
+        verticalScrollBar()->setValue( 0 );
+        SaveProgram();
+        return;
+    }
+
+    SceneProg state = listPrograms.value(currentProgId);
+    setTransform( QTransform() );
+    scale( state.scale, state.scale );
+    horizontalScrollBar()->setValue( state.scrollx );
+    verticalScrollBar()->setValue( state.scrolly );
+}
+
+void MainGraphicsView::CopyProgram(int ori, int dest)
+{
+    if(!listPrograms.contains(ori))
+        return;
+    listPrograms.insert(dest, listPrograms.value(ori));
+}
+
+void MainGraphicsView::RemoveProgram(int prg)
+{
+    if(!listPrograms.contains(prg))
+        return;
+    listPrograms.remove(prg);
+}
+
+void MainGraphicsView::ClearPrograms()
+{
+    SetProgram(EMPTY_PROGRAM);
+    listPrograms.clear();
+    SetProgram(0);
+}
+
+QDataStream & MainGraphicsView::toStream (QDataStream& out) const
+{
+    const quint16 file_version = 1;
+    out << file_version;
+
+    out << (quint16)listPrograms.size();
+    QMap<qint16,SceneProg>::ConstIterator i = listPrograms.constBegin();
+    while(i!=listPrograms.constEnd()) {
+        out << i.key();
+        out << i.value().scale;
+        out << i.value().scrollx;
+        out << i.value().scrolly;
+        ++i;
+    }
+    return out;
+}
+
+QDataStream & MainGraphicsView::fromStream (QDataStream& in)
+{
+    quint16 file_version;
+    in >> file_version;
+
+    quint16 nbProg;
+    in >> nbProg;
+
+    for(quint16 i=0; i<nbProg; i++) {
+        qint16 key;
+        in >> key;
+        SceneProg state;
+        in >> state.scale;
+        in >> state.scrollx;
+        in >> state.scrolly;
+        listPrograms.insert(key,state);
+    }
+    return in;
+}
+
+QDataStream & operator<< (QDataStream & out, const MainGraphicsView& value)
+{
+    return value.toStream(out);
+}
+
+QDataStream & operator>> (QDataStream & in, MainGraphicsView& value)
+{
+    return value.fromStream(in);
+}

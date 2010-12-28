@@ -33,10 +33,25 @@
         MainGraphicsView(QGraphicsScene * scene, QWidget * parent = 0);
 //        bool event(QEvent *event);
 
+        QDataStream & toStream (QDataStream &) const;
+        QDataStream & fromStream (QDataStream &);
+
+        void SaveProgram();
+
     protected:
         void wheelEvent(QWheelEvent * event);
+        void mousePressEvent ( QMouseEvent * event );
         void resizeEvent ( QResizeEvent * event );
         void scrollContentsBy ( int dx, int dy );
+
+        struct SceneProg {
+            qreal scale;
+            qint16 scrollx;
+            qint16 scrolly;
+        };
+        QMap<qint16,SceneProg>listPrograms;
+
+        qint16 currentProgId;
 
     signals:
         void viewResized(QRectF trans);
@@ -46,8 +61,16 @@
         void zoomOut();
         void zoomReset();
         void ForceResize();
+        void SetProgram(int progId);
+        void SetProgram(const QModelIndex &prg);
+        void CopyProgram(int ori, int dest);
+        void RemoveProgram(int prg);
+        void ClearPrograms();
     };
 
 //}
+
+QDataStream & operator<< (QDataStream & out, const MainGraphicsView& value);
+QDataStream & operator>> (QDataStream & in, MainGraphicsView& value);
 
 #endif // MAINGRAPHICSVIEW_H

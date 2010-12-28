@@ -36,15 +36,15 @@
 
 using namespace View;
 
-SceneView::SceneView(MainHost *myHost,Connectables::ObjectFactory *objFactory, MainGraphicsView *viewHost, MainGraphicsView *viewProject, MainGraphicsView *viewProgram, MainGraphicsView *viewInsert,QWidget *parent) :
+SceneView::SceneView(MainHost *myHost,Connectables::ObjectFactory *objFactory, MainGraphicsView *viewHost, MainGraphicsView *viewProject, MainGraphicsView *viewProgram, MainGraphicsView *viewGroup,QWidget *parent) :
         QAbstractItemView(parent),
         viewHost(viewHost),
         viewProject(viewProject),
         viewProgram(viewProgram),
-        viewInsert(viewInsert),
+        viewGroup(viewGroup),
         sceneHost(0),
         sceneProgram(0),
-        sceneInsert(0),
+        sceneGroup(0),
         objFactory(objFactory),
         myHost(myHost)
 {
@@ -55,18 +55,18 @@ SceneView::SceneView(MainHost *myHost,Connectables::ObjectFactory *objFactory, M
     sceneHost = new QGraphicsScene(this);
     sceneProject = new QGraphicsScene(this);
     sceneProgram = new QGraphicsScene(this);
-    sceneInsert = new QGraphicsScene(this);
+    sceneGroup = new QGraphicsScene(this);
 
     //we need a root object to avoid a bug when the scene is empty
     rootObjHost = new QGraphicsRectItem(0, sceneHost);
     rootObjProject = new QGraphicsRectItem(0, sceneProject);
     rootObjProgram = new QGraphicsRectItem(0, sceneProgram);
-    rootObjInsert = new QGraphicsRectItem(0, sceneInsert);
+    rootObjInsert = new QGraphicsRectItem(0, sceneGroup);
 
     viewHost->setScene(sceneHost);
     viewProject->setScene(sceneProject);
     viewProgram->setScene(sceneProgram);
-    viewInsert->setScene(sceneInsert);
+    viewGroup->setScene(sceneGroup);
 }
 
 void SceneView::SetParkings(QWidget *progPark, QWidget *groupPark)
@@ -299,6 +299,12 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                             programContainerView->setParentItem(rootObjProgram);
                             connect(viewProgram,SIGNAL(viewResized(QRectF)),
                                     programContainerView,SLOT(OnViewChanged(QRectF)));
+                            connect(myHost->programList,SIGNAL(ProgChanged(QModelIndex)),
+                                    viewProgram, SLOT(SetProgram(QModelIndex)));
+                            connect(myHost->programList,SIGNAL(ProgCopy(int,int)),
+                                    viewProgram, SLOT(CopyProgram(int,int)));
+                            connect(myHost->programList,SIGNAL(ProgDelete(int)),
+                                    viewProgram, SLOT(RemoveProgram(int)));
                             QTimer::singleShot(0, viewProgram, SLOT(ForceResize()));
                             programContainerView->SetParking(progParking);
                         }
@@ -307,9 +313,15 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                             MainContainerView *groupContainerView = new MainContainerView(myHost, model());
                             objView=groupContainerView;
                             groupContainerView->setParentItem(rootObjInsert);
-                            connect(viewInsert,SIGNAL(viewResized(QRectF)),
+                            connect(viewGroup,SIGNAL(viewResized(QRectF)),
                                     groupContainerView,SLOT(OnViewChanged(QRectF)));
-                            QTimer::singleShot(0, viewInsert, SLOT(ForceResize()));
+                            connect(myHost->programList,SIGNAL(GroupChanged(QModelIndex)),
+                                    viewGroup, SLOT(SetProgram(QModelIndex)));
+                            connect(myHost->programList,SIGNAL(GroupCopy(int,int)),
+                                    viewGroup, SLOT(CopyProgram(int,int)));
+                            connect(myHost->programList,SIGNAL(GroupDelete(int)),
+                                    viewGroup, SLOT(RemoveProgram(int)));
+                            QTimer::singleShot(0, viewGroup, SLOT(ForceResize()));
                             groupContainerView->SetParking(groupParking);
                         }
 
@@ -617,6 +629,6 @@ void SceneView::ToggleProgramView(bool show)
 
 void SceneView::ToggleInsertView(bool show)
 {
-    viewInsert->setVisible(show);
+    viewGroup->setVisible(show);
 //    emit insertShown(show);
 }
