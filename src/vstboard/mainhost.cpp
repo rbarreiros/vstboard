@@ -45,6 +45,8 @@ MainHost::MainHost(Vst *myVstPlugin, QObject *parent) :
     solverUpdateEnabled(true),
     mutexListCables(new QMutex(QMutex::Recursive))
 {
+    setObjectName("MainHost");
+
     if(!vst::CVSTHost::Get())
         vstHost = new vst::CVSTHost();
     else
@@ -523,10 +525,17 @@ void MainHost::EnableSolverUpdate(bool enable)
     solverMutex.unlock();
 }
 
-bool MainHost::IsSolverUpdateEnabled()
+//bool MainHost::IsSolverUpdateEnabled()
+//{
+//    QMutexLocker l(&solverMutex);
+//    return solverUpdateEnabled;
+//}
+
+void MainHost::SetSolverUpdateNeeded(bool need)
 {
-    QMutexLocker l(&solverMutex);
-    return solverUpdateEnabled;
+    solverMutex.lock();
+    solverNeedAnUpdate = need;
+    solverMutex.unlock();
 }
 
 void MainHost::UpdateSolver(bool forceUpdate)
@@ -564,10 +573,7 @@ void MainHost::UpdateSolver(bool forceUpdate)
         solver->Resolve(workingListOfCables);
     mutexListCables->unlock();
 
-    solverMutex.lock();
-        //solver is up to date
-        solverNeedAnUpdate = false;
-    solverMutex.unlock();
+    SetSolverUpdateNeeded(false);
 
     //allow rendering
     mutexRender.unlock();
@@ -639,7 +645,7 @@ void MainHost::OnCableAdded(const ConnectionInfo &outputPin, const ConnectionInf
     workingListOfCables.insert(outputPin,inputPin);
     mutexListCables->unlock();
 
-    solverNeedAnUpdate = true;
+    SetSolverUpdateNeeded();
 }
 
 void MainHost::OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
@@ -648,7 +654,7 @@ void MainHost::OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionI
     workingListOfCables.remove(outputPin,inputPin);
     mutexListCables->unlock();
 
-    solverNeedAnUpdate = true;
+    SetSolverUpdateNeeded();
 }
 
 void MainHost::SetTempo(int tempo, int sign1, int sign2)

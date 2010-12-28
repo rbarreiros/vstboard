@@ -62,7 +62,7 @@ public:
     float GetSampleRate() {return sampleRate;}
 
     void EnableSolverUpdate(bool enable);
-    bool IsSolverUpdateEnabled();
+//    bool IsSolverUpdateEnabled();
 
     void GetTempo(int &tempo, int &sign1, int &sign2);
 
@@ -136,17 +136,15 @@ signals:
     void groupParkingModelChanged(QStandardItemModel *model);
 
 public slots:
+    void SetSolverUpdateNeeded(bool need=true);
     void OnCableAdded(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
     void OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
-
-    void UpdateSolver(bool forceUpdate=false);
-
     void SetTempo(int tempo=120, int sign1=4, int sign2=4);
     void OnNewRenderingOrder(orderedNodes *renderLines);
     void Render(unsigned long samples=0);
 
-
 private slots:
+    void UpdateSolver(bool forceUpdate=false);
 
     friend class SetupFile;
     friend class ProjectFile;

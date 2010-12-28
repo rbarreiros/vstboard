@@ -366,7 +366,7 @@ void Container::AddChildObject(QSharedPointer<Object> objPtr)
         myHost->midiDevices->OpenDevice(objPtr);
 #endif
 
-    myHost->UpdateSolver();
+    myHost->SetSolverUpdateNeeded();
 }
 
 void Container::ParkChildObject(QSharedPointer<Object> objPtr)
@@ -387,8 +387,9 @@ void Container::ParkChildObject(QSharedPointer<Object> objPtr)
         myHost->midiDevices->CloseDevice(objPtr);
 #endif
 
-    myHost->UpdateSolver();
+    myHost->SetSolverUpdateNeeded();
 }
+
 
 void Container::OnChildDeleted(Object *obj)
 {
