@@ -76,7 +76,7 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     ui->treeAudioInterfaces->header()->resizeSection(1,30);
     ui->treeAudioInterfaces->header()->resizeSection(2,30);
     ui->treeAudioInterfaces->header()->resizeSection(3,40);
-    ui->treeAudioInterfaces->expandAll();
+    ui->treeAudioInterfaces->expand( myHost->audioDevices->AsioIndex );
 
     //midi devices
     ui->treeMidiInterfaces->setModel(myHost->midiDevices->GetModel());
@@ -85,7 +85,6 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     ui->treeMidiInterfaces->header()->setResizeMode(2,QHeaderView::Fixed);
     ui->treeMidiInterfaces->header()->resizeSection(1,30);
     ui->treeMidiInterfaces->header()->resizeSection(2,30);
-    ui->treeMidiInterfaces->expandAll();
 #endif
 
     BuildListTools();

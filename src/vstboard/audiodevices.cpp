@@ -120,6 +120,8 @@ void AudioDevices::BuildModel()
     for (int i = 0; i < Pa_GetHostApiCount(); ++i) {
         QStandardItem *api = new QStandardItem(Pa_GetHostApiInfo(i)->name);
         parentItem->appendRow(api);
+        if(api->text() == "ASIO")
+            AsioIndex = api->index();
     }
 
     //devices

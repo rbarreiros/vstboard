@@ -42,6 +42,8 @@ public:
     QHash<qint32,QSharedPointer<Connectables::AudioDevice> >listAudioDevices;
     QTimer fakeRenderTimer;
 
+    QPersistentModelIndex AsioIndex;
+
 private:
     void BuildModel();
     ListAudioInterfacesModel *model;
