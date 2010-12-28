@@ -197,6 +197,7 @@ Pin * PinsList::AddPin(int nb)
     if(modelList.isValid())
         newPin->SetParentModelIndex(modelList);
 
+    parent->OnProgramDirty();
     return newPin;
 }
 
@@ -205,6 +206,7 @@ void PinsList::RemovePin(int nb)
     if(!listPins.contains(nb))
         return;
 
+    parent->OnProgramDirty();
     delete listPins.take(nb);
 }
 

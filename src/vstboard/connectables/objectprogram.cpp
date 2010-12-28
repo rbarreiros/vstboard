@@ -47,22 +47,33 @@ void ObjectProgram::Load(PinsList *in, PinsList *out)
 {
     QMap<ushort,ObjectParameter>::ConstIterator i=listParametersIn.constBegin();
     while(i!=listParametersIn.constEnd()) {
+        Pin *pin=0;
         if(!in->listPins.contains(i.key())) {
-            in->AddPin(i.key());
+            pin = in->AddPin(i.key());
+        } else {
+            pin =  in->listPins.value(i.key());
         }
-        static_cast<ParameterPin*>( in->listPins.value(i.key()) )->Load(i.value());
+        if(!pin) {
+            ++i;
+            continue;
+        }
+        static_cast<ParameterPin*>(pin)->Load(i.value());
         ++i;
     }
 
     QMap<ushort,ObjectParameter>::ConstIterator j=listParametersOut.constBegin();
     while(j!=listParametersOut.constEnd()) {
+        Pin *pin=0;
         if(!out->listPins.contains(j.key())) {
-            if(!out->AddPin(j.key())) {
-                ++j;
-                continue;
-            }
+            pin = out->AddPin(j.key());
+        } else {
+            pin = out->listPins.value(j.key());
         }
-        static_cast<ParameterPin*>( out->listPins.value(j.key()) )->Load(j.value());
+        if(!pin) {
+            ++j;
+            continue;
+        }
+        static_cast<ParameterPin*>(pin)->Load(j.value());
         ++j;
     }
 
@@ -88,12 +99,14 @@ void ObjectProgram::Load(PinsList *in, PinsList *out)
 
 void ObjectProgram::Save(PinsList *in,PinsList *out)
 {
+    listParametersIn.clear();
     QMap<quint16,Pin*>::ConstIterator i = in->listPins.constBegin();
     while(i!=in->listPins.constEnd()) {
         static_cast<ParameterPin*>(i.value())->GetValues( listParametersIn[i.key()] );
         ++i;
     }
 
+    listParametersOut.clear();
     QMap<quint16,Pin*>::ConstIterator j = out->listPins.constBegin();
     while(j!=out->listPins.constEnd()) {
         static_cast<ParameterPin*>(j.value())->GetValues( listParametersOut[j.key()] );
