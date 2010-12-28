@@ -456,8 +456,12 @@ void VstPlugin::SetContainerAttribs(const ObjectContainerAttribs &attr)
 {
     Object::SetContainerAttribs(attr);
 
-    if(editorWnd && editorWnd->isVisible()) {
-        editorWnd->LoadAttribs();
+    if(editorWnd) {
+        if(attr.editorVisible != editorWnd->isVisible()) {
+            editorWnd->setVisible(attr.editorVisible);
+        }
+        if(attr.editorVisible)
+            editorWnd->LoadAttribs();
 //        editorWnd->move(attr.editorPosition);
 //        editorWnd->resize(attr.editorSize);
 //        editorWnd->SetScrollValue(attr.editorHScroll,attr.editorVScroll);
@@ -470,6 +474,7 @@ void VstPlugin::GetContainerAttribs(ObjectContainerAttribs &attr)
         editorWnd->SaveAttribs();
 
     Object::GetContainerAttribs(attr);
+    attr.editorVisible=editorWnd->isVisible();
 }
 
 void VstPlugin::EditorDestroyed()

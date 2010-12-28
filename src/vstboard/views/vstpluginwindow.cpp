@@ -139,7 +139,7 @@ void VstPluginWindow::closeEvent( QCloseEvent * event )
 
 void VstPluginWindow::hideEvent ( QHideEvent * event )
 {
-    SaveAttribs();
+    //SaveAttribs();
 }
 
 void VstPluginWindow::SetWindowSize(int newWidth, int newHeight)
@@ -156,7 +156,7 @@ void VstPluginWindow::showEvent ( QShowEvent * event )
     int h = ui->scrollAreaWidgetContents->height();
     setMaximumSize(w,h);
     //resize(w,h);
-    LoadAttribs();
+    //LoadAttribs();
 }
 
 void VstPluginWindow::resizeEvent ( QResizeEvent * event )

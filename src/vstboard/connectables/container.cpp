@@ -331,6 +331,8 @@ void Container::AddParkedObject(QSharedPointer<Object> objPtr)
 
 void Container::ParkObject(QSharedPointer<Object> objPtr)
 {
+    objPtr->ToggleEditor(false);
+
     //this container is not programmable : delete the object from the saved program too
     if(!listenProgramChanges) {
         foreach(ContainerProgram *prg, listContainerPrograms) {

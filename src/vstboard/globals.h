@@ -43,6 +43,7 @@ namespace UserRoles {
         parking,
         objInfo,
         nodeType,
+        editorVisible,
         editorImage,
         editorPos,
         editorSize,

@@ -38,7 +38,7 @@ namespace Connectables {
         ~ContainerProgram();
         void Load(int progId);
         void Unload();
-        void Save();
+        void Save(bool saveChildPrograms=true);
         void ParkAllObj();
         ContainerProgram * Copy(int fromId, int toId);
         ContainerProgram * CopyTo(int toId);

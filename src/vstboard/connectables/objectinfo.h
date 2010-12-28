@@ -56,6 +56,7 @@ public:
     ObjectContainerAttribs() :
         position(QPointF(0,0)),
 //        size(QSizeF(0,0)),
+        editorVisible(false),
         editorPosition(QPoint(0,0)),
         editorSize(QSize(0,0)),
         editorHScroll(0),
@@ -64,6 +65,7 @@ public:
 
     QPointF position;
 //    QSizeF size;
+    bool editorVisible;
     QPoint editorPosition;
     QSize editorSize;
     quint16 editorHScroll;
@@ -79,6 +81,8 @@ QDataStream & operator>> (QDataStream & in, ObjectContainerAttribs& value);
 inline bool operator==(const ObjectContainerAttribs &c1, const ObjectContainerAttribs &c2)
 {
     if(c1.position != c2.position)
+        return false;
+    if(c1.editorVisible != c2.editorVisible)
         return false;
     if(c1.editorPosition != c2.editorPosition)
         return false;

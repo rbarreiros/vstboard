@@ -39,7 +39,7 @@ bool ProjectFile::SaveToFile(MainHost *myHost,QString filePath)
 
     out << (quint32)PROJECT_FILE_KEY;
     out << (quint32)PROJECT_FILE_VERSION;
-    out.setVersion(QDataStream::Qt_4_6);
+    out.setVersion(QDataStream::Qt_4_7);
 
     myHost->EnableSolverUpdate(false);
 
@@ -119,7 +119,7 @@ bool ProjectFile::LoadFromFile(MainHost *myHost,QString filePath)
         return false;
     }
 
-    in.setVersion(QDataStream::Qt_4_6);
+    in.setVersion(QDataStream::Qt_4_7);
 
     myHost->EnableSolverUpdate(false);
 

@@ -295,6 +295,8 @@ void Object::CopyCurrentProgram(int dest)
         return;
     }
     ObjectProgram *cpy = new ObjectProgram( *currentProgram );
+    cpy->progId=dest;
+    cpy->Save(listParameterPinIn,listParameterPinOut);
     listPrograms.insert(dest,cpy);
 }
 
@@ -425,7 +427,10 @@ void Object::OnParameterChanged(ConnectionInfo pinInfo, float value)
 
 void Object::ToggleEditor(bool visible)
 {
-    static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::editorVisible))->ChangeValue(visible);
+    ParameterPin *pin = static_cast<ParameterPin*>(listParameterPinIn->listPins.value(FixedPinNumber::editorVisible));
+    if(!pin)
+        return;
+    pin->ChangeValue(visible);
 }
 
 LearningMode::Enum Object::GetLearningMode()
@@ -444,6 +449,7 @@ void Object::SetContainerAttribs(const ObjectContainerAttribs &attr)
     QStandardItem *item = myHost->GetModel()->itemFromIndex(modelIndex);
 
     item->setData(attr.position, UserRoles::position);
+    item->setData(attr.editorVisible, UserRoles::editorVisible);
     item->setData(attr.editorPosition, UserRoles::editorPos);
     item->setData(attr.editorSize, UserRoles::editorSize);
     item->setData(attr.editorHScroll, UserRoles::editorHScroll);
@@ -456,6 +462,7 @@ void Object::GetContainerAttribs(ObjectContainerAttribs &attr)
         return;
 
     attr.position = modelIndex.data(UserRoles::position).toPointF();
+    attr.editorVisible = modelIndex.data(UserRoles::editorVisible).toBool();
     attr.editorPosition = modelIndex.data(UserRoles::editorPos).toPoint();
     attr.editorSize = modelIndex.data(UserRoles::editorSize).toSize();
     attr.editorHScroll = modelIndex.data(UserRoles::editorHScroll).toInt();

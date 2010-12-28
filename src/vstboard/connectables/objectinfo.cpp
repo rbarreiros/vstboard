@@ -96,10 +96,11 @@ QDataStream & operator>> (QDataStream& stream, ObjectInfo& objInfo)
 
 QDataStream & ObjectContainerAttribs::toStream (QDataStream& out) const
 {
-    const quint16 file_version = 2;
+    const quint16 file_version = 3;
     out << file_version;
     out << position;
 //    out << size;
+    out << editorVisible;
     out << editorPosition;
     out << editorSize;
     out << editorHScroll;
@@ -117,6 +118,9 @@ QDataStream & ObjectContainerAttribs::fromStream (QDataStream& in)
     if(file_version<2) {
         QSizeF tmp;
         in >> tmp;
+    }
+    if(file_version>2) {
+        in >> editorVisible;
     }
     in >> editorPosition;
     in >> editorSize;

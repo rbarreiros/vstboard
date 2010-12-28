@@ -78,7 +78,7 @@ ContainerProgram * ContainerProgram::CopyTo(int toId)
         objPtr->CopyCurrentProgram(toId);
     }
     ContainerProgram *newPrg = new ContainerProgram(*this);
-    newPrg->Save();
+    newPrg->Save(false);
     return newPrg;
 }
 
@@ -164,10 +164,12 @@ bool ContainerProgram::IsDirty()
     return false;
 }
 
-void ContainerProgram::Save()
+void ContainerProgram::Save(bool saveChildPrograms)
 {
-    foreach(QSharedPointer<Object> objPtr, listObjects) {
-        objPtr->SaveProgram();
+    if(saveChildPrograms) {
+        foreach(QSharedPointer<Object> objPtr, listObjects) {
+            objPtr->SaveProgram();
+        }
     }
 
     mapObjAttribs.clear();

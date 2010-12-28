@@ -39,7 +39,7 @@ bool SetupFile::SaveToFile(MainHost *myHost, QString filePath)
 
     out << (quint32)SETUP_FILE_KEY;
     out << (quint32)SETUP_FILE_VERSION;
-    out.setVersion(QDataStream::Qt_4_6);
+    out.setVersion(QDataStream::Qt_4_7);
 
     myHost->EnableSolverUpdate(false);
     myHost->hostContainer->SaveProgram();
@@ -100,7 +100,7 @@ bool SetupFile::LoadFromFile(MainHost *myHost, QString filePath)
         return false;
     }
 
-    in.setVersion(QDataStream::Qt_4_6);
+    in.setVersion(QDataStream::Qt_4_7);
 
     myHost->EnableSolverUpdate(false);
     myHost->SetupHostContainer();
