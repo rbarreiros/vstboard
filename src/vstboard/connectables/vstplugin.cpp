@@ -352,7 +352,7 @@ bool VstPlugin::Open()
     listAudioPinIn->ChangeNumberOfPins(pEffect->numInputs);
     listAudioPinOut->ChangeNumberOfPins(pEffect->numOutputs);
 
-    //int nbParam = pEffect->numParams;
+    int nbParam = pEffect->numParams;
     bool nameCanChange=false;
     bool defVisible = true;
 
@@ -366,16 +366,17 @@ bool VstPlugin::Open()
     }
 
     //create all parameters pins
-  /*  for(int i=0;i<nbParam;i++) {
+    for(int i=0;i<nbParam;i++) {
+        ParameterPinIn *pin=0;
         if(listParameterPinIn->listPins.contains(i)) {
-            ParameterPinIn *pin = static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(i));
-            pin->SetDefaultVisible(defVisible);
-            pin->SetNameCanChange(nameCanChange);
+            pin = static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(i));
         } else {
-            listParameterPinIn->AddPin(i);
+            pin = static_cast<ParameterPinIn*>(listParameterPinIn->AddPin(i));
         }
+        pin->SetDefaultVisible(defVisible);
+        pin->SetNameCanChange(nameCanChange);
     }
-*/
+
     Object::Open();
     CreateEditorWindow();
     return true;
@@ -474,7 +475,9 @@ void VstPlugin::GetContainerAttribs(ObjectContainerAttribs &attr)
         editorWnd->SaveAttribs();
 
     Object::GetContainerAttribs(attr);
-    attr.editorVisible=editorWnd->isVisible();
+
+    if(editorWnd)
+        attr.editorVisible=editorWnd->isVisible();
 }
 
 void VstPlugin::EditorDestroyed()
@@ -522,10 +525,14 @@ long VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr,
             //create the parameter pin if needed
             switch(GetLearningMode()) {
                 case LearningMode::unlearn :
-                    listParameterPinIn->AsyncRemovePin(index);
+                    if(listParameterPinIn->listPins.contains(index))
+                        static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(index))->SetVisible(false);
+//                    listParameterPinIn->AsyncRemovePin(index);
                     break;
                 case LearningMode::learn :
-                    listParameterPinIn->AsyncAddPin(index);
+                    if(listParameterPinIn->listPins.contains(index))
+                        static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(index))->SetVisible(true);
+//                    listParameterPinIn->AsyncAddPin(index);
                 case LearningMode::off :
                     if(listParameterPinIn->listPins.contains(index))
                         static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(index))->ChangeValue(opt);
@@ -608,7 +615,7 @@ Pin* VstPlugin::CreatePin(const ConnectionInfo &info)
                 pin->SetLimitsEnabled(false);
                 return pin;
             } else {
-                ParameterPinIn *pin = new ParameterPinIn(this,info.pinNumber,EffGetParameter(info.pinNumber),true,EffGetParamName(info.pinNumber),true);
+                ParameterPinIn *pin = new ParameterPinIn(this,info.pinNumber,EffGetParameter(info.pinNumber),false,EffGetParamName(info.pinNumber),true);
                 return pin;
             }
             break;
