@@ -29,10 +29,8 @@ namespace Connectables {
     {
     public:
         MidiPinIn(Object *parent, int number=0, bool bridge=false);
-        void ReceiveMsg(const int msgType=0,void *data=0);
+        void ReceiveMsg(const PinMessage::Enum msgType,void *data=0);
         float GetValue();
-    protected:
-        float vuVal;
     };
 
 }

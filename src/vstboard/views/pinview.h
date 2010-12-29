@@ -71,7 +71,6 @@ namespace View {
         static QGraphicsLineItem *currentLine;
         void CreateMimeData(QByteArray &bytes);
         void ReadMimeData(QByteArray &bytes, ConnectionInfo &data);
-        float falloffSpeed;
 
         QAbstractItemModel *model;
         QPersistentModelIndex pinIndex;

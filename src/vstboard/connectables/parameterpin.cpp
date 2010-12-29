@@ -46,11 +46,8 @@ ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int num
         limitsEnabled(true)
 {
     SetVisible(defaultVisible);
-
     value = defaultValue;
-    falloff = 0.0f;
     setObjectName(name);
-
     loading=true;
     OnValueChanged( defaultValue );
     loading=false;
@@ -75,10 +72,7 @@ ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int num
         limitsEnabled(true)
 {
     SetVisible(defaultVisible);
-    falloff = 0.0f;
     setObjectName(name);
-
-    loading=true;
     stepSize=1.0f/(listValues->size()-1);
     stepIndex=listValues->indexOf(defaultVariantValue);
     defaultIndex=stepIndex;
@@ -261,6 +255,7 @@ void ParameterPin::SetLimit(ObjType::Enum type, float newVal)
             return;
     }
 
+    OnValueChanged(value);
     if(!dirty) {
         dirty=true;
         parent->OnProgramDirty();

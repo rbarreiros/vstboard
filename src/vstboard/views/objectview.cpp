@@ -54,25 +54,8 @@ ObjectView::ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsIte
             this,SLOT(close()));
     addAction(actDel);
 
-//    actEditor = new QAction(QIcon(":/img16x16/configure.png"), tr("Show editor"),this);
-//    actEditor->setEnabled(false);
-//    actEditor->setCheckable(true);
-//    actEditor->setShortcut( Qt::Key_Asterisk );
-//    actEditor->setShortcutContext(Qt::WidgetShortcut);
-//    connect(actEditor, SIGNAL(toggled(bool)),
-//            this,SLOT(ShowEditor(bool)));
-//    addAction(actEditor);
-
-//    actLearn = new QAction(tr("Learning mode"),this);
-//    actLearn->setEnabled(false);
-//    actLearn->setCheckable(true);
-//    actLearn->setShortcut( Qt::Key_Plus );
-//    actLearn->setShortcutContext(Qt::WidgetShortcut);
-//    connect(actLearn, SIGNAL(toggled(bool)),
-//            this,SLOT(ToggleLearningMode(bool)));
-//    addAction(actLearn);
-
-    backgroundImg = new QGraphicsPixmapItem(this,scene());
+//    backgroundImg = new QGraphicsPixmapItem(this,scene());
+//    setAutoFillBackground(true);
 }
 
 ObjectView::~ObjectView()

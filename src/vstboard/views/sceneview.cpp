@@ -481,6 +481,8 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                         angle=-3.1416f/2.0f;
 
                     pinView = static_cast<PinView*>( new BridgePinView(angle, model(), parentList, pin) );
+                    connect(timerFalloff,SIGNAL(timeout()),
+                            pinView,SLOT(updateVu()));
                 } else {
                     if(pinInfo.direction==PinDirection::Input)
                         angle=3.1416f;

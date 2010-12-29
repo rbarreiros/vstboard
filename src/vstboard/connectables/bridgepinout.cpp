@@ -19,12 +19,47 @@
 ******************************************************************************/
 
 #include "bridgepinout.h"
-
+#include "audiobuffer.h"
+#include "mainhost.h"
 using namespace Connectables;
 
 BridgePinOut::BridgePinOut(Object *parent, int number, bool bridge)
-    :Pin(parent,PinType::Bridge,PinDirection::Output,number,bridge)
+    :Pin(parent,PinType::Bridge,PinDirection::Output,number,bridge),
+    valueType(PinType::ND)
 {
     setObjectName(QString("BOut%1").arg(number));
     visible=true;
+}
+
+void BridgePinOut::SendMsg(const PinMessage::Enum msgType,void *data)
+{
+    Pin::SendMsg(msgType,data);
+
+    switch(msgType) {
+        case PinMessage::AudioBufferToMix :
+            if(static_cast<AudioBuffer*>(data)->GetCurrentVu() < 0.01)
+                return;
+            valueType=PinType::Audio;
+            break;
+        case PinMessage::ParameterValue :
+            valueType=PinType::Parameter;
+            break;
+        case PinMessage::MidiMsg:
+            valueType=PinType::Midi;
+            break;
+        default :
+            valueType=PinType::ND;
+    }
+
+    valueChanged=true;
+}
+
+float BridgePinOut::GetValue()
+{
+    if(valueChanged) {
+        if(value==1.0f) value=0.99f;
+        else value=1.0f;
+        parent->getHost()->GetModel()->setData(modelIndex, valueType, UserRoles::type);
+    }
+    return value;
 }

@@ -49,7 +49,7 @@ void AudioPinIn::SetBuffer(AudioBuffer *buff)
     buffer = buff;
 }
 
-void AudioPinIn::ReceiveMsg(const int msgType,void *data)
+void AudioPinIn::ReceiveMsg(const PinMessage::Enum msgType,void *data)
 {
     if(msgType==PinMessage::AudioBufferToMix) {
         AudioBuffer *buf = static_cast<AudioBuffer*>(data);

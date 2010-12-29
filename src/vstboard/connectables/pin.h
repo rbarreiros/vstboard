@@ -48,8 +48,8 @@ namespace Connectables {
         Pin(Object *parent,PinType::Enum type, PinDirection::Enum direction, int number, bool bridge=false );
         virtual ~Pin();
 
-        virtual void SendMsg(int msgType,void *data=0);
-        virtual void ReceiveMsg(const int msgType=0,void *data=0) {}
+        virtual void SendMsg(const PinMessage::Enum msgType,void *data=0);
+        virtual void ReceiveMsg(const PinMessage::Enum msgType,void *data=0) {}
         virtual float GetValue() {return value;}
 
         void setObjectName(const QString &name);
@@ -74,7 +74,6 @@ namespace Connectables {
     protected:
         ConnectionInfo connectInfo;
         float value;
-        float falloff;
         float stepSize;
         Object *parent;
         bool visible;

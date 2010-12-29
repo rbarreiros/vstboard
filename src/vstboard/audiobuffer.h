@@ -38,6 +38,7 @@ public:
         float *ConsumeStack();
         inline unsigned long GetSize() {return nSize;}
         float GetVu();
+        float GetCurrentVu() {return currentVu;}
         inline void ResetStackCounter() {stackSize=0;}
         inline bool IsEmpty() {return (stackSize==0);}
         static float const blankBuffer[BLANK_BUFFER_SIZE];
@@ -48,6 +49,7 @@ protected:
         unsigned long nSize;
         unsigned long nAllocatedSize;
         float _maxVal;
+        float currentVu;
 
         bool bExternalAllocation;
 };

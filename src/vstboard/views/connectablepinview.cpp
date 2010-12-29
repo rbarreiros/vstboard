@@ -23,16 +23,11 @@
 
 using namespace View;
 
-QBrush ConnectablePinView::normalBrush;
-QBrush ConnectablePinView::highBrush;
-
 ConnectablePinView::ConnectablePinView(float angle, QAbstractItemModel *model, QGraphicsItem * parent, Connectables::Pin *pin) :
        PinView(angle,model,parent,pin),
        value(0),
        isParameter(false)
 {
-    falloffSpeed = .05f;
-
     setGeometry(0,0,50,15);
     setMinimumSize(50,15);
     setMaximumSize(50,15);
@@ -47,17 +42,24 @@ ConnectablePinView::ConnectablePinView(float angle, QAbstractItemModel *model, Q
     textItem->moveBy(2,1);
     textItem->setZValue(1);
 
-    QLinearGradient normalgradient(0, 0, geometry().right(), 0);
-    normalgradient.setColorAt(0, QColor::fromRgbF(0, 0, 0, 0));
-    normalgradient.setColorAt(1, QColor::fromRgbF(0, 1, 0, 1));
-    normalBrush = QBrush(normalgradient);
+    QColor c;
+    switch(connectInfo.type) {
+    case PinType::Audio :
+        c=Qt::yellow;
+        break;
+    case PinType::Midi :
+        c=Qt::cyan;
+        rectVu->setRect(rect());
+        break;
+    case PinType::Parameter :
+        c=QColor(255,127,127);
+        break;
+    default :
+        c=Qt::darkGray;
+        break;
 
-    QLinearGradient highgradient(0, 0, geometry().right(), 0);
-    highgradient.setColorAt(0, QColor::fromRgbF(0, 1, 0, 0));
-    highgradient.setColorAt(1, QColor::fromRgbF(0, 0, 1, 1));
-    highBrush = QBrush(highgradient);
-
-    rectVu->setBrush(normalBrush);
+    }
+    rectVu->setBrush(c);
 }
 
 void ConnectablePinView::UpdateModelIndex(const QModelIndex &index)
@@ -66,15 +68,13 @@ void ConnectablePinView::UpdateModelIndex(const QModelIndex &index)
     if(newName!=textItem->text())
         textItem->setText(newName);
 
-    falloffSpeed = index.data(UserRoles::falloff).toFloat();
-
-    if(falloffSpeed>.0f) {
-        if(index.data(UserRoles::value).toFloat()>value)
-            value = index.data(UserRoles::value).toFloat();
-    } else {
+    if(connectInfo.type == PinType::Parameter) {
         value = index.data(UserRoles::value).toFloat();
         float newVu = geometry().width() * value;
         rectVu->setRect(0,0, newVu, geometry().height());
+    } else {
+        float newVal = index.data(UserRoles::value).toFloat();
+        value = std::max(value,newVal);
     }
 
     ConnectionInfo pinInfo = index.data(UserRoles::connectionInfo).value<ConnectionInfo>();
@@ -85,21 +85,41 @@ void ConnectablePinView::UpdateModelIndex(const QModelIndex &index)
 
 void ConnectablePinView::updateVu()
 {
-    if(falloffSpeed==.0f)
+    if(value<.0f)
         return;
 
-    value-=falloffSpeed;
-    if(value<.0f)
-        value=.0f;
+    switch(connectInfo.type) {
+        case PinType::Audio : {
+            value-=.05f;
+            float newVu=.0f;
+            if(value<.0f) {
+                value=-1.0f;
+            } else {
+                newVu = geometry().width() * value;
+            }
+            rectVu->setRect(0,0, newVu, geometry().height());
+            break;
+        }
 
-    float newVu = geometry().width() * value;
-    rectVu->setRect(0,0, newVu, geometry().height());
+        case PinType::Midi : {
+            value-=.1f;
+            if(value<.0f) {
+                value=-1.0f;
+                rectVu->setBrush(Qt::NoBrush);
+                return;
+            }
+            QColor c=Qt::cyan;
 
-//    if(value>=.9f) {
-//        rectVu->setBrush(highBrush);
-//    } else {
-//        rectVu->setBrush(normalBrush);
-//    }
+            if(value<0.7)
+                c.setAlphaF( value/0.7 );
+
+            rectVu->setBrush(c);
+            break;
+        }
+
+        default :
+            break;
+    }
 }
 
 void ConnectablePinView::wheelEvent ( QGraphicsSceneWheelEvent * event )

@@ -61,6 +61,17 @@ ListMidiInterfacesModel* MidiDevices::GetModel()
 
     BuildModel();
 
+    foreach(QSharedPointer<Connectables::Object>obj, myHost->objFactory->GetListObjects()) {
+        if(obj.isNull())
+            continue;
+
+        if(obj->info().objType == ObjType::MidiInterface) {
+//            if(!obj->errorMessage.isEmpty())
+                obj->Open();
+            obj->UpdateModelNode();
+        }
+    }
+
     foreach(QSharedPointer<Connectables::MidiDevice>md, listOpenedMidiDevices) {
         if(md->OpenStream())
             md->SetSleep(false);

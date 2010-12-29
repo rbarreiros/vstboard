@@ -34,7 +34,7 @@ namespace Connectables {
         ~AudioPinIn();
 
         void SetBuffer(AudioBuffer *buffer);
-        void ReceiveMsg(const int msgType=0,void *data=0);
+        void ReceiveMsg(const PinMessage::Enum msgType,void *data=0);
         float GetValue();
         void NewRenderLoop();
         AudioBuffer *buffer;

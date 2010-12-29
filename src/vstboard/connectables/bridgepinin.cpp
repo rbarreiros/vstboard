@@ -20,32 +20,51 @@
 
 #include "bridgepinin.h"
 #include "object.h"
+#include "audiobuffer.h"
+#include "mainhost.h"
 
 using namespace Connectables;
 
 BridgePinIn::BridgePinIn(Object *parent, int number, bool bridge) :
     Pin(parent,PinType::Bridge,PinDirection::Input,number,bridge),
-    vuVal(.0f)
+    valueType(PinType::ND)
 {
     setObjectName(QString("BIn%1").arg(number));
     visible=true;
 }
 
 //send message to the corresponding output pin
-void BridgePinIn::ReceiveMsg(const int msgType,void *data)
+void BridgePinIn::ReceiveMsg(const PinMessage::Enum msgType,void *data)
 {
     ConnectionInfo info = connectInfo;
     info.direction=PinDirection::Output;
     parent->GetPin(info)->SendMsg(msgType,data);
-    value=1.0f;
+
+    switch(msgType) {
+        case PinMessage::AudioBufferToMix :
+            if(static_cast<AudioBuffer*>(data)->GetCurrentVu() < 0.01)
+                return;
+            valueType=PinType::Audio;
+            break;
+        case PinMessage::ParameterValue :
+            valueType=PinType::Parameter;
+            break;
+        case PinMessage::MidiMsg:
+            valueType=PinType::Midi;
+            break;
+        default :
+            valueType=PinType::ND;
+    }
+
+    valueChanged=true;
 }
 
 float BridgePinIn::GetValue()
 {
-    if(vuVal!=value)
-        valueChanged=true;
-
-    vuVal=value;
-    value=.0f;
-    return vuVal;
+    if(valueChanged) {
+        if(value==1.0f) value=0.99f;
+        else value=1.0f;
+        parent->getHost()->GetModel()->setData(modelIndex, valueType, UserRoles::type);
+    }
+    return value;
 }

@@ -31,7 +31,6 @@ namespace View {
     Q_OBJECT
     public:
         ConnectablePinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, Connectables::Pin *pin);
-        void SetFalloffSpeed(float speed) {falloffSpeed = speed;}
         virtual void UpdateModelIndex(const QModelIndex &index);
 
     protected:
@@ -41,9 +40,6 @@ namespace View {
         QString text;
         float value;
         bool isParameter;
-
-        static QBrush normalBrush;
-        static QBrush highBrush;
 
     public slots:
         void updateVu();

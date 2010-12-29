@@ -67,55 +67,68 @@ bool MidiDevice::OpenStream()
 
     QMutexLocker l(&objMutex);
 
-    if(!FindDeviceByName())
-        return false;
+    if(!FindDeviceByName()){
+        errorMessage = tr("Device not found");
+        return true;
+    }
 
     queue = Pm_QueueCreate(QUEUE_SIZE, sizeof(PmEvent));
     if(!queue) {
         debug("MidiDevice::OpenStream can't create queue")
-                return false;
+                return true;
     }
 
     if(objInfo.inputs>0) {
         PmError err = Pm_OpenInput(&stream, (PmDeviceID)objInfo.id, 0, 512, 0, 0);
         if (err!=pmNoError) {
+            QString msgTxt;
             if(err==pmHostError) {
-                char msg[20];
-                unsigned int len=20;
-                Pm_GetHostErrorText(msg,len);
+                char msg[255];
+                Pm_GetHostErrorText(msg,255);
                 debug("MidiDevice::OpenStream openInput host %s",msg)
+                msgTxt=QString::fromAscii(msg);
             } else {
                 debug("MidiDevice::OpenStream openInput %s",Pm_GetErrorText(err))
+                msgTxt=QString::fromAscii(Pm_GetErrorText(err));
             }
-            return false;
+            errorMessage=tr("Error while opening midi device %1 %2").arg(objInfo.name).arg(msgTxt);
+            return true;
         }
 
         err = Pm_SetFilter(stream, PM_FILT_ACTIVE | PM_FILT_SYSEX | PM_FILT_CLOCK);
         if (err!=pmNoError) {
+            QString msgTxt;
             if(err==pmHostError) {
                 char msg[20];
                 unsigned int len=20;
                 Pm_GetHostErrorText(msg,len);
                 debug("MidiDevice::OpenStream setFilter host %s",msg)
+                msgTxt=QString::fromAscii(msg);
             } else {
+                msgTxt=QString::fromAscii(Pm_GetErrorText(err));
                 debug("MidiDevice::OpenStream setFilter %s",Pm_GetErrorText(err))
             }
-            return false;
+            errorMessage=tr("Error while opening midi device %1 %2").arg(objInfo.name).arg(msgTxt);
+            return true;
         }
     }
 
     if(objInfo.outputs>0) {
         PmError err = Pm_OpenOutput(&stream, (PmDeviceID)objInfo.id, 0, 512, 0, 0, 0);
         if (err!=pmNoError) {
+            QString msgTxt;
             if(err==pmHostError) {
                 char msg[20];
                 unsigned int len=20;
                 Pm_GetHostErrorText(msg,len);
                 debug("MidiDevice::Open openInput host %s",msg)
+                msgTxt=QString::fromAscii(msg);
             } else {
                 debug("MidiDevice::Open openInput %s",Pm_GetErrorText(err))
+                msgTxt=QString::fromAscii(Pm_GetErrorText(err));
             }
-            return false;
+            errorMessage=tr("Error while opening midi device %1 %2").arg(objInfo.name).arg(msgTxt);
+            return true;
         }
     }
 
@@ -190,6 +203,7 @@ bool MidiDevice::FindDeviceByName()
             deviceNumber=canBe;
             devInfo = Pm_GetDeviceInfo(deviceNumber);
         } else {
+            errorMessage=tr("Error : device was deleted");
             debug("MidiDevice::FindDeviceFromName device not found")
                     return false;
         }
@@ -201,6 +215,7 @@ bool MidiDevice::FindDeviceByName()
 
 bool MidiDevice::Open()
 {
+    errorMessage="";
     closed=false;
 
     if(!OpenStream())

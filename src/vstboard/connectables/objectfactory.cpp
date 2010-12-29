@@ -235,6 +235,7 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
 
                 case ObjType::dummy :
                     obj = new Object(myHost, objId, info);
+                    obj->errorMessage="Dummy object";
                     break;
 
                 default:

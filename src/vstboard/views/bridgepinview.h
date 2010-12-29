@@ -31,6 +31,15 @@ namespace View {
     public:
         BridgePinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, Connectables::Pin *pin);
         const QPointF pinPos() const;
+        void UpdateModelIndex(const QModelIndex &index);
+
+    protected:
+        QGraphicsEllipseItem *vuValue;
+        float value;
+        PinType::Enum valueType;
+
+    public slots:
+        void updateVu();
     };
 
 }

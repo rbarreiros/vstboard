@@ -29,6 +29,11 @@ namespace Connectables {
     {
     public:
         BridgePinOut(Object *parent, int number, bool bridge=false);
+        void SendMsg(const PinMessage::Enum msgType,void *data=0);
+        float GetValue();
+
+    protected:
+        PinType::Enum valueType;
     };
 }
 #endif // BRIDGEPINOUT_H

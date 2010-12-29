@@ -122,7 +122,6 @@ Object::~Object()
 bool Object::Open()
 {
     closed=false;
-    errorMessage="";
     return true;
 }
 

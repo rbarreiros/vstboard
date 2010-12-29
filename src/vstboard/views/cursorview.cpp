@@ -23,6 +23,9 @@
 
 using namespace View;
 
+#define CURS_WIDTH 5.0f
+#define CURD_HEIGHT 7.5f
+
 CursorView::CursorView(QAbstractItemModel *model,bool isMaxi,bool upsideDown,QGraphicsItem *parent) :
         QGraphicsWidget(parent),
         isMaxi(isMaxi),
@@ -36,28 +39,27 @@ CursorView::CursorView(QAbstractItemModel *model,bool isMaxi,bool upsideDown,QGr
 
     if(upsideDown) {
         if(isMaxi) {
-            pol << QPointF(5,7) << QPointF(0,7) << QPointF(5,0);
-            offset.setX(5);
-            offset.setY(7);
+            pol << QPointF(CURS_WIDTH,CURD_HEIGHT) << QPointF(0,CURD_HEIGHT) << QPointF(CURS_WIDTH,0);
+            offset.setX(CURS_WIDTH);
+            offset.setY(CURD_HEIGHT);
         } else {
-            pol << QPointF(5,7) << QPointF(0,7) << QPointF(0,0);
-            offset.setY(7);
+            pol << QPointF(CURS_WIDTH,CURD_HEIGHT) << QPointF(0,CURD_HEIGHT) << QPointF(0,0);
+            offset.setY(CURD_HEIGHT);
         }
     } else {
         if(isMaxi) {
-            pol << QPointF(0,0) << QPointF(5,0) << QPointF(5,7);
-            offset.setX(5);
+            pol << QPointF(0,0) << QPointF(CURS_WIDTH,0) << QPointF(CURS_WIDTH,CURD_HEIGHT);
+            offset.setX(CURS_WIDTH);
         } else {
-            pol << QPointF(0,0) << QPointF(5,0) << QPointF(0,7);
+            pol << QPointF(0,0) << QPointF(CURS_WIDTH,0) << QPointF(0,CURD_HEIGHT);
         }
     }
     cursor = new QGraphicsPolygonItem(pol,this);
-    cursor->setBrush(Qt::black);
+    cursor->setPen(Qt::NoPen);
+    cursor->setBrush(QColor(64,64,64));
 
     setFlag(QGraphicsItem::ItemIsMovable, true);
-//    setFlag(QGraphicsItem::ItemIsSelectable, true);
     setCursor(Qt::SplitHCursor);
-//    setAutoFillBackground(true);
     resize(cursor->boundingRect().size());
 }
 
@@ -86,16 +88,6 @@ void CursorView::setPos ( qreal x, qreal y )
     x-=offset.x();
     y-=offset.y();
     QGraphicsWidget::setPos(x,y);
-}
-
-QRectF CursorView::boundingRect() const
-{
-//    if(upsideDown) {
-//        return QRectF(-5,-7,10,7);
-//    } else {
-//        return QRectF(-5,0,10,7);
-//    }
-    return QGraphicsWidget::boundingRect();
 }
 
 void CursorView::mousePressEvent ( QGraphicsSceneMouseEvent * event )
@@ -135,14 +127,13 @@ void CursorView::ValueChanged(float newVal)
     if(value==newVal)
         return;
     model->setData(modelIndex,newVal,UserRoles::value);
-//    value=newVal;
 }
 
 QVariant CursorView::itemChange(GraphicsItemChange change, const QVariant &value)
 {
     if (change == ItemPositionChange && scene() && drag) {
         QPointF newPos = value.toPointF();
-        //SetValue(newPos.x());
+
         if(newPos.x()<-offset.x())
             newPos.setX(-offset.x());
         if(newPos.x()>parentWidget()->rect().width()-offset.x())

@@ -138,6 +138,9 @@
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
+      <property name="childrenCollapsible">
+       <bool>false</bool>
+      </property>
       <widget class="QGroupBox" name="HostBox">
        <property name="title">
         <string>Host Panel</string>
@@ -174,6 +177,9 @@
           </property>
           <property name="dragMode">
            <enum>QGraphicsView::ScrollHandDrag</enum>
+          </property>
+          <property name="transformationAnchor">
+           <enum>QGraphicsView::AnchorUnderMouse</enum>
           </property>
           <property name="resizeAnchor">
            <enum>QGraphicsView::AnchorUnderMouse</enum>
@@ -215,6 +221,9 @@
           </property>
           <property name="dragMode">
            <enum>QGraphicsView::ScrollHandDrag</enum>
+          </property>
+          <property name="transformationAnchor">
+           <enum>QGraphicsView::AnchorUnderMouse</enum>
           </property>
           <property name="resizeAnchor">
            <enum>QGraphicsView::AnchorUnderMouse</enum>
@@ -263,6 +272,9 @@
            </property>
            <property name="dragMode">
             <enum>QGraphicsView::ScrollHandDrag</enum>
+           </property>
+           <property name="transformationAnchor">
+            <enum>QGraphicsView::AnchorUnderMouse</enum>
            </property>
            <property name="resizeAnchor">
             <enum>QGraphicsView::AnchorUnderMouse</enum>
@@ -335,6 +347,9 @@
            </property>
            <property name="dragMode">
             <enum>QGraphicsView::ScrollHandDrag</enum>
+           </property>
+           <property name="transformationAnchor">
+            <enum>QGraphicsView::AnchorUnderMouse</enum>
            </property>
            <property name="resizeAnchor">
             <enum>QGraphicsView::AnchorUnderMouse</enum>

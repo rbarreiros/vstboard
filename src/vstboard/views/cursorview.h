@@ -30,7 +30,6 @@ namespace View {
         Q_OBJECT
     public:
         explicit CursorView(QAbstractItemModel *model,bool isMaxi,bool upsideDown,QGraphicsItem *parent = 0);
-        QRectF	boundingRect () const;
         void SetValue(float newVal);
         void SetModelIndex(QPersistentModelIndex index);
         inline float GetValue() const {return value;}

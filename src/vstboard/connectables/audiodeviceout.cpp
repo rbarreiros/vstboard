@@ -63,6 +63,8 @@ void AudioDeviceOut::SetBufferSize(unsigned long size)
 
 bool AudioDeviceOut::Open()
 {
+    errorMessage="";
+
     //can we find this device on this computer ?
     if(!AudioDevice::FindDeviceByName(objInfo)) {
         errorMessage = tr("Device not found");
@@ -106,7 +108,8 @@ bool AudioDeviceOut::Open()
     //device already has a child
     if(!parentDevice->SetObjectOutput(this)) {
         parentDevice.clear();
-        return false;
+        errorMessage=tr("Already in use");
+        return true;
     }
 
     Object::Open();

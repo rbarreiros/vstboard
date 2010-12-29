@@ -51,7 +51,6 @@ namespace View {
         void resizeEvent ( QResizeEvent * event );
         void showEvent ( QShowEvent * event );
         void closeEvent ( QCloseEvent * event );
-        void hideEvent ( QHideEvent * event );
         Connectables::VstPlugin *plugin;
 
         QModelIndex modelIndex;

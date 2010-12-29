@@ -27,7 +27,6 @@ Pin::Pin(Object *parent,PinType::Enum type, PinDirection::Enum direction, int nu
     QObject(parent),
     connectInfo(parent->getHost(),parent->GetIndex(),type,direction,number,bridge),
     value(.0f),
-    falloff(.05f),
     stepSize(.1f),
     parent(parent),
     visible(false),
@@ -62,7 +61,7 @@ bool Pin::event(QEvent *event)
     return QObject::event(event);
 }
 
-void Pin::SendMsg(int msgType,void *data)
+void Pin::SendMsg(const PinMessage::Enum msgType,void *data)
 {
     parent->getHost()->SendMsg(connectInfo,(PinMessage::Enum)msgType,data);
 }
@@ -149,7 +148,6 @@ void Pin::SetVisible(bool vis)
     if(visible) {
         QStandardItem *item = new QStandardItem("pin");
         item->setData(objectName(),Qt::DisplayRole);
-        item->setData(falloff,UserRoles::falloff);
         item->setData(GetValue(),UserRoles::value);
         item->setData( QVariant::fromValue(ObjectInfo(NodeType::pin)),UserRoles::objInfo);
         item->setData(QVariant::fromValue(connectInfo),UserRoles::connectionInfo);
@@ -158,11 +156,11 @@ void Pin::SetVisible(bool vis)
         QStandardItem *parentItem = parent->getHost()->GetModel()->itemFromIndex(parentIndex);
         parentItem->appendRow(item);
         modelIndex = item->index();
-        if(connectInfo.type!=PinType::Bridge) {
+        //if(connectInfo.type!=PinType::Bridge) {
             connect(parent->getHost()->updateViewTimer,SIGNAL(timeout()),
                     this,SLOT(updateView()),
                     Qt::UniqueConnection);
-        }
+        //}
     } else {
         if(modelIndex.isValid()) {
             //remove cables from pin
@@ -193,7 +191,6 @@ void Pin::UpdateModelNode()
         return;
     }
     item->setData(objectName(),Qt::DisplayRole);
-    item->setData(falloff,UserRoles::falloff);
     item->setData(GetValue(),UserRoles::value);
     item->setData(QVariant::fromValue(ObjectInfo(NodeType::pin)),UserRoles::objInfo);
     item->setData(QVariant::fromValue(connectInfo),UserRoles::connectionInfo);

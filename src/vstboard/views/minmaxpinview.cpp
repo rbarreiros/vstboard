@@ -34,7 +34,7 @@ void MinMaxPinView::CreateCursors()
     cursorCreated=true;
 
     scaledView = new QGraphicsPolygonItem(this);
-    scaledView->setBrush(QBrush(QColor(255,127,127,100)));
+    scaledView->setBrush(QColor(0,0,0,30));
 
     inMin=new CursorView(model,false,false,this);
     inMin->setPos(rect().topLeft());

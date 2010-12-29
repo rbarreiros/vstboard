@@ -38,7 +38,6 @@ namespace UserRoles {
         connectionInfo,
         value,
         stepSize,
-        falloff,
         position,
         parking,
         objInfo,
@@ -50,7 +49,8 @@ namespace UserRoles {
         editorVScroll,
         editorHScroll,
         errorMessage,
-        isDirty
+        isDirty,
+        type
     };
 }
 namespace NodeType {
@@ -153,8 +153,8 @@ namespace PinMessage {
     enum Enum {
         ND,
         AudioBufferToMix,
-        AudioBufferReplace,
-        ClearAudioBuffer,
+       // AudioBufferReplace,
+        //ClearAudioBuffer,
         MidiMsg,
         ParameterValue
     };

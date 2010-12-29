@@ -24,7 +24,9 @@ using namespace View;
 #define PINSIZE 12
 
 BridgePinView::BridgePinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, Connectables::Pin *pin) :
-        PinView(angle, model,parent, pin)
+        PinView(angle, model,parent, pin),
+        value(.0f),
+        valueType(PinType::ND)
 {
     setGeometry(0,0,PINSIZE,PINSIZE);
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -33,9 +35,52 @@ BridgePinView::BridgePinView(float angle, QAbstractItemModel *model,QGraphicsIte
 
     rectBgnd = new QGraphicsEllipseItem(geometry(),this);
     rectBgnd->setBrush(Qt::NoBrush);
+
+    vuValue = new QGraphicsEllipseItem(geometry().adjusted(2,2,-2,-2),this);
+//    vuValue->setBrush(Qt::NoBrush);
+    vuValue->setPen(Qt::NoPen);
 }
 
 const QPointF BridgePinView::pinPos() const
 {
     return QPointF(PINSIZE/2,PINSIZE/2);
+}
+
+void BridgePinView::UpdateModelIndex(const QModelIndex &index)
+{
+    float newVal=index.data(UserRoles::value).toFloat();
+    value = std::max(value,newVal);
+    valueType = (PinType::Enum)index.data(UserRoles::type).toInt();
+}
+
+void BridgePinView::updateVu()
+{
+    if(value<.0f)
+        return;
+
+    value-=.1f;
+    if(value<.0f) {
+        value=-1.0f;
+        vuValue->setBrush(Qt::NoBrush);
+        return;
+    }
+
+    QColor c;
+    switch(valueType) {
+        case PinType::Audio:
+            c=Qt::yellow;
+            break;
+    case PinType::Midi :
+            c=Qt::cyan;
+            break;
+    case PinType::Parameter :
+            c=Qt::red;
+            break;
+        default :
+            c=Qt::darkGray;
+            break;
+    }
+    if(value<0.7)
+        c.setAlphaF( value/0.7 );
+    vuValue->setBrush(c);
 }

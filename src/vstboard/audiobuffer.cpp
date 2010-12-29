@@ -27,8 +27,10 @@ AudioBuffer::AudioBuffer(bool externalAllocation) :
     pBuffer(0),
     nSize(0),
     nAllocatedSize(0),
-    _maxVal(0),
+    _maxVal(.0f),
+    currentVu(.0f),
     bExternalAllocation(externalAllocation)
+
 {
 }
 
@@ -181,7 +183,7 @@ float *AudioBuffer::ConsumeStack()
 
 float AudioBuffer::GetVu()
 {
-    float vu=_maxVal;
+    currentVu=_maxVal;
     _maxVal=.0f;
-    return vu;
+    return currentVu;
 }

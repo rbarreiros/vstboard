@@ -27,31 +27,27 @@
 using namespace Connectables;
 
 MidiPinIn::MidiPinIn(Object *parent, int number, bool bridge)
-    :Pin(parent,PinType::Midi,PinDirection::Input,number,bridge),
-    vuVal(.0f)
+    :Pin(parent,PinType::Midi,PinDirection::Input,number,bridge)
 {
-    falloff = 0.05f;
-
     setObjectName(QString("MidiIn%1").arg(number));
     visible=true;
 }
 
 
-void MidiPinIn::ReceiveMsg(const int msgType,void* data)
+void MidiPinIn::ReceiveMsg(const PinMessage::Enum msgType,void* data)
 {
     if(msgType==PinMessage::MidiMsg) {
         parent->MidiMsgFromInput(*(long*)data);
-        value=1.0f;
+        valueChanged=true;
     }
 }
 
 
 float MidiPinIn::GetValue()
 {
-    if(vuVal!=value)
-        valueChanged=true;
-
-    vuVal=value;
-    value=.0f;
-    return vuVal;
+    if(valueChanged) {
+        if(value==1.0f) value=0.99f;
+        else value=1.0f;
+    }
+    return value;
 }

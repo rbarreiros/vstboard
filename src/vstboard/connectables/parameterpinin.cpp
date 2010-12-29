@@ -36,7 +36,7 @@ ParameterPinIn::ParameterPinIn(Object *parent, int number, const QVariant &defau
 {
 }
 
-void ParameterPinIn::ReceiveMsg(const int msgType,void *data)
+void ParameterPinIn::ReceiveMsg(const PinMessage::Enum msgType,void *data)
 {
     if(msgType == PinMessage::ParameterValue) {
         ChangeValue(*(float*)data);

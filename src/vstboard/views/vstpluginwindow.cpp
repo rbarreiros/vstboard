@@ -127,19 +127,9 @@ void VstPluginWindow::SaveAttribs()
 
 void VstPluginWindow::closeEvent( QCloseEvent * event )
 {
-    //SavePosSize();
-
     hide();
-//    if(plugin->modelIndex.isValid())
-//        MainHost::GetModel()->setData(plugin->modelIndex,false,UserRoles::editorVisible);
     plugin->ToggleEditor(false);
-
     event->ignore();
-}
-
-void VstPluginWindow::hideEvent ( QHideEvent * event )
-{
-    //SaveAttribs();
 }
 
 void VstPluginWindow::SetWindowSize(int newWidth, int newHeight)
@@ -155,8 +145,6 @@ void VstPluginWindow::showEvent ( QShowEvent * event )
     int w = ui->scrollAreaWidgetContents->width();
     int h = ui->scrollAreaWidgetContents->height();
     setMaximumSize(w,h);
-    //resize(w,h);
-    //LoadAttribs();
 }
 
 void VstPluginWindow::resizeEvent ( QResizeEvent * event )

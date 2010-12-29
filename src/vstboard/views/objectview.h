@@ -38,7 +38,6 @@ namespace View {
     public:
         explicit ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
         virtual ~ObjectView();
-        void setPen(const QPen &pen);
 
         virtual void SetModelIndex(QPersistentModelIndex index);
         virtual void UpdateModelIndex();
@@ -66,7 +65,7 @@ namespace View {
 
         QGraphicsSimpleTextItem *titleText;
         QGraphicsRectItem *border;
-        QGraphicsPixmapItem *backgroundImg;
+//        QGraphicsPixmapItem *backgroundImg;
         QGraphicsRectItem *selectBorder;
         QGraphicsPixmapItem *errorMessage;
 
