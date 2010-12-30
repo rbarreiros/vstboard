@@ -54,14 +54,17 @@ bool Gui::open(void* ptr)
 //    win->setMinimumSize(win->size());
 
     widget->show();
-
+    myWindow->readSettings();
     clientResize(static_cast<HWND>(ptr), widget->width(), widget->height());
     return true;
 }
 
 void Gui::close()
 {
-    myWindow->setParent(0);
+    if(myWindow) {
+        myWindow->writeSettings();
+        myWindow->setParent(0);
+    }
     if(widget) {
         delete widget;
         widget=0;

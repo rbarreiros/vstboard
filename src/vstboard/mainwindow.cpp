@@ -135,6 +135,21 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     myHost->Open();
 
     ui->treeHostModel->setModel(myHost->GetModel());
+
+    //load default setup file
+    currentSetupFile = ConfigDialog::defaultSetupFile();
+    if(!currentSetupFile.isEmpty()) {
+        if(!SetupFile::LoadFromFile(myHost,currentSetupFile))
+            currentSetupFile = "";
+    }
+
+    //load default project file
+    currentProjectFile = ConfigDialog::defaultProjectFile();
+    if(!currentProjectFile.isEmpty()) {
+        if(!ProjectFile::LoadFromFile(myHost,currentProjectFile))
+            currentProjectFile = "";
+    }
+
 }
 
 MainWindow::~MainWindow()
@@ -614,23 +629,7 @@ void MainWindow::readSettings()
 
     ui->Programs->readSettings();
 
-
-    //load default setup file
-    currentSetupFile = ConfigDialog::defaultSetupFile();
-    if(!currentSetupFile.isEmpty()) {
-        if(!SetupFile::LoadFromFile(myHost,currentSetupFile))
-            currentSetupFile = "";
-    }
-
-    //load default project file
-    currentProjectFile = ConfigDialog::defaultProjectFile();
-    if(!currentProjectFile.isEmpty()) {
-        if(!ProjectFile::LoadFromFile(myHost,currentProjectFile))
-            currentProjectFile = "";
-    }
-
     updateRecentFileActions();
-
 }
 
 void MainWindow::resetSettings()
@@ -669,7 +668,7 @@ void MainWindow::resetSettings()
 
     tabifyDockWidget(ui->dockTools,ui->dockMidiDevices);
     tabifyDockWidget(ui->dockMidiDevices,ui->dockAudioDevices);
-    tabifyDockWidget(ui->dockAudioDevices,ui->dockVstBrowser);
+//    tabifyDockWidget(ui->dockAudioDevices,ui->dockVstBrowser);
 
     tabifyDockWidget(ui->dockHostModel,ui->dockSolver);
 
@@ -790,6 +789,7 @@ void MainWindow::groupParkingModelChanges(QStandardItemModel *model)
 void MainWindow::on_actionRefresh_Audio_devices_triggered()
 {
     ui->treeAudioInterfaces->setModel(myHost->audioDevices->GetModel());
+    ui->treeAudioInterfaces->expand( myHost->audioDevices->AsioIndex );
 }
 
 void MainWindow::on_actionRefresh_Midi_devices_triggered()

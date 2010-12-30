@@ -97,7 +97,6 @@ gui.cpp \
 connectables/vstaudiodevicein.cpp \
 connectables/vstaudiodeviceout.cpp \
 connectables/mididevice.cpp \
-connectables/hostcontroller.cpp \
 ../vstboard/views/connectablepinview.cpp \
 ../../libs/vstsdk2.4/public.sdk/source/vst2.x/audioeffectx.cpp \
 ../../libs/vstsdk2.4/public.sdk/source/vst2.x/audioeffect.cpp \
@@ -170,7 +169,8 @@ connectables/hostcontroller.cpp \
     ../vstboard/views/cursorview.cpp \
     ../vstboard/mainwindow.cpp \
     ../vstboard/views/configdialog.cpp \
-    ../vstboard/views/maingraphicsview.cpp
+    ../vstboard/views/maingraphicsview.cpp \
+    ../vstboard/connectables/hostcontroller.cpp
 
 
 HEADERS  += \

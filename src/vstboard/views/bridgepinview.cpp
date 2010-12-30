@@ -58,7 +58,7 @@ void BridgePinView::updateVu()
     if(value<.0f)
         return;
 
-    value-=.1f;
+    value-=.3f;
     if(value<.0f) {
         value=-1.0f;
         vuValue->setBrush(Qt::NoBrush);
@@ -80,7 +80,7 @@ void BridgePinView::updateVu()
             c=Qt::darkGray;
             break;
     }
-    if(value<0.7)
-        c.setAlphaF( value/0.7 );
+//    if(value<0.5)
+//        c.setAlphaF( value/0.5 );
     vuValue->setBrush(c);
 }

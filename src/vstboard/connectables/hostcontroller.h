@@ -40,7 +40,6 @@ namespace Connectables {
     public:
         explicit HostController(MainHost *myHost,int index);
         void Render();
-        void MidiMsgFromInput(long msg);
 
     protected:
         QList<QVariant> listTempo;
@@ -50,8 +49,6 @@ namespace Connectables {
         QList<QVariant> listGrp;
 
         bool tempoChanged;
-        bool midiProgChanged;
-        int prog;
         bool progChanged;
         bool grpChanged;
 

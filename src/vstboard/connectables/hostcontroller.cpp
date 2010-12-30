@@ -28,8 +28,6 @@ using namespace Connectables;
 HostController::HostController(MainHost *myHost,int index):
     Object(myHost,index, ObjectInfo(NodeType::object, ObjType::HostController, tr("HostController") ) ),
     tempoChanged(false),
-    midiProgChanged(false),
-    prog(0),
     progChanged(false),
     grpChanged(false)
 {
@@ -51,8 +49,6 @@ HostController::HostController(MainHost *myHost,int index):
         for(int i=0;i<128;i++) {
             listGrp << i;
         }
-
-    listMidiPinIn->ChangeNumberOfPins(1);
 
     int tempo=120;
     int sign1=4;
@@ -86,34 +82,20 @@ void HostController::Render()
     if(tempoChanged) {
         tempoChanged=false;
 
-        int tempo = static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(Param_Tempo))->GetVariantValue().toInt();
-        int sign1 = static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(Param_Sign1))->GetVariantValue().toInt();
-        int sign2 = static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(Param_Sign2))->GetVariantValue().toInt();
+        int tempo = static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Tempo))->GetVariantValue().toInt();
+        int sign1 = static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Sign1))->GetVariantValue().toInt();
+        int sign2 = static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Sign2))->GetVariantValue().toInt();
 
         emit tempoChange(tempo,sign1,sign2);
     }
 
-    if(midiProgChanged) {
-        midiProgChanged=false;
-        emit progChange(prog);
-    }
-
     if(progChanged) {
         progChanged=false;
-        emit progChange( static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(Param_Prog))->GetVariantValue().toInt() );
+        emit progChange( static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Prog))->GetVariantValue().toInt() );
     }
     if(grpChanged) {
         grpChanged=false;
-        emit grpChange( static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(Param_Group))->GetVariantValue().toInt() );
-    }
-}
-
-void HostController::MidiMsgFromInput(long msg)
-{
-    int command = Pm_MessageStatus(msg) & MidiConst::codeMask;
-    if (command == MidiConst::prog) {
-        prog = Pm_MessageData1(msg);
-        midiProgChanged=true;
+        emit grpChange( static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Group))->GetVariantValue().toInt() );
     }
 }
 

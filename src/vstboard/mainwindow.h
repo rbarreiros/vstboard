@@ -43,6 +43,7 @@ public:
     MainWindow(MainHost * myHost, QWidget *parent = 0);
     ~MainWindow();
     void readSettings();
+    void writeSettings();
     bool openedPrompt;
 
     View::SceneView *mySceneView;
@@ -65,7 +66,6 @@ private:
     bool userWantsToUnloadProject();
     bool userWantsToUnloadSetup();
     void BuildListTools();
-    void writeSettings();
     void resetSettings();
     void updateRecentFileActions();
 

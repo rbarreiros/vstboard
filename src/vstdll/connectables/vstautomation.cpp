@@ -36,8 +36,10 @@ VstAutomation::VstAutomation(MainHost *myHost,int index) :
     for(int i=0;i<128;i++) {
         listValues << i;
     }
+
     ParameterPinIn *nbPin = new ParameterPinIn(this,FixedPinNumber::numberOfPins,VST_AUTOMATION_DEFAULT_NB_PINS,&listValues,true,tr("NbPins"));
     nbPin->SetAlwaysVisible(true);
+    nbPin->SetLimitsEnabled(false);
     listParameterPinIn->listPins.insert(FixedPinNumber::numberOfPins, nbPin);
 
     static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::learningMode))->SetAlwaysVisible(true);
