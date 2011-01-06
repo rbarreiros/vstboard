@@ -48,6 +48,7 @@ namespace vst
         CVSTHost();
         virtual ~CVSTHost();
 
+        void SetTimeInfo(const VstTimeInfo *info);
         void UpdateTimeInfo(double timer, int addSamples, double sampleRate);
 
         int loopLenght;

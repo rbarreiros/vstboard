@@ -26,23 +26,22 @@
 #define DEFAULT_INPUTS 1
 #define DEFAULT_OUTPUTS 1
 
-#include <QObject>
 #include <QtGui/QApplication>
 #include "mainwindow.h"
 #include "public.sdk/source/vst2.x/audioeffectx.h"
 #include "gui.h"
 #include "connectables/vstaudiodevicein.h"
 #include "connectables/vstaudiodeviceout.h"
-#include "connectables/mididevice.h"
+#include "connectables/vstmididevice.h"
 #include "connectables/vstautomation.h"
 
 AudioEffect* createEffectInstance (audioMasterCallback audioMaster);
 
 //-------------------------------------------------------------------------------------------------------
-class Vst : public QObject, public AudioEffectX
+class Vst : public AudioEffectX
 {
-Q_OBJECT
 public:
+
         Vst (audioMasterCallback audioMaster);
         ~Vst ();
 
@@ -75,10 +74,10 @@ public:
         bool removeAudioIn(Connectables::VstAudioDeviceIn *dev);
         bool removeAudioOut(Connectables::VstAudioDeviceOut *dev);
 
-        void addMidiIn(Connectables::MidiDevice *dev);
-        void addMidiOut(Connectables::MidiDevice *dev);
-        void removeMidiIn(Connectables::MidiDevice *dev);
-        void removeMidiOut(Connectables::MidiDevice *dev);
+        void addMidiIn(Connectables::VstMidiDevice *dev);
+        void addMidiOut(Connectables::VstMidiDevice *dev);
+        void removeMidiIn(Connectables::VstMidiDevice *dev);
+        void removeMidiOut(Connectables::VstMidiDevice *dev);
 
         void addVstAutomation(Connectables::VstAutomation *dev);
         void removeVstAutomation(Connectables::VstAutomation *dev);
@@ -103,8 +102,8 @@ protected:
 
         QList<Connectables::VstAudioDeviceIn*>lstAudioIn;
         QList<Connectables::VstAudioDeviceOut*>lstAudioOut;
-        QList<Connectables::MidiDevice*>lstMidiIn;
-        QList<Connectables::MidiDevice*>lstMidiOut;
+        QList<Connectables::VstMidiDevice*>lstMidiIn;
+        QList<Connectables::VstMidiDevice*>lstMidiOut;
         QList<Connectables::VstAutomation*>lstVstAutomation;
         QList<int>lstParameters;
 
@@ -116,8 +115,10 @@ protected:
 
         VstEvents *listEvnts;
 
-        long hostAcceptIOChanges;
+        bool hostAcceptIOChanges;
+        bool hostSendVstTimeInfo;
         bool opened;
+
 };
 
 

@@ -18,7 +18,7 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#define PROJECT_FILE_VERSION 8
+#define PROJECT_FILE_VERSION 9
 #define PROJECT_FILE_KEY 0x757b0a5d
 
 #include "projectfile.h"
@@ -53,14 +53,20 @@ bool ProjectFile::SaveToFile(MainHost *myHost,QString filePath)
         out << *myHost->groupContainer;
     }
 
-    myHost->mainWindow->mySceneView->viewProject->SaveProgram();
-    myHost->mainWindow->mySceneView->viewProgram->SaveProgram();
-    myHost->mainWindow->mySceneView->viewGroup->SaveProgram();
-    out << *myHost->mainWindow->mySceneView->viewProject;
-    out << *myHost->mainWindow->mySceneView->viewProgram;
-    out << *myHost->mainWindow->mySceneView->viewGroup;
-
     out << *myHost->programList;
+
+    if(myHost->mainWindow) {
+        out << (quint8)1;
+        myHost->mainWindow->mySceneView->viewProject->SaveProgram();
+        myHost->mainWindow->mySceneView->viewProgram->SaveProgram();
+        myHost->mainWindow->mySceneView->viewGroup->SaveProgram();
+
+        out << *myHost->mainWindow->mySceneView->viewProject;
+        out << *myHost->mainWindow->mySceneView->viewProgram;
+        out << *myHost->mainWindow->mySceneView->viewGroup;
+    } else {
+        out << (quint8)0;
+    }
 
     myHost->EnableSolverUpdate(true);
 
@@ -75,10 +81,11 @@ void ProjectFile::Clear(MainHost *myHost)
     myHost->SetupGroupContainer();
     myHost->EnableSolverUpdate(true);
 
-    myHost->mainWindow->mySceneView->viewProject->ClearPrograms();
-    myHost->mainWindow->mySceneView->viewProgram->ClearPrograms();
-    myHost->mainWindow->mySceneView->viewGroup->ClearPrograms();
-
+    if(myHost->mainWindow) {
+        myHost->mainWindow->mySceneView->viewProject->ClearPrograms();
+        myHost->mainWindow->mySceneView->viewProgram->ClearPrograms();
+        myHost->mainWindow->mySceneView->viewGroup->ClearPrograms();
+    }
     myHost->programList->BuildModel();
 }
 
@@ -135,7 +142,11 @@ bool ProjectFile::LoadFromFile(MainHost *myHost,QString filePath)
 
     myHost->objFactory->ResetSavedId();
 
-    if(version>7) {
+    in >> *myHost->programList;
+
+    quint8 gui;
+    in >> gui;
+    if(gui && myHost->mainWindow) {
         myHost->mainWindow->mySceneView->viewProject->SetProgram(EMPTY_PROGRAM);
         myHost->mainWindow->mySceneView->viewProgram->SetProgram(EMPTY_PROGRAM);
         myHost->mainWindow->mySceneView->viewGroup->SetProgram(EMPTY_PROGRAM);
@@ -144,8 +155,6 @@ bool ProjectFile::LoadFromFile(MainHost *myHost,QString filePath)
         in >> *myHost->mainWindow->mySceneView->viewProgram;
         in >> *myHost->mainWindow->mySceneView->viewGroup;
     }
-
-    in >> *myHost->programList;
 
     myHost->EnableSolverUpdate(true);
 

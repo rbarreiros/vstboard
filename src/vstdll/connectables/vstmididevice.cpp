@@ -18,49 +18,49 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#include "mididevice.h"
+#include "vstmididevice.h"
 #include "globals.h"
 #include "mainhost.h"
 #include "vst.h"
 
 using namespace Connectables;
 
-MidiDevice::MidiDevice(MainHost *myHost, int index, const ObjectInfo &info) :
-        Object(myHost,index, info),
-        queue(0)
+VstMidiDevice::VstMidiDevice(MainHost *myHost, int index, const ObjectInfo &info) :
+        Object(myHost,index, info)
 {
 }
 
-MidiDevice::~MidiDevice()
+VstMidiDevice::~VstMidiDevice()
 {
     Close();
 }
 
-void MidiDevice::Render()
+void VstMidiDevice::Render()
 {
     if(objInfo.inputs) {
-        PmEvent buffer;
         Lock();
 
-        while (Pm_Dequeue(queue, &buffer) == 1) {
+        foreach(long msg, midiQueue) {
 
             foreach(Pin *pin,listMidiPinOut->listPins) {
-                static_cast<MidiPinOut*>(pin)->SendMsg(PinMessage::MidiMsg,(void*)&buffer.message);
+                //static_cast<MidiPinOut*>(pin)->SendMsg(PinMessage::MidiMsg,(void*)&buffer.message);
+                static_cast<MidiPinOut*>(pin)->SendMsg(PinMessage::MidiMsg,(void*)&msg);
             }
         }
+        midiQueue.clear();
         Unlock();
     }
 }
 
-void MidiDevice::MidiMsgFromInput(long msg) {
+void VstMidiDevice::MidiMsgFromInput(long msg) {
     if(objInfo.outputs) {
         Lock();
-        Pm_Enqueue(queue,(void*)&msg);
+        midiQueue << msg;
         Unlock();
     }
 }
 
-bool MidiDevice::Close()
+bool VstMidiDevice::Close()
 {
     if(objInfo.inputs>0)
         myHost->myVstPlugin->removeMidiIn(this);
@@ -71,21 +71,13 @@ bool MidiDevice::Close()
     return Object::Close();
 }
 
-bool MidiDevice::Open()
+bool VstMidiDevice::Open()
 {
     if(objInfo.inputs>0)
         myHost->myVstPlugin->addMidiIn(this);
 
     if(objInfo.outputs>0)
         myHost->myVstPlugin->addMidiOut(this);
-
-
-
-    queue = Pm_QueueCreate(QUEUE_SIZE, sizeof(PmEvent));
-    if(!queue) {
-        debug("MidiDevice::Open can't create queue")
-                return false;
-    }
 
     listMidiPinOut->ChangeNumberOfPins(objInfo.inputs);
     listMidiPinIn->ChangeNumberOfPins(objInfo.outputs);

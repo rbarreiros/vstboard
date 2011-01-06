@@ -27,8 +27,7 @@
 using namespace Connectables;
 
 VstAudioDeviceIn::VstAudioDeviceIn(MainHost *myHost, int index, const ObjectInfo &info) :
-    Object(myHost,index, info),
-    bufferReady(false)
+    Object(myHost,index, info)
 {
 }
 
@@ -55,9 +54,6 @@ void VstAudioDeviceIn::Render()
 
 void VstAudioDeviceIn::SetBufferSize(unsigned long size)
 {
-    foreach(Pin *pin, listAudioPinIn->listPins) {
-        static_cast<AudioPinIn*>(pin)->buffer->SetSize(size);
-    }
     foreach(Pin *pin, listAudioPinOut->listPins) {
         static_cast<AudioPinOut*>(pin)->buffer->SetSize(size);
     }
@@ -74,17 +70,16 @@ bool VstAudioDeviceIn::Open()
     return true;
 }
 
-void VstAudioDeviceIn::SetBuffers(float **buf, int &cpt)
+void VstAudioDeviceIn::SetBuffers(float **buf, int &cpt, int sampleFrames)
 {
     foreach(Pin *pin, listAudioPinOut->listPins) {
-        static_cast<AudioPinIn*>(pin)->buffer->ResetStackCounter();
-        static_cast<AudioPinIn*>(pin)->buffer->SetPointer(buf[cpt]);
+        memcpy(static_cast<AudioPinIn*>(pin)->buffer->GetPointer(true),buf[cpt],sampleFrames*sizeof(float));
         cpt++;
     }
 }
 
 Pin* VstAudioDeviceIn::CreatePin(const ConnectionInfo &info)
 {
-    AudioPinOut *newPin = new AudioPinOut(this,info.pinNumber,true);
+    AudioPinOut *newPin = new AudioPinOut(this,info.pinNumber);
     return newPin;
 }

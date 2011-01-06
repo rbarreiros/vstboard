@@ -411,6 +411,7 @@ void VstPlugin::CreateEditorWindow()
     static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::learningMode))->SetAlwaysVisible(true);
 
     editorWnd = new View::VstPluginWindow(myHost->mainWindow);
+
     connect(this,SIGNAL(CloseEditorWindow()),
             editorWnd,SLOT(hide()),
             Qt::QueuedConnection);
@@ -518,6 +519,25 @@ void VstPlugin::MidiMsgFromInput(long msg)
     midiEventsMutex.unlock();
 }
 
+void VstPlugin::processEvents(VstEvents* events)
+{
+    VstEvent *evnt=0;
+
+    for(int i=0; i<events->numEvents; i++) {
+        evnt=events->events[i];
+        if( evnt->type==kVstMidiType) {
+            VstMidiEvent *midiEvnt = (VstMidiEvent*)evnt;
+
+            long msg;
+            memcpy(&msg, midiEvnt->midiData, sizeof(midiEvnt->midiData));
+            MidiPinOut *pin = static_cast<MidiPinOut*>(listMidiPinOut->GetPin(0,true));
+            pin->SendMsg(PinMessage::MidiMsg, &msg);
+        } else {
+            debug("other vst event")
+        }
+    }
+}
+
 long VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr, float opt, long currentReturnCode)
 {
     switch(opcode) {
@@ -549,6 +569,11 @@ long VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr,
 
         case audioMasterIdle : //3
             QApplication::processEvents();
+            break;
+
+        case audioMasterProcessEvents : //8
+            processEvents((VstEvents*)ptr);
+            return 1L;
             break;
 
         case audioMasterGetNumAutomatableParameters : //11

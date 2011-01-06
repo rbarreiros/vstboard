@@ -19,12 +19,11 @@
 ******************************************************************************/
 
 #include "mainhost.h"
-#include "connectables/mididevice.h"
 #include "mainwindow.h"
 #include "connectables/container.h"
-//#include "mainconfig.h"
 
 #ifndef VST_PLUGIN
+    #include "connectables/mididevice.h"
     #include "connectables/audiodevice.h"
     #include "audiodevices.h"
 #else
@@ -40,6 +39,7 @@ MainHost::MainHost(Vst *myVstPlugin, QObject *parent) :
     solver(new PathSolver(this)),
     filePass(0),
     objFactory(new Connectables::ObjectFactory(this)),
+    mainWindow(0),
     myVstPlugin(myVstPlugin),
     solverNeedAnUpdate(false),
     solverUpdateEnabled(true),
@@ -90,7 +90,6 @@ MainHost::MainHost(Vst *myVstPlugin, QObject *parent) :
 
 MainHost::~MainHost()
 {
-    debug2(<< "delete MainHost" << hex << (long)this)
     EnableSolverUpdate(false);
 
     updateViewTimer->stop();
@@ -626,7 +625,9 @@ void MainHost::Render(unsigned long samples)
         samples=bufferSize;
 
 #ifdef VSTSDK
-    vstHost->UpdateTimeInfo(timeFromStart.elapsed(), samples, sampleRate);
+#ifndef VST_PLUGIN
+        vstHost->UpdateTimeInfo(timeFromStart.elapsed(), samples, sampleRate);
+#endif
 #endif
 
     mutexRender.lock();

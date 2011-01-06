@@ -18,7 +18,7 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#define SETUP_FILE_VERSION 6
+#define SETUP_FILE_VERSION 7
 #define SETUP_FILE_KEY 0x7575e711
 
 #include "setupfile.h"
@@ -48,8 +48,13 @@ bool SetupFile::SaveToFile(MainHost *myHost, QString filePath)
         out << *myHost->hostContainer;
     }
 
-    myHost->mainWindow->mySceneView->viewHost->SaveProgram();
-    out << *myHost->mainWindow->mySceneView->viewHost;
+    if(myHost->mainWindow) {
+        out << (quint8)1;
+        myHost->mainWindow->mySceneView->viewHost->SaveProgram();
+        out << *myHost->mainWindow->mySceneView->viewHost;
+    } else {
+        out << (quint8)0;
+    }
 
     myHost->EnableSolverUpdate(true);
 
@@ -61,7 +66,9 @@ void SetupFile::Clear(MainHost *myHost)
     myHost->EnableSolverUpdate(false);
     myHost->SetupHostContainer();
     myHost->EnableSolverUpdate(true);
-    myHost->mainWindow->mySceneView->viewHost->ClearPrograms();
+    if(myHost->mainWindow) {
+        myHost->mainWindow->mySceneView->viewHost->ClearPrograms();
+    }
 }
 
 bool SetupFile::LoadFromFile(MainHost *myHost, QString filePath)
@@ -111,11 +118,14 @@ bool SetupFile::LoadFromFile(MainHost *myHost, QString filePath)
 
     myHost->objFactory->ResetSavedId();
 
-    if(version>5) {
+    quint8 gui;
+    in >> gui;
+    if(gui && myHost->mainWindow) {
         myHost->mainWindow->mySceneView->viewHost->SetProgram(EMPTY_PROGRAM);
         in >> *myHost->mainWindow->mySceneView->viewHost;
         myHost->mainWindow->mySceneView->viewHost->SetProgram(0);
     }
+
     myHost->EnableSolverUpdate(true);
     return true;
 }

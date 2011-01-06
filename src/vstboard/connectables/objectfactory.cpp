@@ -22,12 +22,14 @@
 #ifndef VST_PLUGIN
     #include "audiodevicein.h"
     #include "audiodeviceout.h"
+    #include "mididevice.h"
 #else
     #include "connectables/vstaudiodevicein.h"
     #include "connectables/vstaudiodeviceout.h"
     #include "connectables/vstautomation.h"
+    #include "connectables/vstmididevice.h"
 #endif
-#include "mididevice.h"
+
 #include "midisender.h"
 #include "miditoautomation.h"
 #include "hostcontroller.h"
@@ -198,6 +200,10 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
                 case ObjType::AudioInterfaceOut:
                     obj = new AudioDeviceOut(myHost,objId, info);
                     break;
+
+                case ObjType::MidiInterface:
+                    obj = new MidiDevice(myHost,objId, info);
+                    break;
 #else
             case ObjType::AudioInterfaceIn:
                 obj = new VstAudioDeviceIn(myHost,objId, info);
@@ -210,10 +216,12 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
             case ObjType::VstAutomation:
                 obj = new VstAutomation(myHost,objId);
                 break;
+
+            case ObjType::MidiInterface:
+                obj = new VstMidiDevice(myHost,objId, info);
+                break;
 #endif
-                case ObjType::MidiInterface:
-                    obj = new MidiDevice(myHost,objId, info);
-                    break;
+
 
                 case ObjType::MidiSender:
                     obj = new MidiSender(myHost,objId);

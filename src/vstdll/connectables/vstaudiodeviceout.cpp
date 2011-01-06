@@ -44,13 +44,6 @@ bool VstAudioDeviceOut::Close()
     return true;
 }
 
-void VstAudioDeviceOut::Render()
-{
-    foreach(Pin *pin, listAudioPinIn->listPins) {
-        static_cast<AudioPinIn*>(pin)->buffer->ConsumeStack();
-    }
-}
-
 void VstAudioDeviceOut::SetBufferSize(unsigned long size)
 {
     foreach(Pin *pin, listAudioPinIn->listPins) {
@@ -69,16 +62,17 @@ bool VstAudioDeviceOut::Open()
     return true;
 }
 
-void VstAudioDeviceOut::SetBuffers(float **buf, int &cpt)
+void VstAudioDeviceOut::GetBuffers(float **buf, int &cpt, int sampleFrames)
 {
     foreach(Pin *pin, listAudioPinIn->listPins) {
-        static_cast<AudioPinIn*>(pin)->buffer->SetPointer(buf[cpt],true);
+        AudioBuffer *abuf= static_cast<AudioPinIn*>(pin)->buffer;
+        memcpy((float*)buf[cpt], (float*)abuf->ConsumeStack(), sampleFrames*sizeof(float));
         cpt++;
     }
 }
 
 Pin* VstAudioDeviceOut::CreatePin(const ConnectionInfo &info)
 {
-    AudioPinIn *newPin = new AudioPinIn(this,info.pinNumber,true);
+    AudioPinIn *newPin = new AudioPinIn(this,info.pinNumber);
     return newPin;
 }

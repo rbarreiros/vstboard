@@ -21,7 +21,6 @@
 #include "midipinin.h"
 #include "pin.h"
 #include "object.h"
-#include "mididevice.h"
 #include "../globals.h"
 
 using namespace Connectables;

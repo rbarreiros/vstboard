@@ -16,10 +16,6 @@ DEFINES += QT_NODLL
 
 DEFINES += VST_PLUGIN
 
-PORTMIDI_PATH 	= ../libs/portmidi
-INCLUDEPATH += $$top_srcdir/$$PORTMIDI_PATH/pm_common
-INCLUDEPATH += $$top_srcdir/$$PORTMIDI_PATH/porttime
-
 QTWINMIGRATE_PATH = ../libs/qtwinmigrate
 
 DEFINES += APP_NAME=\\\"VstBoardPlugin\\\"
@@ -46,11 +42,7 @@ TARGET      =$$TARGET
 
 win32 {
     LIBS += -lwinmm
-#    LIBS += -luser32
     LIBS += -ladvapi32
-#    LIBS += -lole32
-#    LIBS += -lsetupapi
-#    LIBS += -ldsound
 }
 
 win32-g++ {
@@ -76,10 +68,6 @@ win32-msvc* {
 
 QT       += core gui
 
-#LIBS += -lqtmain
-
-#LIBS += -L$$top_destdir -lportmidi
-
 include($$top_srcdir/$$QTWINMIGRATE_PATH/src/qtwinmigrate.pri)
 
 vstsdk {
@@ -96,7 +84,6 @@ main.cpp \
 gui.cpp \
 connectables/vstaudiodevicein.cpp \
 connectables/vstaudiodeviceout.cpp \
-connectables/mididevice.cpp \
 ../vstboard/views/connectablepinview.cpp \
 ../../libs/vstsdk2.4/public.sdk/source/vst2.x/audioeffectx.cpp \
 ../../libs/vstsdk2.4/public.sdk/source/vst2.x/audioeffect.cpp \
@@ -155,12 +142,12 @@ connectables/mididevice.cpp \
 ../vstboard/connectables/bridge.cpp \
 ../vstboard/views/aboutdialog.cpp \
     vst.cpp \
-    ../../libs/portmidi/pm_common/portmidi.c \
-    ../../libs/portmidi/pm_common/pmutil.c \
-    ../../libs/portmidi/pm_win/pmwin.c \
-    ../../libs/portmidi/porttime/porttime.c \
-    ../../libs/portmidi/porttime/ptwinmm.c \
-    ../../libs/portmidi/pm_win/pmwinmm.c \
+    #../../libs/portmidi/pm_common/portmidi.c \
+    #../../libs/portmidi/pm_common/pmutil.c \
+    #../../libs/portmidi/pm_win/pmwin.c \
+    #../../libs/portmidi/porttime/porttime.c \
+    #../../libs/portmidi/porttime/ptwinmm.c \
+    #../../libs/portmidi/pm_win/pmwinmm.c \
     ../vstboard/connectables/miditoautomation.cpp \
     ../vstboard/connectables/midisender.cpp \
     connectables/vstautomation.cpp \
@@ -170,14 +157,14 @@ connectables/mididevice.cpp \
     ../vstboard/mainwindow.cpp \
     ../vstboard/views/configdialog.cpp \
     ../vstboard/views/maingraphicsview.cpp \
-    ../vstboard/connectables/hostcontroller.cpp
+    ../vstboard/connectables/hostcontroller.cpp \
+    connectables/vstmididevice.cpp
 
 
 HEADERS  += \
 gui.h \
 connectables/vstaudiodevicein.h \
 connectables/vstaudiodeviceout.h \
-connectables/mididevice.h \
 ../vstboard/globals.h \
 ../vstboard/mainhost.h \
 ../vstboard/connectables/midisender.h \
@@ -246,7 +233,8 @@ connectables/mididevice.h \
     ../vstboard/views/minmaxpinview.h \
     ../vstboard/views/cursorview.h \
     ../vstboard/mainwindow.h \
-    ../vstboard/views/maingraphicsview.h
+    ../vstboard/views/maingraphicsview.h \
+    connectables/vstmididevice.h
 
 FORMS += \
 ../vstboard/views/configdialog.ui \

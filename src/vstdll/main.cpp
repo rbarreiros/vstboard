@@ -65,17 +65,19 @@ extern "C" {
 #include <windows.h>
 #include <QMfcApp>
 
-//extern "C" {
+extern "C" {
 BOOL WINAPI DllMain( HINSTANCE hInst, DWORD dwReason, LPVOID /*lpvReserved*/ )
 {
     static bool ownApplication = FALSE;
      if ( dwReason == DLL_PROCESS_ATTACH )
          ownApplication = QMfcApp::pluginInstance( hInst );
-     if ( dwReason == DLL_PROCESS_DETACH && ownApplication )
+     if ( dwReason == DLL_PROCESS_DETACH && ownApplication ) {
          delete qApp;
+     }
 
     return TRUE;
-} // extern "C"
+}
+}// extern "C"
 
 #endif
 

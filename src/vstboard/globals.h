@@ -169,6 +169,14 @@ namespace FixedPinNumber {
     };
 }
 
+#define MidiMessage(status, data1, data2) \
+         ((((data2) << 16) & 0xFF0000) | \
+          (((data1) << 8) & 0xFF00) | \
+          ((status) & 0xFF))
+#define MidiStatus(msg) ((msg) & 0xFF)
+#define MidiData1(msg) (((msg) >> 8) & 0xFF)
+#define MidiData2(msg) (((msg) >> 16) & 0xFF)
+
 namespace MidiConst {
      enum Enum {
         codeMask = 0xf0,

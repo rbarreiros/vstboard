@@ -20,7 +20,6 @@
 
 #include "midisender.h"
 #include "../globals.h"
-#include "portmidi.h"
 
 using namespace Connectables;
 
@@ -85,7 +84,7 @@ void MidiSender::Render()
 
     status |= channel;
 
-    midiMsg = Pm_Message(status, value1, value2);
+    midiMsg = MidiMessage(status, value1, value2);
 
     listMidiPinOut->GetPin(0)->SendMsg(PinMessage::MidiMsg, (void*)&midiMsg);
 }

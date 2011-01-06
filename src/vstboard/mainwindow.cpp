@@ -154,7 +154,6 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    debug2(<< "delete MainWindow" << hex << (long)this)
     if(ui)
         delete ui;
 }

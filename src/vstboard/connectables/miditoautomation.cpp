@@ -22,7 +22,6 @@
 #include "midipinin.h"
 #include "../globals.h"
 #include "mainhost.h"
-#include "portmidi.h"
 
 using namespace Connectables;
 
@@ -47,8 +46,6 @@ MidiToAutomation::MidiToAutomation(MainHost *myHost,int index) :
 
 void MidiToAutomation::Render()
 {
-//    QMutexLocker l(&objMutex);
-
     if(listChanged.isEmpty())
         return;
 
@@ -64,39 +61,39 @@ void MidiToAutomation::Render()
 
 void MidiToAutomation::MidiMsgFromInput(long msg)
 {
-    int command = Pm_MessageStatus(msg) & MidiConst::codeMask;
+    int command = MidiStatus(msg) & MidiConst::codeMask;
 
     switch(command) {
         case MidiConst::ctrl: {
-            ChangeValue(Pm_MessageData1(msg),Pm_MessageData2(msg));
+            ChangeValue(MidiData1(msg),MidiData2(msg));
             break;
         }
         case MidiConst::prog : {
-            ChangeValue(para_prog, Pm_MessageData1(msg) );
+            ChangeValue(para_prog, MidiData1(msg) );
             break;
         }
         case MidiConst::noteOn : {
-            ChangeValue(para_velocity, Pm_MessageData2(msg) );
-            ChangeValue(para_notes+Pm_MessageData1(msg), Pm_MessageData2(msg) );
-            ChangeValue(para_notepitch, Pm_MessageData1(msg) );
+            ChangeValue(para_velocity, MidiData2(msg) );
+            ChangeValue(para_notes+MidiData1(msg), MidiData2(msg) );
+            ChangeValue(para_notepitch, MidiData1(msg) );
             break;
         }
         case MidiConst::noteOff : {
-            ChangeValue(para_notepitch, Pm_MessageData1(msg) );
-            ChangeValue(para_notes+Pm_MessageData1(msg), Pm_MessageData2(msg) );
+            ChangeValue(para_notepitch, MidiData1(msg) );
+            ChangeValue(para_notes+MidiData1(msg), MidiData2(msg) );
             break;
         }
         case MidiConst::pitchbend : {
-            ChangeValue(para_pitchbend, Pm_MessageData2(msg) );
+            ChangeValue(para_pitchbend, MidiData2(msg) );
             break;
         }
         case MidiConst::chanpressure : {
-            ChangeValue(para_chanpress, Pm_MessageData1(msg) );
+            ChangeValue(para_chanpress, MidiData1(msg) );
             break;
         }
         case MidiConst::aftertouch : {
-            ChangeValue(para_velocity, Pm_MessageData1(msg) );
-            ChangeValue(para_aftertouch, Pm_MessageData2(msg) );
+            ChangeValue(para_velocity, MidiData1(msg) );
+            ChangeValue(para_aftertouch, MidiData2(msg) );
         }
     }
 }

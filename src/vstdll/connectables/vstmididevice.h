@@ -18,35 +18,33 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#ifndef MIDIDEVICE_H
-#define MIDIDEVICE_H
+#ifndef VSTMIDIDEVICE_H
+#define VSTMIDIDEVICE_H
 
 #include "precomp.h"
-#include "portmidi.h"
-#include "pmutil.h"
 #include "connectables/object.h"
 
 #define QUEUE_SIZE 1024
 
 namespace Connectables {
 
-    class MidiDevice : public Object
+    class VstMidiDevice : public Object
     {
     Q_OBJECT
 
     public:
-        MidiDevice(MainHost *myHost, int index, const ObjectInfo &info);
-        ~MidiDevice();
+        VstMidiDevice(MainHost *myHost, int index, const ObjectInfo &info);
+        ~VstMidiDevice();
         bool Open();
         bool Close();
         void Render();
         void MidiMsgFromInput(long msg);
 
-        PmQueue *queue;
+        QList<long>midiQueue;
 
     signals:
         void SendMsg(int msgType,void *data=0);
     };
 
 }
-#endif // MIDIDEVICE_H
+#endif // VSTMIDIDEVICE_H

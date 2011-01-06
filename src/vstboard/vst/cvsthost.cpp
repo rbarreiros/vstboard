@@ -83,6 +83,13 @@ CVSTHost::~CVSTHost()
         pHost = NULL;                         /* remove ourselves from pointer     */
 }
 
+void CVSTHost::SetTimeInfo(const VstTimeInfo *info) {
+    if (!info)
+        return;
+
+    vstTimeInfo = *info;
+}
+
 void CVSTHost::UpdateTimeInfo(double timer, int addSamples, double sampleRate)
 {
     vstTimeInfo.sampleRate = sampleRate;
@@ -122,7 +129,6 @@ void CVSTHost::UpdateTimeInfo(double timer, int addSamples, double sampleRate)
 
     //start of last bar
     vstTimeInfo.barStartPos = barLengthq*floor(vstTimeInfo.ppqPos/barLengthq);
-
 }
 
 /*****************************************************************************/
@@ -210,6 +216,7 @@ VstIntPtr VSTCALLBACK CVSTHost::AudioMasterCallback(AEffect *effect, VstInt32 op
         case audioMasterAutomate : //0
         case audioMasterCurrentId : //2
         case audioMasterIdle : //3
+        case audioMasterProcessEvents : //8
         case audioMasterGetNumAutomatableParameters : //11
         case audioMasterIOChanged : //13
         case audioMasterSizeWindow : //15

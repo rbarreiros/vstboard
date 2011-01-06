@@ -22,69 +22,32 @@
 #include "connectables/connectioninfo.h"
 #include "connectables/objectinfo.h"
 #include "mainhost.h"
-#include "portmidi.h"
-#include "pmutil.h"
 #include "audioeffectx.h"
+#include "projectfile/setupfile.h"
+#include "projectfile/projectfile.h"
+#include "views/configdialog.h"
 
 AudioEffect* createEffectInstance (audioMasterCallback audioMaster)
 {
     return new Vst (audioMaster);
 }
 
-Vst::Vst (audioMasterCallback audioMaster)
-    : AudioEffectX (audioMaster, 1, 128),
+Vst::Vst (audioMasterCallback audioMaster) :
+    AudioEffectX (audioMaster, 1, 128),
     myApp(0),
     myHost(0),
     myWindow(0),
     bufferSize(0),
     listEvnts(0),
-    hostAcceptIOChanges(0),
+    hostAcceptIOChanges(false),
+    hostSendVstTimeInfo(false),
     opened(false)
 {
-//    VstInt32 ver = getMasterVersion();
-//    if(ver<2400) {
-//        QMessageBox msg;
-//        msg.setText(tr("host not supported (Vst version %1)").arg(ver));
-//        msg.exec();
-//    }
-
-    char str[64];
-    getHostVendorString(str);
-    getHostProductString(str);
-    //VstInt32 hostVer = getHostVendorVersion();
-
-   /* long hostSendVstEvents = canHostDo("sendVstEvents");
-    long hostSendVstMidiEvent = canHostDo("sendVstMidiEvent");
-    long hostSendVstTimeInfo = canHostDo("sendVstTimeInfo");
-    long hostReceiveVstEvents = canHostDo("receiveVstEvents");
-    long hostReceiveVstMidiEvents = canHostDo("receiveVstMidiEvents");
-    long hostReceiveVstTimeInfo = canHostDo("receiveVstTimeInfo");
-    long hostReportConnectionChanges = canHostDo("reportConnectionChanges");
-    */
-    hostAcceptIOChanges = canHostDo("acceptIOChanges");
-    /*
-    long hostSizeWindow = canHostDo("sizeWindow");
-    long hostAsyncProcessing = canHostDo("asyncProcessing");
-    long hostOffline = canHostDo("offline");
-    long hostSupplyIdle = canHostDo("supplyIdle");
-    long hostSupportShell = canHostDo("supportShell");
-    long hostOpenFileSelector = canHostDo("openFileSelector");
-    long hostEditFile = canHostDo("editFile");
-    long hostCloseFileSelector = canHostDo("closeFileSelector");
-*/
-
-    //cEffect.flags |= effFlagsIsSynth;
-
     setNumInputs (DEFAULT_INPUTS*2);
     setNumOutputs (DEFAULT_OUTPUTS*2);
     setUniqueID (kUniqueID);
     canProcessReplacing(true);
-    //        canDoubleReplacing ();
-
     vst_strncpy (programName, "Default", kVstMaxProgNameLen);	// default program name
-
-    qEditor = new Gui(this);
-    setEditor(qEditor);
 
     qRegisterMetaType<ConnectionInfo>("ConnectionInfo");
     qRegisterMetaType<ObjectInfo>("ObjectInfo");
@@ -94,36 +57,89 @@ Vst::Vst (audioMasterCallback audioMaster)
 
     qRegisterMetaTypeStreamOperators<ObjectInfo>("ObjectInfo");
 
-//    if(!qApp) {
-//        int argc=0;
-//        char *argv=0;
-//        myApp = new QApplication(argc,&argv);
-//      }
-
     QCoreApplication::setOrganizationName("CtrlBrk");
     QCoreApplication::setApplicationName(APP_NAME);
 
     myHost = new MainHost(this);
     myWindow = new MainWindow(myHost);
+    qEditor = new Gui(this);
+    setEditor(qEditor);
     qEditor->SetMainWindow(myWindow);
 }
 
 Vst::~Vst ()
 {
-    debug2(<< "delete Vst" << hex << (long)this)
-    Pm_Terminate();
-    myHost->mainWindow=0;
-    myWindow->setParent(0);
-    qApp->removePostedEvents(myWindow);
-    delete myWindow;
-    qApp->removePostedEvents(myHost);
-    delete myHost;
-    qApp->removePostedEvents(qEditor);
-//    setEditor(0);
-//    delete qEditor;
-//    if(myApp)
-//        delete myApp;
+    if(myHost) {
+        delete myHost;
+        myHost=0;
+    }
+}
 
+
+void Vst::open()
+{
+    /* char str[64];
+     getHostVendorString(str);
+     getHostProductString(str);
+     */
+     //VstInt32 hostVer = getHostVendorVersion();
+
+    // long hostSendVstEvents = canHostDo("sendVstEvents");
+    // long hostSendVstMidiEvent = canHostDo("sendVstMidiEvent");
+     hostSendVstTimeInfo = (bool)canHostDo((char *)"sendVstTimeInfo");
+    /* long hostReceiveVstEvents = canHostDo("receiveVstEvents");
+     long hostReceiveVstMidiEvents = canHostDo("receiveVstMidiEvents");
+     long hostReceiveVstTimeInfo = canHostDo("receiveVstTimeInfo");
+     long hostReportConnectionChanges = canHostDo("reportConnectionChanges");
+     */
+     hostAcceptIOChanges = (bool)canHostDo((char *)"acceptIOChanges");
+     /*
+     long hostSizeWindow = canHostDo("sizeWindow");
+     long hostAsyncProcessing = canHostDo("asyncProcessing");
+     long hostOffline = canHostDo("offline");
+     long hostSupplyIdle = canHostDo("supplyIdle");
+     long hostSupportShell = canHostDo("supportShell");
+     long hostOpenFileSelector = canHostDo("openFileSelector");
+     long hostEditFile = canHostDo("editFile");
+     long hostCloseFileSelector = canHostDo("closeFileSelector");
+ */
+
+     myHost->Open();
+
+     //load default setup file
+     QString currentSetupFile = ConfigDialog::defaultSetupFile();
+     if(!currentSetupFile.isEmpty()) {
+         if(!SetupFile::LoadFromFile(myHost,currentSetupFile))
+             currentSetupFile = "";
+     }
+
+     //load default project file
+     QString currentProjectFile = ConfigDialog::defaultProjectFile();
+     if(!currentProjectFile.isEmpty()) {
+         if(!ProjectFile::LoadFromFile(myHost,currentProjectFile))
+             currentProjectFile = "";
+     }
+
+    opened=true;
+    myWindow->readSettings();
+}
+
+void Vst::close()
+{
+    foreach(Connectables::VstAudioDeviceIn* dev, lstAudioIn) {
+        removeAudioIn(dev);
+    }
+    foreach(Connectables::VstAudioDeviceOut* dev, lstAudioOut) {
+        removeAudioOut(dev);
+    }
+
+    opened=false;
+
+    if(myHost)
+        myHost->mainWindow=0;
+    myWindow->setParent(0);
+    qEditor->SetMainWindow(0);
+    delete myWindow;
 }
 
 bool Vst::addAudioIn(Connectables::VstAudioDeviceIn *dev)
@@ -139,9 +155,7 @@ bool Vst::addAudioIn(Connectables::VstAudioDeviceIn *dev)
     lstAudioIn << dev;
     dev->setObjectName( QString("Vst audio in %1").arg(lstAudioIn.count()) );
     setNumInputs(lstAudioIn.count()*2);
-
-    if(hostAcceptIOChanges)
-        ioChanged();
+    ioChanged();
     return true;
 }
 
@@ -158,9 +172,7 @@ bool Vst::addAudioOut(Connectables::VstAudioDeviceOut *dev)
     lstAudioOut << dev;
     dev->setObjectName( QString("Vst audio out %1").arg(lstAudioOut.count()) );
     setNumOutputs(lstAudioOut.count()*2);
-
-    if(hostAcceptIOChanges)
-        ioChanged();
+    ioChanged();
     return true;
 }
 
@@ -184,22 +196,22 @@ bool Vst::removeAudioOut(Connectables::VstAudioDeviceOut *dev)
     return true;
 }
 
-void Vst::addMidiIn(Connectables::MidiDevice *dev)
+void Vst::addMidiIn(Connectables::VstMidiDevice *dev)
 {
     lstMidiIn << dev;
  }
 
-void Vst::addMidiOut(Connectables::MidiDevice *dev)
+void Vst::addMidiOut(Connectables::VstMidiDevice *dev)
 {
     lstMidiOut << dev;
 }
 
-void Vst::removeMidiIn(Connectables::MidiDevice *dev)
+void Vst::removeMidiIn(Connectables::VstMidiDevice *dev)
 {
     lstMidiIn.removeAll(dev);
 }
 
-void Vst::removeMidiOut(Connectables::MidiDevice *dev)
+void Vst::removeMidiOut(Connectables::VstMidiDevice *dev)
 {
     lstMidiOut.removeAll(dev);
 }
@@ -296,8 +308,8 @@ VstInt32 Vst::canDo(char* text)
             (!strcmp(text, "sendVstEvents")) ||
             (!strcmp(text, "sendVstMidiEvent")) ||
             (!strcmp(text, "receiveVstEvents")) ||
-            (!strcmp(text, "receiveVstMidiEvent") ||
-            (!strcmp(text, "receiveVstTimeInfo")))
+            (!strcmp(text, "receiveVstMidiEvent")) ||
+            (!strcmp(text, "receiveVstTimeInfo"))
          )
          return 1;
 
@@ -314,8 +326,10 @@ VstInt32 Vst::processEvents(VstEvents* events)
         if( evnt->type==kVstMidiType) {
             VstMidiEvent *midiEvnt = (VstMidiEvent*)evnt;
 
-            foreach(Connectables::MidiDevice *dev, lstMidiIn) {
-                Pm_Enqueue(dev->queue, midiEvnt->midiData);
+            foreach(Connectables::VstMidiDevice *dev, lstMidiIn) {
+                long msg;
+                memcpy(&msg, midiEvnt->midiData, sizeof(midiEvnt->midiData));
+                dev->midiQueue << msg;
             }
         } else {
             debug("other vst event")
@@ -327,27 +341,24 @@ VstInt32 Vst::processEvents(VstEvents* events)
 
 void Vst::processReplacing (float** inputs, float** outputs, VstInt32 sampleFrames)
 {
+    myHost->vstHost->SetTimeInfo( getTimeInfo( -1));
+
     if(bufferSize!=sampleFrames) {
         myHost->SetBufferSize((unsigned long)sampleFrames);
         bufferSize=sampleFrames;
     }
 
-    mutexDevices.lock();
-
     int cpt=0;
     foreach(Connectables::VstAudioDeviceIn* dev, lstAudioIn) {
-        dev->SetBuffers(inputs,cpt);
+        dev->SetBuffers(inputs,cpt,sampleFrames);
     }
-
-    cpt=0;
-    foreach(Connectables::VstAudioDeviceOut* dev, lstAudioOut) {
-        dev->SetBuffers(outputs,cpt);
-    }
-
-    mutexDevices.unlock();
 
     myHost->Render();
 
+    cpt=0;
+    foreach(Connectables::VstAudioDeviceOut* dev, lstAudioOut) {
+        dev->GetBuffers(outputs,cpt,sampleFrames);
+    }
 
     //free last buffer
     if(listEvnts) {
@@ -355,55 +366,37 @@ void Vst::processReplacing (float** inputs, float** outputs, VstInt32 sampleFram
         listEvnts = 0;
     }
 
-    PmEvent msg;
     cpt=0;
-    foreach(Connectables::MidiDevice *dev, lstMidiOut) {
-        while (!Pm_QueueEmpty(dev->queue)) {
+    foreach(Connectables::VstMidiDevice *dev, lstMidiOut) {
+        foreach(long msg, dev->midiQueue) {
 
             //allocate a new buffer
             if(!listEvnts)
                 listEvnts = (VstEvents*)malloc(sizeof(VstEvents) + sizeof(VstEvents*)*(VST_EVENT_BUFFER_SIZE-2));
-
-            Pm_Dequeue( dev->queue, &msg);
 
             VstMidiEvent *evnt = new VstMidiEvent;
             memset(evnt, 0, sizeof(VstMidiEvent));
             evnt->type = kVstMidiType;
             evnt->flags = kVstMidiEventIsRealtime;
             evnt->byteSize = sizeof(VstMidiEvent);
-            memcpy(evnt->midiData, &msg.message, sizeof(evnt->midiData));
+            //memcpy(evnt->midiData, &msg.message, sizeof(evnt->midiData));
+            memcpy(evnt->midiData, &msg, sizeof(evnt->midiData));
             listEvnts->events[cpt]=(VstEvent*)evnt;
             cpt++;
         }
+        dev->midiQueue.clear();
     }
 
     if(cpt>0) {
         listEvnts->numEvents=cpt;
         sendVstEventsToHost(listEvnts);
     }
+
 }
 
 void Vst::processDoubleReplacing (double** inputs, double** outputs, VstInt32 sampleFrames)
 {
 
-}
-
-void Vst::open()
-{
-    opened=true;
-    myWindow->readSettings();
-}
-
-void Vst::close()
-{
-    opened=false;
-
-    foreach(Connectables::VstAudioDeviceIn* dev, lstAudioIn) {
-        removeAudioIn(dev);
-    }
-    foreach(Connectables::VstAudioDeviceOut* dev, lstAudioOut) {
-        removeAudioOut(dev);
-    }
 }
 
 void Vst::setSampleRate(float sampleRate)

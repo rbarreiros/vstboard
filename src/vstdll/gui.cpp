@@ -28,9 +28,11 @@ Gui::Gui(AudioEffectX* effect) : widget(0), effect(effect)
 
 Gui::~Gui()
 {
-    debug2(<< "delete Gui" << hex << (long)this)
+    if(myWindow) {
+        myWindow->writeSettings();
+        myWindow->setParent(0);
+    }
     if(widget) {
-        debug2(<< "delete widget" << hex << (long)widget)
         delete widget;
         widget=0;
     }
@@ -51,7 +53,6 @@ bool Gui::open(void* ptr)
     rectangle.left = 0;
     rectangle.bottom = widget->height();
     rectangle.right = widget->width();
-//    win->setMinimumSize(win->size());
 
     widget->show();
     myWindow->readSettings();

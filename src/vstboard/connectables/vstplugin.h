@@ -64,6 +64,7 @@ namespace Connectables {
         Pin* CreatePin(const ConnectionInfo &info);
 
     protected:
+        void processEvents(VstEvents* events);
         float sampleRate;
         unsigned long bufferSize;
         VstEvents *listEvnts;
