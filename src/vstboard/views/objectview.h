@@ -77,8 +77,6 @@ namespace View {
         QPersistentModelIndex objIndex;
 
         QAction *actDel;
-        QAction *actEditor;
-        QAction *actLearn;
 
         bool shrinkAsked;
         MainHost *myHost;

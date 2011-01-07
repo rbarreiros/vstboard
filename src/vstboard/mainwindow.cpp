@@ -286,12 +286,17 @@ void MainWindow::BuildListTools()
     QStandardItem *parentItem=0;
     QStandardItem *item=0;
 
+    //tools
+    //================================
+    listToolsModel = new ListToolsModel();
+    listToolsModel->setHorizontalHeaderLabels(headerLabels);
+    parentItem = listToolsModel->invisibleRootItem();
+    ObjectInfo info;
+
 #ifdef VST_PLUGIN
+
 //audio devices (vst in/out)
 //================================
-    listAudioDevModel = new ListToolsModel();
-    listAudioDevModel->setHorizontalHeaderLabels(headerLabels);
-    parentItem = listAudioDevModel->invisibleRootItem();
 
     //vst audio in
     item = new QStandardItem(tr("Vst audio input"));
@@ -311,14 +316,8 @@ void MainWindow::BuildListTools()
     item->setData(QVariant::fromValue(infoao), UserRoles::objInfo);
     parentItem->appendRow(item);
 
-    ui->treeAudioInterfaces->setModel(listAudioDevModel);
-    ui->treeAudioInterfaces->header()->setResizeMode(0,QHeaderView::Stretch);
-
 //midi devices (vst in/out)
 //================================
-    listMidiDevModel = new ListToolsModel();
-    listMidiDevModel->setHorizontalHeaderLabels(headerLabels);
-    parentItem = listMidiDevModel->invisibleRootItem();
 
     //vst midi in
     item = new QStandardItem(tr("Vst midi input"));
@@ -340,18 +339,6 @@ void MainWindow::BuildListTools()
     item->setData(QVariant::fromValue(infomo), UserRoles::objInfo);
     parentItem->appendRow(item);
 
-    ui->treeMidiInterfaces->setModel(listMidiDevModel);
-    ui->treeMidiInterfaces->header()->setResizeMode(0,QHeaderView::Stretch);
-#endif
-
-//tools
-//================================
-    listToolsModel = new ListToolsModel();
-    listToolsModel->setHorizontalHeaderLabels(headerLabels);
-    parentItem = listToolsModel->invisibleRootItem();
-    ObjectInfo info;
-
-#ifdef VST_PLUGIN
     //vst automation
     item = new QStandardItem(tr("Vst Automation"));
     info.nodeType = NodeType::object;
@@ -553,8 +540,11 @@ void MainWindow::readSettings()
     //add dock visibility to the menu
     QList<QDockWidget*>listDocks;
     listDocks << ui->dockTools;
+
+#ifndef VST_PLUGIN
     listDocks << ui->dockMidiDevices;
     listDocks << ui->dockAudioDevices;
+#endif
     listDocks << ui->dockVstBrowser;
     listDocks << ui->dockPrograms;
 
@@ -629,14 +619,21 @@ void MainWindow::readSettings()
     ui->Programs->readSettings();
 
     updateRecentFileActions();
+
+#ifdef VST_PLUGIN
+    ui->dockAudioDevices->hide();
+    ui->dockMidiDevices->hide();
+#endif
 }
 
 void MainWindow::resetSettings()
 {
     QList<QDockWidget*>listDocksVisible;
     listDocksVisible << ui->dockTools;
+#ifndef VST_PLUGIN
     listDocksVisible << ui->dockMidiDevices;
     listDocksVisible << ui->dockAudioDevices;
+#endif
     listDocksVisible << ui->dockVstBrowser;
 
     listDocksVisible << ui->dockPrograms;
@@ -657,8 +654,10 @@ void MainWindow::resetSettings()
     ui->Programs->resetSettings();
 
     addDockWidget(Qt::LeftDockWidgetArea,  ui->dockTools);
+#ifndef VST_PLUGIN
     addDockWidget(Qt::LeftDockWidgetArea,  ui->dockMidiDevices);
     addDockWidget(Qt::LeftDockWidgetArea,  ui->dockAudioDevices);
+#endif
     addDockWidget(Qt::LeftDockWidgetArea,  ui->dockVstBrowser);
 
     addDockWidget(Qt::RightDockWidgetArea,  ui->dockPrograms);
@@ -692,6 +691,11 @@ void MainWindow::resetSettings()
     QList<int> szGrp;
     szGrp << 1000 << 100;
     ui->splitterGroup->setSizes(szGrp);
+
+#ifdef VST_PLUGIN
+    ui->dockAudioDevices->hide();
+    ui->dockMidiDevices->hide();
+#endif
 }
 
 void MainWindow::on_actionAbout_triggered()

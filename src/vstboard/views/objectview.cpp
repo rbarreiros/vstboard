@@ -34,6 +34,7 @@ ObjectView::ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsIte
     errorMessage(0),
     layout(0),
     model(model),
+    actDel(0),
     shrinkAsked(false),
     myHost(myHost),
     listAudioIn(0),
