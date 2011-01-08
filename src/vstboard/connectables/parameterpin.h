@@ -38,13 +38,14 @@ namespace Connectables {
 
         void ChangeValue(float val, bool fromObj=false);
         void ChangeValue(int index, bool fromObj=false);
-        void ChangeValue(QVariant variant, bool fromObj=false);
+        void ChangeValue(const QVariant &variant, bool fromObj=false);
         void Load(const ObjectParameter &param);
 
         virtual void OnValueChanged(float val);
 
         inline int GetIndex() {return outStepIndex;}
         inline QVariant GetVariantValue() {return listValues->at(outStepIndex);}
+        void SetVariantValue(const QVariant &val);
 
         void GetDefault(ObjectParameter &param);
         void GetValues(ObjectParameter &param);

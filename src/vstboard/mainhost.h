@@ -65,6 +65,7 @@ public:
 //    bool IsSolverUpdateEnabled();
 
     void GetTempo(int &tempo, int &sign1, int &sign2);
+    void SetTimeInfo(const VstTimeInfo *info);
 
     QSharedPointer<Connectables::MainContainer> mainContainer;
     QSharedPointer<Connectables::MainContainer> hostContainer;
@@ -103,6 +104,8 @@ private:
     void SetupProgramContainer();
     void SetupGroupContainer();
 
+    void CheckTempo();
+
     bool solverNeedAnUpdate;
     bool solverUpdateEnabled;
 
@@ -120,9 +123,11 @@ private:
     unsigned long bufferSize;
     QTime timeFromStart;
 
-    QList<Connectables::Object*>listObjToRemove;
-
     HostModel *model;
+
+    int currentTempo;
+    int currentTimeSig1;
+    int currentTimeSig2;
 
 signals:
     void SampleRateChanged(float rate);
@@ -134,6 +139,7 @@ signals:
     void Rendered();
     void programParkingModelChanged(QStandardItemModel *model);
     void groupParkingModelChanged(QStandardItemModel *model);
+    void TempoChanged(int tempo=120, int sign1=4, int sign2=4);
 
 public slots:
     void SetSolverUpdateNeeded(bool need=true);

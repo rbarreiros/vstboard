@@ -145,12 +145,21 @@ void ParameterPin::ChangeValue(int index, bool fromObj)
 }
 
 //from variant
-void ParameterPin::ChangeValue(QVariant variant, bool fromObj)
+void ParameterPin::ChangeValue(const QVariant &variant, bool fromObj)
 {
     if(listValues)
         ChangeValue(listValues->indexOf(variant),fromObj);
     else
         ChangeValue(variant.toFloat(),fromObj);
+}
+
+void ParameterPin::SetVariantValue(const QVariant &val)
+{
+    int index=listValues->indexOf(val);
+    if(index==-1)
+        return;
+
+    ChangeValue(listValues->value(index));
 }
 
 void ParameterPin::OnStep(int delta)

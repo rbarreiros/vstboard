@@ -26,6 +26,7 @@
 #define DEFAULT_INPUTS 1
 #define DEFAULT_OUTPUTS 1
 
+#include <QObject>
 #include <QtGui/QApplication>
 #include "mainwindow.h"
 #include "public.sdk/source/vst2.x/audioeffectx.h"
@@ -38,8 +39,9 @@
 AudioEffect* createEffectInstance (audioMasterCallback audioMaster);
 
 //-------------------------------------------------------------------------------------------------------
-class Vst : public AudioEffectX
+class Vst : public QObject, public AudioEffectX
 {
+    Q_OBJECT
 public:
 
         Vst (audioMasterCallback audioMaster);
@@ -115,10 +117,18 @@ protected:
 
         VstEvents *listEvnts;
 
+        bool hostSendVstEvents;
+        bool hostSendVstMidiEvent;
+        bool hostReportConnectionChanges;
         bool hostAcceptIOChanges;
         bool hostSendVstTimeInfo;
-        bool opened;
+        bool hostReceiveVstEvents;
+        bool hostReceiveVstMidiEvents;
+        bool hostReceiveVstTimeInfo;
 
+        bool opened;
+    public slots:
+        void OnMainHostTempoChange();
 };
 
 

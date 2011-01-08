@@ -59,6 +59,10 @@ MainHost::MainHost(Vst *myVstPlugin, QObject *parent) :
     sampleRate = 44100.0;
     bufferSize = 512;
 
+    currentTempo=120;
+    currentTimeSig1=4;
+    currentTimeSig2=4;
+
     programList = new Programs(this);
 
 #ifndef VST_PLUGIN
@@ -625,9 +629,13 @@ void MainHost::Render(unsigned long samples)
         samples=bufferSize;
 
 #ifdef VSTSDK
-#ifndef VST_PLUGIN
+
+    CheckTempo();
+
+    #ifndef VST_PLUGIN
+        //as a host : update internal clock
         vstHost->UpdateTimeInfo(timeFromStart.elapsed(), samples, sampleRate);
-#endif
+    #endif
 #endif
 
     mutexRender.lock();
@@ -658,21 +666,46 @@ void MainHost::OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionI
     SetSolverUpdateNeeded();
 }
 
+void MainHost::SetTimeInfo(const VstTimeInfo *info)
+{
+#ifdef VSTSDK
+    vstHost->SetTimeInfo(info);
+//    CheckTempo();
+#endif
+}
+
 void MainHost::SetTempo(int tempo, int sign1, int sign2)
 {
 #ifdef VSTSDK
-    vstHost->vstTimeInfo.tempo = tempo;
-    vstHost->vstTimeInfo.timeSigNumerator = sign1;
-    vstHost->vstTimeInfo.timeSigDenominator = sign2;
+    vstHost->SetTempo(tempo,sign1,sign2);
+//    CheckTempo();
+#endif
+}
+
+void MainHost::CheckTempo()
+{
+#ifdef VSTSDK
+    int tempo=0;
+    int sign1=0;
+    int sign2=0;
+
+    vstHost->GetTempo(tempo,sign1,sign2);
+    if(tempo!=currentTempo
+       || sign1!=currentTimeSig1
+       || sign2!=currentTimeSig2) {
+
+        currentTempo=tempo;
+        currentTimeSig1=sign1;
+        currentTimeSig2=sign2;
+        emit TempoChanged(currentTempo,currentTimeSig1,currentTimeSig2);
+    }
 #endif
 }
 
 void MainHost::GetTempo(int &tempo, int &sign1, int &sign2)
 {
 #ifdef VSTSDK
-    tempo=vstHost->vstTimeInfo.tempo;
-    sign1=vstHost->vstTimeInfo.timeSigNumerator;
-    sign2=vstHost->vstTimeInfo.timeSigDenominator;
+    vstHost->GetTempo(tempo,sign1,sign2);
 #else
     tempo=120;
     sign1=4;

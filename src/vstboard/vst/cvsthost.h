@@ -49,10 +49,12 @@ namespace vst
         virtual ~CVSTHost();
 
         void SetTimeInfo(const VstTimeInfo *info);
+        void SetTempo(int tempo, int sign1, int sign2);
+        void GetTempo(int &tempo, int &sign1, int &sign2);
         void UpdateTimeInfo(double timer, int addSamples, double sampleRate);
 
         int loopLenght;
-         VstTimeInfo vstTimeInfo;
+        VstTimeInfo vstTimeInfo;
 
     protected:
         static CVSTHost * pHost;

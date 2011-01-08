@@ -35,6 +35,7 @@
 MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
         QMainWindow(parent),
         openedPrompt(false),
+        mySceneView(0),
         listToolsModel(0),
 #ifdef VST_PLUGIN
         listAudioDevModel(0),
@@ -42,7 +43,6 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
 #endif
         listVstPluginsModel(0),
         solverScene(0),
-        mySceneView(0),
         ui(new Ui::MainWindow),
         myHost(myHost)
 {

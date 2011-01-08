@@ -68,7 +68,6 @@ CVSTHost::CVSTHost()
     vstTimeInfo.flags |= kVstSmpteValid;//           = 1 << 14,	///< VstTimeInfo::smpteOffset and VstTimeInfo::smpteFrameRate valid
     vstTimeInfo.flags |= kVstClockValid;
 
-
     loopLenght=4;
     pHost = this;                           /* install this instance as the one  */
 }
@@ -88,6 +87,27 @@ void CVSTHost::SetTimeInfo(const VstTimeInfo *info) {
         return;
 
     vstTimeInfo = *info;
+}
+
+void CVSTHost::SetTempo(int tempo, int sign1, int sign2)
+{
+    vstTimeInfo.tempo = tempo;
+    vstTimeInfo.timeSigNumerator = sign1;
+    vstTimeInfo.timeSigDenominator = sign2;
+
+    vstTimeInfo.flags |= kVstTempoValid;
+    vstTimeInfo.flags |= kVstTimeSigValid;
+}
+
+void CVSTHost::GetTempo(int &tempo, int &sign1, int &sign2)
+{
+    if(vstTimeInfo.flags & kVstTempoValid)
+        tempo=vstTimeInfo.tempo;
+
+    if(vstTimeInfo.flags & kVstTimeSigValid) {
+        sign1=vstTimeInfo.timeSigNumerator;
+        sign2=vstTimeInfo.timeSigDenominator;
+    }
 }
 
 void CVSTHost::UpdateTimeInfo(double timer, int addSamples, double sampleRate)
@@ -151,19 +171,7 @@ VstIntPtr VSTCALLBACK CVSTHost::AudioMasterCallback(AEffect *effect, VstInt32 op
             return (long)&pHost->vstTimeInfo;
 
         case audioMasterSetTime : //9
-            {
-                VstTimeInfo *ti = (VstTimeInfo*)ptr;
-
-                if(value &= kVstTempoValid) {
-                    pHost->vstTimeInfo.tempo = ti->tempo;
-                }
-
-                if(value &= kVstTimeSigValid) {
-                    pHost->vstTimeInfo.timeSigNumerator = ti->timeSigNumerator;
-                    pHost->vstTimeInfo.timeSigDenominator = ti->timeSigDenominator;
-                }
-            }
-
+            pHost->SetTimeInfo((VstTimeInfo*)ptr);
             return 0L;
 
         case audioMasterTempoAt : //10

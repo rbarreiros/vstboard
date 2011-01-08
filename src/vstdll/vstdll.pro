@@ -108,7 +108,6 @@ connectables/vstaudiodeviceout.cpp \
 ../vstboard/models/listtoolsmodel.cpp \
 ../vstboard/views/cableview.cpp \
 ../vstboard/views/maincontainerview.cpp \
-../vstboard/views/containerview.cpp \
 ../vstboard/views/connectableobjectview.cpp \
 ../vstboard/views/bridgepinview.cpp \
 ../vstboard/views/containercontent.cpp \
@@ -191,7 +190,6 @@ connectables/vstaudiodeviceout.h \
 ../vstboard/models/listtoolsmodel.h \
 ../vstboard/views/cableview.h \
 ../vstboard/views/maincontainerview.h \
-../vstboard/views/containerview.h \
 ../vstboard/views/connectableobjectview.h \
 ../vstboard/views/bridgepinview.h \
 ../vstboard/views/containercontent.h \

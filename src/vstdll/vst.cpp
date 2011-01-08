@@ -39,8 +39,14 @@ Vst::Vst (audioMasterCallback audioMaster) :
     myWindow(0),
     bufferSize(0),
     listEvnts(0),
+    hostSendVstEvents(false),
+    hostSendVstMidiEvent(false),
+    hostReportConnectionChanges(false),
     hostAcceptIOChanges(false),
     hostSendVstTimeInfo(false),
+    hostReceiveVstEvents(false),
+    hostReceiveVstMidiEvents(false),
+    hostReceiveVstTimeInfo(false),
     opened(false)
 {
     setNumInputs (DEFAULT_INPUTS*2);
@@ -78,31 +84,33 @@ Vst::~Vst ()
 
 void Vst::open()
 {
-    /* char str[64];
-     getHostVendorString(str);
-     getHostProductString(str);
-     */
-     //VstInt32 hostVer = getHostVendorVersion();
+//     char str[64];
+//     getHostVendorString(str);
+//     getHostProductString(str);
+//     VstInt32 hostVer = getHostVendorVersion();
 
-    // long hostSendVstEvents = canHostDo("sendVstEvents");
-    // long hostSendVstMidiEvent = canHostDo("sendVstMidiEvent");
+     hostSendVstEvents = (bool)canHostDo("sendVstEvents");
+     hostSendVstMidiEvent = (bool)canHostDo("sendVstMidiEvent");
      hostSendVstTimeInfo = (bool)canHostDo((char *)"sendVstTimeInfo");
-    /* long hostReceiveVstEvents = canHostDo("receiveVstEvents");
-     long hostReceiveVstMidiEvents = canHostDo("receiveVstMidiEvents");
-     long hostReceiveVstTimeInfo = canHostDo("receiveVstTimeInfo");
-     long hostReportConnectionChanges = canHostDo("reportConnectionChanges");
-     */
+     hostReceiveVstEvents = (bool)canHostDo("receiveVstEvents");
+     hostReceiveVstMidiEvents = (bool)canHostDo("receiveVstMidiEvents");
+     hostReceiveVstTimeInfo = (bool)canHostDo("receiveVstTimeInfo");
+     hostReportConnectionChanges = (bool)canHostDo("reportConnectionChanges");
      hostAcceptIOChanges = (bool)canHostDo((char *)"acceptIOChanges");
-     /*
-     long hostSizeWindow = canHostDo("sizeWindow");
-     long hostAsyncProcessing = canHostDo("asyncProcessing");
-     long hostOffline = canHostDo("offline");
-     long hostSupplyIdle = canHostDo("supplyIdle");
-     long hostSupportShell = canHostDo("supportShell");
-     long hostOpenFileSelector = canHostDo("openFileSelector");
-     long hostEditFile = canHostDo("editFile");
-     long hostCloseFileSelector = canHostDo("closeFileSelector");
- */
+
+//     long hostSizeWindow = canHostDo("sizeWindow");
+//     long hostAsyncProcessing = canHostDo("asyncProcessing");
+//     long hostOffline = canHostDo("offline");
+//     long hostSupplyIdle = canHostDo("supplyIdle");
+//     long hostSupportShell = canHostDo("supportShell");
+//     long hostOpenFileSelector = canHostDo("openFileSelector");
+//     long hostEditFile = canHostDo("editFile");
+//     long hostCloseFileSelector = canHostDo("closeFileSelector");
+
+     if(hostReceiveVstTimeInfo) {
+        connect(myHost,SIGNAL(TempoChanged()),
+             this,SLOT(OnMainHostTempoChange()));
+    }
 
      myHost->Open();
 
@@ -319,6 +327,9 @@ VstInt32 Vst::canDo(char* text)
 
 VstInt32 Vst::processEvents(VstEvents* events)
 {
+    if(!hostSendVstEvents || !hostSendVstMidiEvent)
+        return 0;
+
     VstEvent *evnt=0;
 
     for(int i=0; i<events->numEvents; i++) {
@@ -341,7 +352,8 @@ VstInt32 Vst::processEvents(VstEvents* events)
 
 void Vst::processReplacing (float** inputs, float** outputs, VstInt32 sampleFrames)
 {
-    myHost->vstHost->SetTimeInfo( getTimeInfo( -1));
+    if(hostSendVstTimeInfo)
+        myHost->SetTimeInfo( getTimeInfo( -1));
 
     if(bufferSize!=sampleFrames) {
         myHost->SetBufferSize((unsigned long)sampleFrames);
@@ -360,38 +372,39 @@ void Vst::processReplacing (float** inputs, float** outputs, VstInt32 sampleFram
         dev->GetBuffers(outputs,cpt,sampleFrames);
     }
 
-    //free last buffer
-    if(listEvnts) {
-        free(listEvnts);
-        listEvnts = 0;
-    }
-
-    cpt=0;
-    foreach(Connectables::VstMidiDevice *dev, lstMidiOut) {
-        foreach(long msg, dev->midiQueue) {
-
-            //allocate a new buffer
-            if(!listEvnts)
-                listEvnts = (VstEvents*)malloc(sizeof(VstEvents) + sizeof(VstEvents*)*(VST_EVENT_BUFFER_SIZE-2));
-
-            VstMidiEvent *evnt = new VstMidiEvent;
-            memset(evnt, 0, sizeof(VstMidiEvent));
-            evnt->type = kVstMidiType;
-            evnt->flags = kVstMidiEventIsRealtime;
-            evnt->byteSize = sizeof(VstMidiEvent);
-            //memcpy(evnt->midiData, &msg.message, sizeof(evnt->midiData));
-            memcpy(evnt->midiData, &msg, sizeof(evnt->midiData));
-            listEvnts->events[cpt]=(VstEvent*)evnt;
-            cpt++;
+    if(hostReceiveVstEvents || hostReceiveVstMidiEvents) {
+        //free last buffer
+        if(listEvnts) {
+            free(listEvnts);
+            listEvnts = 0;
         }
-        dev->midiQueue.clear();
-    }
 
-    if(cpt>0) {
-        listEvnts->numEvents=cpt;
-        sendVstEventsToHost(listEvnts);
-    }
+        cpt=0;
+        foreach(Connectables::VstMidiDevice *dev, lstMidiOut) {
+            foreach(long msg, dev->midiQueue) {
 
+                //allocate a new buffer
+                if(!listEvnts)
+                    listEvnts = (VstEvents*)malloc(sizeof(VstEvents) + sizeof(VstEvents*)*(VST_EVENT_BUFFER_SIZE-2));
+
+                VstMidiEvent *evnt = new VstMidiEvent;
+                memset(evnt, 0, sizeof(VstMidiEvent));
+                evnt->type = kVstMidiType;
+                evnt->flags = kVstMidiEventIsRealtime;
+                evnt->byteSize = sizeof(VstMidiEvent);
+                //memcpy(evnt->midiData, &msg.message, sizeof(evnt->midiData));
+                memcpy(evnt->midiData, &msg, sizeof(evnt->midiData));
+                listEvnts->events[cpt]=(VstEvent*)evnt;
+                cpt++;
+            }
+            dev->midiQueue.clear();
+        }
+
+        if(cpt>0) {
+            listEvnts->numEvents=cpt;
+            sendVstEventsToHost(listEvnts);
+        }
+    }
 }
 
 void Vst::processDoubleReplacing (double** inputs, double** outputs, VstInt32 sampleFrames)
@@ -418,4 +431,12 @@ void Vst::suspend()
 void Vst::resume()
 {
 
+}
+
+void Vst::OnMainHostTempoChange()
+{
+    if (!audioMaster)
+        return;
+
+    audioMaster (&cEffect, audioMasterSetTime, 0, 0, &myHost->vstHost->vstTimeInfo, 0);
 }

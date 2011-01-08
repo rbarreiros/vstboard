@@ -75,6 +75,8 @@ HostController::HostController(MainHost *myHost,int index):
            this,SLOT(OnHostProgChanged(QModelIndex)));
     connect(myHost->programList,SIGNAL(GroupChanged(QModelIndex)),
            this,SLOT(OnHostGroupChanged(QModelIndex)));
+    connect(myHost,SIGNAL(TempoChanged(int,int,int)),
+            this,SLOT(OnHostTempoChange(int,int,int)));
 }
 
 void HostController::Render()
@@ -126,4 +128,11 @@ void HostController::OnHostProgChanged(const QModelIndex &index)
 void HostController::OnHostGroupChanged(const QModelIndex &index)
 {
     static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Group))->ChangeValue( index.row(), true );
+}
+
+void HostController::OnHostTempoChange(int tempo, int sign1, int sign2)
+{
+    static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Tempo))->SetVariantValue( tempo);
+    static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Sign1))->SetVariantValue( sign1 );
+    static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Sign2))->SetVariantValue( sign2 );
 }
