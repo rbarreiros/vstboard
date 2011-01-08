@@ -21,6 +21,9 @@
 #ifndef BRIDGEPINVIEW_H
 #define BRIDGEPINVIEW_H
 
+#define PINSIZE 12
+#define BRPIN_MRG 3
+
 #include "pinview.h"
 
 namespace View {
@@ -29,12 +32,12 @@ namespace View {
     {
     Q_OBJECT
     public:
-        BridgePinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, Connectables::Pin *pin);
+        BridgePinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo);
         const QPointF pinPos() const;
         void UpdateModelIndex(const QModelIndex &index);
 
     protected:
-        QGraphicsEllipseItem *vuValue;
+        QAbstractGraphicsShapeItem *vuValue;
         float value;
         PinType::Enum valueType;
 

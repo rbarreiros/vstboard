@@ -30,9 +30,9 @@ QBrush PinView::highlightBrush(QColor(100,0,200,100),Qt::SolidPattern);
 
 QGraphicsLineItem *PinView::currentLine = 0;
 
-PinView::PinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, Connectables::Pin *pin) :
+PinView::PinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo) :
         QGraphicsWidget(parent),
-        connectInfo(pin->GetConnectionInfo()),
+        connectInfo(pinInfo),
         model(model),
         pinAngle(angle)
 {

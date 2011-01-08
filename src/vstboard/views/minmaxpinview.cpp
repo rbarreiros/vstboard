@@ -22,8 +22,8 @@
 
 using namespace View;
 
-MinMaxPinView::MinMaxPinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, Connectables::Pin *pin) :
-        ConnectablePinView(angle,model,parent,pin),
+MinMaxPinView::MinMaxPinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo) :
+        ConnectablePinView(angle,model,parent,pinInfo),
         cursorCreated(false)
 {
 

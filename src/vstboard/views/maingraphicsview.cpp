@@ -106,6 +106,12 @@ void MainGraphicsView::zoomReset()
     emit viewResized( mapToScene(viewport()->rect()).boundingRect() );
 }
 
+void MainGraphicsView::paintEvent ( QPaintEvent * event )
+{
+    emit viewResized( mapToScene(viewport()->rect()).boundingRect() );
+    QGraphicsView::paintEvent(event);
+}
+
 void MainGraphicsView::scrollContentsBy ( int dx, int dy )
 {
     QGraphicsView::scrollContentsBy(dx,dy);
@@ -115,7 +121,7 @@ void MainGraphicsView::scrollContentsBy ( int dx, int dy )
 void MainGraphicsView::resizeEvent ( QResizeEvent * event )
 {
     QGraphicsView::resizeEvent(event);
-    emit viewResized( mapToScene(viewport()->rect()).boundingRect() );
+//    emit viewResized( mapToScene(viewport()->rect()).boundingRect() );
 }
 
 void MainGraphicsView::SaveProgram()

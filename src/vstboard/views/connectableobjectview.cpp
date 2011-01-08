@@ -39,9 +39,6 @@ ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel
 
     titleText = new QGraphicsSimpleTextItem(QString("Title"),this);
     titleText->moveBy(2,1);
-//    editorButton =  new TextButton("Ed",this,Qt::black,QColor(255,255,255));
-//    editorButton->moveBy(rect().width()-15,0);
-//    editorButton->hide();
 
     layout = new QGraphicsGridLayout() ;
     layout->setSpacing(0);
@@ -58,8 +55,6 @@ ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel
     listMidiOut = new ListPinsView(this);
     listParametersIn = new ListPinsView(this);
     listParametersOut = new ListPinsView(this);
-    listBridgeIn = new ListPinsView(this);
-    listBridgeOut = new ListPinsView(this);
 
     layout->addItem(listAudioIn,0,0,Qt::AlignLeft | Qt::AlignTop);
     layout->addItem(listAudioOut,0,1,Qt::AlignRight | Qt::AlignTop);
@@ -67,8 +62,7 @@ ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel
     layout->addItem(listMidiOut,1,1,Qt::AlignRight | Qt::AlignTop);
     layout->addItem(listParametersIn,2,0,Qt::AlignLeft | Qt::AlignTop);
     layout->addItem(listParametersOut,2,1,Qt::AlignRight | Qt::AlignTop);
-    layout->addItem(listBridgeIn,3,0,Qt::AlignLeft | Qt::AlignTop);
-    layout->addItem(listBridgeOut,3,1,Qt::AlignRight | Qt::AlignTop);
+
 }
 
 

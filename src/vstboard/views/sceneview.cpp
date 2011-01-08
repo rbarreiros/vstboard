@@ -22,7 +22,6 @@
 #include "globals.h"
 #include "../connectables/objectfactory.h"
 #include "objectview.h"
-#include "containerview.h"
 #include "connectableobjectview.h"
 #include "maincontainerview.h"
 #include "bridgeview.h"
@@ -52,10 +51,15 @@ SceneView::SceneView(MainHost *myHost,Connectables::ObjectFactory *objFactory, M
     timerFalloff = new QTimer(this);
     timerFalloff->start(50);
 
+//    QPixmap back(":/back.png");
     sceneHost = new QGraphicsScene(this);
+    sceneHost->setBackgroundBrush(Qt::lightGray);
     sceneProject = new QGraphicsScene(this);
+    sceneProject->setBackgroundBrush(Qt::lightGray);
     sceneProgram = new QGraphicsScene(this);
+    sceneProgram->setBackgroundBrush(Qt::lightGray);
     sceneGroup = new QGraphicsScene(this);
+    sceneGroup->setBackgroundBrush(Qt::lightGray);
 
     //we need a root object to avoid a bug when the scene is empty
     rootObjHost = new QGraphicsRectItem(0, sceneHost);
@@ -270,78 +274,57 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
         switch(info.nodeType) {
             case NodeType::container :
             {
-                switch(info.objType) {
-                    case ObjType::MainContainer :
-                    {
-                        int objId = index.data(UserRoles::value).toInt();
+                int objId = index.data(UserRoles::value).toInt();
 
-                        if(objId == FixedObjId::hostContainer) {
-                            hostContainerView = new MainContainerView(myHost, model());
-                            objView=hostContainerView;
-                            hostContainerView->setParentItem(rootObjHost);
-                            connect(viewHost,SIGNAL(viewResized(QRectF)),
-                                    hostContainerView,SLOT(OnViewChanged(QRectF)));
-                            QTimer::singleShot(0, viewHost, SLOT(ForceResize()));
-                        }
-
-                        if(objId == FixedObjId::projectContainer) {
-                            projectContainerView = new MainContainerView(myHost, model());
-                            objView=projectContainerView;
-                            projectContainerView->setParentItem(rootObjProject);
-                            connect(viewProject,SIGNAL(viewResized(QRectF)),
-                                    projectContainerView,SLOT(OnViewChanged(QRectF)));
-                            QTimer::singleShot(0, viewProject, SLOT(ForceResize()));
-                        }
-
-                        if(objId == FixedObjId::programContainer) {
-                            programContainerView = new MainContainerView(myHost, model());
-                            objView=programContainerView;
-                            programContainerView->setParentItem(rootObjProgram);
-                            connect(viewProgram,SIGNAL(viewResized(QRectF)),
-                                    programContainerView,SLOT(OnViewChanged(QRectF)));
-                            connect(myHost->programList,SIGNAL(ProgChanged(QModelIndex)),
-                                    viewProgram, SLOT(SetProgram(QModelIndex)));
-                            connect(myHost->programList,SIGNAL(ProgCopy(int,int)),
-                                    viewProgram, SLOT(CopyProgram(int,int)));
-                            connect(myHost->programList,SIGNAL(ProgDelete(int)),
-                                    viewProgram, SLOT(RemoveProgram(int)));
-                            QTimer::singleShot(0, viewProgram, SLOT(ForceResize()));
-                            programContainerView->SetParking(progParking);
-                        }
-
-                        if(objId == FixedObjId::groupContainer) {
-                            MainContainerView *groupContainerView = new MainContainerView(myHost, model());
-                            objView=groupContainerView;
-                            groupContainerView->setParentItem(rootObjInsert);
-                            connect(viewGroup,SIGNAL(viewResized(QRectF)),
-                                    groupContainerView,SLOT(OnViewChanged(QRectF)));
-                            connect(myHost->programList,SIGNAL(GroupChanged(QModelIndex)),
-                                    viewGroup, SLOT(SetProgram(QModelIndex)));
-                            connect(myHost->programList,SIGNAL(GroupCopy(int,int)),
-                                    viewGroup, SLOT(CopyProgram(int,int)));
-                            connect(myHost->programList,SIGNAL(GroupDelete(int)),
-                                    viewGroup, SLOT(RemoveProgram(int)));
-                            QTimer::singleShot(0, viewGroup, SLOT(ForceResize()));
-                            groupContainerView->SetParking(groupParking);
-                        }
-
-
-                        break;
-                    }
-                    case ObjType::Container :
-                    {
-                        ObjectView *parentView = static_cast<ObjectView*>(hashItems.value(parent,0));
-                        if(!parentView) {
-                            debug("SceneView::rowsInserted parent not found")
-                                    continue;
-                        }
-                        objView = new ContainerView(myHost, model(),parentView);
-                        break;
-                    }
-                    default:
-                        continue;
+                if(objId == FixedObjId::hostContainer) {
+                    hostContainerView = new MainContainerView(myHost, model());
+                    objView=hostContainerView;
+                    hostContainerView->setParentItem(rootObjHost);
+                    connect(viewHost,SIGNAL(viewResized(QRectF)),
+                            hostContainerView,SLOT(OnViewChanged(QRectF)));
+                    QTimer::singleShot(0, viewHost, SLOT(ForceResize()));
                 }
 
+                if(objId == FixedObjId::projectContainer) {
+                    projectContainerView = new MainContainerView(myHost, model());
+                    objView=projectContainerView;
+                    projectContainerView->setParentItem(rootObjProject);
+                    connect(viewProject,SIGNAL(viewResized(QRectF)),
+                            projectContainerView,SLOT(OnViewChanged(QRectF)));
+                    QTimer::singleShot(0, viewProject, SLOT(ForceResize()));
+                }
+
+                if(objId == FixedObjId::programContainer) {
+                    programContainerView = new MainContainerView(myHost, model());
+                    objView=programContainerView;
+                    programContainerView->setParentItem(rootObjProgram);
+                    connect(viewProgram,SIGNAL(viewResized(QRectF)),
+                            programContainerView,SLOT(OnViewChanged(QRectF)));
+                    connect(myHost->programList,SIGNAL(ProgChanged(QModelIndex)),
+                            viewProgram, SLOT(SetProgram(QModelIndex)));
+                    connect(myHost->programList,SIGNAL(ProgCopy(int,int)),
+                            viewProgram, SLOT(CopyProgram(int,int)));
+                    connect(myHost->programList,SIGNAL(ProgDelete(int)),
+                            viewProgram, SLOT(RemoveProgram(int)));
+                    QTimer::singleShot(0, viewProgram, SLOT(ForceResize()));
+                    programContainerView->SetParking(progParking);
+                }
+
+                if(objId == FixedObjId::groupContainer) {
+                    MainContainerView *groupContainerView = new MainContainerView(myHost, model());
+                    objView=groupContainerView;
+                    groupContainerView->setParentItem(rootObjInsert);
+                    connect(viewGroup,SIGNAL(viewResized(QRectF)),
+                            groupContainerView,SLOT(OnViewChanged(QRectF)));
+                    connect(myHost->programList,SIGNAL(GroupChanged(QModelIndex)),
+                            viewGroup, SLOT(SetProgram(QModelIndex)));
+                    connect(myHost->programList,SIGNAL(GroupCopy(int,int)),
+                            viewGroup, SLOT(CopyProgram(int,int)));
+                    connect(myHost->programList,SIGNAL(GroupDelete(int)),
+                            viewGroup, SLOT(RemoveProgram(int)));
+                    QTimer::singleShot(0, viewGroup, SLOT(ForceResize()));
+                    groupContainerView->SetParking(groupParking);
+                }
 
                 hashItems.insert( index , objView);
                 connect(objView,SIGNAL(destroyed(QObject*)),
@@ -362,10 +345,10 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
 
                 switch(info.objType) {
                     case ObjType::BridgeIn :
-                        objView = static_cast<ContainerView*>(parentView)->bridgeIn;
+                        objView = static_cast<MainContainerView*>(parentView)->bridgeIn;
                         break;
                     case ObjType::BridgeOut :
-                        objView = static_cast<ContainerView*>(parentView)->bridgeOut;
+                        objView = static_cast<MainContainerView*>(parentView)->bridgeOut;
                         break;
                     case ObjType::BridgeSend :
                         objView = static_cast<MainContainerView*>(parentView)->bridgeSend;
@@ -388,7 +371,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
             }
             case NodeType::object :
             {
-                ContainerView *parentView = static_cast<ContainerView*>(hashItems.value(parent,0));
+                MainContainerView *parentView = static_cast<MainContainerView*>(hashItems.value(parent,0));
                 if(!parentView) {
                     debug("SceneView::rowsInserted object parent not found")
                             continue;
@@ -415,32 +398,29 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                 }
 
                 ListPinsView *v=0;
-                ConnectableObjectView* CntObj = static_cast<ConnectableObjectView*>(parentView);
 
                 switch(info.objType) {
                     case ObjType::listAudioIn :
-                        v = CntObj->listAudioIn;
+                        v = parentView->listAudioIn;
                         break;
                     case ObjType::listAudioOut :
-                        v = CntObj->listAudioOut;
+                        v = parentView->listAudioOut;
                         break;
                     case ObjType::listMidiIn :
-                        v = CntObj->listMidiIn;
+                        v = parentView->listMidiIn;
                         break;
                     case ObjType::listMidiOut :
-                        v = CntObj->listMidiOut;
+                        v = parentView->listMidiOut;
                         break;
                     case ObjType::listParamIn :
-                        v = CntObj->listParametersIn;
+                        v = parentView->listParametersIn;
                         break;
                     case ObjType::listParamOut :
-                        v = CntObj->listParametersOut;
+                        v = parentView->listParametersOut;
                         break;
                     case ObjType::listBridgeIn :
-                        v = CntObj->listBridgeIn;
-                        break;
                     case ObjType::listBridgeOut :
-                        v = CntObj->listBridgeOut;
+                        v = parentView->listBridge;
                         break;
                     default:
                         debug("SceneView::rowsInserted unknown pin type")
@@ -476,27 +456,27 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
 
                 if(parentInfo.nodeType == NodeType::bridge) {
                     if(parentInfo.objType==ObjType::BridgeIn || parentInfo.objType==ObjType::BridgeOut)
-                        angle=3.1416f/2.0f;
+                        angle=1.570796f; //pi/2
                     if(parentInfo.objType==ObjType::BridgeSend || parentInfo.objType==ObjType::BridgeReturn)
-                        angle=-3.1416f/2.0f;
+                        angle=-1.570796f; //-pi/2
 
-                    pinView = static_cast<PinView*>( new BridgePinView(angle, model(), parentList, pin) );
+                    pinView = static_cast<PinView*>( new BridgePinView(angle, model(), parentList, pin->GetConnectionInfo()) );
                     connect(timerFalloff,SIGNAL(timeout()),
                             pinView,SLOT(updateVu()));
                 } else {
                     if(pinInfo.direction==PinDirection::Input)
-                        angle=3.1416f;
+                        angle=3.141592f;
                     if(pinInfo.direction==PinDirection::Output)
                         angle=.0f;
 
 
                     if(pinInfo.type==PinType::Parameter) {
-                        MinMaxPinView *p = new MinMaxPinView(angle,model(),parentList,pin);
+                        MinMaxPinView *p = new MinMaxPinView(angle,model(),parentList,pin->GetConnectionInfo());
                         connect(timerFalloff,SIGNAL(timeout()),
                                 p,SLOT(updateVu()));
                         pinView = static_cast<PinView*>(p);
                     } else {
-                        ConnectablePinView *p = new ConnectablePinView(angle, model(), parentList, pin);
+                        ConnectablePinView *p = new ConnectablePinView(angle, model(), parentList, pin->GetConnectionInfo());
                         connect(timerFalloff,SIGNAL(timeout()),
                                 p,SLOT(updateVu()));
                         pinView = static_cast<PinView*>(p);
@@ -535,7 +515,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
             }
             case NodeType::cable :
             {
-                ContainerView *cnt = static_cast<ContainerView*>(hashItems.value(parent.parent(),0));
+                MainContainerView *cnt = static_cast<MainContainerView*>(hashItems.value(parent.parent(),0));
                 if(!cnt) {
                     debug("SceneView::rowsInserted add cable, container not found")
                             continue;

@@ -21,10 +21,9 @@
 #include "bridgepinview.h"
 
 using namespace View;
-#define PINSIZE 12
 
-BridgePinView::BridgePinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, Connectables::Pin *pin) :
-        PinView(angle, model,parent, pin),
+BridgePinView::BridgePinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo) :
+        PinView(angle, model,parent, pinInfo),
         value(.0f),
         valueType(PinType::ND)
 {
@@ -33,17 +32,31 @@ BridgePinView::BridgePinView(float angle, QAbstractItemModel *model,QGraphicsIte
     setMaximumSize(PINSIZE,PINSIZE);
     setMinimumSize(PINSIZE,PINSIZE);
 
-    rectBgnd = new QGraphicsEllipseItem(geometry(),this);
-    rectBgnd->setBrush(Qt::NoBrush);
 
-    vuValue = new QGraphicsEllipseItem(geometry().adjusted(2,2,-2,-2),this);
-//    vuValue->setBrush(Qt::NoBrush);
+    QPolygonF pol;
+
+    if( (connectInfo.direction==PinDirection::Input && pinAngle<0)
+        || (connectInfo.direction==PinDirection::Output && pinAngle>0) ) {
+        pol << QPointF(PINSIZE/2,PINSIZE) << QPointF(0,0) << QPointF(PINSIZE,0);
+    } else {
+        pol << QPointF(PINSIZE/2,0) << QPointF(0,PINSIZE) << QPointF(PINSIZE,PINSIZE);
+    }
+
+    vuValue = new QGraphicsPolygonItem(pol,this);
+//    vuValue = new QGraphicsEllipseItem(geometry().adjusted(BRPIN_MRG,BRPIN_MRG,-BRPIN_MRG,-BRPIN_MRG),this);
     vuValue->setPen(Qt::NoPen);
+
+    rectBgnd = new QGraphicsPolygonItem(pol,this);
+    rectBgnd->setBrush(Qt::NoBrush);
 }
 
 const QPointF BridgePinView::pinPos() const
 {
-    return QPointF(PINSIZE/2,PINSIZE/2);
+    if(pinAngle>0) {
+        return QPointF(PINSIZE/2,PINSIZE);
+    } else {
+        return QPointF(PINSIZE/2,0);
+    }
 }
 
 void BridgePinView::UpdateModelIndex(const QModelIndex &index)

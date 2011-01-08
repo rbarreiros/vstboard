@@ -142,7 +142,6 @@ SOURCES += main.cpp \
     views/maingraphicsview.cpp \
     views/configdialog.cpp \
     views/textbutton.cpp \
-    views/containerview.cpp \
     connectables/container.cpp \
     views/connectableobjectview.cpp \
     views/bridgepinview.cpp \
@@ -219,7 +218,6 @@ HEADERS += mainwindow.h \
     views/maingraphicsview.h \
     views/configdialog.h \
     views/textbutton.h \
-    views/containerview.h \
     connectables/container.h \
     views/connectableobjectview.h \
     views/bridgepinview.h \

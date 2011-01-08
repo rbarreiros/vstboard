@@ -49,8 +49,7 @@ namespace View {
         ListPinsView *listMidiOut;
         ListPinsView *listParametersIn;
         ListPinsView *listParametersOut;
-        ListPinsView *listBridgeIn;
-        ListPinsView *listBridgeOut;
+        ListPinsView *listBridge;
 
     protected:
         void SetErrorMessage(const QString & msg);

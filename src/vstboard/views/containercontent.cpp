@@ -37,16 +37,19 @@ ContainerContent::ContainerContent(QAbstractItemModel *model, QGraphicsItem * pa
     dropPos.setX(0);
     dropPos.setY(0);
 
-    QPalette pal;
-    pal = palette();
-    pal.setBrush(QPalette::Active, QPalette::Window, Qt::lightGray);
-    setPalette(pal);
+
+
+//    QPalette pal;
+//    pal = palette();
+////    pal.setBrush(QPalette::Active, QPalette::Window, Qt::lightGray);
+//    pal.setBrush(QPalette::Active, QPalette::Window, Qt::NoBrush);
+//    setPalette(pal);
 }
 
 void ContainerContent::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    painter->setBrush(palette().brush(QPalette::Window));
-    painter->drawRect(boundingRect());
+//    painter->setBrush(palette().brush(QPalette::Window));
+//    painter->drawRect(boundingRect());
 }
 
 void ContainerContent::SetModelIndex(QPersistentModelIndex index)

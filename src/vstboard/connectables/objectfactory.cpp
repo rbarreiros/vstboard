@@ -170,19 +170,7 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
     switch(info.nodeType) {
 
         case NodeType::container :
-            switch(info.objType) {
-                case ObjType::Container:
-                    obj = new Container(myHost,objId, info);
-                    break;
-
-                case ObjType::MainContainer:
-                    obj = new MainContainer(myHost,objId, info);
-                    break;
-
-                default :
-                    debug("ObjectFactory::NewObject : unknown object type")
-                    return QSharedPointer<Object>();
-            }
+            obj = new MainContainer(myHost,objId, info);
             break;
 
         case NodeType::bridge :

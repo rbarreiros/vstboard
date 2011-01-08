@@ -24,30 +24,30 @@
 using namespace View;
 
 MainContainerView::MainContainerView(MainHost *myHost,QAbstractItemModel *model) :
-        ContainerView(myHost,model)
+        ObjectView(myHost,model)
 {
-//    setObjectName("MainContainerView");
-
     content = new ContainerContent(model,this);
     content->setAcceptDrops(true);
 
     bridgeIn = new BridgeView(myHost, model, this);
-    bridgeIn->listBridgeIn->layout->setOrientation(Qt::Horizontal);
-    bridgeIn->listBridgeOut->layout->setOrientation(Qt::Horizontal);
-
     bridgeOut = new BridgeView(myHost, model, this);
-    bridgeOut->listBridgeIn->layout->setOrientation(Qt::Horizontal);
-    bridgeOut->listBridgeOut->layout->setOrientation(Qt::Horizontal);
-
     bridgeSend = new BridgeView(myHost, model, this);
-    bridgeSend->listBridgeIn->layout->setOrientation(Qt::Horizontal);
-    bridgeSend->listBridgeOut->layout->setOrientation(Qt::Horizontal);
-
     bridgeReturn = new BridgeView(myHost, model, this);
-    bridgeReturn->listBridgeIn->layout->setOrientation(Qt::Horizontal);
-    bridgeReturn->listBridgeOut->layout->setOrientation(Qt::Horizontal);
 
     setGeometry(0,0,0,0);
+}
+
+MainContainerView::~MainContainerView()
+{
+    foreach(CableView *c, listCables) {
+        c->scene()->removeItem(c);
+        delete c;
+    }
+}
+
+QPointF MainContainerView::GetDropPos()
+{
+    return mapFromScene( content->GetDropPos() );
 }
 
 void MainContainerView::SetModelIndex(QPersistentModelIndex index)
@@ -69,3 +69,4 @@ void MainContainerView::OnViewChanged(QRectF rect)
     bridgeReturn->setPos(rect.right() - bridgeReturn->geometry().width(), rect.bottom() - bridgeReturn->geometry().height());
     content->setGeometry(rect);
 }
+

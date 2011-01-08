@@ -23,21 +23,22 @@
 using namespace View;
 
 BridgeView::BridgeView(MainHost *myHost,QAbstractItemModel *model, QGraphicsItem * parent, Qt::WindowFlags wFlags) :
-        ConnectableObjectView(myHost, model,parent,wFlags)
+        ObjectView(myHost,model,parent,wFlags),
+        lLayout(0)
 {
     setGeometry(QRectF(0,0,0,0));
-    border->hide();
-    titleText->hide();
-//    editorButton->hide();
-    layout->setContentsMargins(0,0,0,0);
 
-    setFlag(QGraphicsItem::ItemIsMovable, false);
-    setFlag(QGraphicsItem::ItemIsSelectable, false);
-    setFlag(QGraphicsItem::ItemSendsGeometryChanges, false);
+    lLayout = new QGraphicsLinearLayout(Qt::Horizontal) ;
+    lLayout->setSpacing(0);
+    lLayout->setContentsMargins(0,0,0,0);
+    setLayout(lLayout);
+
+    listBridge = new ListPinsView(this);
+    listBridge->layout->setOrientation(Qt::Horizontal);
+    lLayout->addItem(listBridge);
 }
 
 void BridgeView::moveEvent ( QGraphicsSceneMoveEvent * event )
 {
-    listBridgeIn->UpdateCablesPosition();
-    listBridgeOut->UpdateCablesPosition();
+    listBridge->UpdateCablesPosition();
 }

@@ -21,20 +21,32 @@
 #ifndef MAINCONTAINERVIEW_H
 #define MAINCONTAINERVIEW_H
 
-#include "containerview.h"
+#include "objectview.h"
+#include "containercontent.h"
+#include "cableview.h"
+#include "bridgeview.h"
 
 class MainHost;
 namespace View {
 
-    class MainContainerView : public ContainerView
+    class MainContainerView : public ObjectView
     {
     Q_OBJECT
     public:
         explicit MainContainerView(MainHost *myHost,QAbstractItemModel *model);
+        ~MainContainerView();
         void SetModelIndex(QPersistentModelIndex index);
         void SetParking(QWidget *parking);
+        QPointF GetDropPos();
+
+        BridgeView *bridgeIn;
+        BridgeView *bridgeOut;
         BridgeView *bridgeSend;
         BridgeView *bridgeReturn;
+
+    protected:
+        ContainerContent *content;
+        QList<CableView*>listCables;
 
     public slots:
         void OnViewChanged(QRectF rect);

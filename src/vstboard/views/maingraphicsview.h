@@ -43,6 +43,7 @@
         void mousePressEvent ( QMouseEvent * event );
         void resizeEvent ( QResizeEvent * event );
         void scrollContentsBy ( int dx, int dy );
+        void paintEvent ( QPaintEvent * event );
 
         struct SceneProg {
             qreal scale;

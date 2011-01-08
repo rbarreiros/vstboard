@@ -21,12 +21,12 @@
 #ifndef BRIDGEVIEW_H
 #define BRIDGEVIEW_H
 
-#include "connectableobjectview.h"
+#include "objectview.h"
 #include "cableview.h"
 
 class MainHost;
 namespace View {
-    class BridgeView : public ConnectableObjectView
+    class BridgeView : public ObjectView
     {
     Q_OBJECT
     public:
@@ -34,6 +34,7 @@ namespace View {
 
     protected:
         void moveEvent ( QGraphicsSceneMoveEvent * event );
+        QGraphicsLinearLayout *lLayout;
     };
 }
 #endif // BRIDGEVIEW_H

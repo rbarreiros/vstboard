@@ -207,16 +207,16 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                     return false;
                 }
                 cntPtr->AddObject(objPtr);
-                if(info.objType == ObjType::Container) {
-                    ObjectInfo in;
-                    in.nodeType = NodeType::bridge;
-                    in.objType = ObjType::BridgeIn;
-                    static_cast<Connectables::Container*>(objPtr.data())->AddObject( myHost->objFactory->NewObject(in) );
-                    ObjectInfo out;
-                    out.nodeType = NodeType::bridge;
-                    out.objType = ObjType::BridgeOut;
-                    static_cast<Connectables::Container*>(objPtr.data())->AddObject( myHost->objFactory->NewObject(out) );
-                }
+//                if(info.objType == ObjType::Container) {
+//                    ObjectInfo in;
+//                    in.nodeType = NodeType::bridge;
+//                    in.objType = ObjType::BridgeIn;
+//                    static_cast<Connectables::Container*>(objPtr.data())->AddObject( myHost->objFactory->NewObject(in) );
+//                    ObjectInfo out;
+//                    out.nodeType = NodeType::bridge;
+//                    out.objType = ObjType::BridgeOut;
+//                    static_cast<Connectables::Container*>(objPtr.data())->AddObject( myHost->objFactory->NewObject(out) );
+//                }
 
 
                 return true;

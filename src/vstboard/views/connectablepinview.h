@@ -30,7 +30,7 @@ namespace View {
     {
     Q_OBJECT
     public:
-        ConnectablePinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, Connectables::Pin *pin);
+        ConnectablePinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo);
         virtual void UpdateModelIndex(const QModelIndex &index);
 
     protected:

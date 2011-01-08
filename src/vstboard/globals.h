@@ -81,7 +81,6 @@ namespace ObjType {
         HostController,
         MainContainer,
         ParkingContainer,
-        Container,
         BridgeIn,
         BridgeOut,
         BridgeSend,

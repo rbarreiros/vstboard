@@ -21,7 +21,6 @@
 #include "objectview.h"
 #include "pinview.h"
 #include "../globals.h"
-//#include "mainwindow.h"
 #include "../mainhost.h"
 
 using namespace View;
@@ -43,8 +42,7 @@ ObjectView::ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsIte
     listMidiOut(0),
     listParametersIn(0),
     listParametersOut(0),
-    listBridgeIn(0),
-    listBridgeOut(0)
+    listBridge(0)
 {
 //    setFocusPolicy(Qt::StrongFocus);
 
@@ -55,7 +53,7 @@ ObjectView::ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsIte
             this,SLOT(close()));
     addAction(actDel);
 
-//    backgroundImg = new QGraphicsPixmapItem(this,scene());
+
 //    setAutoFillBackground(true);
 }
 
@@ -70,25 +68,12 @@ void ObjectView::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     menu.exec(actions(),event->screenPos(),actions().at(0),event->widget());
 }
 
-//void ObjectView::ShowEditor(bool show)
-//{
-//    model->setData(objIndex,show,UserRoles::editorVisible);
-//}
-
-//void ObjectView::ToggleLearningMode(bool learn)
-//{
-//    model->setData(objIndex,learn,UserRoles::paramLearning);
-//}
-
 void ObjectView::SetModelIndex(QPersistentModelIndex index)
 {
     ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
     if(info.objType == ObjType::dummy) {
         SetErrorMessage("object not loaded");
     }
-
-//    actEditor->setEnabled( objIndex.data(UserRoles::hasEditor).toBool() );
-//    actLearn->setEnabled( objIndex.data(UserRoles::canLearn).toBool() );
 
     if(info.nodeType == NodeType::bridge) {
         actDel->setEnabled(false);
@@ -98,10 +83,6 @@ void ObjectView::SetModelIndex(QPersistentModelIndex index)
     if(titleText) {
         titleText->setText(index.data(Qt::DisplayRole).toString());
     }
-
-//    if(index.data(UserRoles::editorImage).isValid()) {
-//        SetBackground( index.data(UserRoles::editorImage).toString() );
-//    }
 }
 
 void ObjectView::UpdateModelIndex()
@@ -151,22 +132,6 @@ void ObjectView::SetErrorMessage(const QString & msg)
     }
 }
 
-//void ObjectView::SetBackground(const QString & imgName)
-//{
-//    if(!backgroundImg->pixmap().isNull() &&
-//       backgroundImg->pixmap().size() == boundingRect().size().toSize())
-//        return;
-
-//    QPixmap pix = ImageCollection::Get()->GetImage( imgName ).copy(boundingRect().toRect());
-//    if(pix.isNull())
-//        return;
-
-//    backgroundImg->setPixmap(pix);
-//    QGraphicsBlurEffect *eff = new QGraphicsBlurEffect(this);
-//    eff->setBlurRadius(2);
-//    backgroundImg->setGraphicsEffect(eff);
-//}
-
 void ObjectView::closeEvent ( QCloseEvent * event )
 {
     setActive(false);
@@ -205,8 +170,6 @@ void ObjectView::resizeEvent ( QGraphicsSceneResizeEvent * event )
 {
     if(selectBorder)
         selectBorder->setRect( -2, -2, event->newSize().width()+4, event->newSize().height()+4);
-//    if(model)
-//        model->setData(objIndex,event->newSize(),UserRoles::size);
 }
 
 void ObjectView::mouseReleaseEvent ( QGraphicsSceneMouseEvent * event )
