@@ -40,6 +40,7 @@ namespace Connectables {
     public:
         explicit HostController(MainHost *myHost,int index);
         void Render();
+        void SetContainerId(quint16 id);
 
     protected:
         QList<QVariant> listTempo;

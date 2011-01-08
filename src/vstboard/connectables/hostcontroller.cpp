@@ -122,11 +122,15 @@ void HostController::OnParameterChanged(ConnectionInfo pinInfo, float value)
 
 void HostController::OnHostProgChanged(const QModelIndex &index)
 {
+    if(!listParameterPinIn->listPins.contains(Param_Prog))
+        return;
     static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Prog))->ChangeValue( index.row(), true );
 }
 
 void HostController::OnHostGroupChanged(const QModelIndex &index)
 {
+    if(!listParameterPinIn->listPins.contains(Param_Group))
+        return;
     static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Group))->ChangeValue( index.row(), true );
 }
 
@@ -135,4 +139,25 @@ void HostController::OnHostTempoChange(int tempo, int sign1, int sign2)
     static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Tempo))->SetVariantValue( tempo);
     static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Sign1))->SetVariantValue( sign1 );
     static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Sign2))->SetVariantValue( sign2 );
+}
+
+void HostController::SetContainerId(quint16 id)
+{
+    switch(id) {
+        case FixedObjId::programContainer :
+            listParameterPinIn->RemovePin(Param_Prog);
+            disconnect(this, SIGNAL(progChange(int)),
+                    myHost->programList,SLOT(ChangeProg(int)));
+            disconnect(myHost->programList,SIGNAL(ProgChanged(QModelIndex)),
+                   this,SLOT(OnHostProgChanged(QModelIndex)));
+
+        case FixedObjId::groupContainer :
+            listParameterPinIn->RemovePin(Param_Group);
+            disconnect(this, SIGNAL(grpChange(int)),
+                    myHost->programList,SLOT(ChangeGroup(int)));
+            disconnect(myHost->programList,SIGNAL(GroupChanged(QModelIndex)),
+                   this,SLOT(OnHostGroupChanged(QModelIndex)));
+    }
+
+    Object::SetContainerId(id);
 }
