@@ -141,12 +141,6 @@ connectables/vstaudiodeviceout.cpp \
 ../vstboard/connectables/bridge.cpp \
 ../vstboard/views/aboutdialog.cpp \
     vst.cpp \
-    #../../libs/portmidi/pm_common/portmidi.c \
-    #../../libs/portmidi/pm_common/pmutil.c \
-    #../../libs/portmidi/pm_win/pmwin.c \
-    #../../libs/portmidi/porttime/porttime.c \
-    #../../libs/portmidi/porttime/ptwinmm.c \
-    #../../libs/portmidi/pm_win/pmwinmm.c \
     ../vstboard/connectables/miditoautomation.cpp \
     ../vstboard/connectables/midisender.cpp \
     connectables/vstautomation.cpp \

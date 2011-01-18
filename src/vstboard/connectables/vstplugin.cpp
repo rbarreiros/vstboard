@@ -24,7 +24,6 @@
 #include "../mainwindow.h"
 #include "../vst/cvsthost.h"
 #include "../views/vstpluginwindow.h"
-#include "imagecollection.h"
 
 using namespace Connectables;
 

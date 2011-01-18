@@ -138,10 +138,8 @@ SOURCES += main.cpp \
     connectables/objectprogram.cpp \
     connectables/parameterpin.cpp \
     connectables/objectparameter.cpp \
-    views/outlinedtext.cpp \
     views/maingraphicsview.cpp \
     views/configdialog.cpp \
-    views/textbutton.cpp \
     connectables/container.cpp \
     views/connectableobjectview.cpp \
     views/bridgepinview.cpp \
@@ -155,11 +153,9 @@ SOURCES += main.cpp \
     connectables/cable.cpp \
     connectables/containerprogram.cpp \
     projectfile/setupfile.cpp \
-    models/hostmodelproxy.cpp \
     audiodevices.cpp \
     connectables/bridgepinin.cpp \
     connectables/bridgepinout.cpp \
-    views/combodelegate.cpp \
     connectables/maincontainer.cpp \
     connectables/objectinfo.cpp \
     views/aboutdialog.cpp \
@@ -171,7 +167,6 @@ SOURCES += main.cpp \
     views/grouplistview.cpp \
     views/proglistview.cpp \
     models/programsmodel.cpp \
-    imagecollection.cpp \
     connectables/pinslist.cpp \
     views/minmaxpinview.cpp \
     views/cursorview.cpp
@@ -214,10 +209,8 @@ HEADERS += mainwindow.h \
     connectables/objectprogram.h \
     connectables/parameterpin.h \
     connectables/objectparameter.h \
-    views/outlinedtext.h \
     views/maingraphicsview.h \
     views/configdialog.h \
-    views/textbutton.h \
     connectables/container.h \
     views/connectableobjectview.h \
     views/bridgepinview.h \
@@ -231,11 +224,9 @@ HEADERS += mainwindow.h \
     connectables/cable.h \
     connectables/containerprogram.h \
     projectfile/setupfile.h \
-    models/hostmodelproxy.h \
     audiodevices.h \
     connectables/bridgepinin.h \
     connectables/bridgepinout.h \
-    views/combodelegate.h \
     connectables/maincontainer.h \
     connectables/objectinfo.h \
     views/aboutdialog.h \
@@ -247,7 +238,6 @@ HEADERS += mainwindow.h \
     views/grouplistview.h \
     views/proglistview.h \
     models/programsmodel.h \
-    imagecollection.h \
     _version.h \
     connectables/pinslist.h \
     views/minmaxpinview.h \
