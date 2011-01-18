@@ -2,6 +2,14 @@
 <!DOCTYPE TS>
 <TS version="2.0" language="fr_FR">
 <context>
+    <name>AboutDialog</name>
+    <message>
+        <location filename="views/aboutdialog.cpp" line="40"/>
+        <source>About %1</source>
+        <translation>A propos de %1</translation>
+    </message>
+</context>
+<context>
     <name>AudioDevices</name>
     <message>
         <location filename="audiodevices.cpp" line="78"/>
@@ -180,37 +188,47 @@
 <context>
     <name>Connectables::AudioDeviceIn</name>
     <message>
-        <location filename="connectables/audiodevicein.cpp" line="78"/>
+        <location filename="connectables/audiodevicein.cpp" line="80"/>
         <source>Device not found</source>
         <translation>Périphérique non trouvé</translation>
     </message>
     <message>
-        <location filename="connectables/audiodevicein.cpp" line="93"/>
+        <location filename="connectables/audiodevicein.cpp" line="95"/>
         <source>Error while opening the interface</source>
         <translation>Erreur lors de l&apos;ouverture du périphérique</translation>
     </message>
     <message>
-        <location filename="connectables/audiodevicein.cpp" line="103"/>
+        <location filename="connectables/audiodevicein.cpp" line="105"/>
         <source>Error : device was deleted</source>
         <translation>Erreur : le périphérique est fermé</translation>
+    </message>
+    <message>
+        <location filename="connectables/audiodevicein.cpp" line="121"/>
+        <source>Already in use</source>
+        <translation>En cours d&apos;utilisation</translation>
     </message>
 </context>
 <context>
     <name>Connectables::AudioDeviceOut</name>
     <message>
-        <location filename="connectables/audiodeviceout.cpp" line="68"/>
+        <location filename="connectables/audiodeviceout.cpp" line="70"/>
         <source>Device not found</source>
         <translation>Périphérique non trouvé</translation>
     </message>
     <message>
-        <location filename="connectables/audiodeviceout.cpp" line="83"/>
+        <location filename="connectables/audiodeviceout.cpp" line="85"/>
         <source>Error while opening the interface</source>
         <translation>Erreur lors de l&apos;ouverture du périphérique</translation>
     </message>
     <message>
-        <location filename="connectables/audiodeviceout.cpp" line="93"/>
+        <location filename="connectables/audiodeviceout.cpp" line="95"/>
         <source>Error : device was deleted</source>
         <translation>Erreur : le périphérique est fermé</translation>
+    </message>
+    <message>
+        <location filename="connectables/audiodeviceout.cpp" line="111"/>
+        <source>Already in use</source>
+        <translation>En cours d&apos;utilisation</translation>
     </message>
 </context>
 <context>
@@ -222,9 +240,29 @@
     </message>
 </context>
 <context>
+    <name>Connectables::MidiDevice</name>
+    <message>
+        <location filename="connectables/mididevice.cpp" line="71"/>
+        <source>Device not found</source>
+        <translation>Périphérique non trouvé</translation>
+    </message>
+    <message>
+        <location filename="connectables/mididevice.cpp" line="94"/>
+        <location filename="connectables/mididevice.cpp" line="111"/>
+        <location filename="connectables/mididevice.cpp" line="130"/>
+        <source>Error while opening midi device %1 %2</source>
+        <translation>Erreur lors de l&apos;ouverture du périphérique %1 %2</translation>
+    </message>
+    <message>
+        <location filename="connectables/mididevice.cpp" line="206"/>
+        <source>Error : device was deleted</source>
+        <translation>Erreur : le périphérique est fermé</translation>
+    </message>
+</context>
+<context>
     <name>Connectables::MidiSender</name>
     <message>
-        <location filename="connectables/midisender.cpp" line="28"/>
+        <location filename="connectables/midisender.cpp" line="27"/>
         <source>MidiSender</source>
         <translation>Générateur Midi</translation>
     </message>
@@ -232,7 +270,7 @@
 <context>
     <name>Connectables::MidiToAutomation</name>
     <message>
-        <location filename="connectables/miditoautomation.cpp" line="30"/>
+        <location filename="connectables/miditoautomation.cpp" line="29"/>
         <source>Midi to Parameter</source>
         <oldsource>MidiCC-&gt;Automation</oldsource>
         <translation>Midi-=&gt; Paramètres</translation>
@@ -241,12 +279,12 @@
 <context>
     <name>Connectables::Object</name>
     <message>
-        <location filename="connectables/object.cpp" line="478"/>
+        <location filename="connectables/object.cpp" line="495"/>
         <source>Editor</source>
         <translation>Editeur</translation>
     </message>
     <message>
-        <location filename="connectables/object.cpp" line="483"/>
+        <location filename="connectables/object.cpp" line="500"/>
         <source>Learn</source>
         <translation>Learn</translation>
     </message>
@@ -254,7 +292,7 @@
 <context>
     <name>Connectables::VstPlugin</name>
     <message>
-        <location filename="connectables/vstplugin.cpp" line="238"/>
+        <location filename="connectables/vstplugin.cpp" line="234"/>
         <source>Error while loading plugin</source>
         <translation>Erreur lors du chargement du plugin</translation>
     </message>
@@ -285,7 +323,7 @@
 <context>
     <name>GroupListView</name>
     <message>
-        <location filename="views/grouplistview.cpp" line="11"/>
+        <location filename="views/grouplistview.cpp" line="31"/>
         <source>Delete group</source>
         <translation>Supprimer groupe</translation>
     </message>
@@ -298,410 +336,410 @@
         <translation>VstBoard</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="143"/>
+        <location filename="mainwindow.ui" line="146"/>
         <source>Host Panel</source>
         <translation>Volet Config</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="161"/>
+        <location filename="mainwindow.ui" line="164"/>
         <source>The Host panel is where you normally put your audio and midi interfaces.</source>
         <translation>Le volet config, normalement utilisé pour les interfaces audio et midi.</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="187"/>
+        <location filename="mainwindow.ui" line="193"/>
         <source>Project Panel</source>
         <translation>Volet Projet</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="228"/>
+        <location filename="mainwindow.ui" line="237"/>
         <source>Program Panel</source>
         <translation>Volet Programme</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="300"/>
+        <location filename="mainwindow.ui" line="312"/>
         <source>Group Panel</source>
         <translation>Volet Groupe</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="382"/>
+        <location filename="mainwindow.ui" line="400"/>
         <source>View</source>
         <translation>Affichage</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="395"/>
+        <location filename="mainwindow.ui" line="413"/>
         <source>Edit</source>
         <translation>Edition</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="403"/>
+        <location filename="mainwindow.ui" line="421"/>
         <source>File</source>
         <translation>Fichier</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="407"/>
+        <location filename="mainwindow.ui" line="425"/>
         <source>Recent Setups</source>
         <translation>Config récentes</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="412"/>
+        <location filename="mainwindow.ui" line="430"/>
         <source>Recent Projects</source>
         <translation>Projets récents</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="429"/>
+        <location filename="mainwindow.ui" line="447"/>
         <source>Help</source>
         <translation>Aide</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="479"/>
+        <location filename="mainwindow.ui" line="497"/>
         <source>Programs</source>
         <translation>Programmes</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="519"/>
+        <location filename="mainwindow.ui" line="537"/>
         <source>Midi devices</source>
         <translation>Interfaces midi</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="577"/>
+        <location filename="mainwindow.ui" line="595"/>
         <source>Vst Plugins</source>
         <translation>Plugins VST</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="608"/>
+        <location filename="mainwindow.ui" line="626"/>
         <source>Audio devices</source>
         <translation>Interfaces audio</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="669"/>
+        <location filename="mainwindow.ui" line="687"/>
         <source>Solver</source>
         <translation>Solver</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="700"/>
+        <location filename="mainwindow.ui" line="718"/>
         <source>Tools</source>
         <translation>Outils</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="767"/>
+        <location filename="mainwindow.ui" line="785"/>
         <source>HostModel</source>
         <translation>HostModel</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="832"/>
+        <location filename="mainwindow.ui" line="850"/>
         <source>Save the Program and Group panels in a project file</source>
         <translation>Enregistre les volet Programme et Groupe dans un fichier Projet</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="844"/>
+        <location filename="mainwindow.ui" line="862"/>
         <source>Open Project</source>
         <translation>Ouvrir un Projet</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="847"/>
-        <location filename="mainwindow.cpp" line="378"/>
+        <location filename="mainwindow.ui" line="865"/>
+        <location filename="mainwindow.cpp" line="380"/>
         <source>Open a Project file</source>
         <translation>Ouvrir un fichier Projet</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="850"/>
+        <location filename="mainwindow.ui" line="868"/>
         <source>Open a project file</source>
         <translation>Ouvrir un fichier Projet</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="865"/>
+        <location filename="mainwindow.ui" line="883"/>
         <source>Clear the Program and Group panels</source>
         <translation>Efface les volets Programme et Groupe</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="918"/>
+        <location filename="mainwindow.ui" line="936"/>
         <source>Save the Host panel in a setup file</source>
         <translation>Enregistre le volet Config dans un fichier Config</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="933"/>
+        <location filename="mainwindow.ui" line="951"/>
         <source>Clear the Host panel</source>
         <translation>Efface le volet Config</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1099"/>
+        <location filename="mainwindow.ui" line="1117"/>
         <source>Open Setup</source>
         <translation>Ouvrir une Config</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1102"/>
-        <location filename="mainwindow.ui" line="1105"/>
-        <location filename="mainwindow.cpp" line="437"/>
+        <location filename="mainwindow.ui" line="1120"/>
+        <location filename="mainwindow.ui" line="1123"/>
+        <location filename="mainwindow.cpp" line="439"/>
         <source>Open a Setup file</source>
         <translation>Ouvrir un fichier Config</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1108"/>
+        <location filename="mainwindow.ui" line="1126"/>
         <source>Alt+O</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="829"/>
-        <location filename="mainwindow.cpp" line="414"/>
+        <location filename="mainwindow.ui" line="847"/>
+        <location filename="mainwindow.cpp" line="416"/>
         <source>Save Project</source>
         <translation>Enregistrer le Projet</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="835"/>
+        <location filename="mainwindow.ui" line="853"/>
         <source>Ctrl+S</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="853"/>
+        <location filename="mainwindow.ui" line="871"/>
         <source>Ctrl+O</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="862"/>
+        <location filename="mainwindow.ui" line="880"/>
         <source>New Project</source>
         <translation>Nouveau Projet</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="868"/>
+        <location filename="mainwindow.ui" line="886"/>
         <source>Ctrl+N</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="877"/>
+        <location filename="mainwindow.ui" line="895"/>
         <source>Configuration</source>
         <translation>Configuration</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="880"/>
+        <location filename="mainwindow.ui" line="898"/>
         <source>Show the configuration dialog</source>
         <translation>Affiche la boîte de dialogue configuration</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="883"/>
+        <location filename="mainwindow.ui" line="901"/>
         <source>Ctrl+C</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="891"/>
-        <location filename="mainwindow.ui" line="894"/>
+        <location filename="mainwindow.ui" line="909"/>
+        <location filename="mainwindow.ui" line="912"/>
         <source>Edit Shortcuts (testing)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="903"/>
-        <location filename="mainwindow.ui" line="906"/>
+        <location filename="mainwindow.ui" line="921"/>
+        <location filename="mainwindow.ui" line="924"/>
         <source>Delete</source>
         <translation>Supprimer</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="915"/>
-        <location filename="mainwindow.cpp" line="474"/>
+        <location filename="mainwindow.ui" line="933"/>
+        <location filename="mainwindow.cpp" line="476"/>
         <source>Save Setup</source>
         <translation>Enregistrer la Config</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="921"/>
+        <location filename="mainwindow.ui" line="939"/>
         <source>Alt+S</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="930"/>
+        <location filename="mainwindow.ui" line="948"/>
         <source>New Setup</source>
         <translation>Nouvelle Config</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="936"/>
+        <location filename="mainwindow.ui" line="954"/>
         <source>Alt+N</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="951"/>
+        <location filename="mainwindow.ui" line="969"/>
         <source>Toggle Host panel</source>
         <translation>Afficher/masquer le volet Config</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="954"/>
+        <location filename="mainwindow.ui" line="972"/>
         <source>Show or hide the host panel</source>
         <translation>Afficher/masquer le volet Config</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="957"/>
+        <location filename="mainwindow.ui" line="975"/>
         <source>Ctrl+H</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="966"/>
+        <location filename="mainwindow.ui" line="984"/>
         <source>About...</source>
         <translation>A propos de...</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="969"/>
+        <location filename="mainwindow.ui" line="987"/>
         <source>About</source>
         <translation>A propos</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="978"/>
+        <location filename="mainwindow.ui" line="996"/>
         <source>Save Project As ...</source>
         <translation>Enregistrer le Projet sous ...</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="981"/>
+        <location filename="mainwindow.ui" line="999"/>
         <source>Save Project As</source>
         <translation>Enregistrer le Projet sous</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="984"/>
+        <location filename="mainwindow.ui" line="1002"/>
         <source>Ctrl+Shift+S</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="993"/>
+        <location filename="mainwindow.ui" line="1011"/>
         <source>Save Setup As ...</source>
         <translation>Enregistrer le Setup sous ...</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="996"/>
+        <location filename="mainwindow.ui" line="1014"/>
         <source>Save Setup As</source>
         <translation>Enregistrer le Setup sous</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="999"/>
+        <location filename="mainwindow.ui" line="1017"/>
         <source>Alt+Shift+S</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1014"/>
-        <location filename="mainwindow.ui" line="1017"/>
+        <location filename="mainwindow.ui" line="1032"/>
+        <location filename="mainwindow.ui" line="1035"/>
         <source>Toggle Group panel</source>
         <translation>Afficher/masquer le volet Groupe</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1020"/>
+        <location filename="mainwindow.ui" line="1038"/>
         <source>Show or hide the group panel</source>
         <oldsource>Show or hide the insert panel</oldsource>
         <translation>Afficher/masquer le volet Groupe</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1023"/>
+        <location filename="mainwindow.ui" line="1041"/>
         <source>Ctrl+G</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1049"/>
+        <location filename="mainwindow.ui" line="1067"/>
         <source>Refresh Audio devices</source>
         <translation>Redétecter les interfaces audio</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1054"/>
+        <location filename="mainwindow.ui" line="1072"/>
         <source>Refresh Midi devices</source>
         <translation>Redétecter les interfaces midi</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1059"/>
+        <location filename="mainwindow.ui" line="1077"/>
         <source>Restore default layout</source>
         <translation>Mise en page par défaut</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1067"/>
+        <location filename="mainwindow.ui" line="1085"/>
         <source>Status bar</source>
         <translation>Barre de status</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1075"/>
+        <location filename="mainwindow.ui" line="1093"/>
         <source>Tool bar</source>
         <translation>Barre d&apos;outils</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1090"/>
+        <location filename="mainwindow.ui" line="1108"/>
         <source>Toggle Project panel</source>
         <translation>Afficher/masquer le volet Projet</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1038"/>
+        <location filename="mainwindow.ui" line="1056"/>
         <source>Toggle Program panel</source>
         <translation>Afficher/masquer le volet Programme</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1041"/>
+        <location filename="mainwindow.ui" line="1059"/>
         <source>Show or hide the program panel</source>
         <translation>Afficher/masquer le volet programme</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="1044"/>
+        <location filename="mainwindow.ui" line="1062"/>
         <source>Ctrl+P</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="356"/>
+        <location filename="mainwindow.cpp" line="358"/>
         <source>Midi sender</source>
         <translation>Générateur Midi </translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="363"/>
+        <location filename="mainwindow.cpp" line="365"/>
         <source>Host Controller</source>
         <translation>Contrôleur d&apos;hôte</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="187"/>
+        <location filename="mainwindow.cpp" line="200"/>
         <source>The setup has been modified.</source>
         <translation>La config a été modifiée.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="188"/>
-        <location filename="mainwindow.cpp" line="238"/>
+        <location filename="mainwindow.cpp" line="201"/>
+        <location filename="mainwindow.cpp" line="251"/>
         <source>Do you want to save your changes?</source>
         <translation>Voulez-vous enregistrer les modifications ?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="237"/>
+        <location filename="mainwindow.cpp" line="250"/>
         <source>The project has been modified.</source>
         <translation>Le projet a été modifié.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="284"/>
+        <location filename="mainwindow.cpp" line="302"/>
         <source>Vst audio input</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="293"/>
+        <location filename="mainwindow.cpp" line="311"/>
         <source>Vst audio output</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="311"/>
+        <location filename="mainwindow.cpp" line="323"/>
         <source>Vst midi input</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="321"/>
+        <location filename="mainwindow.cpp" line="333"/>
         <source>Vst midi output</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="341"/>
+        <location filename="mainwindow.cpp" line="343"/>
         <source>Vst Automation</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="349"/>
+        <location filename="mainwindow.cpp" line="351"/>
         <source>Midi to parameter</source>
         <translation>Midi-=&gt; Paramètres</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="378"/>
-        <location filename="mainwindow.cpp" line="414"/>
+        <location filename="mainwindow.cpp" line="380"/>
+        <location filename="mainwindow.cpp" line="416"/>
         <source>Project Files (*.%1)</source>
         <translation>Fichiers projet (*.%1)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="437"/>
-        <location filename="mainwindow.cpp" line="474"/>
+        <location filename="mainwindow.cpp" line="439"/>
+        <location filename="mainwindow.cpp" line="476"/>
         <source>Setup Files (*.%1)</source>
         <translation>Fichers config (*.%1)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="702"/>
-        <location filename="mainwindow.cpp" line="717"/>
+        <location filename="mainwindow.cpp" line="716"/>
+        <location filename="mainwindow.cpp" line="731"/>
         <source>&amp;%1 %2</source>
         <translation></translation>
     </message>
@@ -709,12 +747,12 @@
 <context>
     <name>MidiDevices</name>
     <message>
-        <location filename="mididevices.cpp" line="47"/>
+        <location filename="mididevices.cpp" line="67"/>
         <source>Unable to initialize midi engine : %1</source>
         <translation>Impossible d&apos;initialiser l&apos;interface midi : %1</translation>
     </message>
     <message>
-        <location filename="mididevices.cpp" line="56"/>
+        <location filename="mididevices.cpp" line="76"/>
         <source>Unable to start midi engine</source>
         <translation>Impossible d&apos;initialiser le moteur midi</translation>
     </message>
@@ -722,7 +760,7 @@
 <context>
     <name>ProgListView</name>
     <message>
-        <location filename="views/proglistview.cpp" line="10"/>
+        <location filename="views/proglistview.cpp" line="30"/>
         <source>Delete program</source>
         <translation>Supprimer programme</translation>
     </message>
@@ -751,18 +789,18 @@
 <context>
     <name>Programs</name>
     <message>
-        <location filename="programs.cpp" line="106"/>
+        <location filename="programs.cpp" line="126"/>
         <source>The group has been modified.</source>
         <translation>Le group a été modifié.</translation>
     </message>
     <message>
-        <location filename="programs.cpp" line="107"/>
-        <location filename="programs.cpp" line="148"/>
+        <location filename="programs.cpp" line="127"/>
+        <location filename="programs.cpp" line="168"/>
         <source>Do you want to save your changes?</source>
         <translation>Voulez-vous enregistrer les modifications ?</translation>
     </message>
     <message>
-        <location filename="programs.cpp" line="147"/>
+        <location filename="programs.cpp" line="167"/>
         <source>The progarm has been modified.</source>
         <translation>Le programme a été modifié.</translation>
     </message>
@@ -770,28 +808,28 @@
 <context>
     <name>ProjectFile</name>
     <message>
-        <location filename="projectfile/projectfile.cpp" line="32"/>
-        <location filename="projectfile/projectfile.cpp" line="77"/>
+        <location filename="projectfile/projectfile.cpp" line="49"/>
+        <location filename="projectfile/projectfile.cpp" line="63"/>
         <source>Unable to open %1</source>
         <translation>Impossible d&apos;ouvrir %1</translation>
     </message>
     <message>
-        <location filename="projectfile/projectfile.cpp" line="90"/>
+        <location filename="projectfile/projectfile.cpp" line="123"/>
         <source>Unknown file format.</source>
         <translation>Format inconnu.</translation>
     </message>
     <message>
-        <location filename="projectfile/projectfile.cpp" line="91"/>
+        <location filename="projectfile/projectfile.cpp" line="124"/>
         <source>Not a VstBoard project file</source>
         <translation>N&apos;est pas un fichier Projet</translation>
     </message>
     <message>
-        <location filename="projectfile/projectfile.cpp" line="102"/>
+        <location filename="projectfile/projectfile.cpp" line="134"/>
         <source>Wrong file version.</source>
         <translation>Mauvaise version de fichier.</translation>
     </message>
     <message>
-        <location filename="projectfile/projectfile.cpp" line="103"/>
+        <location filename="projectfile/projectfile.cpp" line="135"/>
         <source>Project file format v%1 can&apos;t be converted to the current file format v%2</source>
         <translation>Les fichiers Projet v%1 ne sont pas lisibles par la version actuelle v%2</translation>
     </message>
@@ -817,48 +855,37 @@
 <context>
     <name>SetupFile</name>
     <message>
-        <location filename="projectfile/setupfile.cpp" line="32"/>
-        <location filename="projectfile/setupfile.cpp" line="67"/>
+        <location filename="projectfile/setupfile.cpp" line="43"/>
+        <location filename="projectfile/setupfile.cpp" line="57"/>
         <source>Unable to open %1</source>
         <translation>Impossible d&apos;ouvrir %1</translation>
     </message>
     <message>
-        <location filename="projectfile/setupfile.cpp" line="79"/>
+        <location filename="projectfile/setupfile.cpp" line="104"/>
         <source>Unknown file format.</source>
         <oldsource>Not a setup file.</oldsource>
         <translation>Format inconnu.</translation>
     </message>
     <message>
-        <location filename="projectfile/setupfile.cpp" line="80"/>
+        <location filename="projectfile/setupfile.cpp" line="105"/>
         <source>Not a VstBoard setup file</source>
         <translation>N&apos;est pas un fichier Config</translation>
     </message>
     <message>
-        <location filename="projectfile/setupfile.cpp" line="91"/>
+        <location filename="projectfile/setupfile.cpp" line="115"/>
         <source>Wrong file version.</source>
         <translation>Mauvaise version de fichier.</translation>
     </message>
     <message>
-        <location filename="projectfile/setupfile.cpp" line="92"/>
+        <location filename="projectfile/setupfile.cpp" line="116"/>
         <source>Setup file format v%1 can&apos;t be converted to the current file format v%2</source>
         <translation>Les fichiers Config v%1 ne sont pas lisibles par la version actuelle v%2</translation>
     </message>
 </context>
 <context>
     <name>Splash</name>
-    <message utf8="true">
-        <location filename="views/splash.ui" line="192"/>
-        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; Copyright (C) 2010 Raphaël François&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This program comes with ABSOLUTELY NO WARRANTY; This is free software, and you are welcome to redistribute it under certain conditions; for details see &amp;quot;About...&amp;quot; in the Help menu.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation></translation>
-    </message>
     <message>
-        <location filename="views/splash.ui" line="210"/>
+        <location filename="views/splash.ui" line="213"/>
         <source>Don&apos;t show this again</source>
         <translation>Ne plus afficher</translation>
     </message>
@@ -866,7 +893,7 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>View::ObjectView</name>
     <message>
-        <location filename="views/objectview.cpp" line="50"/>
+        <location filename="views/objectview.cpp" line="49"/>
         <source>Delete</source>
         <translation>Supprimer</translation>
     </message>
