@@ -37,12 +37,21 @@ VstAutomation::VstAutomation(MainHost *myHost,int index) :
         listValues << i;
     }
 
+    int prog=(int)myHost->myVstPlugin->getProgram();
+    ParameterPinOut *progPin = new ParameterPinOut(this,FixedPinNumber::vstProgNumber,prog,&listValues,true,tr("Prog"));
+    progPin->SetAlwaysVisible(true);
+    progPin->SetLimitsEnabled(false);
+    listParameterPinOut->listPins.insert(FixedPinNumber::vstProgNumber, progPin);
+
     ParameterPinIn *nbPin = new ParameterPinIn(this,FixedPinNumber::numberOfPins,VST_AUTOMATION_DEFAULT_NB_PINS,&listValues,true,tr("NbPins"));
     nbPin->SetAlwaysVisible(true);
     nbPin->SetLimitsEnabled(false);
     listParameterPinIn->listPins.insert(FixedPinNumber::numberOfPins, nbPin);
 
     static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::learningMode))->SetAlwaysVisible(true);
+
+    connect(myHost->myVstPlugin,SIGNAL(HostChangedProg(int)),
+            this,SLOT(OnHostChangedProg(int)));
 }
 
 VstAutomation::~VstAutomation()
@@ -69,6 +78,11 @@ void VstAutomation::Render()
         }
         listChanged.clear();
     }
+}
+
+void VstAutomation::OnHostChangedProg(int prog)
+{
+    static_cast<ParameterPin*>(listParameterPinOut->listPins.value(FixedPinNumber::vstProgNumber))->ChangeValue( prog, true );
 }
 
 void VstAutomation::ValueFromHost(int pinNum, float value)

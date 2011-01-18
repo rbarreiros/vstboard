@@ -44,9 +44,11 @@ namespace Connectables {
         QList<QVariant> listValues;
         QHash<int,float>listChanged;
         int numberOfPins;
+        int progChanged;
 
     public slots:
         void OnParameterChanged(ConnectionInfo pinInfo, float value);
+        void OnHostChangedProg(int prog);
     };
 }
 #endif // VSTAUTOMATION_H

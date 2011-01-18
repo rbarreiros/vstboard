@@ -57,6 +57,8 @@ public:
         // Program
         void setProgramName (char* name);
         void getProgramName (char* name);
+        void setProgram(VstInt32 program);
+        VstInt32 getProgram();
 
         // Parameters
         void setParameter (VstInt32 index, float value);
@@ -125,8 +127,11 @@ protected:
         bool hostReceiveVstEvents;
         bool hostReceiveVstMidiEvents;
         bool hostReceiveVstTimeInfo;
-
         bool opened;
+        VstInt32 currentHostProg;
+
+    signals:
+        void HostChangedProg(int prog);
     public slots:
         void OnMainHostTempoChange();
 };

@@ -33,7 +33,7 @@ AudioEffect* createEffectInstance (audioMasterCallback audioMaster)
 }
 
 Vst::Vst (audioMasterCallback audioMaster) :
-    AudioEffectX (audioMaster, 1, 128),
+    AudioEffectX (audioMaster, 128, 128),
     myApp(0),
     myHost(0),
     myWindow(0),
@@ -47,7 +47,8 @@ Vst::Vst (audioMasterCallback audioMaster) :
     hostReceiveVstEvents(false),
     hostReceiveVstMidiEvents(false),
     hostReceiveVstTimeInfo(false),
-    opened(false)
+    opened(false),
+    currentHostProg(0)
 {
     setNumInputs (DEFAULT_INPUTS*2);
     setNumOutputs (DEFAULT_OUTPUTS*2);
@@ -251,7 +252,18 @@ void Vst::setProgramName (char* name)
 
 void Vst::getProgramName (char* name)
 {
-    vst_strncpy (name, programName, kVstMaxProgNameLen);
+    vst_strncpy (name, QString("prog%1").arg(currentHostProg).toAscii(), kVstMaxProgNameLen);
+}
+
+void Vst::setProgram(VstInt32 program)
+{
+    currentHostProg=program;
+    emit HostChangedProg((int)currentHostProg);
+}
+
+VstInt32 Vst::getProgram()
+{
+    return currentHostProg;
 }
 
 void Vst::setParameter (VstInt32 index, float value)
