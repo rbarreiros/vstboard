@@ -1,5 +1,5 @@
-/******************************************************************************
-#    Copyright 2010 Raphaël François
+/**************************************************************************
+#    Copyright 2010-2011 Raphaël François
 #    Contact : ctrlbrk76@gmail.com
 #
 #    This file is part of VstBoard.
@@ -16,7 +16,7 @@
 #
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+**************************************************************************/
 
 #ifndef CONTAINER_H
 #define CONTAINER_H
