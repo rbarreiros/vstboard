@@ -97,6 +97,8 @@ public:
         void resume();
         VstPlugCategory getPlugCategory() {return kPlugCategEffect;}
 
+        void updateParameter(int index, float value);
+
 protected:
         QApplication *myApp;
         MainHost *myHost;
@@ -109,11 +111,12 @@ protected:
         QList<Connectables::VstMidiDevice*>lstMidiIn;
         QList<Connectables::VstMidiDevice*>lstMidiOut;
         QList<Connectables::VstAutomation*>lstVstAutomation;
-        QList<int>lstParameters;
+        QMap<int,float>listParameters;
 
         VstInt32 bufferSize;
 
         QMutex mutexDevices;
+        QMutex mutexParam;
 
         Gui *qEditor;
 

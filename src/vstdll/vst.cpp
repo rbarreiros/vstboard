@@ -270,6 +270,10 @@ VstInt32 Vst::getProgram()
 
 void Vst::setParameter (VstInt32 index, float value)
 {
+    mutexParam.lock();
+    listParameters.insert(index,value);
+    mutexParam.unlock();
+
     foreach(Connectables::VstAutomation *dev, lstVstAutomation) {
         dev->ValueFromHost(index,value);
     }
@@ -277,9 +281,8 @@ void Vst::setParameter (VstInt32 index, float value)
 
 float Vst::getParameter (VstInt32 index)
 {
-    if(lstParameters.count()>index)
-        return lstParameters.at(index);
-    return .0f;
+    QMutexLocker m(&mutexParam);
+    return listParameters.value(index,.0f);
 }
 
 void Vst::getParameterName (VstInt32 index, char* label)
@@ -289,12 +292,28 @@ void Vst::getParameterName (VstInt32 index, char* label)
 
 void Vst::getParameterDisplay (VstInt32 index, char* text)
 {
-    dB2string (0, text, kVstMaxParamStrLen);
+    QMutexLocker m(&mutexParam);
+    float val=.0f;
+    if(listParameters.contains(index))
+        val=listParameters.value(index);
+    float2string (val, text, kVstMaxParamStrLen);
+}
+
+void Vst::updateParameter(int index, float value)
+{
+    mutexParam.lock();
+    listParameters.insert(index,value);
+    mutexParam.unlock();
+
+    if(!beginEdit(index))
+        return;
+    setParameterAutomated(index,value);
+    endEdit(index);
 }
 
 void Vst::getParameterLabel (VstInt32 index, char* label)
 {
-    vst_strncpy (label, "nd", kVstMaxParamStrLen);
+    vst_strncpy (label, "", kVstMaxParamStrLen);
 }
 
 bool Vst::getEffectName (char* name)

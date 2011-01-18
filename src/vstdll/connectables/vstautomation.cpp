@@ -71,9 +71,7 @@ void VstAutomation::Render()
             if(listParameterPinOut->listPins.contains(i.key())) {
                 static_cast<ParameterPin*>( listParameterPinOut->listPins.value(i.key()) )->ChangeValue(i.value());
             }
-            vst->beginEdit(i.key());
-            vst->setParameterAutomated(i.key(),i.value());
-            vst->endEdit(i.key());
+            vst->updateParameter(i.key(),i.value());
             ++i;
         }
         listChanged.clear();
