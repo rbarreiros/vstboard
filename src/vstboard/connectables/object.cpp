@@ -542,9 +542,6 @@ Pin* Object::CreatePin(const ConnectionInfo &info)
 
 QDataStream & Object::toStream(QDataStream & out) const
 {
-    const quint16 file_version = 1;
-    out << file_version;
-
     out << (qint16)index;
     out << sleep;
     out << listenProgramChanges;
@@ -567,9 +564,6 @@ QDataStream & Object::toStream(QDataStream & out) const
 
 QDataStream & Object::fromStream(QDataStream & in)
 {
-    quint16 file_version;
-    in >> file_version;
-
     qint16 id;
     in >> id;
     savedIndex=id;

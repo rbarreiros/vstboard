@@ -27,10 +27,11 @@ class SetupFile : public QObject
 {
 Q_OBJECT
 public:
+    static void Clear(MainHost *myHost);
     static bool SaveToFile(MainHost *myHost, QString filePath);
     static bool LoadFromFile(MainHost *myHost, QString filePath);
-    static void Clear(MainHost *myHost);
-
+    static bool ToStream(MainHost *myHost,QDataStream &out);
+    static bool FromStream(MainHost *myHost,QDataStream &in);
 };
 
 #endif // SETUPFILE_H

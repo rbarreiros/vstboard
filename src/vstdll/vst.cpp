@@ -48,12 +48,14 @@ Vst::Vst (audioMasterCallback audioMaster) :
     hostReceiveVstMidiEvents(false),
     hostReceiveVstTimeInfo(false),
     opened(false),
-    currentHostProg(0)
+    currentHostProg(0),
+    chunkData(0)
 {
     setNumInputs (DEFAULT_INPUTS*2);
     setNumOutputs (DEFAULT_OUTPUTS*2);
     setUniqueID (kUniqueID);
     canProcessReplacing(true);
+    programsAreChunks(true);
     vst_strncpy (programName, "Default", kVstMaxProgNameLen);	// default program name
 
     qRegisterMetaType<ConnectionInfo>("ConnectionInfo");
@@ -437,12 +439,12 @@ void Vst::setBlockSize (VstInt32 blockSize)
 
 void Vst::suspend()
 {
-
+    deleteChunkData();
 }
 
 void Vst::resume()
 {
-
+    deleteChunkData();
 }
 
 void Vst::OnMainHostTempoChange()
@@ -451,4 +453,35 @@ void Vst::OnMainHostTempoChange()
         return;
 
     audioMaster (&cEffect, audioMasterSetTime, 0, 0, &myHost->vstHost->vstTimeInfo, 0);
+}
+
+void Vst::deleteChunkData()
+{
+    if(chunkData) {
+        delete[] chunkData;
+        chunkData=0;
+    }
+}
+
+VstInt32 Vst::setChunk ( void* data, VstInt32 byteSize, bool isPreset)
+{
+    QByteArray tmpStream;
+    tmpStream.setRawData((const char*)data,byteSize);
+    QDataStream tmp( &tmpStream , QIODevice::ReadOnly);
+    SetupFile::FromStream(myHost,tmp);
+    ProjectFile::FromStream(myHost,tmp);
+    return 0;
+}
+
+VstInt32 Vst::getChunk (void** data, bool isPreset)
+{
+    QByteArray tmpStream;
+    QDataStream tmp( &tmpStream , QIODevice::WriteOnly);
+    SetupFile::ToStream(myHost,tmp);
+    ProjectFile::ToStream(myHost,tmp);
+
+    chunkData = new char[tmpStream.size()+1];
+    memcpy(chunkData, tmpStream.data(), tmpStream.size()+1);
+    *data=chunkData;
+    return tmpStream.size()+1;
 }

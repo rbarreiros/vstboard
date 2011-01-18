@@ -61,6 +61,12 @@ HostController::HostController(MainHost *myHost,int index):
     listParameterPinIn->listPins.insert(Param_Group, new ParameterPinIn(this,Param_Group, myHost->programList->GetCurrentMidiGroup(),&listGrp,true,"Group"));
     listParameterPinIn->listPins.insert(Param_Prog, new ParameterPinIn(this,Param_Prog, myHost->programList->GetCurrentMidiProg(),&listPrg,true,"Prog"));
 
+    listParameterPinOut->listPins.insert(Param_Tempo, new ParameterPinOut(this,Param_Tempo,tempo,&listTempo,true,"bpm"));
+    listParameterPinOut->listPins.insert(Param_Sign1, new ParameterPinOut(this,Param_Sign1,sign1,&listSign1,true,"sign1"));
+    listParameterPinOut->listPins.insert(Param_Sign2, new ParameterPinOut(this,Param_Sign2,sign2,&listSign2,true,"sign2"));
+    listParameterPinOut->listPins.insert(Param_Group, new ParameterPinOut(this,Param_Group, myHost->programList->GetCurrentMidiGroup(),&listGrp,true,"Group"));
+    listParameterPinOut->listPins.insert(Param_Prog, new ParameterPinOut(this,Param_Prog, myHost->programList->GetCurrentMidiProg(),&listPrg,true,"Prog"));
+
     connect(this, SIGNAL(progChange(int)),
             myHost->programList,SLOT(ChangeProg(int)),
             Qt::QueuedConnection);
@@ -105,6 +111,9 @@ void HostController::OnParameterChanged(ConnectionInfo pinInfo, float value)
 {
     Object::OnParameterChanged(pinInfo,value);
 
+    if(pinInfo.direction!=PinDirection::Input)
+        return;
+
     switch(pinInfo.pinNumber) {
         case Param_Tempo :
         case Param_Sign1 :
@@ -122,16 +131,18 @@ void HostController::OnParameterChanged(ConnectionInfo pinInfo, float value)
 
 void HostController::OnHostProgChanged(const QModelIndex &index)
 {
-    if(!listParameterPinIn->listPins.contains(Param_Prog))
-        return;
-    static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Prog))->ChangeValue( index.row(), true );
+    if(listParameterPinIn->listPins.contains(Param_Prog))
+        static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Prog))->ChangeValue( index.row(), true );
+    if(listParameterPinOut->listPins.contains(Param_Prog))
+        static_cast<ParameterPin*>(listParameterPinOut->listPins.value(Param_Prog))->ChangeValue( index.row(), true );
 }
 
 void HostController::OnHostGroupChanged(const QModelIndex &index)
 {
-    if(!listParameterPinIn->listPins.contains(Param_Group))
-        return;
-    static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Group))->ChangeValue( index.row(), true );
+    if(listParameterPinIn->listPins.contains(Param_Group))
+        static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Group))->ChangeValue( index.row(), true );
+    if(listParameterPinOut->listPins.contains(Param_Group))
+        static_cast<ParameterPin*>(listParameterPinOut->listPins.value(Param_Group))->ChangeValue( index.row(), true );
 }
 
 void HostController::OnHostTempoChange(int tempo, int sign1, int sign2)
@@ -139,6 +150,10 @@ void HostController::OnHostTempoChange(int tempo, int sign1, int sign2)
     static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Tempo))->SetVariantValue( tempo);
     static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Sign1))->SetVariantValue( sign1 );
     static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Sign2))->SetVariantValue( sign2 );
+
+    static_cast<ParameterPin*>(listParameterPinOut->listPins.value(Param_Tempo))->SetVariantValue( tempo);
+    static_cast<ParameterPin*>(listParameterPinOut->listPins.value(Param_Sign1))->SetVariantValue( sign1 );
+    static_cast<ParameterPin*>(listParameterPinOut->listPins.value(Param_Sign2))->SetVariantValue( sign2 );
 }
 
 void HostController::SetContainerId(quint16 id)

@@ -18,12 +18,22 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#define SETUP_FILE_VERSION 8
 #define SETUP_FILE_KEY 0x7575e711
 
 #include "setupfile.h"
 #include "../mainhost.h"
 #include "../mainwindow.h"
+#include "fileversion.h"
+
+void SetupFile::Clear(MainHost *myHost)
+{
+    myHost->EnableSolverUpdate(false);
+    myHost->SetupHostContainer();
+    myHost->EnableSolverUpdate(true);
+    if(myHost->mainWindow) {
+        myHost->mainWindow->mySceneView->viewHost->ClearPrograms();
+    }
+}
 
 bool SetupFile::SaveToFile(MainHost *myHost, QString filePath)
 {
@@ -36,10 +46,32 @@ bool SetupFile::SaveToFile(MainHost *myHost, QString filePath)
         return false;
     }
     QDataStream out(&file);
+    return ToStream(myHost,out);
+}
+
+bool SetupFile::LoadFromFile(MainHost *myHost, QString filePath)
+{
+    QFile file(filePath);
+    if(!file.open(QIODevice::ReadOnly)) {
+        QMessageBox msgBox;
+        msgBox.setText(tr("Unable to open %1").arg(filePath));
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.exec();
+        return false;
+    }
+    QDataStream in(&file);
+    return FromStream(myHost,in);
+
+}
+
+bool SetupFile::ToStream(MainHost *myHost,QDataStream &out)
+{
+    out.setVersion(QDataStream::Qt_4_7);
+
+    myHost->currentFileVersion=PROJECT_AND_SETUP_FILE_VERSION;
 
     out << (quint32)SETUP_FILE_KEY;
-    out << (quint32)SETUP_FILE_VERSION;
-    out.setVersion(QDataStream::Qt_4_7);
+    out << myHost->currentFileVersion;
 
     myHost->EnableSolverUpdate(false);
     myHost->hostContainer->SaveProgram();
@@ -57,37 +89,18 @@ bool SetupFile::SaveToFile(MainHost *myHost, QString filePath)
     }
 
     myHost->EnableSolverUpdate(true);
-
     return true;
 }
 
-void SetupFile::Clear(MainHost *myHost)
+bool SetupFile::FromStream(MainHost *myHost,QDataStream &in)
 {
-    myHost->EnableSolverUpdate(false);
-    myHost->SetupHostContainer();
-    myHost->EnableSolverUpdate(true);
-    if(myHost->mainWindow) {
-        myHost->mainWindow->mySceneView->viewHost->ClearPrograms();
-    }
-}
-
-bool SetupFile::LoadFromFile(MainHost *myHost, QString filePath)
-{
-    QFile file(filePath);
-    if(!file.open(QIODevice::ReadOnly)) {
-        QMessageBox msgBox;
-        msgBox.setText(tr("Unable to open %1").arg(filePath));
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.exec();
-        return false;
-    }
-    QDataStream in(&file);
+    in.setVersion(QDataStream::Qt_4_7);
 
     quint32 magic;
     in >> magic;
     if(magic != SETUP_FILE_KEY) {
         QMessageBox msgBox;
-        msgBox.setWindowTitle(filePath);
+        //msgBox.setWindowTitle(filePath);
         msgBox.setText( tr("Unknown file format.") );
         msgBox.setInformativeText( tr("Not a VstBoard setup file") );
         msgBox.setIcon(QMessageBox::Critical);
@@ -95,19 +108,16 @@ bool SetupFile::LoadFromFile(MainHost *myHost, QString filePath)
         return false;
     }
 
-    quint32 version;
-    in >> version;
-    if(version != SETUP_FILE_VERSION) {
+    in >> myHost->currentFileVersion;
+    if(myHost->currentFileVersion != PROJECT_AND_SETUP_FILE_VERSION) {
         QMessageBox msgBox;
-        msgBox.setWindowTitle(filePath);
+//        msgBox.setWindowTitle(filePath);
         msgBox.setText( tr("Wrong file version.") );
-        msgBox.setInformativeText( tr("Setup file format v%1 can't be converted to the current file format v%2").arg(version).arg(SETUP_FILE_VERSION) );
+        msgBox.setInformativeText( tr("Setup file format v%1 can't be converted to the current file format v%2").arg(myHost->currentFileVersion).arg(PROJECT_AND_SETUP_FILE_VERSION) );
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.exec();
         return false;
     }
-
-    in.setVersion(QDataStream::Qt_4_7);
 
     myHost->EnableSolverUpdate(false);
     myHost->SetupHostContainer();

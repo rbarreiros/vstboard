@@ -24,9 +24,6 @@ using namespace Connectables;
 
 QDataStream & ObjectParameter::toStream(QDataStream& out) const
 {
-    const quint16 file_version = 1;
-    out << file_version;
-
     out << value;
     out << (qint16)index;
     out << visible;
@@ -40,9 +37,6 @@ QDataStream & ObjectParameter::toStream(QDataStream& out) const
 
 QDataStream & ObjectParameter::fromStream(QDataStream& in)
 {
-    quint16 file_version;
-    in >> file_version;
-
     in >> value;
     in >> (qint16&)index;
     in >> visible;

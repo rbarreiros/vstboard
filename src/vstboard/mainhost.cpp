@@ -31,8 +31,11 @@
 #endif
 
 #ifdef VSTSDK
-#include "connectables/vstplugin.h"
+    #include "connectables/vstplugin.h"
 #endif
+
+#include "projectfile/fileversion.h"
+
 
 MainHost::MainHost(Vst *myVstPlugin, QObject *parent) :
     QObject(parent),
@@ -43,7 +46,8 @@ MainHost::MainHost(Vst *myVstPlugin, QObject *parent) :
     myVstPlugin(myVstPlugin),
     solverNeedAnUpdate(false),
     solverUpdateEnabled(true),
-    mutexListCables(new QMutex(QMutex::Recursive))
+    mutexListCables(new QMutex(QMutex::Recursive)),
+    currentFileVersion(PROJECT_AND_SETUP_FILE_VERSION)
 {
     setObjectName("MainHost");
 

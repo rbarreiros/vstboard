@@ -50,22 +50,22 @@ public:
         VstInt32 canDo(char* text);
         VstInt32 processEvents(VstEvents* events);
 
-        // Processing
         void processReplacing (float** inputs, float** outputs, VstInt32 sampleFrames);
         void processDoubleReplacing (double** inputs, double** outputs, VstInt32 sampleFrames);
 
-        // Program
         void setProgramName (char* name);
         void getProgramName (char* name);
         void setProgram(VstInt32 program);
         VstInt32 getProgram();
 
-        // Parameters
         void setParameter (VstInt32 index, float value);
         float getParameter (VstInt32 index);
         void getParameterLabel (VstInt32 index, char* label);
         void getParameterDisplay (VstInt32 index, char* text);
         void getParameterName (VstInt32 index, char* text);
+
+        VstInt32 setChunk (void* data, VstInt32 byteSize, bool isPreset = false);
+        VstInt32 getChunk (void** data, bool isPreset);
 
         bool getEffectName (char* name);
         bool getVendorString (char* text);
@@ -129,6 +129,9 @@ protected:
         bool hostReceiveVstTimeInfo;
         bool opened;
         VstInt32 currentHostProg;
+
+        char *chunkData;
+        void deleteChunkData();
 
     signals:
         void HostChangedProg(int prog);

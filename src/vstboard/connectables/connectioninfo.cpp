@@ -77,9 +77,6 @@ bool ConnectionInfo::CanConnectTo(const ConnectionInfo &c) {
 
 QDataStream & ConnectionInfo::toStream(QDataStream& out) const
 {
-    const quint16 file_version = 1;
-    out << file_version;
-
     out << bridge;
     out << container;
     out << objId;
@@ -91,9 +88,6 @@ QDataStream & ConnectionInfo::toStream(QDataStream& out) const
 
 QDataStream & ConnectionInfo::fromStream(QDataStream& in)
 {
-    quint16 file_version;
-    in >> file_version;
-
     in >> bridge;
     quint16 savedContainerId;
     in >> savedContainerId;

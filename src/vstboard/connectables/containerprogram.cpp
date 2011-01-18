@@ -295,9 +295,6 @@ bool ContainerProgram::CableExists(const ConnectionInfo &outputPin, const Connec
 
 QDataStream & ContainerProgram::toStream (QDataStream& out) const
 {
-    const quint16 file_version = 1;
-    out << file_version;
-
     out << (quint16)listObjects.size();
     foreach(QSharedPointer<Object> objPtr, listObjects) {
         out << (qint16)objPtr->GetIndex();
@@ -322,9 +319,6 @@ QDataStream & ContainerProgram::toStream (QDataStream& out) const
 
 QDataStream & ContainerProgram::fromStream (QDataStream& in)
 {
-    quint16 file_version;
-    in >> file_version;
-
     quint16 nbobj;
     in >> nbobj;
     for(quint16 i=0; i<nbobj; i++) {

@@ -658,10 +658,6 @@ QDataStream & VstPlugin::toStream(QDataStream & out) const
 {
     Object::toStream(out);
 
-    const quint16 file_version = 1;
-    out << file_version;
-
-
     if(pEffect->flags & effFlagsProgramChunks) {
         void *ptr=0;
         quint32 size = (quint32)EffGetChunk(&ptr,false);
@@ -677,16 +673,15 @@ QDataStream & VstPlugin::fromStream(QDataStream & in)
 {
     Object::fromStream(in);
 
-    quint16 file_version;
-    in >> file_version;
-
     quint32 size;
     in >> size;
 
     if(size!=0 && (pEffect->flags & effFlagsProgramChunks)) {
-        char data[size];
+        char *data = new char[size];
         in.readRawData(data,size);
         EffSetChunk(data,size);
+        EffSetProgram(0);
+        delete[] data;
     }
     return in;
 }

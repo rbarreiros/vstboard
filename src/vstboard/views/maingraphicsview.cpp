@@ -182,9 +182,6 @@ void MainGraphicsView::ClearPrograms()
 
 QDataStream & MainGraphicsView::toStream (QDataStream& out) const
 {
-    const quint16 file_version = 1;
-    out << file_version;
-
     out << (quint16)listPrograms.size();
     QMap<qint16,SceneProg>::ConstIterator i = listPrograms.constBegin();
     while(i!=listPrograms.constEnd()) {
@@ -199,9 +196,6 @@ QDataStream & MainGraphicsView::toStream (QDataStream& out) const
 
 QDataStream & MainGraphicsView::fromStream (QDataStream& in)
 {
-    quint16 file_version;
-    in >> file_version;
-
     quint16 nbProg;
     in >> nbProg;
 

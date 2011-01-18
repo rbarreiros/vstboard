@@ -442,9 +442,6 @@ void Container::RemoveCableFromObj(int objId)
 
 QDataStream & Container::toStream (QDataStream& out) const
 {
-    const quint16 file_version = 1;
-    out << file_version;
-
     switch(myHost->filePass) {
 
         //save all loaded objects
@@ -490,9 +487,6 @@ QDataStream & Container::toStream (QDataStream& out) const
 
 QDataStream & Container::fromStream (QDataStream& in)
 {
-    quint16 file_version;
-    in >> file_version;
-
     switch(myHost->filePass) {
 
         //load all objects

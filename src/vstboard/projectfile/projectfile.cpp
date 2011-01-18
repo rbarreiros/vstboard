@@ -18,12 +18,28 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#define PROJECT_FILE_VERSION 10
 #define PROJECT_FILE_KEY 0x757b0a5d
 
 #include "projectfile.h"
 #include "../mainhost.h"
 #include "../mainwindow.h"
+#include "fileversion.h"
+
+void ProjectFile::Clear(MainHost *myHost)
+{
+    myHost->EnableSolverUpdate(false);
+    myHost->SetupProjectContainer();
+    myHost->SetupProgramContainer();
+    myHost->SetupGroupContainer();
+    myHost->EnableSolverUpdate(true);
+
+    if(myHost->mainWindow) {
+        myHost->mainWindow->mySceneView->viewProject->ClearPrograms();
+        myHost->mainWindow->mySceneView->viewProgram->ClearPrograms();
+        myHost->mainWindow->mySceneView->viewGroup->ClearPrograms();
+    }
+    myHost->programList->BuildModel();
+}
 
 bool ProjectFile::SaveToFile(MainHost *myHost,QString filePath)
 {
@@ -36,10 +52,32 @@ bool ProjectFile::SaveToFile(MainHost *myHost,QString filePath)
         return false;
     }
     QDataStream out(&file);
+    return ToStream(myHost,out);
+}
+
+bool ProjectFile::LoadFromFile(MainHost *myHost,QString filePath)
+{
+    QFile file(filePath);
+    if(!file.open(QIODevice::ReadOnly)) {
+        QMessageBox msgBox;
+        msgBox.setText(tr("Unable to open %1").arg(filePath));
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.exec();
+        return false;
+    }
+
+    QDataStream in(&file);
+    return FromStream(myHost,in);
+}
+
+bool ProjectFile::ToStream(MainHost *myHost,QDataStream &out)
+{
+    out.setVersion(QDataStream::Qt_4_7);
+
+    myHost->currentFileVersion=PROJECT_AND_SETUP_FILE_VERSION;
 
     out << (quint32)PROJECT_FILE_KEY;
-    out << (quint32)PROJECT_FILE_VERSION;
-    out.setVersion(QDataStream::Qt_4_7);
+    out << myHost->currentFileVersion;
 
     myHost->EnableSolverUpdate(false);
 
@@ -73,40 +111,15 @@ bool ProjectFile::SaveToFile(MainHost *myHost,QString filePath)
     return true;
 }
 
-void ProjectFile::Clear(MainHost *myHost)
+bool ProjectFile::FromStream(MainHost *myHost,QDataStream &in)
 {
-    myHost->EnableSolverUpdate(false);
-    myHost->SetupProjectContainer();
-    myHost->SetupProgramContainer();
-    myHost->SetupGroupContainer();
-    myHost->EnableSolverUpdate(true);
-
-    if(myHost->mainWindow) {
-        myHost->mainWindow->mySceneView->viewProject->ClearPrograms();
-        myHost->mainWindow->mySceneView->viewProgram->ClearPrograms();
-        myHost->mainWindow->mySceneView->viewGroup->ClearPrograms();
-    }
-    myHost->programList->BuildModel();
-}
-
-bool ProjectFile::LoadFromFile(MainHost *myHost,QString filePath)
-{
-    QFile file(filePath);
-    if(!file.open(QIODevice::ReadOnly)) {
-        QMessageBox msgBox;
-        msgBox.setText(tr("Unable to open %1").arg(filePath));
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.exec();
-        return false;
-    }
-
-    QDataStream in(&file);
+    in.setVersion(QDataStream::Qt_4_7);
 
     quint32 magic;
     in >> magic;
     if(magic != PROJECT_FILE_KEY) {
         QMessageBox msgBox;
-        msgBox.setWindowTitle(filePath);
+        //msgBox.setWindowTitle(filePath);
         msgBox.setText( tr("Unknown file format.") );
         msgBox.setInformativeText( tr("Not a VstBoard project file") );
         msgBox.setIcon(QMessageBox::Critical);
@@ -114,19 +127,16 @@ bool ProjectFile::LoadFromFile(MainHost *myHost,QString filePath)
         return false;
     }
 
-    quint32 version;
-    in >> version;
-    if(version != PROJECT_FILE_VERSION) {
+    in >> myHost->currentFileVersion;
+    if(myHost->currentFileVersion != PROJECT_AND_SETUP_FILE_VERSION) {
         QMessageBox msgBox;
-        msgBox.setWindowTitle(filePath);
+//        msgBox.setWindowTitle(filePath);
         msgBox.setText( tr("Wrong file version.") );
-        msgBox.setInformativeText( tr("Project file format v%1 can't be converted to the current file format v%2").arg(version).arg(PROJECT_FILE_VERSION) );
+        msgBox.setInformativeText( tr("Project file format v%1 can't be converted to the current file format v%2").arg(myHost->currentFileVersion).arg(PROJECT_AND_SETUP_FILE_VERSION) );
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.exec();
         return false;
     }
-
-    in.setVersion(QDataStream::Qt_4_7);
 
     myHost->EnableSolverUpdate(false);
 
@@ -160,4 +170,3 @@ bool ProjectFile::LoadFromFile(MainHost *myHost,QString filePath)
 
     return true;
 }
-

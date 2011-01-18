@@ -119,9 +119,6 @@ void ObjectProgram::Save(PinsList *in,PinsList *out)
 
 QDataStream & ObjectProgram::toStream(QDataStream& out) const
 {
-    const quint16 file_version = 1;
-    out << file_version;
-
     out << (quint16)progId;
 
     out << (quint16)listParametersIn.size();
@@ -153,9 +150,6 @@ QDataStream & ObjectProgram::toStream(QDataStream& out) const
 
 QDataStream & ObjectProgram::fromStream(QDataStream& in)
 {
-    quint16 file_version;
-    in >> file_version;
-
     in >> (quint16&)progId;
 
     quint16 nbParam;

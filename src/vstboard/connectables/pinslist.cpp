@@ -212,9 +212,6 @@ void PinsList::RemovePin(int nb)
 
 QDataStream & PinsList::toStream(QDataStream & out) const
 {
-    const quint16 file_version = 1;
-    out << file_version;
-
     out << connInfo;
     out << objInfo;
 
@@ -233,9 +230,6 @@ QDataStream & PinsList::toStream(QDataStream & out) const
 
 QDataStream & PinsList::fromStream(QDataStream & in)
 {
-    quint16 file_version;
-    in >> file_version;
-
     in >> connInfo;
     in >> objInfo;
 

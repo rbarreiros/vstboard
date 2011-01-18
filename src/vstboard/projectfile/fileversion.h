@@ -1,5 +1,5 @@
-/******************************************************************************
-#    Copyright 2010 Raphaël François
+/**************************************************************************
+#    Copyright 2010-2011 Raphaï¿½l Franï¿½ois
 #    Contact : ctrlbrk76@gmail.com
 #
 #    This file is part of VstBoard.
@@ -16,23 +16,11 @@
 #
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+**************************************************************************/
 
-#ifndef PROJECTFILE_H
-#define PROJECTFILE_H
+#ifndef FILEVERSION_H
+#define FILEVERSION_H
 
-#include "../precomp.h"
-class MainHost;
-class ProjectFile : public QObject
-{
-Q_OBJECT
-public:
-    static void Clear(MainHost *myHost);
-    static bool SaveToFile(MainHost *myHost,QString filePath);
-    static bool LoadFromFile(MainHost *myHost,QString filePath);
-    static bool ToStream(MainHost *myHost,QDataStream &out);
-    static bool FromStream(MainHost *myHost,QDataStream &in);
-};
+#define PROJECT_AND_SETUP_FILE_VERSION 11
 
-#endif // PROJECTFILE_H
-
+#endif // FILEVERSION_H

@@ -95,7 +95,9 @@ public:
     vst::CVSTHost *vstHost;
 #endif
 
-Vst *myVstPlugin;
+    Vst *myVstPlugin;
+
+    quint32 currentFileVersion;
 
 private:
     void SetupMainContainer();

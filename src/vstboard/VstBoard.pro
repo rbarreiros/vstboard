@@ -251,7 +251,8 @@ HEADERS += mainwindow.h \
     _version.h \
     connectables/pinslist.h \
     views/minmaxpinview.h \
-    views/cursorview.h
+    views/cursorview.h \
+    projectfile/fileversion.h
 FORMS += mainwindow.ui \
     views/filebrowser.ui \
     views/configdialog.ui \

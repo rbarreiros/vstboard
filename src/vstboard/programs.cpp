@@ -27,7 +27,7 @@ void Programs::BuildModel()
     groupAutosaveState=Autosave::save;
     progAutosaveState=Autosave::save;
 
-    for(unsigned int grp=0; grp<1; grp++) {
+    for(unsigned int grp=0; grp<3; grp++) {
         QStandardItem *grpItem = new QStandardItem(QString("Grp%1").arg(grp));
         grpItem->setData(NodeType::programGroup,UserRoles::nodeType);
         grpItem->setData(nextGroupId,UserRoles::value);
@@ -356,9 +356,6 @@ void Programs::SetGroupAutosave(const Autosave::Enum state)
 
 QDataStream & Programs::toStream (QDataStream &out)
 {
-    const quint16 file_version = 1;
-    out << file_version;
-
     QStandardItem *root = model->invisibleRootItem();
     out << (quint16)root->rowCount();
     for(int i=0; i<root->rowCount(); i++) {
@@ -390,9 +387,6 @@ QDataStream & Programs::toStream (QDataStream &out)
 
 QDataStream & Programs::fromStream (QDataStream &in)
 {
-    quint16 file_version;
-    in >> file_version;
-
     model->clear();
     currentPrg=0;
     QStandardItem *root = model->invisibleRootItem();
