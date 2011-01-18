@@ -653,3 +653,40 @@ Pin* VstPlugin::CreatePin(const ConnectionInfo &info)
 
     return 0;
 }
+
+QDataStream & VstPlugin::toStream(QDataStream & out) const
+{
+    Object::toStream(out);
+
+    const quint16 file_version = 1;
+    out << file_version;
+
+
+    if(pEffect->flags & effFlagsProgramChunks) {
+        void *ptr=0;
+        quint32 size = (quint32)EffGetChunk(&ptr,false);
+        out << size;
+        out.writeRawData((char*)ptr, size);
+    } else {
+        out << (quint32)0;
+    }
+    return out;
+}
+
+QDataStream & VstPlugin::fromStream(QDataStream & in)
+{
+    Object::fromStream(in);
+
+    quint16 file_version;
+    in >> file_version;
+
+    quint32 size;
+    in >> size;
+
+    if(size!=0 && (pEffect->flags & effFlagsProgramChunks)) {
+        char data[size];
+        in.readRawData(data,size);
+        EffSetChunk(data,size);
+    }
+    return in;
+}

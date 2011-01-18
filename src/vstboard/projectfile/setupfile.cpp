@@ -18,7 +18,7 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#define SETUP_FILE_VERSION 7
+#define SETUP_FILE_VERSION 8
 #define SETUP_FILE_KEY 0x7575e711
 
 #include "setupfile.h"
@@ -97,7 +97,7 @@ bool SetupFile::LoadFromFile(MainHost *myHost, QString filePath)
 
     quint32 version;
     in >> version;
-    if(version != SETUP_FILE_VERSION && version!=5) {
+    if(version != SETUP_FILE_VERSION) {
         QMessageBox msgBox;
         msgBox.setWindowTitle(filePath);
         msgBox.setText( tr("Wrong file version.") );

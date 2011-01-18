@@ -18,7 +18,7 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#define PROJECT_FILE_VERSION 9
+#define PROJECT_FILE_VERSION 10
 #define PROJECT_FILE_KEY 0x757b0a5d
 
 #include "projectfile.h"
@@ -116,7 +116,7 @@ bool ProjectFile::LoadFromFile(MainHost *myHost,QString filePath)
 
     quint32 version;
     in >> version;
-    if(version != PROJECT_FILE_VERSION && version != 7) {
+    if(version != PROJECT_FILE_VERSION) {
         QMessageBox msgBox;
         msgBox.setWindowTitle(filePath);
         msgBox.setText( tr("Wrong file version.") );

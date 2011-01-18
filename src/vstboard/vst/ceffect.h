@@ -95,7 +95,17 @@ namespace vst
         virtual void EffEditSleep() { EffDispatch(effEditSleep); }
     #endif
         virtual long EffIdentify() { return EffDispatch(effIdentify); }
-        virtual long EffGetChunk(void **ptr, bool isPreset = false) { return EffDispatch(effGetChunk, isPreset, 0, ptr); }
+
+        //as const
+        virtual long EffGetChunk(void **ptr, bool isPreset = false) const
+        { if (!pEffect)
+            return 0;
+
+            long disp=0L;
+            disp = pEffect->dispatcher(pEffect, effGetChunk, isPreset, 0, ptr, .0);
+            return disp;
+          //  return EffDispatch(effGetChunk, isPreset, 0, ptr);
+        }
         virtual long EffSetChunk(void *data, long byteSize, bool isPreset = false) { EffBeginSetProgram(); long lResult = EffDispatch(effSetChunk, isPreset, byteSize, data); EffEndSetProgram(); return lResult;}
                                             /* VST 2.0                           */
         virtual long EffProcessEvents(VstEvents* ptr) { return EffDispatch(effProcessEvents, 0, 0, ptr); }

@@ -63,6 +63,9 @@ namespace Connectables {
         void GetContainerAttribs(ObjectContainerAttribs &attr);
         Pin* CreatePin(const ConnectionInfo &info);
 
+        QDataStream & toStream (QDataStream &) const;
+        QDataStream & fromStream (QDataStream &);
+
     protected:
         void processEvents(VstEvents* events);
         float sampleRate;
