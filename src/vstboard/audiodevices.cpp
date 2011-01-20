@@ -133,6 +133,10 @@ void AudioDevices::BuildModel()
         const PaDeviceInfo *devInfo = Pa_GetDeviceInfo(i);
 
         QString devName(devInfo->name);
+
+        //remove " x64" from device name so we can share files with 32bit version
+        devName.remove(QRegExp("( )?x64"));
+
         if(lastName == devName) {
             cptDuplicateNames++;
         } else {

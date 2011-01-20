@@ -39,6 +39,9 @@ MidiDevice::~MidiDevice()
 
 void MidiDevice::Render()
 {
+    if(!deviceOpened)
+        return;
+
     if(devInfo->input) {
         PmEvent buffer;
         Lock();
@@ -69,13 +72,13 @@ bool MidiDevice::OpenStream()
 
     if(!FindDeviceByName()){
         errorMessage = tr("Device not found");
-        return true;
+        return false;
     }
 
     queue = Pm_QueueCreate(QUEUE_SIZE, sizeof(PmEvent));
     if(!queue) {
         debug("MidiDevice::OpenStream can't create queue")
-                return true;
+                return false;
     }
 
     if(objInfo.inputs>0) {
@@ -92,7 +95,7 @@ bool MidiDevice::OpenStream()
                 msgTxt=QString::fromAscii(Pm_GetErrorText(err));
             }
             errorMessage=tr("Error while opening midi device %1 %2").arg(objInfo.name).arg(msgTxt);
-            return true;
+            return false;
         }
 
         err = Pm_SetFilter(stream, PM_FILT_ACTIVE | PM_FILT_SYSEX | PM_FILT_CLOCK);
@@ -109,7 +112,7 @@ bool MidiDevice::OpenStream()
                 debug("MidiDevice::OpenStream setFilter %s",Pm_GetErrorText(err))
             }
             errorMessage=tr("Error while opening midi device %1 %2").arg(objInfo.name).arg(msgTxt);
-            return true;
+            return false;
         }
     }
 
@@ -128,7 +131,7 @@ bool MidiDevice::OpenStream()
                 msgTxt=QString::fromAscii(Pm_GetErrorText(err));
             }
             errorMessage=tr("Error while opening midi device %1 %2").arg(objInfo.name).arg(msgTxt);
-            return true;
+            return false;
         }
     }
 
@@ -204,8 +207,8 @@ bool MidiDevice::FindDeviceByName()
             devInfo = Pm_GetDeviceInfo(deviceNumber);
         } else {
             errorMessage=tr("Error : device was deleted");
-            debug("MidiDevice::FindDeviceFromName device not found")
-                    return false;
+            debug("MidiDevice::FindDeviceByName device not found")
+            return false;
         }
     }
 
@@ -218,9 +221,16 @@ bool MidiDevice::Open()
     errorMessage="";
     closed=false;
 
-    if(!OpenStream())
-        return false;
+    //device not found, create a dummy object
+    if(!FindDeviceByName()){
+        errorMessage = tr("Device not found");
+        return true;
+    }
 
+    //error while opening device, delete it now
+    if(!OpenStream()) {
+        return false;
+    }
     listMidiPinOut->ChangeNumberOfPins(devInfo->input);
     listMidiPinIn->ChangeNumberOfPins(devInfo->output);
 
