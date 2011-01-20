@@ -161,7 +161,11 @@ bool AudioDevice::FindDeviceByName(ObjectInfo &objInfo, PaDeviceInfo *devInfo)
 
     for(int i=0;i<Pa_GetDeviceCount();i++) {
         const PaDeviceInfo *info = Pa_GetDeviceInfo(i);
-        if(QString::fromStdString(info->name) == objInfo.name
+        QString devName = QString::fromStdString(info->name);
+        //remove " x64" from device name so we can share files with 32bit version
+        devName.remove(QRegExp("( )?x64"));
+
+        if(devName == objInfo.name
            && info->maxInputChannels == objInfo.inputs
            && info->maxOutputChannels == objInfo.outputs) {
             //can be this one, but the interface number can change form a comp to another
