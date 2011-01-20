@@ -82,18 +82,19 @@ win32 {
 
     }
 
-    win32-msvc2008 {
-        DEFINES += PAWIN_USE_DIRECTSOUNDFULLDUPLEXCREATE
+    win32-msvc* {
+DEFINES += PA_NO_DS
+ #       DEFINES += PAWIN_USE_DIRECTSOUNDFULLDUPLEXCREATE
 
         INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/src/os/win
         HEADERS += $$top_srcdir/$$PORTAUDIO_PATH/src/os/win/pa_win_wdmks_utils.h \
                 $$top_srcdir/$$PORTAUDIO_PATH/src/os/win/pa_x86_plain_converters.h \
-                $$top_srcdir/$$PORTAUDIO_PATH/include/pa_win_ds.h
+             #   $$top_srcdir/$$PORTAUDIO_PATH/include/pa_win_ds.h
         SOURCES += $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/wdmks/pa_win_wdmks.c \
                 $$top_srcdir/$$PORTAUDIO_PATH/src/os/win/pa_win_wdmks_utils.c \
                 $$top_srcdir/$$PORTAUDIO_PATH/src/os/win/pa_x86_plain_converters.c \
-                $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/dsound/pa_win_ds.c \
-                $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/dsound/pa_win_ds_dynlink.c
+           #     $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/dsound/pa_win_ds.c \
+                #$$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/dsound/pa_win_ds_dynlink.c
     }
 
 

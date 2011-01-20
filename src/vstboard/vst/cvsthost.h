@@ -58,7 +58,7 @@ namespace vst
 
     protected:
         static CVSTHost * pHost;
-        static VstIntPtr VSTCALLBACK AudioMasterCallback(AEffect *effect, VstInt32 opcode, VstInt32  index, VstInt32  value, void *ptr, float opt);
+        static VstIntPtr VSTCALLBACK AudioMasterCallback(AEffect *effect, VstInt32 opcode, VstInt32  index, VstIntPtr  value, void *ptr, float opt);
     };
 
 }

@@ -18,3 +18,7 @@ In Qt Creator, create a new session and open :
 
 - Compile portaudio and portmidi
 - You can now compile the VstBoard project
+
+x64 and msvc 2010 :
+====================
+hotfix needed : http://support.microsoft.com/kb/2280741

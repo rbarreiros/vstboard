@@ -154,7 +154,7 @@ void CVSTHost::UpdateTimeInfo(double timer, int addSamples, double sampleRate)
 /*****************************************************************************/
 /* AudioMasterCallback : callback to be called by plugins                    */
 /*****************************************************************************/
-VstIntPtr VSTCALLBACK CVSTHost::AudioMasterCallback(AEffect *effect, VstInt32 opcode, VstInt32  index, VstInt32  value, void *ptr, float opt)
+VstIntPtr VSTCALLBACK CVSTHost::AudioMasterCallback(AEffect *effect, VstInt32 opcode, VstInt32  index, VstIntPtr  value, void *ptr, float opt)
 {
     long retValue = 0L;
     const char* str;
