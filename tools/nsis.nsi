@@ -1,12 +1,12 @@
 Name "VstBoard"
-RequestExecutionLevel user
-OutFile "vstboard_win32_setup.exe"
+#RequestExecutionLevel user
+OutFile "vstboard_${ARCH}_setup.exe"
 SetDateSave on
 SetDatablockOptimize on
 CRCCheck on
 XPStyle on
 
-InstallDir "$LOCALAPPDATA\VstBoard"
+InstallDir "$LOCALAPPDATA\VstBoard\"
 
 !define START_LINK_DIR "$SMPROGRAMS\VstBoard"
 !define START_LINK_RUN "$SMPROGRAMS\VstBoard\VstBoard.lnk"
@@ -56,7 +56,7 @@ Function defaultVstDir
 FunctionEnd
 
 Function getVstDir
-  StrCpy $VstDir $INSTDIR
+  StrCpy $VstDir "$INSTDIR\"
 FunctionEnd
 
 

@@ -17,7 +17,7 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 
 #INSTALLER_UPDATEQTDLL = 1
-INSTALLER_NSIS_PATH = D:\\Program Files\\NSIS\\makensis.exe
+INSTALLER_NSIS_PATH = c:\\Program Files (x86)\\NSIS\\makensis.exe
 INSTALLER_UPX_PATH = $${_PRO_FILE_PWD_}\\..\\..\\tools\\upx.exe
 
 PORTAUDIO_PATH 	= ../libs/portaudio
