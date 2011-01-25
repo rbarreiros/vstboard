@@ -43,6 +43,7 @@ TARGET      =$$TARGET
 win32 {
     LIBS += -lwinmm
     LIBS += -ladvapi32
+    LIBS += -lws2_32
 }
 
 win32-g++ {

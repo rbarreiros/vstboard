@@ -21,7 +21,7 @@
 #ifndef AUDIOBUFFER_H
 #define AUDIOBUFFER_H
 
-#define BLANK_BUFFER_SIZE 4096
+#define BLANK_BUFFER_SIZE 44100
 
 #include "precomp.h"
 
