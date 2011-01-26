@@ -18,5 +18,11 @@
         <file>vst.png</file>
         <file>asio.png</file>
         <file>lgplv3-88x31.png</file>
+        <file>vstboard16_8.png</file>
+        <file>vstboard24_8.png</file>
+        <file>vstboard32_8.png</file>
+        <file>vstboard logo2.png</file>
+        <file>vstboard48_8.png</file>
+        <file>vstboard64_8.png</file>
     </qresource>
 </RCC>

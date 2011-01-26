@@ -33,7 +33,7 @@ TARGET = $${APP_NAME}
     EXTRA_FILES = \
         $${_PRO_FILE_PWD_}/../../*.txt \
         $${_PRO_FILE_PWD_}/../../tools/*.nsi \
-        $${_PRO_FILE_PWD_}/../../tools/*.qm \
+        $${_PRO_FILE_PWD_}/../../tools/*.qm
 
     linux-g++{
         for(FILE,EXTRA_FILES){

@@ -107,6 +107,10 @@
   <property name="windowTitle">
    <string>VstBoard</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../resources/resources.qrc">
+    <normaloff>:/vstboard32_8.png</normaloff>:/vstboard32_8.png</iconset>
+  </property>
   <property name="locale">
    <locale language="English" country="UnitedStates"/>
   </property>

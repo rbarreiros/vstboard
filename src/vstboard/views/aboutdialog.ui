@@ -27,6 +27,16 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
+    <widget class="QLabel" name="label_4">
+     <property name="pixmap">
+      <pixmap resource="../../resources/resources.qrc">:/vstboard logo2.png</pixmap>
+     </property>
+     <property name="textInteractionFlags">
+      <set>Qt::NoTextInteraction</set>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <property name="spacing">
       <number>0</number>

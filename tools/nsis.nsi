@@ -5,6 +5,7 @@ SetDateSave on
 SetDatablockOptimize on
 CRCCheck on
 XPStyle on
+SetCompressor lzma
 
 InstallDir "$LOCALAPPDATA\VstBoard\"
 
