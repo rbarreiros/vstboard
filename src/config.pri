@@ -18,7 +18,7 @@
 
 #INSTALLER_UPDATEQTDLL = 1
 INSTALLER_NSIS_PATH = c:\\Program Files (x86)\\NSIS\\makensis.exe
-INSTALLER_UPX_PATH = $${_PRO_FILE_PWD_}\\..\\..\\tools\\upx.exe
+INSTALLER_MPRESS_PATH = $${_PRO_FILE_PWD_}/../../tools/mpress/mpress.exe
 
 PORTAUDIO_PATH 	= ../libs/portaudio
 PORTMIDI_PATH 	= ../libs/portmidi

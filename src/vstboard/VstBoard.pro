@@ -58,21 +58,20 @@ win32-msvc* {
             QMAKE_POST_LINK += copy /y \"$${FILE}\" \"$${DESTDIR_WIN}\" $$escape_expand(\n\t)
         }
 
-    #run upx (for x86 only)
-    !contains(QMAKE_HOST.arch, x86_64):{
-        exists($$INSTALLER_UPX_PATH) {
+    #run mpress
+        exists($$INSTALLER_MPRESS_PATH) {
             exists($$DESTDIR_WIN/VstBoard.exe) {
-                QMAKE_POST_LINK += \"$$INSTALLER_UPX_PATH\" -q --best \"$$DESTDIR_WIN\\VstBoard.exe\" $$escape_expand(\n\t)
+                QMAKE_POST_LINK += \"$$INSTALLER_MPRESS_PATH\" -q \"$$DESTDIR_WIN\\VstBoard.exe\" $$escape_expand(\n\t)
             }
             exists($$DESTDIR_WIN/VstBoardPlugin.dll) {
-                QMAKE_POST_LINK += \"$$INSTALLER_UPX_PATH\" -q --best \"$$DESTDIR_WIN\\VstBoardPlugin.dll\" $$escape_expand(\n\t)
+                QMAKE_POST_LINK += \"$$INSTALLER_MPRESS_PATH\" -q \"$$DESTDIR_WIN\\VstBoardPlugin.dll\" $$escape_expand(\n\t)
             }
 
             $${INSTALLER_UPDATEQTDLL} {
-                QMAKE_POST_LINK += \"$$INSTALLER_UPX_PATH\" -q --best \"$$DESTDIR_WIN\\*.dll\" $$escape_expand(\n\t)
+                QMAKE_POST_LINK += \"$$INSTALLER_MPRESS_PATH\" -q \"$$DESTDIR_WIN\\QtGui4.dll\" $$escape_expand(\n\t)
+                QMAKE_POST_LINK += \"$$INSTALLER_MPRESS_PATH\" -q \"$$DESTDIR_WIN\\QtCode4.dll\" $$escape_expand(\n\t)
             }
         }
-    }
 
     #build installer
         exists($$INSTALLER_NSIS_PATH) {
