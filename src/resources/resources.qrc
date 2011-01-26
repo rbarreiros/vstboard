@@ -24,5 +24,7 @@
         <file>vstboard logo2.png</file>
         <file>vstboard48_8.png</file>
         <file>vstboard64_8.png</file>
+        <file>translations/vstboard_fr.qm</file>
+        <file>translations/qt_fr.qm</file>
     </qresource>
 </RCC>

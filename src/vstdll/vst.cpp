@@ -69,6 +69,12 @@ Vst::Vst (audioMasterCallback audioMaster) :
     QCoreApplication::setOrganizationName("CtrlBrk");
     QCoreApplication::setApplicationName(APP_NAME);
 
+    if(qtTranslator.load("qt_" + QLocale::system().name(), ":/translations/"))
+        qApp->installTranslator(&qtTranslator);
+
+    if(myappTranslator.load("vstboard_" + QLocale::system().name(), ":/translations/"))
+        qApp->installTranslator(&myappTranslator);
+
     myHost = new MainHost(this);
     myWindow = new MainWindow(myHost);
     qEditor = new Gui(this);

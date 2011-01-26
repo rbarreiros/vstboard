@@ -105,12 +105,12 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
 
     QTranslator qtTranslator;
-    qtTranslator.load("qt_" + QLocale::system().name());
-    app.installTranslator(&qtTranslator);
+    if(qtTranslator.load("qt_" + QLocale::system().name(), ":/translations/"))
+        qApp->installTranslator(&qtTranslator);
 
     QTranslator myappTranslator;
-    myappTranslator.load("vstboard_" + QLocale::system().name());
-    app.installTranslator(&myappTranslator);
+    if(myappTranslator.load("vstboard_" + QLocale::system().name(), ":/translations/"))
+        qApp->installTranslator(&myappTranslator);
 
 
     MainHost *host = new MainHost();

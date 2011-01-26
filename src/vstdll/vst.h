@@ -28,6 +28,7 @@
 
 #include <QObject>
 #include <QtGui/QApplication>
+#include <QTranslator>
 #include "mainwindow.h"
 #include "public.sdk/source/vst2.x/audioeffectx.h"
 #include "gui.h"
@@ -136,6 +137,8 @@ protected:
         char *chunkData;
         void deleteChunkData();
 
+        QTranslator qtTranslator;
+        QTranslator myappTranslator;
     signals:
         void HostChangedProg(int prog);
     public slots:

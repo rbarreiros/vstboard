@@ -32,8 +32,7 @@ TARGET = $${APP_NAME}
 #other files included in the release
     EXTRA_FILES = \
         $${_PRO_FILE_PWD_}/../../*.txt \
-        $${_PRO_FILE_PWD_}/../../tools/*.nsi \
-        $${_PRO_FILE_PWD_}/../../tools/*.qm
+        $${_PRO_FILE_PWD_}/../../tools/*.nsi
 
     linux-g++{
         for(FILE,EXTRA_FILES){
@@ -59,7 +58,8 @@ win32-msvc* {
             QMAKE_POST_LINK += copy /y \"$${FILE}\" \"$${DESTDIR_WIN}\" $$escape_expand(\n\t)
         }
 
-    #run upx
+    #run upx (for x86 only)
+    !contains(QMAKE_HOST.arch, x86_64):{
         exists($$INSTALLER_UPX_PATH) {
             exists($$DESTDIR_WIN/VstBoard.exe) {
                 QMAKE_POST_LINK += \"$$INSTALLER_UPX_PATH\" -q --best \"$$DESTDIR_WIN\\VstBoard.exe\" $$escape_expand(\n\t)
@@ -72,6 +72,7 @@ win32-msvc* {
                 QMAKE_POST_LINK += \"$$INSTALLER_UPX_PATH\" -q --best \"$$DESTDIR_WIN\\*.dll\" $$escape_expand(\n\t)
             }
         }
+    }
 
     #build installer
         exists($$INSTALLER_NSIS_PATH) {

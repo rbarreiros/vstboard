@@ -12,7 +12,6 @@ TARGET = "VstBoardPlugin"
 
 TEMPLATE = lib
 CONFIG += dll
-DEFINES += QT_NODLL
 
 DEFINES += VST_PLUGIN
 
@@ -30,6 +29,9 @@ CONFIG(debug, debug|release) {
 } else {
     POST =
     build_postfix=release
+
+    #static link in release mode only
+    DEFINES += QT_NODLL
 }
 
 top_builddir =$$top_srcdir/../build/$$build_postfix
