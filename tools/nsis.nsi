@@ -1,5 +1,5 @@
 Name "VstBoard"
-#RequestExecutionLevel user
+RequestExecutionLevel admin
 OutFile "vstboard_${ARCH}_setup.exe"
 SetDateSave on
 SetDatablockOptimize on
@@ -9,6 +9,7 @@ SetCompressor lzma
 
 InstallDir "$LOCALAPPDATA\VstBoard\"
 
+!include LogicLib.nsh
 !define START_LINK_DIR "$SMPROGRAMS\VstBoard"
 !define START_LINK_RUN "$SMPROGRAMS\VstBoard\VstBoard.lnk"
 !define START_LINK_UNINSTALLER "$SMPROGRAMS\VstBoard\Uninstall VstBoard.lnk"
@@ -54,6 +55,9 @@ FunctionEnd
 
 Function defaultVstDir
   ReadRegStr $INSTDIR HKLM "SOFTWARE\VST" "VSTPluginsPath"
+  ${If} $INSTDIR == ""
+    StrCpy $INSTDIR "$PROGRAMFILES\Vstplugins\"
+  ${EndIf}
 FunctionEnd
 
 Function getVstDir
@@ -62,7 +66,7 @@ FunctionEnd
 
 
 Section "VstBoard (required)"
-
+        SetShellVarContext current
 	SectionIn RO
 	SetOutPath $InstFolder
 	File "QtCore4.dll"
@@ -95,7 +99,7 @@ Section "VstBoard (required)"
 SectionEnd
 
 Section "Start Menu Shortcuts"
-	SetShellVarContext current
+        SetShellVarContext current
 	SetOutPath $InstFolder
 	CreateDirectory "${START_LINK_DIR}"
 	CreateShortCut "${START_LINK_RUN}" "$InstFolder\VstBoard.exe"
@@ -103,7 +107,7 @@ Section "Start Menu Shortcuts"
 SectionEnd
 
 Section "Uninstall"
-	SetShellVarContext current
+        SetShellVarContext current
 	
 	ReadRegStr $VstDir HKCU "${REG_SETTINGS}" "pluginInstallDir"
 	Delete "$VstDir\VstBoardPlugin.dll"
@@ -121,6 +125,6 @@ Section "Uninstall"
 	RMDir "$INSTDIR"
 	Delete "${START_LINK_RUN}"
 	Delete "${START_LINK_UNINSTALLER}"
-    RMDir "${START_LINK_DIR}"
+        RMDir "${START_LINK_DIR}"
 SectionEnd
 
