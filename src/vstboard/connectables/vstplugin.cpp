@@ -76,6 +76,9 @@ bool VstPlugin::Close()
 
 void VstPlugin::SetSleep(bool sleeping)
 {
+    if(closed)
+        return;
+
     Lock();
 
     if(sleeping) {
@@ -93,7 +96,7 @@ void VstPlugin::SetSleep(bool sleeping)
 
 void VstPlugin::SetBufferSize(unsigned long size)
 {
-    if(!pEffect)
+    if(closed)
         return;
 
     if(size==bufferSize)
@@ -121,7 +124,7 @@ void VstPlugin::SetSampleRate(float rate)
 {
     sampleRate = rate;
 
-    if(!pEffect)
+    if(closed)
         return;
 
     bool wasSleeping = GetSleep();
@@ -537,6 +540,9 @@ void VstPlugin::EditIdle()
 
 QString VstPlugin::GetParameterName(ConnectionInfo pinInfo)
 {
+    if(closed)
+        return "";
+
     if(pEffect && pinInfo.pinNumber < pEffect->numParams)
         return EffGetParamName( pinInfo.pinNumber );
     else
@@ -547,6 +553,8 @@ QString VstPlugin::GetParameterName(ConnectionInfo pinInfo)
 
 void VstPlugin::MidiMsgFromInput(long msg)
 {
+    if(closed)
+        return;
 
     VstMidiEvent *evnt = new VstMidiEvent;
     memset(evnt, 0, sizeof(VstMidiEvent));
@@ -562,6 +570,9 @@ void VstPlugin::MidiMsgFromInput(long msg)
 
 void VstPlugin::processEvents(VstEvents* events)
 {
+    if(closed)
+        return;
+
     VstEvent *evnt=0;
 
     for(int i=0; i<events->numEvents; i++) {
@@ -581,6 +592,9 @@ void VstPlugin::processEvents(VstEvents* events)
 
 long VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr, float opt, long currentReturnCode)
 {
+    if(closed)
+        return 0;
+
     switch(opcode) {
         case audioMasterAutomate : //0
             //create the parameter pin if needed
@@ -651,6 +665,9 @@ void VstPlugin::OnParameterChanged(ConnectionInfo pinInfo, float value)
 {
     Object::OnParameterChanged(pinInfo,value);
 
+    if(closed)
+        return;
+
     if(pinInfo.direction == PinDirection::Input) {
         if(pinInfo.pinNumber==FixedPinNumber::vstProgNumber) {
             //program pin
@@ -681,7 +698,7 @@ Pin* VstPlugin::CreatePin(const ConnectionInfo &info)
                 pin->SetLimitsEnabled(false);
                 return pin;
             } else {
-                if(!errorMessage.isEmpty()) {
+                if(closed) {
                     return new ParameterPinIn(this,info.pinNumber,0,false,"",true);
                 }
 

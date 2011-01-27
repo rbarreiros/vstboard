@@ -68,9 +68,9 @@ bool CEffect::Load(MainHost *myHost, const QString &name)
     if(!entryPoint)
         entryPoint = (vstPluginFuncPtr)pluginLib->resolve("main");
     if(!entryPoint) {
-        QMessageBox msgBox;
-        msgBox.setText(QObject::tr("error loading %1, no entry point").arg(name));
-        msgBox.exec();
+//        QMessageBox msgBox;
+//        msgBox.setText(QObject::tr("error loading %1, no entry point").arg(name));
+//        msgBox.exec();
         return false;
     }
 
@@ -80,9 +80,9 @@ bool CEffect::Load(MainHost *myHost, const QString &name)
     }
     catch(...)
     {
-        QMessageBox msgBox;
-        msgBox.setText(QObject::tr("error loading %1, failed on entry point").arg(name));
-        msgBox.exec();
+//        QMessageBox msgBox;
+//        msgBox.setText(QObject::tr("error loading %1, failed on entry point").arg(name));
+//        msgBox.exec();
         pEffect = NULL;
     }
 
@@ -91,9 +91,9 @@ bool CEffect::Load(MainHost *myHost, const QString &name)
 
     if (pEffect->magic != kEffectMagic) {
         pEffect = NULL;
-        QMessageBox msgBox;
-        msgBox.setText(QObject::tr("error loading %1, not a Vst plugin").arg(name));
-        msgBox.exec();
+//        QMessageBox msgBox;
+//        msgBox.setText(QObject::tr("error loading %1, not a Vst plugin").arg(name));
+//        msgBox.exec();
         return false;
     }
     sName = name;
