@@ -38,7 +38,9 @@ VstPlugin::VstPlugin(MainHost *myHost,int index, const ObjectInfo & info) :
     sampleRate(44100.0),
     bufferSize(1024),
     listEvnts(0),
-    isShell(false)
+    isShell(false),
+    savedChunk(0),
+    savedChunkSize(0)
 {
     for(int i=0;i<128;i++) {
         listValues << i;
@@ -48,8 +50,9 @@ VstPlugin::VstPlugin(MainHost *myHost,int index, const ObjectInfo & info) :
 
 VstPlugin::~VstPlugin()
 {
-
     Close();
+    if(savedChunk)
+        delete savedChunk;
 }
 
 bool VstPlugin::Close()
@@ -534,7 +537,7 @@ void VstPlugin::EditIdle()
 
 QString VstPlugin::GetParameterName(ConnectionInfo pinInfo)
 {
-    if(pinInfo.pinNumber < pEffect->numParams)
+    if(pEffect && pinInfo.pinNumber < pEffect->numParams)
         return EffGetParamName( pinInfo.pinNumber );
     else
         debug("VstPlugin::GetParameterName : parameter id out of range")
@@ -678,6 +681,10 @@ Pin* VstPlugin::CreatePin(const ConnectionInfo &info)
                 pin->SetLimitsEnabled(false);
                 return pin;
             } else {
+                if(!errorMessage.isEmpty()) {
+                    return new ParameterPinIn(this,info.pinNumber,0,false,"",true);
+                }
+
                 ParameterPinIn *pin = new ParameterPinIn(this,info.pinNumber,EffGetParameter(info.pinNumber),false,EffGetParamName(info.pinNumber),true);
                 return pin;
             }
@@ -696,7 +703,10 @@ QDataStream & VstPlugin::toStream(QDataStream & out) const
 {
     Object::toStream(out);
 
-    if(pEffect->flags & effFlagsProgramChunks) {
+    if(!errorMessage.isEmpty() && savedChunk) {
+        out << savedChunkSize;
+        out.writeRawData(savedChunk, savedChunkSize);
+    } else if(pEffect && (pEffect->flags & effFlagsProgramChunks)) {
         void *ptr=0;
         quint32 size = (quint32)EffGetChunk(&ptr,false);
         out << size;
@@ -710,16 +720,18 @@ QDataStream & VstPlugin::toStream(QDataStream & out) const
 QDataStream & VstPlugin::fromStream(QDataStream & in)
 {
     Object::fromStream(in);
+    in >> savedChunkSize;
 
-    quint32 size;
-    in >> size;
+    if(savedChunkSize!=0) {
+        savedChunk = new char[savedChunkSize];
+        in.readRawData(savedChunk,savedChunkSize);
 
-    if(size!=0 && (pEffect->flags & effFlagsProgramChunks)) {
-        char *data = new char[size];
-        in.readRawData(data,size);
-        EffSetChunk(data,size);
-        EffSetProgram(0);
-        delete[] data;
+        if(pEffect && (pEffect->flags & effFlagsProgramChunks)) {
+            EffSetChunk(savedChunk,savedChunkSize);
+           // EffSetProgram(0);
+            delete savedChunk;
+            savedChunk=0;
+        }
     }
     return in;
 }

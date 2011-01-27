@@ -77,6 +77,9 @@ namespace Connectables {
         QList<VstMidiEvent*>listVstMidiEvents;
         QList<QVariant>listValues;
 
+        char *savedChunk;
+        quint32 savedChunkSize;
+
     signals:
         void WindowSizeChange(int newWidth, int newHeight);
 
