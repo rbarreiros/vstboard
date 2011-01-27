@@ -56,8 +56,14 @@ bool AudioDeviceOut::Close()
 
 void AudioDeviceOut::SetBufferSize(unsigned long size)
 {
-    foreach(Pin *pin, listAudioPinIn->listPins) {
-        static_cast<AudioPinIn*>(pin)->buffer->SetSize(size);
+    if(doublePrecision) {
+        foreach(Pin *pin, listAudioPinIn->listPins) {
+            static_cast<AudioPinIn*>(pin)->bufferD->SetSize(size);
+        }
+    } else {
+        foreach(Pin *pin, listAudioPinIn->listPins) {
+            static_cast<AudioPinIn*>(pin)->buffer->SetSize(size);
+        }
     }
 }
 

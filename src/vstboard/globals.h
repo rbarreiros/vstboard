@@ -151,9 +151,8 @@ namespace PinDirection {
 namespace PinMessage {
     enum Enum {
         ND,
-        AudioBufferToMix,
-       // AudioBufferReplace,
-        //ClearAudioBuffer,
+        AudioBuffer,
+        AudioBufferD,
         MidiMsg,
         ParameterValue
     };

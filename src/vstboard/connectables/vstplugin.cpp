@@ -162,37 +162,80 @@ void VstPlugin::Render()
         }
     }
 
-    //audio buffers
-    //=========================
-    float **tmpBufOut = new float*[listAudioPinOut->listPins.size()];
+    if(doublePrecision) {
+        if (pEffect->flags & effFlagsCanDoubleReplacing) {
+            double **tmpBufOut = new double*[listAudioPinOut->listPins.size()];
 
-    int cpt=0;
-    foreach(Pin* pin,listAudioPinOut->listPins) {
-        tmpBufOut[cpt] = static_cast<AudioPinOut*>(pin)->buffer->GetPointer(true);
-        cpt++;
-    }
+            int cpt=0;
+            foreach(Pin* pin,listAudioPinOut->listPins) {
+                tmpBufOut[cpt] = static_cast<AudioPinOut*>(pin)->bufferD->GetPointer(true);
+                cpt++;
+            }
 
-    float **tmpBufIn;
-    if(listAudioPinIn->listPins.size()==0) {
-        //no input, use outputs as fake buffers... don't know what we're supposed to do...
-        tmpBufIn = tmpBufOut;
+            double **tmpBufIn;
+            if(listAudioPinIn->listPins.size()==0) {
+                //no input, use outputs as fake buffers... don't know what we're supposed to do...
+                tmpBufIn = tmpBufOut;
+            } else {
+                tmpBufIn = new double*[listAudioPinIn->listPins.size()];
+
+                cpt=0;
+                foreach(Pin* pin,listAudioPinIn->listPins) {
+                    tmpBufIn[cpt] = static_cast<AudioPinOut*>(pin)->bufferD->ConsumeStack();
+                    cpt++;
+                }
+            }
+
+            EffProcessDoubleReplacing(tmpBufIn, tmpBufOut, bufferSize);
+
+            //clear buffers
+            //=========================
+            if(tmpBufOut!=tmpBufIn)
+                delete[] tmpBufIn;
+
+            delete[] tmpBufOut;
+
+        } else {
+            debug("VstPlugin::Render DoubleReplacing not supported")
+        }
     } else {
-        tmpBufIn = new float*[listAudioPinIn->listPins.size()];
+        float **tmpBufOut = new float*[listAudioPinOut->listPins.size()];
 
-        cpt=0;
-        foreach(Pin* pin,listAudioPinIn->listPins) {
-            tmpBufIn[cpt] = static_cast<AudioPinOut*>(pin)->buffer->ConsumeStack();
+        int cpt=0;
+        foreach(Pin* pin,listAudioPinOut->listPins) {
+            tmpBufOut[cpt] = static_cast<AudioPinOut*>(pin)->buffer->GetPointer(true);
             cpt++;
         }
-    }
 
-    //process
-    //=========================
+        float **tmpBufIn;
+        if(listAudioPinIn->listPins.size()==0) {
+            //no input, use outputs as fake buffers... don't know what we're supposed to do...
+            tmpBufIn = tmpBufOut;
+        } else {
+            tmpBufIn = new float*[listAudioPinIn->listPins.size()];
 
-    if (pEffect->flags & effFlagsCanReplacing) {
-        EffProcessReplacing(tmpBufIn, tmpBufOut, bufferSize);
-    } else {
-        EffProcess(tmpBufIn, tmpBufOut, bufferSize);
+            cpt=0;
+            foreach(Pin* pin,listAudioPinIn->listPins) {
+                tmpBufIn[cpt] = static_cast<AudioPinOut*>(pin)->buffer->ConsumeStack();
+                cpt++;
+            }
+        }
+
+        //process
+        //=========================
+
+        if (pEffect->flags & effFlagsCanReplacing) {
+            EffProcessReplacing(tmpBufIn, tmpBufOut, bufferSize);
+        } else {
+            EffProcess(tmpBufIn, tmpBufOut, bufferSize);
+        }
+
+        //clear buffers
+        //=========================
+        if(tmpBufOut!=tmpBufIn)
+            delete[] tmpBufIn;
+
+        delete[] tmpBufOut;
     }
 
     //clear midi events
@@ -202,23 +245,16 @@ void VstPlugin::Render()
         midiEventsMutex.unlock();
     }
 
-
-    //clear buffers
-    //=========================
-    if(tmpBufOut!=tmpBufIn)
-        delete[] tmpBufIn;
-
-    delete[] tmpBufOut;
-
-
     //send result
     //=========================
     foreach(Pin* pin,listAudioPinOut->listPins) {
-        static_cast<AudioPinOut*>(pin)->buffer->ConsumeStack();
+        if(doublePrecision) {
+            static_cast<AudioPinOut*>(pin)->bufferD->ConsumeStack();
+        } else {
+            static_cast<AudioPinOut*>(pin)->buffer->ConsumeStack();
+        }
         static_cast<AudioPinOut*>(pin)->SendAudioBuffer();
     }
-
-
 
     EffIdle();
 }
@@ -278,6 +314,9 @@ bool VstPlugin::Open()
 
         //long canSndMidiEvnt = pEffect->EffCanDo("sendVstMidiEvent");
         bWantMidi = (EffCanDo("receiveVstMidiEvent") == 1);
+
+        if(!(pEffect->flags & effFlagsCanDoubleReplacing))
+            doublePrecision=false;
 
      //   long midiPrgNames = EffCanDo("midiProgramNames");
         VstPinProperties pinProp;

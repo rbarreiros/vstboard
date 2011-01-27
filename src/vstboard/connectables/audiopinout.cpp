@@ -23,13 +23,16 @@
 #include "object.h"
 #include "../globals.h"
 #include "../audiobuffer.h"
+#include "../audiobufferd.h"
 
 using namespace Connectables;
 
 AudioPinOut::AudioPinOut(Object *parent, int number, bool externalAllocation, bool bridge)
     :Pin(parent,PinType::Audio,PinDirection::Output,number,bridge)
 {
+    doublePrecision=false;
     buffer = new AudioBuffer(externalAllocation);
+    bufferD = new AudioBufferD(externalAllocation);
     setObjectName(QString("Out%1").arg(number));
     visible=true;
 }
@@ -37,22 +40,35 @@ AudioPinOut::AudioPinOut(Object *parent, int number, bool externalAllocation, bo
 AudioPinOut::~AudioPinOut()
 {
     delete buffer;
+    delete bufferD;
 }
 
 void AudioPinOut::SetBuffer(AudioBuffer *buffer)
 {
    this->buffer = buffer;
 }
+void AudioPinOut::SetBuffer(AudioBufferD *buffer)
+{
+   this->bufferD = buffer;
+}
 
 void AudioPinOut::SendAudioBuffer()
 {
-    SendMsg(PinMessage::AudioBufferToMix,(void*)buffer);
+    if(doublePrecision)
+        SendMsg(PinMessage::AudioBufferD,(void*)bufferD);
+    else
+        SendMsg(PinMessage::AudioBuffer,(void*)buffer);
 }
 
 
 float AudioPinOut::GetValue()
 {
-    float newVu = buffer->GetVu();
+    float newVu=.0f;
+    if(doublePrecision)
+        newVu = bufferD->GetVu();
+    else
+        newVu = buffer->GetVu();
+
     if(newVu != value) {
         valueChanged=true;
     }

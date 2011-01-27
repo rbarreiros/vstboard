@@ -154,7 +154,8 @@ connectables/vstaudiodeviceout.cpp \
     ../vstboard/views/configdialog.cpp \
     ../vstboard/views/maingraphicsview.cpp \
     ../vstboard/connectables/hostcontroller.cpp \
-    connectables/vstmididevice.cpp
+    connectables/vstmididevice.cpp \
+    ../vstboard/audiobufferd.cpp
 
 
 HEADERS  += \
@@ -229,7 +230,8 @@ connectables/vstaudiodeviceout.h \
     ../vstboard/views/cursorview.h \
     ../vstboard/mainwindow.h \
     ../vstboard/views/maingraphicsview.h \
-    connectables/vstmididevice.h
+    connectables/vstmididevice.h \
+    ../vstboard/audiobufferd.h
 
 FORMS += \
 ../vstboard/views/configdialog.ui \

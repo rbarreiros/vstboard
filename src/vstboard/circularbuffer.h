@@ -29,7 +29,9 @@ public:
     void Clear();
     void SetSize(unsigned int size);
     bool Put(float *buf, unsigned int size);
+    bool Put(double *buf, unsigned int size);
     bool Get(float *buf, unsigned int size);
+    bool Get(double *buf, unsigned int size);
     bool Skip(unsigned int size);
 //    bool Keep(unsigned int size);
     unsigned int buffSize;

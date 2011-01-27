@@ -173,7 +173,8 @@ SOURCES += main.cpp \
     models/programsmodel.cpp \
     connectables/pinslist.cpp \
     views/minmaxpinview.cpp \
-    views/cursorview.cpp
+    views/cursorview.cpp \
+    audiobufferd.cpp
 HEADERS += mainwindow.h \
     precomp.h \
     models/listaudiointerfacesmodel.h \
@@ -246,7 +247,8 @@ HEADERS += mainwindow.h \
     connectables/pinslist.h \
     views/minmaxpinview.h \
     views/cursorview.h \
-    projectfile/fileversion.h
+    projectfile/fileversion.h \
+    audiobufferd.h
 FORMS += mainwindow.ui \
     views/filebrowser.ui \
     views/configdialog.ui \

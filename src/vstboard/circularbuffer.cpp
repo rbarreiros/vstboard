@@ -72,6 +72,33 @@ bool CircularBuffer::Put(float *buf, unsigned int size)
     return true;
 }
 
+bool CircularBuffer::Put(double *buf, unsigned int size)
+{
+    if((buffSize-filledSize)<size) {
+       //debug("CircularBuffer::Put not enough free space")
+       unsigned int overlapping = size-(buffSize-filledSize);
+       filledStart+=overlapping;
+       filledSize-=overlapping;
+       if(filledStart>bufEnd)
+           filledStart-=buffSize;
+//       return false;
+    }
+
+    for(unsigned int i=0; i<size; i++) {
+        filledEnd++;
+
+        if(filledEnd>bufEnd) {
+            filledEnd=bufStart;
+        }
+
+        *filledEnd=(float)*buf;
+        buf++;
+    }
+
+    filledSize+=size;
+    return true;
+}
+
 bool CircularBuffer::Get(float *buf, unsigned int size)
 {
     if(filledSize<size) {
@@ -94,6 +121,27 @@ bool CircularBuffer::Get(float *buf, unsigned int size)
     return true;
 }
 
+bool CircularBuffer::Get(double *buf, unsigned int size)
+{
+    if(filledSize<size) {
+        debug("CircularBuffer::Get not enough data")
+        return false;
+    }
+
+
+    for(unsigned int i=0; i<size; i++) {
+        *buf=(double)*filledStart;
+        buf++;
+        filledStart++;
+
+        if(filledStart>bufEnd) {
+            filledStart=bufStart;
+        }
+    }
+
+    filledSize-=size;
+    return true;
+}
 
 bool CircularBuffer::Skip(unsigned int size)
 {

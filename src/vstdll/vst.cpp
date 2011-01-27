@@ -55,6 +55,7 @@ Vst::Vst (audioMasterCallback audioMaster) :
     setNumOutputs (DEFAULT_OUTPUTS*2);
     setUniqueID (kUniqueID);
     canProcessReplacing(true);
+    canDoubleReplacing(true);
     programsAreChunks(true);
     vst_strncpy (programName, "Default", kVstMaxProgNameLen);	// default program name
 
@@ -448,7 +449,59 @@ void Vst::processReplacing (float** inputs, float** outputs, VstInt32 sampleFram
 
 void Vst::processDoubleReplacing (double** inputs, double** outputs, VstInt32 sampleFrames)
 {
+    if(hostSendVstTimeInfo)
+        myHost->SetTimeInfo( getTimeInfo( -1));
 
+    if(bufferSize!=sampleFrames) {
+        myHost->SetBufferSize((unsigned long)sampleFrames);
+        bufferSize=sampleFrames;
+    }
+
+    int cpt=0;
+    foreach(Connectables::VstAudioDeviceIn* dev, lstAudioIn) {
+        dev->SetBuffers(inputs,cpt,sampleFrames);
+    }
+
+    myHost->Render();
+
+    cpt=0;
+    foreach(Connectables::VstAudioDeviceOut* dev, lstAudioOut) {
+        dev->GetBuffers(outputs,cpt,sampleFrames);
+    }
+
+    if(hostReceiveVstEvents || hostReceiveVstMidiEvents) {
+        //free last buffer
+        if(listEvnts) {
+            free(listEvnts);
+            listEvnts = 0;
+        }
+
+        cpt=0;
+        foreach(Connectables::VstMidiDevice *dev, lstMidiOut) {
+            foreach(long msg, dev->midiQueue) {
+
+                //allocate a new buffer
+                if(!listEvnts)
+                    listEvnts = (VstEvents*)malloc(sizeof(VstEvents) + sizeof(VstEvents*)*(VST_EVENT_BUFFER_SIZE-2));
+
+                VstMidiEvent *evnt = new VstMidiEvent;
+                memset(evnt, 0, sizeof(VstMidiEvent));
+                evnt->type = kVstMidiType;
+                evnt->flags = kVstMidiEventIsRealtime;
+                evnt->byteSize = sizeof(VstMidiEvent);
+                //memcpy(evnt->midiData, &msg.message, sizeof(evnt->midiData));
+                memcpy(evnt->midiData, &msg, sizeof(evnt->midiData));
+                listEvnts->events[cpt]=(VstEvent*)evnt;
+                cpt++;
+            }
+            dev->midiQueue.clear();
+        }
+
+        if(cpt>0) {
+            listEvnts->numEvents=cpt;
+            sendVstEventsToHost(listEvnts);
+        }
+    }
 }
 
 void Vst::setSampleRate(float sampleRate)

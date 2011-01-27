@@ -52,8 +52,13 @@ bool AudioDeviceIn::Close()
 
 void AudioDeviceIn::Render()
 {
+
     foreach(Pin* pin,listAudioPinOut->listPins) {
-        static_cast<AudioPinOut*>(pin)->buffer->ConsumeStack();
+        if(doublePrecision) {
+            static_cast<AudioPinOut*>(pin)->bufferD->ConsumeStack();
+        } else {
+            static_cast<AudioPinOut*>(pin)->buffer->ConsumeStack();
+        }
         static_cast<AudioPinOut*>(pin)->SendAudioBuffer();
     }
 

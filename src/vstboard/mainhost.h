@@ -98,6 +98,7 @@ public:
     Vst *myVstPlugin;
 
     quint32 currentFileVersion;
+    bool doublePrecision;
 
 private:
     void SetupMainContainer();

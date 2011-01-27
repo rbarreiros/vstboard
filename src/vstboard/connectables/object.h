@@ -131,6 +131,7 @@ namespace Connectables {
         MainHost *myHost;
         bool parked;
         quint16 containerId;
+        bool doublePrecision;
     protected:
         QMap<QString, PinsList*>pinLists;
         PinsList *listAudioPinIn;

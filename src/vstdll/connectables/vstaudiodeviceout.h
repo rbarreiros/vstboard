@@ -40,7 +40,8 @@ namespace Connectables {
         bool Close();
 
         void GetBuffers(float **buf, int &cpt, int sampleFrames);
-        Pin* CreatePin(const ConnectionInfo &info);
+        void GetBuffers(double **buf, int &cpt, int sampleFrames);
+//        Pin* CreatePin(const ConnectionInfo &info);
 
     public slots:
         void SetBufferSize(unsigned long size);

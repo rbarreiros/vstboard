@@ -24,6 +24,7 @@
 #include "audiodeviceout.h"
 #include "../globals.h"
 #include "../audiobuffer.h"
+#include "../audiobufferd.h"
 #include "../renderer.h"
 #include "../mainhost.h"
 #include "../audiodevices.h"
@@ -615,21 +616,40 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
             //if(device->listCircularBuffersIn.at(0)->filledSize >= hostBuffSize ) {
             if(readyToRender) {
                 //put circular buffers into pins buffers
-                cpt=0;
-                foreach(CircularBuffer *buf, device->listCircularBuffersIn) {
-                    AudioBuffer *pinBuf = device->devIn->listAudioPinOut->GetBuffer(cpt);
-                    if(pinBuf) {
+                if(device->devIn->doublePrecision) {
+                    cpt=0;
+                    foreach(CircularBuffer *buf, device->listCircularBuffersIn) {
+                        AudioBufferD *pinBuf = device->devIn->listAudioPinOut->GetBufferD(cpt);
+                        if(pinBuf) {
 
-                        if(pinBuf->GetSize() < hostBuffSize) {
-                            pinBuf->SetSize(hostBuffSize);
-    //                        debug("AudioDevice::paCallback pin buffer too small")
-                            continue;
+                            if(pinBuf->GetSize() < hostBuffSize) {
+                                pinBuf->SetSize(hostBuffSize);
+        //                        debug("AudioDevice::paCallback pin buffer too small")
+                                continue;
+                            }
+
+                            if(buf->filledSize >= hostBuffSize)
+                                buf->Get( pinBuf->GetPointer(true), hostBuffSize );
                         }
-
-                        if(buf->filledSize >= hostBuffSize)
-                            buf->Get( pinBuf->GetPointer(true), hostBuffSize );
+                        cpt++;
                     }
-                    cpt++;
+                } else {
+                    cpt=0;
+                    foreach(CircularBuffer *buf, device->listCircularBuffersIn) {
+                        AudioBuffer *pinBuf = device->devIn->listAudioPinOut->GetBuffer(cpt);
+                        if(pinBuf) {
+
+                            if(pinBuf->GetSize() < hostBuffSize) {
+                                pinBuf->SetSize(hostBuffSize);
+        //                        debug("AudioDevice::paCallback pin buffer too small")
+                                continue;
+                            }
+
+                            if(buf->filledSize >= hostBuffSize)
+                                buf->Get( pinBuf->GetPointer(true), hostBuffSize );
+                        }
+                        cpt++;
+                    }
                 }
 
                 if(!device->bufferReady) {
@@ -662,15 +682,28 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
                     continue;
 
                 if(dev->devOut) {
-                    int cpt=0;
-                    //put pins buffer into circular buffers
-                    foreach(CircularBuffer *buf, dev->listCircularBuffersOut) {
-                        AudioBuffer *pinBuf = dev->devOut->listAudioPinIn->GetBuffer(cpt);
-    //                    if(!pinBuf->IsEmpty()) {
-                            buf->Put( pinBuf->ConsumeStack(), pinBuf->GetSize() );
-                            pinBuf->ResetStackCounter();
-    //                    }
-                        cpt++;
+                    if(dev->devOut->doublePrecision) {
+                        int cpt=0;
+                        //put pins buffer into circular buffers
+                        foreach(CircularBuffer *buf, dev->listCircularBuffersOut) {
+                            AudioBufferD *pinBuf = dev->devOut->listAudioPinIn->GetBufferD(cpt);
+        //                    if(!pinBuf->IsEmpty()) {
+                                buf->Put( pinBuf->ConsumeStack(), pinBuf->GetSize() );
+                                pinBuf->ResetStackCounter();
+        //                    }
+                            cpt++;
+                        }
+                    } else {
+                        int cpt=0;
+                        //put pins buffer into circular buffers
+                        foreach(CircularBuffer *buf, dev->listCircularBuffersOut) {
+                            AudioBuffer *pinBuf = dev->devOut->listAudioPinIn->GetBuffer(cpt);
+        //                    if(!pinBuf->IsEmpty()) {
+                                buf->Put( pinBuf->ConsumeStack(), pinBuf->GetSize() );
+                                pinBuf->ResetStackCounter();
+        //                    }
+                            cpt++;
+                        }
                     }
                 }
                 dev->bufferReady=false;

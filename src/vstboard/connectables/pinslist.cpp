@@ -133,6 +133,24 @@ AudioBuffer *PinsList::GetBuffer(int pinNumber)
     return 0;
 }
 
+AudioBufferD *PinsList::GetBufferD(int pinNumber)
+{
+    if(connInfo.type != PinType::Audio)
+        return 0;
+
+    if(!listPins.contains(pinNumber)) {
+        debug2(<<"PinsList::GetBuffer"<< pinNumber <<"not found")
+        return 0;
+    }
+
+    if(connInfo.direction == PinDirection::Input)
+        return static_cast<AudioPinIn*>(listPins.value(pinNumber))->bufferD;
+    if(connInfo.direction == PinDirection::Output)
+        return static_cast<AudioPinOut*>(listPins.value(pinNumber))->bufferD;
+
+    return 0;
+}
+
 void PinsList::ConnectAllTo(Container* container, PinsList *other, bool hidden)
 {
     QSharedPointer<Object>cntPtr = myHost->objFactory->GetObj(modelList.parent().parent());

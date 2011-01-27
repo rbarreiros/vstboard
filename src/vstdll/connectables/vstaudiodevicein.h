@@ -41,7 +41,8 @@ namespace Connectables {
         void Render();
 
         void SetBuffers(float **buf, int &cpt, int sampleFrames);
-        Pin* CreatePin(const ConnectionInfo &info);
+        void SetBuffers(double **buf, int &cpt, int sampleFrames);
+//        Pin* CreatePin(const ConnectionInfo &info);
 
 
     public slots:

@@ -49,6 +49,8 @@ MainHost::MainHost(Vst *myVstPlugin, QObject *parent) :
     mutexListCables(new QMutex(QMutex::Recursive)),
     currentFileVersion(PROJECT_AND_SETUP_FILE_VERSION)
 {
+    doublePrecision=true;
+
     setObjectName("MainHost");
 
     if(!vst::CVSTHost::Get())

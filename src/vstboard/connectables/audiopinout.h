@@ -24,6 +24,7 @@
 #include "pin.h"
 
 class AudioBuffer;
+class AudioBufferD;
 
 namespace Connectables {
 
@@ -34,11 +35,14 @@ namespace Connectables {
         ~AudioPinOut();
 
         void SetBuffer(AudioBuffer *buffer);
+        void SetBuffer(AudioBufferD *buffer);
         void SendAudioBuffer();
         float GetValue();
         void SetBufferSize(unsigned long size);
         AudioBuffer *buffer;
+        AudioBufferD *bufferD;
 
+        bool doublePrecision;
     };
 }
 

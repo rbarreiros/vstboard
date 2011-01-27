@@ -45,6 +45,7 @@ Object::Object(MainHost *host, int index, const ObjectInfo &info) :
     currentProgram(0),
     closed(true),
     containerId(FixedObjId::noContainer),
+    doublePrecision(true),
     currentProgId(TEMP_PROGRAM),
     objInfo(info),
     myHost(host)
@@ -475,7 +476,11 @@ Pin* Object::CreatePin(const ConnectionInfo &info)
             switch(info.type) {
                 case PinType::Audio : {
                     AudioPinIn *newPin = new AudioPinIn(this,info.pinNumber);
-                    newPin->buffer->SetSize(myHost->GetBufferSize());
+                    newPin->doublePrecision=doublePrecision;
+                    if(doublePrecision)
+                        newPin->bufferD->SetSize(myHost->GetBufferSize());
+                    else
+                        newPin->buffer->SetSize(myHost->GetBufferSize());
                     return newPin;
                 }
 
@@ -514,7 +519,11 @@ Pin* Object::CreatePin(const ConnectionInfo &info)
             switch(info.type) {
                 case PinType::Audio : {
                     AudioPinOut *newPin = new AudioPinOut(this,info.pinNumber);
-                    newPin->buffer->SetSize(myHost->GetBufferSize());
+                    newPin->doublePrecision=doublePrecision;
+                    if(doublePrecision)
+                        newPin->bufferD->SetSize(myHost->GetBufferSize());
+                    else
+                        newPin->buffer->SetSize(myHost->GetBufferSize());
                     return newPin;
                 }
 

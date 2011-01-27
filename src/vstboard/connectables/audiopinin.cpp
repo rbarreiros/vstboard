@@ -23,13 +23,16 @@
 #include "object.h"
 #include "../globals.h"
 #include "../audiobuffer.h"
+#include "../audiobufferd.h"
 
 using namespace Connectables;
 
 AudioPinIn::AudioPinIn(Object *parent, int number, bool externalAllocation, bool bridge)
     :Pin(parent,PinType::Audio,PinDirection::Input,number,bridge)
 {
+    doublePrecision=false;
     buffer = new AudioBuffer(externalAllocation);
+    bufferD = new AudioBufferD(externalAllocation);
     setObjectName(QString("In%1").arg(number));
     visible=true;
 }
@@ -37,29 +40,55 @@ AudioPinIn::AudioPinIn(Object *parent, int number, bool externalAllocation, bool
 AudioPinIn::~AudioPinIn()
 {
     delete buffer;
+    delete bufferD;
 }
 
 void AudioPinIn::NewRenderLoop()
 {
-    buffer->ResetStackCounter();
+    if(doublePrecision) {
+        bufferD->ResetStackCounter();
+    } else {
+        buffer->ResetStackCounter();
+    }
 }
 
 void AudioPinIn::SetBuffer(AudioBuffer *buff)
 {
     buffer = buff;
 }
+void AudioPinIn::SetBuffer(AudioBufferD *buff)
+{
+    bufferD = buff;
+}
 
 void AudioPinIn::ReceiveMsg(const PinMessage::Enum msgType,void *data)
 {
-    if(msgType==PinMessage::AudioBufferToMix) {
+    if(msgType==PinMessage::AudioBuffer) {
         AudioBuffer *buf = static_cast<AudioBuffer*>(data);
-        buffer->AddToStack(buf);
+        if(doublePrecision) {
+            bufferD->AddToStack(buf);
+        } else {
+            buffer->AddToStack(buf);
+        }
+    }
+    if(msgType==PinMessage::AudioBufferD) {
+        AudioBufferD *buf = static_cast<AudioBufferD*>(data);
+        if(doublePrecision) {
+            bufferD->AddToStack(buf);
+        } else {
+            buffer->AddToStack(buf);
+        }
     }
 }
 
 float AudioPinIn::GetValue()
 {
-    float newVu = buffer->GetVu();
+    float newVu=.0f;
+    if(doublePrecision)
+        newVu=bufferD->GetVu();
+    else
+        newVu=buffer->GetVu();
+
     if(newVu != value) {
         valueChanged=true;
     }

@@ -21,6 +21,7 @@
 #include "vstaudiodevicein.h"
 #include "globals.h"
 #include "audiobuffer.h"
+#include "audiobufferd.h"
 #include "mainhost.h"
 #include "vst.h"
 
@@ -47,7 +48,11 @@ bool VstAudioDeviceIn::Close()
 void VstAudioDeviceIn::Render()
 {
     foreach(Pin* pin,listAudioPinOut->listPins) {
-        static_cast<AudioPinOut*>(pin)->buffer->ConsumeStack();
+        if(doublePrecision) {
+            static_cast<AudioPinOut*>(pin)->bufferD->ConsumeStack();
+        } else {
+            static_cast<AudioPinOut*>(pin)->buffer->ConsumeStack();
+        }
         static_cast<AudioPinOut*>(pin)->SendAudioBuffer();
     }
 }
@@ -55,7 +60,11 @@ void VstAudioDeviceIn::Render()
 void VstAudioDeviceIn::SetBufferSize(unsigned long size)
 {
     foreach(Pin *pin, listAudioPinOut->listPins) {
-        static_cast<AudioPinOut*>(pin)->buffer->SetSize(size);
+        if(doublePrecision) {
+            static_cast<AudioPinOut*>(pin)->bufferD->SetSize(size);
+        } else {
+            static_cast<AudioPinOut*>(pin)->buffer->SetSize(size);
+        }
     }
 }
 
@@ -73,13 +82,21 @@ bool VstAudioDeviceIn::Open()
 void VstAudioDeviceIn::SetBuffers(float **buf, int &cpt, int sampleFrames)
 {
     foreach(Pin *pin, listAudioPinOut->listPins) {
-        memcpy(static_cast<AudioPinIn*>(pin)->buffer->GetPointer(true),buf[cpt],sampleFrames*sizeof(float));
+        memcpy(static_cast<AudioPinIn*>(pin)->buffer->GetPointer(true),buf[cpt], sampleFrames*sizeof(float));
         cpt++;
     }
 }
 
-Pin* VstAudioDeviceIn::CreatePin(const ConnectionInfo &info)
+void VstAudioDeviceIn::SetBuffers(double **buf, int &cpt, int sampleFrames)
 {
-    AudioPinOut *newPin = new AudioPinOut(this,info.pinNumber);
-    return newPin;
+    foreach(Pin *pin, listAudioPinOut->listPins) {
+        memcpy(static_cast<AudioPinIn*>(pin)->bufferD->GetPointer(true),buf[cpt], sampleFrames*sizeof(double));
+        cpt++;
+    }
 }
+
+//Pin* VstAudioDeviceIn::CreatePin(const ConnectionInfo &info)
+//{
+//    AudioPinOut *newPin = new AudioPinOut(this,info.pinNumber);
+//    return newPin;
+//}

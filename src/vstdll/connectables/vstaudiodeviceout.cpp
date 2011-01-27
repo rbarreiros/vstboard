@@ -21,6 +21,7 @@
 #include "vstaudiodeviceout.h"
 #include "globals.h"
 #include "audiobuffer.h"
+#include "audiobufferd.h"
 #include "mainhost.h"
 #include "../vst.h"
 
@@ -47,7 +48,11 @@ bool VstAudioDeviceOut::Close()
 void VstAudioDeviceOut::SetBufferSize(unsigned long size)
 {
     foreach(Pin *pin, listAudioPinIn->listPins) {
-        static_cast<AudioPinIn*>(pin)->buffer->SetSize(size);
+        if(doublePrecision) {
+            static_cast<AudioPinIn*>(pin)->bufferD->SetSize(size);
+        } else {
+            static_cast<AudioPinIn*>(pin)->buffer->SetSize(size);
+        }
     }
 }
 
@@ -71,8 +76,17 @@ void VstAudioDeviceOut::GetBuffers(float **buf, int &cpt, int sampleFrames)
     }
 }
 
-Pin* VstAudioDeviceOut::CreatePin(const ConnectionInfo &info)
+void VstAudioDeviceOut::GetBuffers(double **buf, int &cpt, int sampleFrames)
 {
-    AudioPinIn *newPin = new AudioPinIn(this,info.pinNumber);
-    return newPin;
+    foreach(Pin *pin, listAudioPinIn->listPins) {
+        AudioBufferD *abuf= static_cast<AudioPinIn*>(pin)->bufferD;
+        memcpy((float*)buf[cpt], (float*)abuf->ConsumeStack(), sampleFrames*sizeof(double));
+        cpt++;
+    }
 }
+
+//Pin* VstAudioDeviceOut::CreatePin(const ConnectionInfo &info)
+//{
+//    AudioPinIn *newPin = new AudioPinIn(this,info.pinNumber);
+//    return newPin;
+//}

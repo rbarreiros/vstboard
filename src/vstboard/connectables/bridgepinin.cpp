@@ -21,6 +21,7 @@
 #include "bridgepinin.h"
 #include "object.h"
 #include "audiobuffer.h"
+#include "audiobufferd.h"
 #include "mainhost.h"
 
 using namespace Connectables;
@@ -41,8 +42,13 @@ void BridgePinIn::ReceiveMsg(const PinMessage::Enum msgType,void *data)
     parent->GetPin(info)->SendMsg(msgType,data);
 
     switch(msgType) {
-        case PinMessage::AudioBufferToMix :
+        case PinMessage::AudioBuffer :
             if(static_cast<AudioBuffer*>(data)->GetCurrentVu() < 0.01)
+                return;
+            valueType=PinType::Audio;
+            break;
+        case PinMessage::AudioBufferD :
+            if(static_cast<AudioBufferD*>(data)->GetCurrentVu() < 0.01)
                 return;
             valueType=PinType::Audio;
             break;

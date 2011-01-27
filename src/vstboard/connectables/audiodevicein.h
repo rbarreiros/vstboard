@@ -44,7 +44,6 @@ namespace Connectables {
         Pin* CreatePin(const ConnectionInfo &info);
 
         bool bufferReady;
-
     protected:
         QSharedPointer<AudioDevice>parentDevice;
 

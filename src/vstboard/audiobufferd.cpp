@@ -1,29 +1,9 @@
-/**************************************************************************
-#    Copyright 2010-2011 Raphaël François
-#    Contact : ctrlbrk76@gmail.com
-#
-#    This file is part of VstBoard.
-#
-#    VstBoard is free software: you can redistribute it and/or modify
-#    it under the terms of the under the terms of the GNU Lesser General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    VstBoard is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    under the terms of the GNU Lesser General Public License for more details.
-#
-#    You should have received a copy of the under the terms of the GNU Lesser General Public License
-#    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
-**************************************************************************/
-
-#include "audiobuffer.h"
 #include "audiobufferd.h"
+#include "audiobuffer.h"
 
-float const AudioBuffer::blankBuffer[] = {.0f};
+double const AudioBufferD::blankBuffer[] = {.0f};
 
-AudioBuffer::AudioBuffer(bool externalAllocation) :
+AudioBufferD::AudioBufferD(bool externalAllocation) :
     stackSize(0),
     pBuffer(0),
     nSize(0),
@@ -35,13 +15,13 @@ AudioBuffer::AudioBuffer(bool externalAllocation) :
 {
 }
 
-AudioBuffer::~AudioBuffer(void)
+AudioBufferD::~AudioBufferD(void)
 {
     if(pBuffer && !bExternalAllocation)
         delete[] pBuffer;
 }
 
-bool AudioBuffer::SetSize(unsigned long size)
+bool AudioBufferD::SetSize(unsigned long size)
 {
     if(size==nSize)
         return true;
@@ -55,7 +35,7 @@ bool AudioBuffer::SetSize(unsigned long size)
         if(pBuffer)
             delete[] pBuffer;
 
-        pBuffer = new float[size];
+        pBuffer = new double[size];
         Q_ASSERT(pBuffer);
         if(!pBuffer) {
             pBuffer=0;
@@ -68,12 +48,12 @@ bool AudioBuffer::SetSize(unsigned long size)
     return true;
 }
 
-void AudioBuffer::Clear()
+void AudioBufferD::Clear()
 {
-     memcpy(pBuffer,blankBuffer,sizeof(float)*nSize);
+    memcpy(pBuffer,blankBuffer,sizeof(double)*nSize);
 }
 
-void AudioBuffer::AddToStack(AudioBuffer * buff)
+void AudioBufferD::AddToStack(AudioBufferD * buff)
 {
     if(buff->GetSize()!=nSize) {
         if(stackSize==0) {
@@ -87,13 +67,13 @@ void AudioBuffer::AddToStack(AudioBuffer * buff)
     if(stackSize==0) {
 
         //1st in the stack, copying is enough
-        memcpy(pBuffer,buff->GetPointer(),sizeof(float)*nSize);
+        memcpy(pBuffer,buff->GetPointer(),sizeof(double)*nSize);
 
     } else {
 
         //add the next buffers to the stack
-        float *buffToAdd = buff->GetPointer();
-        float *myBuff = pBuffer;
+        double *buffToAdd = buff->GetPointer();
+        double *myBuff = pBuffer;
 
         for(unsigned long i=0;i<nSize;i++) {
             *myBuff += *buffToAdd;
@@ -101,10 +81,11 @@ void AudioBuffer::AddToStack(AudioBuffer * buff)
             ++buffToAdd;
         }
     }
+
     stackSize++;
 }
 
-void AudioBuffer::AddToStack(AudioBufferD * buff)
+void AudioBufferD::AddToStack(AudioBuffer * buff)
 {
     if(buff->GetSize()!=nSize) {
         if(stackSize==0) {
@@ -118,10 +99,10 @@ void AudioBuffer::AddToStack(AudioBufferD * buff)
     if(stackSize==0) {
 
         //1st in the stack, copying is enough
-        float *dest=pBuffer;
-        double *ori=buff->GetPointer();
+        double *dest=pBuffer;
+        float *ori=buff->GetPointer();
         for(uint i=0; i<nSize; ++i) {
-            *dest=(float)*ori;
+            *dest=(double)*ori;
             ++dest;
             ++ori;
         }
@@ -129,11 +110,11 @@ void AudioBuffer::AddToStack(AudioBufferD * buff)
     } else {
 
         //add the next buffers to the stack
-        double *buffToAdd = buff->GetPointer();
-        float *myBuff = pBuffer;
+        float *buffToAdd = buff->GetPointer();
+        double *myBuff = pBuffer;
 
-        for(unsigned long i=0;i<nSize;i++) {
-            *myBuff += (float)*buffToAdd;
+        for(unsigned long i=0;i<nSize;++i) {
+            *myBuff += (double)*buffToAdd;
             ++myBuff;
             ++buffToAdd;
         }
@@ -142,7 +123,7 @@ void AudioBuffer::AddToStack(AudioBufferD * buff)
 }
 
 //if tmpBufferToBeFilled : this buff is not a sound and a blank buffer will be returned if no other sounds are added to the stack
-void AudioBuffer::SetPointer(float * buff, bool tmpBufferToBeFilled)
+void AudioBufferD::SetPointer(double * buff, bool tmpBufferToBeFilled)
 {
     pBuffer=buff;
 
@@ -153,7 +134,7 @@ void AudioBuffer::SetPointer(float * buff, bool tmpBufferToBeFilled)
 }
 
 //if willBeFilled : the stack now contains 1 buffer
-float * AudioBuffer::GetPointer(bool willBeFilled)
+double * AudioBufferD::GetPointer(bool willBeFilled)
 {
     if(willBeFilled)
         stackSize=1;
@@ -161,11 +142,11 @@ float * AudioBuffer::GetPointer(bool willBeFilled)
     return pBuffer;
 }
 
-float *AudioBuffer::ConsumeStack()
+double *AudioBufferD::ConsumeStack()
 {
-    float ma = .0f;
-    float mi = .0f;
-    float *buf;
+    double ma = .0;
+    double mi = .0;
+    double *buf;
 
     switch(stackSize) {
         case 0:
@@ -206,23 +187,24 @@ float *AudioBuffer::ConsumeStack()
         _maxVal = std::max(ma,-mi);
 
     //if we're off-limits : here is a limiter
-    if(_maxVal > 1.0f) {
+    if(_maxVal > 1.0) {
         buf = pBuffer;
         for(unsigned long i=0;i<nSize;i++) {
-            if(*buf > 1.0f)
-                *buf = .8f;
-            if(*buf < -1.0f)
-                *buf = -.8f;
+            if(*buf > 1.0)
+                *buf = .8;
+            if(*buf < -1.0)
+                *buf = -.8;
            ++buf;
         }
-        _maxVal = 1.0f;
+        _maxVal = 1.0;
     }
     return pBuffer;
 }
 
-float AudioBuffer::GetVu()
+float AudioBufferD::GetVu()
 {
     currentVu=_maxVal;
-    _maxVal=.0f;
-    return currentVu;
+    _maxVal=.0;
+    return (float)currentVu;
 }
+
