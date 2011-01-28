@@ -50,9 +50,9 @@ void VstAudioDeviceOut::SetBufferSize(unsigned long size)
     foreach(Pin *pin, listAudioPinIn->listPins) {
         if(doublePrecision) {
             static_cast<AudioPinIn*>(pin)->bufferD->SetSize(size);
-        } else {
-            static_cast<AudioPinIn*>(pin)->buffer->SetSize(size);
         }
+        //the host can choose to use processReplacing even if we use double precision
+        static_cast<AudioPinIn*>(pin)->buffer->SetSize(size);
     }
 }
 
@@ -71,7 +71,15 @@ void VstAudioDeviceOut::GetBuffers(float **buf, int &cpt, int sampleFrames)
 {
     foreach(Pin *pin, listAudioPinIn->listPins) {
         AudioBuffer *abuf= static_cast<AudioPinIn*>(pin)->buffer;
-        memcpy((float*)buf[cpt], (float*)abuf->ConsumeStack(), sampleFrames*sizeof(float));
+        AudioBufferD *abufD= static_cast<AudioPinIn*>(pin)->bufferD;
+
+        if(doublePrecision) {
+            abuf->AddToStack(abufD);
+            abufD->ConsumeStack();
+            abufD->ResetStackCounter();
+        }
+        memcpy(buf[cpt], abuf->ConsumeStack(), sampleFrames*sizeof(float));
+        abuf->ResetStackCounter();
         cpt++;
     }
 }
@@ -79,8 +87,16 @@ void VstAudioDeviceOut::GetBuffers(float **buf, int &cpt, int sampleFrames)
 void VstAudioDeviceOut::GetBuffers(double **buf, int &cpt, int sampleFrames)
 {
     foreach(Pin *pin, listAudioPinIn->listPins) {
-        AudioBufferD *abuf= static_cast<AudioPinIn*>(pin)->bufferD;
-        memcpy((float*)buf[cpt], (float*)abuf->ConsumeStack(), sampleFrames*sizeof(double));
+        AudioBuffer *abuf= static_cast<AudioPinIn*>(pin)->buffer;
+        AudioBufferD *abufD= static_cast<AudioPinIn*>(pin)->bufferD;
+
+        if(!doublePrecision) {
+            abufD->AddToStack(abuf);
+            abufD->ConsumeStack();
+            abuf->ResetStackCounter();
+        }
+        memcpy(buf[cpt], abufD->ConsumeStack(), sampleFrames*sizeof(double));
+        abufD->ResetStackCounter();
         cpt++;
     }
 }

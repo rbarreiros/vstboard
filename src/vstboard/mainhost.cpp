@@ -50,7 +50,7 @@ MainHost::MainHost(Vst *myVstPlugin, QObject *parent, QString settingsGroup) :
     currentFileVersion(PROJECT_AND_SETUP_FILE_VERSION),
     settingsGroup(settingsGroup)
 {
-    doublePrecision=GetSetting("doublePrecision",true).toBool();
+    doublePrecision=GetSetting("doublePrecision",false).toBool();
 
     setObjectName("MainHost");
 

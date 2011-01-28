@@ -242,7 +242,7 @@ const int ConfigDialog::defaultBufferSize(MainHost *myHost)
 
 const bool ConfigDialog::defaultDoublePrecision(MainHost *myHost)
 {
-    return myHost->GetSetting("doublePrecision",true).toBool();
+    return myHost->GetSetting("doublePrecision",false).toBool();
 }
 
 void ConfigDialog::AddRecentSetupFile(const QString &file,MainHost *myHost)
