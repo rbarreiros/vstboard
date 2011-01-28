@@ -118,7 +118,7 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     fileFilter << "*.dll";
     listVstPluginsModel->setNameFilters(fileFilter);
     listVstPluginsModel->setNameFilterDisables(false);
-    listVstPluginsModel->setRootPath(ConfigDialog::defaultVstPath());
+    listVstPluginsModel->setRootPath(ConfigDialog::defaultVstPath(myHost));
     ui->VstBrowser->setModel(listVstPluginsModel);
 
 #endif
@@ -130,21 +130,21 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     ui->solverView->setModel(&myHost->solver->model);
 
 #ifndef VST_PLUGIN
-    myHost->SetSampleRate( ConfigDialog::defaultSampleRate() );
+    myHost->SetSampleRate( ConfigDialog::defaultSampleRate(myHost) );
 #endif
     myHost->Open();
 
     ui->treeHostModel->setModel(myHost->GetModel());
 
     //load default setup file
-    currentSetupFile = ConfigDialog::defaultSetupFile();
+    currentSetupFile = ConfigDialog::defaultSetupFile(myHost);
     if(!currentSetupFile.isEmpty()) {
         if(!SetupFile::LoadFromFile(myHost,currentSetupFile))
             currentSetupFile = "";
     }
 
     //load default project file
-    currentProjectFile = ConfigDialog::defaultProjectFile();
+    currentProjectFile = ConfigDialog::defaultProjectFile(myHost);
     if(!currentProjectFile.isEmpty()) {
         if(!ProjectFile::LoadFromFile(myHost,currentProjectFile))
             currentProjectFile = "";
@@ -160,6 +160,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+#ifndef VST_PLUGIN
     if(!userWantsToUnloadSetup()) {
         event->ignore();
         return;
@@ -169,7 +170,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
         event->ignore();
         return;
     }
-
+#endif
     writeSettings();
     event->accept();
 }
@@ -179,8 +180,7 @@ bool MainWindow::userWantsToUnloadSetup()
     if(openedPrompt)
         return false;
 
-    QSettings settings;
-    Autosave::Enum onUnsaved = (Autosave::Enum)settings.value("onUnsavedSetup",Autosave::prompt).toInt();
+    Autosave::Enum onUnsaved = (Autosave::Enum)myHost->GetSetting("onUnsavedSetup",Autosave::prompt).toInt();
 
     if(onUnsaved == Autosave::discard)
         return true;
@@ -223,8 +223,7 @@ bool MainWindow::userWantsToUnloadProject()
     if(openedPrompt)
         return false;
 
-    QSettings settings;
-    Autosave::Enum onUnsaved = (Autosave::Enum)settings.value("onUnsavedProject",Autosave::prompt).toInt();
+    Autosave::Enum onUnsaved = (Autosave::Enum)myHost->GetSetting("onUnsavedProject",Autosave::prompt).toInt();
 
     if(onUnsaved == Autosave::discard)
         return true;
@@ -383,7 +382,7 @@ void MainWindow::on_actionLoad_triggered()
         return;
 
     if(ProjectFile::LoadFromFile(myHost,fileName)) {
-        ConfigDialog::AddRecentProjectFile(fileName);
+        ConfigDialog::AddRecentProjectFile(fileName,myHost);
         currentProjectFile = fileName;
         updateRecentFileActions();
     }
@@ -395,7 +394,7 @@ void MainWindow::on_actionNew_triggered()
         return;
 
     ProjectFile::Clear(myHost);
-    ConfigDialog::AddRecentProjectFile("");
+    ConfigDialog::AddRecentProjectFile("",myHost);
     currentProjectFile = "";
     updateRecentFileActions();
 }
@@ -411,8 +410,7 @@ void MainWindow::on_actionSave_triggered()
 
 void MainWindow::on_actionSave_Project_As_triggered()
 {
-    QSettings settings;
-    QString lastDir = settings.value("lastProjectDir").toString();
+    QString lastDir = myHost->GetSetting("lastProjectDir").toString();
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save Project"), lastDir, tr("Project Files (*.%1)").arg(PROJECT_FILE_EXTENSION));
 
     if(fileName.isEmpty())
@@ -424,8 +422,8 @@ void MainWindow::on_actionSave_Project_As_triggered()
     }
 
     if(ProjectFile::SaveToFile(myHost,fileName)) {
-        settings.setValue("lastProjectDir",QFileInfo(fileName).absolutePath());
-        ConfigDialog::AddRecentProjectFile(fileName);
+        myHost->SetSetting("lastProjectDir",QFileInfo(fileName).absolutePath());
+        ConfigDialog::AddRecentProjectFile(fileName,myHost);
         currentProjectFile = fileName;
         updateRecentFileActions();
     }
@@ -442,7 +440,7 @@ void MainWindow::on_actionLoad_Setup_triggered()
         return;
 
     if(SetupFile::LoadFromFile(myHost,fileName)) {
-        ConfigDialog::AddRecentSetupFile(fileName);
+        ConfigDialog::AddRecentSetupFile(fileName,myHost);
         currentSetupFile = fileName;
         updateRecentFileActions();
     }
@@ -454,7 +452,7 @@ void MainWindow::on_actionNew_Setup_triggered()
         return;
 
     SetupFile::Clear(myHost);
-    ConfigDialog::AddRecentSetupFile("");
+    ConfigDialog::AddRecentSetupFile("",myHost);
     currentSetupFile = "";
     updateRecentFileActions();
 }
@@ -471,8 +469,7 @@ void MainWindow::on_actionSave_Setup_triggered()
 
 void MainWindow::on_actionSave_Setup_As_triggered()
 {
-    QSettings settings;
-    QString lastDir = settings.value("lastSetupDir").toString();
+    QString lastDir = myHost->GetSetting("lastSetupDir").toString();
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save Setup"), lastDir, tr("Setup Files (*.%1)").arg(SETUP_FILE_EXTENSION));
 
     if(fileName.isEmpty())
@@ -485,8 +482,8 @@ void MainWindow::on_actionSave_Setup_As_triggered()
 
 
     if(SetupFile::SaveToFile(myHost,fileName)) {
-        settings.setValue("lastSetupDir",QFileInfo(fileName).absolutePath());
-        ConfigDialog::AddRecentSetupFile(fileName);
+        myHost->SetSetting("lastSetupDir",QFileInfo(fileName).absolutePath());
+        ConfigDialog::AddRecentSetupFile(fileName,myHost);
         currentSetupFile = fileName;
         updateRecentFileActions();
     }
@@ -506,31 +503,28 @@ void MainWindow::on_actionConfig_triggered()
 
 void MainWindow::writeSettings()
 {
-    QSettings settings;
-    settings.beginGroup("MainWindow");
-    settings.setValue("geometry", saveGeometry());
-    settings.setValue("state", saveState());
-    settings.setValue("statusBar", ui->statusBar->isVisible());
-    settings.setValue("splitPan", ui->splitterPanels->saveState());
-    settings.setValue("splitProg", ui->splitterProg->saveState());
-    settings.setValue("splitGroup", ui->splitterGroup->saveState());
+    myHost->SetSetting("MainWindow/geometry", saveGeometry());
+    myHost->SetSetting("MainWindow/state", saveState());
+    myHost->SetSetting("MainWindow/statusBar", ui->statusBar->isVisible());
+    myHost->SetSetting("MainWindow/splitPan", ui->splitterPanels->saveState());
+    myHost->SetSetting("MainWindow/splitProg", ui->splitterProg->saveState());
+    myHost->SetSetting("MainWindow/splitGroup", ui->splitterGroup->saveState());
 
-    settings.setValue("planelHost", ui->actionHost_panel->isChecked());
-    settings.setValue("planelProject", ui->actionProject_panel->isChecked());
-    settings.setValue("planelProgram", ui->actionProgram_panel->isChecked());
-    settings.setValue("planelGroup", ui->actionGroup_panel->isChecked());
+    myHost->SetSetting("MainWindow/planelHost", ui->actionHost_panel->isChecked());
+    myHost->SetSetting("MainWindow/planelProject", ui->actionProject_panel->isChecked());
+    myHost->SetSetting("MainWindow/planelProgram", ui->actionProgram_panel->isChecked());
+    myHost->SetSetting("MainWindow/planelGroup", ui->actionGroup_panel->isChecked());
 
-    settings.endGroup();
-    settings.setValue("lastVstPath", ui->VstBrowser->path());
-    ui->Programs->writeSettings();
-    settings.sync();
+    myHost->SetSetting("lastVstPath", ui->VstBrowser->path());
+    ui->Programs->writeSettings(myHost);
+    //settings.sync();
 }
 
 void MainWindow::readSettings()
 {
-    QSettings settings;
 
 #ifndef VST_PLUGIN
+    QSettings settings;
     if( !settings.value("splashHide",false).toBool() ) {
         Splash spl;
         spl.exec();
@@ -587,12 +581,11 @@ void MainWindow::readSettings()
     updateRecentFileActions();
 
     //window state
-    settings.beginGroup("MainWindow");
 
-    if(settings.contains("geometry") && settings.contains("state")) {
-        restoreGeometry(settings.value("geometry").toByteArray());
-        restoreState(settings.value("state").toByteArray());
-        bool statusb = settings.value("statusBar",false).toBool();
+    if(myHost->SettingDefined("MainWindow/geometry")) {
+        restoreGeometry(myHost->GetSetting("MainWindow/geometry").toByteArray());
+        restoreState(myHost->GetSetting("MainWindow/state").toByteArray());
+        bool statusb = myHost->GetSetting("MainWindow/statusBar",false).toBool();
         ui->actionStatus_bar->setChecked( statusb );
         ui->statusBar->setVisible(statusb);
     } else {
@@ -602,21 +595,19 @@ void MainWindow::readSettings()
     ui->splitterProg->setStretchFactor(0,100);
     ui->splitterGroup->setStretchFactor(0,100);
 
-    if(settings.contains("splitPan"))
-        ui->splitterPanels->restoreState(settings.value("splitPan").toByteArray());
-    if(settings.contains("splitProg"))
-        ui->splitterProg->restoreState(settings.value("splitProg").toByteArray());
-    if(settings.contains("splitGroup"))
-        ui->splitterGroup->restoreState(settings.value("splitGroup").toByteArray());
+    if(myHost->SettingDefined("MainWindow/splitPan"))
+        ui->splitterPanels->restoreState(myHost->GetSetting("MainWindow/splitPan").toByteArray());
+    if(myHost->SettingDefined("MainWindow/splitProg"))
+        ui->splitterProg->restoreState(myHost->GetSetting("MainWindow/splitProg").toByteArray());
+    if(myHost->SettingDefined("MainWindow/splitGroup"))
+        ui->splitterGroup->restoreState(myHost->GetSetting("MainWindow/splitGroup").toByteArray());
 
-    ui->actionHost_panel->setChecked( settings.value("planelHost",true).toBool() );
-    ui->actionProject_panel->setChecked( settings.value("planelProject",false).toBool() );
-    ui->actionProgram_panel->setChecked( settings.value("planelProgram",true).toBool() );
-    ui->actionGroup_panel->setChecked( settings.value("planelGroup",true).toBool() );
+    ui->actionHost_panel->setChecked( myHost->GetSetting("MainWindow/planelHost",true).toBool() );
+    ui->actionProject_panel->setChecked( myHost->GetSetting("MainWindow/planelProject",false).toBool() );
+    ui->actionProgram_panel->setChecked( myHost->GetSetting("MainWindow/planelProgram",true).toBool() );
+    ui->actionGroup_panel->setChecked( myHost->GetSetting("MainWindow/planelGroup",true).toBool() );
 
-    settings.endGroup();
-
-    ui->Programs->readSettings();
+    ui->Programs->readSettings(myHost);
 
     updateRecentFileActions();
 
@@ -706,9 +697,8 @@ void MainWindow::on_actionAbout_triggered()
 
 void MainWindow::updateRecentFileActions()
  {
-     QSettings settings;
      {
-         QStringList files = settings.value("recentSetupFiles").toStringList();
+         QStringList files = myHost->GetSetting("recentSetupFiles").toStringList();
 
          int numRecentFiles = qMin(files.size(), (int)NB_RECENT_FILES);
 
@@ -723,7 +713,7 @@ void MainWindow::updateRecentFileActions()
     }
 
      {
-         QStringList files = settings.value("recentProjectFiles").toStringList();
+         QStringList files = myHost->GetSetting("recentProjectFiles").toStringList();
 
           int numRecentFiles = qMin(files.size(), (int)NB_RECENT_FILES);
 
@@ -754,7 +744,7 @@ void MainWindow::openRecentSetup()
      QString fileName = action->data().toString();
 
      if(SetupFile::LoadFromFile(myHost,fileName)) {
-         ConfigDialog::AddRecentSetupFile(fileName);
+         ConfigDialog::AddRecentSetupFile(fileName,myHost);
          currentSetupFile=fileName;
          updateRecentFileActions();
      }
@@ -772,7 +762,7 @@ void MainWindow::openRecentProject()
      QString fileName = action->data().toString();
 
      if(ProjectFile::LoadFromFile(myHost,fileName)) {
-         ConfigDialog::AddRecentProjectFile(fileName);
+         ConfigDialog::AddRecentProjectFile(fileName,myHost);
          currentProjectFile=fileName;
          updateRecentFileActions();
      }

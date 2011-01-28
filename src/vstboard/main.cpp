@@ -99,19 +99,18 @@ int main(int argc, char *argv[])
 #endif
 
     QCoreApplication::setOrganizationName("CtrlBrk");
-    QCoreApplication::setApplicationName(APP_NAME);
+    QCoreApplication::setApplicationName("VstBoard");
 
     //MyApp app(argc, argv);
     QApplication app(argc, argv);
 
-    QTranslator qtTranslator;
-    if(qtTranslator.load("qt_" + QLocale::system().name(), ":/translations/"))
-        qApp->installTranslator(&qtTranslator);
+//    QTranslator qtTranslator;
+//    if(qtTranslator.load("qt_" + QLocale::system().name(), ":/translations/"))
+//        qApp->installTranslator(&qtTranslator);
 
-    QTranslator myappTranslator;
-    if(myappTranslator.load("vstboard_" + QLocale::system().name(), ":/translations/"))
-        qApp->installTranslator(&myappTranslator);
-
+//    QTranslator myappTranslator;
+//    if(myappTranslator.load("vstboard_" + QLocale::system().name(), ":/translations/"))
+//        qApp->installTranslator(&myappTranslator);
 
     MainHost *host = new MainHost();
     MainWindow *w = new MainWindow(host);

@@ -24,6 +24,7 @@
 //#include <QWidget>
 #include "precomp.h"
 #include "globals.h"
+#include "mainhost.h"
 
 namespace Ui {
     class ProgramList;
@@ -38,8 +39,8 @@ public:
     ~ProgramList();
 
     void SetModel(QStandardItemModel *model);
-    void writeSettings();
-    void readSettings();
+    void writeSettings(MainHost *myHost);
+    void readSettings(MainHost *myHost);
     void resetSettings();
 
 private:

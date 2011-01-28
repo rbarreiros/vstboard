@@ -37,7 +37,7 @@
 #include "projectfile/fileversion.h"
 
 
-MainHost::MainHost(Vst *myVstPlugin, QObject *parent) :
+MainHost::MainHost(Vst *myVstPlugin, QObject *parent, QString settingsGroup) :
     QObject(parent),
     solver(new PathSolver(this)),
     filePass(0),
@@ -47,9 +47,10 @@ MainHost::MainHost(Vst *myVstPlugin, QObject *parent) :
     solverNeedAnUpdate(false),
     solverUpdateEnabled(true),
     mutexListCables(new QMutex(QMutex::Recursive)),
-    currentFileVersion(PROJECT_AND_SETUP_FILE_VERSION)
+    currentFileVersion(PROJECT_AND_SETUP_FILE_VERSION),
+    settingsGroup(settingsGroup)
 {
-    doublePrecision=true;
+    doublePrecision=GetSetting("doublePrecision",true).toBool();
 
     setObjectName("MainHost");
 
@@ -717,4 +718,19 @@ void MainHost::GetTempo(int &tempo, int &sign1, int &sign2)
     sign1=4;
     sign2=4;
 #endif
+}
+
+void MainHost::SetSetting(QString name, QVariant value)
+{
+    settings.setValue(settingsGroup + name,value);
+}
+
+QVariant MainHost::GetSetting(QString name, QVariant defaultVal)
+{
+    return settings.value(settingsGroup + name,defaultVal);
+}
+
+bool MainHost::SettingDefined(QString name)
+{
+    return settings.contains(settingsGroup + name);
 }

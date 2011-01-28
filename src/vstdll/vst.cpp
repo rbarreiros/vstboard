@@ -55,7 +55,6 @@ Vst::Vst (audioMasterCallback audioMaster) :
     setNumOutputs (DEFAULT_OUTPUTS*2);
     setUniqueID (kUniqueID);
     canProcessReplacing(true);
-    canDoubleReplacing(true);
     programsAreChunks(true);
     vst_strncpy (programName, "Default", kVstMaxProgNameLen);	// default program name
 
@@ -68,7 +67,7 @@ Vst::Vst (audioMasterCallback audioMaster) :
     qRegisterMetaTypeStreamOperators<ObjectInfo>("ObjectInfo");
 
     QCoreApplication::setOrganizationName("CtrlBrk");
-    QCoreApplication::setApplicationName(APP_NAME);
+    QCoreApplication::setApplicationName("VstBoard");
 
     if(qtTranslator.load("qt_" + QLocale::system().name(), ":/translations/"))
         qApp->installTranslator(&qtTranslator);
@@ -76,7 +75,10 @@ Vst::Vst (audioMasterCallback audioMaster) :
     if(myappTranslator.load("vstboard_" + QLocale::system().name(), ":/translations/"))
         qApp->installTranslator(&myappTranslator);
 
-    myHost = new MainHost(this);
+    myHost = new MainHost(this,0,"plugin/");
+    if(myHost->doublePrecision)
+        canDoubleReplacing(true);
+
     myWindow = new MainWindow(myHost);
     qEditor = new Gui(this);
     setEditor(qEditor);
@@ -125,14 +127,14 @@ void Vst::open()
      myHost->Open();
 
      //load default setup file
-     QString currentSetupFile = ConfigDialog::defaultSetupFile();
+     QString currentSetupFile = ConfigDialog::defaultSetupFile(myHost);
      if(!currentSetupFile.isEmpty()) {
          if(!SetupFile::LoadFromFile(myHost,currentSetupFile))
              currentSetupFile = "";
      }
 
      //load default project file
-     QString currentProjectFile = ConfigDialog::defaultProjectFile();
+     QString currentProjectFile = ConfigDialog::defaultProjectFile(myHost);
      if(!currentProjectFile.isEmpty()) {
          if(!ProjectFile::LoadFromFile(myHost,currentProjectFile))
              currentProjectFile = "";

@@ -149,28 +149,20 @@ void ProgramList::on_listProgs_clicked(QModelIndex index)
     emit ChangeProg(index);
 }
 
-void ProgramList::writeSettings()
+void ProgramList::writeSettings(MainHost *myHost)
 {
-    QSettings settings;
-    settings.beginGroup("ProgramList");
-    settings.setValue("geometry", saveGeometry());
-    settings.setValue("state", ui->splitter->saveState());
-    settings.endGroup();
-    settings.sync();
+    myHost->SetSetting("ProgramList/geometry", saveGeometry());
+    myHost->SetSetting("ProgramList/state", ui->splitter->saveState());
 }
 
-void ProgramList::readSettings()
+void ProgramList::readSettings(MainHost *myHost)
 {
-    QSettings settings;
-    settings.beginGroup("ProgramList");
-    if(settings.contains("geometry")) {
-        restoreGeometry(settings.value("geometry").toByteArray());
-        ui->splitter->restoreState(settings.value("state").toByteArray());
+    if(myHost->SettingDefined("ProgramList/geometry")) {
+        restoreGeometry(myHost->GetSetting("ProgramList/geometry").toByteArray());
+        ui->splitter->restoreState(myHost->GetSetting("ProgramList/state").toByteArray());
     } else {
         resetSettings();
     }
-
-    settings.endGroup();
 }
 
 void ProgramList::resetSettings()

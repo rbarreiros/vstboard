@@ -49,7 +49,7 @@ class MainHost : public QObject
 {
 Q_OBJECT
 public:
-    MainHost(Vst *myVstPlugin = 0, QObject *parent = 0);
+    MainHost(Vst *myVstPlugin = 0, QObject *parent = 0, QString settingsGroup="");
     ~MainHost();
 
     void Open();
@@ -100,6 +100,10 @@ public:
     quint32 currentFileVersion;
     bool doublePrecision;
 
+    void SetSetting(QString name, QVariant value);
+    QVariant GetSetting(QString name, QVariant defaultVal=0);
+    bool SettingDefined(QString name);
+
 private:
     void SetupMainContainer();
     void SetupHostContainer();
@@ -131,6 +135,9 @@ private:
     int currentTempo;
     int currentTimeSig1;
     int currentTimeSig2;
+
+    QString settingsGroup;
+    QSettings settings;
 
 signals:
     void SampleRateChanged(float rate);
