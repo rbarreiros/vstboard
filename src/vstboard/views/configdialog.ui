@@ -189,7 +189,7 @@
      </property>
      <layout class="QFormLayout" name="formLayout_2">
       <item row="0" column="0">
-       <widget class="QLabel" name="label_4">
+       <widget class="QLabel" name="labelsampleRate">
         <property name="text">
          <string>Sample rate</string>
         </property>
@@ -199,7 +199,7 @@
        <widget class="QComboBox" name="sampleRate"/>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="label_5">
+       <widget class="QLabel" name="labelbufferSize">
         <property name="enabled">
          <bool>false</bool>
         </property>
@@ -216,21 +216,14 @@
        </widget>
       </item>
       <item row="3" column="0">
-       <widget class="QLabel" name="label_6">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
+       <widget class="QLabel" name="labelsamplePrecision">
         <property name="text">
          <string>Precision</string>
         </property>
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QComboBox" name="samplePrecision">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-       </widget>
+       <widget class="QComboBox" name="samplePrecision"/>
       </item>
      </layout>
     </widget>

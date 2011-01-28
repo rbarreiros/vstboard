@@ -33,15 +33,15 @@ public:
     ConfigDialog(MainHost *myHost, QWidget *parent = 0);
     ~ConfigDialog();
 
-    static const QString defaultSetupFile();
-    static const QString defaultProjectFile();
-    static const QString defaultVstPath();
-    static void AddRecentSetupFile(const QString &file);
-    static void AddRecentProjectFile(const QString &file);
+    static const QString defaultSetupFile(MainHost *myHost);
+    static const QString defaultProjectFile(MainHost *myHost);
+    static const QString defaultVstPath(MainHost *myHost);
+    static void AddRecentSetupFile(const QString &file,MainHost *myHost);
+    static void AddRecentProjectFile(const QString &file,MainHost *myHost);
 
-    static const float defaultSampleRate();
-    static const int defaultBufferSize();
-    static const int defaultSamplePrecision();
+    static const float defaultSampleRate(MainHost *myHost);
+    static const int defaultBufferSize(MainHost *myHost);
+    static const bool defaultDoublePrecision(MainHost *myHost);
 
 protected:
     void changeEvent(QEvent *e);

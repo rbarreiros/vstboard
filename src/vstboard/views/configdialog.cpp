@@ -29,18 +29,17 @@ ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QSettings settings;
-
 //vst path
     ui->defaultVstPath->addItem(QIcon(":/img16x16/folder.png"), tr("System default"), "systemDefault");
     ui->defaultVstPath->addItem(QIcon(":/img16x16/folder.png"), tr("From last session"), "fromLastSession");
     ui->defaultVstPath->addItem(tr("Custom path"));
 
-    QString vstPath = settings.value("defaultVstPath", "systemDefault").toString();
-    if(vstPath == "systemDefault" || vstPath == "fromLastSessions")
+    QString vstPath = myHost->GetSetting("defaultVstPath", "systemDefault").toString();
+    if(vstPath == "systemDefault" || vstPath == "fromLastSession")
         ui->defaultVstPath->setCurrentIndex( ui->defaultVstPath->findData( vstPath ) );
     else
         ui->defaultVstPath->setCurrentIndex( ui->defaultVstPath->findText( vstPath ) );
+
 
     connect( ui->defaultVstPath, SIGNAL(currentIndexChanged(int)),
              this, SLOT(onVstPathIndexChanged(int)));
@@ -49,11 +48,11 @@ ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
     ui->defaultSetup->addItem(QIcon(":/img16x16/empty.png"), tr("Empty setup"), "empty");
     ui->defaultSetup->addItem(QIcon(":/img16x16/file_setup.png"), tr("From last session"), "fromLastSession");
     ui->defaultSetup->addItem(tr("Custom setup file"));
-    foreach(const QString &str, settings.value("recentSetupFiles").toStringList()) {
+    foreach(const QString &str, myHost->GetSetting("recentSetupFiles").toStringList()) {
         ui->defaultSetup->addItem(str);
     }
 
-    QString setupFile = settings.value("defaultSetupFile","fromLastSession").toString();
+    QString setupFile = myHost->GetSetting("defaultSetupFile","fromLastSession").toString();
     if(setupFile == "empty" || setupFile == "fromLastSession") {
         ui->defaultSetup->setCurrentIndex( ui->defaultSetup->findData( setupFile ) );
     } else {
@@ -73,11 +72,11 @@ ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
     ui->defaultProject->addItem(QIcon(":/img16x16/empty.png"), tr("Empty project"), "empty");
     ui->defaultProject->addItem(QIcon(":/img16x16/file_project.png"), tr("From last session"), "fromLastSession");
     ui->defaultProject->addItem(tr("Custom project file"));
-    foreach(const QString &str, settings.value("recentProjectFiles").toStringList()) {
+    foreach(const QString &str, myHost->GetSetting("recentProjectFiles").toStringList()) {
         ui->defaultProject->addItem(str);
     }
 
-    QString projectFile = settings.value("defaultProjectFile","fromLastSession").toString();
+    QString projectFile = myHost->GetSetting("defaultProjectFile","fromLastSession").toString();
     if(projectFile == "empty" || projectFile == "fromLastSession") {
         ui->defaultProject->setCurrentIndex( ui->defaultProject->findData( projectFile ) );
     } else {
@@ -92,8 +91,15 @@ ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
     connect( ui->defaultProject, SIGNAL(currentIndexChanged(int)),
              this, SLOT(onProjectIndexChanged(int)));
 
+    int index=0;
+    ui->bufferSize->setVisible(false);
+    ui->labelbufferSize->setVisible(false);
+
 #ifdef VST_PLUGIN
-    ui->groupSampleFormat->setVisible(false);
+    //ui->groupSampleFormat->setVisible(false);
+    ui->sampleRate->setVisible(false);
+    ui->labelsampleRate->setVisible(false);
+
 #else
 //sample rate
 
@@ -102,7 +108,7 @@ ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
     ui->sampleRate->addItem("88.2 kHz",88200);
     ui->sampleRate->addItem("96 kHz",96000);
 
-    int index=ui->sampleRate->findData( myHost->GetSampleRate() );
+    index=ui->sampleRate->findData( myHost->GetSampleRate() );
     if(index==-1) {
         debug("ConfigDialog invalid sample rate")
         return;
@@ -110,32 +116,31 @@ ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
     ui->sampleRate->setCurrentIndex(index);
 
 //buffer size
-    ui->bufferSize->addItem("Auto",0);
-    index = ui->bufferSize->findData( (unsigned int)myHost->GetBufferSize() );
-    if(index==-1) {
-        debug("ConfigDialog invalid buffer size")
-        index=0;
-    }
-    ui->bufferSize->setCurrentIndex(index);
-
+//    ui->bufferSize->addItem("Auto",0);
+//    index = ui->bufferSize->findData( (unsigned int)myHost->GetBufferSize() );
+//    if(index==-1) {
+//        debug("ConfigDialog invalid buffer size")
+//        index=0;
+//    }
+//    ui->bufferSize->setCurrentIndex(index);
+#endif
 //sample precision
-    ui->samplePrecision->addItem("16 bits",16);
-    ui->samplePrecision->addItem("20 bits",20);
-    ui->samplePrecision->addItem("32 bits",32);
-    index=ui->samplePrecision->findData( 16 );
+    ui->samplePrecision->addItem("32 bits",false);
+    ui->samplePrecision->addItem("64 bits",true);
+    index=ui->samplePrecision->findData( defaultDoublePrecision(myHost) );
     if(index==-1) {
         debug("ConfigDialog invalid sample precision")
         index=0;
     }
     ui->samplePrecision->setCurrentIndex(index);
-#endif
+
 
 //on unsaved setup
     ui->onUnsavedSetup->addItem(tr("Always ask"),Autosave::prompt);
     ui->onUnsavedSetup->addItem(tr("Save changes"),Autosave::save);
     ui->onUnsavedSetup->addItem(tr("Discard changes"),Autosave::discard);
 
-    int unsavedSetup = settings.value("onUnsavedSetup",Autosave::prompt).toInt();
+    int unsavedSetup = myHost->GetSetting("onUnsavedSetup",Autosave::prompt).toInt();
     ui->onUnsavedSetup->setCurrentIndex( ui->onUnsavedSetup->findData(unsavedSetup) );
 
 //on unsaved project
@@ -143,7 +148,7 @@ ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
     ui->onUnsavedProject->addItem(tr("Save changes"),Autosave::save);
     ui->onUnsavedProject->addItem(tr("Discard changes"),Autosave::discard);
 
-    int unsavedProject = settings.value("onUnsavedProject",Autosave::prompt).toInt();
+    int unsavedProject = myHost->GetSetting("onUnsavedProject",Autosave::prompt).toInt();
     ui->onUnsavedProject->setCurrentIndex( ui->onUnsavedProject->findData(unsavedProject) );
 }
 
@@ -184,51 +189,36 @@ void ConfigDialog::onProjectIndexChanged(int index)
 }
 
 
-const QString ConfigDialog::defaultSetupFile()
+const QString ConfigDialog::defaultSetupFile(MainHost *myHost)
 {
-    QSettings settings;
-    QString file = settings.value("defaultSetupFile").toString();
-    if(file.isEmpty()) {
-        file = "fromLastSession";
-    }
-
+    QString file = myHost->GetSetting("defaultSetupFile","fromLastSession").toString();
     if(file == "empty") {
         return "";
     }
-
     if(file == "fromLastSession") {
-        file = settings.value("lastSetupFile").toString();
+        file = myHost->GetSetting("lastSetupFile","").toString();
     }
-
     return file;
 }
 
-const QString ConfigDialog::defaultProjectFile()
+const QString ConfigDialog::defaultProjectFile(MainHost *myHost)
 {
-    QSettings settings;
-    QString file = settings.value("defaultProjectFile").toString();
-    if(file.isEmpty()) {
-        file = "fromLastSession";
-    }
-
+    QString file = myHost->GetSetting("defaultProjectFile","fromLastSession").toString();
     if(file == "empty") {
         return "";
     }
-
     if(file == "fromLastSession") {
-        file = settings.value("lastProjectFile").toString();
+        file = myHost->GetSetting("lastProjectFile","").toString();
     }
-
     return file;
 }
 
-const QString ConfigDialog::defaultVstPath()
+const QString ConfigDialog::defaultVstPath(MainHost *myHost)
 {
-    QSettings settings;
-    QString vstPath = settings.value("defaultVstPath").toString();
+    QString vstPath = myHost->GetSetting("defaultVstPath").toString();
 
     if(vstPath == "fromLastSession") {
-        vstPath = settings.value("lastVstPath").toString();
+        vstPath = myHost->GetSetting("lastVstPath").toString();
     }
 
     if(vstPath.isEmpty() || vstPath=="systemDefault") {
@@ -240,71 +230,59 @@ const QString ConfigDialog::defaultVstPath()
     return vstPath;
 }
 
-const float ConfigDialog::defaultSampleRate()
+const float ConfigDialog::defaultSampleRate(MainHost *myHost)
 {
-    QSettings settings;
-    float rate = settings.value("sampleRate").toFloat();
-    if(rate==.0f) {
-        rate=44100.0;
-    }
-
-    return rate;
+    return myHost->GetSetting("sampleRate",44100.0).toFloat();
 }
 
-const int ConfigDialog::defaultBufferSize()
+const int ConfigDialog::defaultBufferSize(MainHost *myHost)
 {
-    QSettings settings;
-    int size = settings.value("bufferSize").toInt();
-    return size;
+    return myHost->GetSetting("bufferSize").toInt();
 }
 
-const int ConfigDialog::defaultSamplePrecision()
+const bool ConfigDialog::defaultDoublePrecision(MainHost *myHost)
 {
-    QSettings settings;
-    int bits = settings.value("samplePrecision").toInt();
-    if(bits==0)
-        bits=16;
-    return bits;
+    return myHost->GetSetting("doublePrecision",true).toBool();
 }
 
-void ConfigDialog::AddRecentSetupFile(const QString &file)
+void ConfigDialog::AddRecentSetupFile(const QString &file,MainHost *myHost)
 {
-    QSettings settings;
     if(!file.isEmpty()) {
-        QStringList lstFiles = settings.value("recentSetupFiles").toStringList();
+        QStringList lstFiles = myHost->GetSetting("recentSetupFiles").toStringList();
         lstFiles.insert(0, file);
         lstFiles.removeDuplicates();
         while(lstFiles.size()>NB_RECENT_FILES) {
             lstFiles.removeLast();
         }
-        settings.setValue("recentSetupFiles",lstFiles);
+        myHost->SetSetting("recentSetupFiles",lstFiles);
     }
-    settings.setValue("lastSetupFile", file);
+    myHost->SetSetting("lastSetupFile", file);
 }
 
-void ConfigDialog::AddRecentProjectFile(const QString &file)
+void ConfigDialog::AddRecentProjectFile(const QString &file,MainHost *myHost)
 {
-    QSettings settings;
     if(!file.isEmpty()) {
-        QStringList lstFiles = settings.value("recentProjectFiles").toStringList();
+        QStringList lstFiles = myHost->GetSetting("recentProjectFiles").toStringList();
         lstFiles.insert(0, file);
         lstFiles.removeDuplicates();
         while(lstFiles.size()>NB_RECENT_FILES) {
             lstFiles.removeLast();
         }
-        settings.setValue("recentProjectFiles",lstFiles);
+        myHost->SetSetting("recentProjectFiles",lstFiles);
     }
-    settings.setValue("lastProjectFile", file);
+    myHost->SetSetting("lastProjectFile", file);
 }
 
 void ConfigDialog::accept()
 {
+    bool needRestart=false;
+
 //vst directory
     QString vstDir = ui->defaultVstPath->itemData( ui->defaultVstPath->currentIndex() ).toString();
     if(vstDir != "systemDefault" && vstDir != "fromLastSession") {
         vstDir = ui->defaultVstPath->currentText();
         QDir dir;
-        if(!dir.exists(vstDir)) {
+        if(vstDir.isEmpty() || !dir.exists(vstDir)) {
             QMessageBox msg(QMessageBox::Critical,
                             tr("Error"),
                             tr("Vst path is not a valid directory"),
@@ -350,31 +328,39 @@ void ConfigDialog::accept()
         }
     }
 
-    QSettings settings;
-
 //default files
-    settings.setValue("defaultVstPath", vstDir );
-    settings.setValue("defaultSetupFile", setupFile );
-    settings.setValue("defaultProjectFile", projectFile );
+    myHost->SetSetting("defaultVstPath", vstDir );
+    myHost->SetSetting("defaultSetupFile", setupFile );
+    myHost->SetSetting("defaultProjectFile", projectFile );
 
 #ifndef VST_PLUGIN
 //sample format
     float rate = ui->sampleRate->itemData(ui->sampleRate->currentIndex()).toFloat();
-    settings.setValue("sampleRate", rate);
-    myHost->SetSampleRate( rate );
+    if(rate!=defaultSampleRate(myHost)) {
+        myHost->SetSampleRate( rate );
+    }
+    myHost->SetSetting("sampleRate", rate);
 
-    int buffer = ui->bufferSize->itemData(ui->bufferSize->currentIndex()).toInt();
-    settings.setValue("bufferSize", buffer);
-
-    int precision = ui->samplePrecision->itemData(ui->samplePrecision->currentIndex()).toInt();
-    settings.setValue("samplePrecision",precision);
+//    int buffer = ui->bufferSize->itemData(ui->bufferSize->currentIndex()).toInt();
+//    settings.setValue("bufferSize", buffer);
 #endif
+    bool precision = ui->samplePrecision->itemData(ui->samplePrecision->currentIndex()).toBool();
+    if(defaultDoublePrecision(myHost)!=precision)
+        needRestart=true;
+    myHost->SetSetting("doublePrecision",precision);
 
 //on unsaved changes
-    settings.setValue("onUnsavedSetup", ui->onUnsavedSetup->itemData( ui->onUnsavedSetup->currentIndex() ).toInt() );
-    settings.setValue("onUnsavedProject", ui->onUnsavedProject->itemData( ui->onUnsavedProject->currentIndex() ).toInt() );
+    myHost->SetSetting("onUnsavedSetup", ui->onUnsavedSetup->itemData( ui->onUnsavedSetup->currentIndex() ).toInt() );
+    myHost->SetSetting("onUnsavedProject", ui->onUnsavedProject->itemData( ui->onUnsavedProject->currentIndex() ).toInt() );
 
     QDialog::accept();
+
+    if(needRestart) {
+        QMessageBox msg;
+        msg.setText(tr("You must restart VstBoard for the changes to take effect"));
+        msg.setIcon(QMessageBox::Information);
+        msg.exec();
+    }
 }
 
 void ConfigDialog::changeEvent(QEvent *e)
@@ -415,7 +401,7 @@ void ConfigDialog::on_browseSetup_clicked()
         return;
     }
 
-    AddRecentSetupFile(fileName);
+    AddRecentSetupFile(fileName,myHost);
 
     int i = ui->defaultSetup->findText(fileName);
     if(i == -1) {
@@ -439,7 +425,7 @@ void ConfigDialog::on_browseProject_clicked()
         return;
     }
 
-    AddRecentProjectFile(fileName);
+    AddRecentProjectFile(fileName,myHost);
 
     int i = ui->defaultProject->findText(fileName);
     if(i == -1) {

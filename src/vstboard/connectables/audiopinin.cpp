@@ -30,7 +30,7 @@ using namespace Connectables;
 AudioPinIn::AudioPinIn(Object *parent, int number, bool externalAllocation, bool bridge)
     :Pin(parent,PinType::Audio,PinDirection::Input,number,bridge)
 {
-    doublePrecision=false;
+    doublePrecision=true;
     buffer = new AudioBuffer(externalAllocation);
     bufferD = new AudioBufferD(externalAllocation);
     setObjectName(QString("In%1").arg(number));

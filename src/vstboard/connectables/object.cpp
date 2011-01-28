@@ -45,12 +45,12 @@ Object::Object(MainHost *host, int index, const ObjectInfo &info) :
     currentProgram(0),
     closed(true),
     containerId(FixedObjId::noContainer),
-    doublePrecision(true),
     currentProgId(TEMP_PROGRAM),
     objInfo(info),
     myHost(host)
 {
     setObjectName(QString("%1.%2").arg(objInfo.name).arg(index));
+    doublePrecision=myHost->doublePrecision;
 
     //init pins lists
     ConnectionInfo i;
