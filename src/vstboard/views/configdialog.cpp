@@ -215,10 +215,10 @@ const QString ConfigDialog::defaultProjectFile(MainHost *myHost)
 
 const QString ConfigDialog::defaultVstPath(MainHost *myHost)
 {
-    QString vstPath = myHost->GetSetting("defaultVstPath").toString();
+    QString vstPath = myHost->GetSetting("defaultVstPath","systemDefault").toString();
 
     if(vstPath == "fromLastSession") {
-        vstPath = myHost->GetSetting("lastVstPath").toString();
+        vstPath = myHost->GetSetting("lastVstPath","").toString();
     }
 
     if(vstPath.isEmpty() || vstPath=="systemDefault") {
