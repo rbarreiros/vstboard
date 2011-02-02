@@ -33,6 +33,7 @@ ProgListView::ProgListView(QWidget *parent) :
     connect(actDel,SIGNAL(triggered()),
             this,SLOT(DeleteItem()));
     addAction(actDel);
+    setSelectionMode(ExtendedSelection);
 }
 
 void ProgListView::dragMoveEvent ( QDragMoveEvent * event )

@@ -121,13 +121,13 @@ void ProgramList::OnProgChange(const QModelIndex &index)
     currentGrp = parIndex.row();
     currentPrg = index.row();
 
-    ui->listGrps->setCurrentIndex(parIndex);
+//    ui->listGrps->setCurrentIndex(parIndex);
     ui->listGrps->scrollTo(parIndex);
 
     ui->listProgs->setRootIndex( index.parent() );
 
     //select current program
-    ui->listProgs->setCurrentIndex(index);
+//    ui->listProgs->setCurrentIndex(index);
     ui->listProgs->scrollTo(index);
 }
 

@@ -51,8 +51,8 @@ private:
     QDataStream & fromStream (QDataStream &);
 
     ProgramsModel *model;
-    QStandardItem *currentGrp;
-    QStandardItem *currentPrg;
+    QPersistentModelIndex currentGrp;
+    QPersistentModelIndex currentPrg;
 
     unsigned int nextGroupId;
     unsigned int nextProgId;

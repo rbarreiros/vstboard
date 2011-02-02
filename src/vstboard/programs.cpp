@@ -26,8 +26,6 @@
 Programs::Programs(MainHost *parent) :
     QObject(parent),
     model(0),
-    currentGrp(0),
-    currentPrg(0),
     nextGroupId(0),
     nextProgId(0),
     myHost(parent),
@@ -76,11 +74,15 @@ void Programs::BuildModel()
         grpItem->appendRow(prgList);
         model->invisibleRootItem()->appendRow(grpItem);
     }
-    currentGrp = model->item(0);
-    currentPrg = model->item(0)->child(0)->child(0);
+    currentGrp = model->item(0)->index();
+    currentPrg = model->item(0)->child(0)->child(0)->index();
 
-    emit GroupChanged( currentGrp->index() );
-    emit ProgChanged( currentPrg->index() );
+    model->item(0)->setBackground(Qt::green);
+    model->item(0)->child(0)->child(0)->setBackground(Qt::green);
+
+
+    emit GroupChanged( currentGrp );
+    emit ProgChanged( currentPrg );
 
     emit GroupAutosaveChanged(groupAutosaveState);
     emit ProgAutosaveChanged(progAutosaveState);
@@ -90,16 +92,16 @@ void Programs::BuildModel()
 
 int Programs::GetCurrentMidiGroup() const
 {
-    if(!currentGrp)
+    if(!currentGrp.isValid())
         return 0;
-    return currentGrp->row();
+    return currentGrp.row();
 }
 
 int Programs::GetCurrentMidiProg() const
 {
-    if(!currentPrg)
+    if(!currentPrg.isValid())
         return 0;
-    return currentPrg->row();
+    return currentPrg.row();
 }
 
 bool Programs::userWantsToUnloadGroup()
@@ -244,8 +246,8 @@ bool Programs::RemoveIndex(const QModelIndex &index)
             return false;
 
         //move to another program
-        if(index==currentPrg->index()) {
-            if(currentPrg->row()==0) {
+        if(index==currentPrg) {
+            if(currentPrg.row()==0) {
                 ChangeProg(1);
             }  else {
                 ChangeProg(0);
@@ -267,8 +269,8 @@ bool Programs::RemoveIndex(const QModelIndex &index)
             return false;
 
         //move to another group
-        if(index==currentGrp->index()) {
-            if(currentGrp->row()==0) {
+        if(index==currentGrp) {
+            if(currentGrp.row()==0) {
                 ChangeGroup(1);
             }  else {
                 ChangeGroup(0);
@@ -296,27 +298,42 @@ bool Programs::RemoveIndex(const QModelIndex &index)
 
 void Programs::ChangeProg(QStandardItem *newPrg)
 {
-    if(!newPrg || newPrg==currentPrg)
+    if(!newPrg || newPrg->index()==currentPrg)
         return;
 
     if(!userWantsToUnloadProgram()) {
-        emit ProgChanged( currentPrg->index() );
+        emit ProgChanged( currentPrg );
         return;
     }
 
-    QStandardItem *newgrp = newPrg->parent()->parent();
+    QModelIndex newgrp = newPrg->parent()->parent()->index();
     if(newgrp!=currentGrp) {
         if(!userWantsToUnloadGroup()) {
-            emit ProgChanged( currentPrg->index() );
+            emit ProgChanged( currentPrg );
             return;
         }
 
+        QStandardItem *oldGrpItem = model->itemFromIndex( currentGrp );
+        if(oldGrpItem)
+            oldGrpItem->setBackground(Qt::transparent);
+
         currentGrp=newgrp;
-        emit GroupChanged( currentGrp->index() );
+
+        QStandardItem *newGrpItem = model->itemFromIndex(currentGrp);
+        if(newGrpItem) {
+            newGrpItem->setBackground(Qt::green);
+            for(int i=0; i<newGrpItem->child(0,0)->rowCount(); i++)
+                newGrpItem->child(0,0)->child(i,0)->setBackground(Qt::transparent);
+        }
+
+        emit GroupChanged( currentGrp );
     }
 
-    currentPrg = newPrg;
-    emit ProgChanged( currentPrg->index() );
+    model->itemFromIndex(currentPrg)->setBackground(Qt::transparent);
+    newPrg->setBackground(Qt::green);
+
+    currentPrg = newPrg->index();
+    emit ProgChanged( currentPrg );
 
     projectDirty=true;
 }
@@ -328,30 +345,30 @@ void Programs::ChangeProg(const QModelIndex &prgIndex)
 }
 
 void Programs::ChangeProg(int midiProgNum) {
-    if(!currentPrg)
+    if(!currentPrg.isValid())
         return;
-    ChangeProg(currentPrg->parent()->child(midiProgNum));
+    ChangeProg(currentPrg.parent().child(midiProgNum,0));
 }
 
 void Programs::ChangeGroup(int grpNum)
 {
-    QStandardItem *newGrp = model->item(grpNum);
-    if(!newGrp)
+    QModelIndex newGrp = model->item(grpNum)->index();
+    if(!newGrp.isValid())
         return;
 
     if(newGrp==currentGrp)
         return;
 
-    QStandardItem *newPrg = newGrp->child(0)->child(0);
+    QStandardItem *newPrg = model->itemFromIndex( newGrp.child(0,0).child(0,0) );
 
-    if(currentPrg) {
-        int prg = currentPrg->row();
-        newPrg = newGrp->child(0,0)->child( prg );
+    if(currentPrg.isValid()) {
+        int prg = currentPrg.row();
+        newPrg = model->itemFromIndex( newGrp.child(0,0).child( prg,0 ) );
     }
 
     if(!newPrg) {
         debug("Programs::ChangeGroup prog not found")
-        newPrg = newGrp->child(0)->child(0);
+        newPrg = model->itemFromIndex( newGrp.child(0,0).child(0,0) );
     }
 
     if(!newPrg) {
@@ -393,9 +410,9 @@ QDataStream & Programs::toStream (QDataStream &out)
         }
     }
 
-    quint16 grp = currentPrg->parent()->parent()->row();
+    quint16 grp = currentPrg.parent().parent().row();
     out << grp;
-    quint16 prg = currentPrg->row();
+    quint16 prg = currentPrg.row();
     out << prg;
 
     out << (quint8)groupAutosaveState;
@@ -408,7 +425,6 @@ QDataStream & Programs::toStream (QDataStream &out)
 QDataStream & Programs::fromStream (QDataStream &in)
 {
     model->clear();
-    currentPrg=0;
     QStandardItem *root = model->invisibleRootItem();
     quint16 nbgrp;
     in >> nbgrp;
@@ -459,8 +475,8 @@ QDataStream & Programs::fromStream (QDataStream &in)
     quint16 prg;
     in >> prg;
 
-    currentGrp=0;
-    currentPrg=0;
+    currentGrp=QModelIndex();
+    currentPrg=QModelIndex();
     ChangeGroup(grp);
     ChangeProg(prg);
 

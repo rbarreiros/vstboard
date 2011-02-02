@@ -35,26 +35,26 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
         case Qt::CopyAction : {
             QStandardItemModel mod;
             mod.dropMimeData(data,action,0,0,QModelIndex());
-            QStandardItem *i = mod.invisibleRootItem()->child(0);
 
-            if(i->data(UserRoles::nodeType).toInt() == NodeType::program) {
-                QStandardItem *cpy = myHost->programList->CopyProgram(i);
-                QStandardItem *par = itemFromIndex(parent);
-                if(row==-1)
-                    par->appendRow(cpy);
-                else
-                    par->insertRow(row,cpy);
-                return false;
-            }
+            for(int i=0; i<mod.rowCount(); i++) {
+                QStandardItem *it = mod.invisibleRootItem()->child(i);
 
-            if(i->data(UserRoles::nodeType).toInt() == NodeType::programGroup) {
-                QStandardItem *cpy = myHost->programList->CopyGroup(i);
-                if(row==-1)
-                    appendRow(cpy);
-                else
-                    invisibleRootItem()->insertRow(row,cpy);
+                if(it->data(UserRoles::nodeType).toInt() == NodeType::program) {
+                    QStandardItem *cpy = myHost->programList->CopyProgram(it);
+                    QStandardItem *par = itemFromIndex(parent);
+                    if(row==-1)
+                        par->appendRow(cpy);
+                    else
+                        par->insertRow(row,cpy);
+                }
 
-                return false;
+                if(it->data(UserRoles::nodeType).toInt() == NodeType::programGroup) {
+                    QStandardItem *cpy = myHost->programList->CopyGroup(it);
+                    if(row==-1)
+                        appendRow(cpy);
+                    else
+                        invisibleRootItem()->insertRow(row,cpy);
+                }
             }
             break;
         }

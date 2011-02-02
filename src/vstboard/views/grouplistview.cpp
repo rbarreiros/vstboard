@@ -34,6 +34,7 @@ GroupListView::GroupListView(QWidget *parent) :
     connect(actDel,SIGNAL(triggered()),
             this,SLOT(DeleteItem()));
     addAction(actDel);
+    setSelectionMode(ExtendedSelection);
 }
 
 void GroupListView::startDrag ( Qt::DropActions supportedActions )
