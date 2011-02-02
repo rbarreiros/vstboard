@@ -1,5 +1,6 @@
 Name "VstBoard"
 RequestExecutionLevel admin
+
 OutFile "vstboard_${ARCH}_setup.exe"
 SetDateSave on
 SetDatablockOptimize on
@@ -24,7 +25,6 @@ LicenseData "license.txt"
 
 Var InstFolder
 Var VstDir
-
 
 Page license
 Page components
@@ -64,9 +64,8 @@ Function getVstDir
   StrCpy $VstDir "$INSTDIR\"
 FunctionEnd
 
-
-Section "VstBoard (required)"
-        SetShellVarContext current
+Section "!VstBoard (required)"
+	SetShellVarContext current
 	SectionIn RO
 	SetOutPath $InstFolder
 	File "QtCore4.dll"
@@ -99,11 +98,19 @@ Section "VstBoard (required)"
 SectionEnd
 
 Section "Start Menu Shortcuts"
-        SetShellVarContext current
+	SetShellVarContext current
 	SetOutPath $InstFolder
 	CreateDirectory "${START_LINK_DIR}"
 	CreateShortCut "${START_LINK_RUN}" "$InstFolder\VstBoard.exe"
 	CreateShortCut "${START_LINK_UNINSTALLER}" "$InstFolder\uninst.exe"
+SectionEnd
+
+Section "-VcRedist"
+	SetOutPath "$TEMP"
+	SetOverwrite on
+	File vcredist_${ARCH}.exe
+	ExecWait '"$TEMP\vcredist_${ARCH}.exe" /q'
+	Delete "$TEMP\vcredist_${ARCH}.exe"
 SectionEnd
 
 Section "Uninstall"
@@ -125,6 +132,6 @@ Section "Uninstall"
 	RMDir "$INSTDIR"
 	Delete "${START_LINK_RUN}"
 	Delete "${START_LINK_UNINSTALLER}"
-        RMDir "${START_LINK_DIR}"
+	RMDir "${START_LINK_DIR}"
 SectionEnd
 
