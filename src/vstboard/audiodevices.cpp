@@ -119,6 +119,8 @@ void AudioDevices::BuildModel()
     //APIs
     for (int i = 0; i < Pa_GetHostApiCount(); ++i) {
         QStandardItem *api = new QStandardItem(Pa_GetHostApiInfo(i)->name);
+        api->setDragEnabled(false);
+        api->setSelectable(false);
         parentItem->appendRow(api);
         if(api->text() == "ASIO")
             AsioIndex = api->index();
@@ -157,6 +159,7 @@ void AudioDevices::BuildModel()
         QStandardItem *dev = new QStandardItem( devName);
         dev->setEditable(false);
         dev->setData(QVariant::fromValue(obj), UserRoles::objInfo);
+        dev->setDragEnabled(true);
         items << dev;
 
         QStandardItem *ins = new QStandardItem( QString::number(devInfo->maxInputChannels));

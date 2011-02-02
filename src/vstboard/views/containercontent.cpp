@@ -69,7 +69,6 @@ void ContainerContent::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
 {
     //accepts objects from parking
     if(event->source() == myParking ) {
-        event->setDropAction(Qt::MoveAction);
         QGraphicsWidget::dragEnterEvent(event);
         return;
     }
