@@ -78,9 +78,9 @@ win32-msvc* {
 
     #build installer
         exists($$INSTALLER_NSIS_PATH) {
-            arc=win32
+            arc=x86
             contains(QMAKE_HOST.arch, x86_64):{
-                arc=win64
+                arc=x64
             }
             QMAKE_POST_LINK += \"$$INSTALLER_NSIS_PATH\" /V1 /DARCH=$$arc \"$$DESTDIR_WIN\\nsis.nsi\" $$escape_expand(\n\t)
         }

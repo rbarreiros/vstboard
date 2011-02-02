@@ -94,28 +94,19 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
             if(data->hasFormat("application/x-qstandarditemmodeldatalist")) {
                 QStandardItemModel mod;
                 mod.dropMimeData(data,action,0,0,QModelIndex());
-                QStandardItem *i = mod.invisibleRootItem()->child(0);
-                if(i->data(UserRoles::value).isValid()) {
-                    QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->GetObjectFromId( i->data(UserRoles::value).toInt() );
-                    if(objPtr.isNull()) {
-                        debug("HostModel::dropMimeData x-qstandarditemmodeldatalist object not found")
-                        return false;
-                    }
-
-                    //parking object are only accepted in programmable objects
-                    if(i->data(UserRoles::parking).toBool()) {
-                        if(cntPtr->listenProgramChanges) {
-                            cntPtr->AddObject(objPtr);
-                            return true;
-                        } else {
-                            return false;
+                int a=mod.rowCount();
+                for(int i=0;i<mod.rowCount();i++) {
+                    QStandardItem *it = mod.invisibleRootItem()->child(i);
+                    if(it->data(UserRoles::value).isValid()) {
+                        QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->GetObjectFromId( it->data(UserRoles::value).toInt() );
+                        if(objPtr.isNull()) {
+                            debug("HostModel::dropMimeData x-qstandarditemmodeldatalist object not found")
+                            continue;
                         }
-                    } else {
                         cntPtr->AddObject(objPtr);
-                        return true;
                     }
                 }
-                return false;
+                return true;
             }
 
     #ifdef VSTSDK
@@ -156,22 +147,24 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                 QByteArray b = data->data("application/x-audiointerface");
                 QDataStream stream(&b,QIODevice::ReadOnly);
                 ObjectInfo info;
-                stream >> info;
 
-                info.objType=ObjType::AudioInterfaceIn;
-                QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
-                if(objPtr.isNull()) {
-                    debug("HostModel::dropMimeData audioin object not found or already used")
-                } else {
-                    cntPtr->AddObject(objPtr);
-                }
+                while(!stream.atEnd()) {
+                    stream >> info;
+                    info.objType=ObjType::AudioInterfaceIn;
+                    QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
+                    if(objPtr.isNull()) {
+                        debug("HostModel::dropMimeData audioin object not found or already used")
+                    } else {
+                        cntPtr->AddObject(objPtr);
+                    }
 
-                info.objType=ObjType::AudioInterfaceOut;
-                objPtr = myHost->objFactory->NewObject(info);
-                if(objPtr.isNull()) {
-                    debug("HostModel::dropMimeData audioout object not found or already used")
-                } else {
-                    cntPtr->AddObject(objPtr);
+                    info.objType=ObjType::AudioInterfaceOut;
+                    objPtr = myHost->objFactory->NewObject(info);
+                    if(objPtr.isNull()) {
+                        debug("HostModel::dropMimeData audioout object not found or already used")
+                    } else {
+                        cntPtr->AddObject(objPtr);
+                    }
                 }
 
                 return true;
@@ -182,15 +175,16 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                 QByteArray b = data->data("application/x-midiinterface");
                 QDataStream stream(&b,QIODevice::ReadOnly);
                 ObjectInfo info;
-                stream >> info;
 
-                QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
-                if(objPtr.isNull()) {
-                    debug("HostModel::dropMimeData midi object not found or already used")
-                    return false;
+                while(!stream.atEnd()) {
+                    stream >> info;
+                    QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
+                    if(objPtr.isNull()) {
+                        debug("HostModel::dropMimeData midi object not found or already used")
+                        continue;
+                    }
+                    cntPtr->AddObject(objPtr);
                 }
-                cntPtr->AddObject(objPtr);
-
                 return true;
             }
 
@@ -199,26 +193,16 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                 QByteArray b = data->data("application/x-tools");
                 QDataStream stream(&b,QIODevice::ReadOnly);
                 ObjectInfo info;
-                stream >> info;
 
-                QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
-                if(objPtr.isNull()) {
-                    debug("HostModel::dropMimeData tool object not found")
-                    return false;
+                while(!stream.atEnd()) {
+                    stream >> info;
+                    QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
+                    if(objPtr.isNull()) {
+                        debug("HostModel::dropMimeData tool object not found")
+                        continue;
+                    }
+                    cntPtr->AddObject(objPtr);
                 }
-                cntPtr->AddObject(objPtr);
-//                if(info.objType == ObjType::Container) {
-//                    ObjectInfo in;
-//                    in.nodeType = NodeType::bridge;
-//                    in.objType = ObjType::BridgeIn;
-//                    static_cast<Connectables::Container*>(objPtr.data())->AddObject( myHost->objFactory->NewObject(in) );
-//                    ObjectInfo out;
-//                    out.nodeType = NodeType::bridge;
-//                    out.objType = ObjType::BridgeOut;
-//                    static_cast<Connectables::Container*>(objPtr.data())->AddObject( myHost->objFactory->NewObject(out) );
-//                }
-
-
                 return true;
             }
             break;
@@ -227,8 +211,6 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
         //connect a pin by drag&drop
         case NodeType::pin :
         {
-
-
             if(data->hasFormat("application/x-pin")) {
                 ConnectionInfo parentInfo = rootIndex.data(UserRoles::connectionInfo).value<ConnectionInfo>();
 

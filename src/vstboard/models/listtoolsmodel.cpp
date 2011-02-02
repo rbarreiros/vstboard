@@ -28,14 +28,14 @@ ListToolsModel::ListToolsModel(QObject *parent) :
 
 QMimeData  * ListToolsModel::mimeData ( const QModelIndexList  & indexes ) const
 {
-    QMimeData  *data = new QMimeData();// QStandardItemModel::mimeData ( indexes ) ;
-    QStandardItem *item = itemFromIndex(indexes.first());
-
+    QMimeData  *data = new QMimeData();
     QByteArray b;
     QDataStream stream(&b,QIODevice::WriteOnly);
 
-    stream << item->data(UserRoles::objInfo).value<ObjectInfo>();
-    data->setData("application/x-tools",b);
+    foreach(QModelIndex idx, indexes) {
+        stream << itemFromIndex(idx)->data(UserRoles::objInfo).value<ObjectInfo>();
+    }
 
+    data->setData("application/x-tools",b);
     return data;
 }

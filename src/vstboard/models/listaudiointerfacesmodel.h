@@ -27,6 +27,7 @@ class ListAudioInterfacesModel : public QStandardItemModel
 {
 public:
     ListAudioInterfacesModel(QObject *parent=0);
+    Qt::ItemFlags flags ( const QModelIndex & index ) const;
     QMimeData  * mimeData ( const QModelIndexList  & indexes ) const ;
 };
 

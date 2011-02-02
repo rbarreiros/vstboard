@@ -26,21 +26,30 @@ ListAudioInterfacesModel::ListAudioInterfacesModel(QObject *parent) :
 {
 }
 
+Qt::ItemFlags ListAudioInterfacesModel::flags ( const QModelIndex & index ) const
+{
+    if(!index.parent().isValid())
+        return Qt::ItemIsEnabled;
+
+    return Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsEnabled;
+
+}
+
 QMimeData  * ListAudioInterfacesModel::mimeData ( const QModelIndexList  & indexes ) const
 {
-    QMimeData  *data = new QMimeData();//QStandardItemModel::mimeData ( indexes ) ;
-    QStandardItem *item = itemFromIndex(indexes.first());
-
-    //don't drag api
-    if(item->parent()==0)
-        return 0;
-
+    QMimeData  *data = new QMimeData();
     QByteArray b;
     QDataStream stream(&b,QIODevice::WriteOnly);
 
-    stream << item->data(UserRoles::objInfo).value<ObjectInfo>();
+    QStandardItem *item = itemFromIndex(indexes.first());
+
+    foreach(QModelIndex idx, indexes) {
+        //don't drag api
+        if(item->parent()==0)
+            continue;
+        stream << itemFromIndex(idx)->data(UserRoles::objInfo).value<ObjectInfo>();
+    }
 
     data->setData("application/x-audiointerface",b);
-
     return data;
 }

@@ -297,6 +297,9 @@
            <property name="dragEnabled">
             <bool>true</bool>
            </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::ExtendedSelection</enum>
+           </property>
            <property name="uniformItemSizes">
             <bool>true</bool>
            </property>
@@ -365,6 +368,9 @@
            </property>
            <property name="dragEnabled">
             <bool>true</bool>
+           </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::ExtendedSelection</enum>
            </property>
            <property name="uniformItemSizes">
             <bool>true</bool>
@@ -562,6 +568,9 @@
        <property name="dragDropMode">
         <enum>QAbstractItemView::DragOnly</enum>
        </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::ExtendedSelection</enum>
+       </property>
        <property name="indentation">
         <number>10</number>
        </property>
@@ -645,8 +654,11 @@
        <property name="showDropIndicator" stdset="0">
         <bool>false</bool>
        </property>
-       <property name="dragDropMode">
-        <enum>QAbstractItemView::DragOnly</enum>
+       <property name="dragEnabled">
+        <bool>true</bool>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::ExtendedSelection</enum>
        </property>
        <property name="indentation">
         <number>10</number>
@@ -742,6 +754,9 @@
        </property>
        <property name="dragDropMode">
         <enum>QAbstractItemView::DragOnly</enum>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::ExtendedSelection</enum>
        </property>
        <property name="indentation">
         <number>10</number>
