@@ -24,7 +24,7 @@
 
 ProgramsModel::ProgramsModel(MainHost *parent) :
     QStandardItemModel(parent),
-    movingItems(false),
+    movingItems(0),
     myHost(parent)
 {
 }
@@ -59,8 +59,10 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
             break;
         }
         case Qt::MoveAction : {
-                //note that we're moving items : remove items but don't delete the associated programs
-            movingItems=true;
+            //note that we're moving items : remove items but don't delete the associated programs
+            QStandardItemModel mod;
+            mod.dropMimeData(data,action,0,0,QModelIndex());
+            movingItems=mod.rowCount();
             return QStandardItemModel::dropMimeData(data, action,row, column, parent);
             break;
         }
@@ -73,8 +75,8 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
 
 bool ProgramsModel::removeRows ( int row, int count, const QModelIndex & parent )
 {
-    if(movingItems) {
-        movingItems=false;
+    if(movingItems>0) {
+        movingItems--;
     } else {
         QModelIndex idx = index(row,0,parent);
         if(!myHost->programList->RemoveIndex(idx))
@@ -82,3 +84,4 @@ bool ProgramsModel::removeRows ( int row, int count, const QModelIndex & parent 
     }
     return QStandardItemModel::removeRows(row,count,parent);
 }
+

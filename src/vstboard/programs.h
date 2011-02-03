@@ -45,7 +45,7 @@ public:
     void SetMainWindow(MainWindow *win) {mainWindow=win;}
 
 private:
-    void ChangeProg(QStandardItem *newPrg);
+//    void ChangeProg(QStandardItem *newPrg);
 
     QDataStream & toStream (QDataStream &);
     QDataStream & fromStream (QDataStream &);
@@ -53,6 +53,8 @@ private:
     ProgramsModel *model;
     QPersistentModelIndex currentGrp;
     QPersistentModelIndex currentPrg;
+
+    QModelIndex displayedGroup;
 
     unsigned int nextGroupId;
     unsigned int nextProgId;
@@ -77,9 +79,14 @@ signals:
 public slots:
     void ChangeProg(int midiPrgId);
     void ChangeGroup(int grpNum);
-    void ChangeProg(const QModelIndex &prgIndex);
+    void ChangeProg(const QModelIndex &newPrg);
+    void ChangeGroup(const QModelIndex &newGrp);
     void SetProgAutosave(const Autosave::Enum state);
     void SetGroupAutosave(const Autosave::Enum state);
+
+    void rowsRemoved( const QModelIndex & parent, int start, int end );
+
+    void DisplayedGroupChanged(const QModelIndex &index);
 
     friend QDataStream & operator<< (QDataStream&, Programs&);
     friend QDataStream & operator>> (QDataStream&, Programs&);

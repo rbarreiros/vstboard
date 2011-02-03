@@ -38,29 +38,26 @@ public:
     explicit ProgramList(QWidget *parent = 0);
     ~ProgramList();
 
-    void SetModel(QStandardItemModel *model);
+    void SetModel(QAbstractItemModel *model);
     void writeSettings(MainHost *myHost);
     void readSettings(MainHost *myHost);
     void resetSettings();
 
 private:
     Ui::ProgramList *ui;
-    QStandardItemModel *model;
-    int currentGrp;
-    int currentPrg;
-    int currentGrpDragging;
+    QAbstractItemModel *model;
+    QPersistentModelIndex currentPrg;
 
 signals:
     void ChangeProg(const QModelIndex &index);
+    void ChangeGroup(const QModelIndex &index);
     void ProgAutoSave(const Autosave::Enum state);
     void GroupAutoSave(const Autosave::Enum state);
+    void CurrentDisplayedGroup(const QModelIndex &index);
 
 public slots:
     void OnProgChange(const QModelIndex &index);
     void OnDragOverGroups( QWidget *source, const QModelIndex & index);
-    void OnGrpStartDrag(const QModelIndex & index);
-    void ShowCurrentGroup();
-    void rowsInserted ( const QModelIndex & parent, int start, int end );
     void OnProgAutoSaveChanged(const Autosave::Enum state);
     void OnGroupAutoSaveChanged(const Autosave::Enum state);
 

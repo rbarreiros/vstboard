@@ -21,6 +21,7 @@
 #include "precomp.h"
 #include "proglistview.h"
 #include "globals.h"
+
 ProgListView::ProgListView(QWidget *parent) :
     QListView(parent)
 {
