@@ -37,12 +37,6 @@ GroupListView::GroupListView(QWidget *parent) :
     setSelectionMode(ExtendedSelection);
 }
 
-void GroupListView::startDrag ( Qt::DropActions supportedActions )
-{
-    emit StartDrag(currentIndex());
-    QListView::startDrag(supportedActions);
-}
-
 void GroupListView::dragMoveEvent ( QDragMoveEvent * event )
 {
     if(event->source() == this) {

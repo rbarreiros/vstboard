@@ -95,7 +95,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                 QStandardItemModel mod;
                 mod.dropMimeData(data,action,0,0,QModelIndex());
                 int a=mod.rowCount();
-                for(int i=0;i<mod.rowCount();i++) {
+                for(int i=0;i<a;i++) {
                     QStandardItem *it = mod.invisibleRootItem()->child(i);
                     if(it->data(UserRoles::value).isValid()) {
                         QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->GetObjectFromId( it->data(UserRoles::value).toInt() );

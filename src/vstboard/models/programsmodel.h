@@ -31,7 +31,7 @@ public:
     bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
     bool removeRows ( int row, int count, const QModelIndex & parent = QModelIndex() );
 protected:
-    bool movingItems;
+    int movingItems;
     MainHost *myHost;
 signals:
 
