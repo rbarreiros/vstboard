@@ -430,7 +430,10 @@ void Programs::ChangeProg(const QModelIndex &newPrg)
 void Programs::ChangeProg(int midiProgNum) {
     if(!currentPrg.isValid())
         return;
-    ChangeProg(currentPrg.parent().child(midiProgNum,0));
+    QModelIndex index = currentPrg.parent().child(midiProgNum,0);
+    if(!index.isValid())
+        return;
+    ChangeProg(index);
 }
 
 void Programs::ChangeGroup(const QModelIndex &newGrp)
@@ -457,6 +460,9 @@ void Programs::ChangeGroup(const QModelIndex &newGrp)
 
 void Programs::ChangeGroup(int grpNum)
 {
+    if(grpNum>=model->rowCount())
+        return;
+
     QModelIndex newGrp = model->item(grpNum)->index();
     ChangeGroup(newGrp);
 }

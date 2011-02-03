@@ -104,6 +104,7 @@ int main(int argc, char *argv[])
     //MyApp app(argc, argv);
     QApplication app(argc, argv);
 
+#ifdef QT_NO_DEBUG
     QTranslator qtTranslator;
     if(qtTranslator.load("qt_" + QLocale::system().name(), ":/translations/"))
         qApp->installTranslator(&qtTranslator);
@@ -111,6 +112,7 @@ int main(int argc, char *argv[])
     QTranslator myappTranslator;
     if(myappTranslator.load("vstboard_" + QLocale::system().name(), ":/translations/"))
         qApp->installTranslator(&myappTranslator);
+#endif
 
     MainHost *host = new MainHost();
     MainWindow *w = new MainWindow(host);
