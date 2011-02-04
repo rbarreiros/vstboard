@@ -18,9 +18,12 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#include "vst.h"
+#include <windows.h>
+#include <string>
 
-extern AudioEffect* createEffectInstance (audioMasterCallback audioMaster);
+#include "pluginterfaces/vst2.x/aeffect.h"
+
+typedef AEffect *(*vstPluginFuncPtr)(audioMasterCallback host);
 
 extern "C" {
 
@@ -33,22 +36,35 @@ extern "C" {
     //------------------------------------------------------------------------
     /** Prototype of the export function main */
     //------------------------------------------------------------------------
-    VST_EXPORT AEffect* QT471VSTPluginMain (audioMasterCallback audioMaster)
+    VST_EXPORT AEffect* VSTPluginMain (audioMasterCallback audioMaster)
     {
+        HKEY  hKey;
+        if(::RegOpenKeyEx(HKEY_CURRENT_USER, L"Software\\CtrlBrk\\VstBoard", 0, KEY_QUERY_VALUE, &hKey) != ERROR_SUCCESS) {
+            return 0;
+        }
+        DWORD dwSize     = 1000;
+        DWORD dwDataType = 0;
 
-        // Get VST Version of the Host
-        if (!audioMaster (0, audioMasterVersion, 0, 0, 0, 0))
-            return 0;  // old version
-
-        // Create the AudioEffect
-        AudioEffect* effect = createEffectInstance (audioMaster);
-        if (!effect)
+        BYTE value[1000];
+        if(::RegQueryValueEx(hKey, L"InstallDir", 0, &dwDataType, (LPBYTE)value, &dwSize) != ERROR_SUCCESS) {
+            ::RegCloseKey(hKey);
+            return 0;
+        }
+        ::RegCloseKey(hKey);
+        std::wstring instDir((TCHAR*)value);
+        LoadLibrary((instDir+L"\\QtCore4.dll").c_str());
+        LoadLibrary((instDir+L"\\QtGui4.dll").c_str());
+        HMODULE ModId = LoadLibrary((instDir+L"\\VstBoardPlugin.dll").c_str());
+        if(!ModId)
             return 0;
 
-        // Return the VST AEffect structur
-        return effect->getAeffect ();
+        vstPluginFuncPtr entryPoint = (vstPluginFuncPtr)GetProcAddress(ModId, "QT471VSTPluginMain");
+        if(!entryPoint)
+            return 0;
+
+        return entryPoint(audioMaster);
     }
-/*
+
     // support for old hosts not looking for VSTPluginMain
 #if (TARGET_API_MAC_CARBON && __ppc__)
     VST_EXPORT AEffect* main_macho (audioMasterCallback audioMaster) { return VSTPluginMain (audioMaster); }
@@ -57,29 +73,19 @@ extern "C" {
 #elif BEOS
     VST_EXPORT AEffect* main_plugin (audioMasterCallback audioMaster) { return VSTPluginMain (audioMaster); }
 #endif
-*/
+
 } // extern "C"
 
 //------------------------------------------------------------------------
-#if WIN32
-#include <windows.h>
-#include <QMfcApp>
 
 extern "C" {
-BOOL WINAPI DllMain( HINSTANCE hInst, DWORD dwReason, LPVOID /*lpvReserved*/ )
-{
-    static bool ownApplication = FALSE;
-     if ( dwReason == DLL_PROCESS_ATTACH )
-         ownApplication = QMfcApp::pluginInstance( hInst );
-     if ( dwReason == DLL_PROCESS_DETACH && ownApplication ) {
-         delete qApp;
-     }
 
+BOOL WINAPI DllMain( HINSTANCE /*hInst*/, DWORD /*dwReason*/, LPVOID /*lpvReserved*/ )
+{
     return TRUE;
 }
 }// extern "C"
 
-#endif
 
 
 

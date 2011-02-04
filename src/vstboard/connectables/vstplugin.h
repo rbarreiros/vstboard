@@ -71,7 +71,6 @@ namespace Connectables {
         float sampleRate;
         unsigned long bufferSize;
         VstEvents *listEvnts;
-        bool isShell;
 
         QMutex midiEventsMutex;
         QList<VstMidiEvent*>listVstMidiEvents;

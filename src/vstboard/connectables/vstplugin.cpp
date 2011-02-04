@@ -38,7 +38,6 @@ VstPlugin::VstPlugin(MainHost *myHost,int index, const ObjectInfo & info) :
     sampleRate(44100.0),
     bufferSize(1024),
     listEvnts(0),
-    isShell(false),
     savedChunk(0),
     savedChunkSize(0)
 {
@@ -281,30 +280,25 @@ bool VstPlugin::Open()
         mapPlugins.insert(pEffect, this);
         VstPlugin::pluginLoading = 0;
 
-        //a shell plugin should have asked for shellCategory capability before we get there (or else what are they waiting for ?)
-        if(isShell && objInfo.id==0) {
-            if (EffGetPlugCategory() == kPlugCategShell ) {
-                QMap<ulong,QString> listPlugins;
-                char szName[1024];
-                ulong id;
-                while ((id = EffGetNextShellPlugin(szName))) {
-                    listPlugins.insert(id,QString::fromAscii(szName));
-                }
+        if(EffGetPlugCategory() == kPlugCategShell && objInfo.id==0) {
+            QMap<ulong,QString> listPlugins;
+            char szName[1024];
+            ulong id;
+            while ((id = EffGetNextShellPlugin(szName))) {
+                listPlugins.insert(id,QString::fromAscii(szName));
+            }
 
-                if(VstPlugin::shellSelectView) {
-                    debug("VstPlugin::Open shell selection already opened")
-                    return false;
-                }
-
-                VstPlugin::shellSelectView = new View::VstShellSelect(myHost->objFactory);
-                VstPlugin::shellSelectView->SetListPlugins(objInfo.name, listPlugins);
-                VstPlugin::shellSelectView->show();
-
-                //this is a shell, return false to delete this object
+            if(VstPlugin::shellSelectView) {
+                debug("VstPlugin::Open shell selection already opened")
                 return false;
-            } //else {
-                //if not, why did he asked for shellCategory capability !?
-            //}
+            }
+
+            VstPlugin::shellSelectView = new View::VstShellSelect(myHost->objFactory);
+            VstPlugin::shellSelectView->SetListPlugins(objInfo.name, listPlugins);
+            VstPlugin::shellSelectView->show();
+
+            //this is a shell, return false to delete this object
+            return false;
         }
 
         long ver = EffGetVstVersion();
@@ -592,9 +586,6 @@ void VstPlugin::processEvents(VstEvents* events)
 
 long VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr, float opt, long currentReturnCode)
 {
-    if(closed)
-        return 0;
-
     switch(opcode) {
         case audioMasterAutomate : //0
             //create the parameter pin if needed
@@ -618,7 +609,6 @@ long VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr,
             break;
 
         case audioMasterCurrentId : //2
-            isShell=true;
             return objInfo.id;
             break;
 
@@ -649,7 +639,6 @@ long VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr,
 
         case audioMasterCanDo : //37
             if(!strcmp((const char*)ptr, "shellCategory")) {
-                isShell=true;
                 return  1L;
             }
             break;

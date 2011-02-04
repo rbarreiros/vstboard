@@ -30,7 +30,7 @@
 #include <QtGui/QApplication>
 #include <QTranslator>
 #include "mainwindow.h"
-#include "public.sdk/source/vst2.x/audioeffectx.h"
+#include "audioeffectx.h"
 #include "gui.h"
 #include "connectables/vstaudiodevicein.h"
 #include "connectables/vstaudiodeviceout.h"

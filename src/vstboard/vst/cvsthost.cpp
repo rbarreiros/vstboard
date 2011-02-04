@@ -208,16 +208,13 @@ VstIntPtr VSTCALLBACK CVSTHost::AudioMasterCallback(AEffect *effect, VstInt32 op
                 (!strcmp(str, "closeFileSelector")) ||
                 (!strcmp(str, "supplyIdle")) ||
                 (!strcmp(str, "receiveVstTimeInfo")) ||
+                (!strcmp(str, "shellCategory")) ||
                 0)
                 return 1L;
 
-            //let our object see this one :
-            if(strcmp(str, "shellCategory")) {
-
-                //ignore the rest
-                debug("host can't do '%s'",str)
-                return 0L;
-            }
+            //ignore the rest
+            debug("host can't do '%s'",str)
+            return 0L;
 
 #ifndef QT_NO_DEBUG
         //handled by the object

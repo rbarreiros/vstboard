@@ -16,9 +16,6 @@ CONFIG += dll
 DEFINES += VST_PLUGIN
 
 QTWINMIGRATE_PATH = ../libs/qtwinmigrate
-
-DEFINES += APP_NAME=\\\"VstBoardPlugin\\\"
-
 VSTSDK_PATH	= ../libs/vstsdk2.4
 CONFIG += vstsdk
 
@@ -31,7 +28,7 @@ CONFIG(debug, debug|release) {
     build_postfix=release
 
     #static link in release mode only
-    DEFINES += QT_NODLL
+    #DEFINES += QT_NODLL
 }
 
 top_builddir =$$top_srcdir/../build/$$build_postfix
@@ -88,8 +85,8 @@ gui.cpp \
 connectables/vstaudiodevicein.cpp \
 connectables/vstaudiodeviceout.cpp \
 ../vstboard/views/connectablepinview.cpp \
-../../libs/vstsdk2.4/public.sdk/source/vst2.x/audioeffectx.cpp \
-../../libs/vstsdk2.4/public.sdk/source/vst2.x/audioeffect.cpp \
+$$top_srcdir/$$VSTSDK_PATH/public.sdk/source/vst2.x/audioeffectx.cpp \
+$$top_srcdir/$$VSTSDK_PATH/public.sdk/source/vst2.x/audioeffect.cpp \
 ../vstboard/mainhost.cpp \
 ../vstboard/connectables/midipinin.cpp \
 ../vstboard/connectables/midipinout.cpp \

@@ -22,7 +22,6 @@
 #include "connectables/connectioninfo.h"
 #include "connectables/objectinfo.h"
 #include "mainhost.h"
-#include "audioeffectx.h"
 #include "projectfile/setupfile.h"
 #include "projectfile/projectfile.h"
 #include "views/configdialog.h"
