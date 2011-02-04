@@ -71,6 +71,7 @@ Section "!VstBoard (required)"
 	File "QtCore4.dll"
 	File "QtGui4.dll"
 	File "VstBoard.exe"
+	File "VstBoardPlugin.dll"
 	File "license.txt"
 	File "GPL.txt"
 	File "LGPL.txt"
@@ -93,7 +94,7 @@ Section "!VstBoard (required)"
 
 	SetOutPath $VstDir
 	WriteRegStr HKCU "${REG_SETTINGS}" "pluginInstallDir" $VstDir
-	File "VstBoardPlugin.dll"
+	File "VstBoard.dll"
 	
 SectionEnd
 
@@ -117,7 +118,7 @@ Section "Uninstall"
         SetShellVarContext current
 	
 	ReadRegStr $VstDir HKCU "${REG_SETTINGS}" "pluginInstallDir"
-	Delete "$VstDir\VstBoardPlugin.dll"
+	Delete "$VstDir\VstBoard.dll"
 	
 	DeleteRegKey HKCU "${REG_UNINSTALL}"
 	DeleteRegKey HKCU "${REG_SETTINGS}"
@@ -125,6 +126,7 @@ Section "Uninstall"
 	Delete "$INSTDIR\QtCore4.dll"
 	Delete "$INSTDIR\QtGui4.dll"
 	Delete "$INSTDIR\VstBoard.exe"
+	Delete "$INSTDIR\VstBoardPlugin.dll"
 	Delete "$INSTDIR\license.txt"
 	Delete "$INSTDIR\GPL.txt"
 	Delete "$INSTDIR\LGPL.txt"

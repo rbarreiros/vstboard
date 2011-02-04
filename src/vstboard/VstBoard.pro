@@ -68,6 +68,9 @@ win32-msvc* {
             exists($$DESTDIR_WIN/VstBoardPlugin.dll) {
                 QMAKE_POST_LINK += \"$$INSTALLER_MPRESS_PATH\" -q \"$$DESTDIR_WIN\\VstBoardPlugin.dll\" $$escape_expand(\n\t)
             }
+            exists($$DESTDIR_WIN/VstBoard.dll) {
+                QMAKE_POST_LINK += \"$$INSTALLER_MPRESS_PATH\" -q \"$$DESTDIR_WIN\\VstBoard.dll\" $$escape_expand(\n\t)
+            }
 
             $${INSTALLER_UPDATEQTDLL} {
                 QMAKE_POST_LINK += \"$$INSTALLER_MPRESS_PATH\" -q \"$$DESTDIR_WIN\\QtGui4.dll\" $$escape_expand(\n\t)

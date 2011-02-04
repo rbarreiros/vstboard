@@ -9,9 +9,7 @@ srcdir      = vstdll
 
 DEFINES += APP_NAME=\\\"VstBoardPlugin\\\"
 TARGET = "VstBoardPlugin"
-
 TEMPLATE = lib
-CONFIG += dll
 
 DEFINES += VST_PLUGIN
 

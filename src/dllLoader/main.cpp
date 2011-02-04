@@ -39,14 +39,14 @@ extern "C" {
     VST_EXPORT AEffect* VSTPluginMain (audioMasterCallback audioMaster)
     {
         HKEY  hKey;
-        if(::RegOpenKeyEx(HKEY_CURRENT_USER, L"Software\\CtrlBrk\\VstBoard", 0, KEY_QUERY_VALUE, &hKey) != ERROR_SUCCESS) {
+        if(::RegOpenKeyEx(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\VstBoard", 0, KEY_QUERY_VALUE, &hKey) != ERROR_SUCCESS) {
             return 0;
         }
         DWORD dwSize     = 1000;
         DWORD dwDataType = 0;
 
         BYTE value[1000];
-        if(::RegQueryValueEx(hKey, L"InstallDir", 0, &dwDataType, (LPBYTE)value, &dwSize) != ERROR_SUCCESS) {
+        if(::RegQueryValueEx(hKey, L"InstallLocation", 0, &dwDataType, (LPBYTE)value, &dwSize) != ERROR_SUCCESS) {
             ::RegCloseKey(hKey);
             return 0;
         }
