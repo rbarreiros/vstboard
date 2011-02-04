@@ -18,6 +18,7 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
+#include <algorithm>
 #include <windows.h>
 #include <string>
 
@@ -52,6 +53,11 @@ extern "C" {
         }
         ::RegCloseKey(hKey);
         std::wstring instDir((TCHAR*)value);
+        instDir.erase(
+            remove( instDir.begin(), instDir.end(), '\"' ),
+            instDir.end()
+            );
+
         LoadLibrary((instDir+L"\\QtCore4.dll").c_str());
         LoadLibrary((instDir+L"\\QtGui4.dll").c_str());
         HMODULE ModId = LoadLibrary((instDir+L"\\VstBoardPlugin.dll").c_str());
