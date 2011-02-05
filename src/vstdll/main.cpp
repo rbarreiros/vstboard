@@ -48,7 +48,7 @@ extern "C" {
         // Return the VST AEffect structur
         return effect->getAeffect ();
     }
-/*
+
     // support for old hosts not looking for VSTPluginMain
 #if (TARGET_API_MAC_CARBON && __ppc__)
     VST_EXPORT AEffect* main_macho (audioMasterCallback audioMaster) { return VSTPluginMain (audioMaster); }
@@ -57,7 +57,7 @@ extern "C" {
 #elif BEOS
     VST_EXPORT AEffect* main_plugin (audioMasterCallback audioMaster) { return VSTPluginMain (audioMaster); }
 #endif
-*/
+
 } // extern "C"
 
 //------------------------------------------------------------------------

@@ -178,6 +178,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
 #endif
     writeSettings();
     event->accept();
+#ifndef VST_PLUGIN
+    qApp->exit(0);
+#endif
 }
 
 bool MainWindow::userWantsToUnloadSetup()

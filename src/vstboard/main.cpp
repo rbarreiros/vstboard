@@ -116,10 +116,10 @@ int main(int argc, char *argv[])
 
     MainHost *host = new MainHost();
     MainWindow *w = new MainWindow(host);
-    w->setAttribute(Qt::WA_DeleteOnClose);
     w->readSettings();
     w->show();
     app.exec();
     delete host;
+    delete w;
     return 0;
 }

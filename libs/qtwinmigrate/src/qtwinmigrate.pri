@@ -7,7 +7,7 @@ LIBS += -luser32
 # MFC support. To disable this (e.g. in order to use this component
 # with Visual Studio Express, which does not include MFC), comment out
 # the following line.
-qtwinmigrate-uselib:DEFINES *= _AFXDLL
+#qtwinmigrate-uselib:DEFINES *= _AFXDLL
 
 qtwinmigrate-uselib:!qtwinmigrate-buildlib {
     LIBS += -L$$QTWINMIGRATE_LIBDIR -l$$QTWINMIGRATE_LIBNAME
@@ -20,3 +20,4 @@ win32 {
     qtwinmigrate-buildlib:DEFINES += QT_QTWINMIGRATE_EXPORT
     else:qtwinmigrate-uselib:DEFINES += QT_QTWINMIGRATE_IMPORT
 }
+

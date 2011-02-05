@@ -86,10 +86,7 @@ Vst::Vst (audioMasterCallback audioMaster) :
 
 Vst::~Vst ()
 {
-    if(myHost) {
-        delete myHost;
-        myHost=0;
-    }
+
 }
 
 
@@ -159,6 +156,10 @@ void Vst::close()
     myWindow->setParent(0);
     qEditor->SetMainWindow(0);
     delete myWindow;
+    if(myHost) {
+        delete myHost;
+        myHost=0;
+    }
 }
 
 bool Vst::addAudioIn(Connectables::VstAudioDeviceIn *dev)

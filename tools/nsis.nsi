@@ -64,7 +64,7 @@ Function getVstDir
   StrCpy $VstDir "$INSTDIR\"
 FunctionEnd
 
-Section "!VstBoard (required)"
+Section "VstBoard (required)"
 	SetShellVarContext current
 	SectionIn RO
 	SetOutPath $InstFolder

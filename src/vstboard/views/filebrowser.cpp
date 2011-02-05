@@ -84,6 +84,8 @@ void FileBrowser::setPath(QString dir)
 
 QString FileBrowser::path()
 {
+    if(dirHistory.isEmpty())
+        return "";
     return dirHistory.last();
 }
 
