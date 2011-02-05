@@ -40,53 +40,17 @@ TARGET = $${APP_NAME}
         }
     }
 
-win32-msvc* {
-    RC_FILE = vstboard.rc
-}
+    win32-msvc* {
+        RC_FILE = vstboard.rc
+    }
 
     win32 {
-        $${INSTALLER_UPDATEQTDLL} {
-            EXTRA_FILES += $$[QT_INSTALL_BINS]/QtCore4.dll \
-                    $$[QT_INSTALL_BINS]/QtGui4.dll
-        }
-
         EXTRA_FILES_WIN = $${EXTRA_FILES}
         EXTRA_FILES_WIN ~= s,/,\\,g
         DESTDIR_WIN = $${targetdir}
         DESTDIR_WIN ~= s,/,\\,g
         for(FILE,EXTRA_FILES_WIN){
             QMAKE_POST_LINK += copy /y \"$${FILE}\" \"$${DESTDIR_WIN}\" $$escape_expand(\n\t)
-        }
-
-    #run mpress
-#x64 version is buggy, pack the 32bit only
-!contains(QMAKE_HOST.arch, x86_64):{
-        exists($$INSTALLER_MPRESS_PATH) {
-            exists($$DESTDIR_WIN/VstBoard.exe) {
-                QMAKE_POST_LINK += \"$$INSTALLER_MPRESS_PATH\" -q \"$$DESTDIR_WIN\\VstBoard.exe\" $$escape_expand(\n\t)
-            }
-            exists($$DESTDIR_WIN/VstBoardPlugin.dll) {
-                QMAKE_POST_LINK += \"$$INSTALLER_MPRESS_PATH\" -q \"$$DESTDIR_WIN\\VstBoardPlugin.dll\" $$escape_expand(\n\t)
-            }
-            exists($$DESTDIR_WIN/VstBoard.dll) {
-                QMAKE_POST_LINK += \"$$INSTALLER_MPRESS_PATH\" -q \"$$DESTDIR_WIN\\VstBoard.dll\" $$escape_expand(\n\t)
-            }
-
-            $${INSTALLER_UPDATEQTDLL} {
-                QMAKE_POST_LINK += \"$$INSTALLER_MPRESS_PATH\" -q \"$$DESTDIR_WIN\\QtGui4.dll\" $$escape_expand(\n\t)
-                QMAKE_POST_LINK += \"$$INSTALLER_MPRESS_PATH\" -q \"$$DESTDIR_WIN\\QtCode4.dll\" $$escape_expand(\n\t)
-            }
-        }
-}
-
-    #build installer
-        exists($$INSTALLER_NSIS_PATH) {
-            arc=x86
-            contains(QMAKE_HOST.arch, x86_64):{
-                arc=x64
-            }
-            QMAKE_POST_LINK += \"$$INSTALLER_NSIS_PATH\" /V1 /DARCH=$$arc \"$$DESTDIR_WIN\\nsis.nsi\" $$escape_expand(\n\t)
-        }
     }
 }
 

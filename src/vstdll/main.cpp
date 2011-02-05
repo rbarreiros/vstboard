@@ -33,7 +33,7 @@ extern "C" {
     //------------------------------------------------------------------------
     /** Prototype of the export function main */
     //------------------------------------------------------------------------
-    VST_EXPORT AEffect* QT471VSTPluginMain (audioMasterCallback audioMaster)
+    VST_EXPORT AEffect* VSTPluginMain (audioMasterCallback audioMaster)
     {
 
         // Get VST Version of the Host

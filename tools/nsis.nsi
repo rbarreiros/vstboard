@@ -16,7 +16,6 @@ InstallDir "$LOCALAPPDATA\VstBoard\"
 !define START_LINK_UNINSTALLER "$SMPROGRAMS\VstBoard\Uninstall VstBoard.lnk"
 !define REG_UNINSTALL "Software\Microsoft\Windows\CurrentVersion\Uninstall\VstBoard"
 !define REG_SETTINGS "Software\CtrlBrk\VstBoard"
-!define REG_SETTINGS_PLUGIN "Software\CtrlBrk\VstBoardPlugin"
 !define UNINSTALLER_NAME "uninst.exe"
 !define WEBSITE_LINK "http://vstboard.blogspot.com/"
 
@@ -57,6 +56,7 @@ Function defaultVstDir
   ReadRegStr $INSTDIR HKLM "SOFTWARE\VST" "VSTPluginsPath"
   ${If} $INSTDIR == ""
     StrCpy $INSTDIR "$PROGRAMFILES\Vstplugins\"
+    WriteRegStr HKLM "SOFTWARE\VST" "VSTPluginsPath" $INSTDIR
   ${EndIf}
 FunctionEnd
 
@@ -89,7 +89,7 @@ Section "!VstBoard (required)"
 	WriteRegDWord HKCU "${REG_UNINSTALL}" "NoRepair" 1
 	WriteRegStr HKCU "${REG_UNINSTALL}" "UninstallString" "$\"$InstFolder\${UNINSTALLER_NAME}$\""
 	WriteRegStr HKCU "${REG_UNINSTALL}" "Comments" "Uninstalls VstBoard."
-
+	WriteRegStr HKCU "${REG_SETTINGS}" "InstallLocation" "$\"$InstFolder$\""
 	WriteUninstaller $InstFolder\uninst.exe
 
 	SetOutPath $VstDir
@@ -122,7 +122,6 @@ Section "Uninstall"
 	
 	DeleteRegKey HKCU "${REG_UNINSTALL}"
 	DeleteRegKey HKCU "${REG_SETTINGS}"
-	DeleteRegKey HKCU "${REG_SETTINGS_PLUGIN}"
 	Delete "$INSTDIR\QtCore4.dll"
 	Delete "$INSTDIR\QtGui4.dll"
 	Delete "$INSTDIR\VstBoard.exe"

@@ -26,6 +26,26 @@
 
 typedef AEffect *(*vstPluginFuncPtr)(audioMasterCallback host);
 
+HMODULE  LoadLib(std::wstring fileName)
+{
+    LPCTSTR pStr=fileName.c_str();
+
+    DWORD dwAttr = GetFileAttributes(pStr);
+    if(dwAttr == 0xffffffff)
+    {
+      MessageBox(NULL,(fileName+L" : file not found").c_str(), L"VstBoard", MB_OK | MB_ICONERROR);
+      return 0;
+    }
+
+    HMODULE libH = LoadLibrary(pStr);
+    if(libH==NULL) {
+        MessageBox( NULL, (L"Error while loading "+fileName).c_str(), L"VstBoard", MB_OK | MB_ICONERROR );
+        return 0;
+    }
+
+    return libH;
+}
+
 extern "C" {
 
 //#if defined (__GNUC__) && ((__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 1)))
@@ -40,7 +60,8 @@ extern "C" {
     VST_EXPORT AEffect* VSTPluginMain (audioMasterCallback audioMaster)
     {
         HKEY  hKey;
-        if(::RegOpenKeyEx(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\VstBoard", 0, KEY_QUERY_VALUE, &hKey) != ERROR_SUCCESS) {
+        if(::RegOpenKeyEx(HKEY_CURRENT_USER, L"Software\\CtrlBrk\\VstBoard", 0, KEY_QUERY_VALUE, &hKey) != ERROR_SUCCESS) {
+            MessageBox(NULL,L"Can't open HKCU\\Software\\CtrlBrk\\VstBoard",L"VstBoard", MB_OK | MB_ICONERROR);
             return 0;
         }
         DWORD dwSize     = 1000;
@@ -49,6 +70,7 @@ extern "C" {
         BYTE value[1000];
         if(::RegQueryValueEx(hKey, L"InstallLocation", 0, &dwDataType, (LPBYTE)value, &dwSize) != ERROR_SUCCESS) {
             ::RegCloseKey(hKey);
+            MessageBox(NULL,L"Can't read HKCU\\Software\\CtrlBrk\\VstBoard\\InstallLocation",L"VstBoard", MB_OK | MB_ICONERROR);
             return 0;
         }
         ::RegCloseKey(hKey);
@@ -58,15 +80,51 @@ extern "C" {
             instDir.end()
             );
 
-        LoadLibrary((instDir+L"\\QtCore4.dll").c_str());
-        LoadLibrary((instDir+L"\\QtGui4.dll").c_str());
-        HMODULE ModId = LoadLibrary((instDir+L"\\VstBoardPlugin.dll").c_str());
-        if(!ModId)
-            return 0;
+        if(GetFileAttributes((instDir).c_str()) == 0xffffffff)
+        {
+          MessageBox(NULL,(L"The path \""+instDir+L"\" defined in HKCU\\Software\\CtrlBrk\\VstBoard\\InstallLocation is not valid").c_str(),L"VstBoard", MB_OK | MB_ICONERROR);
+          return 0;
+        }
 
-        vstPluginFuncPtr entryPoint = (vstPluginFuncPtr)GetProcAddress(ModId, "QT471VSTPluginMain");
-        if(!entryPoint)
+        if(GetFileAttributes((instDir+L"\\VstBoardPlugin.dll").c_str()) == 0xffffffff)
+        {
+          MessageBox(NULL,(instDir+L"\\VstBoardPlugin.dll : file not found").c_str(),L"VstBoard", MB_OK | MB_ICONERROR);
+          return 0;
+        }
+
+        HMODULE Hcore = LoadLib((instDir+L"\\QtCore4.dll").c_str());
+        if(!Hcore) {
+            FreeLibrary(Hcore);
             return 0;
+        }
+
+        HMODULE Hgui = LoadLib((instDir+L"\\QtGui4.dll").c_str());
+        if(!Hgui) {
+            FreeLibrary(Hcore);
+            FreeLibrary(Hgui);
+            return 0;
+        }
+
+        HMODULE Hplugin = LoadLibrary((instDir+L"\\VstBoardPlugin.dll").c_str());
+        if(!Hplugin) {
+            FreeLibrary(Hcore);
+            FreeLibrary(Hgui);
+            FreeLibrary(Hplugin);
+            MessageBox(NULL,(L"Error while loading "+instDir+L"\\VstBoardPlugin.dll").c_str(),L"VstBoard", MB_OK | MB_ICONERROR);
+            return 0;
+        }
+
+        vstPluginFuncPtr entryPoint = (vstPluginFuncPtr)GetProcAddress(Hplugin, "VSTPluginMain");
+        if(!entryPoint) {
+            FreeLibrary(Hcore);
+            FreeLibrary(Hgui);
+            FreeLibrary(Hplugin);
+            MessageBox(NULL,(instDir+L"\\VstBoardPlugin.dll is not valid").c_str(),L"VstBoard", MB_OK | MB_ICONERROR);
+            return 0;
+        }
+
+        FreeLibrary(Hcore);
+        FreeLibrary(Hgui);
 
         return entryPoint(audioMaster);
     }
@@ -86,8 +144,13 @@ extern "C" {
 
 extern "C" {
 
-BOOL WINAPI DllMain( HINSTANCE /*hInst*/, DWORD /*dwReason*/, LPVOID /*lpvReserved*/ )
+BOOL WINAPI DllMain( HINSTANCE /*hInst*/, DWORD dwReason, LPVOID /*lpvReserved*/ )
 {
+    if(dwReason==DLL_PROCESS_DETACH) {
+        HMODULE Hplugin = GetModuleHandle(L"VstBoardPlugin");
+        if(Hplugin!=NULL)
+            FreeLibrary(Hplugin);
+    }
     return TRUE;
 }
 }// extern "C"

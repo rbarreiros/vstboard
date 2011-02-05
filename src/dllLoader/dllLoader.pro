@@ -36,7 +36,7 @@ TARGET      =$$TARGET
 
 QT       -= core gui
 LIBS += -ladvapi32
-
+LIBS += -luser32
 
 SOURCES += \
     main.cpp
