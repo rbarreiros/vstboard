@@ -16,10 +16,6 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 
-#INSTALLER_UPDATEQTDLL = 1
-INSTALLER_NSIS_PATH = c:\\Program Files (x86)\\NSIS\\makensis.exe
-INSTALLER_MPRESS_PATH = $${_PRO_FILE_PWD_}/../../tools/mpress/mpress.exe
-
 PORTAUDIO_PATH 	= ../libs/portaudio
 PORTMIDI_PATH 	= ../libs/portmidi
 

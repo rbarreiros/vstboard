@@ -1,7 +1,7 @@
 Name "VstBoard"
 RequestExecutionLevel admin
 
-OutFile "vstboard_${ARCH}_setup.exe"
+OutFile "${OutFile}"
 SetDateSave on
 SetDatablockOptimize on
 CRCCheck on

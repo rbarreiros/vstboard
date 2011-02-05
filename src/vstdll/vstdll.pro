@@ -25,7 +25,7 @@ CONFIG(debug, debug|release) {
     POST =
     build_postfix=release
 
-    #static link in release mode only
+    #static link
     #DEFINES += QT_NODLL
 }
 

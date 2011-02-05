@@ -7,12 +7,11 @@
 top_srcdir  = ..
 srcdir      = dllloader
 
+DEFINES += APP_NAME=\\\"VstBoardLoader\\\"
 TARGET = VstBoard
 TEMPLATE = lib
 
 DEFINES += DLLLOADER_LIBRARY
-
-#DEFINES -= UNICODE
 
 VSTSDK_PATH	= ../libs/vstsdk2.4
 INCLUDEPATH += $$top_srcdir/$$VSTSDK_PATH
@@ -42,3 +41,8 @@ SOURCES += \
     main.cpp
 
 HEADERS +=
+
+OTHER_FILES += \
+    dllLoader.rc
+
+RC_FILE = dllLoader.rc

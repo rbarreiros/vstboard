@@ -51,6 +51,7 @@ TARGET = $${APP_NAME}
         DESTDIR_WIN ~= s,/,\\,g
         for(FILE,EXTRA_FILES_WIN){
             QMAKE_POST_LINK += copy /y \"$${FILE}\" \"$${DESTDIR_WIN}\" $$escape_expand(\n\t)
+        }
     }
 }
 
