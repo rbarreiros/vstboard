@@ -26,26 +26,6 @@
 
 typedef AEffect *(*vstPluginFuncPtr)(audioMasterCallback host);
 
-HMODULE  LoadLib(std::wstring fileName)
-{
-    LPCTSTR pStr=fileName.c_str();
-
-    DWORD dwAttr = GetFileAttributes(pStr);
-    if(dwAttr == 0xffffffff)
-    {
-      MessageBox(NULL,(fileName+L" : file not found").c_str(), L"VstBoard", MB_OK | MB_ICONERROR);
-      return 0;
-    }
-
-    HMODULE libH = LoadLibrary(pStr);
-    if(libH==NULL) {
-        MessageBox( NULL, (L"Error while loading "+fileName).c_str(), L"VstBoard", MB_OK | MB_ICONERROR );
-        return 0;
-    }
-
-    return libH;
-}
-
 extern "C" {
 
 //#if defined (__GNUC__) && ((__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 1)))
@@ -92,18 +72,8 @@ extern "C" {
           return 0;
         }
 
-        HMODULE Hcore = LoadLib((instDir+L"\\QtCore4.dll").c_str());
-        if(!Hcore) {
-            FreeLibrary(Hcore);
-            return 0;
-        }
-
-        HMODULE Hgui = LoadLib((instDir+L"\\QtGui4.dll").c_str());
-        if(!Hgui) {
-            FreeLibrary(Hcore);
-            FreeLibrary(Hgui);
-            return 0;
-        }
+        HMODULE Hcore = LoadLibrary((instDir+L"\\QtCore4.dll").c_str());
+        HMODULE Hgui = LoadLibrary((instDir+L"\\QtGui4.dll").c_str());
 
         HMODULE Hplugin = LoadLibrary((instDir+L"\\VstBoardPlugin.dll").c_str());
         if(!Hplugin) {
