@@ -16,18 +16,17 @@
 #    You should have received a copy of the GNU General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 
-
-top_srcdir  = ..
 srcdir      = portaudio
-include($$top_srcdir/config.pri)
+include(../config.pri)
 
 CONFIG -= qt
 QT -= core gui
-
 TEMPLATE = lib
 CONFIG += staticlib
 
 DEFINES -= UNICODE
+
+INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/include
 
 linux-g++ {
     DEFINES += KSAUDIO_SPEAKER_DIRECTOUT=0
@@ -44,6 +43,14 @@ linux-g++ {
 }
 
 win32 {
+
+    LIBS += -lwinmm
+    LIBS += -luser32
+    LIBS += -ladvapi32
+    LIBS += -lole32
+    LIBS += -lsetupapi
+    LIBS += -ldsound
+
     INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/src/os/win
     INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/common
     INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host

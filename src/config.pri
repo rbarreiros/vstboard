@@ -16,6 +16,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 
+top_srcdir = ..
+
 PORTAUDIO_PATH 	= ../libs/portaudio
 PORTMIDI_PATH 	= ../libs/portmidi
 
@@ -40,24 +42,6 @@ builddir     =$$top_builddir/$$srcdir
 OBJECTS_DIR =$$builddir
 DESTDIR     =$$top_destdir
 TARGET      =$$TARGET
-
-INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/include
-INCLUDEPATH += $$top_srcdir/$$PORTMIDI_PATH/porttime
-INCLUDEPATH += $$top_srcdir/$$PORTMIDI_PATH/pm_common
-
-
-LIBS += -L$$top_destdir -lportaudio
-LIBS += -L$$top_destdir -lportmidi
-#LIBS += -L$$top_destdir -lqsqlite4
-
-win32 {
-    LIBS += -lwinmm
-    LIBS += -luser32
-    LIBS += -ladvapi32
-    LIBS += -lole32
-    LIBS += -lsetupapi
-    LIBS += -ldsound
-}
 
 win32-g++ {
     DEFINES += WINVER=0x0501

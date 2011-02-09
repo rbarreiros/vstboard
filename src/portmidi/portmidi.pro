@@ -16,17 +16,18 @@
 #    You should have received a copy of the GNU General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 
-top_srcdir  = ..
 srcdir      = portmidi
-include($$top_srcdir/config.pri)
+include(../config.pri)
 
 CONFIG -= qt
 QT -= core gui
+TEMPLATE = lib
+CONFIG += staticlib
 
 DEFINES -= UNICODE
 
-TEMPLATE = lib
-CONFIG += staticlib
+INCLUDEPATH += $$top_srcdir/$$PORTMIDI_PATH/porttime
+INCLUDEPATH += $$top_srcdir/$$PORTMIDI_PATH/pm_common
 
 SOURCES += $$top_srcdir/$$PORTMIDI_PATH/pm_common/portmidi.c \
     $$top_srcdir/$$PORTMIDI_PATH/pm_common/pmutil.c

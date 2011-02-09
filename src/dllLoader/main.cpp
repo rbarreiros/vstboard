@@ -74,27 +74,31 @@ extern "C" {
 
         HMODULE Hcore = LoadLibrary((instDir+L"\\QtCore4.dll").c_str());
         HMODULE Hgui = LoadLibrary((instDir+L"\\QtGui4.dll").c_str());
+        HMODULE HwinMigrate = LoadLibrary((instDir+L"\\QtSolutions_MFCMigrationFramework-head.dll").c_str());
 
         HMODULE Hplugin = LoadLibrary((instDir+L"\\VstBoardPlugin.dll").c_str());
         if(!Hplugin) {
-            FreeLibrary(Hcore);
-            FreeLibrary(Hgui);
             FreeLibrary(Hplugin);
+            FreeLibrary(HwinMigrate);
+            FreeLibrary(Hgui);
+            FreeLibrary(Hcore);
             MessageBox(NULL,(L"Error while loading "+instDir+L"\\VstBoardPlugin.dll").c_str(),L"VstBoard", MB_OK | MB_ICONERROR);
             return 0;
         }
 
         vstPluginFuncPtr entryPoint = (vstPluginFuncPtr)GetProcAddress(Hplugin, "VSTPluginMain");
         if(!entryPoint) {
-            FreeLibrary(Hcore);
-            FreeLibrary(Hgui);
             FreeLibrary(Hplugin);
+            FreeLibrary(HwinMigrate);
+            FreeLibrary(Hgui);
+            FreeLibrary(Hcore);
             MessageBox(NULL,(instDir+L"\\VstBoardPlugin.dll is not valid").c_str(),L"VstBoard", MB_OK | MB_ICONERROR);
             return 0;
         }
 
-        FreeLibrary(Hcore);
+        FreeLibrary(HwinMigrate);
         FreeLibrary(Hgui);
+        FreeLibrary(Hcore);
 
         return entryPoint(audioMaster);
     }

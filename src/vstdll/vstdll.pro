@@ -4,8 +4,8 @@
 #
 #-------------------------------------------------
 
-top_srcdir  = ..
 srcdir      = vstdll
+include(../config.pri)
 
 DEFINES += APP_NAME=\\\"VstBoardPlugin\\\"
 TARGET = "VstBoardPlugin"
@@ -13,29 +13,7 @@ TEMPLATE = lib
 
 DEFINES += VST_PLUGIN
 
-QTWINMIGRATE_PATH = ../libs/qtwinmigrate
-VSTSDK_PATH	= ../libs/vstsdk2.4
-CONFIG += vstsdk
-
-CONFIG(debug, debug|release) {
-    POST =
-    build_postfix=debug
-    DEFINES += DEBUG
-} else {
-    POST =
-    build_postfix=release
-
-    #static link
-    #DEFINES += QT_NODLL
-}
-
-top_builddir =$$top_srcdir/../build/$$build_postfix
-top_destdir  =$$top_srcdir/../bin/$$build_postfix
-builddir     =$$top_builddir/$$srcdir
-
-OBJECTS_DIR =$$builddir
-DESTDIR     =$$top_destdir
-TARGET      =$$TARGET
+include($${_PRO_FILE_PWD_}/../../libs/qtwinmigrate/src/qtwinmigrate.pri)
 
 win32 {
     LIBS += -lwinmm
@@ -65,8 +43,6 @@ win32-msvc* {
 
 
 QT       += core gui
-
-include($$top_srcdir/$$QTWINMIGRATE_PATH/src/qtwinmigrate.pri)
 
 vstsdk {
     DEFINES += VSTSDK

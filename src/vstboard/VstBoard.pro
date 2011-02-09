@@ -18,12 +18,29 @@
 
 DEFINES += APP_NAME=\\\"VstBoard\\\"
 
-top_srcdir = ..
 srcdir = vstboard
+include(../config.pri)
 
-include($$top_srcdir/config.pri)
 TEMPLATE = app
 TARGET = $${APP_NAME}
+
+
+LIBS += -L$$top_destdir -lportaudio
+LIBS += -L$$top_destdir -lportmidi
+
+win32 {
+    LIBS += -lwinmm
+    LIBS += -luser32
+    LIBS += -ladvapi32
+    LIBS += -lole32
+    LIBS += -lsetupapi
+    LIBS += -ldsound
+}
+
+INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/include
+INCLUDEPATH += $$top_srcdir/$$PORTMIDI_PATH/porttime
+INCLUDEPATH += $$top_srcdir/$$PORTMIDI_PATH/pm_common
+
 !CONFIG(debug, debug|release) {
 
     targetdir = $$OUT_PWD/../../bin/$$build_postfix
@@ -32,7 +49,7 @@ TARGET = $${APP_NAME}
 #other files included in the release
     EXTRA_FILES = \
         $${_PRO_FILE_PWD_}/../../*.txt \
-        $${_PRO_FILE_PWD_}/../../tools/*.nsi
+        $${_PRO_FILE_PWD_}/../../tools/*.nsi \
 
     linux-g++{
         for(FILE,EXTRA_FILES){
