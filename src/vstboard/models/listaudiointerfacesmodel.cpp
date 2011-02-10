@@ -19,7 +19,7 @@
 **************************************************************************/
 
 #include "listaudiointerfacesmodel.h"
-#include "../connectables/objectinfo.h"
+#include "connectables/objectinfo.h"
 
 ListAudioInterfacesModel::ListAudioInterfacesModel(QObject *parent) :
         QStandardItemModel(parent)

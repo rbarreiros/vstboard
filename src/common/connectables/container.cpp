@@ -361,7 +361,7 @@ void Container::AddChildObject(QSharedPointer<Object> objPtr)
     objPtr->modelIndex=item->index();
     objPtr->parked=false;
 
-#ifndef VST_PLUGIN
+#ifdef VSTBOARD
     if(objPtr->info().objType == ObjType::MidiInterface)
         myHost->midiDevices->OpenDevice(objPtr);
 #endif
@@ -382,7 +382,7 @@ void Container::ParkChildObject(QSharedPointer<Object> objPtr)
     objPtr->modelIndex=item->index();
     objPtr->parked=true;
 
-#ifndef VST_PLUGIN
+#ifdef VSTBOARD
     if(objPtr->info().objType == ObjType::MidiInterface)
         myHost->midiDevices->CloseDevice(objPtr);
 #endif

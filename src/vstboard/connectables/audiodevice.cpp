@@ -18,16 +18,16 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#include "audiodevice.h"
-#include "object.h"
-#include "audiodevicein.h"
-#include "audiodeviceout.h"
-#include "../globals.h"
-#include "../audiobuffer.h"
-#include "../audiobufferd.h"
-#include "../renderer.h"
-#include "../mainhost.h"
-#include "../audiodevices.h"
+#include "connectables/audiodevice.h"
+#include "connectables/object.h"
+#include "connectables/audiodevicein.h"
+#include "connectables/audiodeviceout.h"
+#include "globals.h"
+#include "audiobuffer.h"
+#include "audiobufferd.h"
+#include "renderer.h"
+#include "mainhost.h"
+#include "audiodevices.h"
 
 using namespace Connectables;
 

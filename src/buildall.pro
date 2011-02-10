@@ -4,4 +4,5 @@ SUBDIRS     = \
     portaudio \
     dllLoader \
     vstdll \
-    vstboard
+    vstboard \
+    common

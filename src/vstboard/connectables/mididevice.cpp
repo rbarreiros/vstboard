@@ -18,8 +18,8 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#include "mididevice.h"
-#include "../globals.h"
+#include "connectables/mididevice.h"
+#include "globals.h"
 
 using namespace Connectables;
 

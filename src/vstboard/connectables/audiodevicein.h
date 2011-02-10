@@ -21,9 +21,9 @@
 #ifndef AUDIODEVICEIN_H
 #define AUDIODEVICEIN_H
 
-#include "../precomp.h"
-#include "object.h"
-#include "objectinfo.h"
+#include "precomp.h"
+#include "connectables/object.h"
+#include "connectables/objectinfo.h"
 
 class AudioBuffer;
 

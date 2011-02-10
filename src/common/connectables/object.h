@@ -28,6 +28,8 @@
 
 #include "../precomp.h"
 
+//#include <QtScript>
+
 #include "audiopinin.h"
 #include "audiopinout.h"
 #include "midipinin.h"
@@ -143,10 +145,7 @@ namespace Connectables {
         PinsList *listParameterPinIn;
         PinsList *listParameterPinOut;
 
-
         QMutex objMutex;
-
-
 
         //used by pathsolver
         SolverNode *solverNode;
@@ -168,12 +167,10 @@ namespace Connectables {
 
         QList<QVariant>listEditorVisible;
         QList<QVariant>listIsLearning;
-//        bool hasEditor;
-//        bool canLearn;
+
+//        QScriptValue scriptObj;
 
     signals:
-//        void LearningModeChanged(int learn);
-//        void UnLearningModeChanged(bool unlearn);
         void CpuLoad(float load);
         void CloseEditorWindow();
 

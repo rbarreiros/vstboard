@@ -22,6 +22,7 @@
 #define MAINHOST_H
 
 #include "precomp.h"
+//#include <QtScript>
 #include "connectables/objectfactory.h"
 #include "connectables/object.h"
 #include "connectables/maincontainer.h"
@@ -29,10 +30,13 @@
 #include "renderer.h"
 #include "globals.h"
 #include "models/hostmodel.h"
+
 #ifdef VST_PLUGIN
     #include "connectables/vstaudiodevicein.h"
     #include "connectables/vstaudiodeviceout.h"
-#else
+#endif
+
+#ifdef VSTBOARD
     #include "audiodevices.h"
     #include "mididevices.h"
 #endif
@@ -83,7 +87,7 @@ public:
 
     Programs *programList;
 
-#ifndef VST_PLUGIN
+#ifdef VSTBOARD
     AudioDevices *audioDevices;
     MidiDevices *midiDevices;
 #endif
@@ -103,6 +107,8 @@ public:
     void SetSetting(QString name, QVariant value);
     QVariant GetSetting(QString name, QVariant defaultVal=0);
     bool SettingDefined(QString name);
+
+//    QScriptEngine scriptEngine;
 
 private:
     void SetupMainContainer();
@@ -138,6 +144,8 @@ private:
 
     QString settingsGroup;
     QSettings settings;
+
+//    QScriptValue scriptObj;
 
 signals:
     void SampleRateChanged(float rate);

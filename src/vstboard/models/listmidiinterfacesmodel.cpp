@@ -19,7 +19,7 @@
 **************************************************************************/
 
 #include "listmidiinterfacesmodel.h"
-#include "../connectables/objectinfo.h"
+#include "connectables/objectinfo.h"
 
 ListMidiInterfacesModel::ListMidiInterfacesModel(QObject *parent):
         QStandardItemModel(parent)

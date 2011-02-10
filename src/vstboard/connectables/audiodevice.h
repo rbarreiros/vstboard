@@ -23,10 +23,10 @@
 
 #include <QWaitCondition>
 
-#include "../precomp.h"
-#include "object.h"
-#include "objectinfo.h"
-#ifndef VST_PLUGIN
+#include "precomp.h"
+#include "connectables/object.h"
+#include "connectables/objectinfo.h"
+#ifdef VSTBOARD
     #include "portaudio.h"
     #include "pa_win_wmme.h"
     #include "pa_win_ds.h"

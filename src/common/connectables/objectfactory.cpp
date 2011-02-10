@@ -19,11 +19,14 @@
 **************************************************************************/
 
 #include "objectfactory.h"
-#ifndef VST_PLUGIN
-    #include "audiodevicein.h"
-    #include "audiodeviceout.h"
-    #include "mididevice.h"
-#else
+
+#ifdef VSTBOARD
+    #include "connectables/audiodevicein.h"
+    #include "connectables/audiodeviceout.h"
+    #include "connectables/mididevice.h"
+#endif
+
+#ifdef VST_PLUGIN
     #include "connectables/vstaudiodevicein.h"
     #include "connectables/vstaudiodeviceout.h"
     #include "connectables/vstautomation.h"
@@ -37,6 +40,7 @@
 #include "maincontainer.h"
 #include "bridge.h"
 #include "mainhost.h"
+#include "script.h"
 
 #ifdef VSTSDK
     #include "vstplugin.h"
@@ -45,22 +49,13 @@
 
 using namespace Connectables;
 
-//ObjectFactory *ObjectFactory::theObjFactory=0;
-
-//ObjectFactory * ObjectFactory::Create(QObject *parent)
-//{
-//    if(!theObjFactory)
-//        theObjFactory = new ObjectFactory(parent);
-
-//    return theObjFactory;
-//}
-
 ObjectFactory::ObjectFactory(MainHost *myHost) :
     QObject(myHost),
     cptListObjects(50),
     myHost(myHost)
 {
-
+//    scriptObj = myHost->scriptEngine.newQObject(this);
+//    myHost->scriptEngine.globalObject().setProperty("ObjectFactory", scriptObj);
 }
 
 ObjectFactory::~ObjectFactory()
@@ -180,7 +175,7 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
         case NodeType::object :
 
             switch(info.objType) {
-#ifndef VST_PLUGIN
+#ifdef VSTBOARD
                 case ObjType::AudioInterfaceIn:
                     obj = new AudioDeviceIn(myHost,objId, info);
                     break;
@@ -192,7 +187,9 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
                 case ObjType::MidiInterface:
                     obj = new MidiDevice(myHost,objId, info);
                     break;
-#else
+#endif
+
+#ifdef VST_PLUGIN
             case ObjType::AudioInterfaceIn:
                 obj = new VstAudioDeviceIn(myHost,objId, info);
                 break;
@@ -209,7 +206,9 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
                 obj = new VstMidiDevice(myHost,objId, info);
                 break;
 #endif
-
+                case ObjType::Script:
+                    obj = new Script(myHost,objId,info);
+                    break;
 
                 case ObjType::MidiSender:
                     obj = new MidiSender(myHost,objId);

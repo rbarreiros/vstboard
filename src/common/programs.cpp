@@ -37,6 +37,9 @@ Programs::Programs(MainHost *parent) :
     model=new ProgramsModel(parent);
     connect( model, SIGNAL( rowsRemoved( QModelIndex , int, int )),
             this, SLOT(rowsRemoved( QModelIndex, int, int )));
+
+//    scriptObj = myHost->scriptEngine.newQObject(this);
+//    myHost->scriptEngine.globalObject().setProperty("Programs", scriptObj);
 }
 
 void Programs::DisplayedGroupChanged(const QModelIndex &index)

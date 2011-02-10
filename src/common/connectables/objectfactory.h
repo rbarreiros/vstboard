@@ -35,8 +35,6 @@ namespace Connectables {
     {
     Q_OBJECT
     public:
-//        static ObjectFactory * Create(QObject *parent=0);
-//        inline static ObjectFactory * Get() {return theObjFactory;}
         ObjectFactory(MainHost *myHost);
         ~ObjectFactory();
 
@@ -60,6 +58,8 @@ namespace Connectables {
         hashObjects listObjects;
         int cptListObjects;
         MainHost *myHost;
+
+//        QScriptValue scriptObj;
     };
 
 }

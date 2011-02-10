@@ -58,7 +58,7 @@
 #include "qwinwidget.h"
 
 #include <qt_windows.h>
-#include <QDebug>
+
 /*!
     \class QWinWidget qwinwidget.h
     \brief The QWinWidget class is a Qt widget that can be child of a

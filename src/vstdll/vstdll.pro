@@ -1,19 +1,19 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2010-11-29T21:03:21
-#
-#-------------------------------------------------
+DEFINES += APP_NAME=\\\"VstBoardPlugin\\\"
 
 srcdir      = vstdll
 include(../config.pri)
 
-DEFINES += APP_NAME=\\\"VstBoardPlugin\\\"
+QT += core gui
+
 TARGET = "VstBoardPlugin"
 TEMPLATE = lib
+CONFIG += staticlib
 
 DEFINES += VST_PLUGIN
 
 include($${_PRO_FILE_PWD_}/../../libs/qtwinmigrate/src/qtwinmigrate.pri)
+
+LIBS += -L$$top_destdir -lcommon
 
 win32 {
     LIBS += -lwinmm
@@ -42,8 +42,6 @@ win32-msvc* {
 }
 
 
-QT       += core gui
-
 vstsdk {
     DEFINES += VSTSDK
     INCLUDEPATH += $$top_srcdir/$$VSTSDK_PATH \
@@ -51,169 +49,38 @@ vstsdk {
 }
 
 
-INCLUDEPATH += ../vstboard
+INCLUDEPATH += ../common
 
 SOURCES += \
-main.cpp \
-gui.cpp \
-connectables/vstaudiodevicein.cpp \
-connectables/vstaudiodeviceout.cpp \
-../vstboard/views/connectablepinview.cpp \
-$$top_srcdir/$$VSTSDK_PATH/public.sdk/source/vst2.x/audioeffectx.cpp \
-$$top_srcdir/$$VSTSDK_PATH/public.sdk/source/vst2.x/audioeffect.cpp \
-../vstboard/mainhost.cpp \
-../vstboard/connectables/midipinin.cpp \
-../vstboard/connectables/midipinout.cpp \
-../vstboard/connectables/audiopinout.cpp \
-../vstboard/connectables/audiopinin.cpp \
-../vstboard/views/objectview.cpp \
-../vstboard/views/pinview.cpp \
-../vstboard/connectables/objectprogram.cpp \
-../vstboard/connectables/containerprogram.cpp \
-../vstboard/solvernode.cpp \
-../vstboard/audiobuffer.cpp \
-../vstboard/connectables/bridgepinin.cpp \
-../vstboard/connectables/bridgepinout.cpp \
-../vstboard/connectables/cable.cpp \
-../vstboard/connectables/objectparameter.cpp \
-../vstboard/views/sceneview.cpp \
-../vstboard/projectfile/setupfile.cpp \
-../vstboard/projectfile/projectfile.cpp \
-../vstboard/models/listtoolsmodel.cpp \
-../vstboard/views/cableview.cpp \
-../vstboard/views/maincontainerview.cpp \
-../vstboard/views/connectableobjectview.cpp \
-../vstboard/views/bridgepinview.cpp \
-../vstboard/views/containercontent.cpp \
-../vstboard/views/bridgeview.cpp \
-../vstboard/views/listpinsview.cpp \
-../vstboard/views/programlist.cpp \
-../vstboard/views/filebrowser.cpp \
-../vstboard/views/grouplistview.cpp \
-../vstboard/views/proglistview.cpp \
-../vstboard/connectables/objectfactory.cpp \
-../vstboard/connectables/object.cpp \
-../vstboard/connectables/container.cpp \
-../vstboard/connectables/maincontainer.cpp \
-../vstboard/pathsolver.cpp \
-../vstboard/renderer.cpp \
-../vstboard/models/hostmodel.cpp \
-../vstboard/programs.cpp \
-../vstboard/vst/cvsthost.cpp \
-../vstboard/connectables/vstplugin.cpp \
-../vstboard/vst/ceffect.cpp \
-../vstboard/vst/vstbank.cpp \
-../vstboard/views/vstpluginwindow.cpp \
-../vstboard/views/vstshellselect.cpp \
-../vstboard/connectables/connectioninfo.cpp \
-../vstboard/connectables/objectinfo.cpp \
-../vstboard/connectables/pin.cpp \
-../vstboard/connectables/parameterpin.cpp \
-../vstboard/connectables/parameterpinin.cpp \
-../vstboard/connectables/parameterpinout.cpp \
-../vstboard/models/programsmodel.cpp \
-../vstboard/connectables/bridge.cpp \
-../vstboard/views/aboutdialog.cpp \
+    main.cpp \
+    ../common/mainhost.cpp \
+    ../common/connectables/objectfactory.cpp \
+    ../common/connectables/container.cpp \
+    ../common/views/aboutdialog.cpp \
+    ../common/mainwindow.cpp \
+    gui.cpp \
+    connectables/vstaudiodevicein.cpp \
+    connectables/vstaudiodeviceout.cpp \
     vst.cpp \
-    ../vstboard/connectables/miditoautomation.cpp \
-    ../vstboard/connectables/midisender.cpp \
     connectables/vstautomation.cpp \
-    ../vstboard/connectables/pinslist.cpp \
-    ../vstboard/views/minmaxpinview.cpp \
-    ../vstboard/views/cursorview.cpp \
-    ../vstboard/mainwindow.cpp \
-    ../vstboard/views/configdialog.cpp \
-    ../vstboard/views/maingraphicsview.cpp \
-    ../vstboard/connectables/hostcontroller.cpp \
     connectables/vstmididevice.cpp \
-    ../vstboard/audiobufferd.cpp
 
 
 HEADERS  += \
-gui.h \
-connectables/vstaudiodevicein.h \
-connectables/vstaudiodeviceout.h \
-../vstboard/globals.h \
-../vstboard/mainhost.h \
-../vstboard/connectables/midisender.h \
-../vstboard/connectables/miditoautomation.h \
-../vstboard/connectables/hostcontroller.h \
-../vstboard/connectables/midipinout.h \
-../vstboard/connectables/audiopinout.h \
-../vstboard/connectables/audiopinin.h \
-../vstboard/views/configdialog.h \
-../vstboard/views/objectview.h \
-../vstboard/views/pinview.h \
-../vstboard/views/connectablepinview.h \
-../vstboard/connectables/objectprogram.h \
-../vstboard/connectables/containerprogram.h \
-../vstboard/solvernode.h \
-../vstboard/audiobuffer.h \
-../vstboard/connectables/bridgepinin.h \
-../vstboard/connectables/bridgepinout.h \
-../vstboard/connectables/cable.h \
-../vstboard/connectables/objectparameter.h \
-../vstboard/views/sceneview.h \
-../vstboard/projectfile/setupfile.h \
-../vstboard/projectfile/projectfile.h \
-../vstboard/models/listtoolsmodel.h \
-../vstboard/views/cableview.h \
-../vstboard/views/maincontainerview.h \
-../vstboard/views/connectableobjectview.h \
-../vstboard/views/bridgepinview.h \
-../vstboard/views/containercontent.h \
-../vstboard/views/bridgeview.h \
-../vstboard/views/listpinsview.h \
-../vstboard/views/programlist.h \
-../vstboard/views/filebrowser.h \
-../vstboard/views/grouplistview.h \
-../vstboard/views/proglistview.h \
-../vstboard/connectables/objectfactory.h \
-../vstboard/connectables/object.h \
-../vstboard/connectables/container.h \
-../vstboard/connectables/maincontainer.h \
-../vstboard/pathsolver.h \
-../vstboard/renderer.h \
-../vstboard/models/hostmodel.h \
-../vstboard/programs.h \
-../vstboard/vst/cvsthost.h \
-../vstboard/connectables/vstplugin.h \
-../vstboard/vst/ceffect.h \
-../vstboard/vst/const.h \
-../vstboard/vst/vstbank.h \
-../vstboard/views/vstpluginwindow.h \
-../vstboard/views/vstshellselect.h \
-../vstboard/connectables/connectioninfo.h \
-../vstboard/connectables/objectinfo.h \
-../vstboard/connectables/pin.h \
-../vstboard/connectables/parameterpin.h \
-../vstboard/connectables/parameterpinin.h \
-../vstboard/connectables/parameterpinout.h \
-../vstboard/models/programsmodel.h \
-../vstboard/connectables/bridge.h \
-../vstboard/views/aboutdialog.h \
+    gui.h \
+    connectables/vstaudiodevicein.h \
+    connectables/vstaudiodeviceout.h \
     vst.h \
-    ../vstboard/_version.h \
-    ../vstboard/connectables/midipinin.h \
     connectables/vstautomation.h \
-    ../vstboard/connectables/pinslist.h \
-    ../vstboard/views/minmaxpinview.h \
-    ../vstboard/views/cursorview.h \
-    ../vstboard/mainwindow.h \
-    ../vstboard/views/maingraphicsview.h \
     connectables/vstmididevice.h \
-    ../vstboard/audiobufferd.h
+
 
 FORMS += \
-../vstboard/views/configdialog.ui \
-../vstboard/mainwindow.ui \
-../vstboard/views/filebrowser.ui \
-../vstboard/views/programlist.ui \
-../vstboard/views/vstpluginwindow.ui \
-../vstboard/views/vstshellselect.ui \
-../vstboard/views/aboutdialog.ui
+    ../common/views/configdialog.ui \
+    ../common/mainwindow.ui
 
-PRECOMPILED_HEADER = ../vstboard/precomp.h
+
+PRECOMPILED_HEADER = ../common/precomp.h
 OTHER_FILES += \
     vstdll.rc
 

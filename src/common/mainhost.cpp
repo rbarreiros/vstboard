@@ -22,11 +22,13 @@
 #include "mainwindow.h"
 #include "connectables/container.h"
 
-#ifndef VST_PLUGIN
+#ifdef VSTBOARD
     #include "connectables/mididevice.h"
     #include "connectables/audiodevice.h"
     #include "audiodevices.h"
-#else
+#endif
+
+#ifdef VST_PLUGIN
     #include "vst.h"
 #endif
 
@@ -41,7 +43,7 @@ MainHost::MainHost(Vst *myVstPlugin, QObject *parent, QString settingsGroup) :
     QObject(parent),
     solver(new PathSolver(this)),
     filePass(0),
-    objFactory(new Connectables::ObjectFactory(this)),
+    objFactory(0),
     mainWindow(0),
     myVstPlugin(myVstPlugin),
     solverNeedAnUpdate(false),
@@ -53,6 +55,11 @@ MainHost::MainHost(Vst *myVstPlugin, QObject *parent, QString settingsGroup) :
     doublePrecision=GetSetting("doublePrecision",false).toBool();
 
     setObjectName("MainHost");
+
+//    scriptObj = scriptEngine.newQObject(this);
+//    scriptEngine.globalObject().setProperty("MainHost", scriptObj);
+
+    objFactory = new Connectables::ObjectFactory(this);
 
     if(!vst::CVSTHost::Get())
         vstHost = new vst::CVSTHost();
@@ -72,7 +79,7 @@ MainHost::MainHost(Vst *myVstPlugin, QObject *parent, QString settingsGroup) :
 
     programList = new Programs(this);
 
-#ifndef VST_PLUGIN
+#ifdef VSTBOARD
     midiDevices = new MidiDevices(this);
 
     audioDevices = new AudioDevices(this);
@@ -119,7 +126,7 @@ MainHost::~MainHost()
     solver->Resolve(workingListOfCables);
     renderer.Clear();
 
-#ifndef VST_PLUGIN
+#ifdef VSTBOARD
     delete audioDevices;
     delete midiDevices;
 #endif

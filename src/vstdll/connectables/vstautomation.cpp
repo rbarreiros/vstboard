@@ -19,8 +19,8 @@
 **************************************************************************/
 
 #include "vstautomation.h"
-#include "../vstboard/mainhost.h"
-#include "../vst.h"
+#include "mainhost.h"
+#include "vst.h"
 
 using namespace Connectables;
 

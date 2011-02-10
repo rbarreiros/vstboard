@@ -66,7 +66,7 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     connect(ui->mainToolBar, SIGNAL(visibilityChanged(bool)),
             ui->actionTool_bar, SLOT(setChecked(bool)));
 
-#ifndef VST_PLUGIN
+#ifdef VSTBOARD
     //audio devices
     ui->treeAudioInterfaces->setModel(myHost->audioDevices->GetModel());
     ui->treeAudioInterfaces->header()->setResizeMode(0,QHeaderView::Stretch);
@@ -353,6 +353,13 @@ void MainWindow::BuildListTools()
     item->setData(QVariant::fromValue(info), UserRoles::objInfo);
     parentItem->appendRow(item);
 #endif
+
+    //script
+    item = new QStandardItem(tr("Script"));
+    info.nodeType = NodeType::object;
+    info.objType = ObjType::Script;
+    item->setData(QVariant::fromValue(info), UserRoles::objInfo);
+    parentItem->appendRow(item);
 
     //midi parameters
     item = new QStandardItem(tr("Midi to parameter"));
@@ -786,7 +793,7 @@ void MainWindow::groupParkingModelChanges(QStandardItemModel *model)
     ui->groupParkList->setModel(model);
 }
 
-#ifndef VST_PLUGIN
+#ifdef VSTBOARD
 void MainWindow::on_actionRefresh_Audio_devices_triggered()
 {
     ui->treeAudioInterfaces->setModel(myHost->audioDevices->GetModel());

@@ -99,6 +99,7 @@ namespace ObjType {
         limitInMax,
         limitOutMin,
         limitOutMax,
+        Script
     };
 }
 

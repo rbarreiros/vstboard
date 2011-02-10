@@ -21,9 +21,9 @@
 #ifndef VSTAUDIODEVICEIN_H
 #define VSTAUDIODEVICEIN_H
 
-#include "../vstboard/precomp.h"
-#include "../vstboard/connectables/object.h"
-#include "../vstboard/connectables/objectinfo.h"
+#include "precomp.h"
+#include "connectables/object.h"
+#include "connectables/objectinfo.h"
 
 class AudioBuffer;
 
