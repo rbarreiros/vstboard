@@ -47,6 +47,8 @@ QMimeData  * ListAudioInterfacesModel::mimeData ( const QModelIndexList  & index
         //don't drag api
         if(item->parent()==0)
             continue;
+        if(idx.column()!=0)
+            continue;
         stream << itemFromIndex(idx)->data(UserRoles::objInfo).value<ObjectInfo>();
     }
 

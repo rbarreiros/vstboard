@@ -18,26 +18,37 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#include "listtoolsmodel.h"
-#include "../connectables/objectinfo.h"
+#include "mainhosthost.h"
 
-ListToolsModel::ListToolsModel(QObject *parent) :
-        QStandardItemModel(parent)
+#include "connectables/mididevice.h"
+#include "connectables/audiodevice.h"
+#include "connectables/objectfactoryhost.h"
+
+MainHostHost::MainHostHost(QObject *parent, QString settingsGroup) :
+    MainHost(parent,settingsGroup)
 {
+    objFactory = new Connectables::ObjectFactoryHost(this);
+    midiDevices = new MidiDevices(this);
+    audioDevices = new AudioDevices(this);
+    connect(this,SIGNAL(OnAudioDeviceToggleInUse(ObjectInfo,bool)),
+            audioDevices,SLOT(OnToggleDeviceInUse(ObjectInfo,bool)));
+    connect(&audioDevices->fakeRenderTimer,SIGNAL(timeout()),
+            this, SLOT(Render()));
 }
 
-QMimeData  * ListToolsModel::mimeData ( const QModelIndexList  & indexes ) const
+MainHostHost::~MainHostHost()
 {
-    QMimeData  *data = new QMimeData();
-    QByteArray b;
-    QDataStream stream(&b,QIODevice::WriteOnly);
+    delete audioDevices;
+    audioDevices=0;
+    delete midiDevices;
+    midiDevices=0;
+}
 
-    foreach(QModelIndex idx, indexes) {
-        if(idx.column()!=0)
-            continue;
-        stream << itemFromIndex(idx)->data(UserRoles::objInfo).value<ObjectInfo>();
-    }
+void MainHostHost::Render(unsigned long samples)
+{
+    #ifdef VSTSDK
+        vstHost->UpdateTimeInfo(timeFromStart.elapsed(), samples, sampleRate);
+    #endif
 
-    data->setData("application/x-tools",b);
-    return data;
+    MainHost::Render(samples);
 }

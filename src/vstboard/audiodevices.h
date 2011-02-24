@@ -24,9 +24,7 @@
 #define FAKE_RENDER_TIMER_MS 10
 
 #include "precomp.h"
-#ifndef VST_PLUGIN
-    #include "portaudio.h"
-#endif
+#include "portaudio.h"
 #include "models/listaudiointerfacesmodel.h"
 #include "connectables/objectinfo.h"
 #include "connectables/audiodevice.h"

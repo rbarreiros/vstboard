@@ -44,7 +44,7 @@ namespace Connectables {
         void Render();
         int GetProcessingTime() {return 20;}
         long OnGetUniqueId() { return index; }
-        long OnMasterCallback(long opcode, long index, long value, void *ptr, float opt, long currentReturnCode);
+        VstIntPtr OnMasterCallback(long opcode, long index, long value, void *ptr, float opt, long currentReturnCode);
         void SetSleep(bool sleeping);
         void MidiMsgFromInput(long msg);
         QString GetParameterName(ConnectionInfo pinInfo);

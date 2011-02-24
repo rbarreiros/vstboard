@@ -20,7 +20,7 @@
 
 #include "vstmididevice.h"
 #include "globals.h"
-#include "mainhost.h"
+#include "mainhostvst.h"
 #include "vst.h"
 
 using namespace Connectables;
@@ -63,10 +63,10 @@ void VstMidiDevice::MidiMsgFromInput(long msg) {
 bool VstMidiDevice::Close()
 {
     if(objInfo.inputs>0)
-        myHost->myVstPlugin->removeMidiIn(this);
+        static_cast<MainHostVst*>(myHost)->myVstPlugin->removeMidiIn(this);
 
     if(objInfo.outputs>0)
-        myHost->myVstPlugin->removeMidiOut(this);
+        static_cast<MainHostVst*>(myHost)->myVstPlugin->removeMidiOut(this);
 
     return Object::Close();
 }
@@ -74,10 +74,10 @@ bool VstMidiDevice::Close()
 bool VstMidiDevice::Open()
 {
     if(objInfo.inputs>0)
-        myHost->myVstPlugin->addMidiIn(this);
+        static_cast<MainHostVst*>(myHost)->myVstPlugin->addMidiIn(this);
 
     if(objInfo.outputs>0)
-        myHost->myVstPlugin->addMidiOut(this);
+        static_cast<MainHostVst*>(myHost)->myVstPlugin->addMidiOut(this);
 
     listMidiPinOut->ChangeNumberOfPins(objInfo.inputs);
     listMidiPinIn->ChangeNumberOfPins(objInfo.outputs);

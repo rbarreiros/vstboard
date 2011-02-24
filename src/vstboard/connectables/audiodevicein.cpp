@@ -22,7 +22,7 @@
 #include "connectables/audiodevice.h"
 #include "globals.h"
 #include "audiobuffer.h"
-#include "mainhost.h"
+#include "mainhosthost.h"
 #include "audiodevices.h"
 
 using namespace Connectables;
@@ -91,18 +91,19 @@ bool AudioDeviceIn::Open()
     //create the audiodevice if needed
     if(!parentDevice) {
         QMutexLocker l(&AudioDevice::listDevMutex);
+        MainHostHost *host=static_cast<MainHostHost*>(myHost);
 
-        if(!myHost->audioDevices->listAudioDevices.contains(objInfo.id)) {
-            AudioDevice *dev = new AudioDevice(myHost,objInfo);
+        if(!host->audioDevices->listAudioDevices.contains(objInfo.id)) {
+            AudioDevice *dev = new AudioDevice(host,objInfo);
             parentDevice = QSharedPointer<AudioDevice>(dev);
             if(!parentDevice->Open()) {
                 parentDevice.clear();
                 errorMessage=tr("Error while opening the interface");
                 return true;
             }
-            myHost->audioDevices->listAudioDevices.insert(objInfo.id, parentDevice);
+            host->audioDevices->listAudioDevices.insert(objInfo.id, parentDevice);
         } else {
-            parentDevice = myHost->audioDevices->listAudioDevices.value(objInfo.id);
+            parentDevice = host->audioDevices->listAudioDevices.value(objInfo.id);
         }
     }
 

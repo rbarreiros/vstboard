@@ -116,8 +116,7 @@ void ParameterPin::ChangeValue(float val, bool fromObj)
     val = std::min(val,1.0f);
     val = std::max(val,.0f);
 
-
-    if(!loading && std::abs(val-value)<0.01f)
+    if(!loading && std::abs(val-value)<0.001f)
         return;
 
     OnValueChanged(val);

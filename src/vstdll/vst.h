@@ -29,7 +29,7 @@
 #include <QObject>
 #include <QtGui/QApplication>
 #include <QTranslator>
-#include "mainwindow.h"
+#include "mainwindowvst.h"
 #include "audioeffectx.h"
 #include "gui.h"
 #include "connectables/vstaudiodevicein.h"
@@ -102,8 +102,8 @@ public:
 
 protected:
         QApplication *myApp;
-        MainHost *myHost;
-        MainWindow *myWindow;
+        MainHostVst *myHost;
+        MainWindowVst *myWindow;
 
         char programName[kVstMaxProgNameLen + 1];
 

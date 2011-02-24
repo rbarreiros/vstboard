@@ -18,6 +18,7 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
+#include "mainhosthost.h"
 #include "connectables/mididevice.h"
 #include "globals.h"
 
@@ -169,6 +170,10 @@ bool MidiDevice::CloseStream()
 
 bool MidiDevice::Close()
 {
+    MidiDevices *devCtrl = static_cast<MainHostHost*>(myHost)->midiDevices;
+    if(devCtrl)
+        devCtrl->CloseDevice(this);
+
     CloseStream();
     return true;
 }
@@ -235,5 +240,9 @@ bool MidiDevice::Open()
     listMidiPinIn->ChangeNumberOfPins(devInfo->output);
 
     Object::Open();
+
+    MidiDevices *devCtrl = static_cast<MainHostHost*>(myHost)->midiDevices;
+    if(devCtrl)
+        devCtrl->OpenDevice(this);
     return true;
 }

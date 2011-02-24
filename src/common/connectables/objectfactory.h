@@ -25,6 +25,7 @@
 #include "../globals.h"
 #include "object.h"
 #include "objectinfo.h"
+
 class MainHost;
 
 namespace Connectables {
@@ -51,9 +52,8 @@ namespace Connectables {
 
         const hashObjects &GetListObjects() {return listObjects;}
 
-    private:
-
-//        static ObjectFactory *theObjFactory;
+    protected:
+        virtual Object *CreateOtherObjects(const ObjectInfo &info)=0;
 
         hashObjects listObjects;
         int cptListObjects;

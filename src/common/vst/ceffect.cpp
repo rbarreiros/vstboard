@@ -205,7 +205,7 @@ float CEffect::EffGetParameter(long index)
     return pEffect->getParameter(pEffect, index);
 }
 
-long CEffect::OnMasterCallback(long opcode, long index, long value, void *ptr, float opt,long currentReturnCode)
+VstIntPtr CEffect::OnMasterCallback(long opcode, long index, long value, void *ptr, float opt,long currentReturnCode)
 {
     switch(opcode) {
         case audioMasterWantMidi : //6

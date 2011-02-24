@@ -33,6 +33,8 @@ QMimeData  * ListMidiInterfacesModel::mimeData ( const QModelIndexList  & indexe
     QDataStream stream(&b,QIODevice::WriteOnly);
 
     foreach(QModelIndex idx, indexes) {
+        if(idx.column()!=0)
+            continue;
         stream << itemFromIndex(idx)->data(UserRoles::objInfo).value<ObjectInfo>();
     }
 

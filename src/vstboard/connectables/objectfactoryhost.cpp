@@ -18,26 +18,46 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#include "listtoolsmodel.h"
-#include "../connectables/objectinfo.h"
+#include "objectfactoryhost.h"
 
-ListToolsModel::ListToolsModel(QObject *parent) :
-        QStandardItemModel(parent)
+#include "connectables/audiodevicein.h"
+#include "connectables/audiodeviceout.h"
+#include "connectables/mididevice.h"
+
+using namespace Connectables;
+
+ObjectFactoryHost::ObjectFactoryHost(MainHost *myHost) :
+    ObjectFactory(myHost)
 {
 }
 
-QMimeData  * ListToolsModel::mimeData ( const QModelIndexList  & indexes ) const
+Object *ObjectFactoryHost::CreateOtherObjects(const ObjectInfo &info)
 {
-    QMimeData  *data = new QMimeData();
-    QByteArray b;
-    QDataStream stream(&b,QIODevice::WriteOnly);
-
-    foreach(QModelIndex idx, indexes) {
-        if(idx.column()!=0)
-            continue;
-        stream << itemFromIndex(idx)->data(UserRoles::objInfo).value<ObjectInfo>();
+    int objId = cptListObjects;
+    if(info.forcedObjId) {
+        objId = info.forcedObjId;
     }
 
-    data->setData("application/x-tools",b);
-    return data;
+    Object *obj=0;
+
+    switch(info.nodeType) {
+        case NodeType::object :
+
+            switch(info.objType) {
+                case ObjType::AudioInterfaceIn:
+                    obj = new AudioDeviceIn(myHost,objId, info);
+                    break;
+
+                case ObjType::AudioInterfaceOut:
+                    obj = new AudioDeviceOut(myHost,objId, info);
+                    break;
+
+                case ObjType::MidiInterface:
+                    obj = new MidiDevice(myHost,objId, info);
+                    break;
+            }
+            break;
+    }
+
+    return obj;
 }

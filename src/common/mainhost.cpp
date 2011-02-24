@@ -22,16 +22,6 @@
 #include "mainwindow.h"
 #include "connectables/container.h"
 
-#ifdef VSTBOARD
-    #include "connectables/mididevice.h"
-    #include "connectables/audiodevice.h"
-    #include "audiodevices.h"
-#endif
-
-#ifdef VST_PLUGIN
-    #include "vst.h"
-#endif
-
 #ifdef VSTSDK
     #include "connectables/vstplugin.h"
 #endif
@@ -39,13 +29,12 @@
 #include "projectfile/fileversion.h"
 
 
-MainHost::MainHost(Vst *myVstPlugin, QObject *parent, QString settingsGroup) :
+MainHost::MainHost(QObject *parent, QString settingsGroup) :
     QObject(parent),
     solver(new PathSolver(this)),
     filePass(0),
     objFactory(0),
     mainWindow(0),
-    myVstPlugin(myVstPlugin),
     solverNeedAnUpdate(false),
     solverUpdateEnabled(true),
     mutexListCables(new QMutex(QMutex::Recursive)),
@@ -59,7 +48,7 @@ MainHost::MainHost(Vst *myVstPlugin, QObject *parent, QString settingsGroup) :
 //    scriptObj = scriptEngine.newQObject(this);
 //    scriptEngine.globalObject().setProperty("MainHost", scriptObj);
 
-    objFactory = new Connectables::ObjectFactory(this);
+//    objFactory = new Connectables::ObjectFactory(this);
 
     if(!vst::CVSTHost::Get())
         vstHost = new vst::CVSTHost();
@@ -78,16 +67,6 @@ MainHost::MainHost(Vst *myVstPlugin, QObject *parent, QString settingsGroup) :
     currentTimeSig2=4;
 
     programList = new Programs(this);
-
-#ifdef VSTBOARD
-    midiDevices = new MidiDevices(this);
-
-    audioDevices = new AudioDevices(this);
-    connect(this,SIGNAL(OnAudioDeviceToggleInUse(ObjectInfo,bool)),
-            audioDevices,SLOT(OnToggleDeviceInUse(ObjectInfo,bool)));
-    connect(&audioDevices->fakeRenderTimer,SIGNAL(timeout()),
-            this, SLOT(Render()));
-#endif
 
     //timer
     timeFromStart.start();
@@ -125,11 +104,6 @@ MainHost::~MainHost()
 
     solver->Resolve(workingListOfCables);
     renderer.Clear();
-
-#ifdef VSTBOARD
-    delete audioDevices;
-    delete midiDevices;
-#endif
 
     delete objFactory;
 }
@@ -643,13 +617,7 @@ void MainHost::Render(unsigned long samples)
         samples=bufferSize;
 
 #ifdef VSTSDK
-
     CheckTempo();
-
-    #ifndef VST_PLUGIN
-        //as a host : update internal clock
-        vstHost->UpdateTimeInfo(timeFromStart.elapsed(), samples, sampleRate);
-    #endif
 #endif
 
     mutexRender.lock();

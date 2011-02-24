@@ -46,9 +46,9 @@ MidiDevices::~MidiDevices()
 
 ListMidiInterfacesModel* MidiDevices::GetModel()
 {
-    mutexListMidi.lock();
+//    mutexListMidi.lock();
 
-    foreach(QSharedPointer<Connectables::MidiDevice>md, listOpenedMidiDevices) {
+    foreach(Connectables::MidiDevice* md, listOpenedMidiDevices) {
         md->SetSleep(true);
         md->CloseStream();
     }
@@ -92,28 +92,28 @@ ListMidiInterfacesModel* MidiDevices::GetModel()
         }
     }
 
-    foreach(QSharedPointer<Connectables::MidiDevice>md, listOpenedMidiDevices) {
+    foreach(Connectables::MidiDevice* md, listOpenedMidiDevices) {
         if(md->OpenStream())
             md->SetSleep(false);
     }
 
-    mutexListMidi.unlock();
+//    mutexListMidi.unlock();
 
     return model;
 }
 
-void MidiDevices::OpenDevice(QSharedPointer<Connectables::Object> objPtr)
+void MidiDevices::OpenDevice(Connectables::MidiDevice* objPtr)
 {
-    mutexListMidi.lock();
-    listOpenedMidiDevices << objPtr.staticCast<Connectables::MidiDevice>();
-    mutexListMidi.unlock();
+//    mutexListMidi.lock();
+    listOpenedMidiDevices << objPtr;
+//    mutexListMidi.unlock();
 }
 
-void MidiDevices::CloseDevice(QSharedPointer<Connectables::Object> objPtr)
+void MidiDevices::CloseDevice(Connectables::MidiDevice* objPtr)
 {
-    mutexListMidi.lock();
-    listOpenedMidiDevices.removeAll( objPtr.staticCast<Connectables::MidiDevice>() );
-    mutexListMidi.unlock();
+//    mutexListMidi.lock();
+    listOpenedMidiDevices.removeAll( objPtr );
+//    mutexListMidi.unlock();
 }
 
 void MidiDevices::BuildModel()
@@ -172,14 +172,11 @@ void MidiDevices::MidiReceive_poll(PtTimestamp timestamp, void *userData)
 
     MidiDevices *devices = static_cast<MidiDevices*>(userData);
 
-    devices->mutexListMidi.lock();
-    foreach(QSharedPointer<Connectables::Object> objPtr, devices->listOpenedMidiDevices) {
-        if(objPtr.isNull())
-            continue;
-        if(objPtr->GetSleep())
+//    devices->mutexListMidi.lock();
+    foreach(Connectables::MidiDevice* device, devices->listOpenedMidiDevices) {
+        if(device->GetSleep())
             continue;
 
-        Connectables::MidiDevice *device = static_cast<Connectables::MidiDevice*>(objPtr.data());
         if(!device->stream)
            continue;
 
@@ -216,5 +213,5 @@ void MidiDevices::MidiReceive_poll(PtTimestamp timestamp, void *userData)
 
         device->Unlock();
     }
-    devices->mutexListMidi.unlock();
+//    devices->mutexListMidi.unlock();
 }

@@ -74,11 +74,11 @@ Vst::Vst (audioMasterCallback audioMaster) :
     if(myappTranslator.load("vstboard_" + QLocale::system().name(), ":/translations/"))
         qApp->installTranslator(&myappTranslator);
 
-    myHost = new MainHost(this,0,"plugin/");
+    myHost = new MainHostVst(this,0,"plugin/");
     if(myHost->doublePrecision)
         canDoubleReplacing(true);
 
-    myWindow = new MainWindow(myHost);
+    myWindow = new MainWindowVst(myHost);
     qEditor = new Gui(this);
     setEditor(qEditor);
     qEditor->SetMainWindow(myWindow);

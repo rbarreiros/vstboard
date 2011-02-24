@@ -18,26 +18,35 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#include "listtoolsmodel.h"
-#include "../connectables/objectinfo.h"
+#ifndef MAINWINDOWHOST_H
+#define MAINWINDOWHOST_H
 
-ListToolsModel::ListToolsModel(QObject *parent) :
-        QStandardItemModel(parent)
-{
-}
+#ifndef APP_NAME
+#define APP_NAME "noname ?"
+#endif
 
-QMimeData  * ListToolsModel::mimeData ( const QModelIndexList  & indexes ) const
-{
-    QMimeData  *data = new QMimeData();
-    QByteArray b;
-    QDataStream stream(&b,QIODevice::WriteOnly);
+#include "mainwindow.h"
+#include "mainhosthost.h"
+#include "../common/ui_mainwindow.h"
+class MainWindowHost : public MainWindow {
+    Q_OBJECT
 
-    foreach(QModelIndex idx, indexes) {
-        if(idx.column()!=0)
-            continue;
-        stream << itemFromIndex(idx)->data(UserRoles::objInfo).value<ObjectInfo>();
-    }
+public:
+    MainWindowHost(MainHostHost * myHost, QWidget *parent = 0);
+    void readSettings();
 
-    data->setData("application/x-tools",b);
-    return data;
-}
+protected:
+    void closeEvent(QCloseEvent *event);
+    void resetSettings();
+
+    ListToolsModel *listAudioDevModel;
+    ListToolsModel *listMidiDevModel;
+
+private slots:
+    void on_actionConfig_triggered();
+    void on_actionRefresh_Midi_devices_triggered();
+    void on_actionRefresh_Audio_devices_triggered();
+
+};
+
+#endif // MAINWINDOWHOST_H

@@ -2,7 +2,7 @@ TEMPLATE    = subdirs
 SUBDIRS     = \
     portmidi \
     portaudio \
-    dllLoader \
+    common \
     vstdll \
     vstboard \
-    common
+    dllLoader

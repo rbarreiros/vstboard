@@ -35,6 +35,7 @@ vstsdk {
 }
 
 SOURCES += \
+    mainhost.cpp \
     views/connectablepinview.cpp \
     connectables/midipinin.cpp \
     connectables/midipinout.cpp \

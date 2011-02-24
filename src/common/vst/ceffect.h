@@ -60,7 +60,7 @@ namespace vst
         virtual bool SaveBank(std::string *name);
 
         virtual long EffDispatch(VstInt32 opCode, VstInt32 index=0, VstInt32 value=0, void *ptr=0, float opt=0.);
-        virtual long OnMasterCallback(long opcode, long index, long value, void *ptr, float opt,long currentReturnCode);
+        virtual VstIntPtr OnMasterCallback(long opcode, long index, long value, void *ptr, float opt,long currentReturnCode);
 
         virtual void EffProcess(float **inputs, float **outputs, long sampleframes);
         virtual void EffProcessReplacing(float **inputs, float **outputs, long sampleframes);

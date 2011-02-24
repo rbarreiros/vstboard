@@ -27,6 +27,7 @@
 #include "models/listmidiinterfacesmodel.h"
 #include "connectables/mididevice.h"
 
+class MainHost;
 class MidiDevices : public QObject
 {
 Q_OBJECT
@@ -36,13 +37,13 @@ public:
 
     ListMidiInterfacesModel* GetModel();
 
-    void OpenDevice(QSharedPointer<Connectables::Object> objPtr);
-    void CloseDevice(QSharedPointer<Connectables::Object> objPtr);
+    void OpenDevice(Connectables::MidiDevice* objPtr);
+    void CloseDevice(Connectables::MidiDevice* objPtr);
 
 private:
     void BuildModel();
     static void MidiReceive_poll(PtTimestamp timestamp, void *userData);
-    QList< QSharedPointer<Connectables::MidiDevice> >listOpenedMidiDevices;
+    QList< Connectables::MidiDevice* >listOpenedMidiDevices;
 
     ListMidiInterfacesModel *model;
 

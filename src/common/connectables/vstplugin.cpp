@@ -584,7 +584,7 @@ void VstPlugin::processEvents(VstEvents* events)
     }
 }
 
-long VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr, float opt, long currentReturnCode)
+VstIntPtr VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr, float opt, long currentReturnCode)
 {
     switch(opcode) {
         case audioMasterAutomate : //0
@@ -645,6 +645,9 @@ long VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr,
 
 //        case audioMasterUpdateDisplay : //42
 //            break;
+        case audioMasterBeginEdit : //43
+        case audioMasterEndEdit : //44
+            return 1L;
     }
 
     return CEffect::OnMasterCallback(opcode, index, value, ptr, opt, currentReturnCode);

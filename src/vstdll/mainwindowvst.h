@@ -18,26 +18,31 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#include "listtoolsmodel.h"
-#include "../connectables/objectinfo.h"
+#ifndef MAINWINDOWVST_H
+#define MAINWINDOWVST_H
 
-ListToolsModel::ListToolsModel(QObject *parent) :
-        QStandardItemModel(parent)
-{
-}
+#ifndef APP_NAME
+#define APP_NAME "noname ?"
+#endif
 
-QMimeData  * ListToolsModel::mimeData ( const QModelIndexList  & indexes ) const
-{
-    QMimeData  *data = new QMimeData();
-    QByteArray b;
-    QDataStream stream(&b,QIODevice::WriteOnly);
+#include "mainwindow.h"
+#include "mainhostvst.h"
+#include "../common/ui_mainwindow.h"
 
-    foreach(QModelIndex idx, indexes) {
-        if(idx.column()!=0)
-            continue;
-        stream << itemFromIndex(idx)->data(UserRoles::objInfo).value<ObjectInfo>();
-    }
+class MainWindowVst : public MainWindow {
+    Q_OBJECT
 
-    data->setData("application/x-tools",b);
-    return data;
-}
+public:
+    MainWindowVst(MainHost * myHost, QWidget *parent = 0);
+    void readSettings();
+
+protected:
+    void closeEvent(QCloseEvent *event);
+    void BuildListTools();
+    void resetSettings();
+
+private slots:
+    void on_actionConfig_triggered();
+};
+
+#endif // MAINWINDOWVST_H

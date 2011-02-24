@@ -22,7 +22,7 @@
 #include "globals.h"
 #include "audiobuffer.h"
 #include "audiobufferd.h"
-#include "mainhost.h"
+#include "mainhostvst.h"
 #include "vst.h"
 
 using namespace Connectables;
@@ -39,7 +39,7 @@ VstAudioDeviceIn::~VstAudioDeviceIn()
 
 bool VstAudioDeviceIn::Close()
 {
-    myHost->myVstPlugin->removeAudioIn(this);
+    static_cast<MainHostVst*>(myHost)->myVstPlugin->removeAudioIn(this);
     if(!Object::Close())
         return false;
     return true;
@@ -70,7 +70,7 @@ void VstAudioDeviceIn::SetBufferSize(unsigned long size)
 
 bool VstAudioDeviceIn::Open()
 {
-    if(!myHost->myVstPlugin->addAudioIn(this))
+    if(!static_cast<MainHostVst*>(myHost)->myVstPlugin->addAudioIn(this))
         return false;
 
     listAudioPinOut->ChangeNumberOfPins(2);

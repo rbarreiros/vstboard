@@ -45,13 +45,11 @@ public:
 
 protected:
     void changeEvent(QEvent *e);
-
-private:
     Ui::ConfigDialog *ui;
     MainHost *myHost;
 
 public slots:
-    void accept();
+    virtual void accept();
 
 private slots:
     void on_browseProject_clicked();

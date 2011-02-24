@@ -18,26 +18,22 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#include "listtoolsmodel.h"
-#include "../connectables/objectinfo.h"
+#ifndef OBJECTFACTORYHOST_H
+#define OBJECTFACTORYHOST_H
 
-ListToolsModel::ListToolsModel(QObject *parent) :
-        QStandardItemModel(parent)
-{
+#include "connectables/objectfactory.h"
+
+namespace Connectables {
+
+    class ObjectFactoryHost : public ObjectFactory
+    {
+    public:
+        ObjectFactoryHost(MainHost *myHost);
+    protected:
+        Object *CreateOtherObjects(const ObjectInfo &info);
+
+    };
+
 }
 
-QMimeData  * ListToolsModel::mimeData ( const QModelIndexList  & indexes ) const
-{
-    QMimeData  *data = new QMimeData();
-    QByteArray b;
-    QDataStream stream(&b,QIODevice::WriteOnly);
-
-    foreach(QModelIndex idx, indexes) {
-        if(idx.column()!=0)
-            continue;
-        stream << itemFromIndex(idx)->data(UserRoles::objInfo).value<ObjectInfo>();
-    }
-
-    data->setData("application/x-tools",b);
-    return data;
-}
+#endif // OBJECTFACTORYHOST_H

@@ -23,7 +23,8 @@
 #include <QLibraryInfo>
 #include <QTranslator>
 
-#include "mainwindow.h"
+#include "mainhosthost.h"
+#include "mainwindowhost.h"
 #include "pathsolver.h"
 #include "connectables/objectinfo.h"
 
@@ -114,8 +115,9 @@ int main(int argc, char *argv[])
         qApp->installTranslator(&myappTranslator);
 #endif
 
-    MainHost *host = new MainHost();
-    MainWindow *w = new MainWindow(host);
+    MainHostHost *host = new MainHostHost();
+    MainWindowHost *w = new MainWindowHost(host);
+    host->Open();
     w->readSettings();
     w->show();
     app.exec();

@@ -18,26 +18,28 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#include "listtoolsmodel.h"
-#include "../connectables/objectinfo.h"
+#ifndef MAINHOSTHOST_H
+#define MAINHOSTHOST_H
 
-ListToolsModel::ListToolsModel(QObject *parent) :
-        QStandardItemModel(parent)
+#include "mainhost.h"
+#include "audiodevices.h"
+#include "mididevices.h"
+
+class AudioDevices;
+class MidiDevices;
+class MainHostHost : public MainHost
 {
-}
+Q_OBJECT
+public:
+    MainHostHost(QObject *parent = 0, QString settingsGroup="");
+    ~MainHostHost();
 
-QMimeData  * ListToolsModel::mimeData ( const QModelIndexList  & indexes ) const
-{
-    QMimeData  *data = new QMimeData();
-    QByteArray b;
-    QDataStream stream(&b,QIODevice::WriteOnly);
+    AudioDevices *audioDevices;
+    MidiDevices *midiDevices;
 
-    foreach(QModelIndex idx, indexes) {
-        if(idx.column()!=0)
-            continue;
-        stream << itemFromIndex(idx)->data(UserRoles::objInfo).value<ObjectInfo>();
-    }
+public slots:
+    void Render(unsigned long samples=0);
+};
 
-    data->setData("application/x-tools",b);
-    return data;
-}
+#endif // MAINHOSTHOST_H
+

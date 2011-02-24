@@ -112,12 +112,12 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
     #ifdef VSTSDK
             //vst plugin
             if (data->hasUrls()) {
-                QString fName;
-                QFileInfo info;
 
                 foreach(QUrl url,data->urls()) {
-                    fName = url.toLocalFile();
+                    QString fName = url.toLocalFile();
+                    QFileInfo info;
                     info.setFile( fName );
+
                     if ( info.isFile() && info.isReadable() && info.suffix()=="dll" ) {
 
                         ObjectInfo infoVst;
@@ -146,9 +146,9 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
             if(data->hasFormat("application/x-audiointerface")) {
                 QByteArray b = data->data("application/x-audiointerface");
                 QDataStream stream(&b,QIODevice::ReadOnly);
-                ObjectInfo info;
 
                 while(!stream.atEnd()) {
+                    ObjectInfo info;
                     stream >> info;
                     info.objType=ObjType::AudioInterfaceIn;
                     QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
@@ -174,9 +174,9 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
             if(data->hasFormat("application/x-midiinterface")) {
                 QByteArray b = data->data("application/x-midiinterface");
                 QDataStream stream(&b,QIODevice::ReadOnly);
-                ObjectInfo info;
 
                 while(!stream.atEnd()) {
+                    ObjectInfo info;
                     stream >> info;
                     QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
                     if(objPtr.isNull()) {
@@ -192,9 +192,9 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
             if(data->hasFormat("application/x-tools")) {
                 QByteArray b = data->data("application/x-tools");
                 QDataStream stream(&b,QIODevice::ReadOnly);
-                ObjectInfo info;
 
                 while(!stream.atEnd()) {
+                    ObjectInfo info;
                     stream >> info;
                     QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
                     if(objPtr.isNull()) {

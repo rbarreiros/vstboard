@@ -26,7 +26,7 @@
 #include "audiobuffer.h"
 #include "audiobufferd.h"
 #include "renderer.h"
-#include "mainhost.h"
+#include "mainhosthost.h"
 #include "audiodevices.h"
 
 using namespace Connectables;
@@ -36,7 +36,7 @@ QMutex AudioDevice::listDevMutex;
 int AudioDevice::countDevicesReady=0;
 int AudioDevice::countInputDevices=0;
 
-AudioDevice::AudioDevice(MainHost *myHost,const ObjectInfo &info, QObject *parent) :
+AudioDevice::AudioDevice(MainHostHost *myHost,const ObjectInfo &info, QObject *parent) :
     QObject(parent),
     bufferReady(false),
     sampleRate(44100.0f),

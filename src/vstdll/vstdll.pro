@@ -7,9 +7,7 @@ QT += core gui
 
 TARGET = "VstBoardPlugin"
 TEMPLATE = lib
-CONFIG += staticlib
-
-DEFINES += VST_PLUGIN
+#CONFIG += staticlib
 
 include($${_PRO_FILE_PWD_}/../../libs/qtwinmigrate/src/qtwinmigrate.pri)
 
@@ -34,7 +32,7 @@ win32-msvc* {
     INCLUDEPATH += $$quote($$(INCLUDE))
     LIBS += -L$$quote($$(LIB))
     QMAKE_CFLAGS += -Fd$$top_destdir/$$TARGET
-    RC_FILE = vstdll.rc
+    #RC_FILE = vstdll.rc
 
 #to add symbols :
 #    QMAKE_CFLAGS_RELEASE +=  -Zi
@@ -53,17 +51,16 @@ INCLUDEPATH += ../common
 
 SOURCES += \
     main.cpp \
-    ../common/mainhost.cpp \
-    ../common/connectables/objectfactory.cpp \
-    ../common/connectables/container.cpp \
-    ../common/views/aboutdialog.cpp \
-    ../common/mainwindow.cpp \
     gui.cpp \
     connectables/vstaudiodevicein.cpp \
     connectables/vstaudiodeviceout.cpp \
     vst.cpp \
     connectables/vstautomation.cpp \
     connectables/vstmididevice.cpp \
+    mainwindowvst.cpp \
+    mainhostvst.cpp \
+    connectables/objectfactoryvst.cpp \
+    views/configdialogvst.cpp
 
 
 HEADERS  += \
@@ -73,11 +70,13 @@ HEADERS  += \
     vst.h \
     connectables/vstautomation.h \
     connectables/vstmididevice.h \
+    mainwindowvst.h \
+    mainhostvst.h \
+    connectables/objectfactoryvst.h \
+    views/configdialogvst.h
 
 
-FORMS += \
-    ../common/views/configdialog.ui \
-    ../common/mainwindow.ui
+FORMS +=
 
 
 PRECOMPILED_HEADER = ../common/precomp.h

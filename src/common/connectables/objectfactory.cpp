@@ -19,20 +19,6 @@
 **************************************************************************/
 
 #include "objectfactory.h"
-
-#ifdef VSTBOARD
-    #include "connectables/audiodevicein.h"
-    #include "connectables/audiodeviceout.h"
-    #include "connectables/mididevice.h"
-#endif
-
-#ifdef VST_PLUGIN
-    #include "connectables/vstaudiodevicein.h"
-    #include "connectables/vstaudiodeviceout.h"
-    #include "connectables/vstautomation.h"
-    #include "connectables/vstmididevice.h"
-#endif
-
 #include "midisender.h"
 #include "miditoautomation.h"
 #include "hostcontroller.h"
@@ -54,6 +40,7 @@ ObjectFactory::ObjectFactory(MainHost *myHost) :
     cptListObjects(50),
     myHost(myHost)
 {
+    setObjectName("ObjectFactory");
 //    scriptObj = myHost->scriptEngine.newQObject(this);
 //    myHost->scriptEngine.globalObject().setProperty("ObjectFactory", scriptObj);
 }
@@ -162,89 +149,61 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
 
     Object *obj=0;
 
-    switch(info.nodeType) {
+    obj=CreateOtherObjects(info);
 
-        case NodeType::container :
-            obj = new MainContainer(myHost,objId, info);
-            break;
+    if(!obj) {
+        switch(info.nodeType) {
 
-        case NodeType::bridge :
-            obj = new Bridge(myHost,objId, info);
-            break;
-
-        case NodeType::object :
-
-            switch(info.objType) {
-#ifdef VSTBOARD
-                case ObjType::AudioInterfaceIn:
-                    obj = new AudioDeviceIn(myHost,objId, info);
-                    break;
-
-                case ObjType::AudioInterfaceOut:
-                    obj = new AudioDeviceOut(myHost,objId, info);
-                    break;
-
-                case ObjType::MidiInterface:
-                    obj = new MidiDevice(myHost,objId, info);
-                    break;
-#endif
-
-#ifdef VST_PLUGIN
-            case ObjType::AudioInterfaceIn:
-                obj = new VstAudioDeviceIn(myHost,objId, info);
+            case NodeType::container :
+                obj = new MainContainer(myHost,objId, info);
                 break;
 
-            case ObjType::AudioInterfaceOut:
-                obj = new VstAudioDeviceOut(myHost,objId, info);
+            case NodeType::bridge :
+                obj = new Bridge(myHost,objId, info);
                 break;
 
-            case ObjType::VstAutomation:
-                obj = new VstAutomation(myHost,objId);
+            case NodeType::object :
+
+                switch(info.objType) {
+                    case ObjType::Script:
+                        obj = new Script(myHost,objId,info);
+                        break;
+
+                    case ObjType::MidiSender:
+                        obj = new MidiSender(myHost,objId);
+                        break;
+
+                    case ObjType::MidiToAutomation:
+                        obj = new MidiToAutomation(myHost,objId);
+                        break;
+
+                    case ObjType::HostController:
+                        obj = new HostController(myHost,objId);
+                        break;
+
+            #ifdef VSTSDK
+                    case ObjType::VstPlugin:
+                        obj = new VstPlugin(myHost,objId, info);
+                        break;
+            #endif
+
+                    case ObjType::dummy :
+                        obj = new Object(myHost, objId, info);
+                        obj->errorMessage="Dummy object";
+                        break;
+
+                    default:
+                        debug("ObjectFactory::NewObject : unknown object type")
+                        return QSharedPointer<Object>();
+                }
                 break;
 
-            case ObjType::MidiInterface:
-                obj = new VstMidiDevice(myHost,objId, info);
-                break;
-#endif
-                case ObjType::Script:
-                    obj = new Script(myHost,objId,info);
-                    break;
 
-                case ObjType::MidiSender:
-                    obj = new MidiSender(myHost,objId);
-                    break;
-
-                case ObjType::MidiToAutomation:
-                    obj = new MidiToAutomation(myHost,objId);
-                    break;
-
-                case ObjType::HostController:
-                    obj = new HostController(myHost,objId);
-                    break;
-
-        #ifdef VSTSDK
-                case ObjType::VstPlugin:
-                    obj = new VstPlugin(myHost,objId, info);
-                    break;
-        #endif
-
-                case ObjType::dummy :
-                    obj = new Object(myHost, objId, info);
-                    obj->errorMessage="Dummy object";
-                    break;
-
-                default:
-                    debug("ObjectFactory::NewObject : unknown object type")
-                    return QSharedPointer<Object>();
-            }
-            break;
-
-
-        default :
-            debug("ObjectFactory::NewObject unknown nodeType")
-            return QSharedPointer<Object>();
+            default :
+                debug("ObjectFactory::NewObject unknown nodeType")
+                return QSharedPointer<Object>();
+        }
     }
-
 
 
     QSharedPointer<Object> sharedObj(obj);

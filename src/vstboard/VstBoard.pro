@@ -8,8 +8,6 @@ QT += core gui
 TEMPLATE = app
 TARGET = $${APP_NAME}
 
-DEFINES += VSTBOARD
-
 LIBS += -L$$top_destdir -lportaudio
 LIBS += -L$$top_destdir -lportmidi
 LIBS += -L$$top_destdir -lcommon
@@ -65,21 +63,14 @@ vstsdk {
     INCLUDEPATH += $$top_srcdir/$$VSTSDK_PATH \
         $$top_srcdir/$$VSTSDK_PATH/public.sdk/source/vst2.x
 
-    HEADERS += ../common/vst/cvsthost.h \
-        ../common/connectables/vstplugin.h \
-        ../common/vst/ceffect.h \
-        ../common/vst/const.h \
-        ../common/vst/vstbank.h \
-        ../common/views/vstpluginwindow.h \
-        ../common/views/vstshellselect.h
+    HEADERS +=
 }
 
 SOURCES += \
     main.cpp \
-    ../common/mainhost.cpp \
-    ../common/connectables/objectfactory.cpp \
-    ../common/connectables/container.cpp \
-    ../common/mainwindow.cpp \
+    mainhosthost.cpp \
+    connectables/objectfactoryhost.cpp \
+    mainwindowhost.cpp \
     connectables/audiodevice.cpp \
     connectables/audiodevicein.cpp \
     connectables/audiodeviceout.cpp \
@@ -89,8 +80,12 @@ SOURCES += \
     audiodevices.cpp \
     mididevices.cpp \
     circularbuffer.cpp \
+    views/configdialoghost.cpp
 
 HEADERS += \
+    mainhosthost.h \
+    mainwindowhost.h \
+    connectables/objectfactoryhost.h \
     models/listaudiointerfacesmodel.h \
     connectables/audiodevice.h \
     connectables/audiodevicein.h \
@@ -100,13 +95,13 @@ HEADERS += \
     audiodevices.h \
     mididevices.h \
     circularbuffer.h \
+    views/configdialoghost.h
 
 
-FORMS += ../common/mainwindow.ui \
-    ../common/views/configdialog.ui
+FORMS +=
 
 
-PRECOMPILED_HEADER = ../common/precomp.h
+#PRECOMPILED_HEADER = ../common/precomp.h
 
 #RESOURCES += ../resources/resources.qrc
 

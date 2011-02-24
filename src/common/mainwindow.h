@@ -28,10 +28,6 @@
 #include "views/solverscene.h"
 #include "views/sceneview.h"
 
-#ifndef APP_NAME
-#define APP_NAME "noname ?"
-#endif
-
 namespace Ui {
     class MainWindow;
 }
@@ -41,32 +37,25 @@ class MainWindow : public QMainWindow {
 
 public:
     MainWindow(MainHost * myHost, QWidget *parent = 0);
-    ~MainWindow();
-    void readSettings();
+    virtual ~MainWindow();
+    virtual void readSettings();
     void writeSettings();
     bool openedPrompt;
 
     View::SceneView *mySceneView;
 
 protected:
-    void closeEvent(QCloseEvent *event);
     void changeEvent(QEvent *e);
 
     ListToolsModel *listToolsModel;
 
-#ifdef VST_PLUGIN
-    ListToolsModel *listAudioDevModel;
-    ListToolsModel *listMidiDevModel;
-#endif
-
     QFileSystemModel *listVstPluginsModel;
     View::SolverScene *solverScene;
 
-private:
     bool userWantsToUnloadProject();
     bool userWantsToUnloadSetup();
-    void BuildListTools();
-    void resetSettings();
+    virtual void BuildListTools();
+    virtual void resetSettings();
     void updateRecentFileActions();
 
     QString currentProjectFile;
@@ -85,14 +74,9 @@ public slots:
 private slots:
     void on_actionLoad_Setup_triggered();
     void on_actionRestore_default_layout_triggered();
-#ifndef VST_PLUGIN
-    void on_actionRefresh_Midi_devices_triggered();
-    void on_actionRefresh_Audio_devices_triggered();
-#endif
     void on_actionSave_Setup_As_triggered();
     void on_actionSave_Project_As_triggered();
     void on_actionAbout_triggered();
-    void on_actionConfig_triggered();
     void on_actionNew_Setup_triggered();
     void on_actionSave_Setup_triggered();
     void on_actionShortcuts_toggled(bool );
@@ -101,6 +85,9 @@ private slots:
     void on_actionSave_triggered();
     void openRecentSetup();
     void openRecentProject();
+    virtual void on_actionConfig_triggered();
+    virtual void on_actionRefresh_Midi_devices_triggered() {}
+    virtual void on_actionRefresh_Audio_devices_triggered() {}
 
 };
 

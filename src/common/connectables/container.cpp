@@ -361,11 +361,6 @@ void Container::AddChildObject(QSharedPointer<Object> objPtr)
     objPtr->modelIndex=item->index();
     objPtr->parked=false;
 
-#ifdef VSTBOARD
-    if(objPtr->info().objType == ObjType::MidiInterface)
-        myHost->midiDevices->OpenDevice(objPtr);
-#endif
-
     myHost->SetSolverUpdateNeeded();
 }
 
@@ -381,11 +376,6 @@ void Container::ParkChildObject(QSharedPointer<Object> objPtr)
     parkModel.invisibleRootItem()->appendRow(item);
     objPtr->modelIndex=item->index();
     objPtr->parked=true;
-
-#ifdef VSTBOARD
-    if(objPtr->info().objType == ObjType::MidiInterface)
-        myHost->midiDevices->CloseDevice(objPtr);
-#endif
 
     myHost->SetSolverUpdateNeeded();
 }

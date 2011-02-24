@@ -18,26 +18,17 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#include "listtoolsmodel.h"
-#include "../connectables/objectinfo.h"
+#include "mainhostvst.h"
+#include "vst.h"
+#include "connectables/vstaudiodevicein.h"
+#include "connectables/vstaudiodeviceout.h"
+#include "connectables/objectfactoryvst.h"
 
-ListToolsModel::ListToolsModel(QObject *parent) :
-        QStandardItemModel(parent)
+MainHostVst::MainHostVst(Vst *myVstPlugin, QObject *parent, QString settingsGroup) :
+    MainHost(parent,settingsGroup),
+    myVstPlugin(myVstPlugin)
 {
+    objFactory = new Connectables::ObjectFactoryVst(this);
 }
 
-QMimeData  * ListToolsModel::mimeData ( const QModelIndexList  & indexes ) const
-{
-    QMimeData  *data = new QMimeData();
-    QByteArray b;
-    QDataStream stream(&b,QIODevice::WriteOnly);
 
-    foreach(QModelIndex idx, indexes) {
-        if(idx.column()!=0)
-            continue;
-        stream << itemFromIndex(idx)->data(UserRoles::objInfo).value<ObjectInfo>();
-    }
-
-    data->setData("application/x-tools",b);
-    return data;
-}

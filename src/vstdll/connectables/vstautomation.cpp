@@ -37,7 +37,7 @@ VstAutomation::VstAutomation(MainHost *myHost,int index) :
         listValues << i;
     }
 
-    int prog=(int)myHost->myVstPlugin->getProgram();
+    int prog=(int)static_cast<MainHostVst*>(myHost)->myVstPlugin->getProgram();
     ParameterPinOut *progPin = new ParameterPinOut(this,FixedPinNumber::vstProgNumber,prog,&listValues,true,tr("Prog"));
     progPin->SetAlwaysVisible(true);
     progPin->SetLimitsEnabled(false);
@@ -50,7 +50,7 @@ VstAutomation::VstAutomation(MainHost *myHost,int index) :
 
     static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::learningMode))->SetAlwaysVisible(true);
 
-    connect(myHost->myVstPlugin,SIGNAL(HostChangedProg(int)),
+    connect(static_cast<MainHostVst*>(myHost)->myVstPlugin,SIGNAL(HostChangedProg(int)),
             this,SLOT(OnHostChangedProg(int)));
 }
 
@@ -65,7 +65,7 @@ void VstAutomation::Render()
 //    QMutexLocker l(&objMutex);
 
     if(!listChanged.isEmpty()) {
-        Vst *vst=myHost->myVstPlugin;
+        Vst *vst=static_cast<MainHostVst*>(myHost)->myVstPlugin;
         QHash<int,float>::const_iterator i = listChanged.constBegin();
         while(i!=listChanged.constEnd()) {
             if(listParameterPinOut->listPins.contains(i.key())) {
@@ -94,7 +94,9 @@ void VstAutomation::ValueFromHost(int pinNum, float value)
             listParameterPinOut->AsyncAddPin(pinNum);
             listParameterPinIn->AsyncAddPin(pinNum);
         case LearningMode::off :
-            listChanged.insert(pinNum,value);
+            if(listParameterPinOut->listPins.contains(pinNum))
+                static_cast<ParameterPin*>(listParameterPinOut->listPins.value(pinNum))->ChangeValue( value, true );
+//            listChanged.insert(pinNum,value);
             break;
     }
 }
@@ -129,13 +131,13 @@ void VstAutomation::OnParameterChanged(ConnectionInfo pinInfo, float value)
 
 bool VstAutomation::Close()
 {
-    myHost->myVstPlugin->removeVstAutomation(this);
+    static_cast<MainHostVst*>(myHost)->myVstPlugin->removeVstAutomation(this);
     return Object::Close();
 }
 
 bool VstAutomation::Open()
 {
-    myHost->myVstPlugin->addVstAutomation(this);
+    static_cast<MainHostVst*>(myHost)->myVstPlugin->addVstAutomation(this);
     return Object::Open();
 }
 

@@ -20,7 +20,7 @@
 
 #include "configdialog.h"
 #include "ui_configdialog.h"
-#include "../mainhost.h"
+#include "mainhost.h"
 
 ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
     QDialog(parent),
@@ -95,35 +95,6 @@ ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
     ui->bufferSize->setVisible(false);
     ui->labelbufferSize->setVisible(false);
 
-#ifdef VST_PLUGIN
-    //ui->groupSampleFormat->setVisible(false);
-    ui->sampleRate->setVisible(false);
-    ui->labelsampleRate->setVisible(false);
-
-#else
-//sample rate
-
-    ui->sampleRate->addItem("44.1 kHz",44100);
-    ui->sampleRate->addItem("48 kHz",48000);
-    ui->sampleRate->addItem("88.2 kHz",88200);
-    ui->sampleRate->addItem("96 kHz",96000);
-
-    index=ui->sampleRate->findData( myHost->GetSampleRate() );
-    if(index==-1) {
-        debug("ConfigDialog invalid sample rate")
-        return;
-    }
-    ui->sampleRate->setCurrentIndex(index);
-
-//buffer size
-//    ui->bufferSize->addItem("Auto",0);
-//    index = ui->bufferSize->findData( (unsigned int)myHost->GetBufferSize() );
-//    if(index==-1) {
-//        debug("ConfigDialog invalid buffer size")
-//        index=0;
-//    }
-//    ui->bufferSize->setCurrentIndex(index);
-#endif
 //sample precision
     ui->samplePrecision->addItem("32 bits",false);
     ui->samplePrecision->addItem("64 bits",true);
@@ -333,17 +304,6 @@ void ConfigDialog::accept()
     myHost->SetSetting("defaultSetupFile", setupFile );
     myHost->SetSetting("defaultProjectFile", projectFile );
 
-#ifndef VST_PLUGIN
-//sample format
-    float rate = ui->sampleRate->itemData(ui->sampleRate->currentIndex()).toFloat();
-    if(rate!=defaultSampleRate(myHost)) {
-        myHost->SetSampleRate( rate );
-    }
-    myHost->SetSetting("sampleRate", rate);
-
-//    int buffer = ui->bufferSize->itemData(ui->bufferSize->currentIndex()).toInt();
-//    settings.setValue("bufferSize", buffer);
-#endif
     bool precision = ui->samplePrecision->itemData(ui->samplePrecision->currentIndex()).toBool();
     if(defaultDoublePrecision(myHost)!=precision)
         needRestart=true;

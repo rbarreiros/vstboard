@@ -30,31 +30,19 @@
 #include "renderer.h"
 #include "globals.h"
 #include "models/hostmodel.h"
-
-#ifdef VST_PLUGIN
-    #include "connectables/vstaudiodevicein.h"
-    #include "connectables/vstaudiodeviceout.h"
-#endif
-
-#ifdef VSTBOARD
-    #include "audiodevices.h"
-    #include "mididevices.h"
-#endif
-
 #include "programs.h"
 
 #ifdef VSTSDK
     #include "vst/cvsthost.h"
 #endif
 
-class Vst;
 class MainWindow;
 class MainHost : public QObject
 {
 Q_OBJECT
 public:
-    MainHost(Vst *myVstPlugin = 0, QObject *parent = 0, QString settingsGroup="");
-    ~MainHost();
+    MainHost( QObject *parent = 0, QString settingsGroup="");
+    virtual ~MainHost();
 
     void Open();
 
@@ -87,19 +75,12 @@ public:
 
     Programs *programList;
 
-#ifdef VSTBOARD
-    AudioDevices *audioDevices;
-    MidiDevices *midiDevices;
-#endif
-
     Connectables::ObjectFactory *objFactory;
     MainWindow *mainWindow;
 
 #ifdef VSTSDK
     vst::CVSTHost *vstHost;
 #endif
-
-    Vst *myVstPlugin;
 
     quint32 currentFileVersion;
     bool doublePrecision;
@@ -109,6 +90,10 @@ public:
     bool SettingDefined(QString name);
 
 //    QScriptEngine scriptEngine;
+
+protected:
+    QTime timeFromStart;
+    float sampleRate;
 
 private:
     void SetupMainContainer();
@@ -132,9 +117,7 @@ private:
     QMutex mutexRender;
     QMutex solverMutex;
 
-    float sampleRate;
     unsigned long bufferSize;
-    QTime timeFromStart;
 
     HostModel *model;
 
@@ -165,7 +148,7 @@ public slots:
     void OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
     void SetTempo(int tempo=120, int sign1=4, int sign2=4);
     void OnNewRenderingOrder(orderedNodes *renderLines);
-    void Render(unsigned long samples=0);
+    virtual void Render(unsigned long samples=0);
 
 private slots:
     void UpdateSolver(bool forceUpdate=false);
