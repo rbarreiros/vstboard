@@ -1,7 +1,7 @@
 srcdir      = common
 include(../config.pri)
 
-QT += core gui #script
+QT += core gui script
 
 TEMPLATE = lib
 CONFIG += staticlib
@@ -96,6 +96,7 @@ SOURCES += \
     connectables/script.cpp \
     views/splash.cpp \
     views/solverscene.cpp \
+    connectables/audiopin.cpp
 
 HEADERS  += \
     globals.h \
@@ -160,7 +161,8 @@ HEADERS  += \
     audiobufferd.h \
     connectables/script.h \
     views/splash.h \
-    views/solverscene.h
+    views/solverscene.h \
+    connectables/audiopin.h
 
 FORMS += \
     views/configdialog.ui \
@@ -171,4 +173,3 @@ FORMS += \
     views/splash.ui
 
 PRECOMPILED_HEADER = precomp.h
-

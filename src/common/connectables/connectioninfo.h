@@ -35,21 +35,33 @@ public:
     QDataStream & toStream(QDataStream& out) const;
     QDataStream & fromStream(QDataStream& in);
 
+    /// the Connectables::Container id (can connect to other pins in the same container)
     quint16 container;
+
+    /// the parent Connectables::Object id
     quint16 objId;
+
+    /// pin type
     PinType::Enum type;
+
+    /// pin direction
     PinDirection::Enum direction;
+
+    /// pin number in a list
     quint16 pinNumber;
+
+    /// true if it's a bridge
     bool bridge;
+
+    /// pointer to the MainHost
     MainHost *myHost;
-    int GetId() const
-    {
-        return objId*10000 + pinNumber*100 + type*10 + (int)direction;
-    }
 };
 
 Q_DECLARE_METATYPE(ConnectionInfo)
 
+/*!
+  overload == for ConnectionInfo
+  */
 inline bool operator==(const ConnectionInfo &c1, const ConnectionInfo &c2)
 {
     return c1.container == c2.container
@@ -60,6 +72,9 @@ inline bool operator==(const ConnectionInfo &c1, const ConnectionInfo &c2)
         && c1.bridge == c2.bridge;
 }
 
+/*!
+  overload < for ConnectionInfo
+  */
 inline bool operator<(const ConnectionInfo &c1, const ConnectionInfo &c2)
 {
     if(c1.container < c2.container)
@@ -92,8 +107,6 @@ inline bool operator<(const ConnectionInfo &c1, const ConnectionInfo &c2)
 
     return false;
 }
-
-
 
 QDataStream & operator<< (QDataStream& out, const ConnectionInfo& connInfo);
 QDataStream & operator>> (QDataStream& in, ConnectionInfo& connInfo);

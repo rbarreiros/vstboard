@@ -22,7 +22,7 @@
 #define PROGRAMS_H
 
 #include "precomp.h"
-//#include <QtScript>
+#include <QtScript>
 #include "globals.h"
 #include "models/programsmodel.h"
 
@@ -67,7 +67,7 @@ private:
 
     MainWindow *mainWindow;
 
-//    QScriptValue scriptObj;
+    QScriptValue scriptObj;
 
 signals:
     void ProgChanged(const QModelIndex &prgIndex);

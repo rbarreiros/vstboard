@@ -34,6 +34,7 @@ namespace View {
 
     protected:
         void moveEvent ( QGraphicsSceneMoveEvent * event );
+
         QGraphicsLinearLayout *lLayout;
     };
 }

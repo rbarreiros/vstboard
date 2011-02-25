@@ -1,8 +1,17 @@
 #include "audiobufferd.h"
 #include "audiobuffer.h"
 
+/*!
+  \class AudioBufferD
+  \brief a double precision resizeable audio buffer
+  */
+
 double const AudioBufferD::blankBuffer[] = {.0f};
 
+/*!
+  \param externalAllocation true if the buffer pointer is handle by something else : don't create or delete it
+  \todo check if the externalAllocation is still in use
+  */
 AudioBufferD::AudioBufferD(bool externalAllocation) :
     stackSize(0),
     pBuffer(0),
@@ -15,12 +24,21 @@ AudioBufferD::AudioBufferD(bool externalAllocation) :
 {
 }
 
+/*!
+  Delete the buffer if it's not an external
+  */
 AudioBufferD::~AudioBufferD(void)
 {
     if(pBuffer && !bExternalAllocation)
         delete[] pBuffer;
 }
 
+/*!
+  Set the size of the buffer
+  Keep the memory allocated if smaller, reallocate only if the new size is bigger
+  Don't allocate anything if it's externally allocated
+  \param size the new size
+  */
 bool AudioBufferD::SetSize(unsigned long size)
 {
     if(size==nSize)
@@ -48,11 +66,18 @@ bool AudioBufferD::SetSize(unsigned long size)
     return true;
 }
 
+/*!
+  Erase the buffer by copying a blank buffer
+  */
 void AudioBufferD::Clear()
 {
     memcpy(pBuffer,blankBuffer,sizeof(double)*nSize);
 }
 
+/*!
+  Add a buffer to the stack. Can resize the buffer if needed if the current stack is empty
+  \param buff buffer to be added to the mix
+  */
 void AudioBufferD::AddToStack(AudioBufferD * buff)
 {
     if(buff->GetSize()!=nSize) {
@@ -85,6 +110,10 @@ void AudioBufferD::AddToStack(AudioBufferD * buff)
     stackSize++;
 }
 
+/*!
+  Convert a single precision buffer and add it to the stack
+  \param buff single precision buffer to be added to the mix
+  */
 void AudioBufferD::AddToStack(AudioBuffer * buff)
 {
     if(buff->GetSize()!=nSize) {
@@ -122,7 +151,11 @@ void AudioBufferD::AddToStack(AudioBuffer * buff)
     stackSize++;
 }
 
-//if tmpBufferToBeFilled : this buff is not a sound and a blank buffer will be returned if no other sounds are added to the stack
+/*!
+  Set the pointer to the externally allocated buffer
+  \param buff the pointer
+  \param tmpBufferToBeFilled true if the buffer is currently blank, false if it contains the first stack of the mix
+  */
 void AudioBufferD::SetPointer(double * buff, bool tmpBufferToBeFilled)
 {
     pBuffer=buff;
@@ -133,7 +166,10 @@ void AudioBufferD::SetPointer(double * buff, bool tmpBufferToBeFilled)
         stackSize=1;
 }
 
-//if willBeFilled : the stack now contains 1 buffer
+/*!
+  Get the pointer of the audio buffer
+  \param willBeFilled true if we get this pointer to replace the content of the buffer with a new sound
+  */
 double * AudioBufferD::GetPointer(bool willBeFilled)
 {
     if(willBeFilled)
@@ -142,6 +178,12 @@ double * AudioBufferD::GetPointer(bool willBeFilled)
     return pBuffer;
 }
 
+/*!
+  Flatten the stack and return the resulting pointer.
+  All the stacks are mixed together in one resulting buffer
+  Update the vu-meter value
+  \return pointer to the resulting buffer
+  */
 double *AudioBufferD::ConsumeStack()
 {
     double ma = .0;
@@ -201,6 +243,9 @@ double *AudioBufferD::ConsumeStack()
     return pBuffer;
 }
 
+/*!
+  Get the vu-meter value and reset the peak
+  */
 float AudioBufferD::GetVu()
 {
     currentVu=_maxVal;

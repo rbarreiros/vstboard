@@ -27,11 +27,20 @@
 
 using namespace Connectables;
 
+/*!
+  \class Connectables::AudioDeviceOut
+  \brief an audio device output. used by AudioDevice
+  */
+
+/*!
+  \param myHost pointer to the MainHost
+  \param index object number
+  \param info object description
+  */
 AudioDeviceOut::AudioDeviceOut(MainHost *myHost,int index, const ObjectInfo &info) :
     Object(myHost,index, info),
     parentDevice(0)
 {
-//    listParameterPinOut->AddPin(0);
 }
 
 AudioDeviceOut::~AudioDeviceOut()
@@ -46,25 +55,6 @@ bool AudioDeviceOut::Close()
         parentDevice.clear();
     }
     return true;
-}
-
-//void AudioDeviceOut::Render()
-//{
-//    if(parentDevice)
-//        static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(0))->ChangeValue(parentDevice->GetCpuUsage());
-//}
-
-void AudioDeviceOut::SetBufferSize(unsigned long size)
-{
-    if(doublePrecision) {
-        foreach(Pin *pin, listAudioPinIn->listPins) {
-            static_cast<AudioPinIn*>(pin)->bufferD->SetSize(size);
-        }
-    } else {
-        foreach(Pin *pin, listAudioPinIn->listPins) {
-            static_cast<AudioPinIn*>(pin)->buffer->SetSize(size);
-        }
-    }
 }
 
 bool AudioDeviceOut::Open()
@@ -122,30 +112,3 @@ bool AudioDeviceOut::Open()
     Object::Open();
     return true;
 }
-
-//Pin* AudioDeviceOut::CreatePin(const ConnectionInfo &info)
-//{
-//    Pin *newPin = Object::CreatePin(info);
-//    if(newPin) {
-//        if(info.type==PinType::Audio)
-//            newPin->setObjectName(QString("Output %1").arg(info.pinNumber));
-//        return newPin;
-//    }
-
-//    switch(info.direction) {
-//        case PinDirection::Output :
-//            if(info.pinNumber==0) {
-//                ParameterPinOut *pin = new ParameterPinOut(this,0,0,true,"cpu%",false);
-//                pin->SetLimitsEnabled(false);
-//                return pin;
-//            }
-//            break;
-
-//        default :
-//            debug("AudioDeviceIn::CreatePin PinDirection")
-//            return 0;
-//            break;
-//    }
-
-//    return 0;
-//}

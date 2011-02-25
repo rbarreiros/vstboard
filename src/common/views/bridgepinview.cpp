@@ -22,6 +22,17 @@
 
 using namespace View;
 
+/*!
+  \class View::BridgePinView
+  \brief view class for the bridge pins
+  */
+
+/*!
+  \param angle angle in rad (0=output, pi=input) used by CableView
+  \param model pointer to the model item representing the pin
+  \param parent pointer to the parent object view
+  \param pinInfo description of the pin
+  */
 BridgePinView::BridgePinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo) :
         PinView(angle, model,parent, pinInfo),
         value(.0f),

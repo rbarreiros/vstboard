@@ -42,7 +42,6 @@ namespace Connectables {
         bool Open();
         bool Close();
         void Render();
-        int GetProcessingTime() {return 20;}
         long OnGetUniqueId() { return index; }
         VstIntPtr OnMasterCallback(long opcode, long index, long value, void *ptr, float opt, long currentReturnCode);
         void SetSleep(bool sleeping);

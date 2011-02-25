@@ -30,17 +30,31 @@ QBrush PinView::highlightBrush(QColor(100,0,200,100),Qt::SolidPattern);
 
 QGraphicsLineItem *PinView::currentLine = 0;
 
+/*!
+  \class View::PinView
+  \brief base class for the pins views
+  */
+
+/*!
+  \param angle angle in rad (0=output, pi=input) used by CableView
+  \param model pointer to the model
+  \param parent pointer to the parent object view
+  \param pinInfo description of the pin
+  \todo the model parameter can be removed
+  */
 PinView::PinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo) :
         QGraphicsWidget(parent),
         connectInfo(pinInfo),
         model(model),
         pinAngle(angle)
 {
-//    setObjectName(QString("PinView%1").arg((long)pin,0,16));
     setAcceptDrops(true);
     setCursor(Qt::PointingHandCursor);
 }
 
+/*!
+  Update the position of all connected cables, called by PinView::itemChange and ListPinsView::UpdateCablesPosition
+  */
 void PinView::UpdateCablesPosition()
 {
     foreach (CableView *cable, connectedCables) {
@@ -48,11 +62,10 @@ void PinView::UpdateCablesPosition()
     }
 }
 
-void PinView::polishEvent()
-{
-//    UpdateCablesPosition();
-}
-
+/*!
+  Reimplements QGraphicsWidget::itemChange \n
+  calls PinView::UpdateCablesPosition when needed
+  */
 QVariant PinView::itemChange ( GraphicsItemChange change, const QVariant & value )
 {
     if(!scene())
@@ -64,6 +77,10 @@ QVariant PinView::itemChange ( GraphicsItemChange change, const QVariant & value
     return QGraphicsWidget::itemChange(change, value);
 }
 
+/*!
+  Reimplements QGraphicsWidget::mousePressEvent \n
+  set the closed hand cursor
+  */
 void PinView::mousePressEvent ( QGraphicsSceneMouseEvent * event )
 {
     if (event->button() != Qt::LeftButton) {
@@ -74,6 +91,10 @@ void PinView::mousePressEvent ( QGraphicsSceneMouseEvent * event )
     setCursor(Qt::ClosedHandCursor);
 }
 
+/*!
+  Reimplements QGraphicsWidget::mouseMoveEvent \n
+  Starts a drag&drop when the conditions are met
+  */
 void PinView::mouseMoveEvent ( QGraphicsSceneMouseEvent  * event )
 {
 
@@ -105,17 +126,28 @@ void PinView::mouseMoveEvent ( QGraphicsSceneMouseEvent  * event )
     setCursor(Qt::OpenHandCursor);
 }
 
+/*!
+  Reimplements QGraphicsWidget::mouseReleaseEvent \n
+  back to the open hand cursor
+  */
 void PinView::mouseReleaseEvent ( QGraphicsSceneMouseEvent  * /*event*/ )
 {
     setCursor(Qt::OpenHandCursor);
-
 }
 
+/*!
+  Reimplements QGraphicsWidget::mouseDoubleClickEvent \n
+  remove all connected cables
+  */
 void PinView::mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * /*event*/ )
 {
     emit RemoveCablesFromPin(connectInfo);
 }
 
+/*!
+  Reimplements QGraphicsWidget::dragMoveEvent \n
+  if the dragged object is connectable with us : create a temporary cable and highlight the pin
+  */
 void PinView::dragMoveEvent ( QGraphicsSceneDragDropEvent * event )
 {
     if(event->mimeData()->hasFormat("application/x-pin")) {
@@ -141,6 +173,10 @@ void PinView::dragMoveEvent ( QGraphicsSceneDragDropEvent * event )
     }
 }
 
+/*!
+  Reimplements QGraphicsWidget::dragLeaveEvent \n
+  hide the temporary cable, remove highlight on the pin
+  */
 void PinView::dragLeaveEvent( QGraphicsSceneDragDropEvent  * /*event*/ )
 {
     rectBgnd->setBrush(Qt::NoBrush);
@@ -148,6 +184,10 @@ void PinView::dragLeaveEvent( QGraphicsSceneDragDropEvent  * /*event*/ )
         currentLine->setVisible(false);
 }
 
+/*!
+  Reimplements QGraphicsWidget::dropEvent \n
+  a connectable pin was dropped on us, remove the highlight, emit a ConnectPins
+  */
 void PinView::dropEvent ( QGraphicsSceneDragDropEvent  * event )
 {
     rectBgnd->setBrush(Qt::NoBrush);
@@ -157,6 +197,10 @@ void PinView::dropEvent ( QGraphicsSceneDragDropEvent  * event )
     emit ConnectPins(connectInfo, connInfo);
 }
 
+/*!
+  Get the pin connection point
+  \return the QPointF
+  */
 const QPointF PinView::pinPos() const
 {
     qreal x = 0;
@@ -165,6 +209,10 @@ const QPointF PinView::pinPos() const
     return QPointF(x,geometry().height()/2);
 }
 
+/*!
+  Put the connectInfo in a QByteArray
+  \param[out] bytes the byte array to fill
+  */
 void PinView::CreateMimeData(QByteArray &bytes)
 {
     QDataStream stream(&bytes,QIODevice::WriteOnly);
@@ -176,6 +224,11 @@ void PinView::CreateMimeData(QByteArray &bytes)
     stream << connectInfo.bridge;
 }
 
+/*!
+  Read a ConnectionInfo from a QByteArray
+  \param[in] bytes contains the mime data
+  \param[out] data ConnectionInfo to fill
+  */
 void PinView::ReadMimeData(QByteArray &bytes, ConnectionInfo &data)
 {
     QDataStream stream(&bytes,QIODevice::ReadOnly);
@@ -187,7 +240,10 @@ void PinView::ReadMimeData(QByteArray &bytes, ConnectionInfo &data)
     stream >> data.bridge;
 }
 
-
+/*!
+  Add a cable to the list of connected cables and update its position
+  \param cable pointer to the cable
+  */
 void PinView::AddCable(CableView *cable)
 {
     cable->UpdatePosition(connectInfo, pinAngle, mapToScene(pinPos()) );
@@ -195,6 +251,9 @@ void PinView::AddCable(CableView *cable)
     setFlag(QGraphicsItem::ItemSendsScenePositionChanges, true);
 }
 
+/*!
+  Remove a cable from the list of connected cables
+  */
 void PinView::RemoveCable(CableView *cable)
 {
     connectedCables.removeAll(cable);

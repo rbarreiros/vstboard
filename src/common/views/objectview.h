@@ -43,47 +43,68 @@ namespace View {
         virtual void UpdateModelIndex();
         void Shrink();
 
+        /// list of audio inputs
         ListPinsView *listAudioIn;
+
+        /// list of audio outputs
         ListPinsView *listAudioOut;
+
+        /// list of midi inputs
         ListPinsView *listMidiIn;
+
+        /// list of midi outputs
         ListPinsView *listMidiOut;
+
+        /// list of parameters pins inputs
         ListPinsView *listParametersIn;
+
+        /// list of parameters pins outputs
         ListPinsView *listParametersOut;
+
+        /// list of bridges pins
         ListPinsView *listBridge;
 
     protected:
-        void SetErrorMessage(const QString & msg);
-//        void SetBackground(const QString & imgName);
         virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
         void resizeEvent ( QGraphicsSceneResizeEvent * event );
         virtual void closeEvent ( QCloseEvent * event );
         QVariant itemChange ( GraphicsItemChange  change, const QVariant & value );
-        QPen pen;
-
         void mouseReleaseEvent ( QGraphicsSceneMouseEvent * event );
 
+        void SetErrorMessage(const QString & msg);
+
+        /// the title text
         QGraphicsSimpleTextItem *titleText;
+
+        /// the object border
         QGraphicsRectItem *border;
-//        QGraphicsPixmapItem *backgroundImg;
+
+        /// the selected object border
         QGraphicsRectItem *selectBorder;
+
+        /// error message icon
         QGraphicsPixmapItem *errorMessage;
 
-        QMap<ConnectionInfo, PinView*>listPins;
-
+        /// objects layout
         QGraphicsGridLayout *layout;
 
+        /// main model
         QAbstractItemModel *model;
+
+        /// objects model index
         QPersistentModelIndex objIndex;
 
+        /// the delete action
         QAction *actDel;
 
+        /// true if a shrink is already in progress
         bool shrinkAsked;
+
+        /// pointer to the MainHost
         MainHost *myHost;
 
     public slots:
         void ShrinkNow();
-//        void ShowEditor(bool show);
-//        void ToggleLearningMode(bool learn);
 
     friend class PinView;
     };

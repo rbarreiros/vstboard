@@ -105,12 +105,7 @@ void VstPlugin::SetBufferSize(unsigned long size)
     SetSleep(true);
 
     debug("VstPlugin::SetBufferSize %d size %ld -> %ld",index,bufferSize,size)
-    foreach(Pin *pin, listAudioPinIn->listPins) {
-        static_cast<AudioPinIn*>(pin)->buffer->SetSize(size);
-    }
-    foreach(Pin *pin, listAudioPinOut->listPins) {
-        static_cast<AudioPinOut*>(pin)->buffer->SetSize(size);
-    }
+    Object::SetBufferSize(size);
 
     EffSetBlockSize((long)size);
 
@@ -173,7 +168,7 @@ void VstPlugin::Render()
 
             int cpt=0;
             foreach(Pin* pin,listAudioPinOut->listPins) {
-                tmpBufOut[cpt] = static_cast<AudioPinOut*>(pin)->bufferD->GetPointer(true);
+                tmpBufOut[cpt] = static_cast<AudioPinOut*>(pin)->GetBufferD()->GetPointer(true);
                 cpt++;
             }
 
@@ -186,7 +181,7 @@ void VstPlugin::Render()
 
                 cpt=0;
                 foreach(Pin* pin,listAudioPinIn->listPins) {
-                    tmpBufIn[cpt] = static_cast<AudioPinOut*>(pin)->bufferD->ConsumeStack();
+                    tmpBufIn[cpt] = static_cast<AudioPinOut*>(pin)->GetBufferD()->ConsumeStack();
                     cpt++;
                 }
             }
@@ -208,7 +203,7 @@ void VstPlugin::Render()
 
         int cpt=0;
         foreach(Pin* pin,listAudioPinOut->listPins) {
-            tmpBufOut[cpt] = static_cast<AudioPinOut*>(pin)->buffer->GetPointer(true);
+            tmpBufOut[cpt] = static_cast<AudioPinOut*>(pin)->GetBuffer()->GetPointer(true);
             cpt++;
         }
 
@@ -221,7 +216,7 @@ void VstPlugin::Render()
 
             cpt=0;
             foreach(Pin* pin,listAudioPinIn->listPins) {
-                tmpBufIn[cpt] = static_cast<AudioPinOut*>(pin)->buffer->ConsumeStack();
+                tmpBufIn[cpt] = static_cast<AudioPinOut*>(pin)->GetBuffer()->ConsumeStack();
                 cpt++;
             }
         }
@@ -254,9 +249,9 @@ void VstPlugin::Render()
     //=========================
     foreach(Pin* pin,listAudioPinOut->listPins) {
         if(doublePrecision) {
-            static_cast<AudioPinOut*>(pin)->bufferD->ConsumeStack();
+            static_cast<AudioPinOut*>(pin)->GetBufferD()->ConsumeStack();
         } else {
-            static_cast<AudioPinOut*>(pin)->buffer->ConsumeStack();
+            static_cast<AudioPinOut*>(pin)->GetBuffer()->ConsumeStack();
         }
         static_cast<AudioPinOut*>(pin)->SendAudioBuffer();
     }
@@ -604,26 +599,41 @@ VstIntPtr VstPlugin::OnMasterCallback(long opcode, long index, long value, void 
                         static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(index))->ChangeValue(opt);
                     break;
             }
-
-
             break;
 
         case audioMasterCurrentId : //2
             return objInfo.id;
-            break;
 
         case audioMasterIdle : //3
             QApplication::processEvents();
             break;
 
+        case audioMasterPinConnected : { //4
+            Pin *p=0;
+            if(value==0) {
+                p = listAudioPinIn->GetPin(index);
+            } else {
+                p = listAudioPinOut->GetPin(index);
+            }
+
+            //pin in not created
+            if(!p)
+                return 1L;
+
+            /// \todo check if the pin is really connected
+            return 0L;
+        }
+
+        case audioMasterWantMidi : //6
+            bWantMidi=true;
+            return true;
+
         case audioMasterProcessEvents : //8
             processEvents((VstEvents*)ptr);
             return 1L;
-            break;
 
         case audioMasterGetNumAutomatableParameters : //11
             return 128L;
-            break;
 
         case audioMasterIOChanged : //13
             if(!pEffect)
@@ -637,12 +647,6 @@ VstIntPtr VstPlugin::OnMasterCallback(long opcode, long index, long value, void 
             emit WindowSizeChange((int)index,(int)value);
             break;
 
-        case audioMasterCanDo : //37
-            if(!strcmp((const char*)ptr, "shellCategory")) {
-                return  1L;
-            }
-            break;
-
 //        case audioMasterUpdateDisplay : //42
 //            break;
         case audioMasterBeginEdit : //43
@@ -650,7 +654,7 @@ VstIntPtr VstPlugin::OnMasterCallback(long opcode, long index, long value, void 
             return 1L;
     }
 
-    return CEffect::OnMasterCallback(opcode, index, value, ptr, opt, currentReturnCode);
+    return 0L;
 }
 
 void VstPlugin::OnParameterChanged(ConnectionInfo pinInfo, float value)

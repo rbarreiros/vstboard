@@ -23,11 +23,27 @@
 #include "objectfactory.h"
 #include "mainhost.h"
 
+/*!
+  \class ConnectionInfo
+  \brief describe a pin
+  */
+
+/*!
+  default constructor
+  */
 ConnectionInfo::ConnectionInfo()
     : container(0), objId(0), type(PinType::Audio), direction(PinDirection::Output), pinNumber(0), bridge(false), myHost(0)
 {
 }
 
+/*!
+  \param myHost pointer to the MainHost
+  \param objId id of the parent object
+  \param type the pin type
+  \param direction the pin direction
+  \param pinNumber the pin number in a list of pins
+  \param bridge true if it's a bridge pin (can connect with the pins of the parent container)
+  */
 ConnectionInfo::ConnectionInfo(MainHost *myHost,quint16 objId, PinType::Enum type, PinDirection::Enum direction, quint16 pinNumber, bool bridge) :
     container(-1),
     objId(objId),
@@ -39,10 +55,19 @@ ConnectionInfo::ConnectionInfo(MainHost *myHost,quint16 objId, PinType::Enum typ
 {
 }
 
+/*!
+  Copy the info
+  \param c the model
+  */
 ConnectionInfo::ConnectionInfo(const ConnectionInfo &c) {
     *this = c;
 }
 
+/*!
+  Check if the provided pin can connect to this one
+  \param c the other pin
+  \return true if it can connect
+  */
 bool ConnectionInfo::CanConnectTo(const ConnectionInfo &c) {
 
     //don't connect object to itself
@@ -75,6 +100,11 @@ bool ConnectionInfo::CanConnectTo(const ConnectionInfo &c) {
     return false;
 }
 
+/*!
+  Out the object in a data stream
+  \param out the stream
+  \return the stream
+  */
 QDataStream & ConnectionInfo::toStream(QDataStream& out) const
 {
     out << bridge;
@@ -86,6 +116,11 @@ QDataStream & ConnectionInfo::toStream(QDataStream& out) const
     return out;
 }
 
+/*!
+  Read from a data stream
+  \param in the stream
+  \return the stream
+  */
 QDataStream & ConnectionInfo::fromStream(QDataStream& in)
 {
     in >> bridge;
@@ -114,11 +149,17 @@ QDataStream & ConnectionInfo::fromStream(QDataStream& in)
     return in;
 }
 
+/*!
+  overload datastream for ConnectionInfo
+  */
 QDataStream & operator<< (QDataStream& out, const ConnectionInfo& connInfo)
 {
    return connInfo.toStream(out);
 }
 
+/*!
+  overload datastream for ConnectionInfo
+  */
 QDataStream & operator>> (QDataStream& in, ConnectionInfo& connInfo)
 {
     return connInfo.fromStream(in);

@@ -39,15 +39,10 @@ namespace Connectables {
 
         bool Open();
         bool Close();
-//        void Render();
-//        int GetProcessingTime() {return 10;}
-//        Pin* CreatePin(const ConnectionInfo &info);
 
     protected:
+        /// shared pointer to the linked AudioDevice
         QSharedPointer<AudioDevice>parentDevice;
-
-    public slots:
-        void SetBufferSize(unsigned long size);
 
     friend class AudioDevice;
     };

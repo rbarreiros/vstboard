@@ -20,7 +20,7 @@
 
 #include "sceneview.h"
 #include "globals.h"
-#include "../connectables/objectfactory.h"
+#include "connectables/objectfactory.h"
 #include "objectview.h"
 #include "connectableobjectview.h"
 #include "maincontainerview.h"
@@ -28,9 +28,9 @@
 #include "connectablepinview.h"
 #include "minmaxpinview.h"
 #include "bridgepinview.h"
-#include "../connectables/container.h"
-#include "../connectables/objectfactory.h"
-#include "../mainhost.h"
+#include "connectables/container.h"
+#include "connectables/objectfactory.h"
+#include "mainhost.h"
 #include <QSplitter>
 
 using namespace View;

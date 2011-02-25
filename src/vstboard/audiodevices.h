@@ -37,18 +37,31 @@ public:
     explicit AudioDevices(MainHost *myHost);
     ~AudioDevices();
     ListAudioInterfacesModel * GetModel();
+
+    /// list of opened AudioDevice
     QHash<qint32,QSharedPointer<Connectables::AudioDevice> >listAudioDevices;
+
+    /// timer to launch the rendering loop when no audio devices are opened
     QTimer fakeRenderTimer;
 
+    /// model index of the asio devices, used by the view to expand this branch only
     QPersistentModelIndex AsioIndex;
 
 private:
     void BuildModel();
+
+    /// model pointer
     ListAudioInterfacesModel *model;
+
+    /// number of opened devices
     int countActiveDevices;
+
+    /// pointer to the MainHost
     MainHost *myHost;
+
 public slots:
     void OnToggleDeviceInUse(const ObjectInfo &objInfo, bool opened);
+
 };
 
 #endif // AUDIODEVICES_H

@@ -21,29 +21,17 @@
 #ifndef CONNECTABLEAUDIOPINOUT_H
 #define CONNECTABLEAUDIOPINOUT_H
 
-#include "pin.h"
-
-class AudioBuffer;
-class AudioBufferD;
+#include "audiopin.h"
 
 namespace Connectables {
 
-    class AudioPinOut : public Pin
+    class AudioPinOut : public AudioPin
     {
     public:
-        AudioPinOut(Object *parent, int number, bool externalAllocation = false, bool bridge=false);
-        ~AudioPinOut();
-
-        void SetBuffer(AudioBuffer *buffer);
-        void SetBuffer(AudioBufferD *buffer);
+        AudioPinOut(Object *parent, int number, unsigned long bufferSize, bool doublePrecision=false, bool externalAllocation = false);
         void SendAudioBuffer();
-        float GetValue();
-        void SetBufferSize(unsigned long size);
-        AudioBuffer *buffer;
-        AudioBufferD *bufferD;
-
-        bool doublePrecision;
     };
+
 }
 
 #endif // CONNECTABLEAUDIOPINOUT_H

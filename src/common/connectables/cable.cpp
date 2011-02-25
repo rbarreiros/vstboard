@@ -23,6 +23,16 @@
 
 using namespace Connectables;
 
+/*!
+  \class Connectables::Cable
+  \brief cable are created in Container to connect Objects
+  */
+
+/*!
+  \param myHost pointer to the MainHost
+  \param pinOut the output pin (the one sending the messages)
+  \param pinIn the input pin (the receiver)
+  */
 Cable::Cable(MainHost *myHost, const ConnectionInfo &pinOut, const ConnectionInfo &pinIn) :
         pinOut(pinOut),
         pinIn(pinIn),
@@ -32,6 +42,10 @@ Cable::Cable(MainHost *myHost, const ConnectionInfo &pinOut, const ConnectionInf
 
 }
 
+/*!
+  Copy a cable
+  \param c the model
+  */
 Cable::Cable(const Cable & c) :
         pinOut(c.pinOut),
         pinIn(c.pinIn),
@@ -41,8 +55,13 @@ Cable::Cable(const Cable & c) :
 
 }
 
+/*!
+  Add the cable in the model
+  \param parentIndex the Container index
+  */
 void Cable::AddToParentNode(const QModelIndex &parentIndex)
 {
+    //check if the pin exists, used by errorneous objects to create the needed pins
     myHost->objFactory->GetPin(pinOut);
     myHost->objFactory->GetPin(pinIn);
 
@@ -60,6 +79,10 @@ void Cable::AddToParentNode(const QModelIndex &parentIndex)
     modelIndex = item->index();
 }
 
+/*!
+  Remove the cable from the model
+  \param parentIndex the Container index
+  */
 void Cable::RemoveFromParentNode(const QModelIndex &parentIndex)
 {
     if(modelIndex.isValid() && parentIndex.isValid())

@@ -19,39 +19,30 @@
 **************************************************************************/
 
 #include "audiopinout.h"
-#include "pin.h"
-#include "object.h"
-#include "../globals.h"
-#include "../audiobuffer.h"
-#include "../audiobufferd.h"
 
 using namespace Connectables;
 
-AudioPinOut::AudioPinOut(Object *parent, int number, bool externalAllocation, bool bridge)
-    :Pin(parent,PinType::Audio,PinDirection::Output,number,bridge)
+/*!
+  \class Connectables::AudioPinOut
+  \brief audio pin output
+  */
+
+/*!
+  Constructor, used by PinsList with the help of Object::CreatePin
+  \param parent pointer to the parent Object
+  \param number pin number in the list
+  \param bufferSize size of the buffer
+  \param doublePrecision true if the buffer should be a double precision buffer
+  \param externalAllocation true if the audio buffer is not owned by the pin and shouldn't be deleted
+  */
+AudioPinOut::AudioPinOut(Object *parent, int number, unsigned long bufferSize, bool doublePrecision, bool externalAllocation) :
+    AudioPin(parent,PinDirection::Output,number,bufferSize,doublePrecision,externalAllocation)
 {
-    doublePrecision=false;
-    buffer = new AudioBuffer(externalAllocation);
-    bufferD = new AudioBufferD(externalAllocation);
-    setObjectName(QString("Out%1").arg(number));
-    visible=true;
 }
 
-AudioPinOut::~AudioPinOut()
-{
-    delete buffer;
-    delete bufferD;
-}
-
-void AudioPinOut::SetBuffer(AudioBuffer *buffer)
-{
-   this->buffer = buffer;
-}
-void AudioPinOut::SetBuffer(AudioBufferD *buffer)
-{
-   this->bufferD = buffer;
-}
-
+/*!
+  Send the current buffer to all connected pins
+  */
 void AudioPinOut::SendAudioBuffer()
 {
     if(doublePrecision)
@@ -61,16 +52,3 @@ void AudioPinOut::SendAudioBuffer()
 }
 
 
-float AudioPinOut::GetValue()
-{
-    float newVu=.0f;
-    if(doublePrecision)
-        newVu = bufferD->GetVu();
-    else
-        newVu = buffer->GetVu();
-
-    if(newVu != value) {
-        valueChanged=true;
-    }
-    return newVu;
-}

@@ -24,6 +24,16 @@
 
 using namespace Connectables;
 
+/*!
+  \class Connectables::Container
+  \brief contains Objects an Cables, uses Bridges to communicate with other Containers
+  */
+
+/*!
+  \param myHost pointer to the MainHost
+  \param index object number
+  \param info object description
+  */
 Container::Container(MainHost *myHost,int index, const ObjectInfo &info) :
     Object(myHost,index, info ),
     bridgeIn(0),
@@ -40,30 +50,39 @@ Container::Container(MainHost *myHost,int index, const ObjectInfo &info) :
             this,SLOT(SetSampleRate(float)));
 }
 
+/*!
+  Close on destruction
+  */
 Container::~Container()
 {
     Close();
 }
 
+/*!
+  Get the cables model node (cables are in a child node)
+  \return the node or an invalid index
+  */
 const QModelIndex &Container::GetCablesIndex()
 {
+    // the node exists, return it
     if(cablesNode.isValid())
         return cablesNode;
 
-    if(parked)
-        return QModelIndex();
-
-    if(modelIndex.isValid()) {
-        QStandardItem *item = myHost->GetModel()->itemFromIndex(modelIndex);
-        if(!item) {
-            debug("Container::GetCablesIndex modelindex not found")
-            return cablesNode;
-        }
-        QStandardItem *cab = new QStandardItem("cables");
-        item->appendRow(cab);
-        cablesNode = cab->index();
+    // the container is parked or the node is not valid, return an invalid index
+    if(parked || !modelIndex.isValid()) {
+        cablesNode = QModelIndex();
         return cablesNode;
     }
+
+    //create the cables node
+    QStandardItem *item = myHost->GetModel()->itemFromIndex(modelIndex);
+    if(!item) {
+        debug("Container::GetCablesIndex modelindex not found")
+        return cablesNode;
+    }
+    QStandardItem *cab = new QStandardItem("cables");
+    item->appendRow(cab);
+    cablesNode = cab->index();
     return cablesNode;
 }
 
@@ -76,6 +95,12 @@ void Container::SetContainerId(quint16 id)
     }
 }
 
+/*!
+  Connect the output pins of bridgeA to the inputs of bridgeB
+  \param bridgeA the output bridge
+  \param bridgeB the input bridge
+  \param hidden true to create hidden cables
+  */
 void Container::ConnectBridges(QSharedPointer<Object> bridgeA, QSharedPointer<Object> bridgeB, bool hidden)
 {
     if(bridgeA.isNull() || bridgeB.isNull())
@@ -146,16 +171,15 @@ void Container::Hide()
 
 }
 
-//void Container::SetProgramDirty()
-//{
-//    currentProgram->dirty=true;
-//}
-
 bool Container::IsDirty()
 {
     return currentProgram->IsDirty();
 }
 
+/*!
+  Will change program on the next render loop
+  \param prg a program model index
+  */
 void Container::SetProgram(const QModelIndex &prg)
 {
     progToSet=prg.data(UserRoles::value).toInt();
@@ -295,6 +319,10 @@ void Container::RemoveProgram(int prg)
     delete prog;
 }
 
+/*!
+  Add a new object in the current program
+  \param objPtr shared pointer to the object
+  */
 void Container::AddObject(QSharedPointer<Object> objPtr)
 {
     objPtr->SetContainerId(index);
@@ -321,6 +349,10 @@ void Container::AddObject(QSharedPointer<Object> objPtr)
     objPtr->LoadProgram(currentProgId);
 }
 
+/*!
+  Place an object and park it
+  \param objPtr shared pointer to the object
+  */
 void Container::AddParkedObject(QSharedPointer<Object> objPtr)
 {
     objPtr->SetContainerId(index);
@@ -329,6 +361,10 @@ void Container::AddParkedObject(QSharedPointer<Object> objPtr)
     ParkChildObject(objPtr);
 }
 
+/*!
+  Remove an object from the panel (delete it or park it)
+  \param objPtr shared pointer to the object
+  */
 void Container::ParkObject(QSharedPointer<Object> objPtr)
 {
     objPtr->ToggleEditor(false);
@@ -351,12 +387,22 @@ void Container::ParkObject(QSharedPointer<Object> objPtr)
     listStaticObjects.removeAll(objPtr);
 }
 
+/*!
+  Called by ContainerProgam, move a parked object to the panel
+  \param objPtr shared pointer to the object
+  */
 void Container::AddChildObject(QSharedPointer<Object> objPtr)
 {
+    if(!modelIndex.isValid()) {
+        debug2(<<"Container::AddChildObject index not valid")
+        return;
+    }
+
     if(objPtr->modelIndex.isValid() && objPtr->modelIndex.model()==&parkModel)
         parkModel.removeRow(objPtr->modelIndex.row());
 
     QStandardItem *item = objPtr->GetFullItem();
+
     myHost->GetModel()->itemFromIndex( modelIndex )->appendRow(item);
     objPtr->modelIndex=item->index();
     objPtr->parked=false;
@@ -364,6 +410,10 @@ void Container::AddChildObject(QSharedPointer<Object> objPtr)
     myHost->SetSolverUpdateNeeded();
 }
 
+/*!
+  Called by ContainerProgram, remove an object from the panel
+  \param objPtr shared pointer to the object
+  */
 void Container::ParkChildObject(QSharedPointer<Object> objPtr)
 {
     if(objPtr.isNull())
@@ -380,7 +430,10 @@ void Container::ParkChildObject(QSharedPointer<Object> objPtr)
     myHost->SetSolverUpdateNeeded();
 }
 
-
+/*!
+  Called by the Object destructor, remove the object
+  \param obj pointer to the object
+  */
 void Container::OnChildDeleted(Object *obj)
 {
     listLoadedObjects.removeAll(obj);
@@ -397,11 +450,21 @@ void Container::OnChildDeleted(Object *obj)
     }
 }
 
+/*!
+  User removed a cable from the program
+  \param index model index of the cable
+  */
 void Container::RemoveCable(QModelIndex & index)
 {
     currentProgram->RemoveCable(index);
 }
 
+/*!
+  Add a cable in this container
+  \param outputPin the output pin (messages sender)
+  \param inputPin the input pin (messages receiver)
+  \param hidden true if the cable is hidden (the cables between containers are hidden)
+  */
 void Container::AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin, bool hidden)
 {
     if(!currentProgram)
@@ -409,6 +472,11 @@ void Container::AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &
     currentProgram->AddCable(outputPin,inputPin, hidden);
 }
 
+/*!
+  Remove a cable
+  \param outputPin the output pin (messages sender)
+  \param inputPin the input pin (messages receiver)
+  */
 void Container::RemoveCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
 {
     if(!currentProgram)
@@ -416,6 +484,10 @@ void Container::RemoveCable(const ConnectionInfo &outputPin, const ConnectionInf
     currentProgram->RemoveCable(outputPin,inputPin);
 }
 
+/*!
+  Remove all cables from a Pin
+  \param pin the pin to disconnect
+  */
 void Container::RemoveCableFromPin(const ConnectionInfo &pin)
 {
     if(!currentProgram)
@@ -423,6 +495,10 @@ void Container::RemoveCableFromPin(const ConnectionInfo &pin)
     currentProgram->RemoveCableFromPin(pin);
 }
 
+/*!
+  Remove all cables from an Object
+  \param objId the object index to disconnect
+  */
 void Container::RemoveCableFromObj(int objId)
 {
     if(!currentProgram)
@@ -430,6 +506,9 @@ void Container::RemoveCableFromObj(int objId)
     currentProgram->RemoveCableFromObj(objId);
 }
 
+/*!
+  Put all the ContainerProgram and children Objects in a data stream
+  */
 QDataStream & Container::toStream (QDataStream& out) const
 {
     switch(myHost->filePass) {
@@ -475,6 +554,9 @@ QDataStream & Container::toStream (QDataStream& out) const
 
 }
 
+/*!
+  Read the container from a data stream, creates all the ContainerProgram and children Objects
+  */
 QDataStream & Container::fromStream (QDataStream& in)
 {
     switch(myHost->filePass) {

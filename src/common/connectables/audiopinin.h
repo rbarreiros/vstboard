@@ -21,28 +21,15 @@
 #ifndef CONNECTABLEAUDIOPININ_H
 #define CONNECTABLEAUDIOPININ_H
 
-#include "pin.h"
-
-class AudioBuffer;
-class AudioBufferD;
+#include "audiopin.h"
 
 namespace Connectables {
 
-    class AudioPinIn : public Pin
+    class AudioPinIn : public AudioPin
     {
     public:
-        AudioPinIn(Object *parent, int number, bool externalAllocation = false, bool bridge=false);
-        ~AudioPinIn();
-
-        void SetBuffer(AudioBuffer *buffer);
-        void SetBuffer(AudioBufferD *buffer);
+        AudioPinIn(Object *parent, int number, unsigned long bufferSize, bool doublePrecision=false, bool externalAllocation = false);
         void ReceiveMsg(const PinMessage::Enum msgType,void *data=0);
-        float GetValue();
-        void NewRenderLoop();
-        AudioBuffer *buffer;
-        AudioBufferD *bufferD;
-
-        bool doublePrecision;
     };
 }
 #endif // CONNECTABLEAUDIOPININ_H

@@ -38,6 +38,9 @@ BridgeView::BridgeView(MainHost *myHost,QAbstractItemModel *model, QGraphicsItem
     lLayout->addItem(listBridge);
 }
 
+/*!
+  update the connected cables position
+  */
 void BridgeView::moveEvent ( QGraphicsSceneMoveEvent * event )
 {
     listBridge->UpdateCablesPosition();

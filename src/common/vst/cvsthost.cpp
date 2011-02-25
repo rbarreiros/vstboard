@@ -163,10 +163,6 @@ VstIntPtr VSTCALLBACK CVSTHost::AudioMasterCallback(AEffect *effect, VstInt32 op
         case audioMasterVersion : //1
             return 2400L;
 
-        case audioMasterWantMidi : //6
-            retValue = true;
-            break;
-
         case audioMasterGetTime : //7
             return (long)&pHost->vstTimeInfo;
 
@@ -194,7 +190,6 @@ VstIntPtr VSTCALLBACK CVSTHost::AudioMasterCallback(AEffect *effect, VstInt32 op
         case audioMasterCanDo : //37
             str = (const char*)ptr;
 
-            //we take care of this list :
             if ((!strcmp(str, "sendVstEvents")) ||
                 (!strcmp(str, "sendVstMidiEvent")) ||
                 (!strcmp(str, "receiveVstEvents")) ||
@@ -216,11 +211,12 @@ VstIntPtr VSTCALLBACK CVSTHost::AudioMasterCallback(AEffect *effect, VstInt32 op
             debug("host can't do '%s'",str)
             return 0L;
 
-#ifndef QT_NO_DEBUG
         //handled by the object
         case audioMasterAutomate : //0
         case audioMasterCurrentId : //2
         case audioMasterIdle : //3
+        case audioMasterPinConnected : //4
+        case audioMasterWantMidi : //6
         case audioMasterProcessEvents : //8
         case audioMasterGetNumAutomatableParameters : //11
         case audioMasterIOChanged : //13
@@ -232,7 +228,6 @@ VstIntPtr VSTCALLBACK CVSTHost::AudioMasterCallback(AEffect *effect, VstInt32 op
 
         default:
             debug(QString("vstcallback %1 not handled").arg(opcode).toAscii())
-#endif
     }
 
     if(!effect) {
@@ -241,10 +236,6 @@ VstIntPtr VSTCALLBACK CVSTHost::AudioMasterCallback(AEffect *effect, VstInt32 op
     }
 
     //send it to the connectable object
-//    foreach(Connectables::VstPlugin *plug, Connectables::VstPlugin::listPlugins) {
-//        if(plug->GetPlugin() == effect)
-//            return plug->OnMasterCallback(opcode,index,value,ptr,opt,retValue);
-//    }
     Connectables::VstPlugin *obj = Connectables::VstPlugin::mapPlugins.value(effect,0);
     if(obj)
         return obj->OnMasterCallback(opcode,index,value,ptr,opt,retValue);

@@ -23,6 +23,19 @@
 
 using namespace Connectables;
 
+/*!
+  \class Connectables::Pin
+  \brief virtual pin
+  */
+
+/*!
+  Constructor, used by PinsList with the help of Object::CreatePin
+  \param parent pointer to the parent Object
+  \param type PinType
+  \param direction PinDirection
+  \param number pin number in the list
+  \param bridge true if this pin is a bridge
+  */
 Pin::Pin(Object *parent,PinType::Enum type, PinDirection::Enum direction, int number, bool bridge) :
     QObject(parent),
     connectInfo(parent->getHost(),parent->GetIndex(),type,direction,number,bridge),
@@ -33,16 +46,24 @@ Pin::Pin(Object *parent,PinType::Enum type, PinDirection::Enum direction, int nu
     closed(false),
     valueChanged(false)
 {
-    connectInfo.container = parent->containerId;
+    connectInfo.container = parent->GetContainerId();
 //    setObjectName(QString("pin:%1:%2:%3:%4").arg(connectInfo.objId).arg(connectInfo.type).arg(connectInfo.direction).arg(connectInfo.pinNumber));
 }
 
+/*!
+  Destructor
+  Hide and close
+  */
 Pin::~Pin()
 {
     SetVisible(false);
     Close();
 }
 
+/*!
+  Set the pin name
+  \param name
+  */
 void Pin::setObjectName(const QString &name)
 {
     if(modelIndex.isValid())
@@ -51,37 +72,20 @@ void Pin::setObjectName(const QString &name)
     QObject::setObjectName(name);
 }
 
-bool Pin::event(QEvent *event)
-{
-    if (event->type() == Event::PinMessage) {
-        PinMessageEvent *e = static_cast<PinMessageEvent *>(event);
-        ReceiveMsg(e->msgType,e->data);
-        return true;
-    }
-    return QObject::event(event);
-}
-
+/*!
+  Send a message to all the connected pins
+  \param msgType PinMessage
+  \param data data to send
+  */
 void Pin::SendMsg(const PinMessage::Enum msgType,void *data)
 {
     parent->getHost()->SendMsg(connectInfo,(PinMessage::Enum)msgType,data);
 }
 
-//QString Pin::GetDisplayedText()
-//{
-//    QString retStr;
-//    txtMutex.lock();
-//    retStr = displayedText;
-//    txtMutex.unlock();
-//    return retStr;
-//}
-
-//void Pin::SetDisplayedText(const QString &txt)
-//{
-//    txtMutex.lock();
-//    displayedText = txt;
-//    txtMutex.unlock();
-//}
-
+/*!
+  Update the view with the new parent
+  \param newParent
+  */
 void Pin::SetParentModelIndex(const QModelIndex &newParent)
 {
     closed=false;
@@ -110,11 +114,19 @@ void Pin::SetParentModelIndex(const QModelIndex &newParent)
     }
 }
 
+/*!
+  Set the new container id
+  \param id the new container id
+  */
 void Pin::SetContainerId(quint16 id)
 {
     connectInfo.container = id;
 }
 
+/*!
+  Close the pin before deletion
+  \todo can be merged with destructor ?
+  */
 void Pin::Close()
 {
     QMutexLocker l(&objMutex);
@@ -125,11 +137,19 @@ void Pin::Close()
     closed=true;
 }
 
+/*!
+  Set this pin as a bridge (will allow connection in the parent container)
+  \param bridge true is it's a bridge
+  */
 void Pin::SetBridge(bool bridge)
 {
     connectInfo.bridge=bridge;
 }
 
+/*!
+  Show or hide the pin
+  \param vis true if visible
+  */
 void Pin::SetVisible(bool vis)
 {
     if(visible==vis)
@@ -182,6 +202,10 @@ void Pin::SetVisible(bool vis)
     }
 }
 
+/*!
+  Update the view model
+  Used when moved to a new container
+  */
 void Pin::UpdateModelNode()
 {
 //    QStandardItem *item = parent->getHost()->GetModel()->itemFromIndex(parentIndex)->child(connectInfo.pinNumber,0);
@@ -204,6 +228,9 @@ void Pin::UpdateModelNode()
     }
 }
 
+/*!
+  Update view values
+  */
 void Pin::updateView()
 {
     QMutexLocker l(&objMutex);

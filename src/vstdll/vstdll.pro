@@ -3,7 +3,7 @@ DEFINES += APP_NAME=\\\"VstBoardPlugin\\\"
 srcdir      = vstdll
 include(../config.pri)
 
-QT += core gui
+QT += core gui script
 
 TARGET = "VstBoardPlugin"
 TEMPLATE = lib
@@ -32,7 +32,7 @@ win32-msvc* {
     INCLUDEPATH += $$quote($$(INCLUDE))
     LIBS += -L$$quote($$(LIB))
     QMAKE_CFLAGS += -Fd$$top_destdir/$$TARGET
-    #RC_FILE = vstdll.rc
+    RC_FILE = vstdll.rc
 
 #to add symbols :
 #    QMAKE_CFLAGS_RELEASE +=  -Zi

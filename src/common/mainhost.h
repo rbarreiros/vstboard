@@ -22,7 +22,7 @@
 #define MAINHOST_H
 
 #include "precomp.h"
-//#include <QtScript>
+#include <QtScript>
 #include "connectables/objectfactory.h"
 #include "connectables/object.h"
 #include "connectables/maincontainer.h"
@@ -89,7 +89,7 @@ public:
     QVariant GetSetting(QString name, QVariant defaultVal=0);
     bool SettingDefined(QString name);
 
-//    QScriptEngine scriptEngine;
+    QScriptEngine scriptEngine;
 
 protected:
     QTime timeFromStart;
@@ -128,7 +128,7 @@ private:
     QString settingsGroup;
     QSettings settings;
 
-//    QScriptValue scriptObj;
+    QScriptValue scriptObj;
 
 signals:
     void SampleRateChanged(float rate);

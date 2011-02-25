@@ -461,14 +461,14 @@ void Vst::processDoubleReplacing (double** inputs, double** outputs, VstInt32 sa
 
     int cpt=0;
     foreach(Connectables::VstAudioDeviceIn* dev, lstAudioIn) {
-        dev->SetBuffers(inputs,cpt,sampleFrames);
+        dev->SetBuffersD(inputs,cpt,sampleFrames);
     }
 
     myHost->Render();
 
     cpt=0;
     foreach(Connectables::VstAudioDeviceOut* dev, lstAudioOut) {
-        dev->GetBuffers(outputs,cpt,sampleFrames);
+        dev->GetBuffersD(outputs,cpt,sampleFrames);
     }
 
     if(hostReceiveVstEvents || hostReceiveVstMidiEvents) {

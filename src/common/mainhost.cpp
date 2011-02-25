@@ -45,8 +45,8 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
 
     setObjectName("MainHost");
 
-//    scriptObj = scriptEngine.newQObject(this);
-//    scriptEngine.globalObject().setProperty("MainHost", scriptObj);
+    scriptObj = scriptEngine.newQObject(this);
+    scriptEngine.globalObject().setProperty("MainHost", scriptObj);
 
 //    objFactory = new Connectables::ObjectFactory(this);
 
@@ -135,7 +135,10 @@ void MainHost::SetupMainContainer()
         return;
 
     mainContainer->LoadProgram(0);
-    mainContainer->SetParentModeIndex( model->invisibleRootItem()->index() );
+    QStandardItem *item = mainContainer->GetFullItem();
+    model->invisibleRootItem()->appendRow(item);
+    mainContainer->modelIndex=item->index();
+    mainContainer->parked=false;
     mainContainer->listenProgramChanges=false;
 }
 

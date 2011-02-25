@@ -30,31 +30,63 @@ class AudioBuffer
 {
 public:
         AudioBuffer(bool externalAllocation = false);
-        ~AudioBuffer(void);
+        ~AudioBuffer();
         bool SetSize(unsigned long size);
         void Clear();
         void AddToStack(AudioBuffer * buff);
         void AddToStack(AudioBufferD * buff);
 
-        inline unsigned long GetSize() {return nSize;}
-        float GetVu();
-        float GetCurrentVu() {return currentVu;}
-        inline void ResetStackCounter() {stackSize=0;}
-        inline bool IsEmpty() {return (stackSize==0);}
-        static float const blankBuffer[BLANK_BUFFER_SIZE];
-
         void SetPointer(float * buff, bool tmpBufferToBeFilled=false);
         float *GetPointer(bool willBeFilled=false);
         float *ConsumeStack();
 
+        float GetVu();
+
+        /// \return the current buffer size
+        inline unsigned long GetSize() {return nSize;}
+
+        /*!
+         Get the last vu-meter value. Don't reset the peak value (used by bridges)
+         \return the vu-meter value
+        */
+        float GetCurrentVu() {return currentVu;}
+
+        /*!
+          Clear the stack. Empty the buffer
+          */
+        inline void ResetStackCounter() {stackSize=0;}
+
+        /*!
+          \return true if the buffer is empty, no sound
+          */
+        inline bool IsEmpty() {return (stackSize==0);}
+
+        /// \return true if we're not the owner of the buffer
+        inline bool IsExternallyAllocated() {return bExternalAllocation;}
+
+        /// a blank buffer
+        static float const blankBuffer[BLANK_BUFFER_SIZE];
+
 protected:
+        /// the stack size
         unsigned int stackSize;
+
+        /// pointer to the audio buffer
         float * pBuffer;
+
+        /// buffer size
         unsigned long nSize;
+
+        /// allocated buffer size, can be bigger than the useable buffer size
         unsigned long nAllocatedSize;
+
+        /// vu-meter peak
         float _maxVal;
+
+        /// vu-meter value
         float currentVu;
 
+        /// true if we're not the owned of the buffer
         bool bExternalAllocation;
 };
 

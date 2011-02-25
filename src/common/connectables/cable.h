@@ -33,13 +33,30 @@ namespace Connectables {
         Cable(const Cable & c);
         void AddToParentNode(const QModelIndex &parentIndex);
         void RemoveFromParentNode(const QModelIndex &parentIndex);
+
+        /*!
+          Get the output pin info
+          \return a ConnectionInfo
+          */
         inline const ConnectionInfo & GetInfoOut() const {return pinOut;}
+
+        /*!
+          Get the input pin info
+          \return a ConnectionInfo
+          */
         inline const ConnectionInfo & GetInfoIn() const {return pinIn;}
 
     protected:
+        /// the output pin (the one sending messages)
         const ConnectionInfo pinOut;
+
+        /// the input pin (the receiver)
         const ConnectionInfo pinIn;
+
+        /// the cable index in the model
         QPersistentModelIndex modelIndex;
+
+        /// pointer to the MainHost
         MainHost *myHost;
     };
 }

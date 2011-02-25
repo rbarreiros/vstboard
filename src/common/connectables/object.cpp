@@ -26,6 +26,17 @@
 
 using namespace Connectables;
 
+/*!
+    \class Connectables::Object
+    \brief virtual object, children of containers, parents of pins
+*/
+
+/*!
+  Constructor, used by ObjectFactory
+  \param host parent MainHost
+  \param index unique id
+  \param info ObjectInfo defining this object
+  */
 Object::Object(MainHost *host, int index, const ObjectInfo &info) :
     QObject(),
     listenProgramChanges(true),
@@ -107,7 +118,9 @@ Object::Object(MainHost *host, int index, const ObjectInfo &info) :
     }
 }
 
-
+/*!
+  Destructor
+  */
 Object::~Object()
 {
     pinLists.clear();
@@ -122,13 +135,20 @@ Object::~Object()
     Close();
 }
 
-
+/*!
+  Called by ObjectFactory after the object creation
+  \return true on success, false if the object should be deleted
+  */
 bool Object::Open()
 {
     closed=false;
     return true;
 }
 
+/*!
+  Cleanup before destruction
+  \return false if the object is already closed
+  */
 bool Object::Close()
 {
     if(closed)
@@ -146,50 +166,48 @@ bool Object::Close()
     return true;
 }
 
+/*!
+  Hide the object and all its pins
+  \todo not used anymore except for bridges
+  */
 void Object::Hide() {
-//    SetSleep(true);
-
     foreach(PinsList *lst, pinLists) {
         lst->Hide();
     }
-/*
-    QStandardItemModel *model = 0;
-    if(parked)
-        model = myHost->GetParkingModel();
-    else
-        model = myHost->GetModel();
-
-    if(modelIndex.isValid()) {
-        if(modelIndex.parent().isValid())
-            model->removeRow(modelIndex.row(), modelIndex.parent());
-        else
-            model->removeRow(modelIndex.row());
-    }
-    modelIndex=QModelIndex();
-    */
 }
 
+/*!
+  Toggle visibility of input bridges pins
+  \todo only used by bridges, can it be removed ?
+  */
 void Object::SetBridgePinsInVisible(bool visible)
 {
     listBridgePinIn->SetVisible(visible);
 }
 
+/*!
+  Toggle visibility of output bridges pins
+  \todo only used by bridges, can it be removed ?
+  */
 void Object::SetBridgePinsOutVisible(bool visible)
 {
     listBridgePinOut->SetVisible(visible);
 }
 
+/*!
+  Set the objects name, update the view
+  */
 void Object::setObjectName(const QString &name)
 {
-//    if(modelNode)
-//        modelNode->setData(name,Qt::DisplayRole);
     if(modelIndex.isValid())
         myHost->GetModel()->setData(modelIndex, name, Qt::DisplayRole);
 
-    //objInfo.name=QString("%1.%2").arg(objInfo.name).arg(index);
     QObject::setObjectName(name);
 }
 
+/*!
+  Toggle sleep mode, the object is not rendered when sleeping
+  */
 void Object::SetSleep(bool sleeping)
 {
     objMutex.lock();
@@ -197,12 +215,19 @@ void Object::SetSleep(bool sleeping)
     objMutex.unlock();
 }
 
+/*!
+  Retrive current sleep state
+  */
 bool Object::GetSleep()
 {
     QMutexLocker l(&objMutex);
     return sleep;
 }
 
+/*!
+  Check if the objects program has been modified
+  \return true if modified
+  */
 bool Object::IsDirty()
 {
     if(!currentProgram)
@@ -210,33 +235,29 @@ bool Object::IsDirty()
     return currentProgram->isDirty;
 }
 
+/*!
+  Set the current program dirty flag
+  Called by ParameterPin
+  */
 void Object::OnProgramDirty()
 {
     if(!currentProgram)
         return;
 
     currentProgram->isDirty=true;
-
-
-//    if(!modelIndex.isValid())
-//        return;
-//    QStandardItem *item=myHost->GetModel()->itemFromIndex(modelIndex);
-//    if(!item)
-//        return;
-//    item->setData(true,UserRoles::isDirty);
-
-
-//    QSharedPointer<Object>objPtr = myHost->objFactory->GetObj(modelIndex.parent());
-//    if(!objPtr)
-//        return;
-//    static_cast<Container*>(objPtr.data())->SetProgramDirty();
 }
 
+/*!
+  Unload current progam
+  */
 void Object::UnloadProgram()
 {
     currentProgId=EMPTY_PROGRAM;
 }
 
+/*!
+  Save the current program
+  */
 void Object::SaveProgram()
 {
     if(!currentProgram)
@@ -248,6 +269,12 @@ void Object::SaveProgram()
     currentProgram->Save(listParameterPinIn,listParameterPinOut);
 }
 
+/*!
+  Load a program
+    a new program is created if needed
+    drop the current program if one is loaded
+    \param prog program number
+  */
 void Object::LoadProgram(int prog)
 {
     //if prog is already loaded, update model
@@ -277,6 +304,11 @@ void Object::LoadProgram(int prog)
         listPrograms.remove(TEMP_PROGRAM);
 }
 
+/*!
+  Copy a program
+  \param ori program number to copy
+  \param dest destination program number
+  */
 void Object::CopyProgram(int ori, int dest)
 {
     if(!listPrograms.contains(ori)) {
@@ -291,6 +323,10 @@ void Object::CopyProgram(int ori, int dest)
     listPrograms.insert(dest,cpy);
 }
 
+/*!
+  Save the current program, in it's current state, as a new program without reseting the dirty flag
+  \param dest destination program number
+  */
 void Object::CopyCurrentProgram(int dest)
 {
     if(listPrograms.contains(dest)) {
@@ -303,6 +339,9 @@ void Object::CopyCurrentProgram(int dest)
     listPrograms.insert(dest,cpy);
 }
 
+/*!
+  Remove a program from the program list
+  */
 void Object::RemoveProgram(int prg)
 {
     if(!listPrograms.contains(prg)) {
@@ -312,14 +351,22 @@ void Object::RemoveProgram(int prg)
     listPrograms.remove(prg);
 }
 
+/*!
+  Prepare for a new rendering
+  Called one time at the beginning of the loop
+  */
 void Object::NewRenderLoop()
 {
     foreach(Pin *pin, listAudioPinIn->listPins) {
-        static_cast<AudioPinIn*>(pin)->NewRenderLoop();
+        pin->NewRenderLoop();
     }
 }
 
-
+/*!
+  Get the pin corresponding to the info
+  \param pinInfo a ConnectionInfo describing the pin
+  \return a pointer to the pin, 0 if not found
+  */
 Pin * Object::GetPin(const ConnectionInfo &pinInfo)
 {
     Pin* pin=0;
@@ -339,7 +386,11 @@ Pin * Object::GetPin(const ConnectionInfo &pinInfo)
     return 0;
 }
 
-
+/*!
+  Create a small model used when the object is parked
+  The caller is the owner of the return pointer and should delete it
+  \return a pointer to the QStandardItem
+  */
 QStandardItem *Object::GetParkingItem()
 {
     QStandardItem *modelNode=new QStandardItem();
@@ -348,6 +399,11 @@ QStandardItem *Object::GetParkingItem()
     return modelNode;
 }
 
+/*!
+  Create a full model used when the object is on a panel
+  The caller is the owner of the return pointer and should delete it
+  \return a pointer to the QStandardItem
+  */
 QStandardItem *Object::GetFullItem()
 {
     QStandardItem *modelNode = new QStandardItem();
@@ -358,34 +414,11 @@ QStandardItem *Object::GetFullItem()
     return modelNode;
 }
 
-void Object::SetParentModeIndex(const QModelIndex &parentIndex)
-{
-    if(modelIndex.isValid()) {
-        if(modelIndex.parent() == parentIndex)
-            return;
-        else
-            Hide();
-    }
-
-    parked=false;
-
-    QStandardItem *modelNode = new QStandardItem();
-    modelNode->setData(QVariant::fromValue(objInfo), UserRoles::objInfo);
-    modelNode->setData(index, UserRoles::value);
-    modelNode->setData(objectName(), Qt::DisplayRole);
-//    modelNode->setData(hasEditor, UserRoles::hasEditor);
-//    modelNode->setData(canLearn,UserRoles::canLearn);
-    modelNode->setData(errorMessage, UserRoles::errorMessage);
-
-    if(parentIndex.isValid()) {
-        myHost->GetModel()->itemFromIndex(parentIndex)->appendRow(modelNode);
-    } else {
-        myHost->GetModel()->appendRow(modelNode);
-    }
-
-    modelIndex=modelNode->index();
-}
-
+/*!
+  Set the container Id, called by the parent container
+  notify the children pins
+  \param id the new container id
+  */
 void Object::SetContainerId(quint16 id)
 {
     containerId = id;
@@ -395,6 +428,9 @@ void Object::SetContainerId(quint16 id)
     }
 }
 
+/*!
+  Update the view
+  */
 void Object::UpdateModelNode()
 {
     if(!modelIndex.isValid())
@@ -414,6 +450,11 @@ void Object::UpdateModelNode()
     }
 }
 
+/*!
+  Called when a parameter pin has changed
+  \param pinInfo the modified pin
+  \param value the new value
+  */
 void Object::OnParameterChanged(ConnectionInfo pinInfo, float value)
 {
     //editor pin
@@ -428,6 +469,10 @@ void Object::OnParameterChanged(ConnectionInfo pinInfo, float value)
     }
 }
 
+/*!
+  Toggle the editor (if the object has one) by changing the editor pin value
+  \param visible true to show, false to hide
+  */
 void Object::ToggleEditor(bool visible)
 {
     ParameterPin *pin = static_cast<ParameterPin*>(listParameterPinIn->listPins.value(FixedPinNumber::editorVisible));
@@ -436,6 +481,10 @@ void Object::ToggleEditor(bool visible)
     pin->ChangeValue(visible);
 }
 
+/*!
+  Get the current learning state
+  \return LearningMode::Enum can be learn, unlearn or off
+  */
 LearningMode::Enum Object::GetLearningMode()
 {
     if(!listParameterPinIn->listPins.contains(FixedPinNumber::learningMode))
@@ -444,6 +493,10 @@ LearningMode::Enum Object::GetLearningMode()
     return (LearningMode::Enum)static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::learningMode))->GetIndex();
 }
 
+/*!
+  Set the object view status (position, size, ...) defined by the container
+  \param[in] attr an ObjectContainerAttribs
+  */
 void Object::SetContainerAttribs(const ObjectContainerAttribs &attr)
 {
     if(!modelIndex.isValid())
@@ -459,6 +512,10 @@ void Object::SetContainerAttribs(const ObjectContainerAttribs &attr)
     item->setData(attr.editorVScroll, UserRoles::editorVScroll);
 }
 
+/*!
+  Get the object view status, the status is saved by the container in a ContainerProgram
+  \param[out] attr an ObjectContainerAttribs containing the object status
+  */
 void Object::GetContainerAttribs(ObjectContainerAttribs &attr)
 {
     if(!modelIndex.isValid())
@@ -472,18 +529,28 @@ void Object::GetContainerAttribs(ObjectContainerAttribs &attr)
     attr.editorVScroll = modelIndex.data(UserRoles::editorVScroll).toInt();
 }
 
+void Object::SetBufferSize(unsigned long size)
+{
+    foreach(Pin *pin, listAudioPinIn->listPins) {
+        static_cast<AudioPinIn*>(pin)->SetBufferSize(size);
+    }
+    foreach(Pin *pin, listAudioPinOut->listPins) {
+        static_cast<AudioPinOut*>(pin)->SetBufferSize(size);
+    }
+}
+
+/*!
+  Called by PinsList to create a pin
+  \param info ConnectionInfo defining the pin to be created
+  \return a pointer to the new pin, 0 if not created
+  */
 Pin* Object::CreatePin(const ConnectionInfo &info)
 {
     switch(info.direction) {
         case PinDirection::Input :
             switch(info.type) {
                 case PinType::Audio : {
-                    AudioPinIn *newPin = new AudioPinIn(this,info.pinNumber);
-                    newPin->doublePrecision=doublePrecision;
-                    if(doublePrecision)
-                        newPin->bufferD->SetSize(myHost->GetBufferSize());
-                    else
-                        newPin->buffer->SetSize(myHost->GetBufferSize());
+                    AudioPinIn *newPin = new AudioPinIn(this,info.pinNumber,myHost->GetBufferSize(),doublePrecision);
                     return newPin;
                 }
 
@@ -521,12 +588,7 @@ Pin* Object::CreatePin(const ConnectionInfo &info)
         case PinDirection::Output :
             switch(info.type) {
                 case PinType::Audio : {
-                    AudioPinOut *newPin = new AudioPinOut(this,info.pinNumber);
-                    newPin->doublePrecision=doublePrecision;
-                    if(doublePrecision)
-                        newPin->bufferD->SetSize(myHost->GetBufferSize());
-                    else
-                        newPin->buffer->SetSize(myHost->GetBufferSize());
+                    AudioPinOut *newPin = new AudioPinOut(this,info.pinNumber,myHost->GetBufferSize(),doublePrecision);
                     return newPin;
                 }
 
@@ -552,6 +614,11 @@ Pin* Object::CreatePin(const ConnectionInfo &info)
     return 0;
 }
 
+/*!
+  Put the object in a stream
+  \param[in] out a QDataStream
+  \return the stream
+  */
 QDataStream & Object::toStream(QDataStream & out) const
 {
     out << (qint16)index;
@@ -574,6 +641,11 @@ QDataStream & Object::toStream(QDataStream & out) const
     return out;
 }
 
+/*!
+  Load the object from a stream
+  \param[in] in a QDataStream
+  \return the stream
+  */
 QDataStream & Object::fromStream(QDataStream & in)
 {
     qint16 id;
@@ -606,11 +678,17 @@ QDataStream & Object::fromStream(QDataStream & in)
     return in;
 }
 
+/*!
+  overload stream out
+  */
 QDataStream & operator<< (QDataStream & out, const Connectables::Object& value)
 {
     return value.toStream(out);
 }
 
+/*!
+  overload stream in
+  */
 QDataStream & operator>> (QDataStream & in, Connectables::Object& value)
 {
     return value.fromStream(in);

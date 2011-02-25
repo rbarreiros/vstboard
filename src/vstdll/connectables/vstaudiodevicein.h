@@ -41,9 +41,7 @@ namespace Connectables {
         void Render();
 
         void SetBuffers(float **buf, int &cpt, int sampleFrames);
-        void SetBuffers(double **buf, int &cpt, int sampleFrames);
-//        Pin* CreatePin(const ConnectionInfo &info);
-
+        void SetBuffersD(double **buf, int &cpt, int sampleFrames);
 
     public slots:
         void SetBufferSize(unsigned long size);

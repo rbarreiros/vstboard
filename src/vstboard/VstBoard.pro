@@ -3,7 +3,7 @@ DEFINES += APP_NAME=\\\"VstBoard\\\"
 srcdir = vstboard
 include(../config.pri)
 
-QT += core gui
+QT += core gui script
 
 TEMPLATE = app
 TARGET = $${APP_NAME}
@@ -100,10 +100,7 @@ HEADERS += \
 
 FORMS +=
 
-
-#PRECOMPILED_HEADER = ../common/precomp.h
-
-#RESOURCES += ../resources/resources.qrc
+PRECOMPILED_HEADER = ../common/precomp.h
 
 OTHER_FILES += \ 
     ../../README.txt \

@@ -27,13 +27,21 @@
 
 using namespace Connectables;
 
+/*!
+  \class Connectables::AudioDeviceIn
+  \brief an audio device input. user by AudioDevice
+  */
+
+/*!
+  \param myHost pointer to the MainHost
+  \param index object number
+  \param info object description
+  */
 AudioDeviceIn::AudioDeviceIn(MainHost *myHost,int index, const ObjectInfo &info) :
     Object(myHost,index, info),
-    bufferReady(false),
     parentDevice(0)
 {
     listParameterPinOut->AddPin(0);
-//    listParameterPinOut->listPins.insert(0, new ParameterPinOut(this,0,0,true,"cpu%"));
 }
 
 AudioDeviceIn::~AudioDeviceIn()
@@ -55,25 +63,15 @@ void AudioDeviceIn::Render()
 
     foreach(Pin* pin,listAudioPinOut->listPins) {
         if(doublePrecision) {
-            static_cast<AudioPinOut*>(pin)->bufferD->ConsumeStack();
+            static_cast<AudioPinOut*>(pin)->GetBufferD()->ConsumeStack();
         } else {
-            static_cast<AudioPinOut*>(pin)->buffer->ConsumeStack();
+            static_cast<AudioPinOut*>(pin)->GetBuffer()->ConsumeStack();
         }
         static_cast<AudioPinOut*>(pin)->SendAudioBuffer();
     }
 
     if(parentDevice)
         static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(0))->ChangeValue(parentDevice->GetCpuUsage());
-}
-
-void AudioDeviceIn::SetBufferSize(unsigned long size)
-{
-    foreach(Pin *pin, listAudioPinIn->listPins) {
-        static_cast<AudioPinIn*>(pin)->buffer->SetSize(size);
-    }
-    foreach(Pin *pin, listAudioPinOut->listPins) {
-        static_cast<AudioPinOut*>(pin)->buffer->SetSize(size);
-    }
 }
 
 bool AudioDeviceIn::Open()

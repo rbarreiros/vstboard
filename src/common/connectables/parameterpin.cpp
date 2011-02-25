@@ -241,7 +241,7 @@ void ParameterPin::SetLimit(ObjType::Enum type, float newVal)
             if(limitInMax<=limitInMin) {
                 limitInMax=limitInMin+0.005;
                 if(indexLimitInMax.isValid())
-                    parent->myHost->GetModel()->setData( indexLimitInMax, limitInMax, UserRoles::value);
+                    parent->getHost()->GetModel()->setData( indexLimitInMax, limitInMax, UserRoles::value);
             }
             break;
         case ObjType::limitInMax:
@@ -249,7 +249,7 @@ void ParameterPin::SetLimit(ObjType::Enum type, float newVal)
             if(limitInMax<=limitInMin) {
                 limitInMin=limitInMax-0.005;
                 if(indexLimitInMin.isValid())
-                    parent->myHost->GetModel()->setData( indexLimitInMin, limitInMin, UserRoles::value);
+                    parent->getHost()->GetModel()->setData( indexLimitInMin, limitInMin, UserRoles::value);
             }
             break;
         case ObjType::limitOutMin:

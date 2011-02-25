@@ -49,9 +49,9 @@ void VstAudioDeviceIn::Render()
 {
     foreach(Pin* pin,listAudioPinOut->listPins) {
         if(doublePrecision) {
-            static_cast<AudioPinOut*>(pin)->bufferD->ConsumeStack();
+            static_cast<AudioPinOut*>(pin)->GetBufferD()->ConsumeStack();
         } else {
-            static_cast<AudioPinOut*>(pin)->buffer->ConsumeStack();
+            static_cast<AudioPinOut*>(pin)->GetBuffer()->ConsumeStack();
         }
         static_cast<AudioPinOut*>(pin)->SendAudioBuffer();
     }
@@ -61,10 +61,10 @@ void VstAudioDeviceIn::SetBufferSize(unsigned long size)
 {
     foreach(Pin *pin, listAudioPinOut->listPins) {
         if(doublePrecision) {
-            static_cast<AudioPinOut*>(pin)->bufferD->SetSize(size);
+            static_cast<AudioPinOut*>(pin)->GetBufferD()->SetSize(size);
         }
         //the host can choose to use processReplacing even if we use double precision
-        static_cast<AudioPinOut*>(pin)->buffer->SetSize(size);
+        static_cast<AudioPinOut*>(pin)->GetBuffer()->SetSize(size);
     }
 }
 
@@ -82,8 +82,8 @@ bool VstAudioDeviceIn::Open()
 void VstAudioDeviceIn::SetBuffers(float **buf, int &cpt, int sampleFrames)
 {
     foreach(Pin *pin, listAudioPinOut->listPins) {
-        AudioBuffer *abuf= static_cast<AudioPinOut*>(pin)->buffer;
-        AudioBufferD *abufD= static_cast<AudioPinOut*>(pin)->bufferD;
+        AudioBuffer *abuf= static_cast<AudioPinOut*>(pin)->GetBuffer();
+        AudioBufferD *abufD= static_cast<AudioPinOut*>(pin)->GetBufferD();
 
         memcpy(abuf->GetPointer(true),buf[cpt], sampleFrames*sizeof(float));
 
@@ -96,11 +96,11 @@ void VstAudioDeviceIn::SetBuffers(float **buf, int &cpt, int sampleFrames)
     }
 }
 
-void VstAudioDeviceIn::SetBuffers(double **buf, int &cpt, int sampleFrames)
+void VstAudioDeviceIn::SetBuffersD(double **buf, int &cpt, int sampleFrames)
 {
     foreach(Pin *pin, listAudioPinOut->listPins) {
-        AudioBuffer *abuf= static_cast<AudioPinOut*>(pin)->buffer;
-        AudioBufferD *abufD= static_cast<AudioPinOut*>(pin)->bufferD;
+        AudioBuffer *abuf= static_cast<AudioPinOut*>(pin)->GetBuffer();
+        AudioBufferD *abufD= static_cast<AudioPinOut*>(pin)->GetBufferD();
 
         memcpy(abufD->GetPointer(true),buf[cpt], sampleFrames*sizeof(double));
 
@@ -112,9 +112,3 @@ void VstAudioDeviceIn::SetBuffers(double **buf, int &cpt, int sampleFrames)
         cpt++;
     }
 }
-
-//Pin* VstAudioDeviceIn::CreatePin(const ConnectionInfo &info)
-//{
-//    AudioPinOut *newPin = new AudioPinOut(this,info.pinNumber);
-//    return newPin;
-//}

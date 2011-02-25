@@ -21,6 +21,11 @@
 #ifndef CEFFECT_H
 #define CEFFECT_H
 
+#ifdef _MSC_VER
+#pragma warning( push )
+#pragma warning( disable : 4100 )
+#endif
+
 #include "../precomp.h"
 #include "audioeffectx.h"
 
@@ -180,4 +185,9 @@ namespace vst
         QLibrary *pluginLib;
     };
 }
+
+#ifdef _MSC_VER
+#pragma warning( pop )
+#endif
+
 #endif // CEFFECT_H

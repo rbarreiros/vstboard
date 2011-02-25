@@ -24,7 +24,7 @@
 #include "object.h"
 #include "bridge.h"
 #include "containerprogram.h"
-#include "../models/hostmodel.h"
+#include "models/hostmodel.h"
 
 #define LOADSAVE_STAGES 3
 
@@ -37,53 +37,56 @@ namespace Connectables {
         Container(MainHost *myHost,int index, const ObjectInfo &info);
         virtual ~Container();
 
-        virtual bool Close();
         void Hide();
-
         void ConnectBridges(QSharedPointer<Object> bridgeA, QSharedPointer<Object> bridgeB, bool hidden=true);
-
-        virtual void AddObject(QSharedPointer<Object> objPtr);
-        virtual void AddParkedObject(QSharedPointer<Object> objPtr);
-        virtual void ParkObject(QSharedPointer<Object> objPtr);
         void RemoveCable(QModelIndex & index);
-
-        QSharedPointer<Object> bridgeIn;
-        QSharedPointer<Object> bridgeOut;
+        void SetContainerId(quint16 id);
+        const QModelIndex &GetCablesIndex();
 
         QDataStream & toStream (QDataStream &) const;
         QDataStream & fromStream (QDataStream &);
 
-        void SetContainerId(quint16 id);
-
-        const QModelIndex &GetCablesIndex();
-
-        HostModel parkModel;
-
         void OnChildDeleted(Object *obj);
-//        void SetProgramDirty();
+
+        virtual bool Close();
+        virtual void AddObject(QSharedPointer<Object> objPtr);
+        virtual void AddParkedObject(QSharedPointer<Object> objPtr);
+        virtual void ParkObject(QSharedPointer<Object> objPtr);
         virtual bool IsDirty();
 
-    protected:
-        QList< QSharedPointer< Object > >listStaticObjects;
+        /// shared pointer to the bridge in object
+        QSharedPointer<Object> bridgeIn;
 
+        /// shared pointer to the bridge out object
+        QSharedPointer<Object> bridgeOut;
+
+        /// model for the parking storage
+        HostModel parkModel;
+
+    protected:
         void AddChildObject(QSharedPointer<Object> objPtr);
         void ParkChildObject(QSharedPointer<Object> objPtr);
 
-        void LoadFromProgram(ContainerProgram *prog);
-        void SaveToProgram(ContainerProgram *prog);
+        /// list of programs
         QHash<int,ContainerProgram*>listContainerPrograms;
 
+        /// pointer to the current program
         ContainerProgram* currentProgram;
+
+        /// list of static objects (bridges are static)
+        QList< QSharedPointer< Object > >listStaticObjects;
+
+        /// a child model index for the cables
         QPersistentModelIndex cablesNode;
 
+        /// list of all loaded Objects
         QList<Object*>listLoadedObjects;
 
-        //store the objects while loading preventing them from being deleted since the objects are loaded before the programs using them
+        /// store the objects while loading, preventing them from being deleted. (the objects are loaded before the programs using them)
         QList< QSharedPointer< Object > >listLoadingObjects;
 
+        /// id of the progam to change on the next rendering loop
         int progToSet;
-
-    signals:
 
     public slots:
         void AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin, bool hidden=false);

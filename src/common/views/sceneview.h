@@ -21,6 +21,11 @@
 #ifndef SCENEVIEW_H
 #define SCENEVIEW_H
 
+#ifdef _MSC_VER
+#pragma warning( push )
+#pragma warning( disable : 4100 )
+#endif
+
 #include "precomp.h"
 #include "connectables/connectioninfo.h"
 #include "maingraphicsview.h"
@@ -85,6 +90,7 @@ namespace View {
         QTimer *timerFalloff;
         Connectables::ObjectFactory *objFactory;
         MainHost *myHost;
+
     signals:
 //        void hostShown(bool shown);
 //        void projectShown(bool shown);
@@ -106,5 +112,9 @@ namespace View {
         void graphicObjectRemoved ( QObject* obj);
     };
 }
+
+#ifdef _MSC_VER
+#pragma warning( pop )
+#endif
 
 #endif // SCENEVIEW_H

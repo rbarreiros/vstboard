@@ -25,6 +25,18 @@
 
 using namespace View;
 
+/*!
+  \class View::ObjectView
+  \brief base class for the objects views
+  */
+
+/*!
+  \param myHost pointer to the MainHost
+  \param model pointer to the model
+  \param parent the parent graphic item
+  \param wFlags window flags
+  \todo the model parameter can be removed
+  */
 ObjectView::ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsItem * parent, Qt::WindowFlags wFlags ) :
     QGraphicsWidget(parent,wFlags),
     titleText(0),
@@ -57,17 +69,28 @@ ObjectView::ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsIte
 //    setAutoFillBackground(true);
 }
 
+/*!
+  setActive to false before destruction to move the focus to the next item
+  */
 ObjectView::~ObjectView()
 {
     setActive(false);
 }
 
+/*!
+  Reimplements QGraphicsWidget::contextMenuEvent \n
+  create a menu with all the actions
+  */
 void ObjectView::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
     QMenu menu;
     menu.exec(actions(),event->screenPos(),actions().at(0),event->widget());
 }
 
+/*!
+  Set the model index of this object
+  \param index the index
+  */
 void ObjectView::SetModelIndex(QPersistentModelIndex index)
 {
     ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
@@ -85,6 +108,9 @@ void ObjectView::SetModelIndex(QPersistentModelIndex index)
     }
 }
 
+/*!
+  Update the view, base on the model index
+  */
 void ObjectView::UpdateModelIndex()
 {
     if(!objIndex.isValid())
@@ -110,6 +136,10 @@ void ObjectView::UpdateModelIndex()
     }
 }
 
+/*!
+  Set the error message, add the error icon
+  \param msg the error string
+  */
 void ObjectView::SetErrorMessage(const QString & msg)
 {
     if(msg.isEmpty()) {
@@ -132,6 +162,10 @@ void ObjectView::SetErrorMessage(const QString & msg)
     }
 }
 
+/*!
+  Reimplements QGraphicsWidget::closeEvent \n
+  setActive to false, tell the objectFactory to park this object
+  */
 void ObjectView::closeEvent ( QCloseEvent * event )
 {
     setActive(false);
@@ -145,6 +179,10 @@ void ObjectView::closeEvent ( QCloseEvent * event )
     event->ignore();
 }
 
+/*!
+  Reimplements QGraphicsWidget::itemChange \n
+  add borders on the selected object
+  */
 QVariant ObjectView::itemChange ( GraphicsItemChange  change, const QVariant & value )
 {
     switch(change) {
@@ -166,18 +204,29 @@ QVariant ObjectView::itemChange ( GraphicsItemChange  change, const QVariant & v
     return QGraphicsItem::itemChange(change, value);
 }
 
+/*!
+  Reimplements QGraphicsWidget::resizeEvent \n
+  resize the selected object borders on resize
+  */
 void ObjectView::resizeEvent ( QGraphicsSceneResizeEvent * event )
 {
     if(selectBorder)
         selectBorder->setRect( -2, -2, event->newSize().width()+4, event->newSize().height()+4);
 }
 
+/*!
+  Reimplements QGraphicsWidget::mouseReleaseEvent \n
+  update the model with the new position
+  */
 void ObjectView::mouseReleaseEvent ( QGraphicsSceneMouseEvent * event )
 {
     QGraphicsWidget::mouseReleaseEvent(event);
     model->setData(objIndex,pos(),UserRoles::position);
 }
 
+/*!
+  Shrink the object to its minimal size after a 100ms delay
+  */
 void ObjectView::Shrink()
 {
     if(shrinkAsked)
@@ -187,6 +236,9 @@ void ObjectView::Shrink()
     QTimer::singleShot(100, this, SLOT(ShrinkNow()));
 }
 
+/*!
+  Shrink the object to its minimal size
+  */
 void ObjectView::ShrinkNow()
 {
     shrinkAsked=false;

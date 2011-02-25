@@ -36,6 +36,16 @@ QMutex AudioDevice::listDevMutex;
 int AudioDevice::countDevicesReady=0;
 int AudioDevice::countInputDevices=0;
 
+/*!
+  \class Connectables::AudioDevice
+  \brief an audio device using PortAudio. created by AudioDeviceIn or AudioDeviceOut
+  */
+
+/*!
+  /param myHost the MainHost
+  /param info ObjectInfo describing the device
+  /param parent a parent QObject (unused ?)
+  */
 AudioDevice::AudioDevice(MainHostHost *myHost,const ObjectInfo &info, QObject *parent) :
     QObject(parent),
     bufferReady(false),
@@ -46,17 +56,10 @@ AudioDevice::AudioDevice(MainHostHost *myHost,const ObjectInfo &info, QObject *p
     devOut(0),
     closed(true),
     objInfo(info),
-    cpuUsage(.0f),
     myHost(myHost)
 {
-//    QSharedPointer<AudioDevice> sptr(this);
-//    sharedPointer=sptr;
-//    listAudioDevices.insert(objInfo.id, sharedPointer);
-
     devOutClosing=false;
-
     setObjectName(objInfo.name);
-
 
     connect(myHost,SIGNAL(SampleRateChanged(float)),
             this,SLOT(SetSampleRate(float)));
@@ -71,6 +74,9 @@ AudioDevice::~AudioDevice()
     debug("%s deleted",objectName().toAscii().constData())
 }
 
+/*!
+  Close the device if not in use. Called after a timeout when the AudioDeviceIn or AudioDeviceOut are removed
+  */
 void AudioDevice::DeleteIfUnused()
 {
     if(isClosing)
@@ -91,6 +97,12 @@ void AudioDevice::DeleteIfUnused()
 
 }
 
+/*!
+  Set the input Object
+  The device is closed after 2 seconds if it has no input or output object
+  \param obj the AudioDeviceIn, null to unlink
+  \return true on success
+  */
 bool AudioDevice::SetObjectInput(AudioDeviceIn *obj)
 {
     QMutexLocker l(&devicesMutex);
@@ -120,6 +132,13 @@ bool AudioDevice::SetObjectInput(AudioDeviceIn *obj)
     return true;
 }
 
+
+/*!
+  Set or remove the output Object.
+  The device is closed after 2 seconds if it has no input or output object
+  \param obj the AudioDeviceOut, null to unlink
+  \return true on success
+  */
 bool AudioDevice::SetObjectOutput(AudioDeviceOut *obj)
 {
     QMutexLocker l(&devicesMutex);
@@ -146,6 +165,10 @@ bool AudioDevice::SetObjectOutput(AudioDeviceOut *obj)
     return true;
 }
 
+/*!
+  Reopen the device with the new sample rate
+  \param rate the new rate
+  */
 void AudioDevice::SetSampleRate(float rate)
 {
     if(!closed) {
@@ -154,6 +177,12 @@ void AudioDevice::SetSampleRate(float rate)
     }
 }
 
+/*!
+  Try to find a device in the list return by PortAudio
+  \param[in] objInfo the ObjectInfo we're looking for
+  \param[out] devInfo the PaDeviceInfo of the object found
+  \return true if found
+  */
 bool AudioDevice::FindDeviceByName(ObjectInfo &objInfo, PaDeviceInfo *devInfo)
 {
     int cptDuplicateNames=0;
@@ -201,6 +230,11 @@ bool AudioDevice::FindDeviceByName(ObjectInfo &objInfo, PaDeviceInfo *devInfo)
     return true;
 }
 
+/*!
+  Open the PortAudio stream, used by AudioDevice::Open
+  \param sampleRate the desired sample rate
+  \return true on success
+  */
 bool AudioDevice::OpenStream(double sampleRate)
 {
 
@@ -364,6 +398,10 @@ bool AudioDevice::OpenStream(double sampleRate)
     return true;
 }
 
+/*!
+  Open the device
+  \return true on success
+  */
 bool AudioDevice::Open()
 {
     //already opened
@@ -423,6 +461,10 @@ bool AudioDevice::Open()
     return true;
 }
 
+/*!
+  Close the PortAudio stream, user by AudioDevice::Close and AudioDevice::SetSleep
+  \return true on success
+  */
 bool AudioDevice::CloseStream()
 {
     devicesMutex.lock();
@@ -509,6 +551,9 @@ bool AudioDevice::CloseStream()
     return true;
 }
 
+/*!
+  Delete ring buffers, used by AudioDevice::CloseStream
+  */
 void AudioDevice::DeleteCircualBuffers()
 {
     foreach(CircularBuffer *buf, listCircularBuffersIn)
@@ -521,6 +566,10 @@ void AudioDevice::DeleteCircualBuffers()
 
 }
 
+/*!
+  Close the device
+  \return true on success
+  */
 bool AudioDevice::Close()
 {
     if(closed)
@@ -545,6 +594,10 @@ bool AudioDevice::Close()
     return true;
 }
 
+/*!
+  Set the sleep state
+  \param sleeping the new state
+  */
 void AudioDevice::SetSleep(bool sleeping)
 {
 
@@ -562,17 +615,31 @@ void AudioDevice::SetSleep(bool sleeping)
         CloseStream();
 }
 
+/*!
+  Get the cpu usage returned by PortAudio
+  \return cpu usage
+  */
 float AudioDevice::GetCpuUsage()
 {
    return Pa_GetStreamCpuLoad(stream);
 }
 
+/*!
+  PortAudio callback on stream finished, unused
+  \param userData pointer to the corresponding AudioDevice
+  */
 void AudioDevice::paStreamFinished( void* userData )
 {
 //    AudioDevice* device = (AudioDevice*)userData;
 //    debug("paStreamFinished %s",device->objectName().toAscii().constData())
 }
 
+/*!
+  PortAudio callback
+  put the audio provided by PortAudio in ring buffers
+  starts a rendering loop when we have enough data
+  send the resulting buffers back to PortAudio
+  */
 int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
                                  unsigned long framesPerBuffer,
                                  const PaStreamCallbackTimeInfo* /*timeInfo*/,

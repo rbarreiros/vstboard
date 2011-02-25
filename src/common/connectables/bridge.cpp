@@ -27,12 +27,25 @@
 
 using namespace Connectables;
 
+/*!
+  \class Connectables::Bridge
+  \brief used by containers to receive and send messages from and to other containers
+  */
+
+/*!
+  Constructor
+  \param myHost the MainHost
+  \param index object number
+  \param info ObjectInfo description of the object
+  */
 Bridge::Bridge(MainHost *myHost,int index, const ObjectInfo & info) :
         Object(myHost,index, info)
 {
-
 }
 
+/*!
+  hide the output or input pins depending of the bridge type
+  */
 bool Bridge::Open()
 {
     closed=false;

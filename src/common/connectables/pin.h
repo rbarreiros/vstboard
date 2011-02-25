@@ -30,14 +30,6 @@
 #pragma warning( disable : 4100 )
 #endif
 
-class PinMessageEvent : public QEvent
-{
-public:
-    PinMessageEvent(PinMessage::Enum msgType, void* data=0) : QEvent(Event::PinMessage),msgType(msgType),data(data) {}
-    PinMessage::Enum msgType;
-    void* data;
-};
-
 namespace Connectables {
 
     class Object;
@@ -49,51 +41,87 @@ namespace Connectables {
         virtual ~Pin();
 
         virtual void SendMsg(const PinMessage::Enum msgType,void *data=0);
+
+        /*!
+         Message received from another pin
+         \param msgType PinMessage
+         \param data received data
+         */
         virtual void ReceiveMsg(const PinMessage::Enum msgType,void *data=0) {}
+
+        /*!
+          Get the current value (vu meter or parameter value)
+          \return current value
+          */
         virtual float GetValue() {return value;}
 
         void setObjectName(const QString &name);
 
-//        void SetDisplayedText(const QString &txt);
-//        QString GetDisplayedText();
-
+        /*!
+          get the parent Object
+          \return pointer to parent Object
+          */
         Object *GetParentObj() {return parent;}
 
+        /*!
+          get the pin infos
+          \return ConnectionInfo
+          */
         const ConnectionInfo &GetConnectionInfo() const {return connectInfo;}
-        bool event(QEvent *event);
 
         virtual void SetParentModelIndex(const QModelIndex &newParent);
         void SetContainerId(quint16 id);
 
+        /// \return true if visible
         inline bool GetVisible() {return visible;}
         virtual void SetVisible(bool vis);
         void SetBridge(bool bridge);
         void UpdateModelNode();
         void Close();
 
+        /*!
+          Prepare for a new rendering
+          Called one time at the beginning of the loop
+           */
+        virtual void NewRenderLoop() {}
+
     protected:
+        /// ConnectionInfo og the pin
         ConnectionInfo connectInfo;
+
+        /// current value
         float value;
+
+        /// size of each steps (=1/nbvalues)
         float stepSize;
+
+        /// pointer to the parent Object
         Object *parent;
+
+        /// is displayed or not
         bool visible;
+
+        /// index of the parent in the model
         QPersistentModelIndex parentIndex;
+
+        /// index of this pin in the model
         QPersistentModelIndex modelIndex;
 
+        /// global pin mutex
         QMutex objMutex;
+
+        /// true if closed or closing (no send, no receive)
         bool closed;
+
+        /// text to displaye
         QString displayedText;
+
+        /// true if the value changes since the laste view update
         bool valueChanged;
-
-    private:
-//        QMutex txtMutex;
-
 
     public slots:
         virtual void updateView();
 
-
-    signals:
     };
 }
 

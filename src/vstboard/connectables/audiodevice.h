@@ -49,29 +49,16 @@ namespace Connectables {
 
         bool Open();
         bool Close();
-
         float GetCpuUsage();
-
         bool SetObjectInput(AudioDeviceIn *obj);
         bool SetObjectOutput(AudioDeviceOut *obj);
-
-//        static QHash<qint32,QSharedPointer<AudioDevice> >listAudioDevices;
-
         void SetSleep(bool sleeping);
-
-        bool bufferReady;
-
         static bool FindDeviceByName(ObjectInfo &objInfo, PaDeviceInfo *devInfo=0);
 
-        static int countDevicesReady;
-        static int countInputDevices;
-
-//        QWeakPointer<AudioDevice> GetSharedPointer() {return this->sharedPointer;}
-
+        /// global audio devices mutex
         static QMutex listDevMutex;
 
     protected:
-//        QWeakPointer<AudioDevice>sharedPointer;
 
         static int paCallback( const void *inputBuffer, void *outputBuffer,
                                unsigned long framesPerBuffer,
@@ -86,42 +73,77 @@ namespace Connectables {
 
         void DeleteCircualBuffers();
 
+        /// true if the device is currently closing
         bool isClosing;
+
+        /// true if the AudioDeviceOut is closing
         bool devOutClosing;
 
+        /// current sample rate
         float sampleRate;
+
+        /// current buffre size
         unsigned long bufferSize;
 
+        /// pointer to PortAudio stream
         PaStream *stream;
+
+        /// PortAudio device informations
         PaDeviceInfo devInfo;
 
-        AudioDeviceIn *devIn;
-        AudioDeviceOut *devOut;
-
-        bool closed;
-
-        QMutex devicesMutex;
+        /// objcet description
         ObjectInfo objInfo;
 
+        /// pointer to the AudioDeviceIn, can be null
+        AudioDeviceIn *devIn;
+
+        /// pointer to the AudioDeviceOut, can be null
+        AudioDeviceOut *devOut;
+
+        /// true if the device is closed
+        bool closed;
+
+        /// mutex for this device
+        QMutex devicesMutex;
+
+        /// windows mme stream options
         PaWinMmeStreamInfo wmmeStreamInfo;
+
+        /// windows directsound stream options
         PaWinDirectSoundStreamInfo directSoundStreamInfo;
 
+        /// list of input ring buffers
         QList<CircularBuffer*>listCircularBuffersIn;
+
+        /// list of output ring buffers
         QList<CircularBuffer*>listCircularBuffersOut;
 
-        float cpuUsage;
+        /// pointer to the MainHost
         MainHostHost *myHost;
 
+        /// the number of opened devices
+        static int countInputDevices;
+
+        /// the number of devices ready to render. launch a rendering loop when all the devices are ready
+        static int countDevicesReady;
+
+        /// check if this device has been counted in the list of ready devices
+        bool bufferReady;
+
     signals:
+        /*!
+          emitted when the device is opened or closed, used by AudioDevices
+          \param objInfo object description
+          \param inUse true if the device is in use
+          */
         void InUseChanged(const ObjectInfo &objInfo, bool inUse);
 
     public slots:
         void SetSampleRate(float rate=44100.0);
+        void DeleteIfUnused();
 
         friend class AudioDeviceIn;
         friend class AudioDeviceOut;
-
-        void DeleteIfUnused();
     };
 }
 

@@ -125,12 +125,7 @@ AudioBuffer *PinsList::GetBuffer(int pinNumber)
         return 0;
     }
 
-    if(connInfo.direction == PinDirection::Input)
-        return static_cast<AudioPinIn*>(listPins.value(pinNumber))->buffer;
-    if(connInfo.direction == PinDirection::Output)
-        return static_cast<AudioPinOut*>(listPins.value(pinNumber))->buffer;
-
-    return 0;
+    return static_cast<AudioPin*>(listPins.value(pinNumber))->GetBuffer();
 }
 
 AudioBufferD *PinsList::GetBufferD(int pinNumber)
@@ -143,12 +138,7 @@ AudioBufferD *PinsList::GetBufferD(int pinNumber)
         return 0;
     }
 
-    if(connInfo.direction == PinDirection::Input)
-        return static_cast<AudioPinIn*>(listPins.value(pinNumber))->bufferD;
-    if(connInfo.direction == PinDirection::Output)
-        return static_cast<AudioPinOut*>(listPins.value(pinNumber))->bufferD;
-
-    return 0;
+    return static_cast<AudioPin*>(listPins.value(pinNumber))->GetBufferD();
 }
 
 void PinsList::ConnectAllTo(Container* container, PinsList *other, bool hidden)

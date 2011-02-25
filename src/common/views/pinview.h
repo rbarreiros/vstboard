@@ -21,10 +21,14 @@
 #ifndef PINVIEW_H
 #define PINVIEW_H
 
-#include "../precomp.h"
-#include "../globals.h"
-#include "../connectables/connectioninfo.h"
+#include "precomp.h"
+#include "globals.h"
+#include "connectables/connectioninfo.h"
 
+#ifdef _MSC_VER
+#pragma warning( push )
+#pragma warning( disable : 4100 )
+#endif
 
 namespace Connectables {
     class Pin;
@@ -41,13 +45,24 @@ namespace View {
 
         explicit PinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo);
         const ConnectionInfo GetConnectionInfo() const {return connectInfo;}
-        virtual const QPointF pinPos() const;
         void AddCable(CableView *cable);
         void RemoveCable(CableView *cable);
-
-        virtual void UpdateModelIndex(const QModelIndex &index) {}
-        virtual void SetPinModelIndex(QPersistentModelIndex index) {pinIndex = index; UpdateModelIndex(index);}
         void UpdateCablesPosition();
+
+        /*!
+          Called when the model changed
+          \param index the model index of the pin
+          \todo does the parameter can be removed since the index is stored anyway ?
+          */
+        virtual void UpdateModelIndex(const QModelIndex &index) {}
+
+        /*!
+          Set the model index and update the view
+          \param index the new model index
+          */
+        virtual void SetPinModelIndex(QPersistentModelIndex index) {pinIndex = index; UpdateModelIndex(index);}
+
+        virtual const QPointF pinPos() const;
 
     protected:
 
@@ -59,34 +74,58 @@ namespace View {
         void dragLeaveEvent( QGraphicsSceneDragDropEvent  * event );
         void dragMoveEvent ( QGraphicsSceneDragDropEvent * event );
         void dropEvent ( QGraphicsSceneDragDropEvent  * event );
-        void polishEvent();
 
-        QAbstractGraphicsShapeItem *rectBgnd;
-
-        static QBrush highlightBrush;
-
-        QList<CableView *> connectedCables;
-
-        ConnectionInfo connectInfo;
-
-        static QGraphicsLineItem *currentLine;
         void CreateMimeData(QByteArray &bytes);
         void ReadMimeData(QByteArray &bytes, ConnectionInfo &data);
 
+        /// background
+        /// \todo is it used ?
+        QAbstractGraphicsShapeItem *rectBgnd;
+
+        /// highlight brush on mouseover
+        static QBrush highlightBrush;
+
+        /// list of connected cables
+        QList<CableView *> connectedCables;
+
+        /// description of the pin
+        ConnectionInfo connectInfo;
+
+        /// pointer to the model
         QAbstractItemModel *model;
+
+        /// model index of the pin
         QPersistentModelIndex pinIndex;
 
+        /// pin angle in rad
         float pinAngle;
 
+        /// temporary cable for drag&drop
+        static QGraphicsLineItem *currentLine;
+
     signals:
+        /*!
+          emitted when a pin is drag&droped over another one
+          \param outputPin
+          \param inputPin
+          */
         void ConnectPins(ConnectionInfo outputPin, ConnectionInfo inputPin);
+
+        /*!
+          emitted on double click to remove all the connected cables
+          */
         void RemoveCablesFromPin(ConnectionInfo pin);
 
     public slots:
+        /// update the vu-meter, called by a timer
         virtual void updateVu(){}
 
     friend class Cable;
     };
 }
+
+#ifdef _MSC_VER
+#pragma warning( pop )
+#endif
 
 #endif // PINVIEW_H

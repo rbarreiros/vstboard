@@ -33,6 +33,10 @@
     #include "../vst/cvsthost.h"
 #endif
 
+/*!
+  \namespace Connectables
+  \brief classes used by the engine
+*/
 using namespace Connectables;
 
 ObjectFactory::ObjectFactory(MainHost *myHost) :

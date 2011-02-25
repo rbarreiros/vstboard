@@ -23,18 +23,26 @@
 #include "connectables/objectinfo.h"
 #include "mainhost.h"
 
+/*!
+  \class AudioDevices
+  \brief manage the list of audio devices provided by PortAudio
+  */
+
+/*!
+  \param myHost pointer to the MainHost
+  */
 AudioDevices::AudioDevices(MainHost *myHost) :
         QObject(myHost),
         model(0),
         countActiveDevices(0),
         myHost(myHost)
 {
-    //GetModel();
-
     fakeRenderTimer.start(FAKE_RENDER_TIMER_MS);
-
 }
 
+/*!
+  Destructor, close all the opened devices
+  */
 AudioDevices::~AudioDevices()
 {
     foreach(QSharedPointer<Connectables::AudioDevice>ad, listAudioDevices) {
@@ -56,6 +64,10 @@ AudioDevices::~AudioDevices()
     listAudioDevices.clear();
 }
 
+/*!
+  Get the view model of the list
+  \return pointer to the model
+  */
 ListAudioInterfacesModel * AudioDevices::GetModel()
 {
     foreach(QSharedPointer<Connectables::AudioDevice>ad, listAudioDevices) {
@@ -102,6 +114,9 @@ ListAudioInterfacesModel * AudioDevices::GetModel()
     return model;
 }
 
+/*!
+  Create or update the list of devices
+  */
 void AudioDevices::BuildModel()
 {
     if(!model)
@@ -181,6 +196,11 @@ void AudioDevices::BuildModel()
     }
 }
 
+/*!
+  Called when a device is added or removed from a panel
+  \param objInfo object description
+  \param opened true if opened, false if closed
+  */
 void AudioDevices::OnToggleDeviceInUse(const ObjectInfo &objInfo, bool opened)
 {
     for(int i=0; i<model->invisibleRootItem()->rowCount();i++) {

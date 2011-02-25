@@ -33,6 +33,7 @@ namespace Connectables {
         float GetValue();
 
     protected:
+        /// type of the last message transmited
         PinType::Enum valueType;
     };
 }
