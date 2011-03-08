@@ -228,6 +228,7 @@ VstIntPtr VSTCALLBACK CVSTHost::AudioMasterCallback(AEffect *effect, VstInt32 op
 
         default:
             debug(QString("vstcallback %1 not handled").arg(opcode).toAscii())
+            break;
     }
 
     if(!effect) {

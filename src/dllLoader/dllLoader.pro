@@ -23,7 +23,10 @@ SOURCES += \
 
 HEADERS +=
 
-OTHER_FILES += \
-    dllLoader.rc
+win32-msvc* {
+    OTHER_FILES += \
+        dllLoader.rc
+    RC_FILE = dllLoader.rc
+}
 
-RC_FILE = dllLoader.rc
+

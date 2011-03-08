@@ -23,7 +23,9 @@ using namespace Connectables;
   */
 AudioPin::AudioPin(Object *parent, PinDirection::Enum direction, int number, unsigned long bufferSize, bool doublePrecision, bool externalAllocation) :
     Pin(parent,PinType::Audio,direction,number),
-    doublePrecision(doublePrecision)
+    doublePrecision(doublePrecision),
+    buffer(0),
+    bufferD(0)
 {
     if(doublePrecision) {
         bufferD = new AudioBufferD(externalAllocation);
@@ -40,8 +42,10 @@ AudioPin::AudioPin(Object *parent, PinDirection::Enum direction, int number, uns
   */
 AudioPin::~AudioPin()
 {
-    delete buffer;
-    delete bufferD;
+    if(buffer)
+        delete buffer;
+    if(bufferD)
+        delete bufferD;
 }
 
 

@@ -48,8 +48,6 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
     scriptObj = scriptEngine.newQObject(this);
     scriptEngine.globalObject().setProperty("MainHost", scriptObj);
 
-//    objFactory = new Connectables::ObjectFactory(this);
-
     if(!vst::CVSTHost::Get())
         vstHost = new vst::CVSTHost();
     else

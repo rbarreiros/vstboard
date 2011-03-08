@@ -74,12 +74,14 @@ extern "C" {
 
         HMODULE Hcore = LoadLibrary((instDir+L"\\QtCore4.dll").c_str());
         HMODULE Hgui = LoadLibrary((instDir+L"\\QtGui4.dll").c_str());
+        HMODULE Hscript = LoadLibrary((instDir+L"\\QtScript4.dll").c_str());
         HMODULE HwinMigrate = LoadLibrary((instDir+L"\\QtSolutions_MFCMigrationFramework-head.dll").c_str());
 
         HMODULE Hplugin = LoadLibrary((instDir+L"\\VstBoardPlugin.dll").c_str());
         if(!Hplugin) {
             FreeLibrary(Hplugin);
             FreeLibrary(HwinMigrate);
+            FreeLibrary(Hscript);
             FreeLibrary(Hgui);
             FreeLibrary(Hcore);
             MessageBox(NULL,(L"Error while loading "+instDir+L"\\VstBoardPlugin.dll").c_str(),L"VstBoard", MB_OK | MB_ICONERROR);
@@ -90,6 +92,7 @@ extern "C" {
         if(!entryPoint) {
             FreeLibrary(Hplugin);
             FreeLibrary(HwinMigrate);
+            FreeLibrary(Hscript);
             FreeLibrary(Hgui);
             FreeLibrary(Hcore);
             MessageBox(NULL,(instDir+L"\\VstBoardPlugin.dll is not valid").c_str(),L"VstBoard", MB_OK | MB_ICONERROR);
@@ -97,6 +100,7 @@ extern "C" {
         }
 
         FreeLibrary(HwinMigrate);
+        FreeLibrary(Hscript);
         FreeLibrary(Hgui);
         FreeLibrary(Hcore);
 
