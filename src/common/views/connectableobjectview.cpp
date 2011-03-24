@@ -63,7 +63,32 @@ ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel
     layout->addItem(listParametersIn,2,0,Qt::AlignLeft | Qt::AlignTop);
     layout->addItem(listParametersOut,2,1,Qt::AlignRight | Qt::AlignTop);
 
+    setAcceptDrops(true);
+    setCursor(Qt::UpArrowCursor);
 }
 
+void ConnectableObjectView::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
+{
+    //accept fxp files
+    if (event->mimeData()->hasUrls()) {
+        QString fName;
+        QFileInfo info;
 
+        foreach(QUrl url,event->mimeData()->urls()) {
+            fName = url.toLocalFile();
+            info.setFile( fName );
+            if ( info.isFile() && info.isReadable() && (info.suffix()=="fxb" || info.suffix()=="fxp")) {
+                event->setDropAction(Qt::CopyAction);
+                event->accept();
+                return;
+            }
+        }
+    }
+    event->ignore();
+}
 
+void ConnectableObjectView::dropEvent( QGraphicsSceneDragDropEvent *event)
+{
+    QGraphicsWidget::dropEvent(event);
+    event->setAccepted(model->dropMimeData(event->mimeData(), event->proposedAction(), 0, 0, objIndex));
+}

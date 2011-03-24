@@ -85,9 +85,9 @@ void ContainerContent::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
             if ( info.isFile() && info.isReadable() && info.suffix()=="dll" ) {
                 event->setDropAction(Qt::CopyAction);
                 event->accept();
+                return;
             }
         }
-        return;
     }
 #endif
 
@@ -101,7 +101,6 @@ void ContainerContent::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
         event->accept();
         return;
     }
-
     event->ignore();
 }
 

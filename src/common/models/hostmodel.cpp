@@ -208,6 +208,22 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
             break;
         }
 
+        //drop fxp file
+        case NodeType::object :
+        {
+            if (data->hasUrls()) {
+                foreach(QUrl url,data->urls()) {
+                    QString fName = url.toLocalFile();
+                    QFileInfo info;
+                    info.setFile( fName );
+
+                    if ( info.isFile() && info.isReadable() && (info.suffix()=="fxp" || info.suffix()=="fxb") ) {
+                        cntPtr->DropFile(fName);
+                    }
+                }
+            }
+        }
+
         //connect a pin by drag&drop
         case NodeType::pin :
         {

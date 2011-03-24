@@ -244,3 +244,4 @@ void ObjectView::ShrinkNow()
     shrinkAsked=false;
     resize(0,0);
 }
+

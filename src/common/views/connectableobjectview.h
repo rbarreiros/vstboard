@@ -33,8 +33,9 @@ namespace View {
     public:
         ConnectableObjectView(MainHost *myHost,QAbstractItemModel *model,QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
 
-
     protected:
+        void dragEnterEvent( QGraphicsSceneDragDropEvent *event);
+        void dropEvent( QGraphicsSceneDragDropEvent *event);
 //        WId backOri;
 
         QList<CableView*>listCables;

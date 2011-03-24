@@ -151,6 +151,12 @@ namespace Connectables {
         virtual Pin* CreatePin(const ConnectionInfo &info);
         virtual bool IsDirty();
 
+        /*!
+          Called by the model when a file was dropped on the object
+          \return true on success
+          */
+        virtual bool DropFile(QString filename) {return false;}
+
         /// Render the object, can be called multiple times if the rendering needs multiple passes
         virtual void Render() {}
 
