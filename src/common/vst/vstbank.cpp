@@ -289,6 +289,11 @@ bool CFxBank::LoadBank(std::string *pszFile)
              (pBank->fxMagic != chunkBankMagic)))
             throw (int)1;                       /* get out                           */
 
+        patchChunkInfo.pluginUniqueID = pBank->fxID;
+        patchChunkInfo.pluginVersion = pBank->fxVersion;
+        patchChunkInfo.version = pBank->version;
+        patchChunkInfo.numElements = pBank->numPrograms;
+
         if (pBank->fxMagic == bankMagic)      /* if this is a bank of parameters   */
         {
             /* position on 1st program          */
@@ -344,6 +349,9 @@ bool CFxBank::LoadBank(std::string *pszFile)
         bBank = nBank;                        /* and put in new data               */
         nBankLen = (int)tLen;
         bChunk = (pBank->fxMagic == chunkBankMagic);
+
+
+
     }
     catch(...)
     {
@@ -472,5 +480,3 @@ SFxProgram * CFxBank::GetProgram(int nProgNum)
     pProg = (SFxProgram *)pThatProg;
     return pProg;
 }
-
-

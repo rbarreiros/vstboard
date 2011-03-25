@@ -21,6 +21,7 @@
 #include "ceffect.h"
 #include "cvsthost.h"
 #include "../mainhost.h"
+#include "vstbank.h"
 
 using namespace vst;
 
@@ -117,31 +118,71 @@ bool CEffect::Unload()
 /* LoadBank : loads a .fxb file ... IF it's for this effect                  */
 /*****************************************************************************/
 
-//bool CEffect::LoadBank(std::string *name)
-//{
+bool CEffect::LoadBank(std::string *name)
+{
 
-//    try
-//    {
-//        CFxBank fx(name);
-//        if (!fx.IsLoaded())
-//            throw (int)1;
-//    }
-//    catch(...)
-//    {
-//        return false;
-//    }
+    try
+    {
+        CFxBank bank(name);
 
-//    return true;
-//}
+        if (!bank.IsLoaded())
+            throw (int)1;
 
-///*****************************************************************************/
-///* SaveBank : saves current sound bank to a .fxb file                        */
-///*****************************************************************************/
+        if (pEffect->uniqueID != bank.GetFxID()) {
+            debug2(<<"CEffect::LoadBank ID doesn't match");
+            throw (int)1;
+          }
 
-//bool CEffect::SaveBank(std::string * name)
-//{
-//    return false;
-//}
+        EffBeginLoadBank(bank.GetPatchChunkInfo());
+
+        if(bank.IsChunk()) {
+            debug2(<< "CEffect::LoadBank loading chunk  ")
+            if(!(pEffect->flags & effFlagsProgramChunks)) {
+                debug2(<< "CEffect::LoadBank chunk not handled")
+                throw (int)1;
+            }
+            EffSetChunk(bank.GetChunk(),bank.GetChunkSize(),0);
+
+        } else {
+
+            /**
+              \todo how to handle variable number of programs ? how to delete unused programs ?
+            */
+            //pEffect->numPrograms=bank.GetNumPrograms();
+
+            for (int i = 0; i < bank.GetNumPrograms(); i++) {
+                SFxProgram *prog = bank.GetProgram(i);
+
+                VstPatchChunkInfo info;
+                info = *bank.GetPatchChunkInfo();
+                info.numElements=prog->numParams;
+                EffBeginLoadProgram(&info);
+                EffSetProgram(i);
+                EffSetProgramName(prog->prgName);
+                for(int j=0; j< prog->numParams; j++) {
+                    EffSetParameter(j,bank.GetProgParm(i,j));
+                }
+            }
+            EffSetProgram(0);
+
+        }
+    }
+    catch(...)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+/*****************************************************************************/
+/* SaveBank : saves current sound bank to a .fxb file                        */
+/*****************************************************************************/
+
+bool CEffect::SaveBank(std::string * name)
+{
+    return false;
+}
 
 /*****************************************************************************/
 /* EffDispatch : calls an effect's dispatcher                                */

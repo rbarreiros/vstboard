@@ -221,9 +221,11 @@ namespace vst
     class CFxBase
     {
     public:
+        VstPatchChunkInfo *GetPatchChunkInfo() {return &patchChunkInfo;}
 
     protected:
         static bool NeedsBSwap;
+        VstPatchChunkInfo patchChunkInfo;
 
     protected:
         static void SwapBytes(float &f);
