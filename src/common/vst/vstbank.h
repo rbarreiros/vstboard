@@ -88,7 +88,8 @@ namespace vst
     struct SFxProgramBase : public SFxBase
     {
         VstInt32 numParams;                   /* number of parameters              */
-        std::string * prgName;                     /* program name (ASCIIZ)             */
+        //std::string * prgName;                     /* program name (ASCIIZ)             */
+        char prgName[28];
     };
 
     /*****************************************************************************/
@@ -270,8 +271,8 @@ namespace vst
 
         SFxProgram * GetProgram(int nProgNum);
 
-        std::string * GetProgramName(int nProgram);
-        void SetProgramName(int nProgram, std::string *name);
+        char * GetProgramName(int nProgram);
+        void SetProgramName(int nProgram, char *name);
         float GetProgParm(int nProgram, int nParm);
         bool SetProgParm(int nProgram, int nParm, float val = 0.0);
 

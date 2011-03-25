@@ -21,6 +21,10 @@ win32 {
     LIBS += -ldsound
 }
 
+win32-msvc* {
+    PRE_TARGETDEPS += $$top_destdir/common.lib
+}
+
 INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/include
 INCLUDEPATH += $$top_srcdir/$$PORTMIDI_PATH/porttime
 INCLUDEPATH += $$top_srcdir/$$PORTMIDI_PATH/pm_common
@@ -100,7 +104,7 @@ HEADERS += \
 
 FORMS +=
 
-PRECOMPILED_HEADER = ../common/precomp.h
+#PRECOMPILED_HEADER = ../common/precomp.h
 
 OTHER_FILES += \ 
     ../../README.txt \

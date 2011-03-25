@@ -90,7 +90,7 @@ CFxBank::CFxBank(int nChunkSize)
     SetSize(nChunkSize);                    /* set new size                      */
 }
 
-std::string * CFxBank::GetProgramName(int nProgram)
+char * CFxBank::GetProgramName(int nProgram)
 {
     SFxProgram *p = GetProgram(nProgram);
     if (!p)
@@ -99,16 +99,16 @@ std::string * CFxBank::GetProgramName(int nProgram)
     return p->prgName;
 }
 
-void CFxBank::SetProgramName(int nProgram, std::string *name)
+void CFxBank::SetProgramName(int nProgram, char *name)
 {
     SFxProgram *p = GetProgram(nProgram);
     if (!p)
         return;
 
-    //strncpy(p->prgName, name, sizeof(p->prgName));
-    //p->prgName[sizeof(p->prgName)-1] = '\0';
+    strncpy(p->prgName, name, sizeof(p->prgName));
+    p->prgName[sizeof(p->prgName)-1] = '\0';
 
-    p->prgName = name;
+//    p->prgName = name;
 }
 
 float CFxBank::GetProgParm(int nProgram, int nParm)

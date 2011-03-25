@@ -19,6 +19,10 @@ win32 {
     LIBS += -lws2_32
 }
 
+win32-msvc* {
+    PRE_TARGETDEPS += $$top_destdir/common.lib
+}
+
 win32-g++ {
     DEFINES += WINVER=0x0501
     DEFINES += _WIN32_WINNT=0x0501

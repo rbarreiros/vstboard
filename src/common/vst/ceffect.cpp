@@ -117,31 +117,31 @@ bool CEffect::Unload()
 /* LoadBank : loads a .fxb file ... IF it's for this effect                  */
 /*****************************************************************************/
 
-bool CEffect::LoadBank(std::string *name)
-{
+//bool CEffect::LoadBank(std::string *name)
+//{
 
-    try
-    {
-        CFxBank fx(name);                     /* load the bank                     */
-        if (!fx.IsLoaded())                  /* if error loading                  */
-            throw (int)1;
-    }
-    catch(...)                              /* if any error occured              */
-    {
-        return false;                         /* return NOT!!!                     */
-    }
+//    try
+//    {
+//        CFxBank fx(name);
+//        if (!fx.IsLoaded())
+//            throw (int)1;
+//    }
+//    catch(...)
+//    {
+//        return false;
+//    }
 
-    return true;                            /* pass back OK                      */
-}
+//    return true;
+//}
 
-/*****************************************************************************/
-/* SaveBank : saves current sound bank to a .fxb file                        */
-/*****************************************************************************/
+///*****************************************************************************/
+///* SaveBank : saves current sound bank to a .fxb file                        */
+///*****************************************************************************/
 
-bool CEffect::SaveBank(std::string * name)
-{
-    return false;                           /* return error for now              */
-}
+//bool CEffect::SaveBank(std::string * name)
+//{
+//    return false;
+//}
 
 /*****************************************************************************/
 /* EffDispatch : calls an effect's dispatcher                                */

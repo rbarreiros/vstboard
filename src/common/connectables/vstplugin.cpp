@@ -24,6 +24,7 @@
 #include "../mainwindow.h"
 #include "../vst/cvsthost.h"
 #include "../views/vstpluginwindow.h"
+#include "../vst/vstbank.h"
 
 using namespace Connectables;
 
@@ -677,8 +678,38 @@ void VstPlugin::OnParameterChanged(ConnectionInfo pinInfo, float value)
                 return;
             }
             EffSetParameter(pinInfo.pinNumber,value);
+
+//            if(listParameterPinOut->listPins.contains(pinInfo.pinNumber))
+//                static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(pinInfo.pinNumber))->ChangeValue(value);
         }
     }
+}
+
+bool VstPlugin::DropFile(const QString &filename)
+{
+    try
+    {
+        vst::CFxBank fx(&filename.toStdString());
+        if (!fx.IsLoaded())
+            throw (int)1;
+
+        //load program 0
+        if(fx.GetNumPrograms()>0) {
+            for(int index=0; index<fx.GetNumParams(); index++) {
+                if(listParameterPinIn->listPins.contains(index)) {
+                    float val = fx.GetProgParm(0,index);
+                    static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(index))->ChangeValue( val );
+                }
+            }
+        }
+
+    }
+    catch(...)
+    {
+        return false;
+    }
+
+    return true;
 }
 
 Pin* VstPlugin::CreatePin(const ConnectionInfo &info)

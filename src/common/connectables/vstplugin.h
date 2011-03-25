@@ -62,7 +62,7 @@ namespace Connectables {
         void GetContainerAttribs(ObjectContainerAttribs &attr);
         Pin* CreatePin(const ConnectionInfo &info);
 
-        bool DropFile(QString filename);
+        bool DropFile(const QString &filename);
 
         QDataStream & toStream (QDataStream &) const;
         QDataStream & fromStream (QDataStream &);

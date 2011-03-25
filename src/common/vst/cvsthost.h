@@ -31,7 +31,7 @@
 
 #include "../precomp.h"
 #include "const.h"
-#include "vstbank.h"
+//#include "vstbank.h"
 
 namespace vst
 {
