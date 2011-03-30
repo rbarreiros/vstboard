@@ -227,7 +227,7 @@ bool CFxBank::SetSize(int nPrograms, int nParams)
 
 bool CFxBank::SetSize(int nChunkSize)
 {
-    int nTotLen = nChunkSize; //((int)((SFxBankChunk *)0)->chunk) + nChunkSize;
+    int nTotLen = ((int)((SFxBankChunk *)0)->chunk) + nChunkSize;
     unsigned char *nBank = new unsigned char[nTotLen];
     if (!nBank)
         return false;
@@ -372,6 +372,7 @@ bool CFxBank::SaveBank(std::string *pszFile)
 {
     if (!IsLoaded())
         return false;
+
     /* create internal copy for mod      */
     unsigned char *nBank = new unsigned char[nBankLen];
     if (!nBank)                             /* if impossible                     */

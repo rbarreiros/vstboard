@@ -560,8 +560,8 @@ VstInt32 Vst::getChunk (void** data, bool isPreset)
     SetupFile::ToStream(myHost,tmp);
     ProjectFile::ToStream(myHost,tmp);
 
-    chunkData = new char[tmpStream.size()+1];
-    memcpy(chunkData, tmpStream.data(), tmpStream.size()+1);
+    chunkData = new char[tmpStream.size()];
+    memcpy(chunkData, tmpStream.data(), tmpStream.size());
     *data=chunkData;
-    return tmpStream.size()+1;
+    return tmpStream.size();
 }
