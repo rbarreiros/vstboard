@@ -71,6 +71,8 @@ Vst::Vst (audioMasterCallback audioMaster) :
     if(qtTranslator.load("qt_" + QLocale::system().name(), ":/translations/"))
         qApp->installTranslator(&qtTranslator);
 
+    if(commonTranslator.load("common_" + QLocale::system().name(), ":/translations/"))
+        qApp->installTranslator(&commonTranslator);
     if(myappTranslator.load("vstboard_" + QLocale::system().name(), ":/translations/"))
         qApp->installTranslator(&myappTranslator);
 

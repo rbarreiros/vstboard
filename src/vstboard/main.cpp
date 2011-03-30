@@ -110,6 +110,10 @@ int main(int argc, char *argv[])
     if(qtTranslator.load("qt_" + QLocale::system().name(), ":/translations/"))
         qApp->installTranslator(&qtTranslator);
 
+    QTranslator commonTranslator;
+    if(commonTranslator.load("common_" + QLocale::system().name(), ":/translations/"))
+        qApp->installTranslator(&commonTranslator);
+
     QTranslator myappTranslator;
     if(myappTranslator.load("vstboard_" + QLocale::system().name(), ":/translations/"))
         qApp->installTranslator(&myappTranslator);

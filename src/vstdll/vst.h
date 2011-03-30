@@ -138,6 +138,7 @@ protected:
         void deleteChunkData();
 
         QTranslator qtTranslator;
+        QTranslator commonTranslator;
         QTranslator myappTranslator;
     signals:
         void HostChangedProg(int prog);
