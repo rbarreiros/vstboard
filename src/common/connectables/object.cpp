@@ -431,15 +431,15 @@ void Object::SetContainerId(quint16 id)
 /*!
   Update the view
   */
-void Object::UpdateModelNode()
+QStandardItem * Object::UpdateModelNode()
 {
     if(!modelIndex.isValid())
-        return;
+        return 0;
 
     QStandardItem *modelNode = myHost->GetModel()->itemFromIndex(modelIndex);
     if(!modelNode) {
         debug("Object::UpdateModelNode node not found")
-        return;
+        return 0;
     }
 
     modelNode->setData(QVariant::fromValue(objInfo), UserRoles::objInfo);
@@ -448,6 +448,8 @@ void Object::UpdateModelNode()
     foreach(PinsList *lst, pinLists) {
         lst->UpdateModelNode(modelNode);
     }
+
+    return modelNode;
 }
 
 /*!

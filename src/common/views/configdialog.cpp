@@ -34,15 +34,38 @@ ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
     ui->defaultVstPath->addItem(QIcon(":/img16x16/folder.png"), tr("From last session"), "fromLastSession");
     ui->defaultVstPath->addItem(tr("Custom path"));
 
-    QString vstPath = myHost->GetSetting("defaultVstPath", "systemDefault").toString();
-    if(vstPath == "systemDefault" || vstPath == "fromLastSession")
-        ui->defaultVstPath->setCurrentIndex( ui->defaultVstPath->findData( vstPath ) );
-    else
-        ui->defaultVstPath->setCurrentIndex( ui->defaultVstPath->findText( vstPath ) );
-
-
     connect( ui->defaultVstPath, SIGNAL(currentIndexChanged(int)),
              this, SLOT(onVstPathIndexChanged(int)));
+
+    QString vstPath = myHost->GetSetting("defaultVstPath", "systemDefault").toString();
+    if(vstPath == "systemDefault" || vstPath == "fromLastSession") {
+        ui->defaultVstPath->setCurrentIndex( ui->defaultVstPath->findData( vstPath ) );
+    } else {
+        if(ui->defaultVstPath->findText(vstPath) == -1)
+            ui->defaultVstPath->addItem(vstPath);
+        ui->defaultVstPath->setCurrentIndex( ui->defaultVstPath->findText( vstPath ) );
+    }
+
+    onVstPathIndexChanged(ui->defaultVstPath->currentIndex());
+
+
+//bank path
+    ui->defaultBankPath->addItem(QIcon(":/img16x16/folder.png"), tr("From last session"), "fromLastSession");
+    ui->defaultBankPath->addItem(tr("Custom path"));
+
+    connect( ui->defaultBankPath, SIGNAL(currentIndexChanged(int)),
+             this, SLOT(onBankPathIndexChanged(int)));
+
+    QString bankPath = myHost->GetSetting("defaultBankPath", "fromLastSession").toString();
+    if(bankPath == "fromLastSession") {
+        ui->defaultBankPath->setCurrentIndex( ui->defaultBankPath->findData( bankPath ) );
+    } else {
+        if(ui->defaultBankPath->findText(bankPath) == -1)
+            ui->defaultBankPath->addItem(bankPath);
+        ui->defaultBankPath->setCurrentIndex( ui->defaultBankPath->findText( bankPath ) );
+    }
+
+    onBankPathIndexChanged(ui->defaultBankPath->currentIndex());
 
 //setup file
     ui->defaultSetup->addItem(QIcon(":/img16x16/empty.png"), tr("Empty setup"), "empty");
@@ -52,21 +75,19 @@ ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
         ui->defaultSetup->addItem(str);
     }
 
+    connect( ui->defaultSetup, SIGNAL(currentIndexChanged(int)),
+             this, SLOT(onSetupIndexChanged(int)));
+
     QString setupFile = myHost->GetSetting("defaultSetupFile","fromLastSession").toString();
     if(setupFile == "empty" || setupFile == "fromLastSession") {
         ui->defaultSetup->setCurrentIndex( ui->defaultSetup->findData( setupFile ) );
     } else {
-        int i = ui->defaultSetup->findText( setupFile );
-        if(i == -1) {
+        if(ui->defaultSetup->findText(setupFile) == -1)
             ui->defaultSetup->addItem(setupFile);
-            i = ui->defaultSetup->findText( setupFile );
-        }
-        ui->defaultSetup->setCurrentIndex( i );
+        ui->defaultSetup->setCurrentIndex( ui->defaultSetup->findText( setupFile ) );
     }
 
-    connect( ui->defaultSetup, SIGNAL(currentIndexChanged(int)),
-             this, SLOT(onSetupIndexChanged(int)));
-
+    onSetupIndexChanged(ui->defaultSetup->currentIndex());
 
 //project file
     ui->defaultProject->addItem(QIcon(":/img16x16/empty.png"), tr("Empty project"), "empty");
@@ -76,20 +97,19 @@ ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
         ui->defaultProject->addItem(str);
     }
 
+    connect( ui->defaultProject, SIGNAL(currentIndexChanged(int)),
+             this, SLOT(onProjectIndexChanged(int)));
+
     QString projectFile = myHost->GetSetting("defaultProjectFile","fromLastSession").toString();
     if(projectFile == "empty" || projectFile == "fromLastSession") {
         ui->defaultProject->setCurrentIndex( ui->defaultProject->findData( projectFile ) );
     } else {
-        int i = ui->defaultProject->findText( projectFile );
-        if(i == -1) {
+        if(ui->defaultProject->findText(projectFile) == -1)
             ui->defaultProject->addItem(projectFile);
-            i = ui->defaultProject->findText( projectFile );
-        }
-        ui->defaultProject->setCurrentIndex( i );
+        ui->defaultProject->setCurrentIndex( ui->defaultProject->findText( projectFile ) );
     }
 
-    connect( ui->defaultProject, SIGNAL(currentIndexChanged(int)),
-             this, SLOT(onProjectIndexChanged(int)));
+    onProjectIndexChanged(ui->defaultProject->currentIndex());
 
     int index=0;
     ui->bufferSize->setVisible(false);
@@ -136,6 +156,16 @@ void ConfigDialog::onVstPathIndexChanged(int index)
         ui->defaultVstPath->setEditable(false);
     } else {
         ui->defaultVstPath->setEditable(true);
+    }
+}
+
+void ConfigDialog::onBankPathIndexChanged(int index)
+{
+    QString txt = ui->defaultBankPath->itemData(index).toString();
+    if(txt == "fromLastSession") {
+        ui->defaultBankPath->setEditable(false);
+    } else {
+        ui->defaultBankPath->setEditable(true);
     }
 }
 
@@ -199,6 +229,17 @@ const QString ConfigDialog::defaultVstPath(MainHost *myHost)
     }
 
     return vstPath;
+}
+
+const QString ConfigDialog::defaultBankPath(MainHost *myHost)
+{
+    QString bankPath = myHost->GetSetting("defaultBankPath","fromLastSession").toString();
+
+    if(bankPath == "fromLastSession") {
+        bankPath = myHost->GetSetting("lastBankPath","").toString();
+    }
+
+    return bankPath;
 }
 
 const float ConfigDialog::defaultSampleRate(MainHost *myHost)
@@ -265,6 +306,23 @@ void ConfigDialog::accept()
         }
     }
 
+//bank directory
+    QString bankDir = ui->defaultBankPath->itemData( ui->defaultBankPath->currentIndex() ).toString();
+    if(bankDir != "fromLastSession") {
+        bankDir = ui->defaultBankPath->currentText();
+        QDir dir;
+        if(bankDir.isEmpty() || !dir.exists(bankDir)) {
+            QMessageBox msg(QMessageBox::Critical,
+                            tr("Error"),
+                            tr("Bank path is not a valid directory"),
+                            QMessageBox::Ok,
+                            this);
+            msg.exec();
+            ui->defaultBankPath->setFocus();
+            return;
+        }
+    }
+
 //setup file
     QString setupFile =  ui->defaultSetup->itemData( ui->defaultSetup->currentIndex() ).toString();
     if(setupFile != "empty" && setupFile != "fromLastSession") {
@@ -301,6 +359,7 @@ void ConfigDialog::accept()
 
 //default files
     myHost->SetSetting("defaultVstPath", vstDir );
+    myHost->SetSetting("defaultBankPath", bankDir );
     myHost->SetSetting("defaultSetupFile", setupFile );
     myHost->SetSetting("defaultProjectFile", projectFile );
 
@@ -337,60 +396,98 @@ void ConfigDialog::changeEvent(QEvent *e)
 
 void ConfigDialog::on_browseVst_clicked()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Default Vst path"), "", tr("Directory (*.)"));
+    QFileDialog fileDlg( this, tr("Default Vst path"), defaultBankPath(myHost), tr("Directory (*.)") );
+    fileDlg.setFileMode(QFileDialog::Directory);
 
-    if(fileName.isEmpty())
+    QString filename;
+    if (fileDlg.exec())
+        filename = fileDlg.selectedFiles().value(0);
+
+    if(filename.isEmpty())
         return;
 
-    if(ui->defaultVstPath->findText(fileName) == -1)
-        ui->defaultVstPath->addItem(fileName);
-    ui->defaultVstPath->setCurrentIndex( ui->defaultVstPath->findText(fileName) );
+    if(ui->defaultVstPath->findText(filename) == -1)
+        ui->defaultVstPath->addItem(filename);
+    ui->defaultVstPath->setCurrentIndex( ui->defaultVstPath->findText(filename) );
+    myHost->SetSetting("defaultVstPath", filename );
 }
 
 void ConfigDialog::on_browseSetup_clicked()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Default setup file"), "", tr("Setup file (*.%1)").arg(SETUP_FILE_EXTENSION));
+    QFileDialog fileDlg( this, tr("Default setup file"), defaultSetupFile(myHost), tr("Setup file (*.%1)").arg(SETUP_FILE_EXTENSION) );
+    fileDlg.setFileMode(QFileDialog::ExistingFile);
+    fileDlg.setDefaultSuffix(SETUP_FILE_EXTENSION);
 
-    if(fileName.isEmpty())
+    QString filename;
+    if (fileDlg.exec())
+        filename = fileDlg.selectedFiles().value(0);
+
+    if(filename.isEmpty())
         return;
 
-    if(!fileName.endsWith(SETUP_FILE_EXTENSION)) {
+    if(!filename.endsWith(SETUP_FILE_EXTENSION)) {
         QMessageBox msgBox;
         msgBox.setText(tr("Wrong file extension."));
         msgBox.exec();
         return;
     }
 
-    AddRecentSetupFile(fileName,myHost);
+    AddRecentSetupFile(filename,myHost);
 
-    int i = ui->defaultSetup->findText(fileName);
+    int i = ui->defaultSetup->findText(filename);
     if(i == -1) {
-        ui->defaultSetup->addItem(fileName);
-        i = ui->defaultSetup->findText(fileName);
+        ui->defaultSetup->addItem(filename);
+        i = ui->defaultSetup->findText(filename);
     }
     ui->defaultSetup->setCurrentIndex( i );
+    myHost->SetSetting("defaultSetupFile", filename );
 }
 
 void ConfigDialog::on_browseProject_clicked()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Default setup file"), "", tr("Setup file (*.%1)").arg(PROJECT_FILE_EXTENSION));
+    QFileDialog fileDlg( this, tr("Default project file"), defaultSetupFile(myHost), tr("Project file (*.%1)").arg(PROJECT_FILE_EXTENSION) );
+    fileDlg.setFileMode(QFileDialog::ExistingFile);
+    fileDlg.setDefaultSuffix(PROJECT_FILE_EXTENSION);
 
-    if(fileName.isEmpty())
+    QString filename;
+    if (fileDlg.exec())
+        filename = fileDlg.selectedFiles().value(0);
+
+    if(filename.isEmpty())
         return;
 
-    if(!fileName.endsWith(PROJECT_FILE_EXTENSION)) {
+    if(!filename.endsWith(PROJECT_FILE_EXTENSION)) {
         QMessageBox msgBox;
         msgBox.setText(tr("Wrong file extension."));
         msgBox.exec();
         return;
     }
 
-    AddRecentProjectFile(fileName,myHost);
+    AddRecentProjectFile(filename,myHost);
 
-    int i = ui->defaultProject->findText(fileName);
+    int i = ui->defaultProject->findText(filename);
     if(i == -1) {
-        ui->defaultProject->addItem(fileName);
-        i = ui->defaultProject->findText(fileName);
+        ui->defaultProject->addItem(filename);
+        i = ui->defaultProject->findText(filename);
     }
     ui->defaultProject->setCurrentIndex( i );
+    myHost->SetSetting("defaultProjectFile", filename );
+}
+
+void ConfigDialog::on_browseBank_clicked()
+{
+    QFileDialog fileDlg( this, tr("Default Bank path"), defaultBankPath(myHost), tr("Directory (*.)") );
+    fileDlg.setFileMode(QFileDialog::Directory);
+
+    QString filename;
+    if (fileDlg.exec())
+        filename = fileDlg.selectedFiles().value(0);
+
+    if(filename.isEmpty())
+        return;
+
+    if(ui->defaultBankPath->findText(filename) == -1)
+        ui->defaultBankPath->addItem(filename);
+    ui->defaultBankPath->setCurrentIndex( ui->defaultBankPath->findText(filename) );
+    myHost->SetSetting("defaultBankPath", filename );
 }

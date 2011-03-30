@@ -36,6 +36,7 @@ public:
     static const QString defaultSetupFile(MainHost *myHost);
     static const QString defaultProjectFile(MainHost *myHost);
     static const QString defaultVstPath(MainHost *myHost);
+    static const QString defaultBankPath(MainHost *myHost);
     static void AddRecentSetupFile(const QString &file,MainHost *myHost);
     static void AddRecentProjectFile(const QString &file,MainHost *myHost);
 
@@ -56,8 +57,10 @@ private slots:
     void on_browseSetup_clicked();
     void on_browseVst_clicked();
     void onVstPathIndexChanged(int index);
+    void onBankPathIndexChanged(int index);
     void onSetupIndexChanged(int index);
     void onProjectIndexChanged(int index);
+    void on_browseBank_clicked();
 };
 
 #endif // CONFIGDIALOG_H

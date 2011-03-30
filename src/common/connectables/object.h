@@ -140,7 +140,7 @@ namespace Connectables {
         virtual QDataStream & toStream (QDataStream &) const;
         virtual QDataStream & fromStream (QDataStream &);
         virtual void SetContainerId(quint16 id);
-        virtual void UpdateModelNode();
+        virtual QStandardItem * UpdateModelNode();
         virtual void SetBridgePinsInVisible(bool visible);
         virtual void SetBridgePinsOutVisible(bool visible);
         virtual void CopyProgram(int ori, int dest);
@@ -150,12 +150,6 @@ namespace Connectables {
         virtual void GetContainerAttribs(ObjectContainerAttribs &attr);
         virtual Pin* CreatePin(const ConnectionInfo &info);
         virtual bool IsDirty();
-
-        /*!
-          Called by the model when a file was dropped on the object
-          \return true on success
-          */
-        virtual bool DropFile(const QString &filename) {return false;}
 
         /// Render the object, can be called multiple times if the rendering needs multiple passes
         virtual void Render() {}
@@ -287,6 +281,9 @@ namespace Connectables {
 
         /// to hide the editor window from another thread
         virtual void OnHideEditor() {}
+
+        /// save file asked by the view
+        virtual void SaveBank(const QString & filename) {}
     };
 }
 

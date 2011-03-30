@@ -57,15 +57,6 @@ ObjectView::ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsIte
     listBridge(0)
 {
 //    setFocusPolicy(Qt::StrongFocus);
-
-    actDel = new QAction(QIcon(":/img16x16/delete.png"),tr("Delete"),this);
-    actDel->setShortcut( Qt::Key_Delete );
-    actDel->setShortcutContext(Qt::WidgetShortcut);
-    connect(actDel,SIGNAL(triggered()),
-            this,SLOT(close()));
-    addAction(actDel);
-
-
 //    setAutoFillBackground(true);
 }
 
@@ -83,6 +74,9 @@ ObjectView::~ObjectView()
   */
 void ObjectView::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
+    if(actions().size()==0)
+        return;
+
     QMenu menu;
     menu.exec(actions(),event->screenPos(),actions().at(0),event->widget());
 }
@@ -98,8 +92,13 @@ void ObjectView::SetModelIndex(QPersistentModelIndex index)
         SetErrorMessage("object not loaded");
     }
 
-    if(info.nodeType == NodeType::bridge) {
-        actDel->setEnabled(false);
+    if(info.nodeType != NodeType::bridge) {
+        actDel = new QAction(QIcon(":/img16x16/delete.png"),tr("Delete"),this);
+        actDel->setShortcut( Qt::Key_Delete );
+        actDel->setShortcutContext(Qt::WidgetShortcut);
+        connect(actDel,SIGNAL(triggered()),
+                this,SLOT(close()));
+        addAction(actDel);
     }
 
     objIndex = index;

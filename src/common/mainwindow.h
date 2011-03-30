@@ -50,6 +50,7 @@ protected:
     ListToolsModel *listToolsModel;
 
     QFileSystemModel *listVstPluginsModel;
+    QFileSystemModel *listVstBanksModel;
     View::SolverScene *solverScene;
 
     bool userWantsToUnloadProject();

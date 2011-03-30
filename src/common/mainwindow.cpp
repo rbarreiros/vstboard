@@ -85,6 +85,16 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     listVstPluginsModel->setRootPath(ConfigDialog::defaultVstPath(myHost));
     ui->VstBrowser->setModel(listVstPluginsModel);
 
+    listVstBanksModel = new QFileSystemModel(this);
+    listVstBanksModel->setReadOnly(true);
+    listVstBanksModel->setResolveSymlinks(true);
+    QStringList bankFilter;
+    bankFilter << "*.fxb";
+    bankFilter << "*.fxp";
+    listVstBanksModel->setNameFilters(bankFilter);
+    listVstBanksModel->setNameFilterDisables(false);
+    listVstBanksModel->setRootPath(ConfigDialog::defaultBankPath(myHost));
+    ui->BankBrowser->setModel(listVstBanksModel);
 #endif
 
     mySceneView = new View::SceneView(myHost, myHost->objFactory, ui->hostView, ui->projectView, ui->programView, ui->groupView, this);
@@ -395,6 +405,7 @@ void MainWindow::writeSettings()
     myHost->SetSetting("MainWindow/planelGroup", ui->actionGroup_panel->isChecked());
 
     myHost->SetSetting("lastVstPath", ui->VstBrowser->path());
+    myHost->SetSetting("lastBankPath", ui->BankBrowser->path());
     ui->Programs->writeSettings(myHost);
     //settings.sync();
 }
@@ -404,6 +415,7 @@ void MainWindow::readSettings()
     QList<QDockWidget*>listDocks;
     listDocks << ui->dockTools;
     listDocks << ui->dockVstBrowser;
+    listDocks << ui->dockBankBrowser;
     listDocks << ui->dockPrograms;
     foreach(QDockWidget *dock, listDocks) {
         ui->menuView->addAction(dock->toggleViewAction());
@@ -494,6 +506,7 @@ void MainWindow::resetSettings()
     QList<QDockWidget*>listDocksVisible;
     listDocksVisible << ui->dockTools;
     listDocksVisible << ui->dockVstBrowser;
+    listDocksVisible << ui->dockBankBrowser;
     listDocksVisible << ui->dockPrograms;
     foreach(QDockWidget *dock, listDocksVisible) {
         dock->setFloating(false);
@@ -512,6 +525,7 @@ void MainWindow::resetSettings()
 
     addDockWidget(Qt::LeftDockWidgetArea,  ui->dockTools);
     addDockWidget(Qt::LeftDockWidgetArea,  ui->dockVstBrowser);
+    addDockWidget(Qt::LeftDockWidgetArea,  ui->dockBankBrowser);
 
     addDockWidget(Qt::RightDockWidgetArea,  ui->dockPrograms);
     addDockWidget(Qt::RightDockWidgetArea,  ui->dockSolver);

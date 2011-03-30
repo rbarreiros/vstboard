@@ -205,7 +205,7 @@ bool CFxBank::SetSize(int nPrograms, int nParams)
     memset(nBank, 0, nTotLen);              /* initialize new bank               */
     SFxBank *pBank = (SFxBank *)bBank;
     pBank->chunkMagic = cMagic;
-    pBank->byteSize = 0;
+    pBank->byteSize = nTotLen-8;
     pBank->fxMagic = bankMagic;
     pBank->version = MyVersion;
     pBank->numPrograms = nPrograms;
@@ -215,7 +215,7 @@ bool CFxBank::SetSize(int nPrograms, int nParams)
     {
         SFxProgram * pProg = (SFxProgram *)(bProg + i * nProgLen);
         pProg->chunkMagic = cMagic;
-        pProg->byteSize = 0;
+        pProg->byteSize = 0.f;
         pProg->fxMagic = fMagic;
         pProg->version = 1;
         pProg->numParams = nParams;

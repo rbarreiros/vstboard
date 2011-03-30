@@ -96,7 +96,8 @@ SOURCES += \
     connectables/script.cpp \
     views/splash.cpp \
     views/solverscene.cpp \
-    connectables/audiopin.cpp
+    connectables/audiopin.cpp \
+    views/vstpluginview.cpp
 
 HEADERS  += \
     globals.h \
@@ -162,7 +163,8 @@ HEADERS  += \
     connectables/script.h \
     views/splash.h \
     views/solverscene.h \
-    connectables/audiopin.h
+    connectables/audiopin.h \
+    views/vstpluginview.h
 
 FORMS += \
     views/configdialog.ui \

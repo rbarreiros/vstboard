@@ -73,24 +73,26 @@ QStringList HostModel::mimeTypes () const
 */
 bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, int row, int column, const QModelIndex & parent )
 {
-    QSharedPointer<Connectables::Container> cntPtr;
-    QModelIndex rootIndex = parent.sibling(parent.row(),0);
-    if(parent.isValid()) {
-    //    QSharedPointer<Connectables::Container> cntPtr = Connectables::ObjectFactory::Get()->GetObjectFromId( rootIndex.data(UserRoles::value).toInt() ).staticCast<Connectables::Container>();
-        cntPtr = myHost->objFactory->GetObj(rootIndex).staticCast<Connectables::Container>();
-    }
 
-    if(cntPtr.isNull()) {
-        debug(QString("HostModel::dropMimeData container not found").toAscii())
+    QModelIndex index = parent.sibling(parent.row(),0);
+    if(!index.isValid()) {
+        debug("HostModel::dropMimeData rootIndex not valid")
         return false;
     }
-
-    ObjectInfo info = rootIndex.data(UserRoles::objInfo).value<ObjectInfo>();
+    ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
 
     switch(info.nodeType) {
 
         case NodeType::container :
         {
+            QSharedPointer<Connectables::Container> cntPtr;
+            if(parent.isValid())
+                cntPtr = myHost->objFactory->GetObj(index).staticCast<Connectables::Container>();
+            if(cntPtr.isNull()) {
+                debug(QString("HostModel::dropMimeData container not found").toAscii())
+                return false;
+            }
+
             if(data->hasFormat("application/x-qstandarditemmodeldatalist")) {
                 QStandardItemModel mod;
                 mod.dropMimeData(data,action,0,0,QModelIndex());
@@ -211,15 +213,30 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
         //drop fxp file
         case NodeType::object :
         {
-            if (data->hasUrls()) {
-                foreach(QUrl url,data->urls()) {
-                    QString fName = url.toLocalFile();
-                    QFileInfo info;
-                    info.setFile( fName );
+            if(info.objType == ObjType::VstPlugin) {
+                QSharedPointer<Connectables::VstPlugin> vstPtr;
+                if(parent.isValid())
+                    vstPtr = myHost->objFactory->GetObj(index).staticCast<Connectables::VstPlugin>();
+                if(vstPtr.isNull()) {
+                    debug(QString("HostModel::dropMimeData vstplugin not found").toAscii())
+                    return false;
+                }
 
-                    if ( info.isFile() && info.isReadable() && (info.suffix()=="fxp" || info.suffix()=="fxb") ) {
-                        cntPtr->DropFile(fName);
+                if (data->hasUrls()) {
+                    foreach(QUrl url,data->urls()) {
+                        QString fName = url.toLocalFile();
+                        QFileInfo info;
+                        info.setFile( fName );
+                        if ( !info.isFile() || !info.isReadable() )
+                            continue;
+
+                        if( info.suffix()=="fxb" && vstPtr->LoadBank(fName) ) {
+                            QStandardItem *item = itemFromIndex(index);
+                            if(item)
+                                item->setData(fName,UserRoles::bankFile);
+                        }
                     }
+                    return true;
                 }
             }
         }
@@ -228,10 +245,10 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
         case NodeType::pin :
         {
             if(data->hasFormat("application/x-pin")) {
-                ConnectionInfo parentInfo = rootIndex.data(UserRoles::connectionInfo).value<ConnectionInfo>();
+                ConnectionInfo parentInfo = index.data(UserRoles::connectionInfo).value<ConnectionInfo>();
 
                 //                  pin   . listpin .obj    . container
-                QModelIndex index = rootIndex.parent().parent().parent();
+                QModelIndex index = index.parent().parent().parent();
                 if(parentInfo.bridge)
                     index=index.parent();
 
@@ -289,6 +306,14 @@ bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int
 
 //            if(role == UserRoles::editorVisible)
 //                objPtr->OnEditorVisibilityChanged( value.toBool() );
+
+            if(role == UserRoles::bankFile) {
+                objPtr->SaveBank( value.toString() );
+                QStandardItem *item = itemFromIndex(index);
+                if(item)
+                    item->setData(value,UserRoles::bankFile);
+                return true;
+            }
             break;
         }
 

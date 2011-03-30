@@ -400,14 +400,33 @@ bool VstPlugin::Open()
 
     //create all parameters pins
     for(int i=0;i<nbParam;i++) {
+        //input pins
         ParameterPinIn *pin=0;
         if(listParameterPinIn->listPins.contains(i)) {
             pin = static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(i));
         } else {
             pin = static_cast<ParameterPinIn*>(listParameterPinIn->AddPin(i));
         }
+        if(!pin) {
+            debug2(<<"VstPlugin::Open ParameterPinIn"<<i<<"not created")
+            return false;
+        }
         pin->SetDefaultVisible(defVisible);
         pin->SetNameCanChange(nameCanChange);
+
+        //output pins
+//        ParameterPinOut *pinOut=0;
+//        if(listParameterPinOut->listPins.contains(i)) {
+//            pinOut = static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(i));
+//        } else {
+//            pinOut = static_cast<ParameterPinOut*>(listParameterPinOut->AddPin(i));
+//        }
+//        if(!pinOut) {
+//            debug2(<<"VstPlugin::Open ParameterPinOut"<<i<<"not created")
+//            return false;
+//        }
+//        pinOut->SetDefaultVisible(defVisible);
+//        pinOut->SetNameCanChange(nameCanChange);
     }
 
     Object::Open();
@@ -588,15 +607,19 @@ VstIntPtr VstPlugin::OnMasterCallback(long opcode, long index, long value, void 
                 case LearningMode::unlearn :
                     if(listParameterPinIn->listPins.contains(index))
                         static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(index))->SetVisible(false);
-//                    listParameterPinIn->AsyncRemovePin(index);
+//                    if(listParameterPinOut->listPins.contains(index))
+//                        static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(index))->SetVisible(false);
                     break;
                 case LearningMode::learn :
                     if(listParameterPinIn->listPins.contains(index))
                         static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(index))->SetVisible(true);
-//                    listParameterPinIn->AsyncAddPin(index);
+//                    if(listParameterPinOut->listPins.contains(index))
+//                        static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(index))->SetVisible(true);
                 case LearningMode::off :
                     if(listParameterPinIn->listPins.contains(index))
                         static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(index))->ChangeValue(opt);
+//                    if(listParameterPinOut->listPins.contains(index))
+//                        static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(index))->ChangeValue(opt);
                     break;
             }
             break;
@@ -668,6 +691,7 @@ void VstPlugin::OnParameterChanged(ConnectionInfo pinInfo, float value)
         if(pinInfo.pinNumber==FixedPinNumber::vstProgNumber) {
             //program pin
             EffSetProgram( static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::vstProgNumber))->GetIndex() );
+            onVstProgramChanged();
             return;
         }
 
@@ -684,9 +708,41 @@ void VstPlugin::OnParameterChanged(ConnectionInfo pinInfo, float value)
     }
 }
 
-bool VstPlugin::DropFile(const QString &filename)
+QStandardItem * VstPlugin::UpdateModelNode()
 {
-    return LoadBank(&filename.toStdString());
+    QStandardItem *node = Object::UpdateModelNode();
+    if(!node)
+        return 0;
+
+//    node->setData(currentBankFile,UserRoles::bankFile);
+    return node;
+}
+
+bool VstPlugin::LoadBank(const QString &filename)
+{
+    if(!CEffect::LoadBank(&filename.toStdString()))
+        return false;
+
+    onVstProgramChanged();
+    return true;
+}
+
+void VstPlugin::onVstProgramChanged()
+{
+    for(int i=0; i<pEffect->numParams; i++) {
+        ParameterPinIn *pin = static_cast<ParameterPinIn*>(listParameterPinIn->GetPin(i,false));
+        if(pin) {
+            pin->ChangeValue(EffGetParameter(i));
+        }
+    }
+}
+
+void VstPlugin::SaveBank(const QString &filename)
+{
+    if(!CEffect::SaveBank(&filename.toStdString()))
+        return;
+
+    currentBankFile = filename;
 }
 
 Pin* VstPlugin::CreatePin(const ConnectionInfo &info)
@@ -702,14 +758,16 @@ Pin* VstPlugin::CreatePin(const ConnectionInfo &info)
                 pin->SetLimitsEnabled(false);
                 return pin;
             } else {
-                if(closed) {
+                if(closed)
                     return new ParameterPinIn(this,info.pinNumber,0,false,"",true);
-                }
-
-                ParameterPinIn *pin = new ParameterPinIn(this,info.pinNumber,EffGetParameter(info.pinNumber),false,EffGetParamName(info.pinNumber),true);
-                return pin;
+                return new ParameterPinIn(this,info.pinNumber,EffGetParameter(info.pinNumber),false,EffGetParamName(info.pinNumber),true);
             }
             break;
+
+//        case PinDirection::Output :
+//            if(closed)
+//                return new ParameterPinOut(this,info.pinNumber,0,false,"",true);
+//            return new ParameterPinOut(this,info.pinNumber,EffGetParameter(info.pinNumber),false,EffGetParamName(info.pinNumber),true);
 
         default :
             debug("VstPlugin::CreatePin PinDirection")

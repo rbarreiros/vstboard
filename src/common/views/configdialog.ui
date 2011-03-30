@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>392</width>
-    <height>252</height>
+    <height>282</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -76,7 +76,7 @@
          <string comment="Browse"/>
         </property>
         <property name="icon">
-         <iconset resource="../../resources/resources.qrc">
+         <iconset>
           <normaloff>:/img16x16/folder.png</normaloff>:/img16x16/folder.png</iconset>
         </property>
        </widget>
@@ -122,7 +122,7 @@
          <string comment="Browse"/>
         </property>
         <property name="icon">
-         <iconset resource="../../resources/resources.qrc">
+         <iconset>
           <normaloff>:/img16x16/folder.png</normaloff>:/img16x16/folder.png</iconset>
         </property>
        </widget>
@@ -168,7 +168,47 @@
          <string comment="Browse"/>
         </property>
         <property name="icon">
-         <iconset resource="../../resources/resources.qrc">
+         <iconset>
+          <normaloff>:/img16x16/folder.png</normaloff>:/img16x16/folder.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Bank directory</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QComboBox" name="defaultBankPath">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="editable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QPushButton" name="browseBank">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string comment="Browse"/>
+        </property>
+        <property name="statusTip">
+         <string comment="Browse"/>
+        </property>
+        <property name="icon">
+         <iconset>
           <normaloff>:/img16x16/folder.png</normaloff>:/img16x16/folder.png</iconset>
         </property>
        </widget>
@@ -298,9 +338,7 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../resources/resources.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>

@@ -64,7 +64,7 @@ ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel
     layout->addItem(listParametersOut,2,1,Qt::AlignRight | Qt::AlignTop);
 
     setAcceptDrops(true);
-    setCursor(Qt::UpArrowCursor);
+   // setCursor(Qt::UpArrowCursor);
 }
 
 void ConnectableObjectView::dragEnterEvent( QGraphicsSceneDragDropEvent *event)

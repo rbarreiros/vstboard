@@ -145,9 +145,6 @@ bool CEffect::LoadBank(std::string *name)
 
         } else {
 
-            /**
-              \todo how to handle variable number of programs ? how to delete unused programs ?
-            */
             //pEffect->numPrograms=bank.GetNumPrograms();
 
             for (int i = 0; i < bank.GetNumPrograms(); i++) {
@@ -160,7 +157,8 @@ bool CEffect::LoadBank(std::string *name)
                 EffSetProgram(i);
                 EffSetProgramName(prog->prgName);
                 for(int j=0; j< prog->numParams; j++) {
-                    EffSetParameter(j,bank.GetProgParm(i,j));
+                    float val = bank.GetProgParm(i,j);
+                    EffSetParameter(j,val);
                 }
             }
             EffSetProgram(0);
@@ -181,6 +179,33 @@ bool CEffect::LoadBank(std::string *name)
 
 bool CEffect::SaveBank(std::string * name)
 {
+    CFxBank bank;
+
+    if(pEffect->flags & effFlagsProgramChunks) {
+        void *ptr=0;
+        long size = EffGetChunk(&ptr,false);
+        bank.SetSize(size);
+        bank.SetChunk(ptr);
+    } else {
+        bank.SetSize(pEffect->numPrograms,pEffect->numParams);
+        long oldPrg = EffGetProgram();
+        for(int i=0; i<pEffect->numPrograms; i++) {
+            char prgName[24];
+            EffSetProgram(i);
+            EffGetProgramName(prgName);
+            bank.SetProgramName(i,prgName);
+
+            for(int j=0; j<pEffect->numParams; j++) {
+                bank.SetProgParm(i,j, EffGetParameter(j));
+            }
+        }
+        EffSetProgram(oldPrg);
+    }
+
+    bank.SetFxID(pEffect->uniqueID);
+    bank.SetFxVersion(pEffect->version);
+    bank.SaveBank(name);
+
     return false;
 }
 

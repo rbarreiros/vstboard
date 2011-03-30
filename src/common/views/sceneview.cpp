@@ -31,6 +31,7 @@
 #include "connectables/container.h"
 #include "connectables/objectfactory.h"
 #include "mainhost.h"
+#include "vstpluginview.h"
 #include <QSplitter>
 
 using namespace View;
@@ -377,7 +378,11 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                             continue;
                 }
 
-                objView = new ConnectableObjectView(myHost, model(),parentView);
+                if(info.objType == ObjType::VstPlugin) {
+                    objView = new VstPluginView(myHost, model(),parentView);
+                } else {
+                    objView = new ConnectableObjectView(myHost, model(),parentView);
+                }
                 hashItems.insert( index , objView);
                 objView->SetModelIndex(index);
                 QPointF pos = parentView->GetDropPos();
