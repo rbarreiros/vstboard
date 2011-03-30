@@ -175,3 +175,5 @@ FORMS += \
     views/splash.ui
 
 PRECOMPILED_HEADER = precomp.h
+
+TRANSLATIONS = ../resources/translations/common_fr.ts

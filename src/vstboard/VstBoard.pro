@@ -114,6 +114,6 @@ OTHER_FILES += \
     ../../tools/nsis.nsi \
     vstboard.rc
 
-TRANSLATIONS = vstboard_fr.ts
+TRANSLATIONS = ../resources/translations/vstboard_fr.ts
 
 RESOURCES += ../resources/resources.qrc

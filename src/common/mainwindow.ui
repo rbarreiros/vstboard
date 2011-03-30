@@ -893,7 +893,7 @@
     <string>Open a Project file</string>
    </property>
    <property name="statusTip">
-    <string>Open a project file</string>
+    <string>Open a Project file</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>

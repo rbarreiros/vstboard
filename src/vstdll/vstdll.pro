@@ -88,3 +88,5 @@ OTHER_FILES += \
     vstdll.rc
 
 RESOURCES += ../resources/resources.qrc
+
+TRANSLATIONS = ../resources/translations/vstdll_fr.ts
