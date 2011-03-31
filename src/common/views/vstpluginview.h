@@ -15,10 +15,14 @@ namespace View {
     protected:
         QAction *actSaveBank;
         QAction *actSaveBankAs;
+        QAction *actSaveProgram;
+        QAction *actSaveProgramAs;
 
     public slots:
         void SaveBankAs();
         void SaveBank();
+        void SaveProgramAs();
+        void SaveProgram();
 
     };
 }

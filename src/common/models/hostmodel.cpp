@@ -210,7 +210,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
             break;
         }
 
-        //drop fxp file
+        //drop fxp and fxb file
         case NodeType::object :
         {
             if(info.objType == ObjType::VstPlugin) {
@@ -230,11 +230,19 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                         if ( !info.isFile() || !info.isReadable() )
                             continue;
 
-                        if( info.suffix()=="fxb" && vstPtr->LoadBank(fName) ) {
+                        if( info.suffix()== VST_BANK_FILE_EXTENSION && vstPtr->LoadBank(fName) ) {
                             QStandardItem *item = itemFromIndex(index);
                             if(item)
                                 item->setData(fName,UserRoles::bankFile);
                         }
+
+                        if( info.suffix()== VST_PROGRAM_FILE_EXTENSION && vstPtr->LoadProgram(fName) ) {
+                            QStandardItem *item = itemFromIndex(index);
+                            if(item)
+                                item->setData(fName,UserRoles::programFile);
+                        }
+
+
                     }
                     return true;
                 }
@@ -291,7 +299,7 @@ bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int
     ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
     switch(info.nodeType) {
         case NodeType::object :
-        case NodeType::container :
+        //case NodeType::container :
         {
             int objId = index.data(UserRoles::value).toInt();
             if(!objId) {
@@ -307,11 +315,21 @@ bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int
 //            if(role == UserRoles::editorVisible)
 //                objPtr->OnEditorVisibilityChanged( value.toBool() );
 
+            //save vst bank file
             if(role == UserRoles::bankFile) {
-                objPtr->SaveBank( value.toString() );
+                objPtr.staticCast<Connectables::VstPlugin>()->SaveBank( value.toString() );
                 QStandardItem *item = itemFromIndex(index);
                 if(item)
                     item->setData(value,UserRoles::bankFile);
+                return true;
+            }
+
+            //save vst program file
+            if(role == UserRoles::programFile) {
+                objPtr.staticCast<Connectables::VstPlugin>()->SaveProgram( value.toString() );
+                QStandardItem *item = itemFromIndex(index);
+                if(item)
+                    item->setData(value,UserRoles::programFile);
                 return true;
             }
             break;

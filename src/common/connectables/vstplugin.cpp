@@ -708,25 +708,59 @@ void VstPlugin::OnParameterChanged(ConnectionInfo pinInfo, float value)
     }
 }
 
-QStandardItem * VstPlugin::UpdateModelNode()
-{
-    QStandardItem *node = Object::UpdateModelNode();
-    if(!node)
-        return 0;
-
-//    node->setData(currentBankFile,UserRoles::bankFile);
-    return node;
-}
-
+/**
+  Load FXB file
+  \param filename the file name
+  \return true on success
+  */
 bool VstPlugin::LoadBank(const QString &filename)
 {
     if(!CEffect::LoadBank(&filename.toStdString()))
         return false;
-
     onVstProgramChanged();
     return true;
 }
 
+
+/**
+  Save FXB file
+  \param filename the file name
+  \return true on success
+  */
+void VstPlugin::SaveBank(const QString &filename)
+{
+    if(!CEffect::SaveBank(&filename.toStdString()))
+        return;
+}
+
+/**
+  Load FXP file
+  \param filename the file name
+  \return true on success
+  */
+bool VstPlugin::LoadProgram(const QString &filename)
+{
+    if(!CEffect::LoadProgram(&filename.toStdString()))
+        return false;
+    onVstProgramChanged();
+    return true;
+}
+
+
+/**
+  Save FXP file
+  \param filename the file name
+  \return true on success
+  */
+void VstPlugin::SaveProgram(const QString &filename)
+{
+    if(!CEffect::SaveProgram(&filename.toStdString()))
+        return;
+}
+
+/**
+  Send program's values to each parameter pin
+  */
 void VstPlugin::onVstProgramChanged()
 {
     for(int i=0; i<pEffect->numParams; i++) {
@@ -735,14 +769,6 @@ void VstPlugin::onVstProgramChanged()
             pin->ChangeValue(EffGetParameter(i));
         }
     }
-}
-
-void VstPlugin::SaveBank(const QString &filename)
-{
-    if(!CEffect::SaveBank(&filename.toStdString()))
-        return;
-
-    currentBankFile = filename;
 }
 
 Pin* VstPlugin::CreatePin(const ConnectionInfo &info)

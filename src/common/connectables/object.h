@@ -281,9 +281,6 @@ namespace Connectables {
 
         /// to hide the editor window from another thread
         virtual void OnHideEditor() {}
-
-        /// save file asked by the view
-        virtual void SaveBank(const QString & filename) {}
     };
 }
 

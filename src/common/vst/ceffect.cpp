@@ -22,6 +22,8 @@
 #include "cvsthost.h"
 #include "../mainhost.h"
 #include "vstbank.h"
+#include "vstprogram.h"
+
 
 using namespace vst;
 
@@ -136,7 +138,6 @@ bool CEffect::LoadBank(std::string *name)
         EffBeginLoadBank(bank.GetPatchChunkInfo());
 
         if(bank.IsChunk()) {
-            debug2(<< "CEffect::LoadBank loading chunk  ")
             if(!(pEffect->flags & effFlagsProgramChunks)) {
                 debug2(<< "CEffect::LoadBank chunk not handled")
                 throw (int)1;
@@ -205,6 +206,77 @@ bool CEffect::SaveBank(std::string * name)
     bank.SetFxID(pEffect->uniqueID);
     bank.SetFxVersion(pEffect->version);
     bank.SaveBank(name);
+
+    return false;
+}
+
+bool CEffect::LoadProgram(std::string *name)
+{
+    try
+    {
+        CFxProgram progFile(name);
+
+        if (!progFile.IsLoaded())
+            throw (int)1;
+
+        if (pEffect->uniqueID != progFile.GetFxID()) {
+            debug2(<<"CEffect::LoadPreset ID doesn't match");
+            throw (int)1;
+        }
+
+        if(progFile.IsChunk()) {
+            if(!(pEffect->flags & effFlagsProgramChunks)) {
+                debug2(<< "CEffect::LoadPreset chunk not handled")
+                throw (int)1;
+            }
+            EffSetChunk(progFile.GetChunk(),progFile.GetChunkSize(),0);
+
+        } else {
+            SFxProgram *prog = progFile.GetProgram();
+
+            VstPatchChunkInfo info;
+            info = *progFile.GetPatchChunkInfo();
+            info.numElements=prog->numParams;
+            EffBeginLoadProgram(&info);
+            EffSetProgramName(prog->prgName);
+            for(int i=0; i< prog->numParams; i++) {
+                float val = progFile.GetProgParm(i);
+                EffSetParameter(i,val);
+            }
+        }
+
+    }
+    catch(...)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool CEffect::SaveProgram(std::string *name)
+{
+    CFxProgram progFile;
+
+    if(pEffect->flags & effFlagsProgramChunks) {
+        void *ptr=0;
+        long size = EffGetChunk(&ptr,false);
+        progFile.SetChunkSize(size);
+        progFile.SetChunk(ptr);
+    } else {
+        progFile.SetSize(pEffect->numParams);
+        for(int i=0; i<pEffect->numParams; i++) {
+            progFile.SetProgParm(i, EffGetParameter(i));
+        }
+    }
+
+    char prgName[24];
+    EffGetProgramName(prgName);
+    progFile.SetProgramName(prgName);
+
+    progFile.SetFxID(pEffect->uniqueID);
+    progFile.SetFxVersion(pEffect->version);
+    progFile.SaveProgram(name);
 
     return false;
 }

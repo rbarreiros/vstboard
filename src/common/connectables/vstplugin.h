@@ -58,7 +58,6 @@ namespace Connectables {
 
         static View::VstShellSelect *shellSelectView;
 
-        QStandardItem * UpdateModelNode();
         void SetContainerAttribs(const ObjectContainerAttribs &attr);
         void GetContainerAttribs(ObjectContainerAttribs &attr);
         Pin* CreatePin(const ConnectionInfo &info);
@@ -82,8 +81,6 @@ namespace Connectables {
         char *savedChunk;
         quint32 savedChunkSize;
 
-        QString currentBankFile;
-
     signals:
         void WindowSizeChange(int newWidth, int newHeight);
 
@@ -96,13 +93,10 @@ namespace Connectables {
         void OnParameterChanged(ConnectionInfo pinInfo, float value);
         void OnShowEditor();
         void OnHideEditor();
-
-        /*!
-          Called by the model when a file was dropped on the object
-          \return true on success
-          */
         bool LoadBank(const QString &filename);
         void SaveBank(const QString &filename);
+        bool LoadProgram(const QString &filename);
+        void SaveProgram(const QString &filename);
 //        void TakeScreenshot();
 
         friend class View::VstPluginWindow;

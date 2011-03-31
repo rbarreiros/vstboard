@@ -53,7 +53,8 @@ namespace UserRoles {
         errorMessage,
         isDirty,
         type,
-        bankFile
+        bankFile,
+        programFile
     };
 }
 namespace NodeType {

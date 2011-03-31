@@ -71,8 +71,9 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     connect(ui->Programs, SIGNAL(CurrentDisplayedGroup(QModelIndex)),
             myHost->programList, SLOT(DisplayedGroupChanged(QModelIndex)));
 
-    //vst plugins browser
+
 #if !defined(__GNUC__)
+    //vst plugins browser
     //sse2 crash with gcc ?
 
     listVstPluginsModel = new QFileSystemModel(this);
@@ -85,8 +86,9 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     listVstPluginsModel->setRootPath(ConfigDialog::defaultVstPath(myHost));
     ui->VstBrowser->setModel(listVstPluginsModel);
 
+    //bank file browser
     listVstBanksModel = new QFileSystemModel(this);
-    listVstBanksModel->setReadOnly(true);
+    //listVstBanksModel->setReadOnly(true);
     listVstBanksModel->setResolveSymlinks(true);
     QStringList bankFilter;
     bankFilter << "*.fxb";

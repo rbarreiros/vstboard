@@ -64,6 +64,9 @@ namespace vst
         virtual bool LoadBank(std::string *name);
         virtual bool SaveBank(std::string *name);
 
+        virtual bool LoadProgram(std::string *name);
+        virtual bool SaveProgram(std::string *name);
+
         virtual long EffDispatch(VstInt32 opCode, VstInt32 index=0, VstInt32 value=0, void *ptr=0, float opt=0.);
         virtual VstIntPtr OnMasterCallback(long opcode, long index, long value, void *ptr, float opt,long currentReturnCode);
 

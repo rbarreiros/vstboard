@@ -39,7 +39,7 @@
     <message>
         <location filename="../../common/views/configdialog.ui" line="179"/>
         <source>Bank directory</source>
-        <translation>Dossier des Banks</translation>
+        <translation>Dossier des banques vst</translation>
     </message>
     <message>
         <location filename="../../common/views/configdialog.ui" line="228"/>
@@ -149,7 +149,7 @@
     <message>
         <location filename="../../common/views/configdialog.cpp" line="317"/>
         <source>Bank path is not a valid directory</source>
-        <translation>Le dossier Bank n&apos;est pas valide</translation>
+        <translation>Le dossier Banque Vst n&apos;est pas valide</translation>
     </message>
     <message>
         <location filename="../../common/views/configdialog.cpp" line="334"/>
@@ -206,7 +206,7 @@
     <message>
         <location filename="../../common/views/configdialog.cpp" line="479"/>
         <source>Default Bank path</source>
-        <translation>Dossier Bank par défaut</translation>
+        <translation>Dossier banque par défaut</translation>
     </message>
 </context>
 <context>
@@ -389,7 +389,7 @@
     </message>
     <message>
         <location filename="../../common/mainwindow.ui" line="875"/>
-        <location filename="../../common/mainwindow.cpp" line="303"/>
+        <location filename="../../common/mainwindow.cpp" line="305"/>
         <source>Save Project</source>
         <translation>Enregistrer le Projet</translation>
     </message>
@@ -411,7 +411,7 @@
     <message>
         <location filename="../../common/mainwindow.ui" line="893"/>
         <location filename="../../common/mainwindow.ui" line="896"/>
-        <location filename="../../common/mainwindow.cpp" line="268"/>
+        <location filename="../../common/mainwindow.cpp" line="270"/>
         <source>Open a Project file</source>
         <translation>Ouvre un fichier Projet</translation>
     </message>
@@ -464,7 +464,7 @@
     </message>
     <message>
         <location filename="../../common/mainwindow.ui" line="961"/>
-        <location filename="../../common/mainwindow.cpp" line="362"/>
+        <location filename="../../common/mainwindow.cpp" line="364"/>
         <source>Save Setup</source>
         <translation>Enregistrer la Config</translation>
     </message>
@@ -617,7 +617,7 @@
     <message>
         <location filename="../../common/mainwindow.ui" line="1148"/>
         <location filename="../../common/mainwindow.ui" line="1151"/>
-        <location filename="../../common/mainwindow.cpp" line="326"/>
+        <location filename="../../common/mainwindow.cpp" line="328"/>
         <source>Open a Setup file</source>
         <translation>Ouvre un fichier Config</translation>
     </message>
@@ -627,51 +627,51 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.cpp" line="137"/>
+        <location filename="../../common/mainwindow.cpp" line="139"/>
         <source>The setup has been modified.</source>
         <translation>La Config a été modifiée.</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.cpp" line="138"/>
-        <location filename="../../common/mainwindow.cpp" line="187"/>
+        <location filename="../../common/mainwindow.cpp" line="140"/>
+        <location filename="../../common/mainwindow.cpp" line="189"/>
         <source>Do you want to save your changes?</source>
         <translation>Voulez-vous enregistrer les modifications ?</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.cpp" line="186"/>
+        <location filename="../../common/mainwindow.cpp" line="188"/>
         <source>The project has been modified.</source>
         <translation>Le Projet a été modifié.</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.cpp" line="239"/>
+        <location filename="../../common/mainwindow.cpp" line="241"/>
         <source>Midi to parameter</source>
         <translation>Midi vers Paramètres</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.cpp" line="246"/>
+        <location filename="../../common/mainwindow.cpp" line="248"/>
         <source>Midi sender</source>
         <translation>Générateur Midi</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.cpp" line="253"/>
+        <location filename="../../common/mainwindow.cpp" line="255"/>
         <source>Host Controller</source>
         <translation>Contrôleur d&apos;hôte</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.cpp" line="268"/>
-        <location filename="../../common/mainwindow.cpp" line="303"/>
+        <location filename="../../common/mainwindow.cpp" line="270"/>
+        <location filename="../../common/mainwindow.cpp" line="305"/>
         <source>Project Files (*.%1)</source>
         <translation>Fichier Projet (*.%1)</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.cpp" line="326"/>
-        <location filename="../../common/mainwindow.cpp" line="362"/>
+        <location filename="../../common/mainwindow.cpp" line="328"/>
+        <location filename="../../common/mainwindow.cpp" line="364"/>
         <source>Setup Files (*.%1)</source>
         <translation>Fichier Config (*.%1)</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.cpp" line="573"/>
-        <location filename="../../common/mainwindow.cpp" line="588"/>
+        <location filename="../../common/mainwindow.cpp" line="575"/>
+        <location filename="../../common/mainwindow.cpp" line="590"/>
         <source>&amp;%1 %2</source>
         <translation></translation>
     </message>
@@ -802,19 +802,47 @@
     <name>View::VstPluginView</name>
     <message>
         <location filename="../../common/views/vstpluginview.cpp" line="16"/>
-        <source>Save Bank As</source>
-        <translation>Enregistrer Bank sous</translation>
-    </message>
-    <message>
-        <location filename="../../common/views/vstpluginview.cpp" line="23"/>
-        <location filename="../../common/views/vstpluginview.cpp" line="41"/>
+        <location filename="../../common/views/vstpluginview.cpp" line="48"/>
+        <location filename="../../common/views/vstpluginview.cpp" line="66"/>
         <source>Save Bank</source>
-        <translation>Enregistrer Bank</translation>
+        <translation>Enregistrer Banque</translation>
     </message>
     <message>
-        <location filename="../../common/views/vstpluginview.cpp" line="41"/>
+        <location filename="../../common/views/vstpluginview.cpp" line="21"/>
+        <source>Save Bank As...</source>
+        <translation>Enregistrer Banque Sous...</translation>
+    </message>
+    <message>
+        <location filename="../../common/views/vstpluginview.cpp" line="27"/>
+        <location filename="../../common/views/vstpluginview.cpp" line="58"/>
+        <location filename="../../common/views/vstpluginview.cpp" line="90"/>
+        <source>Save Program</source>
+        <translation>Enregistrer Programme</translation>
+    </message>
+    <message>
+        <location filename="../../common/views/vstpluginview.cpp" line="32"/>
+        <source>Save Program As...</source>
+        <translation>Enregistrer Programme Sous...</translation>
+    </message>
+    <message>
+        <location filename="../../common/views/vstpluginview.cpp" line="45"/>
+        <source>Save Bank (%1)</source>
+        <translation>Enregistrer Banque (%1)</translation>
+    </message>
+    <message>
+        <location filename="../../common/views/vstpluginview.cpp" line="55"/>
+        <source>Save Program (%1)</source>
+        <translation>Enregistrer Programme (%1)</translation>
+    </message>
+    <message>
+        <location filename="../../common/views/vstpluginview.cpp" line="66"/>
         <source>Bank File (*.%1)</source>
-        <translation>Fichier Bank (*.%1)</translation>
+        <translation>Fichier Banque (*.%1)</translation>
+    </message>
+    <message>
+        <location filename="../../common/views/vstpluginview.cpp" line="90"/>
+        <source>Program File (*.%1)</source>
+        <translation>Fichier Programme (*.%1)</translation>
     </message>
 </context>
 <context>
