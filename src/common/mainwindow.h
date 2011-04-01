@@ -27,6 +27,7 @@
 #include "models/listtoolsmodel.h"
 #include "views/solverscene.h"
 #include "views/sceneview.h"
+#include "views/viewconfig.h"
 
 namespace Ui {
     class MainWindow;
@@ -43,6 +44,7 @@ public:
     bool openedPrompt;
 
     View::SceneView *mySceneView;
+    View::ViewConfig viewConfig;
 
 protected:
     void changeEvent(QEvent *e);
@@ -67,6 +69,8 @@ protected:
 
     Ui::MainWindow *ui;
     MainHost *myHost;
+
+
 
 public slots:
     void programParkingModelChanges(QStandardItemModel *model);

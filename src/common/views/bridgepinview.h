@@ -36,6 +36,7 @@ namespace View {
         const QPointF pinPos() const;
         void UpdateModelIndex(const QModelIndex &index);
 
+
     protected:
         QAbstractGraphicsShapeItem *vuValue;
         float value;
@@ -43,6 +44,7 @@ namespace View {
 
     public slots:
         void updateVu();
+        void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
     };
 
 }

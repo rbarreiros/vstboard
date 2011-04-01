@@ -19,13 +19,15 @@
 **************************************************************************/
 
 #include "bridgeview.h"
-#include "../mainhost.h"
+
 using namespace View;
 
 BridgeView::BridgeView(MainHost *myHost,QAbstractItemModel *model, QGraphicsItem * parent, Qt::WindowFlags wFlags) :
         ObjectView(myHost,model,parent,wFlags),
         lLayout(0)
 {
+    setObjectName("bridgeView");
+
     setGeometry(QRectF(0,0,0,0));
 
     lLayout = new QGraphicsLinearLayout(Qt::Horizontal) ;
@@ -36,6 +38,22 @@ BridgeView::BridgeView(MainHost *myHost,QAbstractItemModel *model, QGraphicsItem
     listBridge = new ListPinsView(this);
     listBridge->layout->setOrientation(Qt::Horizontal);
     lLayout->addItem(listBridge);
+
+    QPalette pal(palette());
+    pal.setColor(QPalette::Window, config->GetColor(ColorGroups::Bridge,Colors::Background) );
+    setPalette( pal );
+}
+
+void BridgeView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
+{
+    if(groupId!=ColorGroups::Bridge)
+        return;
+
+    if(colorId==Colors::Background) {
+        QPalette pal(palette());
+        pal.setColor(QPalette::Window,color);
+        setPalette( pal );
+    }
 }
 
 /*!

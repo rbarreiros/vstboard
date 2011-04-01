@@ -25,7 +25,7 @@ namespace View {
         void SaveBank();
         void SaveProgramAs();
         void SaveProgram();
-
+        void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
     };
 }
 

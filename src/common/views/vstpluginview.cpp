@@ -1,5 +1,4 @@
 #include "vstpluginview.h"
-#include "../mainhost.h"
 
 using namespace View;
 
@@ -9,6 +8,25 @@ VstPluginView::VstPluginView(MainHost *myHost,QAbstractItemModel *model,QGraphic
     setObjectName("vstPluginView");
 
     setAcceptDrops(true);
+
+    QPalette pal(palette());
+    pal.setColor(QPalette::Window, config->GetColor(ColorGroups::VstPlugin,Colors::Background) );
+    setPalette( pal );
+}
+
+void VstPluginView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
+{
+    if(groupId!=ColorGroups::VstPlugin)
+        return;
+
+    switch(colorId) {
+    case Colors::Background: {
+        QPalette pal(palette());
+        pal.setColor(QPalette::Window,color);
+        setPalette( pal );
+        break;
+    }
+    }
 }
 
 void VstPluginView::SetModelIndex(QPersistentModelIndex index)

@@ -26,6 +26,8 @@
 #include "../connectables/object.h"
 #include "listpinsview.h"
 //#include "textbutton.h"
+#include "../mainhost.h"
+#include "../mainwindow.h"
 
 class MainHost;
 namespace View {
@@ -63,6 +65,8 @@ namespace View {
 
         /// list of bridges pins
         ListPinsView *listBridge;
+
+        ViewConfig *config;
 
     protected:
         virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
@@ -105,6 +109,7 @@ namespace View {
 
     public slots:
         void ShrinkNow();
+        virtual void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
 
     friend class PinView;
     };

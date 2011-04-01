@@ -32,34 +32,51 @@ ConnectablePinView::ConnectablePinView(float angle, QAbstractItemModel *model, Q
     setMinimumSize(50,15);
     setMaximumSize(50,15);
 
-    rectBgnd = new QGraphicsRectItem(geometry(), this);
+    outline = new QGraphicsRectItem(geometry(), this);
 
     rectVu = new QGraphicsRectItem(this);
-    rectBgnd->setBrush(Qt::NoBrush);
+    outline->setBrush(Qt::NoBrush);
 
 //    textItem = new OutlinedText("", this, Qt::black, QColor(255,255,255,150));
     textItem = new QGraphicsSimpleTextItem(this);
     textItem->moveBy(2,1);
     textItem->setZValue(1);
 
-    QColor c;
+//    QColor c;
     switch(connectInfo.type) {
     case PinType::Audio :
-        c=Qt::yellow;
+        colorGroupId=ColorGroups::AudioPin;
         break;
     case PinType::Midi :
-        c=Qt::cyan;
+        colorGroupId=ColorGroups::MidiPin;
         rectVu->setRect(rect());
         break;
     case PinType::Parameter :
-        c=QColor(255,127,127);
+        colorGroupId=ColorGroups::ParameterPin;
         break;
     default :
-        c=Qt::darkGray;
+        colorGroupId=ColorGroups::ND;
         break;
-
     }
-    rectVu->setBrush(c);
+
+    outline->setBrush( config->GetColor(colorGroupId, Colors::Background) );
+    rectVu->setBrush( config->GetColor(colorGroupId, Colors::VuMeter) );
+}
+
+void ConnectablePinView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
+{
+    if(groupId!=colorGroupId)
+        return;
+
+    switch(colorId) {
+        case Colors::Background :
+            outline->setBrush(color);
+            break;
+        case Colors::VuMeter :
+            rectVu->setBrush(color);
+            break;
+    }
+
 }
 
 void ConnectablePinView::UpdateModelIndex(const QModelIndex &index)

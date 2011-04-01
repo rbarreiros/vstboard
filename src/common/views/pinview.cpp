@@ -48,8 +48,11 @@ PinView::PinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, 
         model(model),
         pinAngle(angle)
 {
+    config = static_cast<ObjectView*>(parentWidget()->parentWidget())->config;
     setAcceptDrops(true);
     setCursor(Qt::PointingHandCursor);
+    connect( config, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)) ,
+            this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)) );
 }
 
 /*!
@@ -167,7 +170,7 @@ void PinView::dragMoveEvent ( QGraphicsSceneDragDropEvent * event )
             currentLine->setLine(newLine);
             currentLine->setVisible(true);
         }
-        rectBgnd->setBrush(highlightBrush);
+        outline->setBrush(highlightBrush);
     } else {
         event->ignore();
     }
@@ -179,7 +182,7 @@ void PinView::dragMoveEvent ( QGraphicsSceneDragDropEvent * event )
   */
 void PinView::dragLeaveEvent( QGraphicsSceneDragDropEvent  * /*event*/ )
 {
-    rectBgnd->setBrush(Qt::NoBrush);
+    outline->setBrush(Qt::NoBrush);
     if(currentLine)
         currentLine->setVisible(false);
 }
@@ -190,7 +193,7 @@ void PinView::dragLeaveEvent( QGraphicsSceneDragDropEvent  * /*event*/ )
   */
 void PinView::dropEvent ( QGraphicsSceneDragDropEvent  * event )
 {
-    rectBgnd->setBrush(Qt::NoBrush);
+    outline->setBrush(Qt::NoBrush);
     QByteArray bytes = event->mimeData()->data("application/x-pin");
     ConnectionInfo connInfo;
     ReadMimeData(bytes,connInfo);

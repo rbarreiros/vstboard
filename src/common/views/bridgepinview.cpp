@@ -19,6 +19,7 @@
 **************************************************************************/
 
 #include "bridgepinview.h"
+#include "objectview.h"
 
 using namespace View;
 
@@ -54,11 +55,33 @@ BridgePinView::BridgePinView(float angle, QAbstractItemModel *model,QGraphicsIte
     }
 
     vuValue = new QGraphicsPolygonItem(pol,this);
-//    vuValue = new QGraphicsEllipseItem(geometry().adjusted(BRPIN_MRG,BRPIN_MRG,-BRPIN_MRG,-BRPIN_MRG),this);
     vuValue->setPen(Qt::NoPen);
 
-    rectBgnd = new QGraphicsPolygonItem(pol,this);
-    rectBgnd->setBrush(Qt::NoBrush);
+    outline = new QGraphicsPolygonItem(pol,this);
+    outline->setBrush(Qt::NoBrush);
+    outline->setPen( config->GetColor(ColorGroups::Bridge,Colors::Borders) );
+
+    QPalette pal(palette());
+    pal.setColor(QPalette::Window, config->GetColor(ColorGroups::Bridge,Colors::Background) );
+    setPalette( pal );
+}
+
+void BridgePinView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
+{
+    if(groupId!=ColorGroups::Bridge)
+        return;
+
+    switch(colorId) {
+    case Colors::Borders:
+        outline->setPen( color );
+        break;
+    case Colors::Background: {
+        QPalette pal(palette());
+        pal.setColor(QPalette::Window,color);
+        setPalette( pal );
+        break;
+    }
+    }
 }
 
 const QPointF BridgePinView::pinPos() const
