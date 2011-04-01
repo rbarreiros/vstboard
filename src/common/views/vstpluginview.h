@@ -13,6 +13,8 @@ namespace View {
         void UpdateModelIndex();
 
     protected:
+        void dragEnterEvent( QGraphicsSceneDragDropEvent *event);
+        void dropEvent( QGraphicsSceneDragDropEvent *event);
         QAction *actSaveBank;
         QAction *actSaveBankAs;
         QAction *actSaveProgram;

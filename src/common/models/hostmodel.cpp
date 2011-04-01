@@ -230,19 +230,47 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                         if ( !info.isFile() || !info.isReadable() )
                             continue;
 
-                        if( info.suffix()== VST_BANK_FILE_EXTENSION && vstPtr->LoadBank(fName) ) {
+                        if( info.suffix() == VST_BANK_FILE_EXTENSION && vstPtr->LoadBank(fName) ) {
                             QStandardItem *item = itemFromIndex(index);
                             if(item)
                                 item->setData(fName,UserRoles::bankFile);
                         }
 
-                        if( info.suffix()== VST_PROGRAM_FILE_EXTENSION && vstPtr->LoadProgram(fName) ) {
+                        if( info.suffix() == VST_PROGRAM_FILE_EXTENSION && vstPtr->LoadProgram(fName) ) {
                             QStandardItem *item = itemFromIndex(index);
                             if(item)
                                 item->setData(fName,UserRoles::programFile);
                         }
 
+                        if( info.suffix() == "dll" ) {
+                            QSharedPointer<Connectables::Container> cntPtr = myHost->objFactory->GetObjectFromId(vstPtr->GetContainerId()).staticCast<Connectables::Container>();
+                            if(!cntPtr) {
+                                debug("HostModel::dropMimeData replace plugin, container not found")
+                                return false;
+                            }
 
+                            ObjectInfo infoVst;
+                            infoVst.nodeType = NodeType::object;
+                            infoVst.objType = ObjType::VstPlugin;
+                            infoVst.filename = fName;
+                            infoVst.name = fName;
+
+                            QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(infoVst);
+                            if(objPtr.isNull()) {
+                                if(Connectables::VstPlugin::shellSelectView) {
+                                    Connectables::VstPlugin::shellSelectView->cntPtr=cntPtr;
+                                } else {
+                                    debug("HostModel::dropMimeData replace plugin, new object not found")
+                                }
+                                return false;
+                            }
+
+                            cntPtr->AddObject(objPtr);
+                            cntPtr->CopyCablesFromObj(objPtr, vstPtr);
+                            vstPtr->CopyStatusTo(objPtr);
+                            cntPtr->ParkObject(vstPtr);
+
+                        }
                     }
                     return true;
                 }

@@ -211,6 +211,13 @@ void ContainerProgram::RemoveObject(QSharedPointer<Object> objPtr)
     dirty=true;
 }
 
+void ContainerProgram::ReplaceObject(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> replacedObjPtr)
+{
+    //AddObject(newObjPtr);
+    CopyCablesFromObj( newObjPtr->GetIndex(), replacedObjPtr->GetIndex() );
+    //RemoveObject(replacedObjPtr);
+}
+
 void ContainerProgram::AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin, bool hidden)
 {
     if(CableExists(outputPin,inputPin))
@@ -279,6 +286,25 @@ void ContainerProgram::RemoveCableFromObj(int objId)
             myHost->OnCableRemoved(cab->GetInfoOut(),cab->GetInfoIn());
             dirty=true;
             delete cab;
+        }
+        --i;
+    }
+}
+
+void ContainerProgram::CopyCablesFromObj(int newObjId, int oldObjId)
+{
+    int i=listCables.size()-1;
+    while(i>=0) {
+        Cable *cab = listCables.at(i);
+        if(cab->GetInfoOut().objId==oldObjId) {
+            ConnectionInfo newConnect = cab->GetInfoOut();
+            newConnect.objId = newObjId;
+            AddCable(newConnect, cab->GetInfoIn());
+        }
+        if(cab->GetInfoIn().objId==oldObjId) {
+            ConnectionInfo newConnect = cab->GetInfoIn();
+            newConnect.objId = newObjId;
+            AddCable(cab->GetInfoOut(), newConnect);
         }
         --i;
     }

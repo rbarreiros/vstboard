@@ -52,7 +52,9 @@ namespace Connectables {
         virtual void AddObject(QSharedPointer<Object> objPtr);
         virtual void AddParkedObject(QSharedPointer<Object> objPtr);
         virtual void ParkObject(QSharedPointer<Object> objPtr);
+        virtual void CopyCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr);
         virtual bool IsDirty();
+
 
         /// shared pointer to the bridge in object
         QSharedPointer<Object> bridgeIn;

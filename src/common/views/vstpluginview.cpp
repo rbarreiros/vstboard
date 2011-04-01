@@ -6,7 +6,9 @@ using namespace View;
 VstPluginView::VstPluginView(MainHost *myHost,QAbstractItemModel *model,QGraphicsItem * parent, Qt::WindowFlags wFlags) :
     ConnectableObjectView(myHost,model,parent,wFlags)
 {
+    setObjectName("vstPluginView");
 
+    setAcceptDrops(true);
 }
 
 void VstPluginView::SetModelIndex(QPersistentModelIndex index)
@@ -106,4 +108,37 @@ void VstPluginView::SaveProgram()
     } else {
         SaveProgramAs();
     }
+}
+
+void VstPluginView::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
+{
+    //accept fxp files and replacement plugin
+    if (event->mimeData()->hasUrls()) {
+        QString fName;
+        QFileInfo info;
+
+        QStringList acceptedFiles;
+        acceptedFiles << "fxb" << "fxp" << "dll";
+
+        foreach(QUrl url,event->mimeData()->urls()) {
+            fName = url.toLocalFile();
+            info.setFile( fName );
+            if ( info.isFile() && info.isReadable() ) {
+                if( acceptedFiles.contains( info.suffix(), Qt::CaseInsensitive) ) {
+                    event->setDropAction(Qt::CopyAction);
+                    event->accept();
+
+                    return;
+                }
+            }
+        }
+    }
+    event->ignore();
+}
+
+void VstPluginView::dropEvent( QGraphicsSceneDragDropEvent *event)
+{
+
+    QGraphicsWidget::dropEvent(event);
+    event->setAccepted(model->dropMimeData(event->mimeData(), event->proposedAction(), 0, 0, objIndex));
 }

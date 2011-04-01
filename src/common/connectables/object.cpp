@@ -531,6 +531,25 @@ void Object::GetContainerAttribs(ObjectContainerAttribs &attr)
     attr.editorVScroll = modelIndex.data(UserRoles::editorVScroll).toInt();
 }
 
+/*!
+  Copy the position, editor visibility and learning state, used by HostModel when a plugin is replaced
+  \param objPtr destination object
+  */
+void Object::CopyStatusTo(QSharedPointer<Object>objPtr)
+{
+    ObjectContainerAttribs attr;
+    GetContainerAttribs(attr);
+    objPtr->SetContainerAttribs(attr);
+
+    Connectables::ParameterPinIn* oldEditPin = static_cast<Connectables::ParameterPinIn*>(listParameterPinIn->GetPin(FixedPinNumber::editorVisible));
+    Connectables::ParameterPinIn* newEditPin = static_cast<Connectables::ParameterPinIn*>(objPtr->listParameterPinIn->GetPin(FixedPinNumber::editorVisible));
+    newEditPin->ChangeValue(oldEditPin->GetValue());
+
+    Connectables::ParameterPinIn* oldLearnPin = static_cast<Connectables::ParameterPinIn*>(listParameterPinIn->GetPin(FixedPinNumber::learningMode));
+    Connectables::ParameterPinIn* newLearnPin = static_cast<Connectables::ParameterPinIn*>(objPtr->listParameterPinIn->GetPin(FixedPinNumber::learningMode));
+    newLearnPin->ChangeValue(oldLearnPin->GetValue());
+}
+
 void Object::SetBufferSize(unsigned long size)
 {
     foreach(Pin *pin, listAudioPinIn->listPins) {
