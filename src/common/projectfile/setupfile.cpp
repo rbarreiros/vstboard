@@ -24,6 +24,7 @@
 #include "../mainhost.h"
 #include "../mainwindow.h"
 #include "fileversion.h"
+#include "../views/viewconfig.h"
 
 void SetupFile::Clear(MainHost *myHost)
 {
@@ -33,6 +34,7 @@ void SetupFile::Clear(MainHost *myHost)
     if(myHost->mainWindow) {
         myHost->mainWindow->mySceneView->viewHost->ClearPrograms();
     }
+    myHost->mainWindow->viewConfig.LoadFromRegistry(myHost);
 }
 
 bool SetupFile::SaveToFile(MainHost *myHost, QString filePath)
@@ -89,6 +91,11 @@ bool SetupFile::ToStream(MainHost *myHost,QDataStream &out)
     }
 
     myHost->EnableSolverUpdate(true);
+
+    out << myHost->mainWindow->viewConfig.savedInSetupFile;
+    if(myHost->mainWindow->viewConfig.savedInSetupFile)
+        out << myHost->mainWindow->viewConfig;
+
     return true;
 }
 
@@ -109,7 +116,8 @@ bool SetupFile::FromStream(MainHost *myHost,QDataStream &in)
     }
 
     in >> myHost->currentFileVersion;
-    if(myHost->currentFileVersion != PROJECT_AND_SETUP_FILE_VERSION) {
+
+    if(myHost->currentFileVersion < 11) {
         QMessageBox msgBox;
 //        msgBox.setWindowTitle(filePath);
         msgBox.setText( tr("Wrong file version.") );
@@ -137,5 +145,17 @@ bool SetupFile::FromStream(MainHost *myHost,QDataStream &in)
     }
 
     myHost->EnableSolverUpdate(true);
+
+    if(myHost->currentFileVersion >= 12) {
+        bool colorsInSetupFile;
+        in >> colorsInSetupFile;
+        myHost->mainWindow->viewConfig.savedInSetupFile=colorsInSetupFile;
+
+        if(colorsInSetupFile)
+            in >> myHost->mainWindow->viewConfig;
+        else
+            myHost->mainWindow->viewConfig.LoadFromRegistry(myHost);
+    }
+
     return true;
 }

@@ -41,6 +41,7 @@ namespace View {
         float value;
         bool isParameter;
         ColorGroups::Enum colorGroupId;
+        QColor vuColor;
 
     public slots:
         void updateVu();

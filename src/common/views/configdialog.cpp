@@ -493,8 +493,3 @@ void ConfigDialog::on_browseBank_clicked()
     myHost->SetSetting("defaultBankPath", filename );
 }
 
-void ConfigDialog::on_BtColors_clicked()
-{
-    View::ViewConfigDialog dlg(myHost,this);
-    dlg.exec();
-}

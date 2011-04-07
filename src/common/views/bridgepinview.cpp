@@ -61,6 +61,10 @@ BridgePinView::BridgePinView(float angle, QAbstractItemModel *model,QGraphicsIte
     outline->setBrush(Qt::NoBrush);
     outline->setPen( config->GetColor(ColorGroups::Bridge,Colors::Borders) );
 
+    highlight = new QGraphicsPolygonItem(pol,this);
+    highlight->setVisible(false);
+    highlight->setBrush( config->GetColor(ColorGroups::Bridge, Colors::HighlightBackground) );
+
     QPalette pal(palette());
     pal.setColor(QPalette::Window, config->GetColor(ColorGroups::Bridge,Colors::Background) );
     setPalette( pal );
@@ -81,6 +85,8 @@ void BridgePinView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId,
         setPalette( pal );
         break;
     }
+    case Colors::HighlightBackground :
+        highlight->setBrush( color );
     }
 }
 
@@ -115,13 +121,13 @@ void BridgePinView::updateVu()
     QColor c;
     switch(valueType) {
         case PinType::Audio:
-            c=Qt::yellow;
+            c = config->GetColor(ColorGroups::AudioPin, Colors::Background);
             break;
     case PinType::Midi :
-            c=Qt::cyan;
+            c= config->GetColor(ColorGroups::MidiPin, Colors::Background);
             break;
     case PinType::Parameter :
-            c=Qt::red;
+            c= config->GetColor(ColorGroups::ParameterPin, Colors::Background);
             break;
         default :
             c=Qt::darkGray;

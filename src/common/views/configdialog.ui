@@ -336,13 +336,6 @@
      </property>
     </spacer>
    </item>
-   <item row="3" column="4">
-    <widget class="QPushButton" name="BtColors">
-     <property name="text">
-      <string>Colors</string>
-     </property>
-    </widget>
-   </item>
   </layout>
  </widget>
  <resources/>

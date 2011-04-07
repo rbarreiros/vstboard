@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>424</width>
-    <height>192</height>
+    <height>194</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Custom Colors</string>
+   <string>VstBoard Appearance</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
@@ -61,6 +61,13 @@
               </property>
              </widget>
             </item>
+            <item>
+             <widget class="QSpinBox" name="RedSpinBox">
+              <property name="maximum">
+               <number>255</number>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
           <item>
@@ -85,6 +92,13 @@
               </property>
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="GreenSpinBox">
+              <property name="maximum">
+               <number>255</number>
               </property>
              </widget>
             </item>
@@ -115,6 +129,13 @@
               </property>
              </widget>
             </item>
+            <item>
+             <widget class="QSpinBox" name="BlueSpinBox">
+              <property name="maximum">
+               <number>255</number>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
           <item>
@@ -139,6 +160,13 @@
               </property>
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="AlphaSpinBox">
+              <property name="maximum">
+               <number>255</number>
               </property>
              </widget>
             </item>
@@ -169,14 +197,31 @@
     </layout>
    </item>
    <item>
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="horizontalLayout_6">
+     <item>
+      <widget class="QCheckBox" name="checkSavedInSetupFile">
+       <property name="text">
+        <string>Save in setup file</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDialogButtonBox" name="buttonBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="standardButtons">
+        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
@@ -189,12 +234,12 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>413</x>
+     <y>183</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
-     <y>274</y>
+     <y>193</y>
     </hint>
    </hints>
   </connection>
@@ -205,12 +250,140 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>413</x>
+     <y>183</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
-     <y>274</y>
+     <y>193</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>RedSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>RedSlider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>377</x>
+     <y>45</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>339</x>
+     <y>45</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>GreenSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>GreenSpinBox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>339</x>
+     <y>69</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>369</x>
+     <y>69</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>GreenSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>GreenSlider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>372</x>
+     <y>74</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>329</x>
+     <y>75</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>BlueSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>BlueSpinBox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>337</x>
+     <y>98</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>378</x>
+     <y>97</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>BlueSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>BlueSlider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>372</x>
+     <y>97</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>333</x>
+     <y>97</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AlphaSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>AlphaSpinBox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>326</x>
+     <y>125</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>379</x>
+     <y>125</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AlphaSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>AlphaSlider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>381</x>
+     <y>126</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>320</x>
+     <y>126</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>RedSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>RedSpinBox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>282</x>
+     <y>44</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>381</x>
+     <y>43</y>
     </hint>
    </hints>
   </connection>

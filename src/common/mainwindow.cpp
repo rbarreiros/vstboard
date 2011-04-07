@@ -26,6 +26,7 @@
 #include "views/configdialog.h"
 #include "views/aboutdialog.h"
 #include "connectables/objectinfo.h"
+#include "views/viewconfigdialog.h"
 
 MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
         QMainWindow(parent),
@@ -106,12 +107,33 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     ui->solverView->setModel(&myHost->solver->model);
 
     ui->treeHostModel->setModel(myHost->GetModel());
+
+    InitColors();
+    connect(&viewConfig, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
+            this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)));
 }
 
 MainWindow::~MainWindow()
 {
     if(ui)
         delete ui;
+}
+
+void MainWindow::InitColors()
+{
+    setPalette( viewConfig.GetPaletteFromColorGroup( ColorGroups::Windows, palette() ));
+}
+
+void MainWindow::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
+{
+    if(groupId!=ColorGroups::Windows)
+        return;
+
+    QPalette::ColorRole role = viewConfig.GetPaletteRoleFromColor(colorId);
+
+    QPalette pal=palette();
+    pal.setColor(role, color);
+    setPalette(pal);
 }
 
 bool MainWindow::userWantsToUnloadSetup()
@@ -501,6 +523,8 @@ void MainWindow::readSettings()
         if(!ProjectFile::LoadFromFile(myHost,currentProjectFile))
             currentProjectFile = "";
     }
+
+    viewConfig.LoadFromRegistry(myHost);
 }
 
 void MainWindow::resetSettings()
@@ -653,3 +677,9 @@ void MainWindow::on_actionRestore_default_layout_triggered()
 }
 
 
+
+void MainWindow::on_actionAppearance_triggered()
+{
+    View::ViewConfigDialog dlg(myHost,this);
+    dlg.exec();
+}

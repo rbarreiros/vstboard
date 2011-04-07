@@ -24,22 +24,48 @@ namespace View {
 
     private:
         void UpdateSliders();
-        void UpdateColor();
+        void DisableSliders();
+        void UpdateColor(int r,int v,int b, int a);
+
+        /// pointer to the dialog ui;
         Ui::ViewConfigDialog *ui;
+
+        /// pointer to the MainHost
         MainHost *myHost;
+
+        /// pointer to the config
         ViewConfig *conf;
 
+        /// currently selected group
         ColorGroups::Enum currentGrp;
+
+        /// currently selected color
         Colors::Enum currentCol;
+
+        /// a copy of the original colors, restored if dialog is canceled
+        QMap<ColorGroups::Enum,ColorGroup>backupColors;
+
+        /// a copy of the colors, restored if saved in setup file is checked
+        QMap<ColorGroups::Enum,ColorGroup>backupSetupColors;
+
+        /// save in setup file, oriinal state
+        bool backupSaveInSetup;
+
+        /// set to true whan changes are made
+        bool modified;
+
+    public slots:
+        void accept();
+        void reject();
 
     private slots:
         void on_listPalettes_itemClicked(QListWidgetItem* item);
         void on_listRoles_itemClicked(QListWidgetItem* item);
-        void on_RedSlider_sliderMoved(int position);
-        void on_GreenSlider_sliderMoved(int position);
-        void on_BlueSlider_sliderMoved(int position);
-        void on_AlphaSlider_sliderMoved(int position);
-
+        void on_checkSavedInSetupFile_clicked(bool checked);
+        void on_RedSpinBox_valueChanged(int );
+        void on_GreenSpinBox_valueChanged(int );
+        void on_BlueSpinBox_valueChanged(int );
+        void on_AlphaSpinBox_valueChanged(int );
     };
 }
 #endif // VIEWCONFIGDIALOG_H

@@ -28,5 +28,6 @@
         <file>translations/qt_fr.qm</file>
         <file>translations/common_fr.qm</file>
         <file>translations/vstdll_fr.qm</file>
+        <file>img16x16/appearance.png</file>
     </qresource>
 </RCC>

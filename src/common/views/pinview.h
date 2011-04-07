@@ -82,8 +82,8 @@ namespace View {
         /// outline
         QAbstractGraphicsShapeItem *outline;
 
-        /// highlight brush on mouseover
-        static QBrush highlightBrush;
+        /// highlight
+        QAbstractGraphicsShapeItem *highlight;
 
         /// list of connected cables
         QList<CableView *> connectedCables;

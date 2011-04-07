@@ -3,15 +3,9 @@
 
 #include "precomp.h"
 
-namespace View {
+class MainHost;
 
-    namespace Palettes {
-        enum Enum {
-            Object,
-            VstPlugin,
-            Bridge
-        };
-    }
+namespace View {
 
     namespace ColorGroups {
         enum Enum {
@@ -21,7 +15,8 @@ namespace View {
             MidiPin,
             ParameterPin,
             Bridge,
-            Object
+            Object,
+            Windows
         };
     }
 
@@ -31,7 +26,17 @@ namespace View {
             Background,
             Borders,
             Text,
-            VuMeter
+            VuMeter,
+            Window,
+            WindowText,
+            Button,
+            ButtonText,
+            Base,
+            AlternateBase,
+            ToolTipBase,
+            ToolTipText,
+            BrightText,
+            HighlightBackground
         };
     }
 
@@ -42,7 +47,6 @@ namespace View {
     };
 
 
-
     class ObjectView;
     class ViewConfig : public QObject
     {
@@ -51,35 +55,49 @@ namespace View {
     public:
         ViewConfig( QObject *parent=0 );
         ~ViewConfig();
-        QPalette * GetPalette(Palettes::Enum palId);
-        int PalettesCount() {return listPalettes.size();}
-        QString GetPaletteName(Palettes::Enum palId) const;
-        void SetPaletteColor(Palettes::Enum palId, QPalette::ColorRole role, const QColor &color);
 
         void SetColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
         QColor GetColor(ColorGroups::Enum groupId, Colors::Enum colorId);
         QString GetColorGroupName(ColorGroups::Enum groupId);
         QString GetColorName(Colors::Enum colorId);
-        QMap<ColorGroups::Enum,ColorGroup*>listColorGroups;
+        QPalette::ColorRole GetPaletteRoleFromColor(Colors::Enum colorId);
+        QPalette GetPaletteFromColorGroup(ColorGroups::Enum groupId, const QPalette &oriPalette);
+        void SetListGroups(QMap<ColorGroups::Enum,ColorGroup> newList);
+        void SaveInRegistry(MainHost *myHost);
+        void LoadFromRegistry(MainHost *myHost);
+
+        /// list of color groups
+        QMap<ColorGroups::Enum,ColorGroup>listColorGroups;
+
+        QDataStream & toStream (QDataStream &) const;
+        QDataStream & fromStream (QDataStream &);
+
+        bool savedInSetupFile;
 
     protected:
         void AddColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
-        void AddPalette(Palettes::Enum palId, const QString &name, QPalette * palette);
+        void UpdateAllWidgets();
 
-        ///list of palettes
-        QMap<Palettes::Enum,QPalette*>listPalettes;
-
-        ///list of palettes names
-        QMap<Palettes::Enum,QString>paletteNames;
-
+        /// list of groups names
         QMap<ColorGroups::Enum,QString>colorGroupNames;
+
+        /// list of colors names
         QMap<Colors::Enum,QString>colorsNames;
 
-
     signals:
-        void PaletteChanged(Palettes::Enum palId);
+        /*!
+            emited when a color changed
+            \param groupId group Id
+            \param colorId color Id
+            \param color the new color
+        */
         void ColorChanged(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
     };
 
 }
+
+QDataStream & operator<< (QDataStream & out, const View::ViewConfig& value);
+QDataStream & operator>> (QDataStream & in, View::ViewConfig& value);
+
+
 #endif // VIEWCONFIG_H

@@ -61,7 +61,6 @@ private slots:
     void onSetupIndexChanged(int index);
     void onProjectIndexChanged(int index);
     void on_browseBank_clicked();
-    void on_BtColors_clicked();
 };
 
 #endif // CONFIGDIALOG_H

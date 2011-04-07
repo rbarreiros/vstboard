@@ -33,6 +33,8 @@ ConnectablePinView::ConnectablePinView(float angle, QAbstractItemModel *model, Q
     setMaximumSize(50,15);
 
     outline = new QGraphicsRectItem(geometry(), this);
+    highlight = new QGraphicsRectItem(geometry(), this);
+    highlight->setVisible(false);
 
     rectVu = new QGraphicsRectItem(this);
     outline->setBrush(Qt::NoBrush);
@@ -60,7 +62,9 @@ ConnectablePinView::ConnectablePinView(float angle, QAbstractItemModel *model, Q
     }
 
     outline->setBrush( config->GetColor(colorGroupId, Colors::Background) );
-    rectVu->setBrush( config->GetColor(colorGroupId, Colors::VuMeter) );
+    vuColor = config->GetColor(colorGroupId, Colors::VuMeter);
+    rectVu->setBrush( vuColor );
+    highlight->setBrush( config->GetColor(colorGroupId, Colors::HighlightBackground) );
 }
 
 void ConnectablePinView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
@@ -73,8 +77,13 @@ void ConnectablePinView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum col
             outline->setBrush(color);
             break;
         case Colors::VuMeter :
-            rectVu->setBrush(color);
+            vuColor=color;
+            if(connectInfo.type != PinType::Midi) {
+                rectVu->setBrush(color);
+            }
             break;
+        case Colors::HighlightBackground :
+            highlight->setBrush(color);
     }
 
 }
@@ -125,7 +134,7 @@ void ConnectablePinView::updateVu()
                 rectVu->setBrush(Qt::NoBrush);
                 return;
             }
-            QColor c=Qt::cyan;
+            QColor c = vuColor;
 
             if(value<0.7)
                 c.setAlphaF( value/0.7 );

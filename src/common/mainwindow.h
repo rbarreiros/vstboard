@@ -33,6 +33,8 @@ namespace Ui {
     class MainWindow;
 }
 
+using namespace View;
+
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
@@ -93,7 +95,10 @@ private slots:
     virtual void on_actionConfig_triggered();
     virtual void on_actionRefresh_Midi_devices_triggered() {}
     virtual void on_actionRefresh_Audio_devices_triggered() {}
+    void InitColors();
+    void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
 
+    void on_actionAppearance_triggered();
 };
 
 #endif // MAINWINDOW_H
