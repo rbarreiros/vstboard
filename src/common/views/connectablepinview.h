@@ -40,9 +40,12 @@ namespace View {
         QString text;
         float value;
         bool isParameter;
+        ColorGroups::Enum colorGroupId;
+        QColor vuColor;
 
     public slots:
         void updateVu();
+        void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
     };
 
 }

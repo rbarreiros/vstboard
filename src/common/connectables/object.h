@@ -148,6 +148,7 @@ namespace Connectables {
         virtual void RemoveProgram(int prg);
         virtual void SetContainerAttribs(const ObjectContainerAttribs &attr);
         virtual void GetContainerAttribs(ObjectContainerAttribs &attr);
+        virtual void CopyStatusTo(QSharedPointer<Object>objPtr);
         virtual Pin* CreatePin(const ConnectionInfo &info);
         virtual bool IsDirty();
 

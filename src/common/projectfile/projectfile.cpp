@@ -128,7 +128,7 @@ bool ProjectFile::FromStream(MainHost *myHost,QDataStream &in)
     }
 
     in >> myHost->currentFileVersion;
-    if(myHost->currentFileVersion != PROJECT_AND_SETUP_FILE_VERSION) {
+    if(myHost->currentFileVersion < 11) {
         QMessageBox msgBox;
 //        msgBox.setWindowTitle(filePath);
         msgBox.setText( tr("Wrong file version.") );

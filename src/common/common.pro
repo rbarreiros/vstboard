@@ -99,7 +99,9 @@ SOURCES += \
     connectables/audiopin.cpp \
     views/vstpluginview.cpp \
     vst/vstbankbase.cpp \
-    vst/vstprogram.cpp
+    vst/vstprogram.cpp \
+    views/viewconfigdialog.cpp \
+    views/viewconfig.cpp
 
 HEADERS  += \
     globals.h \
@@ -168,7 +170,9 @@ HEADERS  += \
     connectables/audiopin.h \
     views/vstpluginview.h \
     vst/vstbankbase.h \
-    vst/vstprogram.h
+    vst/vstprogram.h \
+    views/viewconfigdialog.h \
+    views/viewconfig.h
 
 FORMS += \
     views/configdialog.ui \
@@ -176,8 +180,12 @@ FORMS += \
     views/filebrowser.ui \
     views/programlist.ui \
     views/aboutdialog.ui \
-    views/splash.ui
+    views/splash.ui \
+    views/viewconfigdialog.ui
 
 PRECOMPILED_HEADER = precomp.h
 
 TRANSLATIONS = ../resources/translations/common_fr.ts
+
+RESOURCES += \
+    ../resources/resources.qrc

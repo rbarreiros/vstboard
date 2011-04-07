@@ -26,8 +26,6 @@
 
 using namespace View;
 
-QBrush PinView::highlightBrush(QColor(100,0,200,100),Qt::SolidPattern);
-
 QGraphicsLineItem *PinView::currentLine = 0;
 
 /*!
@@ -44,12 +42,17 @@ QGraphicsLineItem *PinView::currentLine = 0;
   */
 PinView::PinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo) :
         QGraphicsWidget(parent),
+        outline(0),
+        highlight(0),
         connectInfo(pinInfo),
         model(model),
         pinAngle(angle)
 {
+    config = static_cast<ObjectView*>(parentWidget()->parentWidget())->config;
     setAcceptDrops(true);
     setCursor(Qt::PointingHandCursor);
+    connect( config, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)) ,
+            this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)) );
 }
 
 /*!
@@ -167,7 +170,10 @@ void PinView::dragMoveEvent ( QGraphicsSceneDragDropEvent * event )
             currentLine->setLine(newLine);
             currentLine->setVisible(true);
         }
-        rectBgnd->setBrush(highlightBrush);
+//        backupHighlightBrush = outline->brush();
+//        outline->setBrush(highlightBrush);
+        if(highlight)
+            highlight->setVisible(true);
     } else {
         event->ignore();
     }
@@ -179,7 +185,9 @@ void PinView::dragMoveEvent ( QGraphicsSceneDragDropEvent * event )
   */
 void PinView::dragLeaveEvent( QGraphicsSceneDragDropEvent  * /*event*/ )
 {
-    rectBgnd->setBrush(Qt::NoBrush);
+//    outline->setBrush(backupHighlightBrush);
+    if(highlight)
+        highlight->setVisible(false);
     if(currentLine)
         currentLine->setVisible(false);
 }
@@ -190,7 +198,9 @@ void PinView::dragLeaveEvent( QGraphicsSceneDragDropEvent  * /*event*/ )
   */
 void PinView::dropEvent ( QGraphicsSceneDragDropEvent  * event )
 {
-    rectBgnd->setBrush(Qt::NoBrush);
+//    outline->setBrush(backupHighlightBrush);
+    if(highlight)
+        highlight->setVisible(false);
     QByteArray bytes = event->mimeData()->data("application/x-pin");
     ConnectionInfo connInfo;
     ReadMimeData(bytes,connInfo);

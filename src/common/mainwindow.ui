@@ -108,7 +108,7 @@
    <string>VstBoard</string>
   </property>
   <property name="windowIcon">
-   <iconset>
+   <iconset resource="../resources/resources.qrc">
     <normaloff>:/vstboard32_8.png</normaloff>:/vstboard32_8.png</iconset>
   </property>
   <property name="locale">
@@ -405,6 +405,8 @@
     <addaction name="actionRestore_default_layout"/>
     <addaction name="actionStatus_bar"/>
     <addaction name="actionTool_bar"/>
+    <addaction name="actionAppearance"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -468,6 +470,7 @@
    <addaction name="actionGroup_panel"/>
    <addaction name="separator"/>
    <addaction name="actionConfig"/>
+   <addaction name="actionAppearance"/>
    <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar">
@@ -868,7 +871,7 @@
   </widget>
   <action name="actionSave">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources/resources.qrc">
      <normaloff>:/img16x16/filesave.png</normaloff>:/img16x16/filesave.png</iconset>
    </property>
    <property name="text">
@@ -883,7 +886,7 @@
   </action>
   <action name="actionLoad">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources/resources.qrc">
      <normaloff>:/img16x16/fileopen.png</normaloff>:/img16x16/fileopen.png</iconset>
    </property>
    <property name="text">
@@ -901,7 +904,7 @@
   </action>
   <action name="actionNew">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources/resources.qrc">
      <normaloff>:/img16x16/filenew.png</normaloff>:/img16x16/filenew.png</iconset>
    </property>
    <property name="text">
@@ -916,7 +919,7 @@
   </action>
   <action name="actionConfig">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources/resources.qrc">
      <normaloff>:/img16x16/configure.png</normaloff>:/img16x16/configure.png</iconset>
    </property>
    <property name="text">
@@ -942,7 +945,7 @@
   </action>
   <action name="actionDelete">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources/resources.qrc">
      <normaloff>:/img16x16/delete.png</normaloff>:/img16x16/delete.png</iconset>
    </property>
    <property name="text">
@@ -954,7 +957,7 @@
   </action>
   <action name="actionSave_Setup">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources/resources.qrc">
      <normaloff>:/img16x16/filesave.png</normaloff>:/img16x16/filesave.png</iconset>
    </property>
    <property name="text">
@@ -969,7 +972,7 @@
   </action>
   <action name="actionNew_Setup">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources/resources.qrc">
      <normaloff>:/img16x16/filenew.png</normaloff>:/img16x16/filenew.png</iconset>
    </property>
    <property name="text">
@@ -990,7 +993,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources/resources.qrc">
      <normaloff>:/img16x16/file_setup.png</normaloff>:/img16x16/file_setup.png</iconset>
    </property>
    <property name="text">
@@ -1005,7 +1008,7 @@
   </action>
   <action name="actionAbout">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources/resources.qrc">
      <normaloff>:/img16x16/documentinfo.png</normaloff>:/img16x16/documentinfo.png</iconset>
    </property>
    <property name="text">
@@ -1017,7 +1020,7 @@
   </action>
   <action name="actionSave_Project_As">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources/resources.qrc">
      <normaloff>:/img16x16/filesaveas.png</normaloff>:/img16x16/filesaveas.png</iconset>
    </property>
    <property name="text">
@@ -1032,7 +1035,7 @@
   </action>
   <action name="actionSave_Setup_As">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources/resources.qrc">
      <normaloff>:/img16x16/filesaveas.png</normaloff>:/img16x16/filesaveas.png</iconset>
    </property>
    <property name="text">
@@ -1053,7 +1056,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources/resources.qrc">
      <normaloff>:/img16x16/file_setup.png</normaloff>:/img16x16/file_setup.png</iconset>
    </property>
    <property name="text">
@@ -1077,7 +1080,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources/resources.qrc">
      <normaloff>:/img16x16/file_setup.png</normaloff>:/img16x16/file_setup.png</iconset>
    </property>
    <property name="text">
@@ -1129,7 +1132,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources/resources.qrc">
      <normaloff>:/img16x16/file_setup.png</normaloff>:/img16x16/file_setup.png</iconset>
    </property>
    <property name="text">
@@ -1138,7 +1141,7 @@
   </action>
   <action name="actionLoad_Setup">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources/resources.qrc">
      <normaloff>:/img16x16/fileopen.png</normaloff>:/img16x16/fileopen.png</iconset>
    </property>
    <property name="text">
@@ -1152,6 +1155,15 @@
    </property>
    <property name="shortcut">
     <string>Alt+O</string>
+   </property>
+  </action>
+  <action name="actionAppearance">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/img16x16/appearance.png</normaloff>:/img16x16/appearance.png</iconset>
+   </property>
+   <property name="text">
+    <string>Appearance</string>
    </property>
   </action>
  </widget>
@@ -1180,7 +1192,9 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../resources/resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>actionHost_panel</sender>

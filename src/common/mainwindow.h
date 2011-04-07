@@ -27,10 +27,13 @@
 #include "models/listtoolsmodel.h"
 #include "views/solverscene.h"
 #include "views/sceneview.h"
+#include "views/viewconfig.h"
 
 namespace Ui {
     class MainWindow;
 }
+
+using namespace View;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -43,6 +46,7 @@ public:
     bool openedPrompt;
 
     View::SceneView *mySceneView;
+    View::ViewConfig viewConfig;
 
 protected:
     void changeEvent(QEvent *e);
@@ -68,6 +72,8 @@ protected:
     Ui::MainWindow *ui;
     MainHost *myHost;
 
+
+
 public slots:
     void programParkingModelChanges(QStandardItemModel *model);
     void groupParkingModelChanges(QStandardItemModel *model);
@@ -89,7 +95,10 @@ private slots:
     virtual void on_actionConfig_triggered();
     virtual void on_actionRefresh_Midi_devices_triggered() {}
     virtual void on_actionRefresh_Audio_devices_triggered() {}
+    void InitColors();
+    void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
 
+    void on_actionAppearance_triggered();
 };
 
 #endif // MAINWINDOW_H

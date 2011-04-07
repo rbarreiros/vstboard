@@ -36,6 +36,9 @@ namespace View {
         void moveEvent ( QGraphicsSceneMoveEvent * event );
 
         QGraphicsLinearLayout *lLayout;
+
+    public slots:
+        void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
     };
 }
 #endif // BRIDGEVIEW_H

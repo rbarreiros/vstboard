@@ -388,6 +388,18 @@ void Container::ParkObject(QSharedPointer<Object> objPtr)
 }
 
 /*!
+  Copy cables from an object
+  \param newObjPtr the new object
+  \param ObjPtr the object to copy
+  */
+void Container::CopyCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr)
+{
+    if(!currentProgram)
+        return;
+    currentProgram->CopyCablesFromObj( newObjPtr->GetIndex(), ObjPtr->GetIndex() );
+}
+
+/*!
   Called by ContainerProgam, move a parked object to the panel
   \param objPtr shared pointer to the object
   */

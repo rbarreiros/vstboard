@@ -26,7 +26,7 @@ using namespace View;
 ListPinsView::ListPinsView(QGraphicsItem * parent, Qt::WindowFlags wFlags) :
     QGraphicsWidget(parent,wFlags)
 {
-//    setObjectName("listPinView");
+    setObjectName("listPinView");
     layout = new QGraphicsLinearLayout(this);
     layout->setOrientation(Qt::Vertical);
     layout->setSpacing(0);
@@ -50,3 +50,4 @@ int ListPinsView::GetPinPosition(int newPinNumber)
     }
     return layout->count();
 }
+

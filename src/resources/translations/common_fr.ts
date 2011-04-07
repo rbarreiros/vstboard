@@ -385,7 +385,7 @@
     <message>
         <location filename="../../common/mainwindow.ui" line="850"/>
         <source>VST Banks</source>
-        <translation></translation>
+        <translation>Banques VST</translation>
     </message>
     <message>
         <location filename="../../common/mainwindow.ui" line="875"/>

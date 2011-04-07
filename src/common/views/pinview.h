@@ -24,6 +24,7 @@
 #include "precomp.h"
 #include "globals.h"
 #include "connectables/connectioninfo.h"
+#include "viewconfig.h"
 
 #ifdef _MSC_VER
 #pragma warning( push )
@@ -78,12 +79,11 @@ namespace View {
         void CreateMimeData(QByteArray &bytes);
         void ReadMimeData(QByteArray &bytes, ConnectionInfo &data);
 
-        /// background
-        /// \todo is it used ?
-        QAbstractGraphicsShapeItem *rectBgnd;
+        /// outline
+        QAbstractGraphicsShapeItem *outline;
 
-        /// highlight brush on mouseover
-        static QBrush highlightBrush;
+        /// highlight
+        QAbstractGraphicsShapeItem *highlight;
 
         /// list of connected cables
         QList<CableView *> connectedCables;
@@ -103,6 +103,8 @@ namespace View {
         /// temporary cable for drag&drop
         static QGraphicsLineItem *currentLine;
 
+        ViewConfig *config;
+
     signals:
         /*!
           emitted when a pin is drag&droped over another one
@@ -119,6 +121,7 @@ namespace View {
     public slots:
         /// update the vu-meter, called by a timer
         virtual void updateVu(){}
+        virtual void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color) {};
 
     friend class Cable;
     };

@@ -21,6 +21,7 @@
 #include "configdialog.h"
 #include "ui_configdialog.h"
 #include "mainhost.h"
+#include "viewconfigdialog.h"
 
 ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
     QDialog(parent),
@@ -491,3 +492,4 @@ void ConfigDialog::on_browseBank_clicked()
     ui->defaultBankPath->setCurrentIndex( ui->defaultBankPath->findText(filename) );
     myHost->SetSetting("defaultBankPath", filename );
 }
+

@@ -19,6 +19,7 @@
 **************************************************************************/
 
 #include "bridgepinview.h"
+#include "objectview.h"
 
 using namespace View;
 
@@ -54,11 +55,39 @@ BridgePinView::BridgePinView(float angle, QAbstractItemModel *model,QGraphicsIte
     }
 
     vuValue = new QGraphicsPolygonItem(pol,this);
-//    vuValue = new QGraphicsEllipseItem(geometry().adjusted(BRPIN_MRG,BRPIN_MRG,-BRPIN_MRG,-BRPIN_MRG),this);
     vuValue->setPen(Qt::NoPen);
 
-    rectBgnd = new QGraphicsPolygonItem(pol,this);
-    rectBgnd->setBrush(Qt::NoBrush);
+    outline = new QGraphicsPolygonItem(pol,this);
+    outline->setBrush(Qt::NoBrush);
+    outline->setPen( config->GetColor(ColorGroups::Bridge,Colors::Borders) );
+
+    highlight = new QGraphicsPolygonItem(pol,this);
+    highlight->setVisible(false);
+    highlight->setBrush( config->GetColor(ColorGroups::Bridge, Colors::HighlightBackground) );
+
+    QPalette pal(palette());
+    pal.setColor(QPalette::Window, config->GetColor(ColorGroups::Bridge,Colors::Background) );
+    setPalette( pal );
+}
+
+void BridgePinView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
+{
+    if(groupId!=ColorGroups::Bridge)
+        return;
+
+    switch(colorId) {
+    case Colors::Borders:
+        outline->setPen( color );
+        break;
+    case Colors::Background: {
+        QPalette pal(palette());
+        pal.setColor(QPalette::Window,color);
+        setPalette( pal );
+        break;
+    }
+    case Colors::HighlightBackground :
+        highlight->setBrush( color );
+    }
 }
 
 const QPointF BridgePinView::pinPos() const
@@ -92,13 +121,13 @@ void BridgePinView::updateVu()
     QColor c;
     switch(valueType) {
         case PinType::Audio:
-            c=Qt::yellow;
+            c = config->GetColor(ColorGroups::AudioPin, Colors::Background);
             break;
     case PinType::Midi :
-            c=Qt::cyan;
+            c= config->GetColor(ColorGroups::MidiPin, Colors::Background);
             break;
     case PinType::Parameter :
-            c=Qt::red;
+            c= config->GetColor(ColorGroups::ParameterPin, Colors::Background);
             break;
         default :
             c=Qt::darkGray;

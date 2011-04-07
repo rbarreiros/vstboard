@@ -21,6 +21,9 @@
 #ifndef FILEVERSION_H
 #define FILEVERSION_H
 
-#define PROJECT_AND_SETUP_FILE_VERSION 11
+#define PROJECT_AND_SETUP_FILE_VERSION 12
+
+// v11
+// v12 colors can be saved in the setup file
 
 #endif // FILEVERSION_H

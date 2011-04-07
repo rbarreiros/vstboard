@@ -21,7 +21,6 @@
 #include "objectview.h"
 #include "pinview.h"
 #include "../globals.h"
-#include "../mainhost.h"
 
 using namespace View;
 
@@ -56,8 +55,18 @@ ObjectView::ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsIte
     listParametersOut(0),
     listBridge(0)
 {
+    setObjectName("objView");
+    config = &myHost->mainWindow->viewConfig;
 //    setFocusPolicy(Qt::StrongFocus);
-//    setAutoFillBackground(true);
+    setAutoFillBackground(true);
+
+    QPalette pal(palette());
+    pal.setColor(QPalette::Window, config->GetColor(ColorGroups::Object,Colors::Background) );
+    pal.setColor(QPalette::Text, config->GetColor(ColorGroups::Object,Colors::Text) );
+    setPalette( pal );
+
+    connect( config, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
+            this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)) );
 }
 
 /*!
@@ -66,6 +75,30 @@ ObjectView::ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsIte
 ObjectView::~ObjectView()
 {
     setActive(false);
+}
+
+void ObjectView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
+{
+    if(groupId!=ColorGroups::Object)
+        return;
+
+    switch(colorId) {
+    case Colors::Background : {
+        QPalette pal(palette());
+        pal.setColor(QPalette::Window,color);
+        setPalette( pal );
+        break;
+    }
+    case Colors::Text : {
+        QPalette pal(palette());
+        pal.setColor(QPalette::Text,color);
+        setPalette( pal );
+        break;
+    }
+
+    case Colors::Borders :
+        break;
+    }
 }
 
 /*!
@@ -243,4 +276,3 @@ void ObjectView::ShrinkNow()
     shrinkAsked=false;
     resize(0,0);
 }
-
