@@ -508,6 +508,8 @@ void MainWindow::readSettings()
 
     ui->Programs->readSettings(myHost);
 
+    viewConfig.LoadFromRegistry(myHost);
+
     updateRecentFileActions();
 
     //load default setup file
@@ -524,7 +526,7 @@ void MainWindow::readSettings()
             currentProjectFile = "";
     }
 
-    viewConfig.LoadFromRegistry(myHost);
+
 }
 
 void MainWindow::resetSettings()

@@ -46,36 +46,36 @@ ViewConfig::ViewConfig(QObject *parent) :
     AddColor(ColorGroups::VstPlugin,Colors::Background,QColor(255,255,128,128));
     AddColor(ColorGroups::VstPlugin,Colors::Text,QColor(0,0,0,255));
 
-    AddColor(ColorGroups::AudioPin,Colors::Background,QColor(255,128,128,128));
-    AddColor(ColorGroups::AudioPin,Colors::VuMeter,QColor(128,128,128,128));
-    AddColor(ColorGroups::AudioPin,Colors::HighlightBackground,QColor(200,255,200,128));
+    AddColor(ColorGroups::AudioPin,Colors::Background,QColor(200,170,160,255));
+    AddColor(ColorGroups::AudioPin,Colors::VuMeter,QColor(210,210,100,255));
+    AddColor(ColorGroups::AudioPin,Colors::HighlightBackground,QColor(255,255,255,128));
 
-    AddColor(ColorGroups::MidiPin,Colors::Background,QColor(128,255,128,128));
-    AddColor(ColorGroups::MidiPin,Colors::VuMeter,QColor(128,128,128,128));
-    AddColor(ColorGroups::MidiPin,Colors::HighlightBackground,QColor(200,255,200,128));
+    AddColor(ColorGroups::MidiPin,Colors::Background,QColor(190,230,230,255));
+    AddColor(ColorGroups::MidiPin,Colors::VuMeter,QColor(210,210,100,255));
+    AddColor(ColorGroups::MidiPin,Colors::HighlightBackground,QColor(255,255,255,128));
 
-    AddColor(ColorGroups::ParameterPin,Colors::Background,QColor(128,128,255,128));
-    AddColor(ColorGroups::ParameterPin,Colors::VuMeter,QColor(128,128,128,128));
-    AddColor(ColorGroups::ParameterPin,Colors::HighlightBackground,QColor(200,255,200,128));
+    AddColor(ColorGroups::ParameterPin,Colors::Background,QColor(160,185,200,255));
+    AddColor(ColorGroups::ParameterPin,Colors::VuMeter,QColor(210,210,100,255));
+    AddColor(ColorGroups::ParameterPin,Colors::HighlightBackground,QColor(255,255,255,128));
 
-    AddColor(ColorGroups::Bridge,Colors::Background,QColor(0,0,0,0));
+    AddColor(ColorGroups::Bridge,Colors::Background,QColor(160,170,160,255));
     AddColor(ColorGroups::Bridge,Colors::Borders,QColor(0,0,0,255));
     AddColor(ColorGroups::Bridge,Colors::HighlightBackground,QColor(200,255,200,128));
 
-    AddColor(ColorGroups::Object,Colors::Background,QColor(128,255,255,128));
+    AddColor(ColorGroups::Object,Colors::Background,QColor(120,160,185,128));
     AddColor(ColorGroups::Object,Colors::Borders,QColor(0,0,0,255));
     AddColor(ColorGroups::Object,Colors::Text,QColor(0,0,0,255));
 
-    AddColor(ColorGroups::Windows,Colors::Window,QColor(170,170,170,255));
+    AddColor(ColorGroups::Windows,Colors::Text,QColor(0,0,0,255));
+    AddColor(ColorGroups::Windows,Colors::Window,QColor(175,165,135,255));
     AddColor(ColorGroups::Windows,Colors::WindowText,QColor(0,0,0,255));
+    AddColor(ColorGroups::Windows,Colors::Button,QColor(175,165,135,255));
+    AddColor(ColorGroups::Windows,Colors::ButtonText,QColor(0,0,0,255));
     AddColor(ColorGroups::Windows,Colors::Base,QColor(190,190,190,255));
     AddColor(ColorGroups::Windows,Colors::AlternateBase,QColor(100,100,100,255));
-    AddColor(ColorGroups::Windows,Colors::Text,QColor(0,0,0,255));
-    AddColor(ColorGroups::Windows,Colors::BrightText,QColor(50,0,0,255));
-    AddColor(ColorGroups::Windows,Colors::Button,QColor(200,200,200,255));
-    AddColor(ColorGroups::Windows,Colors::ButtonText,QColor(0,0,0,255));
     AddColor(ColorGroups::Windows,Colors::ToolTipBase,QColor(200,200,0,255));
     AddColor(ColorGroups::Windows,Colors::ToolTipText,QColor(0,0,0,255));
+    AddColor(ColorGroups::Windows,Colors::BrightText,QColor(50,0,0,255));
 }
 
 /*!
@@ -245,7 +245,13 @@ void ViewConfig::SaveInRegistry(MainHost *myHost)
 
 void ViewConfig::LoadFromRegistry(MainHost *myHost)
 {
-    QVariant lVar = myHost->GetSetting("Colors");
+    QVariant lVar = myHost->GetSetting("Colors", QVariant::Invalid);
+
+    if( !lVar.isValid() ) {
+        SaveInRegistry(myHost);
+        lVar = myHost->GetSetting("Colors");
+    }
+
     QDataStream tmp( &lVar.value<QByteArray>() , QIODevice::ReadWrite);
     tmp >> *this;
     UpdateAllWidgets();

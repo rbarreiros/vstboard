@@ -84,6 +84,9 @@ void ViewConfigDialog::reject()
   */
 void ViewConfigDialog::UpdateSliders()
 {
+    if(!ui->groupColor->isEnabled())
+        return;
+
     QColor col = conf->GetColor( currentGrp, currentCol );
     ui->RedSlider->setValue(col.red());
     ui->GreenSlider->setValue(col.green());
