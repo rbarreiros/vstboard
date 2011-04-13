@@ -25,7 +25,7 @@
 
 #include "mainhosthost.h"
 #include "mainwindowhost.h"
-#include "pathsolver.h"
+#include "renderer/pathsolver.h"
 #include "connectables/objectinfo.h"
 
 #ifndef QT_NO_DEBUG

@@ -142,6 +142,9 @@ ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
 
     int unsavedProject = myHost->GetSetting("onUnsavedProject",Autosave::prompt).toInt();
     ui->onUnsavedProject->setCurrentIndex( ui->onUnsavedProject->findData(unsavedProject) );
+
+//engine
+    ui->nbThreads->setValue( myHost->GetSetting("MaxNbThreads",4).toInt() );
 }
 
 ConfigDialog::~ConfigDialog()
@@ -380,6 +383,14 @@ void ConfigDialog::accept()
         msg.setText(tr("You must restart VstBoard for the changes to take effect"));
         msg.setIcon(QMessageBox::Information);
         msg.exec();
+    }
+
+//engine
+    int oldNbThreads = myHost->GetSetting("MaxNbThreads",4).toInt();
+    int newNbThreads = ui->nbThreads->value();
+    if( newNbThreads != oldNbThreads ) {
+        myHost->SetSetting("MaxNbThreads", newNbThreads);
+        myHost->ChangeNbThreads(newNbThreads);
     }
 }
 

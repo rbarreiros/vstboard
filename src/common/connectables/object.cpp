@@ -21,7 +21,7 @@
 #include "object.h"
 #include "../globals.h"
 #include "../mainhost.h"
-#include "../pathsolver.h"
+#include "../renderer/pathsolver.h"
 #include "container.h"
 
 using namespace Connectables;

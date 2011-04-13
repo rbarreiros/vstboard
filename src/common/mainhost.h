@@ -26,8 +26,8 @@
 #include "connectables/objectfactory.h"
 #include "connectables/object.h"
 #include "connectables/maincontainer.h"
-#include "pathsolver.h"
-#include "renderer.h"
+#include "renderer/pathsolver.h"
+#include "renderer/renderer.h"
 #include "globals.h"
 #include "models/hostmodel.h"
 #include "programs.h"
@@ -58,6 +58,8 @@ public:
 
     void GetTempo(int &tempo, int &sign1, int &sign2);
     void SetTimeInfo(const VstTimeInfo *info);
+
+    void ChangeNbThreads(int nbThreads);
 
     QSharedPointer<Connectables::MainContainer> mainContainer;
     QSharedPointer<Connectables::MainContainer> hostContainer;
@@ -113,7 +115,7 @@ private:
 
     hashCables workingListOfCables;
     QMutex *mutexListCables;
-    Renderer renderer;
+    Renderer *renderer;
     QMutex mutexRender;
     QMutex solverMutex;
 

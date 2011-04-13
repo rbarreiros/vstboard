@@ -76,7 +76,7 @@
          <string comment="Browse"/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../../resources/resources.qrc">
           <normaloff>:/img16x16/folder.png</normaloff>:/img16x16/folder.png</iconset>
         </property>
        </widget>
@@ -122,7 +122,7 @@
          <string comment="Browse"/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../../resources/resources.qrc">
           <normaloff>:/img16x16/folder.png</normaloff>:/img16x16/folder.png</iconset>
         </property>
        </widget>
@@ -168,7 +168,7 @@
          <string comment="Browse"/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../../resources/resources.qrc">
           <normaloff>:/img16x16/folder.png</normaloff>:/img16x16/folder.png</iconset>
         </property>
        </widget>
@@ -208,7 +208,7 @@
          <string comment="Browse"/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../../resources/resources.qrc">
           <normaloff>:/img16x16/folder.png</normaloff>:/img16x16/folder.png</iconset>
         </property>
        </widget>
@@ -336,9 +336,43 @@
      </property>
     </spacer>
    </item>
+   <item row="3" column="4">
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Engine</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_3">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Threads</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QSpinBox" name="nbThreads">
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>64</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../resources/resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

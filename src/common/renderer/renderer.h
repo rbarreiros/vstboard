@@ -23,30 +23,46 @@
 
 #include "precomp.h"
 #include "connectables/object.h"
+#include "renderthread.h"
+#include <QSemaphore>
+
 class SolverNode;
 
 typedef QMultiHash<int, SolverNode*> orderedNodes;
 typedef QMultiHash<int, QWeakPointer<Connectables::Object> > orderedObjects;
 
-class Renderer : public QThread
+class MainHost;
+class Renderer : public QObject
 {
     Q_OBJECT
 
 public:
-    Renderer(QObject *parent = 0);
+    Renderer(MainHost *myHost);
     ~Renderer();
-
-    void run();
-    QMutex mutexRender;
+    void SetNbThreads(int nbThreads);
 
 protected:
+    void InitThreads();
+
     orderedObjects renderSteps;
+    int maxNumberOfThreads;
+    int numberOfThreads;
+    int numberOfSteps;
+
+    bool stop;
+
+    QList<RenderThread*>listOfThreads;
+
+    QMutex mutex;
+    QSemaphore sem;
+    MainHost *myHost;
 
 public slots:
     void Clear();
     void StartRender();
     void OnNewRenderingOrder(orderedNodes *newSteps);
 
+friend class RenderThread;
 };
 
 #endif // RENDERER_H

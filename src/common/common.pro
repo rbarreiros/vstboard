@@ -45,7 +45,7 @@ SOURCES += \
     views/pinview.cpp \
     connectables/objectprogram.cpp \
     connectables/containerprogram.cpp \
-    solvernode.cpp \
+    renderer/solvernode.cpp \
     audiobuffer.cpp \
     connectables/bridgepinin.cpp \
     connectables/bridgepinout.cpp \
@@ -70,8 +70,8 @@ SOURCES += \
     connectables/object.cpp \
     connectables/container.cpp \
     connectables/maincontainer.cpp \
-    pathsolver.cpp \
-    renderer.cpp \
+    renderer/pathsolver.cpp \
+    renderer/renderer.cpp \
     models/hostmodel.cpp \
     programs.cpp \
     connectables/connectioninfo.cpp \
@@ -101,7 +101,8 @@ SOURCES += \
     vst/vstbankbase.cpp \
     vst/vstprogram.cpp \
     views/viewconfigdialog.cpp \
-    views/viewconfig.cpp
+    views/viewconfig.cpp \
+    renderer/renderthread.cpp
 
 HEADERS  += \
     globals.h \
@@ -118,7 +119,7 @@ HEADERS  += \
     views/connectablepinview.h \
     connectables/objectprogram.h \
     connectables/containerprogram.h \
-    solvernode.h \
+    renderer/solvernode.h \
     audiobuffer.h \
     connectables/bridgepinin.h \
     connectables/bridgepinout.h \
@@ -143,8 +144,8 @@ HEADERS  += \
     connectables/object.h \
     connectables/container.h \
     connectables/maincontainer.h \
-    pathsolver.h \
-    renderer.h \
+    renderer/pathsolver.h \
+    renderer/renderer.h \
     models/hostmodel.h \
     programs.h \
     connectables/connectioninfo.h \
@@ -172,7 +173,8 @@ HEADERS  += \
     vst/vstbankbase.h \
     vst/vstprogram.h \
     views/viewconfigdialog.h \
-    views/viewconfig.h
+    views/viewconfig.h \
+    renderer/renderthread.h
 
 FORMS += \
     views/configdialog.ui \

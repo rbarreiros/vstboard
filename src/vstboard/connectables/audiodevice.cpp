@@ -25,7 +25,7 @@
 #include "globals.h"
 #include "audiobuffer.h"
 #include "audiobufferd.h"
-#include "renderer.h"
+#include "renderer/renderer.h"
 #include "mainhosthost.h"
 #include "audiodevices.h"
 

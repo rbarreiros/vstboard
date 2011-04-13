@@ -64,6 +64,8 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
     currentTimeSig1=4;
     currentTimeSig2=4;
 
+    renderer = new Renderer(this);
+
     programList = new Programs(this);
 
     //timer
@@ -73,7 +75,7 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
     updateViewTimer->start(40);
 
     connect(solver,SIGNAL(NewRenderingOrder(orderedNodes*)),
-            &renderer, SLOT(OnNewRenderingOrder(orderedNodes*)));
+            renderer, SLOT(OnNewRenderingOrder(orderedNodes*)));
 
     connect(solver,SIGNAL(NewRenderingOrder(orderedNodes*)),
             this, SLOT(OnNewRenderingOrder(orderedNodes*)));
@@ -101,8 +103,8 @@ MainHost::~MainHost()
     programContainer.clear();
 
     solver->Resolve(workingListOfCables);
-    renderer.Clear();
 
+    delete renderer;
     delete objFactory;
 }
 
@@ -573,6 +575,13 @@ void MainHost::UpdateSolver(bool forceUpdate)
     EnableSolverUpdate(solverWasEnabled);
 }
 
+void MainHost::ChangeNbThreads(int nbThreads)
+{
+    renderer->SetNbThreads(nbThreads);
+    SetSolverUpdateNeeded(true);
+
+}
+
 void MainHost::SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum msgType,void *data)
 {
     QMutexLocker lock(mutexListCables);
@@ -622,7 +631,7 @@ void MainHost::Render(unsigned long samples)
 #endif
 
     mutexRender.lock();
-    renderer.StartRender();
+    renderer->StartRender();
     mutexRender.unlock();
 
     if(solverNeedAnUpdate && solverUpdateEnabled)

@@ -19,7 +19,7 @@
 **************************************************************************/
 
 #include "solverscene.h"
-#include "../solvernode.h"
+#include "../renderer/solvernode.h"
 #include "../connectables/object.h"
 
 using namespace View;
