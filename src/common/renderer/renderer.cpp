@@ -59,6 +59,7 @@ void Renderer::Clear()
     numberOfSteps=0;
     foreach(RenderThread *th, listOfThreads) {
         th->Stop();
+        th->deleteLater();
     }
     listOfThreads.clear();
     mutex.unlock();
@@ -90,29 +91,76 @@ void Renderer::OnNewRenderingOrder(orderedNodes *newSteps)
     numberOfSteps = step;
     numberOfThreads = threadCount;
 
+    model.clear();
+
     foreach(RenderThread *th, listOfThreads) {
         th->ResetSteps();
     }
 
+//    debug2(<<"sort steps ===========")
     orderedNodes::iterator i = newSteps->begin();
     while (i != newSteps->end()) {
 
-        if(step==i.key()) {
-            threadCount++;
-            if(threadCount>=maxNumberOfThreads)
-                threadCount=0;
-        } else {
-            threadCount=0;
-        }
+//        if(step==i.key()) {
+//            threadCount++;
+//            if(threadCount>=maxNumberOfThreads)
+//                threadCount=0;
+//        } else {
+//            threadCount=0;
+//        }
 
-        if(threadCount>numberOfThreads)
-            numberOfThreads=threadCount;
+//        if(threadCount>numberOfThreads)
+//            numberOfThreads=threadCount;
 
         step = i.key();
         if(step>numberOfSteps)
             numberOfSteps=step;
 
-        listOfThreads.value(threadCount)->SetStep( step, i.value()->objectPtr );
+//        if(!listOfThreads.value(threadCount)->SetStep( i.value(), false )) {
+//            debug2(<<"can't find a thread")
+//        }
+
+
+        bool found=false;
+        int j=0;
+        while(!found && j<maxNumberOfThreads) {
+            if(listOfThreads.value(j)->SetStep( i.value(), true )) {
+                if(j>numberOfThreads)
+                    numberOfThreads=j;
+                found=true;
+//                debug2(<<j << i.value()->minRenderOrder << i.value()->maxRenderOrder << i.value()->objectPtr->objectName())
+            }
+            j++;
+        }
+        if(!found) {
+            j=0;
+            while(!found && j<maxNumberOfThreads) {
+                if(listOfThreads.value(j)->SetStep( i.value(), false )) {
+                    if(j>numberOfThreads)
+                        numberOfThreads=j;
+                    found=true;
+                    QStandardItem *item = model.item(i.value()->minRenderOrder,j);
+                    item->setBackground( QColor(127,127,0));
+//                    debug2(<< "not strict" <<j << i.value()->minRenderOrder << i.value()->maxRenderOrder << i.value()->objectPtr->objectName())
+                }
+                j++;
+            }
+            if(!found) {
+                debug2(<<"can't find a thread")
+            }
+        }
+
+        if(found) {
+            QStandardItem *item = new QStandardItem(QString("[%1:%2] %3:%4")
+                                                    .arg(i.value()->minRenderOrder)
+                                                    .arg(i.value()->maxRenderOrder)
+                                                    .arg(i.value()->objectPtr->GetIndex())
+                                                    .arg(i.value()->objectPtr->objectName())
+                                                    );
+            model.setItem(i.value()->minRenderOrder, j-1, item);
+
+        }
+
         ++i;
     }
 

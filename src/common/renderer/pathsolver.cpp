@@ -37,7 +37,7 @@ PathSolver::~PathSolver()
 
 void PathSolver::Clear()
 {
-    model.clear();
+//    model.clear();
 
     renderingOrder.clear();
     foreach(SolverNode* line, listNodes) {
@@ -52,7 +52,7 @@ void PathSolver::Resolve(hashCables cables)
     Clear();
 
     if(cables.size()==0) {
-        UpdateModel();
+//        UpdateModel();
         emit NewRenderingOrder(&renderingOrder);
         return;
     }
@@ -162,42 +162,42 @@ void PathSolver::Resolve(hashCables cables)
     foreach(SolverNode* node, listNodes) {
         QSharedPointer<Connectables::Object>objPtr = node->objectPtr;
         if(!objPtr.isNull() && objPtr->info().nodeType!=NodeType::container)
-            renderingOrder.insert(node->maxRenderOrder,node);
+            renderingOrder.insert(node->minRenderOrder,node);
     }
 
-    UpdateModel();
+//    UpdateModel();
 
     emit NewRenderingOrder(&renderingOrder);
 }
 
-void PathSolver::UpdateModel()
-{
+//void PathSolver::UpdateModel()
+//{
 
-    int currentStep=0;
-    QList<QStandardItem*>listItems;
+//    int currentStep=0;
+//    QList<QStandardItem*>listItems;
 
-    orderedNodes::iterator i = renderingOrder.end();
-    while (i != renderingOrder.begin()) {
-        --i;
-        if(i.key() != currentStep) {
-            if(listItems.size()!=0) {
-                model.insertRow(0,listItems);
-                listItems.clear();
-            }
-            currentStep = i.key();
-        }
-        listItems << new QStandardItem(QString("[%1:%2] %3:%4")
-                                       .arg(i.value()->minRenderOrder)
-                                       .arg(i.value()->maxRenderOrder)
-                                       .arg(i.value()->objectPtr->GetIndex())
-                                       .arg(i.value()->objectPtr->objectName())
-                                       );
+//    orderedNodes::iterator i = renderingOrder.end();
+//    while (i != renderingOrder.begin()) {
+//        --i;
+//        if(i.key() != currentStep) {
+//            if(listItems.size()!=0) {
+//                model.insertRow(0,listItems);
+//                listItems.clear();
+//            }
+//            currentStep = i.key();
+//        }
+//        listItems << new QStandardItem(QString("[%1:%2] %3:%4")
+//                                       .arg(i.value()->minRenderOrder)
+//                                       .arg(i.value()->maxRenderOrder)
+//                                       .arg(i.value()->objectPtr->GetIndex())
+//                                       .arg(i.value()->objectPtr->objectName())
+//                                       );
 
 
-    }
-    if(listItems.size()>0)
-        model.insertRow(0,listItems);
-}
+//    }
+//    if(listItems.size()>0)
+//        model.insertRow(0,listItems);
+//}
 
 //return a list of good starts by looking at the nodes close to a root
 QList<SolverNode*> PathSolver::ListOfGoodStarts(const QList<SolverNode*>&loop)

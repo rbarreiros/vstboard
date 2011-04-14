@@ -53,13 +53,15 @@ public:
     unsigned long GetBufferSize() {return bufferSize;}
     float GetSampleRate() {return sampleRate;}
 
-    void EnableSolverUpdate(bool enable);
+    bool EnableSolverUpdate(bool enable);
 //    bool IsSolverUpdateEnabled();
 
     void GetTempo(int &tempo, int &sign1, int &sign2);
     void SetTimeInfo(const VstTimeInfo *info);
 
     void ChangeNbThreads(int nbThreads);
+
+    QStandardItemModel *GetRendererModel() { return &renderer->model; }
 
     QSharedPointer<Connectables::MainContainer> mainContainer;
     QSharedPointer<Connectables::MainContainer> hostContainer;

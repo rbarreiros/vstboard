@@ -705,7 +705,7 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QTreeView" name="solverView">
+      <widget class="QTableView" name="solverView">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -714,6 +714,24 @@
        </property>
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+       <property name="showDropIndicator" stdset="0">
+        <bool>false</bool>
+       </property>
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::NoSelection</enum>
+       </property>
+       <property name="wordWrap">
+        <bool>false</bool>
+       </property>
+       <property name="cornerButtonEnabled">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
