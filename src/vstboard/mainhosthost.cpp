@@ -46,6 +46,9 @@ MainHostHost::~MainHostHost()
 
 void MainHostHost::Render(unsigned long samples)
 {
+    if(samples==0)
+        samples=bufferSize;
+
     #ifdef VSTSDK
         vstHost->UpdateTimeInfo(timeFromStart.elapsed(), samples, sampleRate);
     #endif

@@ -33,7 +33,8 @@ namespace Connectables {
             Param_Sign1,
             Param_Sign2,
             Param_Group,
-            Param_Prog
+            Param_Prog,
+            Param_Bar
         };
 
     Q_OBJECT
