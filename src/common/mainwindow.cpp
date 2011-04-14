@@ -34,7 +34,6 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
         mySceneView(0),
         listToolsModel(0),
         listVstPluginsModel(0),
-        solverScene(0),
         ui(new Ui::MainWindow),
         myHost(myHost)
 {

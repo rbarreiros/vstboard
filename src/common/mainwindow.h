@@ -25,7 +25,6 @@
 
 #include "mainhost.h"
 #include "models/listtoolsmodel.h"
-#include "views/solverscene.h"
 #include "views/sceneview.h"
 #include "views/viewconfig.h"
 
@@ -55,7 +54,6 @@ protected:
 
     QFileSystemModel *listVstPluginsModel;
     QFileSystemModel *listVstBanksModel;
-    View::SolverScene *solverScene;
 
     bool userWantsToUnloadProject();
     bool userWantsToUnloadSetup();
