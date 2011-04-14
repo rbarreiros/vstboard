@@ -128,6 +128,7 @@ bool SetupFile::FromStream(MainHost *myHost,QDataStream &in)
     }
 
     myHost->EnableSolverUpdate(false);
+    myHost->renderer->SetEnabled(false);
     myHost->SetupHostContainer();
 
     for(myHost->filePass=0; myHost->filePass<LOADSAVE_STAGES ; myHost->filePass++) {
@@ -144,7 +145,9 @@ bool SetupFile::FromStream(MainHost *myHost,QDataStream &in)
         myHost->mainWindow->mySceneView->viewHost->SetProgram(0);
     }
 
+    myHost->renderer->SetEnabled(true);
     myHost->EnableSolverUpdate(true);
+
 
     if(myHost->currentFileVersion >= 12) {
         bool colorsInSetupFile;

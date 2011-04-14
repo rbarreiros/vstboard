@@ -139,6 +139,7 @@ bool ProjectFile::FromStream(MainHost *myHost,QDataStream &in)
     }
 
     myHost->EnableSolverUpdate(false);
+    myHost->renderer->SetEnabled(false);
 
     myHost->SetupProjectContainer();
     myHost->SetupGroupContainer();
@@ -166,6 +167,7 @@ bool ProjectFile::FromStream(MainHost *myHost,QDataStream &in)
         in >> *myHost->mainWindow->mySceneView->viewGroup;
     }
 
+    myHost->renderer->SetEnabled(true);
     myHost->EnableSolverUpdate(true);
 
     return true;
