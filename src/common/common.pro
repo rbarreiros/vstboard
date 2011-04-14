@@ -95,7 +95,6 @@ SOURCES += \
     audiobufferd.cpp \
     connectables/script.cpp \
     views/splash.cpp \
-    views/solverscene.cpp \
     connectables/audiopin.cpp \
     views/vstpluginview.cpp \
     vst/vstbankbase.cpp \
@@ -167,7 +166,6 @@ HEADERS  += \
     audiobufferd.h \
     connectables/script.h \
     views/splash.h \
-    views/solverscene.h \
     connectables/audiopin.h \
     views/vstpluginview.h \
     vst/vstbankbase.h \
