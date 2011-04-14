@@ -117,10 +117,10 @@ void CVSTHost::UpdateTimeInfo(double timer, int addSamples, double sampleRate)
     vstTimeInfo.samplePos += addSamples;
 
     //bar length in quarter notes
-    int barLengthq = 4*vstTimeInfo.timeSigNumerator/vstTimeInfo.timeSigDenominator;
+    barLengthq =  (float)(4*vstTimeInfo.timeSigNumerator)/vstTimeInfo.timeSigDenominator;
 
 
-    vstTimeInfo.cycleEndPos = loopLenght*barLengthq;
+    vstTimeInfo.cycleEndPos = barLengthq*loopLenght;
     vstTimeInfo.cycleStartPos = 0;
 
     // we don't care for the mask in here
@@ -141,14 +141,25 @@ void CVSTHost::UpdateTimeInfo(double timer, int addSamples, double sampleRate)
     vstTimeInfo.smpteOffset = (long)(dOffsetInSecond * fSmpteDiv[vstTimeInfo.smpteFrameRate] * 80.L);
 
     if(vstTimeInfo.ppqPos > vstTimeInfo.cycleEndPos) {
-        vstTimeInfo.samplePos = 0;
-        vstTimeInfo.ppqPos = 0;
-        vstTimeInfo.smpteOffset = 0;
+
+        vstTimeInfo.ppqPos -= vstTimeInfo.cycleEndPos;
+        dPos = vstTimeInfo.ppqPos / vstTimeInfo.tempo * 60.L;
+        vstTimeInfo.samplePos = dPos * vstTimeInfo.sampleRate;
+        double dOffsetInSecond = dPos - floor(dPos);
+        vstTimeInfo.smpteOffset = (long)(dOffsetInSecond * fSmpteDiv[vstTimeInfo.smpteFrameRate] * 80.L);
 
     }
 
     //start of last bar
-    vstTimeInfo.barStartPos = barLengthq*floor(vstTimeInfo.ppqPos/barLengthq);
+    currentBar = floor(vstTimeInfo.ppqPos/barLengthq);
+    vstTimeInfo.barStartPos = barLengthq*currentBar;
+}
+
+float CVSTHost::GetCurrentBarTic()
+{
+    float step = floor((vstTimeInfo.ppqPos-vstTimeInfo.barStartPos)*vstTimeInfo.timeSigDenominator/4);
+    float total = ((barLengthq*vstTimeInfo.timeSigDenominator/4)-1);
+    return step / total;
 }
 
 /*****************************************************************************/

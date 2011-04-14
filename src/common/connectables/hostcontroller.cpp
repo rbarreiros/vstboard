@@ -36,11 +36,11 @@ HostController::HostController(MainHost *myHost,int index):
             listTempo << i;
         }
 
-        for(int i=1;i<33;i++) {
+        for(int i=2;i<30;i++) {
             listSign1 << i;
         }
 
-        for(int i=0;i<8;i++) {
+        for(int i=0;i<9;i++) {
             listSign2 << (1<<i);
         }
         for(int i=0;i<128;i++) {
@@ -66,6 +66,7 @@ HostController::HostController(MainHost *myHost,int index):
     listParameterPinOut->listPins.insert(Param_Sign2, new ParameterPinOut(this,Param_Sign2,sign2,&listSign2,true,"sign2"));
     listParameterPinOut->listPins.insert(Param_Group, new ParameterPinOut(this,Param_Group, myHost->programList->GetCurrentMidiGroup(),&listGrp,true,"Group"));
     listParameterPinOut->listPins.insert(Param_Prog, new ParameterPinOut(this,Param_Prog, myHost->programList->GetCurrentMidiProg(),&listPrg,true,"Prog"));
+    listParameterPinOut->listPins.insert(Param_Bar, new ParameterPinOut(this,Param_Bar, 0,true,"Bar"));
 
     connect(this, SIGNAL(progChange(int)),
             myHost->programList,SLOT(ChangeProg(int)),
@@ -105,6 +106,8 @@ void HostController::Render()
         grpChanged=false;
         emit grpChange( static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Group))->GetVariantValue().toInt() );
     }
+
+    static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(Param_Bar))->ChangeValue( myHost->vstHost->GetCurrentBarTic() );
 }
 
 void HostController::OnParameterChanged(ConnectionInfo pinInfo, float value)
