@@ -42,8 +42,12 @@ void RenderThread::RenderStep(int step)
         QMap<int, SolverNode* >::iterator i = listOfSteps.begin();
         while (i != listOfSteps.end()) {
             SolverNode *node = i.value();
-            if(node && !node->objectPtr.isNull() && !node->objectPtr->GetSleep()) {
-                node->objectPtr->NewRenderLoop();
+            if(node) {
+                foreach( QSharedPointer<Connectables::Object> ObjPtr, node->listOfObj) {
+                    if(!ObjPtr.isNull()) {
+                        ObjPtr->NewRenderLoop();
+                    }
+                }
             }
             ++i;
         }
@@ -72,8 +76,11 @@ void RenderThread::RenderStep(int step)
 
     //even if we have more time, we can start rendering now
     if(n!=0) {
-        if(!n->objectPtr.isNull() && !n->objectPtr->GetSleep())
-            n->objectPtr->Render();
+        foreach( QSharedPointer<Connectables::Object> objPtr, n->listOfObj) {
+            if(!objPtr.isNull() && !objPtr->GetSleep()) {
+                objPtr->Render();
+            }
+        }
 
         if(lastStepForRendering == step)
             renderer->sem.release();
@@ -121,7 +128,7 @@ bool RenderThread::SetStep(SolverNode *node, bool strict)
     }
 
     SolverNode *n = new SolverNode();
-    n->objectPtr = node->objectPtr;
+    n->listOfObj = node->listOfObj;
     n->minRenderOrder = node->minRenderOrder;
     n->maxRenderOrder = node->maxRenderOrder;
 

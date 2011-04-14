@@ -357,6 +357,9 @@ void Object::RemoveProgram(int prg)
   */
 void Object::NewRenderLoop()
 {
+    if(sleep)
+        return;
+
     foreach(Pin *pin, listAudioPinIn->listPins) {
         pin->NewRenderLoop();
     }

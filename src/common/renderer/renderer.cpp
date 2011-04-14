@@ -139,8 +139,8 @@ void Renderer::OnNewRenderingOrder(orderedNodes *newSteps)
                     if(j>numberOfThreads)
                         numberOfThreads=j;
                     found=true;
-                    QStandardItem *item = model.item(i.value()->minRenderOrder,j);
-                    item->setBackground( QColor(127,127,0));
+//                    QStandardItem *item = model.item(i.value()->minRenderOrder-1,j);
+//                    item->setBackground( QColor(127,127,0));
 //                    debug2(<< "not strict" <<j << i.value()->minRenderOrder << i.value()->maxRenderOrder << i.value()->objectPtr->objectName())
                 }
                 j++;
@@ -151,13 +151,23 @@ void Renderer::OnNewRenderingOrder(orderedNodes *newSteps)
         }
 
         if(found) {
-            QStandardItem *item = new QStandardItem(QString("[%1:%2] %3:%4")
+            QString str;
+            foreach( QSharedPointer<Connectables::Object> objPtr, i.value()->listOfObj) {
+                if(!objPtr.isNull() && !objPtr->GetSleep()) {
+                    str.append(" " + objPtr->objectName());
+                }
+            }
+
+            QStandardItem *item = new QStandardItem(QString("[%1:%2]%3")
                                                     .arg(i.value()->minRenderOrder)
                                                     .arg(i.value()->maxRenderOrder)
-                                                    .arg(i.value()->objectPtr->GetIndex())
-                                                    .arg(i.value()->objectPtr->objectName())
-                                                    );
+                                                    .arg(str));
             model.setItem(i.value()->minRenderOrder, j-1, item);
+
+            for(int k=i.value()->minRenderOrder+1; k<=i.value()->maxRenderOrder; k++) {
+                item = new QStandardItem("--");
+                model.setItem(k, j-1, item);
+            }
 
         }
 
