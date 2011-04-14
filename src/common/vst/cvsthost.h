@@ -52,9 +52,12 @@ namespace vst
         void SetTempo(int tempo, int sign1, int sign2);
         void GetTempo(int &tempo, int &sign1, int &sign2);
         void UpdateTimeInfo(double timer, int addSamples, double sampleRate);
+        float GetCurrentBarTic();
 
         int loopLenght;
         VstTimeInfo vstTimeInfo;
+        int currentBar;
+        float barLengthq;
 
     protected:
         static CVSTHost * pHost;

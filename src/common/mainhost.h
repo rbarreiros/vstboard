@@ -98,6 +98,7 @@ public:
 protected:
     QTime timeFromStart;
     float sampleRate;
+    unsigned long bufferSize;
 
 private:
     void SetupMainContainer();
@@ -120,8 +121,6 @@ private:
     Renderer *renderer;
     QMutex mutexRender;
     QMutex solverMutex;
-
-    unsigned long bufferSize;
 
     HostModel *model;
 
