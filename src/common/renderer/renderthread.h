@@ -1,8 +1,9 @@
 #ifndef RENDERTHREAD_H
 #define RENDERTHREAD_H
 
-#include "connectables/object.h"
+#include "solvernode.h"
 #include <QSemaphore>
+
 
 class Renderer;
 class RenderThread : public QThread
@@ -11,21 +12,21 @@ class RenderThread : public QThread
 
 public:
     RenderThread(Renderer *renderer, const QString &name);
-    ~RenderThread();
 
-    void SetStep(int step, QWeakPointer<Connectables::Object>obj);
+    bool SetStep(SolverNode *node, bool strict=true);
     void ResetSteps();
 
     void run();
     void Stop();
 
 protected:
-    QMap<int, QWeakPointer<Connectables::Object> > listOfSteps;
+    QMap<int, SolverNode* > listOfSteps;
     Renderer *renderer;
     QMutex mutex;
     QSemaphore sem;
     int step;
     bool stop;
+    int lastStepForRendering;
 
 signals:
     void StepRendered();

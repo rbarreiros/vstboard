@@ -40,11 +40,16 @@ public:
 
     void Resolve(hashCables cables);
 
-    QStandardItemModel model;
+//    QStandardItemModel model;
 
 protected:
     void Clear();
-    void UpdateModel();
+//    void UpdateModel();
+    void CreateNodes();
+    void PutParentsInNodes();
+    bool ChainNodes();
+    void UnwrapLoops();
+    void SetMinAndMaxStep();
 
     QList<SolverNode*> ListOfGoodStarts(const QList<SolverNode*>&loop);
     QList<SolverNode*> BestStartsInAList(const QList<SolverNode*>&loop, const QList<SolverNode*>&possibleStarts);

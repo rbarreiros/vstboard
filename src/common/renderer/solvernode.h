@@ -44,6 +44,8 @@ public:
     int SetMinRenderOrder(int order);
     void SetMaxRenderOrder(int order);
 
+    bool MergeWithParentNode();
+
     float GetHeight();
 
     int minRenderOrder;
@@ -51,9 +53,11 @@ public:
     bool loopFlag;
     int countSteps;
 
-    QSharedPointer<Connectables::Object> objectPtr;
+//    QSharedPointer<Connectables::Object> objectPtr;
     QList<SolverNode*>listParents;
     QList<SolverNode*>listChilds;
+
+    QList< QSharedPointer<Connectables::Object> >listOfObj;
 
     void ResetLoopFlags();
 //    static QList<SolverNode*>listNodes;

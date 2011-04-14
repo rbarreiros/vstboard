@@ -27,7 +27,6 @@ SolverNode::SolverNode() :
         maxRenderOrder(9999),
         loopFlag(0),
         countSteps(0),
-        objectPtr(QSharedPointer<Connectables::Object>()),
         height(0)
 {
 //    index = listNodes.size();
@@ -208,6 +207,30 @@ void SolverNode::ReconnectParentsTo(SolverNode *newChild)
     foreach(SolverNode *parent, listParents) {
         RemoveParent(parent);
     }
+}
+
+bool SolverNode::MergeWithParentNode()
+{
+    if(listParents.count()!=1) {
+        debug2(<< "SolverNode::MergeWithParentNode need only one parent")
+        return false;
+    }
+
+    SolverNode *parent = listParents.first();
+    if(parent->listChilds.count()!=1) {
+        debug2(<< "SolverNode::MergeWithParentNode parent must have one child only")
+        return false;
+    }
+
+    parent->listOfObj << listOfObj;
+    parent->listChilds = listChilds;
+    parent->maxRenderOrder = maxRenderOrder;
+
+    foreach(SolverNode *child, listChilds) {
+        child->listParents.removeAll(this);
+        child->listParents << parent;
+    }
+    return true;
 }
 
 float SolverNode::GetHeight()

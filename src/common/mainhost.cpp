@@ -512,11 +512,13 @@ void MainHost::SetupGroupContainer()
     emit groupParkingModelChanged(&groupContainer->parkModel);
 }
 
-void MainHost::EnableSolverUpdate(bool enable)
+bool MainHost::EnableSolverUpdate(bool enable)
 {
     solverMutex.lock();
-        solverUpdateEnabled = enable;
+    bool ret = solverUpdateEnabled;
+    solverUpdateEnabled = enable;
     solverMutex.unlock();
+    return ret;
 }
 
 //bool MainHost::IsSolverUpdateEnabled()
@@ -534,10 +536,17 @@ void MainHost::SetSolverUpdateNeeded(bool need)
 
 void MainHost::UpdateSolver(bool forceUpdate)
 {
+
     solverMutex.lock();
 
+    if(!solverNeedAnUpdate) {
+        solverMutex.unlock();
+        return;
+    }
+
+//    solverNeedAnUpdate=false;
         //solver needs an update
-        solverNeedAnUpdate = true;
+//        solverNeedAnUpdate = true;
 
         bool solverWasEnabled=solverUpdateEnabled;
 

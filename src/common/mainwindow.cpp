@@ -103,7 +103,8 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     mySceneView->SetParkings(ui->programParkList, ui->groupParkList);
     mySceneView->setModel(myHost->GetModel());
 
-    ui->solverView->setModel(&myHost->solver->model);
+    //ui->solverView->setModel(&myHost->solver->model);
+    ui->solverView->setModel(myHost->GetRendererModel());
 
     ui->treeHostModel->setModel(myHost->GetModel());
 

@@ -37,7 +37,7 @@ PathSolver::~PathSolver()
 
 void PathSolver::Clear()
 {
-    model.clear();
+//    model.clear();
 
     renderingOrder.clear();
     foreach(SolverNode* line, listNodes) {
@@ -52,37 +52,65 @@ void PathSolver::Resolve(hashCables cables)
     Clear();
 
     if(cables.size()==0) {
-        UpdateModel();
+//        UpdateModel();
         emit NewRenderingOrder(&renderingOrder);
         return;
     }
 
     listCables = cables;
 
-    //encapsulate objects in solvernodes
+    CreateNodes();
+    PutParentsInNodes();
+    while(ChainNodes()) {}
+    UnwrapLoops();
+    SetMinAndMaxStep();
+
+    //put the nodes in an ordered map
+    foreach(SolverNode* node, listNodes) {
+//        QSharedPointer<Connectables::Object>objPtr = node->objectPtr;
+//        if(!objPtr.isNull() && objPtr->info().nodeType!=NodeType::container)
+            renderingOrder.insert(node->minRenderOrder,node);
+    }
+
+//    UpdateModel();
+
+    emit NewRenderingOrder(&renderingOrder);
+}
+
+/*!
+  Create nodes for each objects
+  */
+void PathSolver::CreateNodes()
+{
     const Connectables::hashObjects listObjects = myHost->objFactory->GetListObjects();
     Connectables::hashObjects::const_iterator i = listObjects.constBegin();
     while(i!=listObjects.constEnd()) {
         QSharedPointer<Connectables::Object> objPtr = i.value();
+
         //don't add parked objects
         if(!objPtr.isNull() && !objPtr->parked) {
-            if(objPtr->info().nodeType!=NodeType::bridge) {
+            if(objPtr->info().nodeType!=NodeType::bridge && objPtr->info().nodeType!=NodeType::container) {
                 SolverNode *node = new SolverNode();
                 listNodes << node;
-                node->objectPtr = objPtr;
+                node->listOfObj << objPtr;
                 objPtr->SetSolverNode(node);
             }
         }
         ++i;
     }
+}
 
-    //list childs and parents of all nodes
+/*!
+  List all childs and parents in each node
+  */
+void PathSolver::PutParentsInNodes()
+{
     foreach(SolverNode *node,listNodes) {
-        foreach(QSharedPointer<Connectables::Object> parent,GetListParents(node->objectPtr)) {
+        foreach(QSharedPointer<Connectables::Object> parent,GetListParents(node->listOfObj.first())) {
             if(!parent.isNull())
                 node->listParents << parent->GetSolverNode();
         }
-        foreach(QSharedPointer<Connectables::Object> child,GetListChildren(node->objectPtr)) {
+        foreach(QSharedPointer<Connectables::Object> child,GetListChildren(node->listOfObj.last())) {
             if(!child.isNull())
                 node->listChilds << child->GetSolverNode();
         }
@@ -93,13 +121,36 @@ void PathSolver::Resolve(hashCables cables)
 //            delete node;
 //        }
     }
+}
 
+/*!
+    Group nodes with only one parent or child
+    \return true if a node was grouped
+    */
+bool PathSolver::ChainNodes()
+{
+    foreach(SolverNode* node, listNodes) {
+        if(node->listChilds.count() == 1) {
+            SolverNode *childNode = node->listChilds.first();
+            if( childNode->listParents.count() == 1) {
+                if(childNode->MergeWithParentNode()) {
+                    listNodes.removeAll(childNode);
+                    delete childNode;
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+void PathSolver::UnwrapLoops()
+{
     //unwrap loops
     foreach(SolverNode *node,listNodes) {
         foreach(SolverNode *n,listNodes) {
             n->ResetLoopFlags();
         }
-
 
         //find loop
         QList<SolverNode*>loop;
@@ -143,8 +194,13 @@ void PathSolver::Resolve(hashCables cables)
             }
         }
     }
+}
 
-    //start from each root and set the rendering order of each child nodes
+/*!
+  Find the rendering window, minimum and maximum rendering step
+  */
+void PathSolver::SetMinAndMaxStep()
+{
     int maxStep=0;
     foreach(SolverNode *node, listNodes) {
         if(!node->IsRoot())
@@ -157,47 +213,36 @@ void PathSolver::Resolve(hashCables cables)
             continue;
         node->SetMaxRenderOrder(maxStep);
     }
-
-    //put the nodes in an ordered map
-    foreach(SolverNode* node, listNodes) {
-        QSharedPointer<Connectables::Object>objPtr = node->objectPtr;
-        if(!objPtr.isNull() && objPtr->info().nodeType!=NodeType::container)
-            renderingOrder.insert(node->maxRenderOrder,node);
-    }
-
-    UpdateModel();
-
-    emit NewRenderingOrder(&renderingOrder);
 }
 
-void PathSolver::UpdateModel()
-{
+//void PathSolver::UpdateModel()
+//{
 
-    int currentStep=0;
-    QList<QStandardItem*>listItems;
+//    int currentStep=0;
+//    QList<QStandardItem*>listItems;
 
-    orderedNodes::iterator i = renderingOrder.end();
-    while (i != renderingOrder.begin()) {
-        --i;
-        if(i.key() != currentStep) {
-            if(listItems.size()!=0) {
-                model.insertRow(0,listItems);
-                listItems.clear();
-            }
-            currentStep = i.key();
-        }
-        listItems << new QStandardItem(QString("[%1:%2] %3:%4")
-                                       .arg(i.value()->minRenderOrder)
-                                       .arg(i.value()->maxRenderOrder)
-                                       .arg(i.value()->objectPtr->GetIndex())
-                                       .arg(i.value()->objectPtr->objectName())
-                                       );
+//    orderedNodes::iterator i = renderingOrder.end();
+//    while (i != renderingOrder.begin()) {
+//        --i;
+//        if(i.key() != currentStep) {
+//            if(listItems.size()!=0) {
+//                model.insertRow(0,listItems);
+//                listItems.clear();
+//            }
+//            currentStep = i.key();
+//        }
+//        listItems << new QStandardItem(QString("[%1:%2] %3:%4")
+//                                       .arg(i.value()->minRenderOrder)
+//                                       .arg(i.value()->maxRenderOrder)
+//                                       .arg(i.value()->objectPtr->GetIndex())
+//                                       .arg(i.value()->objectPtr->objectName())
+//                                       );
 
 
-    }
-    if(listItems.size()>0)
-        model.insertRow(0,listItems);
-}
+//    }
+//    if(listItems.size()>0)
+//        model.insertRow(0,listItems);
+//}
 
 //return a list of good starts by looking at the nodes close to a root
 QList<SolverNode*> PathSolver::ListOfGoodStarts(const QList<SolverNode*>&loop)
@@ -271,7 +316,7 @@ QList<SolverNode*> PathSolver::CopyNodesChain(const QList<SolverNode*>&chain)
     foreach(SolverNode *node, chain) {
         SolverNode *copiedNode = new SolverNode();
         listNodes << copiedNode;
-        copiedNode->objectPtr = node->objectPtr;
+        copiedNode->listOfObj = node->listOfObj;
 
         if(parentNode)
             parentNode->AddChild(copiedNode);

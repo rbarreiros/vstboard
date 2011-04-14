@@ -40,6 +40,9 @@ public:
     Renderer(MainHost *myHost);
     ~Renderer();
     void SetNbThreads(int nbThreads);
+    void SetEnabled(bool enabled) {stop=!enabled;}
+
+    QStandardItemModel model;
 
 protected:
     void InitThreads();

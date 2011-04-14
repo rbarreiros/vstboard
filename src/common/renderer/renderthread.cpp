@@ -5,26 +5,24 @@ RenderThread::RenderThread(Renderer *renderer, const QString &name)
     : QThread(renderer),
       renderer(renderer),
       sem(0),
-      stop(false)
+      stop(false),
+      lastStepForRendering(-1)
 {
     setObjectName(name);
-}
-
-RenderThread::~RenderThread()
-{
-    debug2(<<"delete thread " << objectName())
 }
 
 void RenderThread::run()
 {
     forever {
         sem.acquire();
+
         mutex.lock();
         if(stop)
             return;
-        RenderStep(step);
-        renderer->sem.release();
         mutex.unlock();
+
+        RenderStep(step);
+
     }
 }
 
@@ -39,39 +37,117 @@ void RenderThread::Stop()
 void RenderThread::RenderStep(int step)
 {
     if(step==-1) {
+        mutex.lock();
         //reset counters
-        QMap<int, QWeakPointer<Connectables::Object> >::iterator i = listOfSteps.begin();
+        QMap<int, SolverNode* >::iterator i = listOfSteps.begin();
         while (i != listOfSteps.end()) {
-            if(!i.value().isNull()) {
-                QSharedPointer<Connectables::Object>objPtr = i.value().toStrongRef();
-                if(!objPtr->GetSleep()) {
-                    objPtr->NewRenderLoop();
+            SolverNode *node = i.value();
+            if(node) {
+                foreach( QSharedPointer<Connectables::Object> ObjPtr, node->listOfObj) {
+                    if(!ObjPtr.isNull()) {
+                        ObjPtr->NewRenderLoop();
+                    }
                 }
             }
             ++i;
         }
+        lastStepForRendering = -1;
+        mutex.unlock();
+        renderer->sem.release();
         return;
     }
 
-    if(!listOfSteps.contains(step))
-        return;
+    SolverNode *n = listOfSteps.value(step,0);
+    if(n!=0) {
+        lastStepForRendering = n->maxRenderOrder;
+    } else {
+        //nothing to do
+        if(lastStepForRendering==-1) {
+            renderer->sem.release();
+            return;
+        }
 
-    QSharedPointer<Connectables::Object>objPtr = listOfSteps.value(step).toStrongRef();
-    if(objPtr.isNull() || objPtr->GetSleep())
-        return;
-    objPtr->Render();
+    }
+
+    //we have more time to render, release this step now
+    if(lastStepForRendering > step) {
+        renderer->sem.release();
+    }
+
+    //even if we have more time, we can start rendering now
+    if(n!=0) {
+        foreach( QSharedPointer<Connectables::Object> objPtr, n->listOfObj) {
+            if(!objPtr.isNull() && !objPtr->GetSleep()) {
+                objPtr->Render();
+            }
+        }
+
+        if(lastStepForRendering == step)
+            renderer->sem.release();
+        lastStepForRendering=-1;
+    }
 }
 
-void RenderThread::SetStep(int step, QWeakPointer<Connectables::Object>obj)
+bool RenderThread::SetStep(SolverNode *node, bool strict)
 {
     mutex.lock();
-    listOfSteps.insert(step, obj);
+
+    if(strict) {
+        for(int i=node->minRenderOrder; i<=node->maxRenderOrder; i++) {
+            if(listOfSteps.contains(i)) {
+                mutex.unlock();
+                return false;
+            }
+        }
+    } else {
+        bool found=false;
+
+        //find an empty step
+        for(int i=node->minRenderOrder; i<=node->maxRenderOrder; i++) {
+            if(listOfSteps.value(i,0)==0) {
+
+                //correct the node before
+                int j=i;
+                bool f2=false;
+                while(!f2 && j>=0) {
+                    SolverNode *oldNode = listOfSteps.value(j,0);
+                    if(oldNode!=0) {
+                        oldNode->maxRenderOrder=node->minRenderOrder-1;
+                        f2=true;
+                    }
+                    j--;
+                }
+
+                found=true;
+            }
+        }
+        if(!found) {
+            mutex.unlock();
+            return false;
+        }
+    }
+
+    SolverNode *n = new SolverNode();
+    n->listOfObj = node->listOfObj;
+    n->minRenderOrder = node->minRenderOrder;
+    n->maxRenderOrder = node->maxRenderOrder;
+
+
+    listOfSteps.insert(node->minRenderOrder, n);
+    for(int i=node->minRenderOrder+1; i<=node->maxRenderOrder; i++) {
+        listOfSteps.insert(i,0);
+    }
     mutex.unlock();
+    return true;
 }
 
 void RenderThread::ResetSteps()
 {
     mutex.lock();
+    foreach(SolverNode *node, listOfSteps) {
+        if(node)
+            delete node;
+    }
     listOfSteps.clear();
     mutex.unlock();
 }
