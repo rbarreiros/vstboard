@@ -141,9 +141,12 @@ void CVSTHost::UpdateTimeInfo(double timer, int addSamples, double sampleRate)
     vstTimeInfo.smpteOffset = (long)(dOffsetInSecond * fSmpteDiv[vstTimeInfo.smpteFrameRate] * 80.L);
 
     if(vstTimeInfo.ppqPos > vstTimeInfo.cycleEndPos) {
-        vstTimeInfo.samplePos = 0;
-        vstTimeInfo.ppqPos = 0;
-        vstTimeInfo.smpteOffset = 0;
+
+        vstTimeInfo.ppqPos -= vstTimeInfo.cycleEndPos;
+        dPos = vstTimeInfo.ppqPos / vstTimeInfo.tempo * 60.L;
+        vstTimeInfo.samplePos = dPos * vstTimeInfo.sampleRate;
+        double dOffsetInSecond = dPos - floor(dPos);
+        vstTimeInfo.smpteOffset = (long)(dOffsetInSecond * fSmpteDiv[vstTimeInfo.smpteFrameRate] * 80.L);
 
     }
 
