@@ -82,8 +82,8 @@ HEADERS  += \
 
 FORMS +=
 
-
 PRECOMPILED_HEADER = ../common/precomp.h
+
 OTHER_FILES += \
     vstdll.rc
 
