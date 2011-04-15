@@ -51,6 +51,61 @@ void Renderer::InitThreads()
     }
 }
 
+void Renderer::UpdateView()
+{
+    foreach(RenderThread *th, listOfThreads) {
+        foreach(SolverNode *node, th->listOfSteps) {
+            if(node) {
+                node->UpdateModel(&model);
+            }
+        }
+    }
+}
+
+void Renderer::Optimize()
+{
+    foreach(RenderThread *th, listOfThreads) {
+        th->cpuTotal=0;
+        foreach(SolverNode *node, th->listOfSteps) {
+            if(node) {
+                th->cpuTotal+=node->cpuTime;
+            }
+        }
+    }
+
+    unsigned long maxThreadTime=0;
+    unsigned long maxNodeTime=0;
+    RenderThread *biggestThreadWithMergedNode=0;
+    SolverNode *nodeToMove=0;
+
+    foreach(RenderThread *th, listOfThreads) {
+        if(th->cpuTotal>maxThreadTime) {
+
+            bool merged=false;
+            foreach(SolverNode *node, th->listOfSteps) {
+                if(node && !node->listOfMergedNodes.isEmpty()) {
+                    merged=true;
+                    foreach(SolverNode *mergedNode, node->listOfMergedNodes) {
+                        if(mergedNode->cpuTime > maxNodeTime) {
+                            maxNodeTime=mergedNode->cpuTime;
+                            nodeToMove=mergedNode;
+                        }
+                    }
+                }
+            }
+
+            if(merged) {
+                maxThreadTime = th->cpuTotal;
+                biggestThreadWithMergedNode=th;
+            }
+        }
+    }
+
+    if(nodeToMove && nodeToMove->modelIndex.isValid()) {
+        model.setData( nodeToMove->modelIndex, nodeToMove->modelIndex.data().toString().append("TOMOVE") );
+    }
+}
+
 void Renderer::Clear()
 {
     mutex.lock();
@@ -58,8 +113,7 @@ void Renderer::Clear()
     numberOfThreads=0;
     numberOfSteps=0;
     foreach(RenderThread *th, listOfThreads) {
-        th->Stop();
-        th->deleteLater();
+        delete th;
     }
     listOfThreads.clear();
     mutex.unlock();
@@ -92,12 +146,16 @@ void Renderer::OnNewRenderingOrder(orderedNodes *newSteps)
     numberOfThreads = threadCount;
 
     model.clear();
+    for(int i=0; i<maxNumberOfThreads; i++) {
+        model.setHorizontalHeaderItem(i, new QStandardItem( QString::number(i+1) ) );
+    }
 
     foreach(RenderThread *th, listOfThreads) {
         th->ResetSteps();
     }
 
-    int countNotRenderedNodes=0;
+    listOfNodesToMerge.clear();
+
     orderedNodes::iterator i = newSteps->begin();
     while (i != newSteps->end()) {
 
@@ -138,25 +196,9 @@ void Renderer::OnNewRenderingOrder(orderedNodes *newSteps)
             }
 
             if(found) {
-                listOfThreads.value(bestThread)->NeededModificationsToInsertNode( i.value(), true );
+                listOfThreads.value(bestThread)->NeededModificationsToInsertNode( node, true );
             } else {
-                //create model item
-                QStandardItem *item = new QStandardItem(QString("[%1:%2][%3:%4]")
-                                                        .arg(node->minRenderOrder)
-                                                        .arg(node->maxRenderOrder)
-                                                        .arg(node->minRenderOrderOri)
-                                                        .arg(node->maxRenderOrderOri));
-
-                //add objects names to model
-                foreach( QSharedPointer<Connectables::Object> objPtr, i.value()->listOfObj) {
-                    if(!objPtr.isNull() && !objPtr->GetSleep()) {
-                        item->setText( item->text().append("," + objPtr->objectName()) );
-                    }
-                }
-
-                item->setBackground(QColor(255,127,127));
-                model.setItem(countNotRenderedNodes, maxNumberOfThreads, item);
-                countNotRenderedNodes++;
+                listOfNodesToMerge << node;
             }
         }
         ++i;
@@ -166,8 +208,37 @@ void Renderer::OnNewRenderingOrder(orderedNodes *newSteps)
         listOfThreads.value(i)->AddToModel(&model,i);
     }
 
+    //add nodes to merge
+    foreach(SolverNode *node, listOfNodesToMerge) {
+        int j=0;
+        bool found=false;
+        while(!found && j<maxNumberOfThreads) {
+            if(listOfThreads.value(j)->MergeNodeInStep(node)) {
+                found = true;
+                model.insertRow(node->minRenderOrder+1);
+//                QStandardItem *item = new QStandardItem(QString("merged[%1:%2][%3:%4]")
+//                                                        .arg(node->minRenderOrder)
+//                                                        .arg(node->maxRenderOrder)
+//                                                        .arg(node->minRenderOrderOri)
+//                                                        .arg(node->maxRenderOrderOri));
+//                //add objects names to model
+//                foreach( QSharedPointer<Connectables::Object> objPtr, node->listOfObj) {
+//                    if(!objPtr.isNull() && !objPtr->GetSleep()) {
+//                        item->setText( item->text().append("\n" + objPtr->objectName()) );
+//                    }
+//                }
+                QStandardItem *item = new QStandardItem();
+                model.setItem(node->minRenderOrder+1, j, item);
+                node->modelIndex = item->index();
+            }
+            j++;
+        }
+    }
+
     numberOfSteps++;
     numberOfThreads++;
+
+    QTimer::singleShot(500, this, SLOT(Optimize()));
 
     mutex.unlock();
 }

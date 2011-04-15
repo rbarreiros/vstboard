@@ -55,7 +55,7 @@ protected:
     bool stop;
 
     QList<RenderThread*>listOfThreads;
-
+    QList<SolverNode*>listOfNodesToMerge;
     QMutex mutex;
     QSemaphore sem;
     MainHost *myHost;
@@ -64,6 +64,8 @@ public slots:
     void Clear();
     void StartRender();
     void OnNewRenderingOrder(orderedNodes *newSteps);
+    void UpdateView();
+    void Optimize();
 
 friend class RenderThread;
 };

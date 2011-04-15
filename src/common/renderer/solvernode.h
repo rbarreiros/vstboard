@@ -47,7 +47,10 @@ public:
 
     bool MergeWithParentNode();
 
-    float GetHeight();
+    void NewRenderLoop();
+    void RenderNode();
+
+    void UpdateModel(QStandardItemModel *model);
 
     int minRenderOrder;
     int maxRenderOrder;
@@ -68,9 +71,12 @@ public:
 //    static QList<SolverNode*>listNodes;
 //    int index;
 
-protected:
-    int height;
+    unsigned long cpuTime;
+    int benchCount;
 
+    QList<SolverNode*>listOfMergedNodes;
+    QPersistentModelIndex modelIndex;
+    bool modelNeedUpdate;
 };
 
 #endif // SOLVERNODE_H

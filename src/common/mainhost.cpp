@@ -83,6 +83,9 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
     connect(this,SIGNAL(SolverToUpdate()),
             this,SLOT(UpdateSolver()),
             Qt::QueuedConnection);
+
+    connect(updateViewTimer, SIGNAL(timeout()),
+            renderer, SLOT(UpdateView()));
 }
 
 MainHost::~MainHost()

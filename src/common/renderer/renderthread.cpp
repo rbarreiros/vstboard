@@ -11,6 +11,14 @@ RenderThread::RenderThread(Renderer *renderer, const QString &name)
     setObjectName(name);
 }
 
+RenderThread::~RenderThread()
+{
+    Stop();
+    while(isRunning()) {
+        usleep(100);
+    }
+}
+
 void RenderThread::run()
 {
     forever {
@@ -22,7 +30,6 @@ void RenderThread::run()
         mutex.unlock();
 
         RenderStep(step);
-
     }
 }
 
@@ -43,11 +50,7 @@ void RenderThread::RenderStep(int step)
         while (i != listOfSteps.end()) {
             SolverNode *node = i.value();
             if(node) {
-                foreach( QSharedPointer<Connectables::Object> ObjPtr, node->listOfObj) {
-                    if(!ObjPtr.isNull()) {
-                        ObjPtr->NewRenderLoop();
-                    }
-                }
+                node->NewRenderLoop();
             }
             ++i;
         }
@@ -76,11 +79,7 @@ void RenderThread::RenderStep(int step)
 
     //even if we have more time, we can start rendering now
     if(n!=0) {
-        foreach( QSharedPointer<Connectables::Object> objPtr, n->listOfObj) {
-            if(!objPtr.isNull() && !objPtr->GetSleep()) {
-                objPtr->Render();
-            }
-        }
+        n->RenderNode();
 
         if(lastStepForRendering == step)
             renderer->sem.release();
@@ -119,29 +118,34 @@ bool RenderThread::ShortenNode(SolverNode *node, int maxStep)
 
 void RenderThread::AddToModel(QStandardItemModel *model, int col)
 {
+
     QMap<int, SolverNode* >::iterator i = listOfSteps.begin();
     while (i != listOfSteps.end()) {
         SolverNode *node = i.value();
         if(node) {
-            QStandardItem *item = new QStandardItem(QString("[%1:%2][%3:%4]")
-                                                    .arg(node->minRenderOrder)
-                                                    .arg(node->maxRenderOrder)
-                                                    .arg(node->minRenderOrderOri)
-                                                    .arg(node->maxRenderOrderOri));
-
-            //add objects names to model
-            foreach( QSharedPointer<Connectables::Object> objPtr, node->listOfObj) {
-                if(!objPtr.isNull() && !objPtr->GetSleep()) {
-                    item->setText( item->text().append("\n" + objPtr->objectName()) );
-                }
-            }
-
+            QStandardItem *item = new QStandardItem();
             model->setItem(i.key(), col, item);
+            node->modelIndex = item->index();
         } else {
             model->setItem(i.key(), col, new QStandardItem("+"));
         }
         ++i;
     }
+}
+
+bool RenderThread::MergeNodeInStep(SolverNode *node)
+{
+    SolverNode *targetNode = listOfSteps.value(node->maxRenderOrder,0);
+    if(!targetNode)
+        return false;
+
+    targetNode->listOfMergedNodes << node;
+
+    if(node->minRenderOrder > targetNode->minRenderOrder)
+        targetNode->minRenderOrder = node->minRenderOrder;
+    if(targetNode->maxRenderOrder < node->maxRenderOrder)
+        targetNode->maxRenderOrder = node->maxRenderOrder;
+    return true;
 }
 
 int RenderThread::NeededModificationsToInsertNode(SolverNode *node, bool apply)
