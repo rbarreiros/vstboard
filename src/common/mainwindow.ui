@@ -727,9 +727,6 @@
        <property name="selectionMode">
         <enum>QAbstractItemView::NoSelection</enum>
        </property>
-       <property name="wordWrap">
-        <bool>false</bool>
-       </property>
        <property name="cornerButtonEnabled">
         <bool>false</bool>
        </property>
@@ -1211,6 +1208,8 @@
   </customwidget>
  </customwidgets>
  <resources>
+  <include location="../resources/resources.qrc"/>
+  <include location="../resources/resources.qrc"/>
   <include location="../resources/resources.qrc"/>
  </resources>
  <connections>

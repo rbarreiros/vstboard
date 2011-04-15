@@ -25,12 +25,23 @@
 SolverNode::SolverNode() :
         minRenderOrder(0),
         maxRenderOrder(9999),
+        minRenderOrderOri(-1),
+        maxRenderOrderOri(-1),
         loopFlag(0),
         countSteps(0),
         height(0)
 {
 //    index = listNodes.size();
 //    listNodes << this;
+}
+
+SolverNode::SolverNode(const SolverNode &c)
+{
+    minRenderOrder = c.minRenderOrder;
+    maxRenderOrder = c.maxRenderOrder;
+    minRenderOrderOri = c.minRenderOrderOri;
+    maxRenderOrderOri = c.maxRenderOrderOri;
+    listOfObj = c.listOfObj;
 }
 
 void SolverNode::AddChild(SolverNode *child)

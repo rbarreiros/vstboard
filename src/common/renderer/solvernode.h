@@ -28,6 +28,7 @@ class SolverNode
 {
 public:
     SolverNode();
+    SolverNode(const SolverNode &c);
 
     void ReconnectChildsTo(SolverNode *newParent);
     void ReconnectParentsTo(SolverNode *newChild);
@@ -50,6 +51,10 @@ public:
 
     int minRenderOrder;
     int maxRenderOrder;
+
+    int minRenderOrderOri;
+    int maxRenderOrderOri;
+
     bool loopFlag;
     int countSteps;
 

@@ -205,12 +205,21 @@ void PathSolver::SetMinAndMaxStep()
     foreach(SolverNode *node, listNodes) {
         if(!node->IsRoot())
             continue;
-        maxStep = std::max(maxStep, node->SetMinRenderOrder(0));
+
+        //only audio and midi interfaces can have the first place
+        int firstStep=1;
+        if(node->listOfObj.first()->info().objType == ObjType::AudioInterfaceIn ||
+            node->listOfObj.first()->info().objType == ObjType::AudioInterfaceOut ||
+            node->listOfObj.first()->info().objType == ObjType::MidiInterface )
+                firstStep=0;
+
+        maxStep = std::max(maxStep, node->SetMinRenderOrder( firstStep ));
     }
 
     foreach(SolverNode *node, listNodes) {
         if(!node->IsTail())
             continue;
+
         node->SetMaxRenderOrder(maxStep);
     }
 }

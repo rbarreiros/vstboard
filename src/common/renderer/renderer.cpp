@@ -97,81 +97,73 @@ void Renderer::OnNewRenderingOrder(orderedNodes *newSteps)
         th->ResetSteps();
     }
 
-//    debug2(<<"sort steps ===========")
+    int countNotRenderedNodes=0;
     orderedNodes::iterator i = newSteps->begin();
     while (i != newSteps->end()) {
-
-//        if(step==i.key()) {
-//            threadCount++;
-//            if(threadCount>=maxNumberOfThreads)
-//                threadCount=0;
-//        } else {
-//            threadCount=0;
-//        }
-
-//        if(threadCount>numberOfThreads)
-//            numberOfThreads=threadCount;
 
         step = i.key();
         if(step>numberOfSteps)
             numberOfSteps=step;
 
-//        if(!listOfThreads.value(threadCount)->SetStep( i.value(), false )) {
-//            debug2(<<"can't find a thread")
-//        }
-
+        SolverNode *node = i.value();
+        node->minRenderOrderOri = node->minRenderOrder;
+        node->maxRenderOrderOri = node->maxRenderOrder;
 
         bool found=false;
+
+        //try to find a place in threads
         int j=0;
         while(!found && j<maxNumberOfThreads) {
-            if(listOfThreads.value(j)->SetStep( i.value(), true )) {
+            if(listOfThreads.value(j)->SetStep( node )) {
                 if(j>numberOfThreads)
                     numberOfThreads=j;
                 found=true;
-//                debug2(<<j << i.value()->minRenderOrder << i.value()->maxRenderOrder << i.value()->objectPtr->objectName())
             }
             j++;
         }
+
         if(!found) {
+            //no place found, try again
             j=0;
-            while(!found && j<maxNumberOfThreads) {
-                if(listOfThreads.value(j)->SetStep( i.value(), false )) {
-                    if(j>numberOfThreads)
-                        numberOfThreads=j;
+            int bestThread = -1;
+            int bestMod = -1;
+            while(j<maxNumberOfThreads) {
+                int nbMods = listOfThreads.value(j)->NeededModificationsToInsertNode( node );
+                if(nbMods!=-1 && (bestMod==-1 ||  nbMods<bestMod) ) {
                     found=true;
-//                    QStandardItem *item = model.item(i.value()->minRenderOrder-1,j);
-//                    item->setBackground( QColor(127,127,0));
-//                    debug2(<< "not strict" <<j << i.value()->minRenderOrder << i.value()->maxRenderOrder << i.value()->objectPtr->objectName())
+                    bestMod = nbMods;
+                    bestThread = j;
                 }
                 j++;
             }
-            if(!found) {
-                debug2(<<"can't find a thread")
-            }
-        }
 
-        if(found) {
-            QString str;
-            foreach( QSharedPointer<Connectables::Object> objPtr, i.value()->listOfObj) {
-                if(!objPtr.isNull() && !objPtr->GetSleep()) {
-                    str.append(" " + objPtr->objectName());
+            if(found) {
+                listOfThreads.value(bestThread)->NeededModificationsToInsertNode( i.value(), true );
+            } else {
+                //create model item
+                QStandardItem *item = new QStandardItem(QString("[%1:%2][%3:%4]")
+                                                        .arg(node->minRenderOrder)
+                                                        .arg(node->maxRenderOrder)
+                                                        .arg(node->minRenderOrderOri)
+                                                        .arg(node->maxRenderOrderOri));
+
+                //add objects names to model
+                foreach( QSharedPointer<Connectables::Object> objPtr, i.value()->listOfObj) {
+                    if(!objPtr.isNull() && !objPtr->GetSleep()) {
+                        item->setText( item->text().append("," + objPtr->objectName()) );
+                    }
                 }
+
+                item->setBackground(QColor(255,127,127));
+                model.setItem(countNotRenderedNodes, maxNumberOfThreads, item);
+                countNotRenderedNodes++;
             }
-
-            QStandardItem *item = new QStandardItem(QString("[%1:%2]%3")
-                                                    .arg(i.value()->minRenderOrder)
-                                                    .arg(i.value()->maxRenderOrder)
-                                                    .arg(str));
-            model.setItem(i.value()->minRenderOrder, j-1, item);
-
-            for(int k=i.value()->minRenderOrder+1; k<=i.value()->maxRenderOrder; k++) {
-                item = new QStandardItem("--");
-                model.setItem(k, j-1, item);
-            }
-
         }
-
         ++i;
+    }
+
+    for(int i=0; i<maxNumberOfThreads; i++) {
+        listOfThreads.value(i)->AddToModel(&model,i);
     }
 
     numberOfSteps++;
