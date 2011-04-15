@@ -22,7 +22,13 @@ win32 {
 }
 
 win32-msvc* {
+    PRE_TARGETDEPS += $$top_destdir/portaudio.lib
+    PRE_TARGETDEPS += $$top_destdir/portmidi.lib
     PRE_TARGETDEPS += $$top_destdir/common.lib
+} else {
+    PRE_TARGETDEPS += $$top_destdir/portaudio.a
+    PRE_TARGETDEPS += $$top_destdir/portmidi.a
+    PRE_TARGETDEPS += $$top_destdir/common.a
 }
 
 INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/include
@@ -104,7 +110,7 @@ HEADERS += \
 
 FORMS +=
 
-#PRECOMPILED_HEADER = ../common/precomp.h
+PRECOMPILED_HEADER = ../common/precomp.h
 
 OTHER_FILES += \ 
     ../../README.txt \

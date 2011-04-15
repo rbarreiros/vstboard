@@ -3745,11 +3745,11 @@ static signed long GetStreamWriteAvailable( PaStream* s )
 static int BlockingIoPaCallback(const void                     *inputBuffer    ,
                                       void                     *outputBuffer   ,
                                       unsigned long             framesPerBuffer,
-                                const PaStreamCallbackTimeInfo *timeInfo       ,
+                                const PaStreamCallbackTimeInfo * /*timeInfo*/       ,
                                       PaStreamCallbackFlags     statusFlags    ,
                                       void                     *userData       )
 {
-    PaError result = paNoError; /* Initial return value. */
+    //PaError result = paNoError; /* Initial return value. */
     PaAsioStream *stream = *(PaAsioStream**)userData; /* The PA ASIO stream. */
     PaAsioStreamBlockingState *blockingState = stream->blockingState; /* Persume blockingState is valid, otherwise the callback wouldn't be running. */
 
