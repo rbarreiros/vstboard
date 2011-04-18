@@ -24,7 +24,7 @@ void RenderThread::run()
     forever {
         sem.acquire();
 
-        mutex.lock();
+        mutex.lockForRead();
         if(stop)
             return;
         mutex.unlock();
@@ -35,7 +35,7 @@ void RenderThread::run()
 
 void RenderThread::Stop()
 {
-    mutex.lock();
+    mutex.lockForWrite();
     stop=true;
     mutex.unlock();
     sem.release(1);
@@ -44,7 +44,9 @@ void RenderThread::Stop()
 void RenderThread::RenderStep(int step)
 {
     if(step==-1) {
-        mutex.lock();
+        mutex.lockForRead();
+        cpu = GetCurrentProcessorNumber();
+
         //reset counters
         QMap<int, SolverNode* >::iterator i = listOfSteps.begin();
         while (i != listOfSteps.end()) {
@@ -113,38 +115,10 @@ bool RenderThread::ShortenNode(SolverNode *node, int maxStep)
     }
 
     node->maxRenderOrder=maxStep;
-    return true;
-}
-
-void RenderThread::AddToModel(QStandardItemModel *model, int col)
-{
-
-    QMap<int, SolverNode* >::iterator i = listOfSteps.begin();
-    while (i != listOfSteps.end()) {
-        SolverNode *node = i.value();
-        if(node) {
-            QStandardItem *item = new QStandardItem();
-            model->setItem(i.key(), col, item);
-            node->modelIndex = item->index();
-        } else {
-            model->setItem(i.key(), col, new QStandardItem("+"));
-        }
-        ++i;
+    foreach(SolverNode *n, node->GetListOfMergedNodes()) {
+        n->maxRenderOrder=maxStep;
     }
-}
 
-bool RenderThread::MergeNodeInStep(SolverNode *node)
-{
-    SolverNode *targetNode = listOfSteps.value(node->maxRenderOrder,0);
-    if(!targetNode)
-        return false;
-
-    targetNode->listOfMergedNodes << node;
-
-    if(node->minRenderOrder > targetNode->minRenderOrder)
-        targetNode->minRenderOrder = node->minRenderOrder;
-    if(targetNode->maxRenderOrder < node->maxRenderOrder)
-        targetNode->maxRenderOrder = node->maxRenderOrder;
     return true;
 }
 
@@ -159,6 +133,7 @@ int RenderThread::NeededModificationsToInsertNode(SolverNode *node, bool apply)
         int bestStep=0;
         insertType preferred = ND;
 
+        mutex.lockForRead();
         if(listOfSteps.contains(i)) {
             nodeInPlace=listOfSteps.value(i,0);
             if(nodeInPlace!=0) {
@@ -208,12 +183,13 @@ int RenderThread::NeededModificationsToInsertNode(SolverNode *node, bool apply)
                 preferred = postponeNewNode;
                 bestStep = i;
             }
-
         }
+        mutex.unlock();
 
         if(preferred!=ND) {
 
             if( apply ) {
+                mutex.lockForWrite();
                 switch(preferred) {
                     case postponeNodeInPlace:
                         //the node in place can be postponed, shorten the new node
@@ -234,6 +210,7 @@ int RenderThread::NeededModificationsToInsertNode(SolverNode *node, bool apply)
                         node->maxRenderOrder = FirstUsedStepInRange(bestStep, maxStep) - 1;
                         break;
                 }
+                mutex.unlock();
                 SetStep(node);
             }
 
@@ -241,15 +218,15 @@ int RenderThread::NeededModificationsToInsertNode(SolverNode *node, bool apply)
         }
 
     }
-
     return -1;
 }
 
 int RenderThread::FirstUsedStepInRange(int startStep, int endStep)
 {
     for(int i=startStep; i<=endStep; i++) {
-        if(listOfSteps.value(i,0) != 0)
+        if(listOfSteps.value(i,0) != 0) {
             return i;
+        }
     }
     //nothing found, return next step
     return endStep+1;
@@ -259,25 +236,28 @@ SolverNode* RenderThread::FindNodeUsingStep(int step)
 {
     for(int i=step; i>=0; i--) {
         SolverNode *node = listOfSteps.value(i,0);
-        if(node != 0)
+        if(node != 0) {
             return node;
+        }
     }
     return 0;
 }
 
 bool RenderThread::SetStep(SolverNode *node)
 {
-    mutex.lock();
+    mutex.lockForRead();
     for(int i=node->minRenderOrder; i<=node->maxRenderOrder; i++) {
         if(listOfSteps.contains(i)) {
             mutex.unlock();
             return false;
         }
     }
+    mutex.unlock();
 
-    SolverNode *n = new SolverNode(*node);
+    mutex.lockForWrite();
+//    SolverNode *n = new SolverNode(*node);
 
-    listOfSteps.insert(node->minRenderOrder, n);
+    listOfSteps.insert(node->minRenderOrder, node);
     for(int i=node->minRenderOrder+1; i<=node->maxRenderOrder; i++) {
         listOfSteps.insert(i,0);
     }
@@ -287,11 +267,7 @@ bool RenderThread::SetStep(SolverNode *node)
 
 void RenderThread::ResetSteps()
 {
-    mutex.lock();
-    foreach(SolverNode *node, listOfSteps) {
-        if(node)
-            delete node;
-    }
+    mutex.lockForWrite();
     listOfSteps.clear();
     mutex.unlock();
 }

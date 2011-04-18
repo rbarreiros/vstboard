@@ -3,7 +3,7 @@
 
 #include "solvernode.h"
 #include <QSemaphore>
-
+#include <QReadWriteLock>
 
 class Renderer;
 class RenderThread : public QThread
@@ -17,7 +17,6 @@ public:
     bool SetStep(SolverNode *node);
     void ResetSteps();
     int NeededModificationsToInsertNode(SolverNode *node, bool apply=false);
-    void AddToModel(QStandardItemModel *model, int col);
     bool MergeNodeInStep(SolverNode *node);
 
     void run();
@@ -39,13 +38,15 @@ protected:
 
     QMap<int, SolverNode* > listOfSteps;
     Renderer *renderer;
-    QMutex mutex;
+    QReadWriteLock mutex;
+
     QSemaphore sem;
     int step;
     bool stop;
     int lastStepForRendering;
 
     unsigned long cpuTotal;
+    int cpu;
 
 friend class Renderer;
 };

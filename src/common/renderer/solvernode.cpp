@@ -52,8 +52,14 @@ SolverNode::SolverNode(const SolverNode &c) :
 
 }
 
+SolverNode::~SolverNode()
+{
+//    debug2(<<"delete SolverNode " << (long)this)
+}
+
 void SolverNode::NewRenderLoop()
 {
+    mutex.lockForRead();
     foreach( QSharedPointer<Connectables::Object> ObjPtr, listOfObj) {
         if(!ObjPtr.isNull()) {
             ObjPtr->NewRenderLoop();
@@ -62,18 +68,20 @@ void SolverNode::NewRenderLoop()
     foreach(SolverNode *mergedNode, listOfMergedNodes) {
         mergedNode->NewRenderLoop();
     }
+    mutex.unlock();
 }
 
 void SolverNode::RenderNode()
 {
+    mutex.lockForRead();
     unsigned long timerStart=0;
     FILETIME creationTime, exitTime, kernelTime, userTime;
 
-    if( benchCount<10) {
+//    if( benchCount<10) {
         if( GetThreadTimes( GetCurrentThread(), &creationTime, &exitTime, &kernelTime, &userTime) !=0 ) {
             timerStart = kernelTime.dwLowDateTime + userTime.dwLowDateTime;
         }
-    }
+//    }
 
     foreach( QSharedPointer<Connectables::Object> objPtr, listOfObj) {
         if(!objPtr.isNull() && !objPtr->GetSleep()) {
@@ -81,24 +89,63 @@ void SolverNode::RenderNode()
         }
     }
 
-    if(benchCount<10) {
-        FILETIME creationTime, exitTime, kernelTime, userTime;
+//    if(benchCount<10) {
+//        FILETIME creationTime, exitTime, kernelTime, userTime;
         if( GetThreadTimes( GetCurrentThread(), &creationTime, &exitTime, &kernelTime, &userTime) !=0 ) {
             cpuTime += ( (kernelTime.dwLowDateTime + userTime.dwLowDateTime) - timerStart );
             benchCount++;
             modelNeedUpdate=true;
         }
-    }
+//    }
 
     foreach(SolverNode *mergedNode, listOfMergedNodes) {
         mergedNode->RenderNode();
     }
+    mutex.unlock();
+}
+
+unsigned long SolverNode::GetCpuUsage()
+{
+    unsigned long cpu = cpuTime;
+
+    mutex.lockForRead();
+    foreach(SolverNode *merged, listOfMergedNodes) {
+        cpu+=merged->cpuTime;
+    }
+    mutex.unlock();
+
+    return cpu;
+}
+
+void SolverNode::AddMergedNode(SolverNode *merged)
+{
+    mutex.lockForWrite();
+    listOfMergedNodes << merged;
+    minRenderOrder = merged->minRenderOrder = std::max(minRenderOrder, merged->minRenderOrder);
+    maxRenderOrder = merged->maxRenderOrder = std::min(maxRenderOrder, merged->maxRenderOrder);
+    mutex.unlock();
+}
+
+void SolverNode::RemoveMergedNode(SolverNode *merged)
+{
+    mutex.lockForWrite();
+    listOfMergedNodes.removeAll(merged);
+    mutex.unlock();
+}
+
+void SolverNode::ClearMergedNodes()
+{
+    mutex.lockForWrite();
+    listOfMergedNodes.clear();
+    mutex.unlock();
 }
 
 void SolverNode::UpdateModel(QStandardItemModel *model)
 {
     if(!modelNeedUpdate || !modelIndex.isValid())
         return;
+
+    mutex.lockForRead();
 
     modelNeedUpdate=false;
 
@@ -120,6 +167,8 @@ void SolverNode::UpdateModel(QStandardItemModel *model)
     foreach(SolverNode *mergedNode, listOfMergedNodes) {
         mergedNode->UpdateModel(model);
     }
+
+    mutex.unlock();
 }
 
 void SolverNode::AddChild(SolverNode *child)

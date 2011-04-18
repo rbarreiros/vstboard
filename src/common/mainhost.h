@@ -136,7 +136,7 @@ private:
 signals:
     void SampleRateChanged(float rate);
     void BufferSizeChanged(unsigned long size);
-    void NewSolver(orderedNodes *renderLines);
+//    void NewSolver(orderedNodes *renderLines);
     void ObjectRemoved(int contrainerId, int obj);
     void SolverToUpdate();
     void OnAudioDeviceToggleInUse(const ObjectInfo &objInfo, bool inUse);
@@ -150,7 +150,7 @@ public slots:
     void OnCableAdded(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
     void OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
     void SetTempo(int tempo=120, int sign1=4, int sign2=4);
-    void OnNewRenderingOrder(orderedNodes *renderLines);
+//    void OnNewRenderingOrder(orderedNodes *renderLines);
     virtual void Render(unsigned long samples=0);
 
 private slots:

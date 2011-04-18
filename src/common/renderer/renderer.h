@@ -25,11 +25,11 @@
 #include "connectables/object.h"
 #include "renderthread.h"
 #include <QSemaphore>
+#include <QReadWriteLock>
 
 class SolverNode;
 
 typedef QMultiHash<int, SolverNode*> orderedNodes;
-typedef QMultiHash<int, QWeakPointer<Connectables::Object> > orderedObjects;
 
 class MainHost;
 class Renderer : public QObject
@@ -46,24 +46,25 @@ public:
 
 protected:
     void InitThreads();
+    void BuildModel();
 
-    orderedObjects renderSteps;
     int maxNumberOfThreads;
     int numberOfThreads;
     int numberOfSteps;
-
     bool stop;
 
     QList<RenderThread*>listOfThreads;
+    orderedNodes orderedListOfNodes;
     QList<SolverNode*>listOfNodesToMerge;
-    QMutex mutex;
+    QReadWriteLock mutex;
     QSemaphore sem;
     MainHost *myHost;
+    QTimer updateViewTimer;
 
 public slots:
     void Clear();
     void StartRender();
-    void OnNewRenderingOrder(orderedNodes *newSteps);
+    void OnNewRenderingOrder(const QList<SolverNode*> & listNodes);
     void UpdateView();
     void Optimize();
 

@@ -37,25 +37,24 @@ PathSolver::~PathSolver()
 
 void PathSolver::Clear()
 {
-//    model.clear();
-
-    renderingOrder.clear();
+    mutex.lock();
     foreach(SolverNode* line, listNodes) {
         delete line;
     }
     listNodes.clear();
+    mutex.unlock();
 
 }
 
-void PathSolver::Resolve(hashCables cables)
+void PathSolver::Resolve(hashCables cables, Renderer *renderer)
 {
     Clear();
 
     if(cables.size()==0) {
-//        UpdateModel();
-        emit NewRenderingOrder(&renderingOrder);
         return;
     }
+
+    mutex.lock();
 
     listCables = cables;
 
@@ -65,16 +64,8 @@ void PathSolver::Resolve(hashCables cables)
     UnwrapLoops();
     SetMinAndMaxStep();
 
-    //put the nodes in an ordered map
-    foreach(SolverNode* node, listNodes) {
-//        QSharedPointer<Connectables::Object>objPtr = node->objectPtr;
-//        if(!objPtr.isNull() && objPtr->info().nodeType!=NodeType::container)
-            renderingOrder.insert(node->minRenderOrder,node);
-    }
-
-//    UpdateModel();
-
-    emit NewRenderingOrder(&renderingOrder);
+    renderer->OnNewRenderingOrder(listNodes);
+    mutex.unlock();
 }
 
 /*!
