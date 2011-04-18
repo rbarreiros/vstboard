@@ -25,8 +25,8 @@
 #include "connectables/object.h"
 #include "solvernode.h"
 #include "globals.h"
+#include "renderer.h"
 
-typedef QMultiHash<int, SolverNode*> orderedNodes;
 
 class MainHost;
 
@@ -37,14 +37,10 @@ Q_OBJECT
 public:
     explicit PathSolver(MainHost *parent);
     ~PathSolver();
-
-    void Resolve(hashCables cables);
-
-//    QStandardItemModel model;
+    void Resolve(hashCables cables, Renderer *renderer);
 
 protected:
     void Clear();
-//    void UpdateModel();
     void CreateNodes();
     void PutParentsInNodes();
     bool ChainNodes();
@@ -62,10 +58,10 @@ protected:
     void GetListChildrenOfBridgePin(const ConnectionInfo &info, QList< QSharedPointer<Connectables::Object> > &listChildren);
 
     hashCables listCables;
-    orderedNodes renderingOrder;
     MainHost *myHost;
 
     QList<SolverNode*>listNodes;
+    QMutex mutex;
 signals:
     void NewRenderingOrder(orderedNodes *order);
 };

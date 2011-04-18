@@ -136,9 +136,6 @@ void CVSTHost::UpdateTimeInfo(double timer, int addSamples, double sampleRate)
 
     double dPos = vstTimeInfo.samplePos / vstTimeInfo.sampleRate;
     vstTimeInfo.ppqPos = dPos * vstTimeInfo.tempo / 60.L;
-    /* offset in fractions of a second   */
-    double dOffsetInSecond = dPos - floor(dPos);
-    vstTimeInfo.smpteOffset = (long)(dOffsetInSecond * fSmpteDiv[vstTimeInfo.smpteFrameRate] * 80.L);
 
     if(vstTimeInfo.ppqPos > vstTimeInfo.cycleEndPos) {
 
@@ -149,6 +146,10 @@ void CVSTHost::UpdateTimeInfo(double timer, int addSamples, double sampleRate)
         vstTimeInfo.smpteOffset = (long)(dOffsetInSecond * fSmpteDiv[vstTimeInfo.smpteFrameRate] * 80.L);
 
     }
+
+    /* offset in fractions of a second   */
+    double dOffsetInSecond = dPos - floor(dPos);
+    vstTimeInfo.smpteOffset = (long)(dOffsetInSecond * fSmpteDiv[vstTimeInfo.smpteFrameRate] * 80.L);
 
     //start of last bar
     currentBar = floor(vstTimeInfo.ppqPos/barLengthq);

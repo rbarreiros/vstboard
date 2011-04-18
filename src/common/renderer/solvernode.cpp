@@ -25,12 +25,150 @@
 SolverNode::SolverNode() :
         minRenderOrder(0),
         maxRenderOrder(9999),
+        minRenderOrderOri(-1),
+        maxRenderOrderOri(-1),
         loopFlag(0),
         countSteps(0),
-        height(0)
+        cpuTime(0),
+        benchCount(0),
+        modelNeedUpdate(true)
 {
 //    index = listNodes.size();
 //    listNodes << this;
+}
+
+SolverNode::SolverNode(const SolverNode &c) :
+    minRenderOrder(c.minRenderOrder),
+    maxRenderOrder(c.maxRenderOrder),
+    minRenderOrderOri(c.minRenderOrderOri),
+    maxRenderOrderOri(c.maxRenderOrderOri),
+    loopFlag(0),
+    countSteps(0),
+    listOfObj(c.listOfObj),
+    cpuTime(0),
+    benchCount(0),
+    modelNeedUpdate(true)
+{
+
+}
+
+SolverNode::~SolverNode()
+{
+//    debug2(<<"delete SolverNode " << (long)this)
+}
+
+void SolverNode::NewRenderLoop()
+{
+    mutex.lockForRead();
+    foreach( QSharedPointer<Connectables::Object> ObjPtr, listOfObj) {
+        if(!ObjPtr.isNull()) {
+            ObjPtr->NewRenderLoop();
+        }
+    }
+    foreach(SolverNode *mergedNode, listOfMergedNodes) {
+        mergedNode->NewRenderLoop();
+    }
+    mutex.unlock();
+}
+
+void SolverNode::RenderNode()
+{
+    mutex.lockForRead();
+    unsigned long timerStart=0;
+    FILETIME creationTime, exitTime, kernelTime, userTime;
+
+//    if( benchCount<10) {
+        if( GetThreadTimes( GetCurrentThread(), &creationTime, &exitTime, &kernelTime, &userTime) !=0 ) {
+            timerStart = kernelTime.dwLowDateTime + userTime.dwLowDateTime;
+        }
+//    }
+
+    foreach( QSharedPointer<Connectables::Object> objPtr, listOfObj) {
+        if(!objPtr.isNull() && !objPtr->GetSleep()) {
+            objPtr->Render();
+        }
+    }
+
+//    if(benchCount<10) {
+//        FILETIME creationTime, exitTime, kernelTime, userTime;
+        if( GetThreadTimes( GetCurrentThread(), &creationTime, &exitTime, &kernelTime, &userTime) !=0 ) {
+            cpuTime += ( (kernelTime.dwLowDateTime + userTime.dwLowDateTime) - timerStart );
+            benchCount++;
+            modelNeedUpdate=true;
+        }
+//    }
+
+    foreach(SolverNode *mergedNode, listOfMergedNodes) {
+        mergedNode->RenderNode();
+    }
+    mutex.unlock();
+}
+
+unsigned long SolverNode::GetCpuUsage()
+{
+    unsigned long cpu = cpuTime;
+
+    mutex.lockForRead();
+    foreach(SolverNode *merged, listOfMergedNodes) {
+        cpu+=merged->cpuTime;
+    }
+    mutex.unlock();
+
+    return cpu;
+}
+
+void SolverNode::AddMergedNode(SolverNode *merged)
+{
+    mutex.lockForWrite();
+    listOfMergedNodes << merged;
+    minRenderOrder = merged->minRenderOrder = std::max(minRenderOrder, merged->minRenderOrder);
+    maxRenderOrder = merged->maxRenderOrder = std::min(maxRenderOrder, merged->maxRenderOrder);
+    mutex.unlock();
+}
+
+void SolverNode::RemoveMergedNode(SolverNode *merged)
+{
+    mutex.lockForWrite();
+    listOfMergedNodes.removeAll(merged);
+    mutex.unlock();
+}
+
+void SolverNode::ClearMergedNodes()
+{
+    mutex.lockForWrite();
+    listOfMergedNodes.clear();
+    mutex.unlock();
+}
+
+void SolverNode::UpdateModel(QStandardItemModel *model)
+{
+    if(!modelNeedUpdate || !modelIndex.isValid())
+        return;
+
+    mutex.lockForRead();
+
+    modelNeedUpdate=false;
+
+    QString str = QString("[%1:%2][%3:%4]%5")
+                    .arg(minRenderOrder)
+                    .arg(maxRenderOrder)
+                    .arg(minRenderOrderOri)
+                    .arg(maxRenderOrderOri)
+                    .arg(cpuTime);
+
+    foreach( QSharedPointer<Connectables::Object> objPtr, listOfObj) {
+        if(!objPtr.isNull() && !objPtr->GetSleep()) {
+            str.append("\n" + objPtr->objectName());
+        }
+    }
+
+    model->setData(modelIndex, str);
+
+    foreach(SolverNode *mergedNode, listOfMergedNodes) {
+        mergedNode->UpdateModel(model);
+    }
+
+    mutex.unlock();
 }
 
 void SolverNode::AddChild(SolverNode *child)
@@ -233,15 +371,3 @@ bool SolverNode::MergeWithParentNode()
     return true;
 }
 
-float SolverNode::GetHeight()
-{
-    if(height==0) {
-        //float wp=0;
-        foreach(SolverNode* line,listParents) {
-            height+=line->GetHeight();
-        }
-        if(height==0)
-            height=1;
-    }
-    return height;
-}

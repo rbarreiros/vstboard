@@ -23,11 +23,14 @@
 
 #include "precomp.h"
 #include "connectables/object.h"
+#include <QReadWriteLock>
 
 class SolverNode
 {
 public:
     SolverNode();
+    SolverNode(const SolverNode &c);
+    ~SolverNode();
 
     void ReconnectChildsTo(SolverNode *newParent);
     void ReconnectParentsTo(SolverNode *newChild);
@@ -46,10 +49,21 @@ public:
 
     bool MergeWithParentNode();
 
-    float GetHeight();
+    void NewRenderLoop();
+    void RenderNode();
+    void AddMergedNode(SolverNode *merged);
+    void RemoveMergedNode(SolverNode *merged);
+    void ClearMergedNodes();
+    QList<SolverNode*> GetListOfMergedNodes() const {return listOfMergedNodes;}
+    void UpdateModel(QStandardItemModel *model);
+    unsigned long GetCpuUsage();
 
     int minRenderOrder;
     int maxRenderOrder;
+
+    int minRenderOrderOri;
+    int maxRenderOrderOri;
+
     bool loopFlag;
     int countSteps;
 
@@ -63,9 +77,14 @@ public:
 //    static QList<SolverNode*>listNodes;
 //    int index;
 
-protected:
-    int height;
+    unsigned long cpuTime;
+    int benchCount;
+    QPersistentModelIndex modelIndex;
+    bool modelNeedUpdate;
 
+protected:
+     QList<SolverNode*>listOfMergedNodes;
+     QReadWriteLock mutex;
 };
 
 #endif // SOLVERNODE_H

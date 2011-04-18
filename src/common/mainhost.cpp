@@ -74,15 +74,17 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
     updateViewTimer = new QTimer(this);
     updateViewTimer->start(40);
 
-    connect(solver,SIGNAL(NewRenderingOrder(orderedNodes*)),
-            renderer, SLOT(OnNewRenderingOrder(orderedNodes*)));
+//    connect(solver,SIGNAL(NewRenderingOrder(orderedNodes*)),
+//            renderer, SLOT(OnNewRenderingOrder(orderedNodes*)));
 
-    connect(solver,SIGNAL(NewRenderingOrder(orderedNodes*)),
-            this, SLOT(OnNewRenderingOrder(orderedNodes*)));
+//    connect(solver,SIGNAL(NewRenderingOrder(orderedNodes*)),
+//            this, SLOT(OnNewRenderingOrder(orderedNodes*)));
 
     connect(this,SIGNAL(SolverToUpdate()),
             this,SLOT(UpdateSolver()),
             Qt::QueuedConnection);
+
+
 }
 
 MainHost::~MainHost()
@@ -102,7 +104,7 @@ MainHost::~MainHost()
     groupContainer.clear();
     programContainer.clear();
 
-    solver->Resolve(workingListOfCables);
+//    solver->Resolve(workingListOfCables, &renderer);
 
     delete renderer;
     delete objFactory;
@@ -573,7 +575,7 @@ void MainHost::UpdateSolver(bool forceUpdate)
     }
 
     mutexListCables->lock();
-        solver->Resolve(workingListOfCables);
+        solver->Resolve(workingListOfCables, renderer);
     mutexListCables->unlock();
 
     SetSolverUpdateNeeded(false);
@@ -625,10 +627,10 @@ void MainHost::SetSampleRate(float rate)
     emit SampleRateChanged(sampleRate);
 }
 
-void MainHost::OnNewRenderingOrder(orderedNodes * renderLines)
-{
-    emit NewSolver(renderLines);
-}
+//void MainHost::OnNewRenderingOrder(orderedNodes * renderLines)
+//{
+//    emit NewSolver(renderLines);
+//}
 
 void MainHost::Render(unsigned long samples)
 {

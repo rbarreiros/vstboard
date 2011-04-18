@@ -105,6 +105,10 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
 
     //ui->solverView->setModel(&myHost->solver->model);
     ui->solverView->setModel(myHost->GetRendererModel());
+    connect(myHost->GetRendererModel(), SIGNAL(dataChanged(QModelIndex,QModelIndex)),
+            ui->solverView, SLOT(resizeColumnsToContents()));
+    connect(myHost->GetRendererModel(), SIGNAL(dataChanged(QModelIndex,QModelIndex)),
+            ui->solverView, SLOT(resizeRowsToContents()));
 
     ui->treeHostModel->setModel(myHost->GetModel());
 

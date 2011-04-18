@@ -37,25 +37,24 @@ PathSolver::~PathSolver()
 
 void PathSolver::Clear()
 {
-//    model.clear();
-
-    renderingOrder.clear();
+    mutex.lock();
     foreach(SolverNode* line, listNodes) {
         delete line;
     }
     listNodes.clear();
+    mutex.unlock();
 
 }
 
-void PathSolver::Resolve(hashCables cables)
+void PathSolver::Resolve(hashCables cables, Renderer *renderer)
 {
     Clear();
 
     if(cables.size()==0) {
-//        UpdateModel();
-        emit NewRenderingOrder(&renderingOrder);
         return;
     }
+
+    mutex.lock();
 
     listCables = cables;
 
@@ -65,16 +64,8 @@ void PathSolver::Resolve(hashCables cables)
     UnwrapLoops();
     SetMinAndMaxStep();
 
-    //put the nodes in an ordered map
-    foreach(SolverNode* node, listNodes) {
-//        QSharedPointer<Connectables::Object>objPtr = node->objectPtr;
-//        if(!objPtr.isNull() && objPtr->info().nodeType!=NodeType::container)
-            renderingOrder.insert(node->minRenderOrder,node);
-    }
-
-//    UpdateModel();
-
-    emit NewRenderingOrder(&renderingOrder);
+    renderer->OnNewRenderingOrder(listNodes);
+    mutex.unlock();
 }
 
 /*!
@@ -205,12 +196,21 @@ void PathSolver::SetMinAndMaxStep()
     foreach(SolverNode *node, listNodes) {
         if(!node->IsRoot())
             continue;
-        maxStep = std::max(maxStep, node->SetMinRenderOrder(0));
+
+        //only audio and midi interfaces can have the first place
+        int firstStep=1;
+        if(node->listOfObj.first()->info().objType == ObjType::AudioInterfaceIn ||
+            node->listOfObj.first()->info().objType == ObjType::AudioInterfaceOut ||
+            node->listOfObj.first()->info().objType == ObjType::MidiInterface )
+                firstStep=0;
+
+        maxStep = std::max(maxStep, node->SetMinRenderOrder( firstStep ));
     }
 
     foreach(SolverNode *node, listNodes) {
         if(!node->IsTail())
             continue;
+
         node->SetMaxRenderOrder(maxStep);
     }
 }
