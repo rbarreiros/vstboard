@@ -52,11 +52,6 @@ SolverNode::SolverNode(const SolverNode &c) :
 
 }
 
-SolverNode::~SolverNode()
-{
-//    debug2(<<"delete SolverNode " << (long)this)
-}
-
 void SolverNode::NewRenderLoop()
 {
     mutex.lockForRead();
@@ -74,6 +69,8 @@ void SolverNode::NewRenderLoop()
 void SolverNode::RenderNode()
 {
     mutex.lockForRead();
+
+#ifdef _WIN32
     unsigned long timerStart=0;
     FILETIME creationTime, exitTime, kernelTime, userTime;
 
@@ -82,6 +79,7 @@ void SolverNode::RenderNode()
             timerStart = kernelTime.dwLowDateTime + userTime.dwLowDateTime;
         }
 //    }
+#endif
 
     foreach( QSharedPointer<Connectables::Object> objPtr, listOfObj) {
         if(!objPtr.isNull() && !objPtr->GetSleep()) {
@@ -89,6 +87,8 @@ void SolverNode::RenderNode()
         }
     }
 
+
+#ifdef _WIN32
 //    if(benchCount<10) {
 //        FILETIME creationTime, exitTime, kernelTime, userTime;
         if( GetThreadTimes( GetCurrentThread(), &creationTime, &exitTime, &kernelTime, &userTime) !=0 ) {
@@ -97,6 +97,7 @@ void SolverNode::RenderNode()
             modelNeedUpdate=true;
         }
 //    }
+#endif
 
     foreach(SolverNode *mergedNode, listOfMergedNodes) {
         mergedNode->RenderNode();
@@ -104,7 +105,7 @@ void SolverNode::RenderNode()
     mutex.unlock();
 }
 
-unsigned long SolverNode::GetCpuUsage()
+unsigned long SolverNode::GetTotalCpuUsage()
 {
     unsigned long cpu = cpuTime;
 

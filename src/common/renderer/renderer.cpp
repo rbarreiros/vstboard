@@ -23,6 +23,7 @@
 #include "connectables/object.h"
 #include "solvernode.h"
 #include "mainhost.h"
+#include "views/configdialog.h"
 
 Renderer::Renderer(MainHost *myHost)
     : QObject(),
@@ -32,8 +33,7 @@ Renderer::Renderer(MainHost *myHost)
       sem(0),
       myHost(myHost)
 {
-    maxNumberOfThreads = myHost->GetSetting("MaxNbThreads", 4).toInt();
-    if(maxNumberOfThreads<=0) maxNumberOfThreads = 4;
+    maxNumberOfThreads = ConfigDialog::defaultNumberOfThreads(myHost);
     InitThreads();
 
     connect(&updateViewTimer, SIGNAL(timeout()),
@@ -133,95 +133,83 @@ void Renderer::Optimize()
 
     for(int step=0; step<numberOfSteps; step++) {
 
-//        bool merged=false;
+        QList<SolverNode*>lstOfNodes;
 
-//        //check if there's more node than threads on this step
-//        foreach(RenderThread *th, listOfThreads) {
-//            SolverNode *n = th->listOfSteps.value(step,0);
-//            if(n) {
-//                if(!n->GetListOfMergedNodes().isEmpty()) {
-//                    merged=true;
-//                }
-//            }
-//        }
+        //get a list of nodes on this step
+        foreach(RenderThread *th, listOfThreads) {
+            if(th->listOfSteps.contains(step)) {
+                SolverNode *n = th->listOfSteps.take(step);
+                if(n) {
+                    lstOfNodes << n;
+                    lstOfNodes << n->GetListOfMergedNodes();
+                }
+            }
+        }
 
-//        if(merged) {
-            QList<SolverNode*>lstOfNodes;
+        //remove merged nodes
+        foreach(SolverNode *node, lstOfNodes) {
+            node->ClearMergedNodes();
+        }
 
-            //get a list of nodes on this step
-            foreach(RenderThread *th, listOfThreads) {
-                if(th->listOfSteps.contains(step)) {
-                    SolverNode *n = th->listOfSteps.take(step);
-                    if(n) {
-                        lstOfNodes << n;
-                        lstOfNodes << n->GetListOfMergedNodes();
+        //find the biggest nodes
+        QList<SolverNode*>biggestNodes;
+        while(biggestNodes.count()<numberOfThreads && lstOfNodes.count()!=0) {
+            SolverNode *biggest=0;
+            foreach(SolverNode *n, lstOfNodes) {
+                if(!biggest || n->cpuTime > biggest->cpuTime) {
+                    biggest=n;
+                }
+            }
+            lstOfNodes.removeAll(biggest);
+            biggestNodes << biggest;
+        }
+
+        //merge the smallest nodes
+        int row=step+1;
+        while(lstOfNodes.count()!=0) {
+            model.insertRow(row);
+
+            foreach(SolverNode *n, biggestNodes) {
+                if(lstOfNodes.count()!=0) {
+                    SolverNode *merged = lstOfNodes.takeFirst();
+                    n->AddMergedNode( merged );
+                }
+            }
+            row++;
+        }
+
+        //add nodes to threads
+        int thCpt=0;
+        foreach(RenderThread *th, listOfThreads) {
+            if(biggestNodes.count()!=0) {
+
+                //don't touch empty steps, only create new steps or replace existing
+                if(!th->listOfSteps.contains(step) || th->listOfSteps.value(step)!=0) {
+
+                    SolverNode *node = biggestNodes.takeFirst();
+                    th->listOfSteps.insert(step, node);
+                    node->modelIndex = model.index(step,thCpt);
+                    int row=step+1;
+                    int col=node->modelIndex.column();
+                    foreach(SolverNode *merged, node->GetListOfMergedNodes()) {
+                        merged->modelIndex = model.index( row, col);
+                        row++;
                     }
                 }
             }
+            thCpt++;
+        }
 
-            //remove merged nodes
-            foreach(SolverNode *node, lstOfNodes) {
-                node->ClearMergedNodes();
-            }
 
-            //find the biggest nodes
-            QList<SolverNode*>biggestNodes;
-            while(biggestNodes.count()<numberOfThreads && lstOfNodes.count()!=0) {
-                SolverNode *biggest=0;
-                foreach(SolverNode *n, lstOfNodes) {
-                    if(!biggest || n->cpuTime > biggest->cpuTime) {
-                        biggest=n;
-                    }
-                }
-                lstOfNodes.removeAll(biggest);
-                biggestNodes << biggest;
-            }
 
-            //merge the smallest nodes
-            int row=step+1;
-            while(lstOfNodes.count()!=0) {
-                model.insertRow(row);
-
-                foreach(SolverNode *n, biggestNodes) {
-                    if(lstOfNodes.count()!=0) {
-                        SolverNode *merged = lstOfNodes.takeFirst();
-                        n->AddMergedNode( merged );
-                    }
-                }
-                row++;
-            }
-
-            //add nodes to threads
-            int thCpt=0;
-            foreach(RenderThread *th, listOfThreads) {
-                if(biggestNodes.count()!=0) {
-
-                    //don't touch empty steps, only create new steps or replace existing
-                    if(!th->listOfSteps.contains(step) || th->listOfSteps.value(step)!=0) {
-
-                        SolverNode *node = biggestNodes.takeFirst();
-                        th->listOfSteps.insert(step, node);
-                        node->modelIndex = model.index(step,thCpt);
-                        int row=step+1;
-                        int col=node->modelIndex.column();
-                        foreach(SolverNode *merged, node->GetListOfMergedNodes()) {
-                            merged->modelIndex = model.index( row, col);
-                            row++;
-                        }
-                    }
-                }
-                thCpt++;
-            }
-//        }
-
-    //shorten nodes if possible
+        //shorten nodes if possible
         unsigned long maxcpu=0;
 
         //find the bigger thread on this step, not including nodes spanning on multiple steps
         foreach(RenderThread *th, listOfThreads) {
             SolverNode *node = th->listOfSteps.value(step,0);
             if(node && node->maxRenderOrder == step) {
-                unsigned long cpu = node->GetCpuUsage();
+                unsigned long cpu = node->GetTotalCpuUsage();
                 if(cpu>maxcpu)
                     maxcpu=cpu;
             }
@@ -234,7 +222,7 @@ void Renderer::Optimize()
         foreach(RenderThread *th, listOfThreads) {
             SolverNode *node = th->listOfSteps.value(step,0);
             if(node && node->maxRenderOrder > step) {
-                if(maxcpu==0 || node->GetCpuUsage() < maxcpu) {
+                if(maxcpu==0 || node->GetTotalCpuUsage() < maxcpu) {
                     th->ShortenNode(node,step);
                 }
             }

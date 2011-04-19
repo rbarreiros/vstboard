@@ -45,7 +45,6 @@ void RenderThread::RenderStep(int step)
 {
     if(step==-1) {
         mutex.lockForRead();
-        cpu = GetCurrentProcessorNumber();
 
         //reset counters
         QMap<int, SolverNode* >::iterator i = listOfSteps.begin();
@@ -95,6 +94,8 @@ bool RenderThread::PostponeNode(SolverNode *node, int minStep)
     if(minStep>node->maxRenderOrder)
         return false;
 
+    mutex.lockForWrite();
+
     for(int i=node->minRenderOrder; i<=minStep; i++) {
         listOfSteps.remove(i);
     }
@@ -102,6 +103,7 @@ bool RenderThread::PostponeNode(SolverNode *node, int minStep)
     node->minRenderOrder=minStep;
     listOfSteps.insert(minStep,node);
 
+    mutex.unlock();
     return true;
 }
 
@@ -109,6 +111,8 @@ bool RenderThread::ShortenNode(SolverNode *node, int maxStep)
 {
     if(maxStep<node->minRenderOrder)
         return false;
+
+    mutex.lockForWrite();
 
     for(int i=maxStep+1; i<=node->maxRenderOrder; i++) {
         listOfSteps.remove(i);
@@ -118,7 +122,7 @@ bool RenderThread::ShortenNode(SolverNode *node, int maxStep)
     foreach(SolverNode *n, node->GetListOfMergedNodes()) {
         n->maxRenderOrder=maxStep;
     }
-
+    mutex.unlock();
     return true;
 }
 
@@ -189,7 +193,6 @@ int RenderThread::NeededModificationsToInsertNode(SolverNode *node, bool apply)
         if(preferred!=ND) {
 
             if( apply ) {
-                mutex.lockForWrite();
                 switch(preferred) {
                     case postponeNodeInPlace:
                         //the node in place can be postponed, shorten the new node
@@ -210,7 +213,6 @@ int RenderThread::NeededModificationsToInsertNode(SolverNode *node, bool apply)
                         node->maxRenderOrder = FirstUsedStepInRange(bestStep, maxStep) - 1;
                         break;
                 }
-                mutex.unlock();
                 SetStep(node);
             }
 

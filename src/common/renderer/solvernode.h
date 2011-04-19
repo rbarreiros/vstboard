@@ -25,13 +25,37 @@
 #include "connectables/object.h"
 #include <QReadWriteLock>
 
+class PathSolver;
 class SolverNode
 {
 public:
     SolverNode();
     SolverNode(const SolverNode &c);
-    ~SolverNode();
 
+    void NewRenderLoop();
+    void RenderNode();
+
+    void AddMergedNode(SolverNode *merged);
+    void RemoveMergedNode(SolverNode *merged);
+    void ClearMergedNodes();
+    QList<SolverNode*> GetListOfMergedNodes() const {return listOfMergedNodes;}
+
+    void UpdateModel(QStandardItemModel *model);
+    unsigned long GetTotalCpuUsage();
+
+    int minRenderOrder;
+    int maxRenderOrder;
+
+    int minRenderOrderOri;
+    int maxRenderOrderOri;
+
+    QList< QSharedPointer<Connectables::Object> >listOfObj;
+
+    QPersistentModelIndex modelIndex;
+    bool modelNeedUpdate;
+    unsigned long cpuTime;
+
+protected:
     void ReconnectChildsTo(SolverNode *newParent);
     void ReconnectParentsTo(SolverNode *newChild);
     bool DetectLoopback(QList<SolverNode*>&listLoop);
@@ -49,42 +73,20 @@ public:
 
     bool MergeWithParentNode();
 
-    void NewRenderLoop();
-    void RenderNode();
-    void AddMergedNode(SolverNode *merged);
-    void RemoveMergedNode(SolverNode *merged);
-    void ClearMergedNodes();
-    QList<SolverNode*> GetListOfMergedNodes() const {return listOfMergedNodes;}
-    void UpdateModel(QStandardItemModel *model);
-    unsigned long GetCpuUsage();
-
-    int minRenderOrder;
-    int maxRenderOrder;
-
-    int minRenderOrderOri;
-    int maxRenderOrderOri;
-
     bool loopFlag;
     int countSteps;
 
-//    QSharedPointer<Connectables::Object> objectPtr;
     QList<SolverNode*>listParents;
     QList<SolverNode*>listChilds;
 
-    QList< QSharedPointer<Connectables::Object> >listOfObj;
+    QList<SolverNode*>listOfMergedNodes;
+    QReadWriteLock mutex;
 
     void ResetLoopFlags();
-//    static QList<SolverNode*>listNodes;
-//    int index;
 
-    unsigned long cpuTime;
     int benchCount;
-    QPersistentModelIndex modelIndex;
-    bool modelNeedUpdate;
 
-protected:
-     QList<SolverNode*>listOfMergedNodes;
-     QReadWriteLock mutex;
+    friend class PathSolver;
 };
 
 #endif // SOLVERNODE_H

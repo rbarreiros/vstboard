@@ -45,9 +45,6 @@ protected:
     bool stop;
     int lastStepForRendering;
 
-    unsigned long cpuTotal;
-    int cpu;
-
 friend class Renderer;
 };
 
