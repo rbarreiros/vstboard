@@ -27,11 +27,11 @@ SolverNode::SolverNode() :
         maxRenderOrder(9999),
         minRenderOrderOri(-1),
         maxRenderOrderOri(-1),
+        modelNeedUpdate(true),
+        cpuTime(0),
         loopFlag(0),
         countSteps(0),
-        cpuTime(0),
-        benchCount(0),
-        modelNeedUpdate(true)
+        benchCount(0)
 {
 //    index = listNodes.size();
 //    listNodes << this;
@@ -42,12 +42,12 @@ SolverNode::SolverNode(const SolverNode &c) :
     maxRenderOrder(c.maxRenderOrder),
     minRenderOrderOri(c.minRenderOrderOri),
     maxRenderOrderOri(c.maxRenderOrderOri),
+    listOfObj(c.listOfObj),
+    modelNeedUpdate(true),
+    cpuTime(0),
     loopFlag(0),
     countSteps(0),
-    listOfObj(c.listOfObj),
-    cpuTime(0),
-    benchCount(0),
-    modelNeedUpdate(true)
+    benchCount(0)
 {
 
 }

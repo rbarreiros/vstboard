@@ -61,16 +61,17 @@ namespace Connectables {
         QDataStream & fromStream (QDataStream &);
 
     protected:
-        bool dirty;
-        Container *container;
         bool CableExists(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
+
+        Container *container;
+        bool dirty;
+        MainHost *myHost;
 
         QList< QSharedPointer<Object> >listObjects;
         QList<Cable*>listCables;
 
         QMap<int,ObjectContainerAttribs>mapObjAttribs;
 
-        MainHost *myHost;
 
         friend class Container;
         friend class ParkingContainer;

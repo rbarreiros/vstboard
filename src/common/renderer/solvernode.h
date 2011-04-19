@@ -75,6 +75,7 @@ protected:
 
     bool loopFlag;
     int countSteps;
+    int benchCount;
 
     QList<SolverNode*>listParents;
     QList<SolverNode*>listChilds;
@@ -84,7 +85,7 @@ protected:
 
     void ResetLoopFlags();
 
-    int benchCount;
+
 
     friend class PathSolver;
 };

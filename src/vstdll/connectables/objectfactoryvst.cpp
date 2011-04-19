@@ -60,7 +60,13 @@ Object *ObjectFactoryVst::CreateOtherObjects(const ObjectInfo &info)
                 case ObjType::MidiInterface:
                     obj = new VstMidiDevice(myHost,objId, info);
                     break;
+
+                default:
+                    break;
             }
+            break;
+
+        default:
             break;
     }
 

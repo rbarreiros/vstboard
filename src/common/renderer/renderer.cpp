@@ -131,6 +131,8 @@ void Renderer::Optimize()
 
     mutex.lockForWrite();
 
+    optimizer.Optimize();
+
     for(int step=0; step<numberOfSteps; step++) {
 
         QList<SolverNode*>lstOfNodes;
@@ -259,7 +261,7 @@ void Renderer::SetNbThreads(int nbThreads)
     mutex.unlock();
 }
 
-void Renderer::OnNewRenderingOrder(const QList<SolverNode*> & listNodes)
+void Renderer::OnNewRenderingOrder(QList<SolverNode*> & listNodes)
 {
     mutex.lockForWrite();
     if(stop) {
@@ -284,9 +286,16 @@ void Renderer::OnNewRenderingOrder(const QList<SolverNode*> & listNodes)
     }
     orderedListOfNodes.clear();
 
+    QList<SolverNode*>newLstNodes;
     foreach(SolverNode *node, listNodes) {
-        orderedListOfNodes.insert(node->minRenderOrder, new SolverNode(*node));
+        SolverNode *newNode(node);
+        orderedListOfNodes.insert(node->minRenderOrder, newNode);
+        newLstNodes << newNode;
     }
+
+    optimizer.SetNbThreads(maxNumberOfThreads);
+    optimizer.NewListOfNodes(newLstNodes);
+
 
     orderedNodes::iterator i = orderedListOfNodes.begin();
     while (i != orderedListOfNodes.end()) {

@@ -39,7 +39,9 @@ using namespace Connectables;
   */
 Object::Object(MainHost *host, int index, const ObjectInfo &info) :
     QObject(),
+    parked(false),
     listenProgramChanges(true),
+    myHost(host),
     listAudioPinIn(new PinsList(host,this)),
     listAudioPinOut(new PinsList(host,this)),
     listMidiPinIn(new PinsList(host,this)),
@@ -48,17 +50,15 @@ Object::Object(MainHost *host, int index, const ObjectInfo &info) :
     listBridgePinOut(new PinsList(host,this)),
     listParameterPinIn(new PinsList(host,this)),
     listParameterPinOut(new PinsList(host,this)),
-    parked(false),
     solverNode(0),
     index(index),
     savedIndex(-2),
     sleep(true),
     currentProgram(0),
-    closed(true),
-    containerId(FixedObjId::noContainer),
     currentProgId(TEMP_PROGRAM),
+    closed(true),
     objInfo(info),
-    myHost(host)
+    containerId(FixedObjId::noContainer)
 {
     setObjectName(QString("%1.%2").arg(objInfo.name).arg(index));
     doublePrecision=myHost->doublePrecision;

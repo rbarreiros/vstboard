@@ -20,12 +20,14 @@ void VstPluginView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId,
         return;
 
     switch(colorId) {
-    case Colors::Background: {
-        QPalette pal(palette());
-        pal.setColor(QPalette::Window,color);
-        setPalette( pal );
-        break;
-    }
+        case Colors::Background: {
+            QPalette pal(palette());
+            pal.setColor(QPalette::Window,color);
+            setPalette( pal );
+            break;
+        }
+        default:
+            break;
     }
 }
 

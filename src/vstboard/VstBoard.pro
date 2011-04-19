@@ -26,9 +26,9 @@ win32-msvc* {
     PRE_TARGETDEPS += $$top_destdir/portmidi.lib
     PRE_TARGETDEPS += $$top_destdir/common.lib
 } else {
-    PRE_TARGETDEPS += $$top_destdir/portaudio.a
-    PRE_TARGETDEPS += $$top_destdir/portmidi.a
-    PRE_TARGETDEPS += $$top_destdir/common.a
+    PRE_TARGETDEPS += $$top_destdir/libportaudio.a
+    PRE_TARGETDEPS += $$top_destdir/libportmidi.a
+    PRE_TARGETDEPS += $$top_destdir/libcommon.a
 }
 
 INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/include

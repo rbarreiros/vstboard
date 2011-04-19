@@ -35,10 +35,10 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
     filePass(0),
     objFactory(0),
     mainWindow(0),
+    currentFileVersion(PROJECT_AND_SETUP_FILE_VERSION),
     solverNeedAnUpdate(false),
     solverUpdateEnabled(true),
     mutexListCables(new QMutex(QMutex::Recursive)),
-    currentFileVersion(PROJECT_AND_SETUP_FILE_VERSION),
     settingsGroup(settingsGroup)
 {
     doublePrecision=GetSetting("doublePrecision",false).toBool();

@@ -24,6 +24,7 @@
 #include "precomp.h"
 #include "connectables/object.h"
 #include "renderthread.h"
+#include "optimizer.h"
 #include <QSemaphore>
 #include <QReadWriteLock>
 
@@ -41,6 +42,7 @@ public:
     ~Renderer();
     void SetNbThreads(int nbThreads);
     void SetEnabled(bool enabled) {stop=!enabled;}
+    void OnNewRenderingOrder(QList<SolverNode*> & listNodes);
 
     QStandardItemModel model;
 
@@ -60,11 +62,11 @@ protected:
     QSemaphore sem;
     MainHost *myHost;
     QTimer updateViewTimer;
+    Optimizer optimizer;
 
 public slots:
     void Clear();
     void StartRender();
-    void OnNewRenderingOrder(const QList<SolverNode*> & listNodes);
     void UpdateView();
     void Optimize();
 

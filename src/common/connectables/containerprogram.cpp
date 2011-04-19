@@ -27,8 +27,9 @@ using namespace Connectables;
 
 ContainerProgram::ContainerProgram(MainHost *myHost,Container *container) :
         container(container),
-        myHost(myHost),
-        dirty(false)
+        dirty(false),
+        myHost(myHost)
+
 {
 }
 

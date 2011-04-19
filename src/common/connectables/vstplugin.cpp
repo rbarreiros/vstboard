@@ -715,7 +715,8 @@ void VstPlugin::OnParameterChanged(ConnectionInfo pinInfo, float value)
   */
 bool VstPlugin::LoadBank(const QString &filename)
 {
-    if(!CEffect::LoadBank(&filename.toStdString()))
+    std::string str = filename.toStdString();
+    if(!CEffect::LoadBank(&str))
         return false;
     onVstProgramChanged();
     return true;
@@ -729,7 +730,8 @@ bool VstPlugin::LoadBank(const QString &filename)
   */
 void VstPlugin::SaveBank(const QString &filename)
 {
-    if(!CEffect::SaveBank(&filename.toStdString()))
+    std::string str = filename.toStdString();
+    if(!CEffect::SaveBank(&str))
         return;
 }
 
@@ -740,7 +742,8 @@ void VstPlugin::SaveBank(const QString &filename)
   */
 bool VstPlugin::LoadProgram(const QString &filename)
 {
-    if(!CEffect::LoadProgram(&filename.toStdString()))
+    std::string str = filename.toStdString();
+    if(!CEffect::LoadProgram(&str))
         return false;
     onVstProgramChanged();
     return true;
@@ -754,7 +757,8 @@ bool VstPlugin::LoadProgram(const QString &filename)
   */
 void VstPlugin::SaveProgram(const QString &filename)
 {
-    if(!CEffect::SaveProgram(&filename.toStdString()))
+    std::string str = filename.toStdString();
+    if(!CEffect::SaveProgram(&str))
         return;
 }
 

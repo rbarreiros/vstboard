@@ -212,6 +212,8 @@ int RenderThread::NeededModificationsToInsertNode(SolverNode *node, bool apply)
                         node->minRenderOrder = bestStep;
                         node->maxRenderOrder = FirstUsedStepInRange(bestStep, maxStep) - 1;
                         break;
+                    default:
+                        break;
                 }
                 SetStep(node);
             }

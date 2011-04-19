@@ -252,7 +252,8 @@ void ViewConfig::LoadFromRegistry(MainHost *myHost)
         lVar = myHost->GetSetting("Colors");
     }
 
-    QDataStream tmp( &lVar.value<QByteArray>() , QIODevice::ReadWrite);
+    QByteArray ba( lVar.value<QByteArray>() );
+    QDataStream tmp( &ba , QIODevice::ReadWrite);
     tmp >> *this;
     UpdateAllWidgets();
     savedInSetupFile=false;

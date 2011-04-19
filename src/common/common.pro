@@ -101,7 +101,9 @@ SOURCES += \
     vst/vstprogram.cpp \
     views/viewconfigdialog.cpp \
     views/viewconfig.cpp \
-    renderer/renderthread.cpp
+    renderer/renderthread.cpp \
+    renderer/optimizerstep.cpp \
+    renderer/optimizer.cpp
 
 HEADERS  += \
     globals.h \
@@ -172,7 +174,9 @@ HEADERS  += \
     vst/vstprogram.h \
     views/viewconfigdialog.h \
     views/viewconfig.h \
-    renderer/renderthread.h
+    renderer/renderthread.h \
+    renderer/optimizerstep.h \
+    renderer/optimizer.h
 
 FORMS += \
     views/configdialog.ui \
