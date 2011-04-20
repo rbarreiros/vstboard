@@ -49,6 +49,7 @@ public:
 protected:
     void InitThreads();
     void BuildModel();
+    void GetStepsFromOptimizer();
 
     int maxNumberOfThreads;
     int numberOfThreads;

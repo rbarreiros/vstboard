@@ -71,12 +71,13 @@ void Renderer::BuildModel()
         foreach(RenderThread *th, listOfThreads) {
             if(th->listOfSteps.contains(step)) {
                 SolverNode *node = th->listOfSteps.value(step,0);
-                QStandardItem *item = new QStandardItem();
+                QStandardItem *item = new QStandardItem("0");
                 model.setItem(step,col,item);
-                node->modelIndex=item->index();
-
-                for(int st=node->minRenderOrder+1; st<=node->maxRenderOrder; st++) {
-                    model.setItem(st,col, new QStandardItem("+"));
+                if(node) {
+                    node->modelIndex=item->index();
+                    for(int st=node->minRenderOrder+1; st<=node->maxRenderOrder; st++) {
+                        model.setItem(st,col, new QStandardItem("+"));
+                    }
                 }
             }
             col++;
@@ -125,117 +126,6 @@ void Renderer::UpdateView()
     mutex.unlock();
 }
 
-void Renderer::Optimize()
-{
-    UpdateView();
-
-    mutex.lockForWrite();
-
-    optimizer.Optimize();
-
-    for(int step=0; step<numberOfSteps; step++) {
-
-        QList<SolverNode*>lstOfNodes;
-
-        //get a list of nodes on this step
-        foreach(RenderThread *th, listOfThreads) {
-            if(th->listOfSteps.contains(step)) {
-                SolverNode *n = th->listOfSteps.take(step);
-                if(n) {
-                    lstOfNodes << n;
-                    lstOfNodes << n->GetListOfMergedNodes();
-                }
-            }
-        }
-
-        //remove merged nodes
-        foreach(SolverNode *node, lstOfNodes) {
-            node->ClearMergedNodes();
-        }
-
-        //find the biggest nodes
-        QList<SolverNode*>biggestNodes;
-        while(biggestNodes.count()<numberOfThreads && lstOfNodes.count()!=0) {
-            SolverNode *biggest=0;
-            foreach(SolverNode *n, lstOfNodes) {
-                if(!biggest || n->cpuTime > biggest->cpuTime) {
-                    biggest=n;
-                }
-            }
-            lstOfNodes.removeAll(biggest);
-            biggestNodes << biggest;
-        }
-
-        //merge the smallest nodes
-        int row=step+1;
-        while(lstOfNodes.count()!=0) {
-            model.insertRow(row);
-
-            foreach(SolverNode *n, biggestNodes) {
-                if(lstOfNodes.count()!=0) {
-                    SolverNode *merged = lstOfNodes.takeFirst();
-                    n->AddMergedNode( merged );
-                }
-            }
-            row++;
-        }
-
-        //add nodes to threads
-        int thCpt=0;
-        foreach(RenderThread *th, listOfThreads) {
-            if(biggestNodes.count()!=0) {
-
-                //don't touch empty steps, only create new steps or replace existing
-                if(!th->listOfSteps.contains(step) || th->listOfSteps.value(step)!=0) {
-
-                    SolverNode *node = biggestNodes.takeFirst();
-                    th->listOfSteps.insert(step, node);
-                    node->modelIndex = model.index(step,thCpt);
-                    int row=step+1;
-                    int col=node->modelIndex.column();
-                    foreach(SolverNode *merged, node->GetListOfMergedNodes()) {
-                        merged->modelIndex = model.index( row, col);
-                        row++;
-                    }
-                }
-            }
-            thCpt++;
-        }
-
-
-
-        //shorten nodes if possible
-        unsigned long maxcpu=0;
-
-        //find the bigger thread on this step, not including nodes spanning on multiple steps
-        foreach(RenderThread *th, listOfThreads) {
-            SolverNode *node = th->listOfSteps.value(step,0);
-            if(node && node->maxRenderOrder == step) {
-                unsigned long cpu = node->GetTotalCpuUsage();
-                if(cpu>maxcpu)
-                    maxcpu=cpu;
-            }
-        }
-
-        //20% security
-        maxcpu*=0.8;
-
-        //shorten steps uselessely using multiple steps
-        foreach(RenderThread *th, listOfThreads) {
-            SolverNode *node = th->listOfSteps.value(step,0);
-            if(node && node->maxRenderOrder > step) {
-                if(maxcpu==0 || node->GetTotalCpuUsage() < maxcpu) {
-                    th->ShortenNode(node,step);
-                }
-            }
-        }
-    }
-
-    mutex.unlock();
-
-    BuildModel();
-}
-
 void Renderer::Clear()
 {
     mutex.lockForWrite();
@@ -263,109 +153,18 @@ void Renderer::SetNbThreads(int nbThreads)
 
 void Renderer::OnNewRenderingOrder(QList<SolverNode*> & listNodes)
 {
-    mutex.lockForWrite();
-    if(stop) {
-        mutex.unlock();
-        return;
-    }
-
-    int step = -1;
-    int threadCount = -1;
-
-    numberOfSteps = step;
-    numberOfThreads = threadCount;
-
-    foreach(RenderThread *th, listOfThreads) {
-        th->ResetSteps();
-    }
-
-    listOfNodesToMerge.clear();
-
-    foreach(SolverNode *node, orderedListOfNodes) {
-        delete node;
-    }
-    orderedListOfNodes.clear();
-
     QList<SolverNode*>newLstNodes;
     foreach(SolverNode *node, listNodes) {
-        SolverNode *newNode(node);
-        orderedListOfNodes.insert(node->minRenderOrder, newNode);
+        SolverNode *newNode = new SolverNode(*node);
         newLstNodes << newNode;
     }
 
     optimizer.SetNbThreads(maxNumberOfThreads);
     optimizer.NewListOfNodes(newLstNodes);
 
+    GetStepsFromOptimizer();
 
-    orderedNodes::iterator i = orderedListOfNodes.begin();
-    while (i != orderedListOfNodes.end()) {
-        step = i.key();
-        if(step>numberOfSteps)
-            numberOfSteps=step;
-
-        SolverNode *node = i.value();
-        node->minRenderOrderOri = node->minRenderOrder;
-        node->maxRenderOrderOri = node->maxRenderOrder;
-
-        bool found=false;
-
-        //try to find a place in threads
-        int j=0;
-        while(!found && j<maxNumberOfThreads) {
-            if(listOfThreads.value(j)->SetStep( node )) {
-                if(j>numberOfThreads)
-                    numberOfThreads=j;
-                found=true;
-            }
-            j++;
-        }
-
-        if(!found) {
-            //no place found, try again
-            j=0;
-            int bestThread = -1;
-            int bestMod = -1;
-            while(j<maxNumberOfThreads) {
-                int nbMods = listOfThreads.value(j)->NeededModificationsToInsertNode( node );
-                if(nbMods!=-1 && (bestMod==-1 ||  nbMods<bestMod) ) {
-                    found=true;
-                    bestMod = nbMods;
-                    bestThread = j;
-                }
-                j++;
-            }
-
-            if(found) {
-                listOfThreads.value(bestThread)->NeededModificationsToInsertNode( node, true );
-            } else {
-                listOfNodesToMerge << node;
-            }
-        }
-        ++i;
-    }
-
-    //add nodes to merge
-    foreach(SolverNode *node, listOfNodesToMerge) {
-        int j=0;
-        bool found=false;
-        while(!found && j<maxNumberOfThreads) {
-            SolverNode * parentNode = listOfThreads.value(j)->listOfSteps.value( node->minRenderOrder, 0 );
-            if(parentNode) {
-                parentNode->AddMergedNode(node);
-                found = true;
-            }
-            j++;
-        }
-    }
-
-    numberOfSteps++;
-    numberOfThreads++;
-
-    mutex.unlock();
-
-//    BuildModel();
-
-    QTimer::singleShot(300, this, SLOT(Optimize()));
+    QTimer::singleShot(500, this, SLOT(Optimize()));
 }
 
 void Renderer::StartRender()
@@ -399,3 +198,32 @@ void Renderer::StartRender()
     mutex.unlock();
 }
 
+void Renderer::Optimize()
+{
+    mutex.lockForWrite();
+    optimizer.Optimize();
+    mutex.unlock();
+    GetStepsFromOptimizer();
+    BuildModel();
+}
+
+void Renderer::GetStepsFromOptimizer()
+{
+    mutex.lockForWrite();
+
+    numberOfSteps = -1;
+    numberOfThreads = maxNumberOfThreads;
+
+    foreach(RenderThread *th, listOfThreads) {
+        th->ResetSteps();
+    }
+
+    for(int th=0; th<maxNumberOfThreads; th++) {
+        QMap<int, SolverNode* >lst = optimizer.GetListOfNode(th);
+        listOfThreads.value(th)->listOfSteps = lst;
+        if(lst.size() > numberOfSteps) {
+            numberOfSteps = lst.size();
+        }
+    }
+    mutex.unlock();
+}

@@ -52,6 +52,13 @@ SolverNode::SolverNode(const SolverNode &c) :
 
 }
 
+SolverNode::~SolverNode()
+{
+    foreach(SolverNode *merged, listOfMergedNodes) {
+        delete merged;
+    }
+}
+
 void SolverNode::NewRenderLoop()
 {
     mutex.lockForRead();

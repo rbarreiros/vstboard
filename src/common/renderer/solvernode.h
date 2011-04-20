@@ -31,6 +31,7 @@ class SolverNode
 public:
     SolverNode();
     SolverNode(const SolverNode &c);
+    ~SolverNode();
 
     void NewRenderLoop();
     void RenderNode();
