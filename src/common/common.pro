@@ -104,7 +104,9 @@ SOURCES += \
     renderer/renderthread.cpp \
     renderer/optimizerstep.cpp \
     renderer/optimizer.cpp \
-    renderer/optimizestepthread.cpp
+    renderer/optimizestepthread.cpp \
+    renderer/renderernode.cpp \
+    renderer/node.cpp
 
 HEADERS  += \
     globals.h \
@@ -178,7 +180,9 @@ HEADERS  += \
     renderer/renderthread.h \
     renderer/optimizerstep.h \
     renderer/optimizer.h \
-    renderer/optimizestepthread.h
+    renderer/optimizestepthread.h \
+    renderer/renderernode.h \
+    renderer/node.h
 
 FORMS += \
     views/configdialog.ui \

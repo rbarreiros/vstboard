@@ -13,17 +13,23 @@ OptimizeStepThread::OptimizeStepThread(const OptimizeStepThread &th)
     listOfNodes = th.listOfNodes;
 }
 
-SolverNode * OptimizeStepThread::GetMergedNode()
+bool OptimizeStepThread::GetMergedNode(RendererNode **node)
 {
     if(listOfNodes.isEmpty()) {
-        return 0;
+        return false;
     }
 
-    QList<SolverNode*>newLst = listOfNodes;
+    QList<RendererNode*>newLst = listOfNodes;
+    RendererNode *n = newLst.takeFirst();
+    n->ClearMergedNodes();
 
-    SolverNode *node(newLst.takeFirst());
     while(!newLst.isEmpty()) {
-        node->AddMergedNode( new SolverNode( *(newLst.takeFirst()) ) );
+        RendererNode *merged = newLst.takeFirst();
+        merged->ClearMergedNodes();
+        n->AddMergedNode( merged );
     }
-    return node;
+
+    *node=n;
+
+    return true;
 }

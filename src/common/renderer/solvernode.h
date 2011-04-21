@@ -21,40 +21,14 @@
 #ifndef SOLVERNODE_H
 #define SOLVERNODE_H
 
-#include "precomp.h"
-#include "connectables/object.h"
-#include <QReadWriteLock>
+#include "node.h"
 
 class PathSolver;
-class SolverNode
+class SolverNode : public Node
 {
 public:
     SolverNode();
     SolverNode(const SolverNode &c);
-    ~SolverNode();
-
-    void NewRenderLoop();
-    void RenderNode();
-
-    void AddMergedNode(SolverNode *merged);
-    void RemoveMergedNode(SolverNode *merged);
-    void ClearMergedNodes();
-    QList<SolverNode*> GetListOfMergedNodes() const {return listOfMergedNodes;}
-
-    void UpdateModel(QStandardItemModel *model);
-    unsigned long GetTotalCpuUsage();
-
-    int minRenderOrder;
-    int maxRenderOrder;
-
-    int minRenderOrderOri;
-    int maxRenderOrderOri;
-
-    QList< QSharedPointer<Connectables::Object> >listOfObj;
-
-    QPersistentModelIndex modelIndex;
-    bool modelNeedUpdate;
-    unsigned long cpuTime;
 
 protected:
     void ReconnectChildsTo(SolverNode *newParent);
@@ -76,13 +50,9 @@ protected:
 
     bool loopFlag;
     int countSteps;
-    int benchCount;
 
     QList<SolverNode*>listParents;
     QList<SolverNode*>listChilds;
-
-    QList<SolverNode*>listOfMergedNodes;
-    QReadWriteLock mutex;
 
     void ResetLoopFlags();
 

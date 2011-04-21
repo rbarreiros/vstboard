@@ -1,18 +1,18 @@
 #ifndef OPTIMIZESTEPTHREAD_H
 #define OPTIMIZESTEPTHREAD_H
 
-#include "solvernode.h"
+#include "renderernode.h"
 
 class OptimizeStepThread
 {
 public:
     OptimizeStepThread();
     OptimizeStepThread(const OptimizeStepThread &th);
-    SolverNode *GetMergedNode();
+    bool GetMergedNode(RendererNode **node);
 
-    QList<SolverNode*>listOfNodes;
-    unsigned long cpuTime;
-    SolverNode* spanFor;
+    QList<RendererNode*>listOfNodes;
+    long cpuTime;
+    RendererNode* spanFor;
 };
 
 #endif // OPTIMIZESTEPTHREAD_H

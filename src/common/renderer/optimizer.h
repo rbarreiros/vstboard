@@ -9,11 +9,11 @@ public:
     Optimizer();
     ~Optimizer();
     void SetNbThreads(int nb);
-    void NewListOfNodes(QList<SolverNode*> & listNodes);
+    void NewListOfNodes(const QList<RendererNode*> & listNodes);
     void Optimize();
     OptimizerStep* GetStep(int step) {return listOfSteps.value(step,0); }
     void SetStep(int step, OptimizerStep* s) {listOfSteps.insert(step,s); }
-    QMap<int, SolverNode* > GetListOfNode(int thread);
+    QMap<int, RendererNode* > GetListOfNode(int thread);
 
 protected:
     void Clear();

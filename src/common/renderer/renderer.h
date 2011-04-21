@@ -25,10 +25,8 @@
 #include "connectables/object.h"
 #include "renderthread.h"
 #include "optimizer.h"
-#include <QSemaphore>
-#include <QReadWriteLock>
 
-class SolverNode;
+#include "renderernode.h"
 
 typedef QMultiHash<int, SolverNode*> orderedNodes;
 
@@ -42,7 +40,7 @@ public:
     ~Renderer();
     void SetNbThreads(int nbThreads);
     void SetEnabled(bool enabled) {stop=!enabled;}
-    void OnNewRenderingOrder(QList<SolverNode*> & listNodes);
+    void OnNewRenderingOrder(const QList<SolverNode*> & listNodes);
 
     QStandardItemModel model;
 
@@ -50,15 +48,24 @@ protected:
     void InitThreads();
     void BuildModel();
     void GetStepsFromOptimizer();
+    void Clear();
+    void ClearNodes();
+    void ProcessNewNodes();
 
     int maxNumberOfThreads;
     int numberOfThreads;
     int numberOfSteps;
     bool stop;
 
+    QList<RendererNode*>listOfNodes;
+    QList<RendererNode*>tmpListOfNodes;
+    QMutex mutexNodes;
+    bool newNodes;
+    QMutex mutexOptimize;
+    bool needOptimize;
+    int countOptimize;
+    bool needBuildModel;
     QList<RenderThread*>listOfThreads;
-    orderedNodes orderedListOfNodes;
-    QList<SolverNode*>listOfNodesToMerge;
     QReadWriteLock mutex;
     QSemaphore sem;
     MainHost *myHost;
@@ -66,7 +73,7 @@ protected:
     Optimizer optimizer;
 
 public slots:
-    void Clear();
+
     void StartRender();
     void UpdateView();
     void Optimize();

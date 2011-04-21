@@ -104,7 +104,7 @@ void VstPlugin::SetBufferSize(unsigned long size)
     bool wasSleeping = GetSleep();
     SetSleep(true);
 
-    debug("VstPlugin::SetBufferSize %d size %ld -> %ld",index,bufferSize,size)
+//    debug("VstPlugin::SetBufferSize %d size %ld -> %ld",index,bufferSize,size)
     Object::SetBufferSize(size);
 
     EffSetBlockSize((long)size);

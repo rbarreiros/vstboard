@@ -10,22 +10,22 @@ public:
     OptimizerStep(int step, int nbThreads, Optimizer *parent);
     OptimizerStep(const OptimizerStep &s);
     ~OptimizerStep();
-    void ClearThreads();
-    void CreateThreads();
-    void AddNode(SolverNode *node);
+    void AddNode(RendererNode *node);
     void MapOnThreadsRandomly();
     void Optimize();
     void OptimizeSpannedNodes();
     void SetNbThreads(int nb);
-    SolverNode *GetNode(int thread);
+    bool GetNode(int thread, RendererNode **node);
 
-    static bool CompareNodeSpeed(SolverNode *n1, SolverNode *n2);
+    static bool CompareNodeSpeed(RendererNode *n1, RendererNode *n2);
     static bool CompareThreadSpeed(OptimizeStepThread *t1, OptimizeStepThread *t2);
 
 protected:
-    bool NextStepCanAcceptSpannedNode(SolverNode *node, unsigned long cpuGainForPreviousStep);
-    bool NextStepCanAcceptPostponedNode(SolverNode *node, unsigned long cpuGainForPreviousStep);
-    QList<SolverNode*>listOfNodes;
+    void ClearThreads();
+    void CreateThreads();
+    bool NextStepCanAcceptSpannedNode(RendererNode *node, long cpuGainForPreviousStep);
+    bool NextStepCanAcceptPostponedNode(RendererNode *node, long cpuGainForPreviousStep);
+    QList<RendererNode*>listOfNodes;
     QList<OptimizeStepThread*>listOfThreads;
     int step;
     int nbThreads;

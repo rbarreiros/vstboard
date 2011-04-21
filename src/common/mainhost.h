@@ -63,6 +63,8 @@ public:
 
     QStandardItemModel *GetRendererModel() { return &renderer->model; }
 
+    void OptimizeRenderer() { if(renderer) renderer->Optimize(); }
+
     QSharedPointer<Connectables::MainContainer> mainContainer;
     QSharedPointer<Connectables::MainContainer> hostContainer;
     QSharedPointer<Connectables::MainContainer> projectContainer;

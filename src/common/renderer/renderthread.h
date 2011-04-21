@@ -1,9 +1,8 @@
 #ifndef RENDERTHREAD_H
 #define RENDERTHREAD_H
 
-#include "solvernode.h"
-#include <QSemaphore>
-#include <QReadWriteLock>
+#include "precomp.h"
+#include "renderernode.h"
 
 class Renderer;
 class RenderThread : public QThread
@@ -20,7 +19,7 @@ protected:
     void Stop();
     void RenderStep(int step);
 
-    QMap<int, SolverNode* > listOfSteps;
+    QMap<int, RendererNode* > listOfSteps;
     Renderer *renderer;
     QReadWriteLock mutex;
 

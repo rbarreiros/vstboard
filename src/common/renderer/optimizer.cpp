@@ -25,11 +25,14 @@ void Optimizer::Clear()
     listOfSteps.clear();
 }
 
-void Optimizer::NewListOfNodes(QList<SolverNode*> & listNodes)
+void Optimizer::NewListOfNodes(const QList<RendererNode*> & listNodes)
 {
     Clear();
 
-    foreach(SolverNode *node, listNodes) {
+    foreach(RendererNode *node, listNodes) {
+        node->minRenderOrder = node->minRenderOrderOri;
+        node->maxRenderOrder = node->maxRenderOrderOri;
+
         int step = node->minRenderOrder;
         OptimizerStep *oStep = listOfSteps.value(step,0);
         if(!oStep) {
@@ -54,18 +57,22 @@ void Optimizer::Optimize()
 
     QMap<int,OptimizerStep*>::iterator i = listOfSteps.begin();
     while(i!=listOfSteps.end()) {
-        i.value()->OptimizeSpannedNodes();
+        OptimizerStep* s = i.value();
+        s->OptimizeSpannedNodes();
         ++i;
     }
 }
 
-QMap<int, SolverNode* > Optimizer::GetListOfNode(int thread)
+QMap<int, RendererNode* > Optimizer::GetListOfNode(int thread)
 {
-    QMap<int, SolverNode* >lstSteps;
+    QMap<int, RendererNode* >lstSteps;
 
     QMap<int,OptimizerStep*>::iterator i = listOfSteps.begin();
     while(i!=listOfSteps.end()) {
-        lstSteps.insert(i.key(), i.value()->GetNode(thread) );
+        OptimizerStep* step = i.value();
+        RendererNode *node=0;
+        if( step->GetNode(thread, &node) )
+            lstSteps.insert(i.key(), node );
         ++i;
     }
     return lstSteps;

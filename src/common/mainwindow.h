@@ -97,6 +97,7 @@ private slots:
     void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
 
     void on_actionAppearance_triggered();
+    void on_solverView_clicked(const QModelIndex &index);
 };
 
 #endif // MAINWINDOW_H

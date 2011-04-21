@@ -42,11 +42,9 @@ void OptimizerStep::CreateThreads()
     }
 }
 
-void OptimizerStep::AddNode(SolverNode *node)
+void OptimizerStep::AddNode(RendererNode *node)
 {
     listOfNodes << node;
-    node->minRenderOrderOri = node->minRenderOrder;
-    node->maxRenderOrderOri = node->maxRenderOrder;
     node->minRenderOrder = node->maxRenderOrder = step;
 }
 
@@ -60,11 +58,11 @@ void OptimizerStep::MapOnThreadsRandomly()
     CreateThreads();
 
     int currentThread = 0;
-    QList<SolverNode*>ln = listOfNodes;
+    QList<RendererNode*>ln = listOfNodes;
 
     while(!ln.isEmpty()) {
         OptimizeStepThread *th = listOfThreads.value(currentThread);
-        SolverNode *node = ln.takeFirst();
+        RendererNode *node = ln.takeFirst();
         th->listOfNodes << node;
 
         currentThread++;
@@ -79,13 +77,14 @@ void OptimizerStep::Optimize()
     qSort(listOfNodes.begin(), listOfNodes.end(), CompareNodeSpeed);
 
     CreateThreads();
-    QList<SolverNode*>newLstNodes = listOfNodes;
+    QList<RendererNode*>newLstNodes = listOfNodes;
 
     while(!newLstNodes.isEmpty()) {
 
         //add biggest node to the smallest thread
         OptimizeStepThread *th = listOfThreads.first();
-        SolverNode *node = newLstNodes.takeLast();
+        RendererNode *node = newLstNodes.takeLast();
+
         th->listOfNodes << node;
         th->cpuTime+=node->cpuTime;
 
@@ -104,7 +103,7 @@ void OptimizerStep::OptimizeSpannedNodes()
     if(!nextStep)
         return;
 
-    foreach(SolverNode *node, listOfNodes) {
+    foreach(RendererNode *node, listOfNodes) {
         if(node->maxRenderOrderOri > step) {
             //this node can be postpone or spanned
 
@@ -115,12 +114,12 @@ void OptimizerStep::OptimizeSpannedNodes()
             tmpStep.Optimize();
 
             //the resulting cpu usage :
-            unsigned long tmpCpuTime=tmpStep.listOfThreads.last()->cpuTime;
+            long tmpCpuTime=tmpStep.listOfThreads.last()->cpuTime;
 
             if(tmpCpuTime < node->cpuTime) {
                 //the spanned node is longer than the other threads, really need to be spanned
 
-                unsigned long cpuGainForThisStep = node->cpuTime - tmpCpuTime;
+                long cpuGainForThisStep = node->cpuTime - tmpCpuTime;
 
                 //does the next step accept this node ?
                 if(NextStepCanAcceptPostponedNode(node, cpuGainForThisStep)) {
@@ -129,9 +128,8 @@ void OptimizerStep::OptimizeSpannedNodes()
                     foreach(OptimizeStepThread *th, tmpStep.listOfThreads) {
                         listOfThreads << new OptimizeStepThread(*th);
                     }
-
                 } else {
-                    //try to span this node
+                    //try to span the node
                     if(NextStepCanAcceptSpannedNode(node, cpuGainForThisStep)) {
                         listOfNodes.removeAll(node);
                         nbThreads--;
@@ -150,14 +148,14 @@ void OptimizerStep::OptimizeSpannedNodes()
     }
 }
 
-bool OptimizerStep::NextStepCanAcceptSpannedNode(SolverNode *node, unsigned long cpuGainForPreviousStep)
+bool OptimizerStep::NextStepCanAcceptSpannedNode(RendererNode *node, long cpuGainForPreviousStep)
 {
     OptimizerStep *tmpStep = new OptimizerStep(*nextStep);
     tmpStep->SetNbThreads( nextStep->nbThreads-1 );
     tmpStep->Optimize();
-    unsigned long newCpuTime = tmpStep->listOfThreads.last()->cpuTime;
-    unsigned long oldCpuTime = nextStep->listOfThreads.last()->cpuTime;
-    unsigned long cpuGain = cpuGainForPreviousStep - (newCpuTime - oldCpuTime);
+    long newCpuTime = tmpStep->listOfThreads.last()->cpuTime;
+    long oldCpuTime = nextStep->listOfThreads.last()->cpuTime;
+    long cpuGain = cpuGainForPreviousStep - (newCpuTime - oldCpuTime);
     if(cpuGain>0) {
         tmpStep->SetNbThreads( tmpStep->nbThreads+1 );
         OptimizeStepThread *th = new OptimizeStepThread();
@@ -172,36 +170,39 @@ bool OptimizerStep::NextStepCanAcceptSpannedNode(SolverNode *node, unsigned long
     return false;
 }
 
-bool OptimizerStep::NextStepCanAcceptPostponedNode(SolverNode *node, unsigned long cpuGainForPreviousStep)
+bool OptimizerStep::NextStepCanAcceptPostponedNode(RendererNode *node, long cpuGainForPreviousStep)
 {
+    long oldCpuTime = nextStep->listOfThreads.last()->cpuTime;
+    if( (node->cpuTime - oldCpuTime) > cpuGainForPreviousStep )
+        return false;
+
     OptimizerStep *tmpStep = new OptimizerStep(*nextStep);
     tmpStep->listOfNodes << node;
     tmpStep->Optimize();
-    unsigned long newCpuTime = tmpStep->listOfThreads.last()->cpuTime;
-    unsigned long oldCpuTime = nextStep->listOfThreads.last()->cpuTime;
-    unsigned long cpuGain = cpuGainForPreviousStep - (newCpuTime - oldCpuTime);
+    long newCpuTime = tmpStep->listOfThreads.last()->cpuTime;
+    long cpuGain = cpuGainForPreviousStep - (newCpuTime - oldCpuTime);
     if(cpuGain>0) {
         parent->SetStep(step+1, tmpStep);
         delete nextStep;
         nextStep=tmpStep;
-        node->minRenderOrder = node->maxRenderOrder = step+1;
+        node->minRenderOrder = node->maxRenderOrder = nextStep->step;
         return true;
     }
     delete tmpStep;
     return false;
 }
 
-SolverNode * OptimizerStep::GetNode(int thread)
+bool OptimizerStep::GetNode(int thread, RendererNode **node)
 {
     if(listOfThreads.size()<=thread) {
-        return 0;
+        return false;
     }
 
     OptimizeStepThread *th = listOfThreads.at(thread);
-    return th->GetMergedNode();
+    return th->GetMergedNode( node );
 }
 
-bool OptimizerStep::CompareNodeSpeed(SolverNode *n1, SolverNode *n2)
+bool OptimizerStep::CompareNodeSpeed(RendererNode *n1, RendererNode *n2)
 {
     return n1->cpuTime < n2->cpuTime;
 }

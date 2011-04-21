@@ -47,9 +47,9 @@ void RenderThread::RenderStep(int step)
         mutex.lockForRead();
 
         //reset counters
-        QMap<int, SolverNode* >::iterator i = listOfSteps.begin();
+        QMap<int, RendererNode* >::iterator i = listOfSteps.begin();
         while (i != listOfSteps.end()) {
-            SolverNode *node = i.value();
+            RendererNode *node = i.value();
             if(node) {
                 node->NewRenderLoop();
             }
@@ -61,7 +61,7 @@ void RenderThread::RenderStep(int step)
         return;
     }
 
-    SolverNode *n = listOfSteps.value(step,0);
+    RendererNode *n = listOfSteps.value(step,0);
     if(n!=0) {
         lastStepForRendering = n->maxRenderOrder;
     } else {
@@ -91,9 +91,6 @@ void RenderThread::RenderStep(int step)
 void RenderThread::ResetSteps()
 {
     mutex.lockForWrite();
-//    foreach(SolverNode *node, listOfSteps) {
-//        delete node;
-//    }
     listOfSteps.clear();
     mutex.unlock();
 }

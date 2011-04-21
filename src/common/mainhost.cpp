@@ -98,15 +98,15 @@ MainHost::~MainHost()
     workingListOfCables.clear();
     mutexListCables->unlock();
 
+    solver->Resolve(workingListOfCables, renderer);
+    delete renderer;
+
     mainContainer.clear();
     hostContainer.clear();
     projectContainer.clear();
     groupContainer.clear();
     programContainer.clear();
 
-//    solver->Resolve(workingListOfCables, &renderer);
-
-    delete renderer;
     delete objFactory;
 }
 

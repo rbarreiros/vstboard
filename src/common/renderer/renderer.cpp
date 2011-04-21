@@ -30,6 +30,10 @@ Renderer::Renderer(MainHost *myHost)
       numberOfThreads(0),
       numberOfSteps(0),
       stop(false),
+      newNodes(false),
+      needOptimize(false),
+      countOptimize(0),
+      needBuildModel(false),
       sem(0),
       myHost(myHost)
 {
@@ -47,80 +51,25 @@ Renderer::~Renderer()
     Clear();
 }
 
-void Renderer::InitThreads()
-{
-    for(int i=0; i<maxNumberOfThreads; i++) {
-        RenderThread *th = new RenderThread(this, QString::number(i));
-        listOfThreads << th;
-        th->start(QThread::TimeCriticalPriority);
-    }
-}
-
-void Renderer::BuildModel()
-{
-    mutex.lockForRead();
-
-    model.clear();
-    for(int i=0; i<maxNumberOfThreads; i++) {
-        model.setHorizontalHeaderItem(i, new QStandardItem( QString::number(i+1) ) );
-    }
-
-    //insert steps
-    for(int step=0; step<numberOfSteps; step++) {
-        int col=0;
-        foreach(RenderThread *th, listOfThreads) {
-            if(th->listOfSteps.contains(step)) {
-                SolverNode *node = th->listOfSteps.value(step,0);
-                QStandardItem *item = new QStandardItem("0");
-                model.setItem(step,col,item);
-                if(node) {
-                    node->modelIndex=item->index();
-                    for(int st=node->minRenderOrder+1; st<=node->maxRenderOrder; st++) {
-                        model.setItem(st,col, new QStandardItem("+"));
-                    }
-                }
-            }
-            col++;
-        }
-    }
-
-    //insert merged nodes
-    for(int step=0; step<numberOfSteps; step++) {
-        int mergedOnThisStep=0;
-        int col=0;
-        foreach(RenderThread *th, listOfThreads) {
-            SolverNode *node = th->listOfSteps.value(step,0);
-            if(node) {
-                int cpt=1;
-                foreach(SolverNode *merged, node->GetListOfMergedNodes()) {
-                    if(cpt>mergedOnThisStep) {
-                        mergedOnThisStep=cpt;
-                        model.insertRow(step+mergedOnThisStep);
-                    }
-                    QStandardItem *item = new QStandardItem();
-                    model.setItem(step+cpt,col,item);
-                    merged->modelIndex=item->index();
-                    cpt++;
-                }
-                col++;
-            }
-        }
-    }
-    mutex.unlock();
-}
-
 void Renderer::UpdateView()
 {
     if(!mutex.tryLockForRead())
         return;
 
+    if(needBuildModel) {
+        needBuildModel=false;
+        BuildModel();
+    }
+
     int cpt=0;
     foreach(RenderThread *th, listOfThreads) {
-        foreach(SolverNode *node, th->listOfSteps) {
+        th->mutex.lockForRead();
+        foreach(RendererNode *node, th->listOfSteps) {
             if(node) {
                 node->UpdateModel(&model);
             }
         }
+        th->mutex.unlock();
         cpt++;
     }
     mutex.unlock();
@@ -132,6 +81,7 @@ void Renderer::Clear()
     stop=true;
     numberOfThreads=0;
     numberOfSteps=0;
+    ClearNodes();
     foreach(RenderThread *th, listOfThreads) {
         delete th;
     }
@@ -151,33 +101,84 @@ void Renderer::SetNbThreads(int nbThreads)
     mutex.unlock();
 }
 
-void Renderer::OnNewRenderingOrder(QList<SolverNode*> & listNodes)
+void Renderer::ClearNodes()
 {
-    QList<SolverNode*>newLstNodes;
-    foreach(SolverNode *node, listNodes) {
-        SolverNode *newNode = new SolverNode(*node);
-        newLstNodes << newNode;
+    foreach(RendererNode *node, listOfNodes) {
+        delete node;
     }
+    listOfNodes.clear();
+}
+
+void Renderer::OnNewRenderingOrder(const QList<SolverNode*> & listNodes)
+{
+    mutexNodes.lock();
+
+    //copy nodes
+    tmpListOfNodes.clear();
+    foreach(SolverNode *n, listNodes) {
+        tmpListOfNodes << new RendererNode(*n);
+    }
+    newNodes=true;
+    mutexNodes.unlock();
+
+    mutexOptimize.lock();
+    if(countOptimize<3) {
+        countOptimize++;
+        QTimer::singleShot(5000, this, SLOT(Optimize()));
+    }
+    countOptimize++;
+    QTimer::singleShot(50, this, SLOT(Optimize()));
+    QTimer::singleShot(500, this, SLOT(Optimize()));
+     mutexOptimize.unlock();
+}
+
+void Renderer::ProcessNewNodes()
+{
+    ClearNodes();
+
+    listOfNodes = tmpListOfNodes;
+    tmpListOfNodes.clear();
 
     optimizer.SetNbThreads(maxNumberOfThreads);
-    optimizer.NewListOfNodes(newLstNodes);
-
+    optimizer.NewListOfNodes(listOfNodes);
     GetStepsFromOptimizer();
 
-    QTimer::singleShot(500, this, SLOT(Optimize()));
+
 }
 
 void Renderer::StartRender()
 {
 
-    if(!mutex.tryLockForRead()) {
+    if(!mutex.tryLockForRead(5)) {
         debug2(<<"Renderer::StartRender can't lock")
         return;
     }
+//    mutex.lockForRead();
 
     if(stop) {
         mutex.unlock();
         return;
+    }
+
+    mutexNodes.lock();
+    if(newNodes) {
+        newNodes=false;
+        mutexNodes.unlock();
+        ProcessNewNodes();
+    } else {
+        mutexNodes.unlock();
+    }
+
+    mutexOptimize.lock();
+    if(needOptimize) {
+        needOptimize=false;
+        mutexOptimize.unlock();
+        optimizer.NewListOfNodes(listOfNodes);
+        optimizer.Optimize();
+        GetStepsFromOptimizer();
+        needBuildModel=true;
+    } else {
+        mutexOptimize.unlock();
     }
 
     if(numberOfThreads==0) {
@@ -187,30 +188,39 @@ void Renderer::StartRender()
 
     sem.release(numberOfThreads);
     for(int currentStep=-1; currentStep<numberOfSteps; currentStep++) {
-        sem.acquire(numberOfThreads);
-        for(int i=0;i<numberOfThreads; i++) {
-            RenderThread *th = listOfThreads.value(i);
-            th->step = currentStep;
-            th->sem.release();
+
+        if( sem.tryAcquire(numberOfThreads,1000) ) {
+
+            for(int i=0;i<numberOfThreads; i++) {
+                RenderThread *th = listOfThreads.value(i);
+                th->step = currentStep;
+                th->sem.release();
+            }
+
+        } else {
+            debug2(<<"Renderer::StartRender timeout, step:"<< currentStep << sem.available() << "/" << numberOfThreads )
         }
+
     }
-    sem.acquire(numberOfThreads);
+
+    if( !sem.tryAcquire(numberOfThreads,5000) ) {
+        debug2(<<"Renderer::StartRender timeout last step" << sem.available() << "/" << numberOfThreads )
+        sem.acquire( sem.available() );
+    }
+
     mutex.unlock();
 }
 
 void Renderer::Optimize()
 {
-    mutex.lockForWrite();
-    optimizer.Optimize();
-    mutex.unlock();
-    GetStepsFromOptimizer();
-    BuildModel();
+    mutexOptimize.lock();
+    needOptimize=true;
+    countOptimize++;
+    mutexOptimize.unlock();
 }
 
 void Renderer::GetStepsFromOptimizer()
 {
-    mutex.lockForWrite();
-
     numberOfSteps = -1;
     numberOfThreads = maxNumberOfThreads;
 
@@ -219,11 +229,82 @@ void Renderer::GetStepsFromOptimizer()
     }
 
     for(int th=0; th<maxNumberOfThreads; th++) {
-        QMap<int, SolverNode* >lst = optimizer.GetListOfNode(th);
-        listOfThreads.value(th)->listOfSteps = lst;
-        if(lst.size() > numberOfSteps) {
-            numberOfSteps = lst.size();
+        QMap<int, RendererNode* >lst = optimizer.GetListOfNode(th);
+        RenderThread *thread = listOfThreads.value(th);
+        thread->mutex.lockForWrite();
+        thread->listOfSteps = lst;
+        thread->mutex.unlock();
+
+        if(!lst.isEmpty()) {
+            int lastStep = lst.uniqueKeys().last();
+            if( lastStep >= numberOfSteps) {
+                numberOfSteps = lastStep+1;
+            }
         }
     }
-    mutex.unlock();
+}
+
+void Renderer::InitThreads()
+{
+    for(int i=0; i<maxNumberOfThreads; i++) {
+        RenderThread *th = new RenderThread(this, QString::number(i));
+        listOfThreads << th;
+        th->start(QThread::TimeCriticalPriority);
+    }
+}
+
+void Renderer::BuildModel()
+{
+    model.clear();
+
+    for(int i=0; i<maxNumberOfThreads; i++) {
+        model.setHorizontalHeaderItem(i, new QStandardItem( QString::number(i+1) ) );
+    }
+
+    //insert steps
+    for(int step=0; step<numberOfSteps; step++) {
+        int col=0;
+        foreach(RenderThread *th, listOfThreads) {
+            th->mutex.lockForRead();
+            if(th->listOfSteps.contains(step)) {
+                RendererNode *node = th->listOfSteps.value(step,0);
+                QStandardItem *item = new QStandardItem("0");
+                model.setItem(step,col,item);
+                if(node) {
+                    node->modelIndex=item->index();
+                    for(int st=node->minRenderOrder+1; st<=node->maxRenderOrder; st++) {
+                        model.setItem(st,col, new QStandardItem("+"));
+                    }
+                }
+            }
+            th->mutex.unlock();
+            col++;
+        }
+    }
+
+    //insert merged nodes
+    for(int step=0; step<numberOfSteps; step++) {
+        int mergedOnThisStep=0;
+        int col=0;
+        foreach(RenderThread *th, listOfThreads) {
+            th->mutex.lockForRead();
+            RendererNode *node = th->listOfSteps.value(step,0);
+            th->mutex.unlock();
+            if(node) {
+                int cpt=1;
+                foreach(RendererNode *merged, node->GetListOfMergedNodes()) {
+                    if(cpt>mergedOnThisStep) {
+                        mergedOnThisStep=cpt;
+                        model.insertRow(step+mergedOnThisStep);
+                    }
+                    QStandardItem *item = new QStandardItem();
+                    model.setItem(step+cpt,col,item);
+                    merged->modelIndex=item->index();
+                    cpt++;
+                }
+                col++;
+            }
+
+        }
+    }
 }
