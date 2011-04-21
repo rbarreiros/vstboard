@@ -48,15 +48,15 @@ int AudioDevice::countInputDevices=0;
   */
 AudioDevice::AudioDevice(MainHostHost *myHost,const ObjectInfo &info, QObject *parent) :
     QObject(parent),
-    bufferReady(false),
     sampleRate(44100.0f),
     bufferSize(4096),
     stream(0),
+    objInfo(info),
     devIn(0),
     devOut(0),
     closed(true),
-    objInfo(info),
-    myHost(myHost)
+    myHost(myHost),
+    bufferReady(false)
 {
     devOutClosing=false;
     setObjectName(objInfo.name);

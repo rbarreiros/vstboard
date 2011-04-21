@@ -186,7 +186,7 @@ void Pin::SetVisible(bool vis)
             //remove cables from pin
             QSharedPointer<Object> cnt = parent->getHost()->objFactory->GetObjectFromId(connectInfo.container);
             if(!cnt.isNull()) {
-                static_cast<Container*>(cnt.data())->RemoveCableFromPin(connectInfo);
+                static_cast<Container*>(cnt.data())->UserRemoveCableFromPin(connectInfo);
             }
 
             //remove pin

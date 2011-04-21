@@ -39,7 +39,7 @@ namespace Connectables {
 
         void Hide();
         void ConnectBridges(QSharedPointer<Object> bridgeA, QSharedPointer<Object> bridgeB, bool hidden=true);
-        void RemoveCable(QModelIndex & index);
+//        void RemoveCable(QModelIndex & index);
         void SetContainerId(quint16 id);
         const QModelIndex &GetCablesIndex();
 
@@ -54,7 +54,6 @@ namespace Connectables {
         virtual void ParkObject(QSharedPointer<Object> objPtr);
         virtual void CopyCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr);
         virtual bool IsDirty();
-
 
         /// shared pointer to the bridge in object
         QSharedPointer<Object> bridgeIn;
@@ -91,10 +90,15 @@ namespace Connectables {
         int progToSet;
 
     public slots:
+        void UserAddObject(QSharedPointer<Object> objPtr);
+        void UserParkObject(QSharedPointer<Object> objPtr);
+        void UserAddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
+        void UserRemoveCableFromPin(const ConnectionInfo &pin);
+
         void AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin, bool hidden=false);
-        void RemoveCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
+//        void RemoveCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
         void RemoveCableFromPin(const ConnectionInfo &pin);
-        void RemoveCableFromObj(int objId);
+//        void RemoveCableFromObj(int objId);
 
         void SaveProgram();
         void UnloadProgram();

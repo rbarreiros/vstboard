@@ -148,7 +148,6 @@ bool SetupFile::FromStream(MainHost *myHost,QDataStream &in)
     myHost->renderer->SetEnabled(true);
     myHost->EnableSolverUpdate(true);
 
-
     if(myHost->currentFileVersion >= 12) {
         bool colorsInSetupFile;
         in >> colorsInSetupFile;
@@ -159,6 +158,7 @@ bool SetupFile::FromStream(MainHost *myHost,QDataStream &in)
         else
             myHost->mainWindow->viewConfig.LoadFromRegistry(myHost);
     }
+
 
     return true;
 }

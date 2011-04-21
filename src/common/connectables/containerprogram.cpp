@@ -22,13 +22,14 @@
 #include "mainhost.h"
 #include "container.h"
 #include "object.h"
+#include "renderer/renderernode.h"
 
 using namespace Connectables;
 
 ContainerProgram::ContainerProgram(MainHost *myHost,Container *container) :
         container(container),
-        myHost(myHost),
-        dirty(false)
+        dirty(false),
+        myHost(myHost)
 {
 }
 
@@ -51,6 +52,10 @@ ContainerProgram::ContainerProgram(const ContainerProgram& c)
         mapObjAttribs.insert(i.key(),i.value());
         ++i;
     }
+
+    foreach(RendererNode *node, c.listOfRendererNodes) {
+        listOfRendererNodes << new RendererNode(*node);
+    }
 }
 
 ContainerProgram::~ContainerProgram()
@@ -62,6 +67,10 @@ ContainerProgram::~ContainerProgram()
 
     listObjects.clear();
     mapObjAttribs.clear();
+
+    foreach(RendererNode *node, listOfRendererNodes) {
+        delete node;
+    }
 }
 
 ContainerProgram * ContainerProgram::Copy(int fromId, int toId)
@@ -122,6 +131,8 @@ void ContainerProgram::Load(int progId)
         }
         ++i;
     }
+
+    LoadRendererState();
     dirty=false;
 }
 
@@ -137,6 +148,17 @@ void ContainerProgram::Unload()
             obj->UnloadProgram();
     }
 }
+
+void ContainerProgram::SaveRendererState()
+{
+    listOfRendererNodes = myHost->GetRenderer()->SaveNodes();
+}
+
+void ContainerProgram::LoadRendererState()
+{
+    myHost->GetRenderer()->LoadNodes( listOfRendererNodes );
+}
+
 
 void ContainerProgram::ParkAllObj()
 {
@@ -166,6 +188,8 @@ bool ContainerProgram::IsDirty()
 
 void ContainerProgram::Save(bool saveChildPrograms)
 {
+    SaveRendererState();
+
     if(saveChildPrograms) {
         foreach(QSharedPointer<Object> objPtr, listObjects) {
             objPtr->SaveProgram();

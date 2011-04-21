@@ -59,11 +59,16 @@ void PathSolver::Resolve(hashCables cables, Renderer *renderer)
     listCables = cables;
 
     CreateNodes();
+
+    if(listNodes.isEmpty()) {
+        mutex.unlock();
+        return;
+    }
+
     PutParentsInNodes();
     while(ChainNodes()) {}
     UnwrapLoops();
     SetMinAndMaxStep();
-
     renderer->OnNewRenderingOrder(listNodes);
     mutex.unlock();
 }
@@ -196,53 +201,15 @@ void PathSolver::SetMinAndMaxStep()
     foreach(SolverNode *node, listNodes) {
         if(!node->IsRoot())
             continue;
-
-        //only audio and midi interfaces can have the first place
-        int firstStep=1;
-        if(node->listOfObj.first()->info().objType == ObjType::AudioInterfaceIn ||
-            node->listOfObj.first()->info().objType == ObjType::AudioInterfaceOut ||
-            node->listOfObj.first()->info().objType == ObjType::MidiInterface )
-                firstStep=0;
-
-        maxStep = std::max(maxStep, node->SetMinRenderOrder( firstStep ));
+        maxStep = std::max(maxStep, node->SetMinRenderOrder( 0 ));
     }
 
     foreach(SolverNode *node, listNodes) {
         if(!node->IsTail())
             continue;
-
         node->SetMaxRenderOrder(maxStep);
     }
 }
-
-//void PathSolver::UpdateModel()
-//{
-
-//    int currentStep=0;
-//    QList<QStandardItem*>listItems;
-
-//    orderedNodes::iterator i = renderingOrder.end();
-//    while (i != renderingOrder.begin()) {
-//        --i;
-//        if(i.key() != currentStep) {
-//            if(listItems.size()!=0) {
-//                model.insertRow(0,listItems);
-//                listItems.clear();
-//            }
-//            currentStep = i.key();
-//        }
-//        listItems << new QStandardItem(QString("[%1:%2] %3:%4")
-//                                       .arg(i.value()->minRenderOrder)
-//                                       .arg(i.value()->maxRenderOrder)
-//                                       .arg(i.value()->objectPtr->GetIndex())
-//                                       .arg(i.value()->objectPtr->objectName())
-//                                       );
-
-
-//    }
-//    if(listItems.size()>0)
-//        model.insertRow(0,listItems);
-//}
 
 //return a list of good starts by looking at the nodes close to a root
 QList<SolverNode*> PathSolver::ListOfGoodStarts(const QList<SolverNode*>&loop)

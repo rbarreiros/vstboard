@@ -76,17 +76,19 @@ void BridgePinView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId,
         return;
 
     switch(colorId) {
-    case Colors::Borders:
-        outline->setPen( color );
-        break;
-    case Colors::Background: {
-        QPalette pal(palette());
-        pal.setColor(QPalette::Window,color);
-        setPalette( pal );
-        break;
-    }
-    case Colors::HighlightBackground :
-        highlight->setBrush( color );
+        case Colors::Borders:
+            outline->setPen( color );
+            break;
+        case Colors::Background: {
+            QPalette pal(palette());
+            pal.setColor(QPalette::Window,color);
+            setPalette( pal );
+            break;
+        }
+        case Colors::HighlightBackground :
+            highlight->setBrush( color );
+        default:
+            break;
     }
 }
 

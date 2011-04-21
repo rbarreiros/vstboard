@@ -225,6 +225,7 @@ void Container::LoadProgram(int prog)
 
 
     if(oldProg) {
+
         //remove objects from the old program if not needed anymore
         foreach(QSharedPointer<Object>objPtr, oldProg->listObjects) {
             if(!newProg->listObjects.contains(objPtr)) {
@@ -255,8 +256,9 @@ void Container::LoadProgram(int prog)
     currentProgram->Load(prog);
     UpdateModelNode();
 
-    if(oldProg)
+    if(oldProg) {
         delete oldProg;
+    }
 
 }
 
@@ -266,6 +268,7 @@ void Container::SaveProgram()
         return;
 
     currentProgram->Save();
+
     delete listContainerPrograms.take(currentProgId);
     listContainerPrograms.insert(currentProgId,currentProgram);
     ContainerProgram *tmp = new ContainerProgram(*currentProgram);
@@ -319,6 +322,12 @@ void Container::RemoveProgram(int prg)
     delete prog;
 }
 
+void Container::UserAddObject(QSharedPointer<Object> objPtr)
+{
+    AddObject(objPtr);
+    myHost->SetSolverUpdateNeeded();
+}
+
 /*!
   Add a new object in the current program
   \param objPtr shared pointer to the object
@@ -359,6 +368,13 @@ void Container::AddParkedObject(QSharedPointer<Object> objPtr)
 
     listLoadedObjects << objPtr.data();
     ParkChildObject(objPtr);
+}
+
+
+void Container::UserParkObject(QSharedPointer<Object> objPtr)
+{
+    ParkObject(objPtr);
+    myHost->SetSolverUpdateNeeded();
 }
 
 /*!
@@ -419,7 +435,7 @@ void Container::AddChildObject(QSharedPointer<Object> objPtr)
     objPtr->modelIndex=item->index();
     objPtr->parked=false;
 
-    myHost->SetSolverUpdateNeeded();
+//    myHost->SetSolverUpdateNeeded();
 }
 
 /*!
@@ -439,7 +455,7 @@ void Container::ParkChildObject(QSharedPointer<Object> objPtr)
     objPtr->modelIndex=item->index();
     objPtr->parked=true;
 
-    myHost->SetSolverUpdateNeeded();
+//    myHost->SetSolverUpdateNeeded();
 }
 
 /*!
@@ -466,9 +482,21 @@ void Container::OnChildDeleted(Object *obj)
   User removed a cable from the program
   \param index model index of the cable
   */
-void Container::RemoveCable(QModelIndex & index)
+//void Container::RemoveCable(QModelIndex & index)
+//{
+//    currentProgram->RemoveCable(index);
+//}
+
+void Container::UserAddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
 {
-    currentProgram->RemoveCable(index);
+    AddCable(outputPin,inputPin,false);
+    myHost->SetSolverUpdateNeeded();
+}
+
+void Container::UserRemoveCableFromPin(const ConnectionInfo &pin)
+{
+    RemoveCableFromPin(pin);
+    myHost->SetSolverUpdateNeeded();
 }
 
 /*!
@@ -489,12 +517,12 @@ void Container::AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &
   \param outputPin the output pin (messages sender)
   \param inputPin the input pin (messages receiver)
   */
-void Container::RemoveCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
-{
-    if(!currentProgram)
-        return;
-    currentProgram->RemoveCable(outputPin,inputPin);
-}
+//void Container::RemoveCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
+//{
+//    if(!currentProgram)
+//        return;
+//    currentProgram->RemoveCable(outputPin,inputPin);
+//}
 
 /*!
   Remove all cables from a Pin
@@ -511,12 +539,12 @@ void Container::RemoveCableFromPin(const ConnectionInfo &pin)
   Remove all cables from an Object
   \param objId the object index to disconnect
   */
-void Container::RemoveCableFromObj(int objId)
-{
-    if(!currentProgram)
-        return;
-    currentProgram->RemoveCableFromObj(objId);
-}
+//void Container::RemoveCableFromObj(int objId)
+//{
+//    if(!currentProgram)
+//        return;
+//    currentProgram->RemoveCableFromObj(objId);
+//}
 
 /*!
   Put all the ContainerProgram and children Objects in a data stream
@@ -629,21 +657,20 @@ QDataStream & Container::fromStream (QDataStream& in)
         //load the programs
         case 1:
         {
+            foreach(ContainerProgram *prog, listContainerPrograms) {
+                delete prog;
+            }
+            listContainerPrograms.clear();
+
             quint32 nbProg;
             in >> nbProg;
             for(quint32 i=0; i<nbProg; i++) {
                 quint32 progId;
                 in >> progId;
 
-                ContainerProgram *prog=0;
-                if(listContainerPrograms.contains(progId)) {
-                    prog = listContainerPrograms.value(progId);
-                } else {
-                    prog = new ContainerProgram(myHost,this);
-                    listContainerPrograms.insert(progId,prog);
-                }
-
+                ContainerProgram *prog = new ContainerProgram(myHost,this);
                 in >> *prog;
+                listContainerPrograms.insert(progId,prog);
             }
             break;
         }

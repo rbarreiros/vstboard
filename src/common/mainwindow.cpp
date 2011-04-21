@@ -689,3 +689,8 @@ void MainWindow::on_actionAppearance_triggered()
     View::ViewConfigDialog dlg(myHost,this);
     dlg.exec();
 }
+
+void MainWindow::on_solverView_clicked(const QModelIndex &index)
+{
+    myHost->OptimizeRenderer();
+}

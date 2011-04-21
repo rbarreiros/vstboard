@@ -21,6 +21,8 @@ win32 {
 
 win32-msvc* {
     PRE_TARGETDEPS += $$top_destdir/common.lib
+} else {
+    PRE_TARGETDEPS += $$top_destdir/libcommon.a
 }
 
 win32-g++ {

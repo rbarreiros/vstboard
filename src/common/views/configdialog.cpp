@@ -144,7 +144,10 @@ ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
     ui->onUnsavedProject->setCurrentIndex( ui->onUnsavedProject->findData(unsavedProject) );
 
 //engine
-    ui->nbThreads->setValue( myHost->GetSetting("MaxNbThreads",4).toInt() );
+    int th = myHost->GetSetting("NbThreads",0).toInt();
+    if(th<1 && th>32)
+        th=0;
+    ui->nbThreads->setValue( th );
 }
 
 ConfigDialog::~ConfigDialog()
@@ -259,6 +262,21 @@ const int ConfigDialog::defaultBufferSize(MainHost *myHost)
 const bool ConfigDialog::defaultDoublePrecision(MainHost *myHost)
 {
     return myHost->GetSetting("doublePrecision",false).toBool();
+}
+
+const int ConfigDialog::defaultNumberOfThreads(MainHost *myHost)
+{
+    int th = myHost->GetSetting("NbThreads",0).toInt();
+    if(th>0 && th<=32)
+        return th;
+
+#ifdef _WIN32
+    SYSTEM_INFO info;
+    GetSystemInfo(&info);
+    return info.dwNumberOfProcessors;
+#endif
+
+    return 2;
 }
 
 void ConfigDialog::AddRecentSetupFile(const QString &file,MainHost *myHost)
@@ -386,10 +404,10 @@ void ConfigDialog::accept()
     }
 
 //engine
-    int oldNbThreads = myHost->GetSetting("MaxNbThreads",4).toInt();
+    int oldNbThreads = myHost->GetSetting("NbThreads",0).toInt();
     int newNbThreads = ui->nbThreads->value();
     if( newNbThreads != oldNbThreads ) {
-        myHost->SetSetting("MaxNbThreads", newNbThreads);
+        myHost->SetSetting("NbThreads", newNbThreads);
         myHost->ChangeNbThreads(newNbThreads);
     }
 }

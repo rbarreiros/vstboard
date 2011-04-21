@@ -71,7 +71,9 @@
 #include <QMultiHash>
 #include <QMutex>
 #include <QObject>
+#include <QReadWriteLock>
 #include <QScrollBar>
+#include <QSemaphore>
 #include <QSettings>
 #include <QSharedData>
 #include <QSharedPointer>

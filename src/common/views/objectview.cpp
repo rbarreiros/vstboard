@@ -38,6 +38,14 @@ using namespace View;
   */
 ObjectView::ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsItem * parent, Qt::WindowFlags wFlags ) :
     QGraphicsWidget(parent,wFlags),
+    listAudioIn(0),
+    listAudioOut(0),
+    listMidiIn(0),
+    listMidiOut(0),
+    listParametersIn(0),
+    listParametersOut(0),
+    listBridge(0),
+    config(0),
     titleText(0),
     border(0),
     selectBorder(0),
@@ -46,14 +54,7 @@ ObjectView::ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsIte
     model(model),
     actDel(0),
     shrinkAsked(false),
-    myHost(myHost),
-    listAudioIn(0),
-    listAudioOut(0),
-    listMidiIn(0),
-    listMidiOut(0),
-    listParametersIn(0),
-    listParametersOut(0),
-    listBridge(0)
+    myHost(myHost)
 {
     setObjectName("objView");
     config = &myHost->mainWindow->viewConfig;
@@ -83,21 +84,22 @@ void ObjectView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, co
         return;
 
     switch(colorId) {
-    case Colors::Background : {
-        QPalette pal(palette());
-        pal.setColor(QPalette::Window,color);
-        setPalette( pal );
-        break;
-    }
-    case Colors::Text : {
-        QPalette pal(palette());
-        pal.setColor(QPalette::Text,color);
-        setPalette( pal );
-        break;
-    }
+        case Colors::Background : {
+            QPalette pal(palette());
+            pal.setColor(QPalette::Window,color);
+            setPalette( pal );
+            break;
+        }
+        case Colors::Text : {
+            QPalette pal(palette());
+            pal.setColor(QPalette::Text,color);
+            setPalette( pal );
+            break;
+        }
 
-    case Colors::Borders :
-        break;
+        case Colors::Borders :
+        default:
+            break;
     }
 }
 
@@ -204,7 +206,7 @@ void ObjectView::closeEvent ( QCloseEvent * event )
 
     static_cast<Connectables::Container*>(
             myHost->objFactory->GetObj(objIndex.parent()).data()
-        )->ParkObject(
+        )->UserParkObject(
             myHost->objFactory->GetObj(objIndex)
         );
 

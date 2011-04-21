@@ -28,16 +28,16 @@
  */
 static void pm_exit(void) {
     pm_term();
-#ifdef DEBUG
-#define STRING_MAX 80
-    {
-        char line[STRING_MAX];
-        printf("Type ENTER...\n");
-        /* note, w/o this prompting, client console application can not see one
-           of its errors before closing. */
-        fgets(line, STRING_MAX, stdin);
-    }
-#endif
+//#ifdef DEBUG
+//#define STRING_MAX 80
+//    {
+//        char line[STRING_MAX];
+//        printf("Type ENTER...\n");
+//        /* note, w/o this prompting, client console application can not see one
+//           of its errors before closing. */
+//        fgets(line, STRING_MAX, stdin);
+//    }
+//#endif
 }
 
 

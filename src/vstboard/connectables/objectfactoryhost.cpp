@@ -55,7 +55,12 @@ Object *ObjectFactoryHost::CreateOtherObjects(const ObjectInfo &info)
                 case ObjType::MidiInterface:
                     obj = new MidiDevice(myHost,objId, info);
                     break;
+                default:
+                    break;
             }
+            break;
+
+        default:
             break;
     }
 

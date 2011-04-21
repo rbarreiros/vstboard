@@ -35,10 +35,10 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
     filePass(0),
     objFactory(0),
     mainWindow(0),
+    currentFileVersion(PROJECT_AND_SETUP_FILE_VERSION),
     solverNeedAnUpdate(false),
     solverUpdateEnabled(true),
     mutexListCables(new QMutex(QMutex::Recursive)),
-    currentFileVersion(PROJECT_AND_SETUP_FILE_VERSION),
     settingsGroup(settingsGroup)
 {
     doublePrecision=GetSetting("doublePrecision",false).toBool();
@@ -98,15 +98,15 @@ MainHost::~MainHost()
     workingListOfCables.clear();
     mutexListCables->unlock();
 
+    solver->Resolve(workingListOfCables, renderer);
+    delete renderer;
+
     mainContainer.clear();
     hostContainer.clear();
     projectContainer.clear();
     groupContainer.clear();
     programContainer.clear();
 
-//    solver->Resolve(workingListOfCables, &renderer);
-
-    delete renderer;
     delete objFactory;
 }
 
@@ -341,6 +341,7 @@ void MainHost::SetupProgramContainer()
     if(programContainer.isNull())
         return;
 
+    programContainer->SetOptimizerFlag(true);
     programContainer->LoadProgram(0);
     mainContainer->AddObject(programContainer);
 
@@ -657,7 +658,7 @@ void MainHost::OnCableAdded(const ConnectionInfo &outputPin, const ConnectionInf
     workingListOfCables.insert(outputPin,inputPin);
     mutexListCables->unlock();
 
-    SetSolverUpdateNeeded();
+//    SetSolverUpdateNeeded();
 }
 
 void MainHost::OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
@@ -666,7 +667,7 @@ void MainHost::OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionI
     workingListOfCables.remove(outputPin,inputPin);
     mutexListCables->unlock();
 
-    SetSolverUpdateNeeded();
+//    SetSolverUpdateNeeded();
 }
 
 void MainHost::SetTimeInfo(const VstTimeInfo *info)
