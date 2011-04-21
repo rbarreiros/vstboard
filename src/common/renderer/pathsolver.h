@@ -62,8 +62,7 @@ protected:
 
     QList<SolverNode*>listNodes;
     QMutex mutex;
-signals:
-    void NewRenderingOrder(orderedNodes *order);
+
 };
 
 #endif // PATHSOLVER_H

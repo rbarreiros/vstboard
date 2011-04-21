@@ -165,6 +165,10 @@ namespace Connectables {
           */
         virtual QString GetParameterName(ConnectionInfo pinInfo) {return "";}
 
+        /*!
+          Set this container as the holder of the rendering map
+          */
+        void SetOptimizerFlag(bool opt) { optimizerFlag=opt; }
 
         /// the current model index
         QPersistentModelIndex modelIndex;
@@ -252,6 +256,8 @@ namespace Connectables {
         QList<QVariant>listIsLearning;
 
 //        QScriptValue scriptObj;
+
+        bool optimizerFlag;
 
     private:
         /// the current container id if not parked

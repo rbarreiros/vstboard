@@ -9,9 +9,11 @@ class RendererNode : public Node
 public:
     RendererNode();
     RendererNode(const SolverNode &c);
+    RendererNode(const RendererNode &c);
+    ~RendererNode();
 
     void NewRenderLoop();
-    void RenderNode();
+    void Render();
     void AddMergedNode(RendererNode *merged);
     void RemoveMergedNode(RendererNode *merged);
     void ClearMergedNodes();
@@ -28,7 +30,7 @@ public:
 protected:
     int benchCount;
     QList<RendererNode*>listOfMergedNodes;
-    QReadWriteLock mutex;
+//    QReadWriteLock mutex;
 };
 
 #endif // RENDERERNODE_H

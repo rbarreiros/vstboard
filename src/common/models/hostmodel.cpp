@@ -105,7 +105,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                             debug("HostModel::dropMimeData x-qstandarditemmodeldatalist object not found")
                             continue;
                         }
-                        cntPtr->AddObject(objPtr);
+                        cntPtr->UserAddObject(objPtr);
                     }
                 }
                 return true;
@@ -137,7 +137,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                             }
                             return false;
                         }
-                        cntPtr->AddObject(objPtr);
+                        cntPtr->UserAddObject(objPtr);
                     }
                 }
                 return true;
@@ -157,7 +157,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                     if(objPtr.isNull()) {
                         debug("HostModel::dropMimeData audioin object not found or already used")
                     } else {
-                        cntPtr->AddObject(objPtr);
+                        cntPtr->UserAddObject(objPtr);
                     }
 
                     info.objType=ObjType::AudioInterfaceOut;
@@ -165,7 +165,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                     if(objPtr.isNull()) {
                         debug("HostModel::dropMimeData audioout object not found or already used")
                     } else {
-                        cntPtr->AddObject(objPtr);
+                        cntPtr->UserAddObject(objPtr);
                     }
                 }
 
@@ -185,7 +185,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                         debug("HostModel::dropMimeData midi object not found or already used")
                         continue;
                     }
-                    cntPtr->AddObject(objPtr);
+                    cntPtr->UserAddObject(objPtr);
                 }
                 return true;
             }
@@ -203,7 +203,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                         debug("HostModel::dropMimeData tool object not found")
                         continue;
                     }
-                    cntPtr->AddObject(objPtr);
+                    cntPtr->UserAddObject(objPtr);
                 }
                 return true;
             }
@@ -265,7 +265,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                                 return false;
                             }
 
-                            cntPtr->AddObject(objPtr);
+                            cntPtr->UserAddObject(objPtr);
                             cntPtr->CopyCablesFromObj(objPtr, vstPtr);
                             vstPtr->CopyStatusTo(objPtr);
                             cntPtr->ParkObject(vstPtr);
@@ -278,41 +278,41 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
         }
 
         //connect a pin by drag&drop
-        case NodeType::pin :
-        {
-            if(data->hasFormat("application/x-pin")) {
-                ConnectionInfo parentInfo = index.data(UserRoles::connectionInfo).value<ConnectionInfo>();
+//        case NodeType::pin :
+//        {
+//            if(data->hasFormat("application/x-pin")) {
+//                ConnectionInfo parentInfo = index.data(UserRoles::connectionInfo).value<ConnectionInfo>();
 
-                //                  pin   . listpin .obj    . container
-                QModelIndex index = index.parent().parent().parent();
-                if(parentInfo.bridge)
-                    index=index.parent();
+//                //                  pin   . listpin .obj    . container
+//                QModelIndex index = index.parent().parent().parent();
+//                if(parentInfo.bridge)
+//                    index=index.parent();
 
-                int cntId = index.data(Qt::DisplayRole).toInt();;
-                QSharedPointer<Connectables::Object> cntPtr = myHost->objFactory->GetObjectFromId(cntId);
-                if(cntPtr.isNull()) {
-                    debug(QString("HostModel::dropMimeData NodeType::pin the container %1 is deleted").arg(cntId).toAscii())
-                    return false;
-                }
-                Connectables::Container *cnt = static_cast<Connectables::Container*>(cntPtr.data());
+//                int cntId = index.data(Qt::DisplayRole).toInt();;
+//                QSharedPointer<Connectables::Object> cntPtr = myHost->objFactory->GetObjectFromId(cntId);
+//                if(cntPtr.isNull()) {
+//                    debug(QString("HostModel::dropMimeData NodeType::pin the container %1 is deleted").arg(cntId).toAscii())
+//                    return false;
+//                }
+//                Connectables::Container *cnt = static_cast<Connectables::Container*>(cntPtr.data());
 
 
-                QByteArray bytes = data->data("application/x-pin");
-                ConnectionInfo droppedInfo;
+//                QByteArray bytes = data->data("application/x-pin");
+//                ConnectionInfo droppedInfo;
 
-                QDataStream stream(&bytes,QIODevice::ReadOnly);
-                stream >> droppedInfo;
+//                QDataStream stream(&bytes,QIODevice::ReadOnly);
+//                stream >> droppedInfo;
 
-                if(droppedInfo.CanConnectTo(parentInfo)) {
-                    if(droppedInfo.direction == PinDirection::Output)
-                        cnt->AddCable(droppedInfo, parentInfo);
-                     else
-                        cnt->AddCable(parentInfo, droppedInfo);
-                     return true;
-                 }
-            }
-            break;
-        }
+//                if(droppedInfo.CanConnectTo(parentInfo)) {
+//                    if(droppedInfo.direction == PinDirection::Output)
+//                        cnt->UserAddCable(droppedInfo, parentInfo);
+//                     else
+//                        cnt->UserAddCable(parentInfo, droppedInfo);
+//                     return true;
+//                 }
+//            }
+//            break;
+//        }
         default:
             return false;
 

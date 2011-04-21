@@ -341,6 +341,7 @@ void MainHost::SetupProgramContainer()
     if(programContainer.isNull())
         return;
 
+    programContainer->SetOptimizerFlag(true);
     programContainer->LoadProgram(0);
     mainContainer->AddObject(programContainer);
 
@@ -657,7 +658,7 @@ void MainHost::OnCableAdded(const ConnectionInfo &outputPin, const ConnectionInf
     workingListOfCables.insert(outputPin,inputPin);
     mutexListCables->unlock();
 
-    SetSolverUpdateNeeded();
+//    SetSolverUpdateNeeded();
 }
 
 void MainHost::OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
@@ -666,7 +667,7 @@ void MainHost::OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionI
     workingListOfCables.remove(outputPin,inputPin);
     mutexListCables->unlock();
 
-    SetSolverUpdateNeeded();
+//    SetSolverUpdateNeeded();
 }
 
 void MainHost::SetTimeInfo(const VstTimeInfo *info)

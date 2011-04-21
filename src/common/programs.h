@@ -28,6 +28,7 @@
 
 class MainWindow;
 class MainHost;
+class Optimizer;
 class Programs : public QObject
 {
     Q_OBJECT
@@ -44,6 +45,8 @@ public:
     int GetCurrentMidiGroup() const;
     int GetCurrentMidiProg() const;
     void SetMainWindow(MainWindow *win) {mainWindow=win;}
+
+    Optimizer *optimizer;
 
 private:
 //    void ChangeProg(QStandardItem *newPrg);

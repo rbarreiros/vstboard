@@ -61,9 +61,10 @@ public:
 
     void ChangeNbThreads(int nbThreads);
 
-    QStandardItemModel *GetRendererModel() { return &renderer->model; }
+    QStandardItemModel *GetRendererModel() { return renderer->GetModel(); }
 
     void OptimizeRenderer() { if(renderer) renderer->Optimize(); }
+    Renderer * GetRenderer() { return renderer; }
 
     QSharedPointer<Connectables::MainContainer> mainContainer;
     QSharedPointer<Connectables::MainContainer> hostContainer;

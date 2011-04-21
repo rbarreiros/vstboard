@@ -1,4 +1,5 @@
 #include "optimizestepthread.h"
+#include "renderernode.h"
 
 OptimizeStepThread::OptimizeStepThread() :
     cpuTime(0),
@@ -20,11 +21,11 @@ bool OptimizeStepThread::GetMergedNode(RendererNode **node)
     }
 
     QList<RendererNode*>newLst = listOfNodes;
-    RendererNode *n = newLst.takeFirst();
+    RendererNode *n = new RendererNode( *newLst.takeFirst() );
     n->ClearMergedNodes();
 
     while(!newLst.isEmpty()) {
-        RendererNode *merged = newLst.takeFirst();
+        RendererNode *merged = new RendererNode( *newLst.takeFirst() );
         merged->ClearMergedNodes();
         n->AddMergedNode( merged );
     }
@@ -32,4 +33,30 @@ bool OptimizeStepThread::GetMergedNode(RendererNode **node)
     *node=n;
 
     return true;
+}
+
+void OptimizeStepThread::AddToModel(QStandardItemModel *model, int row, int col)
+{
+    if(spanFor) {
+        model->setItem(row,col, new QStandardItem("+") );
+        return;
+    }
+
+    foreach(RendererNode *node, listOfNodes) {
+        if(node) {
+            QStandardItem *item = new QStandardItem(".");
+            model->setItem(row,col,item);
+            node->modelIndex=item->index();
+        }
+        row++;
+    }
+}
+
+void OptimizeStepThread::UpdateView( QStandardItemModel *model )
+{
+    foreach(RendererNode *node, listOfNodes) {
+        if(node) {
+            node->UpdateModel( model );
+        }
+    }
 }

@@ -26,6 +26,8 @@
 #include "objectinfo.h"
 
 class MainHost;
+
+class RendererNode;
 namespace Connectables {
 
     class Object;
@@ -57,8 +59,13 @@ namespace Connectables {
 
         bool IsDirty();
 
+        void SaveRendererState();
+        void LoadRendererState();
+
         QDataStream & toStream (QDataStream &) const;
         QDataStream & fromStream (QDataStream &);
+
+        QList<RendererNode*>listOfRendererNodes;
 
     protected:
         bool CableExists(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);

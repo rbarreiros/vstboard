@@ -21,23 +21,41 @@ RendererNode::RendererNode(const SolverNode &c) :
 {
 }
 
+RendererNode::RendererNode(const RendererNode &c) :
+    Node(c),
+    minRenderOrderOri(c.minRenderOrderOri),
+    maxRenderOrderOri(c.maxRenderOrderOri),
+    modelNeedUpdate(true),
+    cpuTime(c.cpuTime),
+    benchCount(c.benchCount)
+{
+    foreach( RendererNode *merged, c.listOfMergedNodes) {
+        listOfMergedNodes << new RendererNode(*merged);
+    }
+}
+
+RendererNode::~RendererNode()
+{
+    listOfMergedNodes.clear();
+}
+
 void RendererNode::NewRenderLoop()
 {
-    mutex.lockForRead();
-    foreach( QSharedPointer<Connectables::Object> ObjPtr, listOfObj) {
+//    mutex.lockForRead();
+    foreach( QWeakPointer<Connectables::Object> ObjPtr, listOfObj) {
         if(!ObjPtr.isNull()) {
-            ObjPtr->NewRenderLoop();
+            ObjPtr.toStrongRef()->NewRenderLoop();
         }
     }
     foreach(RendererNode *mergedNode, listOfMergedNodes) {
         mergedNode->NewRenderLoop();
     }
-    mutex.unlock();
+//    mutex.unlock();
 }
 
-void RendererNode::RenderNode()
+void RendererNode::Render()
 {
-    mutex.lockForRead();
+//    mutex.lockForRead();
 
 #ifdef _WIN32
     unsigned long timerStart=0;
@@ -48,6 +66,7 @@ void RendererNode::RenderNode()
             timerStart = kernelTime.dwLowDateTime + userTime.dwLowDateTime;
         }
 //    }
+
 #endif
 
     foreach( QSharedPointer<Connectables::Object> objPtr, listOfObj) {
@@ -69,45 +88,45 @@ void RendererNode::RenderNode()
 #endif
 
     foreach(RendererNode *mergedNode, listOfMergedNodes) {
-        mergedNode->RenderNode();
+        mergedNode->Render();
     }
-    mutex.unlock();
+//    mutex.unlock();
 }
 
 long RendererNode::GetTotalCpuUsage()
 {
     long cpu = cpuTime;
 
-    mutex.lockForRead();
+//    mutex.lockForRead();
     foreach(RendererNode *merged, listOfMergedNodes) {
         cpu+=merged->cpuTime;
     }
-    mutex.unlock();
+//    mutex.unlock();
 
     return cpu;
 }
 
 void RendererNode::AddMergedNode(RendererNode *merged)
 {
-    mutex.lockForWrite();
+//    mutex.lockForWrite();
     listOfMergedNodes << merged;
     minRenderOrder = merged->minRenderOrder = std::max(minRenderOrder, merged->minRenderOrder);
     maxRenderOrder = merged->maxRenderOrder = std::min(maxRenderOrder, merged->maxRenderOrder);
-    mutex.unlock();
+//    mutex.unlock();
 }
 
 void RendererNode::RemoveMergedNode(RendererNode *merged)
 {
-    mutex.lockForWrite();
+//    mutex.lockForWrite();
     listOfMergedNodes.removeAll(merged);
-    mutex.unlock();
+//    mutex.unlock();
 }
 
 void RendererNode::ClearMergedNodes()
 {
-    mutex.lockForWrite();
+//    mutex.lockForWrite();
     listOfMergedNodes.clear();
-    mutex.unlock();
+//    mutex.unlock();
 }
 
 void RendererNode::UpdateModel(QStandardItemModel *model)
@@ -115,11 +134,11 @@ void RendererNode::UpdateModel(QStandardItemModel *model)
     if(!modelNeedUpdate || !modelIndex.isValid())
         return;
 
-    mutex.lockForRead();
+//    mutex.lockForRead();
 
     modelNeedUpdate=false;
 
-    QString str = QString("[%1:%2][%3:%4]%5")
+    QString str = QString("[%1:%2][%3:%4](%5)")
                     .arg(minRenderOrder)
                     .arg(maxRenderOrder)
                     .arg(minRenderOrderOri)
@@ -138,5 +157,5 @@ void RendererNode::UpdateModel(QStandardItemModel *model)
         mergedNode->UpdateModel(model);
     }
 
-    mutex.unlock();
+//    mutex.unlock();
 }

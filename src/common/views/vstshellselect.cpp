@@ -88,7 +88,7 @@ void View::VstShellSelect::on_buttonOk_clicked()
         return;
     }
 
-    cntPtr->AddObject(objPtr);
+    cntPtr->UserAddObject(objPtr);
     close();
 }
 

@@ -169,6 +169,5 @@ bool ProjectFile::FromStream(MainHost *myHost,QDataStream &in)
 
     myHost->renderer->SetEnabled(true);
     myHost->EnableSolverUpdate(true);
-
     return true;
 }

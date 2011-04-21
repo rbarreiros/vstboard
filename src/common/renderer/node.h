@@ -11,7 +11,7 @@ public:
     Node(const Node &c);
     int minRenderOrder;
     int maxRenderOrder;
-    QList< QSharedPointer<Connectables::Object> >listOfObj;
+    QList< QWeakPointer<Connectables::Object> >listOfObj;
 };
 
 #endif // NODE_H

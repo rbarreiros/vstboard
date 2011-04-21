@@ -1,5 +1,6 @@
 #include "renderthread.h"
 #include "renderer.h"
+#include "renderernode.h"
 
 RenderThread::RenderThread(Renderer *renderer, const QString &name)
     : QThread(renderer),
@@ -13,6 +14,7 @@ RenderThread::RenderThread(Renderer *renderer, const QString &name)
 
 RenderThread::~RenderThread()
 {
+    ResetSteps();
     Stop();
     while(isRunning()) {
         usleep(100);
@@ -38,7 +40,7 @@ void RenderThread::Stop()
     mutex.lockForWrite();
     stop=true;
     mutex.unlock();
-    sem.release(1);
+    sem.release();
 }
 
 void RenderThread::RenderStep(int step)
@@ -80,18 +82,53 @@ void RenderThread::RenderStep(int step)
 
     //even if we have more time, we can start rendering now
     if(n!=0) {
-        n->RenderNode();
+//        debug2(<< "start" << currentThreadId() << n->listOfObj.first()->objectName())
+        n->Render();
+//        debug2(<< "end  " << currentThreadId() << n->listOfObj.first()->objectName())
 
         if(lastStepForRendering == step)
             renderer->sem.release();
         lastStepForRendering=-1;
+
+
     }
 }
 
 void RenderThread::ResetSteps()
 {
-    mutex.lockForWrite();
+    foreach( RendererNode *node, listOfSteps ) {
+        delete node;
+    }
     listOfSteps.clear();
+}
+
+void RenderThread::SetListOfSteps( const QMap<int, RendererNode* > &lst )
+{
+    mutex.lockForWrite();
+    ResetSteps();
+    listOfSteps = lst;
     mutex.unlock();
 }
 
+void RenderThread::StartRenderStep( int s )
+{
+    step=s;
+    sem.release();
+}
+
+QList<RendererNode*> RenderThread::GetListOfNodes()
+{
+    mutex.lockForRead();
+    QList<RendererNode*> tmpList;
+
+    foreach(RendererNode *node, listOfSteps) {
+        if(node) {
+            RendererNode *newNode = new RendererNode(*node);
+            tmpList << newNode;
+            tmpList << newNode->GetListOfMergedNodes();
+            newNode->ClearMergedNodes();
+        }
+    }
+    mutex.unlock();
+    return tmpList;
+}

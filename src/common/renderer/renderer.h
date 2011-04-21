@@ -26,11 +26,8 @@
 #include "renderthread.h"
 #include "optimizer.h"
 
-#include "renderernode.h"
-
-typedef QMultiHash<int, SolverNode*> orderedNodes;
-
 class MainHost;
+class RendererNode;
 class Renderer : public QObject
 {
     Q_OBJECT
@@ -41,29 +38,29 @@ public:
     void SetNbThreads(int nbThreads);
     void SetEnabled(bool enabled) {stop=!enabled;}
     void OnNewRenderingOrder(const QList<SolverNode*> & listNodes);
+    QStandardItemModel * GetModel();
+    Optimizer * GetOptimizer() { return &optimizer; }
+
+    void LoadNodes(const QList<RendererNode*> & listNodes);
+    QList<RendererNode*> SaveNodes();
 
     QStandardItemModel model;
 
 protected:
     void InitThreads();
-    void BuildModel();
     void GetStepsFromOptimizer();
     void Clear();
-    void ClearNodes();
-    void ProcessNewNodes();
 
     int maxNumberOfThreads;
     int numberOfThreads;
     int numberOfSteps;
     bool stop;
 
-    QList<RendererNode*>listOfNodes;
-    QList<RendererNode*>tmpListOfNodes;
     QMutex mutexNodes;
     bool newNodes;
     QMutex mutexOptimize;
     bool needOptimize;
-    int countOptimize;
+    int nextOptimize;
     bool needBuildModel;
     QList<RenderThread*>listOfThreads;
     QReadWriteLock mutex;

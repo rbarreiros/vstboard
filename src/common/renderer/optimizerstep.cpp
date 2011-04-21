@@ -1,5 +1,6 @@
 #include "optimizerstep.h"
 #include "optimizer.h"
+#include "renderernode.h"
 
 OptimizerStep::OptimizerStep(int step, int nbThreads, Optimizer *parent) :
     step(step),
@@ -24,6 +25,15 @@ OptimizerStep::OptimizerStep(const OptimizerStep &s) :
 OptimizerStep::~OptimizerStep()
 {
     ClearThreads();
+    listOfNodes.clear();
+}
+
+void OptimizerStep::ClearNodes()
+{
+    foreach(RendererNode *node, listOfNodes) {
+        delete node;
+    }
+    listOfNodes.clear();
 }
 
 void OptimizerStep::ClearThreads()
@@ -121,27 +131,27 @@ void OptimizerStep::OptimizeSpannedNodes()
 
                 long cpuGainForThisStep = node->cpuTime - tmpCpuTime;
 
-                //does the next step accept this node ?
-                if(NextStepCanAcceptPostponedNode(node, cpuGainForThisStep)) {
-                    listOfNodes.removeAll(node);
-                    ClearThreads();
-                    foreach(OptimizeStepThread *th, tmpStep.listOfThreads) {
-                        listOfThreads << new OptimizeStepThread(*th);
-                    }
-                } else {
-                    //try to span the node
-                    if(NextStepCanAcceptSpannedNode(node, cpuGainForThisStep)) {
+                //try to span the node (something is wrong, worst than doing nothing)
+//                if(NextStepCanAcceptSpannedNode(node, cpuGainForThisStep)) {
+//                    listOfNodes.removeAll(node);
+//                    nbThreads--;
+//                    OptimizeStepThread *th = new OptimizeStepThread();
+//                    th->listOfNodes << node;
+//                    tmpStep.listOfThreads << th;
+//                    node->maxRenderOrder = step+1;
+//                    ClearThreads();
+//                    foreach(OptimizeStepThread *th, tmpStep.listOfThreads) {
+//                        listOfThreads << new OptimizeStepThread(*th);
+//                    }
+//                } else {
+                    //does the next step accept this node ?
+                    if(NextStepCanAcceptPostponedNode(node, cpuGainForThisStep)) {
                         listOfNodes.removeAll(node);
-                        nbThreads--;
-                        OptimizeStepThread *th = new OptimizeStepThread();
-                        th->listOfNodes << node;
-                        tmpStep.listOfThreads << th;
-                        node->maxRenderOrder = step+1;
                         ClearThreads();
                         foreach(OptimizeStepThread *th, tmpStep.listOfThreads) {
                             listOfThreads << new OptimizeStepThread(*th);
                         }
-                    }
+//                    }
                 }
             }
         }
@@ -192,7 +202,7 @@ bool OptimizerStep::NextStepCanAcceptPostponedNode(RendererNode *node, long cpuG
     return false;
 }
 
-bool OptimizerStep::GetNode(int thread, RendererNode **node)
+bool OptimizerStep::GetMergedNode(int thread, RendererNode **node)
 {
     if(listOfThreads.size()<=thread) {
         return false;
@@ -200,6 +210,15 @@ bool OptimizerStep::GetNode(int thread, RendererNode **node)
 
     OptimizeStepThread *th = listOfThreads.at(thread);
     return th->GetMergedNode( node );
+}
+
+QList<RendererNode*> OptimizerStep::GetListOfNodes()
+{
+   QList<RendererNode*>newLst;
+   foreach(RendererNode *node, listOfNodes) {
+       newLst << new RendererNode(*node);
+   }
+   return newLst;
 }
 
 bool OptimizerStep::CompareNodeSpeed(RendererNode *n1, RendererNode *n2)
@@ -210,4 +229,21 @@ bool OptimizerStep::CompareNodeSpeed(RendererNode *n1, RendererNode *n2)
 bool OptimizerStep::CompareThreadSpeed(OptimizeStepThread *t1, OptimizeStepThread *t2)
 {
     return t1->cpuTime < t2->cpuTime;
+}
+
+void OptimizerStep::AddToModel( QStandardItemModel *model )
+{
+    int col=0;
+    int row=model->rowCount();
+    foreach( OptimizeStepThread *th, listOfThreads ) {
+        th->AddToModel(model, row, col);
+        col++;
+    }
+}
+
+void OptimizerStep::UpdateView( QStandardItemModel *model )
+{
+    foreach( OptimizeStepThread *th, listOfThreads ) {
+        th->UpdateView(model);
+    }
 }

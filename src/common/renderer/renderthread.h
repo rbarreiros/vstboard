@@ -2,9 +2,9 @@
 #define RENDERTHREAD_H
 
 #include "precomp.h"
-#include "renderernode.h"
 
 class Renderer;
+class RendererNode;
 class RenderThread : public QThread
 {
     Q_OBJECT
@@ -12,10 +12,14 @@ class RenderThread : public QThread
 public:
     RenderThread(Renderer *renderer, const QString &name);
     ~RenderThread();
-    void ResetSteps();
+
     void run();
+    void SetListOfSteps( const QMap<int, RendererNode* > &lst );
+    void StartRenderStep( int s );
+    QList<RendererNode*> GetListOfNodes();
 
 protected:
+    void ResetSteps();
     void Stop();
     void RenderStep(int step);
 
@@ -28,7 +32,7 @@ protected:
     bool stop;
     int lastStepForRendering;
 
-friend class Renderer;
+//friend class Renderer;
 };
 
 #endif // RENDERTHREAD_H

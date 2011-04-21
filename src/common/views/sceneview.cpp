@@ -582,9 +582,9 @@ void SceneView::ConnectPins(ConnectionInfo pinOut,ConnectionInfo pinIn)
     QSharedPointer<Connectables::Object> cntPtr = objFactory->GetObjectFromId(parentOut.data(UserRoles::value).toInt());
 
     if(pinOut.direction==PinDirection::Output)
-        static_cast<Connectables::Container*>(cntPtr.data())->AddCable(pinOut,pinIn);
+        static_cast<Connectables::Container*>(cntPtr.data())->UserAddCable(pinOut,pinIn);
     else
-        static_cast<Connectables::Container*>(cntPtr.data())->AddCable(pinIn,pinOut);
+        static_cast<Connectables::Container*>(cntPtr.data())->UserAddCable(pinIn,pinOut);
 }
 
 void SceneView::RemoveCablesFromPin(ConnectionInfo pin)
@@ -593,7 +593,7 @@ void SceneView::RemoveCablesFromPin(ConnectionInfo pin)
     QModelIndex parent = ix.parent().parent().parent();
     if(pin.bridge) parent = parent.parent();
     QSharedPointer<Connectables::Object> cntPtr = objFactory->GetObjectFromId(parent.data(UserRoles::value).toInt());
-    static_cast<Connectables::Container*>(cntPtr.data())->RemoveCableFromPin(pin);
+    static_cast<Connectables::Container*>(cntPtr.data())->UserRemoveCableFromPin(pin);
 }
 
 void SceneView::ToggleHostView(bool show)
