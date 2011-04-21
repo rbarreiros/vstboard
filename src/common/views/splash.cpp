@@ -18,12 +18,8 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#include "precomp.h"
-
 #include "splash.h"
 #include "ui_splash.h"
-
-#include "../_version.h"
 
 Splash::Splash(QWidget *parent) :
     QDialog(parent),
