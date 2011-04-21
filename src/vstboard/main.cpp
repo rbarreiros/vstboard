@@ -25,7 +25,6 @@
 
 #include "mainhosthost.h"
 #include "mainwindowhost.h"
-#include "renderer/pathsolver.h"
 #include "connectables/objectinfo.h"
 
 #ifndef QT_NO_DEBUG
@@ -90,7 +89,6 @@ int main(int argc, char *argv[])
     qRegisterMetaType<ConnectionInfo>("ConnectionInfo");
     qRegisterMetaType<ObjectInfo>("ObjectInfo");
     qRegisterMetaType<int>("ObjType::Enum");
-    qRegisterMetaType<orderedNodes>("orderedNodes");
     qRegisterMetaType<QVariant>("QVariant");
 
     qRegisterMetaTypeStreamOperators<ObjectInfo>("ObjectInfo");
