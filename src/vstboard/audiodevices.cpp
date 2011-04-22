@@ -22,6 +22,7 @@
 #include "globals.h"
 #include "connectables/objectinfo.h"
 #include "mainhost.h"
+#include "pa_asio.h"
 
 /*!
   \class AudioDevices
@@ -233,4 +234,34 @@ void AudioDevices::OnToggleDeviceInUse(const ObjectInfo &objInfo, bool opened)
     }
 }
 
+void AudioDevices::ConfigDevice(const QModelIndex &dev)
+{
+    if(!dev.data(UserRoles::objInfo).isValid())
+        return;
 
+    ObjectInfo info = dev.data(UserRoles::objInfo).value<ObjectInfo>();
+    if(info.api == "ASIO") {
+        PaError err;
+#if WIN32
+        err = PaAsio_ShowControlPanel( info.id, (void*)myHost->mainWindow );
+#endif
+#ifdef __APPLE__
+        err = PaAsio_ShowControlPanel( info.id, (void*)0 );
+#endif
+
+        if( err != paNoError ) {
+            QMessageBox msg(QMessageBox::Warning,
+                            tr("Error"),
+                            Pa_GetErrorText( err ),
+                            QMessageBox::Ok);
+            msg.exec();
+        }
+        return;
+    }
+
+    QMessageBox msg(QMessageBox::Information,
+                    tr("No config"),
+                    tr("No config dialog for this device"),
+                    QMessageBox::Ok);
+    msg.exec();
+}

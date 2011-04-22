@@ -186,7 +186,12 @@ void AudioDevice::SetSampleRate(float rate)
 bool AudioDevice::FindDeviceByName(ObjectInfo &objInfo, PaDeviceInfo *devInfo)
 {
     int cptDuplicateNames=0;
-    int canBe=-1;
+
+    int foundSameName=-1;
+    int foundSameNameId=-1;
+    int foundSameNamePins=-1;
+    int foundSameNamePinsId=-1;
+
     int deviceNumber=-1;
 
     for(int i=0;i<Pa_GetDeviceCount();i++) {
@@ -195,37 +200,42 @@ bool AudioDevice::FindDeviceByName(ObjectInfo &objInfo, PaDeviceInfo *devInfo)
         //remove " x64" from device name so we can share files with 32bit version
         devName.remove(QRegExp("( )?x64"));
 
-        if(devName == objInfo.name
-           && info->maxInputChannels == objInfo.inputs
-           && info->maxOutputChannels == objInfo.outputs) {
-            //can be this one, but the interface number can change form a comp to another
-            if(cptDuplicateNames==0)
-                canBe=i;
+        if(devName == objInfo.name) {
 
-            //we found the same number and the same name
-            if(objInfo.duplicateNamesCounter == cptDuplicateNames) {
-                if(devInfo)
-                    *devInfo = *info;
-                deviceNumber = i;
-                break;
+            if(info->maxInputChannels == objInfo.inputs
+            && info->maxOutputChannels == objInfo.outputs) {
+                if(objInfo.duplicateNamesCounter == cptDuplicateNames) {
+                    foundSameNamePinsId=i;
+                } else {
+                    foundSameNamePins=i;
+                }
+            } else {
+                if(objInfo.duplicateNamesCounter == cptDuplicateNames) {
+                    foundSameNamePinsId=i;
+                } else {
+                    foundSameName = i;
+                }
             }
+
             cptDuplicateNames++;
         }
     }
 
-    //didn't found an exact match
-    if(deviceNumber==-1) {
-        //but we found a device with the same name
-        if(canBe!=-1) {
-            deviceNumber=canBe;
-            if(devInfo)
-                *devInfo = *Pa_GetDeviceInfo(deviceNumber);
-        } else {
-            debug("AudioDevice::FindDeviceByName device not found")
-            return false;
-        }
+    if(foundSameNamePinsId)
+        deviceNumber = foundSameNamePinsId;
+    else if(foundSameNameId)
+        deviceNumber = foundSameNameId;
+    else if(foundSameNamePins)
+        deviceNumber = foundSameNamePins;
+    else if(foundSameName)
+        deviceNumber = foundSameName;
+    else {
+        debug("AudioDevice::FindDeviceByName device not found")
+        return false;
     }
 
+    if(devInfo)
+        *devInfo = *Pa_GetDeviceInfo(deviceNumber);
     objInfo.id = deviceNumber;
     return true;
 }

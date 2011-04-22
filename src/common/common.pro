@@ -106,7 +106,8 @@ SOURCES += \
     renderer/optimizer.cpp \
     renderer/optimizestepthread.cpp \
     renderer/renderernode.cpp \
-    renderer/node.cpp
+    renderer/node.cpp \
+    views/listaudiodevicesview.cpp
 
 HEADERS  += \
     globals.h \
@@ -182,7 +183,8 @@ HEADERS  += \
     renderer/optimizer.h \
     renderer/optimizestepthread.h \
     renderer/renderernode.h \
-    renderer/node.h
+    renderer/node.h \
+    views/listaudiodevicesview.h
 
 FORMS += \
     views/configdialog.ui \

@@ -59,9 +59,10 @@ private:
     /// pointer to the MainHost
     MainHost *myHost;
 
+
 public slots:
     void OnToggleDeviceInUse(const ObjectInfo &objInfo, bool opened);
-
+    void ConfigDevice(const QModelIndex &dev);
 };
 
 #endif // AUDIODEVICES_H
