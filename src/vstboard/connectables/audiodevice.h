@@ -44,7 +44,7 @@ namespace Connectables {
     {
         Q_OBJECT
     public:
-        AudioDevice(MainHostHost *myHost,const ObjectInfo &info, QObject *parent=0);
+        AudioDevice(PaDeviceIndex devId, PaDeviceInfo &devInfo, MainHostHost *myHost,const ObjectInfo &info, QObject *parent=0);
         ~AudioDevice();
 
         bool Open();
@@ -53,11 +53,13 @@ namespace Connectables {
         bool SetObjectInput(AudioDeviceIn *obj);
         bool SetObjectOutput(AudioDeviceOut *obj);
         void SetSleep(bool sleeping);
-        static bool FindDeviceByName(ObjectInfo &objInfo, PaDeviceInfo *devInfo=0);
 
-        /// global audio devices mutex
-        static QMutex listDevMutex;
+        bool DeviceToRingBuffers( const void *inputBuffer, unsigned long framesPerBuffer);
+        void RingBuffersToPins();
+        void PinsToRingBuffers();
+        bool RingBuffersToDevice( void *outputBuffer, unsigned long framesPerBuffer);
 
+        QString errorMessage;
     protected:
 
         static int paCallback( const void *inputBuffer, void *outputBuffer,
@@ -88,6 +90,9 @@ namespace Connectables {
         /// pointer to PortAudio stream
         PaStream *stream;
 
+        /// PortAudio device Id
+        PaDeviceIndex devId;
+
         /// PortAudio device informations
         PaDeviceInfo devInfo;
 
@@ -103,8 +108,11 @@ namespace Connectables {
         /// true if the device is closed
         bool closed;
 
-        /// mutex for this device
-        QMutex devicesMutex;
+        /// mutex for input and output device
+        QMutex mutexDevicesInOut;
+
+        /// global audio devices mutex
+        static QMutex mutexCountInputDevicesReady;
 
         /// windows mme stream options
         PaWinMmeStreamInfo wmmeStreamInfo;
@@ -128,7 +136,7 @@ namespace Connectables {
         static int countDevicesReady;
 
         /// check if this device has been counted in the list of ready devices
-        bool bufferReady;
+        bool inputBufferReady;
 
     signals:
         /*!

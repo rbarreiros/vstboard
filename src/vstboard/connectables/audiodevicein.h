@@ -24,6 +24,7 @@
 #include "precomp.h"
 #include "connectables/object.h"
 #include "connectables/objectinfo.h"
+#include "circularbuffer.h"
 
 class AudioBuffer;
 
@@ -36,17 +37,18 @@ namespace Connectables {
     public:
         AudioDeviceIn(MainHost *myHost,int index, const ObjectInfo &info);
         ~AudioDeviceIn();
-
         bool Open();
         bool Close();
         void Render();
         Pin* CreatePin(const ConnectionInfo &info);
+        void SetParentDevice( AudioDevice *device );
+        void SetBufferFromRingBuffer(QList<CircularBuffer*>listCircularBuffers);
 
     protected:
-        /// shared pointer to the linked AudioDevice
-        QSharedPointer<AudioDevice>parentDevice;
+        /// pointer to the linked AudioDevice
+        AudioDevice *parentDevice;
 
-    friend class AudioDevice;
+//    friend class AudioDevice;
     };
 }
 

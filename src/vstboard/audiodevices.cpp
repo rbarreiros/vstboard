@@ -21,7 +21,7 @@
 #include "audiodevices.h"
 #include "globals.h"
 #include "connectables/objectinfo.h"
-#include "mainhost.h"
+#include "mainhosthost.h"
 
 /*!
   \class AudioDevices
@@ -31,7 +31,7 @@
 /*!
   \param myHost pointer to the MainHost
   */
-AudioDevices::AudioDevices(MainHost *myHost) :
+AudioDevices::AudioDevices(MainHostHost *myHost) :
         QObject(myHost),
         model(0),
         countActiveDevices(0),
@@ -45,12 +45,13 @@ AudioDevices::AudioDevices(MainHost *myHost) :
   */
 AudioDevices::~AudioDevices()
 {
-    foreach(QSharedPointer<Connectables::AudioDevice>ad, listAudioDevices) {
+    mutexDevices.lock();
+    foreach(Connectables::AudioDevice *ad, listAudioDevices) {
         ad->SetSleep(true);
     }
+    mutexDevices.unlock();
 
     if(model) {
-//        debug("AudioDevices::~AudioDevices pa_terminate")
         PaError err=Pa_Terminate();
         if(err!=paNoError) {
             debug("AudioDevices::~AudioDevices Pa_Terminate %s",Pa_GetErrorText( err ))
@@ -58,10 +59,11 @@ AudioDevices::~AudioDevices()
         model->deleteLater();
     }
 
-    foreach(QSharedPointer<Connectables::AudioDevice>dev, listAudioDevices)
+    mutexDevices.lock();
+    foreach(Connectables::AudioDevice *dev, listAudioDevices)
         dev->DeleteIfUnused();
-
     listAudioDevices.clear();
+    mutexDevices.unlock();
 }
 
 /*!
@@ -70,12 +72,13 @@ AudioDevices::~AudioDevices()
   */
 ListAudioInterfacesModel * AudioDevices::GetModel()
 {
-    foreach(QSharedPointer<Connectables::AudioDevice>ad, listAudioDevices) {
+    mutexDevices.lock();
+    foreach(Connectables::AudioDevice *ad, listAudioDevices) {
         ad->SetSleep(true);
     }
+    mutexDevices.unlock();
 
     if(model) {
-//        debug("AudioDevices::GetModel pa_terminate")
         PaError err=Pa_Terminate();
         if(err!=paNoError) {
             debug("AudioDevices::GetModel Pa_Terminate %s",Pa_GetErrorText( err ))
@@ -94,19 +97,18 @@ ListAudioInterfacesModel * AudioDevices::GetModel()
     }
     BuildModel();
 
-//    Connectables::AudioDevice::listDevMutex.lock();
-    foreach(QSharedPointer<Connectables::AudioDevice>ad, listAudioDevices) {
+    mutexDevices.lock();
+    foreach(Connectables::AudioDevice *ad, listAudioDevices) {
         ad->SetSleep(false);
     }
-//    Connectables::AudioDevice::listDevMutex.unlock();
+    mutexDevices.unlock();
 
     foreach(QSharedPointer<Connectables::Object>obj, myHost->objFactory->GetListObjects()) {
         if(obj.isNull())
             continue;
 
         if(obj->info().objType == ObjType::AudioInterfaceIn || obj->info().objType == ObjType::AudioInterfaceOut) {
-//            if(!obj->errorMessage.isEmpty())
-                obj->Open();
+            obj->Open();
             obj->UpdateModelNode();
         }
     }
@@ -233,4 +235,101 @@ void AudioDevices::OnToggleDeviceInUse(const ObjectInfo &objInfo, bool opened)
     }
 }
 
+Connectables::AudioDevice * AudioDevices::AddDevice(const ObjectInfo &objInfo, QString *errMsg)
+{
+    PaDeviceInfo PAinfo;
+    int devId = FindPortAudioDevice(objInfo, PAinfo);
+    if(devId==-1) {
+        errMsg->append(tr("Device not found"));
+        return 0;
+    }
 
+
+
+    mutexDevices.lock();
+    Connectables::AudioDevice *dev = listAudioDevices.value(devId,0);
+    mutexDevices.unlock();
+
+    if(!dev) {
+        dev = new Connectables::AudioDevice(devId, PAinfo, myHost,objInfo);
+        if(!dev->Open()) {
+            if(errMsg)
+                errMsg->append(dev->errorMessage);
+            delete dev;
+            return 0;
+        }
+        mutexDevices.lock();
+        listAudioDevices.insert(devId, dev);
+        mutexDevices.unlock();
+    }
+    return dev;
+}
+
+void AudioDevices::RemoveDevice(PaDeviceIndex devId)
+{
+    mutexDevices.lock();
+    Connectables::AudioDevice *dev = listAudioDevices.take(devId);
+    mutexDevices.unlock();
+    if(dev) {
+        delete dev;
+    }
+}
+
+void AudioDevices::PutPinsBuffersInRingBuffers()
+{
+    mutexDevices.lock();
+    foreach(Connectables::AudioDevice *dev, listAudioDevices) {
+        dev->PinsToRingBuffers();
+    }
+    mutexDevices.unlock();
+}
+
+/*!
+  Try to find a device in the list returned by PortAudio
+  \param[in] objInfo the ObjectInfo we're looking for
+  \param[out] devInfo the PaDeviceInfo of the object found
+  \return true if found
+  */
+PaDeviceIndex AudioDevices::FindPortAudioDevice(const ObjectInfo &objInfo, PaDeviceInfo &devInfo)
+{
+    int cptDuplicateNames=0;
+    int canBe=-1;
+    PaDeviceIndex deviceNumber=-1;
+
+    for(int i=0;i<Pa_GetDeviceCount();i++) {
+        const PaDeviceInfo *info = Pa_GetDeviceInfo(i);
+        QString devName = QString::fromStdString(info->name);
+        //remove " x64" from device name so we can share files with 32bit version
+        devName.remove(QRegExp("( )?x64"));
+
+        if(devName == objInfo.name
+           && info->maxInputChannels == objInfo.inputs
+           && info->maxOutputChannels == objInfo.outputs) {
+            //can be this one, but the interface number can change form a comp to another
+            if(cptDuplicateNames==0)
+                canBe=i;
+
+            //we found the same number and the same name
+            if(objInfo.duplicateNamesCounter == cptDuplicateNames) {
+                devInfo = *info;
+                deviceNumber = i;
+                break;
+            }
+            cptDuplicateNames++;
+        }
+    }
+
+    //didn't found an exact match
+    if(deviceNumber==-1) {
+        //but we found a device with the same name
+        if(canBe!=-1) {
+            deviceNumber=canBe;
+            devInfo = *Pa_GetDeviceInfo(deviceNumber);
+        } else {
+            debug("AudioDevice::FindDeviceByName device not found")
+            return -1;
+        }
+    }
+
+    return deviceNumber;
+}

@@ -48,54 +48,41 @@ AudioDeviceOut::~AudioDeviceOut()
     Close();
 }
 
+void AudioDeviceOut::SetParentDevice( AudioDevice *device )
+{
+    objMutex.lock();
+    parentDevice=device;
+    objMutex.unlock();
+}
+
 bool AudioDeviceOut::Close()
 {
+    objMutex.lock();
     if(parentDevice) {
         parentDevice->SetObjectOutput(0);
-        parentDevice.clear();
+        parentDevice=0;
     }
+    objMutex.unlock();
     return true;
 }
 
 bool AudioDeviceOut::Open()
 {
-    errorMessage="";
-
-    //can we find this device on this computer ?
-    if(!AudioDevice::FindDeviceByName(objInfo)) {
-        errorMessage = tr("Device not found");
-        return true;
-    }
+    QMutexLocker l(&objMutex);
 
     closed=false;
 
     //create the audiodevice if needed
     if(!parentDevice) {
-        QMutexLocker l(&AudioDevice::listDevMutex);
         MainHostHost *host=static_cast<MainHostHost*>(myHost);
-
-        if(!host->audioDevices->listAudioDevices.contains(objInfo.id)) {
-            AudioDevice *dev = new AudioDevice(host,objInfo);
-            parentDevice = QSharedPointer<AudioDevice>(dev);
-            if(!parentDevice->Open()) {
-                parentDevice.clear();
-                errorMessage=tr("Error while opening the interface");
-                return true;
-            }
-            host->audioDevices->listAudioDevices.insert(objInfo.id, parentDevice);
-        } else {
-            parentDevice = host->audioDevices->listAudioDevices.value(objInfo.id);
-        }
-    }
-
-    if(!parentDevice) {
-        errorMessage=tr("Error : device was deleted");
-        return true;
+        parentDevice=host->audioDevices->AddDevice(objInfo, &errorMessage);
+        if(!parentDevice)
+            return true;
     }
 
     //if no output channels
     if(parentDevice->devInfo.maxOutputChannels==0) {
-        parentDevice.clear();
+        parentDevice=0;
         //should be deleted : return false
         return false;
     }
@@ -104,11 +91,31 @@ bool AudioDeviceOut::Open()
 
     //device already has a child
     if(!parentDevice->SetObjectOutput(this)) {
-        parentDevice.clear();
+        parentDevice=0;
         errorMessage=tr("Already in use");
         return true;
     }
 
     Object::Open();
     return true;
+}
+
+void AudioDeviceOut::SetRingBufferFromPins(QList<CircularBuffer*>listCircularBuffers) {
+    if(doublePrecision) {
+        int cpt=0;
+        foreach(CircularBuffer *buf, listCircularBuffers) {
+            AudioBufferD *pinBuf = listAudioPinIn->GetBufferD(cpt);
+            cpt++;
+            buf->Put( pinBuf->ConsumeStack(), pinBuf->GetSize() );
+            pinBuf->ResetStackCounter();
+        }
+    } else {
+        int cpt=0;
+        foreach(CircularBuffer *buf, listCircularBuffers) {
+            AudioBuffer *pinBuf = listAudioPinIn->GetBuffer(cpt);
+            cpt++;
+            buf->Put( pinBuf->ConsumeStack(), pinBuf->GetSize() );
+            pinBuf->ResetStackCounter();
+        }
+    }
 }
