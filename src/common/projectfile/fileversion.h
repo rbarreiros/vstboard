@@ -21,9 +21,10 @@
 #ifndef FILEVERSION_H
 #define FILEVERSION_H
 
-#define PROJECT_AND_SETUP_FILE_VERSION 12
+#define PROJECT_AND_SETUP_FILE_VERSION 13
 
 // v11
 // v12 colors can be saved in the setup file
+// v13 store portaudio api id instead of it's name
 
 #endif // FILEVERSION_H

@@ -29,11 +29,8 @@
 #include "portaudio.h"
 #include "pa_win_wmme.h"
 #include "pa_win_ds.h"
+#include "pa_win_wasapi.h"
 #include "../circularbuffer.h"
-
-#ifndef bzero
-#define bzero(memArea, len)  memset((memArea), 0, (len))
-#endif
 
 class MainHostHost;
 namespace Connectables {
@@ -111,6 +108,9 @@ namespace Connectables {
 
         /// windows directsound stream options
         PaWinDirectSoundStreamInfo directSoundStreamInfo;
+
+        /// windows wasapi stream options
+        PaWasapiStreamInfo wasapiStreamInfo;
 
         /// list of input ring buffers
         QList<CircularBuffer*>listCircularBuffersIn;

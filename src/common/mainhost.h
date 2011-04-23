@@ -89,7 +89,7 @@ public:
     vst::CVSTHost *vstHost;
 #endif
 
-    quint32 currentFileVersion;
+    static quint32 currentFileVersion;
     bool doublePrecision;
 
     void SetSetting(QString name, QVariant value);

@@ -74,10 +74,10 @@ bool ProjectFile::ToStream(MainHost *myHost,QDataStream &out)
 {
     out.setVersion(QDataStream::Qt_4_7);
 
-    myHost->currentFileVersion=PROJECT_AND_SETUP_FILE_VERSION;
+    MainHost::currentFileVersion=PROJECT_AND_SETUP_FILE_VERSION;
 
     out << (quint32)PROJECT_FILE_KEY;
-    out << myHost->currentFileVersion;
+    out << MainHost::currentFileVersion;
 
     myHost->EnableSolverUpdate(false);
 
@@ -127,12 +127,12 @@ bool ProjectFile::FromStream(MainHost *myHost,QDataStream &in)
         return false;
     }
 
-    in >> myHost->currentFileVersion;
-    if(myHost->currentFileVersion < 11) {
+    in >> MainHost::currentFileVersion;
+    if(MainHost::currentFileVersion < 11) {
         QMessageBox msgBox;
 //        msgBox.setWindowTitle(filePath);
         msgBox.setText( tr("Wrong file version.") );
-        msgBox.setInformativeText( tr("Project file format v%1 can't be converted to the current file format v%2").arg(myHost->currentFileVersion).arg(PROJECT_AND_SETUP_FILE_VERSION) );
+        msgBox.setInformativeText( tr("Project file format v%1 can't be converted to the current file format v%2").arg(MainHost::currentFileVersion).arg(PROJECT_AND_SETUP_FILE_VERSION) );
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.exec();
         return false;

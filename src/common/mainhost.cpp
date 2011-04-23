@@ -28,6 +28,7 @@
 
 #include "projectfile/fileversion.h"
 
+quint32 MainHost::currentFileVersion=PROJECT_AND_SETUP_FILE_VERSION;
 
 MainHost::MainHost(QObject *parent, QString settingsGroup) :
     QObject(parent),
@@ -35,7 +36,6 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
     filePass(0),
     objFactory(0),
     mainWindow(0),
-    currentFileVersion(PROJECT_AND_SETUP_FILE_VERSION),
     solverNeedAnUpdate(false),
     solverUpdateEnabled(true),
     mutexListCables(new QMutex(QMutex::Recursive)),

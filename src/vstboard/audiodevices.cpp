@@ -23,6 +23,7 @@
 #include "connectables/objectinfo.h"
 #include "mainhost.h"
 #include "pa_asio.h"
+#include "views/mmeconfigdialog.h"
 
 /*!
   \class AudioDevices
@@ -134,66 +135,71 @@ void AudioDevices::BuildModel()
 
     //APIs
     for (int i = 0; i < Pa_GetHostApiCount(); ++i) {
-        QStandardItem *api = new QStandardItem(Pa_GetHostApiInfo(i)->name);
-        api->setDragEnabled(false);
-        api->setSelectable(false);
-        parentItem->appendRow(api);
-        if(api->text() == "ASIO")
-            AsioIndex = api->index();
-    }
+        const PaHostApiInfo *apiInfo = Pa_GetHostApiInfo(i);
+        QStandardItem *apiItem = new QStandardItem(apiInfo->name);
+        apiItem->setData( (quint8)apiInfo->type, UserRoles::value );
+        apiItem->setDragEnabled(false);
+        apiItem->setSelectable(false);
+        parentItem->appendRow(apiItem);
+        if(apiInfo->type == paASIO)
+            AsioIndex = apiItem->index();
 
-    //devices
-    QString lastName;
-    int cptDuplicateNames=0;
+        //Devices
 
-    for (int i = 0; i < Pa_GetDeviceCount(); ++i) {
-        QList<QStandardItem *>  items;
-        const PaDeviceInfo *devInfo = Pa_GetDeviceInfo(i);
+        //an api can contain multiple devices with the same name
+        QString lastName;
+        int cptDuplicateNames=0;
 
-        QString devName(devInfo->name);
+        for (int j=0; j<apiInfo->deviceCount; j++) {
+            PaDeviceIndex devIndex = Pa_HostApiDeviceIndexToDeviceIndex(i, j);
+            const PaDeviceInfo *devInfo = Pa_GetDeviceInfo( devIndex );
 
-        //remove " x64" from device name so we can share files with 32bit version
-        devName.remove(QRegExp("( )?x64"));
+            QString devName(devInfo->name);
+            //remove " x64" from device name so we can share files with 32bit version
+            devName.remove(QRegExp("( )?x64"));
 
-        if(lastName == devName) {
-            cptDuplicateNames++;
-        } else {
-            cptDuplicateNames=0;
+            //count duplicate names
+            if(lastName == devName) {
+                cptDuplicateNames++;
+            } else {
+                cptDuplicateNames=0;
+                lastName = devName;
+            }
+
+            ObjectInfo obj;
+            obj.nodeType = NodeType::object;
+            obj.objType = ObjType::AudioInterface;
+            obj.id = devIndex;
+            obj.name = devName;
+            obj.api = apiInfo->type;
+            obj.duplicateNamesCounter = cptDuplicateNames;
+            obj.inputs = devInfo->maxInputChannels;
+            obj.outputs = devInfo->maxOutputChannels;
+
+            QList<QStandardItem *> listItems;
+
+            QStandardItem *devItem = new QStandardItem( devName);
+            devItem->setEditable(false);
+            devItem->setData(QVariant::fromValue(obj), UserRoles::objInfo);
+            devItem->setDragEnabled(true);
+            listItems << devItem;
+
+            QStandardItem *inputItem = new QStandardItem( QString::number(devInfo->maxInputChannels));
+            inputItem->setEditable(false);
+            listItems << inputItem;
+
+            QStandardItem *outputItem = new QStandardItem( QString::number(devInfo->maxOutputChannels));
+            outputItem->setEditable(false);
+            listItems << outputItem;
+
+            QStandardItem *inUseItem = new QStandardItem();
+            inUseItem->setCheckable(true);
+            inUseItem->setCheckable(false);
+            inUseItem->setEditable(false);
+            listItems << inUseItem;
+
+            apiItem->appendRow( listItems );
         }
-        lastName = devName;
-
-        ObjectInfo obj;
-        obj.nodeType = NodeType::object;
-        obj.objType = ObjType::AudioInterface;
-        obj.id = i;
-        obj.name = devName;
-        obj.api = QString::fromStdString( Pa_GetHostApiInfo(devInfo->hostApi)->name );
-        obj.duplicateNamesCounter = cptDuplicateNames;
-        obj.inputs = devInfo->maxInputChannels;
-        obj.outputs = devInfo->maxOutputChannels;
-
-        QStandardItem *dev = new QStandardItem( devName);
-        dev->setEditable(false);
-        dev->setData(QVariant::fromValue(obj), UserRoles::objInfo);
-        dev->setDragEnabled(true);
-        items << dev;
-
-        QStandardItem *ins = new QStandardItem( QString::number(devInfo->maxInputChannels));
-        ins->setEditable(false);
-        items << ins;
-
-        QStandardItem *outs = new QStandardItem( QString::number(devInfo->maxOutputChannels));
-        outs->setEditable(false);
-        items << outs;
-
-        QStandardItem *inUse = new QStandardItem();
-        inUse->setCheckable(true);
-        inUse->setCheckable(false);
-        inUse->setEditable(false);
-        items << inUse;
-
-        QStandardItem *parent = model->item(devInfo->hostApi,0);
-        parent->appendRow(items);
     }
 }
 
@@ -204,33 +210,54 @@ void AudioDevices::BuildModel()
   */
 void AudioDevices::OnToggleDeviceInUse(const ObjectInfo &objInfo, bool opened)
 {
-    for(int i=0; i<model->invisibleRootItem()->rowCount();i++) {
-        QStandardItem *itemApi = model->item(i,0);
-        if(itemApi->data(Qt::DisplayRole).toString()==objInfo.api) {
-            for(int j=0; j<itemApi->rowCount(); j++) {
-                QStandardItem *itemDev = itemApi->child(j,0);
-                ObjectInfo info = itemDev->data(UserRoles::objInfo).value<ObjectInfo>();
-                if(info.id == objInfo.id) {
-                    if(opened) {
-                        itemApi->child(j,3)->setCheckState(Qt::Checked);
-                        countActiveDevices++;
-                    } else {
-                        itemApi->child(j,3)->setCheckState(Qt::Unchecked);
-                        countActiveDevices--;
-                    }
 
-                    //the renderer is normally launched when all the audio devices are ready,
-                    //if there is no audio device we have to run a timer
-                    if(countActiveDevices==1) {
-                        fakeRenderTimer.stop();
-                    }
-                    if(countActiveDevices==0) {
-                        fakeRenderTimer.start(FAKE_RENDER_TIMER_MS);
-                    }
-                    return;
-                }
-            }
-        }
+    //find API item
+    QStandardItem *apiItem = 0;
+    int nbApi = model->invisibleRootItem()->rowCount();
+    int apiCount = 0;
+    while(!apiItem && apiCount<nbApi) {
+        if(model->item(apiCount,0)->data(UserRoles::value).toInt() == objInfo.api )
+            apiItem = model->item(apiCount,0);
+        apiCount++;
+    }
+
+    if(!apiItem) {
+        debug2(<< "AudioDevices::OnToggleDeviceInUse API not found " << objInfo.api << objInfo.name)
+        return;
+    }
+
+    //find device item
+    QStandardItem *devItem = 0;
+    int nbDev = apiItem->rowCount();
+    int devCount = 0;
+    while(!devItem && devCount<nbDev) {
+        ObjectInfo info = apiItem->child(devCount,0)->data(UserRoles::objInfo).value<ObjectInfo>();
+        if(info.id == objInfo.id)
+            devItem = apiItem->child(devCount,0);
+        devCount++;
+    }
+
+    if(!devItem) {
+        debug2(<< "AudioDevices::OnToggleDeviceInUse device not found " << objInfo.api << objInfo.name)
+        return;
+    }
+
+    //change status
+    if(opened) {
+        apiItem->child( devItem->row(), 3)->setCheckState(Qt::Checked);
+        countActiveDevices++;
+    } else {
+        apiItem->child( devItem->row(), 3)->setCheckState(Qt::Unchecked);
+        countActiveDevices--;
+    }
+
+    //the renderer is normally launched when all the audio devices are ready,
+    //if there is no audio device we have to run a timer
+    if(countActiveDevices==1) {
+        fakeRenderTimer.stop();
+    }
+    if(countActiveDevices==0) {
+        fakeRenderTimer.start(FAKE_RENDER_TIMER_MS);
     }
 }
 
@@ -240,7 +267,7 @@ void AudioDevices::ConfigDevice(const QModelIndex &dev)
         return;
 
     ObjectInfo info = dev.data(UserRoles::objInfo).value<ObjectInfo>();
-    if(info.api == "ASIO") {
+    if(info.api == paASIO) {
         PaError err;
 #if WIN32
         err = PaAsio_ShowControlPanel( info.id, (void*)myHost->mainWindow );
@@ -256,6 +283,12 @@ void AudioDevices::ConfigDevice(const QModelIndex &dev)
                             QMessageBox::Ok);
             msg.exec();
         }
+        return;
+    }
+
+    if(info.api == paMME) {
+        MmeConfigDialog dlg( info.name, myHost );
+        dlg.exec();
         return;
     }
 
