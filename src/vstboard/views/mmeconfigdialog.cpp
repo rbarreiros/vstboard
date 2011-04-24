@@ -3,18 +3,17 @@
 #include "mainhost.h"
 #include "pa_win_wmme.h"
 
-MmeConfigDialog::MmeConfigDialog(const QString &deviceName, MainHost *myHost, QWidget *parent) :
+MmeConfigDialog::MmeConfigDialog( MainHost *myHost, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::MmeConfigDialog),
-    myHost(myHost),
-    deviceName(deviceName)
+    myHost(myHost)
 {
     ui->setupUi(this);
-    setWindowTitle(deviceName);
+    setWindowTitle(tr("MME Config"));
 
-    unsigned int flags = myHost->GetSetting("devices/flag_" + deviceName, MME_DFAULT_FLAGS).toUInt();
-    unsigned int framesPerBuffer = myHost->GetSetting("devices/bufferSize_" + deviceName, MME_DEFAULT_BUFFER_SIZE).toUInt();
-    unsigned int bufferCount = myHost->GetSetting("devices/bufferCount_" + deviceName, MME_DEFAULT_BUFFER_COUNT).toUInt();
+    unsigned int flags = myHost->GetSetting("api/wmme_flags", MME_DFAULT_FLAGS).toUInt();
+    unsigned int framesPerBuffer = myHost->GetSetting("api/wmme_bufferSize", MME_DEFAULT_BUFFER_SIZE).toUInt();
+    unsigned int bufferCount = myHost->GetSetting("api/wmme_bufferCount", MME_DEFAULT_BUFFER_COUNT).toUInt();
 
     ui->UseLowLevelLatencyParameters->setChecked( flags & paWinMmeUseLowLevelLatencyParameters );
     ui->UseMultipleDevices->setChecked( flags & paWinMmeUseMultipleDevices );
@@ -53,9 +52,9 @@ void MmeConfigDialog::accept()
     unsigned int framesPerBuffer = ui->framesPerBuffer->value();
     unsigned int bufferCount = ui->bufferCount->value();
 
-    myHost->SetSetting("devices/flag_" + deviceName, flags);
-    myHost->SetSetting("devices/bufferSize_" + deviceName, framesPerBuffer);
-    myHost->SetSetting("devices/bufferCount_" + deviceName, bufferCount);
+    myHost->SetSetting("api/wmme_flags", flags);
+    myHost->SetSetting("api/wmme_bufferSize", framesPerBuffer);
+    myHost->SetSetting("api/wmme_bufferCount", bufferCount);
 
     QDialog::accept();
 }

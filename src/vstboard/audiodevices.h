@@ -68,8 +68,8 @@ private:
 
 
 public slots:
-    void OnToggleDeviceInUse(PaHostApiIndex apiId, PaDeviceIndex devId, bool inUse);
-    void ConfigDevice(const QModelIndex &dev);
+    void OnToggleDeviceInUse(PaHostApiIndex apiId, PaDeviceIndex devId, bool inUse, PaTime inLatency=0, PaTime outLatency=0, double sampleRate=0);
+    void ConfigDevice(const QModelIndex &index);
 };
 
 #endif // AUDIODEVICES_H

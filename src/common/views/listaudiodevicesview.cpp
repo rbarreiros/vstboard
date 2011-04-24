@@ -18,11 +18,11 @@ ListAudioDevicesView::ListAudioDevicesView(QWidget *parent) :
 
 void ListAudioDevicesView::AudioDevContextMenu(const QPoint &pt)
 {
-    currentDevice = indexAt(pt);
+    currentDevice = indexAt(pt).sibling(0,0);
 
     QList<QAction *> lstActions;
 
-    if(currentDevice.data(UserRoles::objInfo).isValid())
+//    if(currentDevice.data(UserRoles::objInfo).isValid())
         lstActions << audioDevConfig;
 
     lstActions << updateList;

@@ -24,6 +24,7 @@
 #include "mainhosthost.h"
 #include "pa_asio.h"
 #include "views/mmeconfigdialog.h"
+#include "views/wasapiconfigdialog.h"
 
 /*!
   \class AudioDevices
@@ -210,7 +211,7 @@ void AudioDevices::BuildModel()
   \param objInfo object description
   \param opened true if opened, false if closed
   */
-void AudioDevices::OnToggleDeviceInUse(PaHostApiIndex apiId, PaDeviceIndex devId, bool inUse)
+void AudioDevices::OnToggleDeviceInUse(PaHostApiIndex apiId, PaDeviceIndex devId, bool inUse, PaTime inLatency, PaTime outLatency, double sampleRate)
 {
 
     //find API item
@@ -247,9 +248,15 @@ void AudioDevices::OnToggleDeviceInUse(PaHostApiIndex apiId, PaDeviceIndex devId
     //change status
     if(inUse) {
         apiItem->child( devItem->row(), 3)->setCheckState(Qt::Checked);
+
+        int inL = ceil(inLatency*1000);
+        int outL = ceil(outLatency*1000);
+        devItem->setToolTip( QString("Input latency %1ms\nOutput latency %2ms\nSample rate %3Hz")
+                             .arg(inL).arg(outL).arg(sampleRate) );
         countActiveDevices++;
     } else {
         apiItem->child( devItem->row(), 3)->setCheckState(Qt::Unchecked);
+        devItem->setToolTip("");
         countActiveDevices--;
     }
 
@@ -386,40 +393,65 @@ bool AudioDevices::FindPortAudioDevice(ObjectInfo &objInfo, PaDeviceInfo *dInfo)
     return true;
 }
 
-void AudioDevices::ConfigDevice(const QModelIndex &dev)
+void AudioDevices::ConfigDevice(const QModelIndex &index)
 {
-    if(!dev.data(UserRoles::objInfo).isValid())
-        return;
+    PaHostApiTypeId apiIndex;
+    PaDeviceIndex devId=-1;
 
-    ObjectInfo info = dev.data(UserRoles::objInfo).value<ObjectInfo>();
-    if(info.api == paASIO) {
-        PaError err;
-#if WIN32
-        err = PaAsio_ShowControlPanel( info.id, (void*)myHost->mainWindow );
-#endif
-#ifdef __APPLE__
-        err = PaAsio_ShowControlPanel( info.id, (void*)0 );
-#endif
-
-        if( err != paNoError ) {
-            QMessageBox msg(QMessageBox::Warning,
-                            tr("Error"),
-                            Pa_GetErrorText( err ),
-                            QMessageBox::Ok);
-            msg.exec();
-        }
-        return;
+    if(index.data(UserRoles::objInfo).isValid()) {
+        //a device was clicked
+        ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
+        devId = (PaDeviceIndex)info.id;
+        apiIndex = (PaHostApiTypeId)info.api;
     }
 
-    if(info.api == paMME) {
-        MmeConfigDialog dlg( info.name, myHost );
-        dlg.exec();
-        return;
+    if(index.data(UserRoles::value).isValid()) {
+        //an api was clicked
+        apiIndex = (PaHostApiTypeId)index.data(UserRoles::value).toInt();
+    }
+
+    switch(apiIndex) {
+        case paASIO: {
+            if(devId!=-1) {
+                PaError err;
+    #if WIN32
+                err = PaAsio_ShowControlPanel( devId, (void*)myHost->mainWindow );
+    #endif
+    #ifdef __APPLE__
+                err = PaAsio_ShowControlPanel( devId, (void*)0 );
+    #endif
+
+                if( err != paNoError ) {
+                    QMessageBox msg(QMessageBox::Warning,
+                                    tr("Error"),
+                                    Pa_GetErrorText( err ),
+                                    QMessageBox::Ok);
+                    msg.exec();
+                }
+                return;
+            }
+            break;
+        }
+
+        case paMME: {
+            MmeConfigDialog dlg( myHost );
+            dlg.exec();
+            return;
+        }
+
+        case paWASAPI: {
+            WasapiConfigDialog dlg( myHost );
+            dlg.exec();
+            return;
+        }
+
+        default:
+            break;
     }
 
     QMessageBox msg(QMessageBox::Information,
-                    tr("No config"),
-                    tr("No config dialog for this device"),
-                    QMessageBox::Ok);
+        tr("No config"),
+        tr("No config dialog for this device"),
+        QMessageBox::Ok);
     msg.exec();
 }
