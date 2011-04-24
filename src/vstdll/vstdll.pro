@@ -9,6 +9,7 @@ TARGET = "VstBoardPlugin"
 TEMPLATE = lib
 #CONFIG += staticlib
 
+CONFIG += qtwinmigrate-uselib
 include($${_PRO_FILE_PWD_}/../../libs/qtwinmigrate/src/qtwinmigrate.pri)
 
 LIBS += -L$$top_destdir -lcommon
