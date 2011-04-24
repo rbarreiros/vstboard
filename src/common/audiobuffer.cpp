@@ -78,6 +78,7 @@ bool AudioBuffer::SetSize(unsigned long size)
             pBuffer=0;
             return false;
         }
+        ZeroMemory( pBuffer, sizeof(float)*size );
     }
 
     nSize = nAllocatedSize = size;
