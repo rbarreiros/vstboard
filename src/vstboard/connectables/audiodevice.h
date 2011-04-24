@@ -29,11 +29,8 @@
 #include "portaudio.h"
 #include "pa_win_wmme.h"
 #include "pa_win_ds.h"
+#include "pa_win_wasapi.h"
 #include "../circularbuffer.h"
-
-#ifndef bzero
-#define bzero(memArea, len)  memset((memArea), 0, (len))
-#endif
 
 class MainHostHost;
 namespace Connectables {
@@ -44,7 +41,7 @@ namespace Connectables {
     {
         Q_OBJECT
     public:
-        AudioDevice(PaDeviceIndex devId, PaDeviceInfo &devInfo, MainHostHost *myHost,const ObjectInfo &info, QObject *parent=0);
+        AudioDevice(PaDeviceInfo &devInfo, MainHostHost *myHost,const ObjectInfo &info, QObject *parent=0);
         ~AudioDevice();
 
         bool Open();
@@ -90,9 +87,6 @@ namespace Connectables {
         /// pointer to PortAudio stream
         PaStream *stream;
 
-        /// PortAudio device Id
-        PaDeviceIndex devId;
-
         /// PortAudio device informations
         PaDeviceInfo devInfo;
 
@@ -120,6 +114,9 @@ namespace Connectables {
         /// windows directsound stream options
         PaWinDirectSoundStreamInfo directSoundStreamInfo;
 
+        /// windows wasapi stream options
+        PaWasapiStreamInfo wasapiStreamInfo;
+
         /// list of input ring buffers
         QList<CircularBuffer*>listCircularBuffersIn;
 
@@ -141,10 +138,11 @@ namespace Connectables {
     signals:
         /*!
           emitted when the device is opened or closed, used by AudioDevices
-          \param objInfo object description
+          \param apiId api index
+          \param devId device id
           \param inUse true if the device is in use
           */
-        void InUseChanged(const ObjectInfo &objInfo, bool inUse);
+        void InUseChanged(PaHostApiIndex apiId,PaDeviceIndex devId, bool inUse);
 
     public slots:
         void SetSampleRate(float rate=44100.0);

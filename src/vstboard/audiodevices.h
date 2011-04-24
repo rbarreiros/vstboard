@@ -37,7 +37,7 @@ public:
     explicit AudioDevices(MainHostHost *myHost);
     ~AudioDevices();
     ListAudioInterfacesModel * GetModel();
-    Connectables::AudioDevice * AddDevice(const ObjectInfo &objInfo, QString *errMsg=0);
+    Connectables::AudioDevice * AddDevice(ObjectInfo &objInfo, QString *errMsg=0);
     void RemoveDevice(PaDeviceIndex devId);
 
     void PutPinsBuffersInRingBuffers();
@@ -48,7 +48,7 @@ public:
     /// model index of the asio devices, used by the view to expand this branch only
     QPersistentModelIndex AsioIndex;
 
-    static PaDeviceIndex FindPortAudioDevice(const ObjectInfo &objInfo, PaDeviceInfo &devInfo);
+    bool FindPortAudioDevice(ObjectInfo &objInfo, PaDeviceInfo *dInfo);
 private:
     void BuildModel();
 
@@ -66,9 +66,10 @@ private:
 
     QMutex mutexDevices;
 
-public slots:
-    void OnToggleDeviceInUse(const ObjectInfo &objInfo, bool opened);
 
+public slots:
+    void OnToggleDeviceInUse(PaHostApiIndex apiId, PaDeviceIndex devId, bool inUse);
+    void ConfigDevice(const QModelIndex &dev);
 };
 
 #endif // AUDIODEVICES_H

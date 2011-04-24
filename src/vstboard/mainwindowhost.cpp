@@ -50,6 +50,13 @@ MainWindowHost::MainWindowHost(MainHostHost * myHost,QWidget *parent) :
 
     BuildListTools();
 
+    connect(ui->treeAudioInterfaces, SIGNAL(Config(const QModelIndex &)),
+            myHost->audioDevices, SLOT(ConfigDevice(const QModelIndex &)));
+    connect(ui->treeAudioInterfaces, SIGNAL(UpdateList()),
+            this, SLOT(on_actionRefresh_Audio_devices_triggered()));
+
+    ui->treeMidiInterfaces->addAction( new QAction(QIcon(":/img16x16/viewmag+.png"), tr("Refresh list"), ui->treeMidiInterfaces));
+
     myHost->SetSampleRate( ConfigDialog::defaultSampleRate(myHost) );
 }
 
@@ -110,15 +117,25 @@ void MainWindowHost::resetSettings()
     tabifyDockWidget(ui->dockMidiDevices,ui->dockAudioDevices);
 }
 
-void MainWindowHost::on_actionRefresh_Audio_devices_triggered()
+void MainWindowHost::UpdateAudioDevices()
 {
     ui->treeAudioInterfaces->setModel(static_cast<MainHostHost*>(myHost)->audioDevices->GetModel());
     ui->treeAudioInterfaces->expand( static_cast<MainHostHost*>(myHost)->audioDevices->AsioIndex );
 }
 
-void MainWindowHost::on_actionRefresh_Midi_devices_triggered()
+void MainWindowHost::UpdateMidiDevices()
 {
     ui->treeMidiInterfaces->setModel(static_cast<MainHostHost*>(myHost)->midiDevices->GetModel());
+}
+
+void MainWindowHost::on_actionRefresh_Audio_devices_triggered()
+{
+    UpdateAudioDevices();
+}
+
+void MainWindowHost::on_actionRefresh_Midi_devices_triggered()
+{
+    UpdateMidiDevices();
 }
 
 void MainWindowHost::on_actionConfig_triggered()

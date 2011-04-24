@@ -70,10 +70,10 @@ bool SetupFile::ToStream(MainHost *myHost,QDataStream &out)
 {
     out.setVersion(QDataStream::Qt_4_7);
 
-    myHost->currentFileVersion=PROJECT_AND_SETUP_FILE_VERSION;
+    MainHost::currentFileVersion=PROJECT_AND_SETUP_FILE_VERSION;
 
     out << (quint32)SETUP_FILE_KEY;
-    out << myHost->currentFileVersion;
+    out << MainHost::currentFileVersion;
 
     myHost->EnableSolverUpdate(false);
     myHost->hostContainer->SaveProgram();
@@ -115,13 +115,13 @@ bool SetupFile::FromStream(MainHost *myHost,QDataStream &in)
         return false;
     }
 
-    in >> myHost->currentFileVersion;
+    in >> MainHost::currentFileVersion;
 
-    if(myHost->currentFileVersion < 11) {
+    if(MainHost::currentFileVersion < 11) {
         QMessageBox msgBox;
 //        msgBox.setWindowTitle(filePath);
         msgBox.setText( tr("Wrong file version.") );
-        msgBox.setInformativeText( tr("Setup file format v%1 can't be converted to the current file format v%2").arg(myHost->currentFileVersion).arg(PROJECT_AND_SETUP_FILE_VERSION) );
+        msgBox.setInformativeText( tr("Setup file format v%1 can't be converted to the current file format v%2").arg(MainHost::currentFileVersion).arg(PROJECT_AND_SETUP_FILE_VERSION) );
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.exec();
         return false;
@@ -148,7 +148,7 @@ bool SetupFile::FromStream(MainHost *myHost,QDataStream &in)
     myHost->renderer->SetEnabled(true);
     myHost->EnableSolverUpdate(true);
 
-    if(myHost->currentFileVersion >= 12) {
+    if(MainHost::currentFileVersion >= 12) {
         bool colorsInSetupFile;
         in >> colorsInSetupFile;
         myHost->mainWindow->viewConfig.savedInSetupFile=colorsInSetupFile;

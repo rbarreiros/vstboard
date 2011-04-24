@@ -147,7 +147,7 @@ void MidiDevices::BuildModel()
         obj.objType = ObjType::MidiInterface;
         obj.id = i;
         obj.name = devName;
-        obj.api = QString::fromStdString( devInfo->interf );
+        obj.apiName = QString::fromStdString( devInfo->interf );
         obj.duplicateNamesCounter = cptDuplicateNames;
         obj.inputs = devInfo->input;
         obj.outputs = devInfo->output;

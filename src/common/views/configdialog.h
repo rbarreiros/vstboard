@@ -51,7 +51,7 @@ protected:
     MainHost *myHost;
 
 public slots:
-    virtual void accept();
+    void accept();
 
 private slots:
     void on_browseProject_clicked();

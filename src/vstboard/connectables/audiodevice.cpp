@@ -46,13 +46,12 @@ int AudioDevice::countInputDevices=0;
   /param info ObjectInfo describing the device
   /param parent a parent QObject (unused ?)
   */
-AudioDevice::AudioDevice(PaDeviceIndex devId,PaDeviceInfo &devInfo,MainHostHost *myHost,const ObjectInfo &info, QObject *parent) :
+AudioDevice::AudioDevice(PaDeviceInfo &devInfo,MainHostHost *myHost,const ObjectInfo &info, QObject *parent) :
     QObject(parent),
     sampleRate(44100.0f),
     bufferSize(4096),
     stream(0),
     objInfo(info),
-    devId(devId),
     devInfo(devInfo),
     devIn(0),
     devOut(0),
@@ -66,8 +65,8 @@ AudioDevice::AudioDevice(PaDeviceIndex devId,PaDeviceInfo &devInfo,MainHostHost 
     connect(myHost,SIGNAL(SampleRateChanged(float)),
             this,SLOT(SetSampleRate(float)));
 
-    connect(this,SIGNAL(InUseChanged(ObjectInfo,bool)),
-            myHost,SIGNAL(OnAudioDeviceToggleInUse(ObjectInfo,bool)));
+    connect(this,SIGNAL(InUseChanged(PaHostApiIndex,PaDeviceIndex,bool)),
+            myHost->audioDevices,SLOT(OnToggleDeviceInUse(PaHostApiIndex,PaDeviceIndex,bool)));
 }
 
 AudioDevice::~AudioDevice()
@@ -92,7 +91,7 @@ void AudioDevice::DeleteIfUnused()
 
     if(del) {
         SetSleep(true);
-        myHost->audioDevices->RemoveDevice(devId);
+        myHost->audioDevices->RemoveDevice(objInfo.id);
     }
 
 }
@@ -196,16 +195,17 @@ bool AudioDevice::OpenStream(double sampleRate)
 
     if(devInfo.maxInputChannels > 0) {
 
-        inputParameters = new(PaStreamParameters);
-        bzero( inputParameters, sizeof( PaStreamParameters ) );
+        inputParameters = new PaStreamParameters;
+        ZeroMemory( inputParameters, sizeof( PaStreamParameters ) );
         inputParameters->channelCount = devInfo.maxInputChannels;
-        inputParameters->device = devId;
+        inputParameters->device = objInfo.id;
         inputParameters->hostApiSpecificStreamInfo = NULL;
         inputParameters->sampleFormat = paFloat32 | paNonInterleaved;
-        inputParameters->suggestedLatency = Pa_GetDeviceInfo(devId)->defaultLowInputLatency ;
+        inputParameters->suggestedLatency = Pa_GetDeviceInfo(objInfo.id)->defaultLowInputLatency ;
 
         switch(Pa_GetHostApiInfo( devInfo.hostApi )->type) {
             case paDirectSound :
+                ZeroMemory( &directSoundStreamInfo, sizeof(PaWinDirectSoundStreamInfo) );
                 directSoundStreamInfo.size = sizeof(PaWinDirectSoundStreamInfo);
                 directSoundStreamInfo.hostApiType = paDirectSound;
                 directSoundStreamInfo.version = 1;
@@ -214,12 +214,13 @@ bool AudioDevice::OpenStream(double sampleRate)
                 inputParameters->hostApiSpecificStreamInfo = &directSoundStreamInfo;
                 break;
             case paMME :
+                ZeroMemory( &wmmeStreamInfo, sizeof(PaWinMmeStreamInfo) );
                 wmmeStreamInfo.size = sizeof(PaWinMmeStreamInfo);
                 wmmeStreamInfo.hostApiType = paMME;
                 wmmeStreamInfo.version = 1;
-                wmmeStreamInfo.flags = paWinMmeUseLowLevelLatencyParameters | paWinMmeDontThrottleOverloadedProcessingThread;
-                wmmeStreamInfo.framesPerBuffer = 512;
-                wmmeStreamInfo.bufferCount = 8;//devInfo->maxInputChannels;
+                wmmeStreamInfo.flags = myHost->GetSetting("devices/flag_" + objInfo.name, MME_DFAULT_FLAGS).toUInt();
+                wmmeStreamInfo.framesPerBuffer = myHost->GetSetting("devices/bufferSize_" + objInfo.name, MME_DEFAULT_BUFFER_SIZE).toUInt();
+                wmmeStreamInfo.bufferCount = myHost->GetSetting("devices/bufferCount_" + objInfo.name, MME_DEFAULT_BUFFER_COUNT).toUInt();
                 inputParameters->hostApiSpecificStreamInfo = &wmmeStreamInfo;
                 inputParameters->suggestedLatency = 0;
                 break;
@@ -242,6 +243,13 @@ bool AudioDevice::OpenStream(double sampleRate)
             case paJACK :
                 break;
             case paWASAPI :
+                ZeroMemory( &wasapiStreamInfo, sizeof(PaWasapiStreamInfo) );
+                wasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
+                wasapiStreamInfo.hostApiType = paWASAPI;
+                wasapiStreamInfo.version = 1;
+                wasapiStreamInfo.flags = WASAPI_DEFAULT_FLAGS;
+                inputParameters->hostApiSpecificStreamInfo = &wasapiStreamInfo;
+                inputParameters->suggestedLatency = 0;
                 break;
             case paAudioScienceHPI :
                 break;
@@ -252,16 +260,17 @@ bool AudioDevice::OpenStream(double sampleRate)
 
     if(devInfo.maxOutputChannels > 0) {
 
-        outputParameters = new(PaStreamParameters);
-        bzero( outputParameters, sizeof( PaStreamParameters ) );
+        outputParameters = new PaStreamParameters;
+        ZeroMemory( outputParameters, sizeof( PaStreamParameters ) );
         outputParameters->channelCount = devInfo.maxOutputChannels;
-        outputParameters->device = devId;
+        outputParameters->device = objInfo.id;
         outputParameters->hostApiSpecificStreamInfo = NULL;
         outputParameters->sampleFormat = paFloat32 | paNonInterleaved;
-        outputParameters->suggestedLatency = Pa_GetDeviceInfo(devId)->defaultLowOutputLatency ;
+        outputParameters->suggestedLatency = Pa_GetDeviceInfo(objInfo.id)->defaultLowOutputLatency ;
 
         switch(Pa_GetHostApiInfo( devInfo.hostApi )->type) {
             case paDirectSound :
+                ZeroMemory( &directSoundStreamInfo, sizeof(PaWinDirectSoundStreamInfo) );
                 directSoundStreamInfo.size = sizeof(PaWinDirectSoundStreamInfo);
                 directSoundStreamInfo.hostApiType = paDirectSound;
                 directSoundStreamInfo.version = 1;
@@ -270,12 +279,13 @@ bool AudioDevice::OpenStream(double sampleRate)
                 outputParameters->hostApiSpecificStreamInfo = &directSoundStreamInfo;
                 break;
             case paMME :
+                ZeroMemory( &wmmeStreamInfo, sizeof(PaWinMmeStreamInfo) );
                 wmmeStreamInfo.size = sizeof(PaWinMmeStreamInfo);
                 wmmeStreamInfo.hostApiType = paMME;
                 wmmeStreamInfo.version = 1;
-                wmmeStreamInfo.flags = paWinMmeUseLowLevelLatencyParameters | paWinMmeDontThrottleOverloadedProcessingThread;
-                wmmeStreamInfo.framesPerBuffer = 512;
-                wmmeStreamInfo.bufferCount = 8;//devInfo->maxOutputChannels;
+                wmmeStreamInfo.flags = myHost->GetSetting("devices/flag_" + objInfo.name, MME_DFAULT_FLAGS).toUInt();
+                wmmeStreamInfo.framesPerBuffer = myHost->GetSetting("devices/bufferSize_" + objInfo.name, MME_DEFAULT_BUFFER_SIZE).toUInt();
+                wmmeStreamInfo.bufferCount = myHost->GetSetting("devices/bufferCount_" + objInfo.name, MME_DEFAULT_BUFFER_COUNT).toUInt();
                 outputParameters->hostApiSpecificStreamInfo = &wmmeStreamInfo;
                 outputParameters->suggestedLatency = 0;
                 break;
@@ -298,6 +308,13 @@ bool AudioDevice::OpenStream(double sampleRate)
             case paJACK :
                 break;
             case paWASAPI :
+                ZeroMemory( &wasapiStreamInfo, sizeof(PaWasapiStreamInfo) );
+                wasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
+                wasapiStreamInfo.hostApiType = paWASAPI;
+                wasapiStreamInfo.version = 1;
+                wasapiStreamInfo.flags = WASAPI_DEFAULT_FLAGS;
+                outputParameters->hostApiSpecificStreamInfo = &wasapiStreamInfo;
+                outputParameters->suggestedLatency = 0;
                 break;
             case paAudioScienceHPI :
                 break;
@@ -306,7 +323,7 @@ bool AudioDevice::OpenStream(double sampleRate)
         }
     }
 
-    if(!Pa_IsFormatSupported( inputParameters, outputParameters, sampleRate ) == paFormatIsSupported) {
+    if(Pa_IsFormatSupported( inputParameters, outputParameters, sampleRate ) != paFormatIsSupported) {
         debug("AudioDevice::OpenStream Pa_IsFormatSupported format not supported")
         errorMessage = tr("Stream format not supported");
         if(inputParameters)
@@ -323,8 +340,8 @@ bool AudioDevice::OpenStream(double sampleRate)
             sampleRate,
             framesPerBuffer,
             flags,
-            paCallback, //your callback function
-            (void *)this ); //data to be passed to callback. In C++, it is frequently (void *)this
+            paCallback,
+            (void *)this );
 
     if(inputParameters)
         delete inputParameters;
@@ -346,7 +363,7 @@ bool AudioDevice::OpenStream(double sampleRate)
         return false;
     }
 
-    emit InUseChanged(objInfo,true);
+    emit InUseChanged(objInfo.api,objInfo.id,true);
 //    const PaStreamInfo *inf = Pa_GetStreamInfo(&stream);
     return true;
 }
@@ -390,6 +407,7 @@ bool AudioDevice::Open()
         if(stream)
         {
             Pa_StopStream(stream);
+            Pa_CloseStream(stream);
             stream = 0;
         }
 
@@ -419,11 +437,12 @@ bool AudioDevice::CloseStream()
     closed=true;
     inputBufferReady=false;
 
-    emit InUseChanged(objInfo,false);
+    emit InUseChanged( objInfo.api,objInfo.id,false);
 
     if(stream)
     {
         Pa_StopStream(stream);
+        Pa_CloseStream(stream);
         stream = 0;
     }
 

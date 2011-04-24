@@ -89,7 +89,7 @@ public:
     vst::CVSTHost *vstHost;
 #endif
 
-    quint32 currentFileVersion;
+    static quint32 currentFileVersion;
     bool doublePrecision;
 
     void SetSetting(QString name, QVariant value);
@@ -142,7 +142,6 @@ signals:
 //    void NewSolver(orderedNodes *renderLines);
     void ObjectRemoved(int contrainerId, int obj);
     void SolverToUpdate();
-    void OnAudioDeviceToggleInUse(const ObjectInfo &objInfo, bool inUse);
     void Rendered();
     void programParkingModelChanged(QStandardItemModel *model);
     void groupParkingModelChanged(QStandardItemModel *model);

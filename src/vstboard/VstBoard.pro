@@ -90,7 +90,8 @@ SOURCES += \
     audiodevices.cpp \
     mididevices.cpp \
     circularbuffer.cpp \
-    views/configdialoghost.cpp
+    views/configdialoghost.cpp \
+    views/mmeconfigdialog.cpp
 
 HEADERS += \
     mainhosthost.h \
@@ -105,10 +106,12 @@ HEADERS += \
     audiodevices.h \
     mididevices.h \
     circularbuffer.h \
-    views/configdialoghost.h
+    views/configdialoghost.h \
+    views/mmeconfigdialog.h
 
 
-FORMS +=
+FORMS += \
+    views/mmeconfigdialog.ui
 
 PRECOMPILED_HEADER = ../common/precomp.h
 

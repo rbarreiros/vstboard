@@ -32,6 +32,12 @@
 #define VST_BANK_FILE_EXTENSION "fxb"
 #define VST_PROGRAM_FILE_EXTENSION "fxp"
 
+#define MME_DFAULT_FLAGS paWinMmeUseLowLevelLatencyParameters | paWinMmeDontThrottleOverloadedProcessingThread
+#define MME_DEFAULT_BUFFER_SIZE 512
+#define MME_DEFAULT_BUFFER_COUNT 8
+
+#define WASAPI_DEFAULT_FLAGS paWinWasapiExclusive
+
 namespace UserRoles {
     enum Enum {
         programGroup = Qt::UserRole+1,

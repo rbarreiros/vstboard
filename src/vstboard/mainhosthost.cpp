@@ -30,8 +30,6 @@ MainHostHost::MainHostHost(QObject *parent, QString settingsGroup) :
     objFactory = new Connectables::ObjectFactoryHost(this);
     midiDevices = new MidiDevices(this);
     audioDevices = new AudioDevices(this);
-    connect(this,SIGNAL(OnAudioDeviceToggleInUse(ObjectInfo,bool)),
-            audioDevices,SLOT(OnToggleDeviceInUse(ObjectInfo,bool)));
     connect(&audioDevices->fakeRenderTimer,SIGNAL(timeout()),
             this, SLOT(Render()));
 }

@@ -42,6 +42,10 @@ protected:
     ListToolsModel *listAudioDevModel;
     ListToolsModel *listMidiDevModel;
 
+public slots:
+    void UpdateAudioDevices();
+    void UpdateMidiDevices();
+
 private slots:
     void on_actionConfig_triggered();
     void on_actionRefresh_Midi_devices_triggered();
