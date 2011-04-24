@@ -35,10 +35,11 @@
   \param myHost pointer to the MainHost
   */
 AudioDevices::AudioDevices(MainHostHost *myHost) :
-        QObject(myHost),
-        model(0),
-        countActiveDevices(0),
-        myHost(myHost)
+    QObject(myHost),
+    closing(false),
+    model(0),
+    countActiveDevices(0),
+    myHost(myHost)
 {
     fakeRenderTimer.start(FAKE_RENDER_TIMER_MS);
 }
@@ -48,6 +49,10 @@ AudioDevices::AudioDevices(MainHostHost *myHost) :
   */
 AudioDevices::~AudioDevices()
 {
+    mutexClosing.lock();
+    closing=true;
+    mutexClosing.unlock();
+
     mutexDevices.lock();
     foreach(Connectables::AudioDevice *ad, listAudioDevices) {
         ad->SetSleep(true);
@@ -310,6 +315,13 @@ void AudioDevices::RemoveDevice(PaDeviceIndex devId)
 
 void AudioDevices::PutPinsBuffersInRingBuffers()
 {
+    mutexClosing.lock();
+    if(closing) {
+        mutexClosing.unlock();
+        return;
+    }
+    mutexClosing.unlock();
+
     mutexDevices.lock();
     foreach(Connectables::AudioDevice *dev, listAudioDevices) {
         dev->PinsToRingBuffers();
