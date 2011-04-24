@@ -424,6 +424,8 @@ bool AudioDevice::Open()
     isClosing=false;
     mutexOpenClose.unlock();
 
+    errorMessage="";
+
     //try to open at the host rate
     double sampleRate = myHost->GetSampleRate();
     if(!OpenStream(sampleRate)) {

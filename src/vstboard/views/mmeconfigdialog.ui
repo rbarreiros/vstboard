@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>234</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -68,30 +68,9 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QCheckBox" name="UseMultipleDevices">
-        <property name="text">
-         <string>Use Multiple Devices</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QCheckBox" name="DontThrottleOverloadedProcessingThread">
         <property name="text">
          <string>Don't Throttle Overloaded Processing Thread</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="WaveFormatDolbyAc3Spdif">
-        <property name="text">
-         <string>Wave Format Dolby Ac3 Spdif</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="WaveFormatWmaSpdif">
-        <property name="text">
-         <string>Wave Format Wma Spdif</string>
         </property>
        </widget>
       </item>

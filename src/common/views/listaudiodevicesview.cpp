@@ -22,7 +22,7 @@ void ListAudioDevicesView::AudioDevContextMenu(const QPoint &pt)
 
     QList<QAction *> lstActions;
 
-//    if(currentDevice.data(UserRoles::objInfo).isValid())
+    if(currentDevice.data(UserRoles::objInfo).isValid())
         lstActions << audioDevConfig;
 
     lstActions << updateList;

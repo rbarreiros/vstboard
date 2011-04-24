@@ -80,11 +80,19 @@ AudioDevices::~AudioDevices()
   */
 ListAudioInterfacesModel * AudioDevices::GetModel()
 {
+    mutexClosing.lock();
+    closing=true;
+    mutexClosing.unlock();
+
     mutexDevices.lock();
     foreach(Connectables::AudioDevice *ad, listAudioDevices) {
         ad->SetSleep(true);
     }
     mutexDevices.unlock();
+
+    mutexClosing.lock();
+    closing=false;
+    mutexClosing.unlock();
 
     if(model) {
         PaError err=Pa_Terminate();
@@ -105,19 +113,32 @@ ListAudioInterfacesModel * AudioDevices::GetModel()
     }
     BuildModel();
 
+    mutexClosing.lock();
+    closing=true;
+    mutexClosing.unlock();
+
     mutexDevices.lock();
     foreach(Connectables::AudioDevice *ad, listAudioDevices) {
         ad->SetSleep(false);
     }
     mutexDevices.unlock();
 
+    mutexClosing.lock();
+    closing=false;
+    mutexClosing.unlock();
+
+
+    //rebuild all audio in&out objects
     foreach(QSharedPointer<Connectables::Object>obj, myHost->objFactory->GetListObjects()) {
         if(obj.isNull())
             continue;
 
         if(obj->info().objType == ObjType::AudioInterfaceIn || obj->info().objType == ObjType::AudioInterfaceOut) {
-            obj->Open();
-            obj->UpdateModelNode();
+            if(obj->Open()) {
+                obj->UpdateModelNode();
+            } else {
+                static_cast<Connectables::Container*>(myHost->objFactory->GetObjectFromId( obj->GetContainerId() ).data())->UserParkObject( obj );
+            }
         }
     }
 
@@ -320,13 +341,14 @@ void AudioDevices::PutPinsBuffersInRingBuffers()
         mutexClosing.unlock();
         return;
     }
-    mutexClosing.unlock();
 
     mutexDevices.lock();
     foreach(Connectables::AudioDevice *dev, listAudioDevices) {
         dev->PinsToRingBuffers();
     }
     mutexDevices.unlock();
+
+    mutexClosing.unlock();
 }
 
 /*!
@@ -411,38 +433,29 @@ void AudioDevices::ConfigDevice(const QModelIndex &index)
     PaDeviceIndex devId=-1;
 
     if(index.data(UserRoles::objInfo).isValid()) {
-        //a device was clicked
         ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
         devId = (PaDeviceIndex)info.id;
         apiIndex = (PaHostApiTypeId)info.api;
     }
 
-    if(index.data(UserRoles::value).isValid()) {
-        //an api was clicked
-        apiIndex = (PaHostApiTypeId)index.data(UserRoles::value).toInt();
-    }
-
     switch(apiIndex) {
         case paASIO: {
-            if(devId!=-1) {
-                PaError err;
-    #if WIN32
-                err = PaAsio_ShowControlPanel( devId, (void*)myHost->mainWindow );
-    #endif
-    #ifdef __APPLE__
-                err = PaAsio_ShowControlPanel( devId, (void*)0 );
-    #endif
+            PaError err;
+#if WIN32
+            err = PaAsio_ShowControlPanel( devId, (void*)myHost->mainWindow );
+#endif
+#ifdef __APPLE__
+            err = PaAsio_ShowControlPanel( devId, (void*)0 );
+#endif
 
-                if( err != paNoError ) {
-                    QMessageBox msg(QMessageBox::Warning,
-                                    tr("Error"),
-                                    Pa_GetErrorText( err ),
-                                    QMessageBox::Ok);
-                    msg.exec();
-                }
-                return;
+            if( err != paNoError ) {
+                QMessageBox msg(QMessageBox::Warning,
+                                tr("Error"),
+                                Pa_GetErrorText( err ),
+                                QMessageBox::Ok);
+                msg.exec();
             }
-            break;
+            return;
         }
 
         case paMME: {
