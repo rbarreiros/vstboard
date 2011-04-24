@@ -13,13 +13,12 @@ class MmeConfigDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit MmeConfigDialog(const QString &deviceName, MainHost *myHost, QWidget *parent = 0);
+    explicit MmeConfigDialog( MainHost *myHost, QWidget *parent = 0);
     ~MmeConfigDialog();
 
 private:
     Ui::MmeConfigDialog *ui;
     MainHost *myHost;
-    QString deviceName;
 
 public slots:
     void accept();

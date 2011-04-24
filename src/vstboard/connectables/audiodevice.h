@@ -45,7 +45,6 @@ namespace Connectables {
         ~AudioDevice();
 
         bool Open();
-        bool Close();
         float GetCpuUsage();
         bool SetObjectInput(AudioDeviceIn *obj);
         bool SetObjectOutput(AudioDeviceOut *obj);
@@ -57,18 +56,16 @@ namespace Connectables {
         bool RingBuffersToDevice( void *outputBuffer, unsigned long framesPerBuffer);
 
         QString errorMessage;
-    protected:
 
+    protected:
+        bool Close();
         static int paCallback( const void *inputBuffer, void *outputBuffer,
                                unsigned long framesPerBuffer,
                                const PaStreamCallbackTimeInfo* timeInfo,
                                PaStreamCallbackFlags statusFlags,
                                void *userData );
 
-        static void paStreamFinished( void* userData );
-
         bool OpenStream(double sampleRate);
-        bool CloseStream();
 
         void DeleteCircualBuffers();
 
@@ -99,8 +96,11 @@ namespace Connectables {
         /// pointer to the AudioDeviceOut, can be null
         AudioDeviceOut *devOut;
 
-        /// true if the device is closed
-        bool closed;
+        /// true if the device is opened
+        bool opened;
+
+        /// mutex protecting open/close
+        QMutex mutexOpenClose;
 
         /// mutex for input and output device
         QMutex mutexDevicesInOut;
@@ -142,7 +142,7 @@ namespace Connectables {
           \param devId device id
           \param inUse true if the device is in use
           */
-        void InUseChanged(PaHostApiIndex apiId,PaDeviceIndex devId, bool inUse);
+        void InUseChanged(PaHostApiIndex apiId,PaDeviceIndex devId, bool inUse, PaTime inLatency=0, PaTime outLatency=0, double sampleRate=0);
 
     public slots:
         void SetSampleRate(float rate=44100.0);

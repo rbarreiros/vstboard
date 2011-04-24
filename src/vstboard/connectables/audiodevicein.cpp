@@ -90,6 +90,7 @@ bool AudioDeviceIn::Open()
     QMutexLocker l(&objMutex);
 
     closed=false;
+    errorMessage="";
 
     //create the audiodevice if needed
     if(!parentDevice) {

@@ -18,7 +18,7 @@ ListAudioDevicesView::ListAudioDevicesView(QWidget *parent) :
 
 void ListAudioDevicesView::AudioDevContextMenu(const QPoint &pt)
 {
-    currentDevice = indexAt(pt);
+    currentDevice = indexAt(pt).sibling(0,0);
 
     QList<QAction *> lstActions;
 

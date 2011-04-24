@@ -52,6 +52,8 @@ public:
 private:
     void BuildModel();
 
+    bool closing;
+
     /// list of opened AudioDevice
     QHash<qint32,Connectables::AudioDevice* >listAudioDevices;
 
@@ -66,10 +68,11 @@ private:
 
     QMutex mutexDevices;
 
+    QMutex mutexClosing;
 
 public slots:
-    void OnToggleDeviceInUse(PaHostApiIndex apiId, PaDeviceIndex devId, bool inUse);
-    void ConfigDevice(const QModelIndex &dev);
+    void OnToggleDeviceInUse(PaHostApiIndex apiId, PaDeviceIndex devId, bool inUse, PaTime inLatency=0, PaTime outLatency=0, double sampleRate=0);
+    void ConfigDevice(const QModelIndex &index);
 };
 
 #endif // AUDIODEVICES_H

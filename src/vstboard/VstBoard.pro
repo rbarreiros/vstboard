@@ -91,7 +91,8 @@ SOURCES += \
     mididevices.cpp \
     circularbuffer.cpp \
     views/configdialoghost.cpp \
-    views/mmeconfigdialog.cpp
+    views/mmeconfigdialog.cpp \
+    views/wasapiconfigdialog.cpp
 
 HEADERS += \
     mainhosthost.h \
@@ -107,11 +108,13 @@ HEADERS += \
     mididevices.h \
     circularbuffer.h \
     views/configdialoghost.h \
-    views/mmeconfigdialog.h
+    views/mmeconfigdialog.h \
+    views/wasapiconfigdialog.h
 
 
 FORMS += \
-    views/mmeconfigdialog.ui
+    views/mmeconfigdialog.ui \
+    views/wasapiconfigdialog.ui
 
 PRECOMPILED_HEADER = ../common/precomp.h
 

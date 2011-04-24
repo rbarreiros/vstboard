@@ -53,9 +53,12 @@ MainWindowHost::MainWindowHost(MainHostHost * myHost,QWidget *parent) :
     connect(ui->treeAudioInterfaces, SIGNAL(Config(const QModelIndex &)),
             myHost->audioDevices, SLOT(ConfigDevice(const QModelIndex &)));
     connect(ui->treeAudioInterfaces, SIGNAL(UpdateList()),
-            this, SLOT(on_actionRefresh_Audio_devices_triggered()));
+            this, SLOT(UpdateAudioDevices()));
 
-    ui->treeMidiInterfaces->addAction( new QAction(QIcon(":/img16x16/viewmag+.png"), tr("Refresh list"), ui->treeMidiInterfaces));
+    QAction *updateMidiList = new QAction(QIcon(":/img16x16/viewmag+.png"), tr("Refresh list"), ui->treeMidiInterfaces);
+    connect( updateMidiList, SIGNAL(triggered()),
+             this, SLOT(UpdateMidiDevices()));
+    ui->treeMidiInterfaces->addAction( updateMidiList );
 
     myHost->SetSampleRate( ConfigDialog::defaultSampleRate(myHost) );
 }

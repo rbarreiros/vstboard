@@ -36,7 +36,9 @@
 #define MME_DEFAULT_BUFFER_SIZE 512
 #define MME_DEFAULT_BUFFER_COUNT 8
 
-#define WASAPI_DEFAULT_FLAGS paWinWasapiExclusive
+#define WASAPI_DEFAULT_FLAGS 0
+#define WASAPI_DEFAULT_INLATENCY 0
+#define WASAPI_DEFAULT_OUTLATENCY 0
 
 namespace UserRoles {
     enum Enum {
