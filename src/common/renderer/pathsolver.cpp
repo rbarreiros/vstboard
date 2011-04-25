@@ -59,12 +59,6 @@ void PathSolver::Resolve(hashCables cables, Renderer *renderer)
     listCables = cables;
 
     CreateNodes();
-
-    if(listNodes.isEmpty()) {
-        mutex.unlock();
-        return;
-    }
-
     PutParentsInNodes();
     while(ChainNodes()) {}
     UnwrapLoops();

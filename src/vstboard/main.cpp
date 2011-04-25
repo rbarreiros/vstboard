@@ -90,7 +90,6 @@ int main(int argc, char *argv[])
     qRegisterMetaType<ConnectionInfo>("ConnectionInfo");
     qRegisterMetaType<ObjectInfo>("ObjectInfo");
     qRegisterMetaType<int>("ObjType::Enum");
-    qRegisterMetaType<orderedNodes>("orderedNodes");
     qRegisterMetaType<QVariant>("QVariant");
 
     qRegisterMetaTypeStreamOperators<ObjectInfo>("ObjectInfo");
