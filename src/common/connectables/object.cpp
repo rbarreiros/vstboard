@@ -58,8 +58,7 @@ Object::Object(MainHost *host, int index, const ObjectInfo &info) :
     currentProgId(TEMP_PROGRAM),
     closed(true),
     objInfo(info),
-    containerId(FixedObjId::noContainer),
-    optimizerFlag(false)
+    containerId(FixedObjId::noContainer)
 {
     setObjectName(QString("%1.%2").arg(objInfo.name).arg(index));
     doublePrecision=myHost->doublePrecision;

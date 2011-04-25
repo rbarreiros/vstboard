@@ -193,7 +193,7 @@ void MainHost::SetupHostContainer()
     hostContainer->bridgeOut = bridge;
 
     //connect with groupContainer
-    if(!programContainer.isNull()) {
+    if(!groupContainer.isNull()) {
         mainContainer->ConnectBridges(groupContainer->bridgeSend, hostContainer->bridgeIn);
         mainContainer->ConnectBridges(hostContainer->bridgeOut, groupContainer->bridgeReturn);
     }
@@ -222,12 +222,15 @@ void MainHost::SetupHostContainer()
     bridge->SetBridgePinsInVisible(false);
     hostContainer->bridgeReturn = bridge;
 
-    //connect with programContainer
+    //connect with projectContainer
     if(!projectContainer.isNull()) {
         mainContainer->ConnectBridges(hostContainer->bridgeSend, projectContainer->bridgeIn);
         mainContainer->ConnectBridges(projectContainer->bridgeOut, hostContainer->bridgeReturn);
     }
     hostContainer->listenProgramChanges=false;
+
+    if(projectContainer)
+        hostContainer->childContainer=projectContainer;
 }
 
 void MainHost::SetupProjectContainer()
@@ -321,6 +324,11 @@ void MainHost::SetupProjectContainer()
     projectContainer->ConnectBridges(projectContainer->bridgeReturn, projectContainer->bridgeOut,false);
 
     projectContainer->listenProgramChanges=false;
+
+    if(hostContainer)
+        hostContainer->childContainer=projectContainer;
+    if(groupContainer)
+        projectContainer->childContainer=groupContainer;
 }
 
 void MainHost::SetupProgramContainer()
@@ -418,6 +426,11 @@ void MainHost::SetupProgramContainer()
             programContainer.data(), SLOT(Render()));
 
     emit programParkingModelChanged(&programContainer->parkModel);
+
+    if(groupContainer) {
+        groupContainer->childContainer=programContainer;
+        programContainer->parentContainer=groupContainer;
+    }
 }
 
 void MainHost::SetupGroupContainer()
@@ -513,6 +526,13 @@ void MainHost::SetupGroupContainer()
             groupContainer.data(), SLOT(Render()));
 
     emit groupParkingModelChanged(&groupContainer->parkModel);
+
+    if(projectContainer)
+        projectContainer->childContainer=groupContainer;
+    if(programContainer) {
+        groupContainer->childContainer=programContainer;
+        programContainer->parentContainer=groupContainer;
+    }
 }
 
 bool MainHost::EnableSolverUpdate(bool enable)
