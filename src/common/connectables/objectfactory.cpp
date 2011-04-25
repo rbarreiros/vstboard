@@ -45,8 +45,8 @@ ObjectFactory::ObjectFactory(MainHost *myHost) :
     myHost(myHost)
 {
     setObjectName("ObjectFactory");
-//    scriptObj = myHost->scriptEngine.newQObject(this);
-//    myHost->scriptEngine.globalObject().setProperty("ObjectFactory", scriptObj);
+    QScriptValue scriptObj = myHost->scriptEngine.newQObject(this);
+    myHost->scriptEngine.globalObject().setProperty("ObjectFactory", scriptObj);
 }
 
 ObjectFactory::~ObjectFactory()

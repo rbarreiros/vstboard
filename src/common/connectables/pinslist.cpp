@@ -40,6 +40,8 @@ PinsList::PinsList(MainHost *myHost, Object *parent) :
             this,SLOT(AddPin(int)));
     connect(this,SIGNAL(PinRemoved(int)),
             this,SLOT(RemovePin(int)));
+//    connect(this, SIGNAL(NbPinChanged(int)),
+//            this,SLOT(SetNbPins(int)));
 }
 
 void PinsList::SetContainerId(quint16 id)
@@ -57,27 +59,9 @@ void PinsList::Hide()
     }
 }
 
-bool PinsList::ChangeNumberOfPins(int newNb)
+void PinsList::ChangeNumberOfPins(int newNb)
 {
-    int nbPins=listPins.count();
-
-    if(newNb==nbPins)
-        return true;
-
-    if(newNb<nbPins) {
-        QMap<quint16,Pin*>::Iterator i = listPins.end();
-        for(int nb=newNb; nb<nbPins; nb++) {
-            i=listPins.erase(i);
-        }
-    }
-    if(newNb>nbPins){
-        //must start from zero
-        for(int nb=0;nb<newNb;nb++) {
-            AsyncAddPin(nb);
-        }
-    }
-
-    return true;
+    emit SetNbPins(newNb);
 }
 
 void PinsList::SetInfo(Object *parent,const ConnectionInfo &connInfo, const ObjectInfo &objInfo)
@@ -187,6 +171,17 @@ void PinsList::AsyncRemovePin(int nb)
     emit PinRemoved(nb);
 }
 
+void PinsList::SetNbPins(int nb)
+{
+    for(int n = listPins.count(); n>nb; n--) {
+        RemovePin( n-1 );
+    }
+
+    for(int n = listPins.count(); n<nb; n++) {
+        AddPin( n );
+    }
+}
+
 Pin * PinsList::AddPin(int nb)
 {
     if(listPins.contains(nb))
@@ -199,7 +194,6 @@ Pin * PinsList::AddPin(int nb)
         debug("PinsList::AddPin pin not created")
         return 0;
     }
-
     listPins.insert(nb, newPin);
 
     if(modelList.isValid())

@@ -256,12 +256,12 @@ void MainWindow::BuildListTools()
     parentItem = listToolsModel->invisibleRootItem();
 
     //script
-   /* item = new QStandardItem(tr("Script"));
+    item = new QStandardItem(tr("Script"));
     info.nodeType = NodeType::object;
     info.objType = ObjType::Script;
     item->setData(QVariant::fromValue(info), UserRoles::objInfo);
     parentItem->appendRow(item);
-*/
+
 
     //midi parameters
     item = new QStandardItem(tr("Midi to parameter"));

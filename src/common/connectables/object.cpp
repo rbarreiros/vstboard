@@ -64,8 +64,8 @@ Object::Object(MainHost *host, int index, const ObjectInfo &info) :
     setObjectName(QString("%1.%2").arg(objInfo.name).arg(index));
     doublePrecision=myHost->doublePrecision;
 
-//    scriptObj = myHost->scriptEngine.newQObject(this);
-//    myHost->scriptEngine.globalObject().setProperty(QString("Obj%1").arg(index), scriptObj);
+    QScriptValue scriptObj = myHost->scriptEngine.newQObject(this);
+    myHost->scriptEngine.globalObject().setProperty(QString("Obj%1").arg(index), scriptObj);
 
     //init pins lists
     ConnectionInfo i;
@@ -75,26 +75,34 @@ Object::Object(MainHost *host, int index, const ObjectInfo &info) :
     i.type=PinType::Audio;
     i.direction=PinDirection::Input;
     listAudioPinIn->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listAudioIn));
+    listAudioPinIn->setObjectName("listAudioPinIn");
     i.direction=PinDirection::Output;
     listAudioPinOut->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listAudioOut));
+    listAudioPinOut->setObjectName("listAudioPinOut");
 
     i.type=PinType::Midi;
     i.direction=PinDirection::Input;
     listMidiPinIn->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listMidiIn));
+    listMidiPinIn->setObjectName("listMidiPinIn");
     i.direction=PinDirection::Output;
     listMidiPinOut->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listMidiOut));
+    listMidiPinOut->setObjectName("listMidiPinOut");
 
     i.type=PinType::Bridge;
     i.direction=PinDirection::Input;
     listBridgePinIn->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listBridgeIn));
+    listBridgePinIn->setObjectName("listBridgePinIn");
     i.direction=PinDirection::Output;
     listBridgePinOut->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listBridgeOut));
+    listBridgePinOut->setObjectName("listBridgePinOut");
 
     i.type=PinType::Parameter;
     i.direction=PinDirection::Input;
     listParameterPinIn->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listParamIn));
+    listParameterPinIn->setObjectName("listParameterPinIn");
     i.direction=PinDirection::Output;
     listParameterPinOut->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listParamOut));
+    listParameterPinOut->setObjectName("listParameterPinOut");
 
     pinLists.insert("audioin", listAudioPinIn);
     pinLists.insert("audioout", listAudioPinOut);
@@ -105,18 +113,7 @@ Object::Object(MainHost *host, int index, const ObjectInfo &info) :
     pinLists.insert("parameterin",listParameterPinIn);
     pinLists.insert("parameterout",listParameterPinOut);
 
-    if(objInfo.nodeType != NodeType::container) {
-        //editor pin
-        listEditorVisible << "hide";
-        listEditorVisible << "show";
-        listParameterPinIn->AddPin(FixedPinNumber::editorVisible);
 
-        //learning pin
-        listIsLearning << "off";
-        listIsLearning << "learn";
-        listIsLearning << "unlearn";
-        listParameterPinIn->AddPin(FixedPinNumber::learningMode);
-    }
 }
 
 /*!

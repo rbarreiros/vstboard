@@ -22,7 +22,6 @@
 #define MAINHOST_H
 
 #include "precomp.h"
-#include <QtScript>
 #include "connectables/objectfactory.h"
 #include "connectables/object.h"
 #include "connectables/maincontainer.h"
@@ -133,8 +132,6 @@ private:
 
     QString settingsGroup;
     QSettings settings;
-
-    QScriptValue scriptObj;
 
 signals:
     void SampleRateChanged(float rate);

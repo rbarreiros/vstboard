@@ -44,6 +44,18 @@ VstPlugin::VstPlugin(MainHost *myHost,int index, const ObjectInfo & info) :
     for(int i=0;i<128;i++) {
         listValues << i;
     }
+//    if(objInfo.nodeType != NodeType::container) {
+        //editor pin
+        listEditorVisible << "hide";
+        listEditorVisible << "show";
+        listParameterPinIn->AddPin(FixedPinNumber::editorVisible);
+
+        //learning pin
+        listIsLearning << "off";
+        listIsLearning << "learn";
+        listIsLearning << "unlearn";
+        listParameterPinIn->AddPin(FixedPinNumber::learningMode);
+//    }
     listParameterPinIn->AddPin(FixedPinNumber::vstProgNumber);
 }
 

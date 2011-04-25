@@ -28,8 +28,6 @@
 
 #include "../precomp.h"
 
-//#include <QtScript>
-
 #include "audiopinin.h"
 #include "audiopinout.h"
 #include "midipinin.h"
@@ -254,8 +252,6 @@ namespace Connectables {
 
         /// list of values used by the learn pin (off, learn, unlearn)
         QList<QVariant>listIsLearning;
-
-//        QScriptValue scriptObj;
 
         bool optimizerFlag;
 

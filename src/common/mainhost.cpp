@@ -45,7 +45,7 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
 
     setObjectName("MainHost");
 
-    scriptObj = scriptEngine.newQObject(this);
+    QScriptValue scriptObj = scriptEngine.newQObject(this);
     scriptEngine.globalObject().setProperty("MainHost", scriptObj);
 
     if(!vst::CVSTHost::Get())
