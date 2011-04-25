@@ -642,7 +642,7 @@ bool AudioDevice::RingBuffersToDevice( void *outputBuffer, unsigned long framesP
             memcpy(((float **) outputBuffer)[cpt], AudioBuffer::blankBuffer, sizeof(float)*framesPerBuffer );
             cpt++;
         }
-        return false;
+        return true;
 
     }
     mutexDevicesInOut.unlock();
