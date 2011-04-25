@@ -33,7 +33,7 @@ AudioPin::AudioPin(Object *parent, PinDirection::Enum direction, int number, uns
         buffer = new AudioBuffer(externalAllocation);
     }
     SetBufferSize(bufferSize);
-    setObjectName(QString("In%1").arg(number));
+
     visible=true;
 }
 

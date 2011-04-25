@@ -478,7 +478,7 @@ bool AudioDevice::Close()
     mutexOpenClose.lock();
     if(isClosing) {
         mutexOpenClose.unlock();
-        debug("AudioDevice::CloseStream already closing")
+//        debug("AudioDevice::CloseStream already closing")
         return false;
     }
     isClosing=true;
