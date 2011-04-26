@@ -66,6 +66,7 @@ namespace Connectables {
         QDataStream & fromStream (QDataStream &);
 
         QList<RendererNode*>listOfRendererNodes;
+        QTime timeSavedRendererNodes;
 
     protected:
         bool CableExists(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);

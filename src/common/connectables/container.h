@@ -48,6 +48,11 @@ namespace Connectables {
 
         void OnChildDeleted(Object *obj);
 
+        /*!
+          Set this container as the holder of the rendering map
+          */
+        void SetOptimizerFlag(bool opt) { optimizerFlag=opt; }
+
         virtual bool Close();
         virtual void AddObject(QSharedPointer<Object> objPtr);
         virtual void AddParkedObject(QSharedPointer<Object> objPtr);
@@ -64,9 +69,28 @@ namespace Connectables {
         /// model for the parking storage
         HostModel parkModel;
 
+        QWeakPointer<Container>childContainer;
+        QWeakPointer<Container>parentContainer;
+
+        void Updated() {
+            if(currentProgram)
+                currentProgram->timeSavedRendererNodes = QTime::currentTime();
+            if(childContainer)
+                childContainer.toStrongRef()->Updated();
+        }
+
+        const QTime & GetLastUpdate() {
+            if(!currentProgram)
+                return QTime();
+            return currentProgram->timeSavedRendererNodes;
+        }
+
     protected:
         void AddChildObject(QSharedPointer<Object> objPtr);
         void ParkChildObject(QSharedPointer<Object> objPtr);
+
+        /// true if this container saves the solver status
+        bool optimizerFlag;
 
         /// list of programs
         QHash<int,ContainerProgram*>listContainerPrograms;

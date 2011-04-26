@@ -38,6 +38,7 @@ Container::Container(MainHost *myHost,int index, const ObjectInfo &info) :
     Object(myHost,index, info ),
     bridgeIn(0),
     bridgeOut(0),
+    optimizerFlag(false),
     currentProgram(0),
     cablesNode(QModelIndex()),
     progToSet(-1)
@@ -225,6 +226,9 @@ void Container::LoadProgram(int prog)
 
 
     if(oldProg) {
+        //update the saved rendering map
+        if(optimizerFlag && currentProgId!=EMPTY_PROGRAM && currentProgId!=TEMP_PROGRAM)
+            listContainerPrograms.value(currentProgId)->SaveRendererState();
 
         //remove objects from the old program if not needed anymore
         foreach(QSharedPointer<Object>objPtr, oldProg->listObjects) {
@@ -254,12 +258,15 @@ void Container::LoadProgram(int prog)
     }
 
     currentProgram->Load(prog);
+    if(optimizerFlag)
+        currentProgram->LoadRendererState();
     UpdateModelNode();
 
     if(oldProg) {
         delete oldProg;
     }
 
+    //Updated();
 }
 
 void Container::SaveProgram()
@@ -326,6 +333,8 @@ void Container::UserAddObject(QSharedPointer<Object> objPtr)
 {
     AddObject(objPtr);
     myHost->SetSolverUpdateNeeded();
+
+    Updated();
 }
 
 /*!
@@ -356,6 +365,7 @@ void Container::AddObject(QSharedPointer<Object> objPtr)
         listLoadedObjects << objPtr.data();
     currentProgram->AddObject(objPtr);
     objPtr->LoadProgram(currentProgId);
+
 }
 
 /*!
@@ -375,6 +385,8 @@ void Container::UserParkObject(QSharedPointer<Object> objPtr)
 {
     ParkObject(objPtr);
     myHost->SetSolverUpdateNeeded();
+
+    Updated();
 }
 
 /*!
@@ -491,12 +503,16 @@ void Container::UserAddCable(const ConnectionInfo &outputPin, const ConnectionIn
 {
     AddCable(outputPin,inputPin,false);
     myHost->SetSolverUpdateNeeded();
+
+    Updated();
 }
 
 void Container::UserRemoveCableFromPin(const ConnectionInfo &pin)
 {
     RemoveCableFromPin(pin);
     myHost->SetSolverUpdateNeeded();
+
+    Updated();
 }
 
 /*!
