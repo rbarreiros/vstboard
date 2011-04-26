@@ -227,7 +227,7 @@ void Container::LoadProgram(int prog)
 
     if(oldProg) {
         //update the saved rendering map
-        if(optimizerFlag)
+        if(optimizerFlag && currentProgId!=EMPTY_PROGRAM && currentProgId!=TEMP_PROGRAM)
             listContainerPrograms.value(currentProgId)->SaveRendererState();
 
         //remove objects from the old program if not needed anymore
@@ -266,7 +266,7 @@ void Container::LoadProgram(int prog)
         delete oldProg;
     }
 
-    Updated();
+    //Updated();
 }
 
 void Container::SaveProgram()
@@ -503,12 +503,16 @@ void Container::UserAddCable(const ConnectionInfo &outputPin, const ConnectionIn
 {
     AddCable(outputPin,inputPin,false);
     myHost->SetSolverUpdateNeeded();
+
+    Updated();
 }
 
 void Container::UserRemoveCableFromPin(const ConnectionInfo &pin)
 {
     RemoveCableFromPin(pin);
     myHost->SetSolverUpdateNeeded();
+
+    Updated();
 }
 
 /*!

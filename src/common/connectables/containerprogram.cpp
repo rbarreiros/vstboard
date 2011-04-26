@@ -151,7 +151,7 @@ void ContainerProgram::Unload()
 
 void ContainerProgram::SaveRendererState()
 {
-    timeSavedRendererNodes = container->GetLastUpdate();
+    timeSavedRendererNodes = QTime::currentTime();
     listOfRendererNodes = myHost->GetRenderer()->SaveNodes();
 }
 
