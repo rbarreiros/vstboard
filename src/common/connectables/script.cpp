@@ -1,10 +1,12 @@
 #include "script.h"
 #include "../mainhost.h"
+#include "../mainwindow.h"
 
 using namespace Connectables;
 
 Script::Script(MainHost *host, int index, const ObjectInfo &info) :
-    Object(host,index,info)
+    Object(host,index,info),
+    editorWnd(0)
 {
     setObjectName( QString("objScript%1").arg(index) );
     objScriptName = objectName();
@@ -12,28 +14,68 @@ Script::Script(MainHost *host, int index, const ObjectInfo &info) :
 
     QScriptValue scriptObj = myHost->scriptEngine.newQObject(this);
     myHost->scriptEngine.globalObject().setProperty(objScriptName, scriptObj);
+
+    //editor pin
+    listEditorVisible << "hide";
+    listEditorVisible << "show";
+    listParameterPinIn->AddPin(FixedPinNumber::editorVisible);
+
+
+//    QString fileName = "C:\\Users\\CtrlBrk\\Documents\\vstboard.shadow.32\\bin\\debug\\script.qs";
+//    QFile scriptFile(fileName);
+//    if (!scriptFile.open(QIODevice::ReadOnly)) {
+//        QMessageBox m(
+//            QMessageBox::Critical,
+//            tr("Script error"),
+//            tr("Can't open %1").arg(fileName)
+//        );
+//        m.exec();
+//    }
+
+//    QTextStream stream(&scriptFile);
+//    scriptText = stream.readAll();
+//    scriptFile.close();
+
+    connect(this, SIGNAL(_dspMsg(QString,QString)),
+            this, SLOT(DspMsg(QString,QString)),
+            Qt::QueuedConnection);
+
+    editorWnd = new View::ScriptEditor(myHost->mainWindow);
+    connect(editorWnd, SIGNAL(Execute(QString)),
+            this,SLOT(ReplaceScript(QString)));
+    connect(editorWnd, SIGNAL(Hide()),
+            this, SLOT(OnHideEditor()));
+    connect(editorWnd, SIGNAL(destroyed()),
+            this, SLOT(EditorDestroyed()));
 }
+
+
 
 bool Script::Open()
 {
-    QString fileName = "C:\\Users\\CtrlBrk\\Documents\\vstboard.shadow.msvc\\bin\\debug\\script.qs";
-    QFile scriptFile(fileName);
-    if (!scriptFile.open(QIODevice::ReadOnly)) {
-        QMessageBox m(
-            QMessageBox::Critical,
-            tr("Script error"),
-            tr("Can't open %1").arg(fileName)
-        );
-        m.exec();
-        return false;
+    static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::editorVisible))->SetAlwaysVisible(true);
+
+    if(scriptText.isEmpty()) {
+        scriptText = "\
+this.open = function() {\n\
+    obj.listParameterPinIn.nbPins=1;\n\
+    obj.listParameterPinOut.nbPins=1;\n\
+    obj.listAudioPinIn.nbPins=1;\n\
+    obj.listAudioPinOut.nbPins=1;\n\
+}\n\
+\n\
+this.render = function() {\n\
+\n\
+}";
     }
 
-    QTextStream stream(&scriptFile);
-    QString contents = stream.readAll();
-    scriptFile.close();
+    mutexScript.lock();
 
-    QScriptSyntaxCheckResult chk = myHost->scriptEngine.checkSyntax(contents);
+    QScriptSyntaxCheckResult chk = myHost->scriptEngine.checkSyntax(scriptText);
     if(chk.state()!=QScriptSyntaxCheckResult::Valid) {
+        comiledScript="";
+        mutexScript.unlock();
+
         QMessageBox msg(
             QMessageBox::Critical,
             tr("Script syntax error"),
@@ -43,12 +85,13 @@ bool Script::Open()
         return false;
     }
 
-    //contents.replace("obj.", objScriptName+".");
-    contents = QString( "function %1class(t) { obj=t; %2 }  %1m = new %1class(%1);" ).arg(objScriptName).arg(contents);
+    comiledScript = QString( "function %1class(t) { obj=t; %2 }  %1m = new %1class(%1);" ).arg(objScriptName).arg(scriptText);
+    QScriptValue result = myHost->scriptEngine.evaluate(comiledScript);
 
-    debug2(<<contents)
-    QScriptValue result = myHost->scriptEngine.evaluate(contents, fileName);
     if(myHost->scriptEngine.hasUncaughtException()) {
+        comiledScript="";
+        mutexScript.unlock();
+
         int line = myHost->scriptEngine.uncaughtExceptionLineNumber();
         QMessageBox msg(
             QMessageBox::Critical,
@@ -56,44 +99,157 @@ bool Script::Open()
             tr("line %1\n%2").arg(line).arg(result.toString())
         );
         msg.exec();
+
         return false;
     }
 
     myHost->scriptEngine.evaluate( objScriptName+"m.open();" );
 
+    mutexScript.unlock();
+
+    return true;
+}
+
+Script::~Script()
+{
+    Close();
+}
+
+bool Script::Close()
+{
+    if(editorWnd) {
+        editorWnd->close();
+        editorWnd->deleteLater();
+        editorWnd=0;
+    }
     return true;
 }
 
 void Script::Render()
 {
-    myHost->scriptEngine.evaluate( objScriptName+"m.render();" );
+    mutexScript.lock();
 
+    foreach(Pin *pin, listAudioPinIn->listPins) {
+        static_cast<AudioPinIn*>(pin)->GetBuffer()->ConsumeStack();
+        static_cast<AudioPinIn*>(pin)->NewRenderLoop();
+    }
+    foreach(Pin *pin, listAudioPinOut->listPins) {
+        static_cast<AudioPinOut*>(pin)->NewRenderLoop();
+    }
+
+    if(!comiledScript.isEmpty()) {
+        QScriptValue result = myHost->scriptEngine.evaluate( objScriptName+"m.render();" );
+        if(myHost->scriptEngine.hasUncaughtException()) {
+            comiledScript="";
+
+            int line = myHost->scriptEngine.uncaughtExceptionLineNumber();
+            emit _dspMsg(
+                tr("Script exception"),
+                tr("line %1\n%2").arg(line).arg(result.toString())
+            );
+        }
+    }
+
+    foreach(Pin *pin, listAudioPinOut->listPins) {
+        static_cast<AudioPinOut*>(pin)->GetBuffer()->ConsumeStack();
+        static_cast<AudioPinOut*>(pin)->SendAudioBuffer();
+    }
+
+    mutexScript.unlock();
 }
 
 void Script::alert(const QString &str)
 {
+    emit _dspMsg(objectName(),str);
+}
+
+void Script::DspMsg(const QString &title, const QString &str)
+{
     QMessageBox msg(
         QMessageBox::Information,
-        objectName(),
+        title,
         str
     );
     msg.exec();
 }
 
+void Script::ReplaceScript(const QString &str)
+{
+    scriptText = str;
+    OnProgramDirty();
+    Open();
+}
+
 Pin* Script::CreatePin(const ConnectionInfo &info)
 {
-    if(info.type == PinType::Parameter) {
-        ParameterPin *newPin = 0;
-        switch(info.direction) {
-        case PinDirection::Input :
-            newPin = new ParameterPinIn(this,info.pinNumber,0,true,QString("ParamIn%1").arg(info.pinNumber));
-            break;
-        case PinDirection::Output :
-            newPin = new ParameterPinOut(this,info.pinNumber,0,true,QString("ParamOut%1").arg(info.pinNumber));
-            break;
-        }
-        newPin->SetLimitsEnabled(false);
+    Pin *newPin = Object::CreatePin(info);
+    if(newPin)
         return newPin;
+
+    ParameterPin *pin=0;
+
+    if(info.type == PinType::Parameter) {
+        switch(info.direction) {
+            case PinDirection::Input :
+                pin = new ParameterPinIn(this,info.pinNumber,0,true,QString("ParamIn%1").arg(info.pinNumber));
+                pin->SetAlwaysVisible(true);
+                return pin;
+            case PinDirection::Output :
+                pin = new ParameterPinOut(this,info.pinNumber,0,true,QString("ParamOut%1").arg(info.pinNumber));
+                pin->SetAlwaysVisible(true);
+                return pin;
+        }
     }
-    return Object::CreatePin(info);
+
+    return 0;
+}
+
+void Script::OnShowEditor()
+{
+    if(!editorWnd || editorWnd->isVisible())
+        return;
+
+    editorWnd->SetScript(scriptText);
+    editorWnd->show();
+}
+
+void Script::OnHideEditor()
+{
+    if(!editorWnd || !editorWnd->isVisible())
+        return;
+    editorWnd->close();
+}
+
+void Script::OnEditorClosed()
+{
+    ToggleEditor(false);
+}
+
+void Script::EditorDestroyed()
+{
+    editorWnd=0;
+    ToggleEditor(false);
+}
+
+void Script::SaveProgram()
+{
+    if(!currentProgram || !currentProgram->isDirty)
+        return;
+
+    Object::SaveProgram();
+
+    currentProgram->listOtherValues.insert(0, scriptText);
+}
+
+void Script::LoadProgram(int prog)
+{
+    Object::LoadProgram(prog);
+    if(!currentProgram)
+        return;
+
+    scriptText = currentProgram->listOtherValues.value(0,"").toString();
+    Open();
+
+    if(editorWnd && editorWnd->isVisible())
+        editorWnd->SetScript(scriptText);
 }

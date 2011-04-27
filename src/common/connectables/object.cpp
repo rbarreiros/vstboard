@@ -257,10 +257,7 @@ void Object::UnloadProgram()
   */
 void Object::SaveProgram()
 {
-    if(!currentProgram)
-        return;
-
-    if(!currentProgram->isDirty)
+    if(!currentProgram || !currentProgram->isDirty)
         return;
 
     currentProgram->Save(listParameterPinIn,listParameterPinOut);
@@ -571,18 +568,15 @@ Pin* Object::CreatePin(const ConnectionInfo &info)
         case PinDirection::Input :
             switch(info.type) {
                 case PinType::Audio : {
-                    AudioPinIn *newPin = new AudioPinIn(this,info.pinNumber,myHost->GetBufferSize(),doublePrecision);
-                    return newPin;
+                    return new AudioPinIn(this,info.pinNumber,myHost->GetBufferSize(),doublePrecision);
                 }
 
                 case PinType::Midi : {
-                    MidiPinIn *newPin = new MidiPinIn(this,info.pinNumber);
-                    return newPin;
+                    return new MidiPinIn(this,info.pinNumber);
                 }
 
                 case PinType::Bridge : {
-                    BridgePinIn *newPin = new BridgePinIn(this,info.pinNumber,info.bridge);
-                    return newPin;
+                    return new BridgePinIn(this,info.pinNumber,info.bridge);
                 }
 
                 case PinType::Parameter : {
@@ -609,18 +603,15 @@ Pin* Object::CreatePin(const ConnectionInfo &info)
         case PinDirection::Output :
             switch(info.type) {
                 case PinType::Audio : {
-                    AudioPinOut *newPin = new AudioPinOut(this,info.pinNumber,myHost->GetBufferSize(),doublePrecision);
-                    return newPin;
+                    return new AudioPinOut(this,info.pinNumber,myHost->GetBufferSize(),doublePrecision);
                 }
 
                 case PinType::Midi : {
-                    MidiPinOut *newPin = new MidiPinOut(this,info.pinNumber);
-                    return newPin;
+                    return new MidiPinOut(this,info.pinNumber);
                 }
 
                 case PinType::Bridge : {
-                    BridgePinOut *newPin = new BridgePinOut(this,info.pinNumber,info.bridge);
-                    return newPin;
+                    return new BridgePinOut(this,info.pinNumber,info.bridge);
                 }
 
                 default :

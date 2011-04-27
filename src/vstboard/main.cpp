@@ -90,6 +90,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<ObjectInfo>("ObjectInfo");
     qRegisterMetaType<int>("ObjType::Enum");
     qRegisterMetaType<QVariant>("QVariant");
+    qRegisterMetaType<AudioBuffer*>("AudioBuffer*");
 
     qRegisterMetaTypeStreamOperators<ObjectInfo>("ObjectInfo");
 

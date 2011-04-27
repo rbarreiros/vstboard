@@ -33,6 +33,7 @@ using namespace Connectables;
 
 PinsList::PinsList(MainHost *myHost, Object *parent) :
         QObject(parent),
+        pinCount(0),
         parent(parent),
         myHost(myHost)
 {
@@ -173,11 +174,11 @@ void PinsList::AsyncRemovePin(int nb)
 
 void PinsList::SetNbPins(int nb)
 {
-    for(int n = listPins.count(); n>nb; n--) {
+    for(int n = pinCount; n>nb; n--) {
         RemovePin( n-1 );
     }
 
-    for(int n = listPins.count(); n<nb; n++) {
+    for(int n = pinCount; n<nb; n++) {
         AddPin( n );
     }
 }
@@ -196,6 +197,9 @@ Pin * PinsList::AddPin(int nb)
     }
     listPins.insert(nb, newPin);
 
+    if(nb<60000)
+        pinCount++;
+
     if(modelList.isValid())
         newPin->SetParentModelIndex(modelList);
 
@@ -207,6 +211,9 @@ void PinsList::RemovePin(int nb)
 {
     if(!listPins.contains(nb))
         return;
+
+    if(nb<60000)
+        pinCount--;
 
     parent->OnProgramDirty();
     delete listPins.take(nb);
