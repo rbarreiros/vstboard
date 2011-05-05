@@ -28,6 +28,8 @@ namespace Connectables {
         View::ScriptEditor *editorWnd;
         QMutex mutexScript;
 
+        QScriptValue scriptThisObj;
+        QScriptValue objScript;
         QScriptValue openScript;
         QScriptValue renderScript;
 

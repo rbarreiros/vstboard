@@ -12,8 +12,8 @@ Script::Script(MainHost *host, int index, const ObjectInfo &info) :
     objScriptName = objectName();
     objScriptName.append("sc");
 
-    QScriptValue scriptObj = myHost->scriptEngine.newQObject(this);
-    myHost->scriptEngine.globalObject().setProperty(objScriptName, scriptObj);
+    scriptThisObj = myHost->scriptEngine.newQObject(this);
+    myHost->scriptEngine.globalObject().setProperty(objScriptName, scriptThisObj);
 
     //editor pin
     listEditorVisible << "hide";
@@ -71,16 +71,16 @@ bool Script::Open()
 
     if(scriptText.isEmpty()) {
         scriptText = "\
-({open: function() {\n\
-    this.listParameterPinIn.nbPins=1;\n\
-    this.listParameterPinOut.nbPins=1;\n\
-    this.listAudioPinIn.nbPins=1;\n\
-    this.listAudioPinOut.nbPins=1;\n\
+({open: function(obj) {\n\
+    obj.listParameterPinIn.nbPins=1;\n\
+    obj.listParameterPinOut.nbPins=1;\n\
+    obj.listAudioPinIn.nbPins=1;\n\
+    obj.listAudioPinOut.nbPins=1;\n\
 },\n\
 \n\
-render: function() {\n\
+render: function(obj) {\n\
 \n\
-})}";
+}})";
     }
 
     mutexScript.lock();
@@ -102,28 +102,44 @@ render: function() {\n\
 //    comiledScript = QString( "function %1class(t) { obj=t; %2 }  %1m = new %1class(%1);" ).arg(objScriptName).arg(scriptText);
 //    QScriptValue result = myHost->scriptEngine.evaluate(comiledScript);
 
-//    if(myHost->scriptEngine.hasUncaughtException()) {
-//        comiledScript="";
-//        mutexScript.unlock();
 
-//        int line = myHost->scriptEngine.uncaughtExceptionLineNumber();
-//        QMessageBox msg(
-//            QMessageBox::Critical,
-//            tr("Script exception"),
-//            tr("line %1\n%2").arg(line).arg(result.toString())
-//        );
-//        msg.exec();
-
-//        return false;
-//    }
 
 //    myHost->scriptEngine.evaluate( objScriptName+"m.open();" );
 
-    QScriptValue objScript = myHost->scriptEngine.evaluate(scriptText);
+    objScript = myHost->scriptEngine.evaluate(scriptText);
+    if(myHost->scriptEngine.hasUncaughtException()) {
+        comiledScript="";
+        mutexScript.unlock();
+
+        int line = myHost->scriptEngine.uncaughtExceptionLineNumber();
+        QMessageBox msg(
+            QMessageBox::Critical,
+            tr("Script exception"),
+            tr("line %1\n%2").arg(line).arg(objScript.toString())
+        );
+        msg.exec();
+
+        return false;
+    }
+
     openScript = objScript.property("open");
     renderScript = objScript.property("render");
 
-    QScriptValue result = openScript.call(object);
+    QScriptValue result = openScript.call(objScript, QScriptValueList() << scriptThisObj);
+    if(myHost->scriptEngine.hasUncaughtException()) {
+        comiledScript="";
+        mutexScript.unlock();
+
+        int line = myHost->scriptEngine.uncaughtExceptionLineNumber();
+        QMessageBox msg(
+            QMessageBox::Critical,
+            tr("Script exception"),
+            tr("line %1\n%2").arg(line).arg(result.toString())
+        );
+        msg.exec();
+
+        return false;
+    }
 
     mutexScript.unlock();
 
@@ -157,7 +173,7 @@ void Script::Render()
         static_cast<AudioPinOut*>(pin)->NewRenderLoop();
     }
 
-    QScriptValue result = renderScript.call(object);
+    QScriptValue result = renderScript.call(objScript, QScriptValueList() << scriptThisObj);
 
 //    if(!comiledScript.isEmpty()) {
 //        QScriptValue result = myHost->scriptEngine.evaluate( objScriptName+"m.render();" );
