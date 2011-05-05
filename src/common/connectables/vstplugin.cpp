@@ -800,6 +800,16 @@ Pin* VstPlugin::CreatePin(const ConnectionInfo &info)
                 newPin->SetLimitsEnabled(false);
                 return newPin;
             }
+            case FixedPinNumber::editorVisible : {
+                ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::editorVisible,"hide",&listEditorVisible,false,tr("Editor"));
+                newPin->SetLimitsEnabled(false);
+                return newPin;
+            }
+            case FixedPinNumber::learningMode : {
+                ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::learningMode,"off",&listIsLearning,false,tr("Learn"));
+                newPin->SetLimitsEnabled(false);
+                return newPin;
+            }
             default : {
                 if(closed)
                     return new ParameterPinIn(this,info.pinNumber,0,false,"",true);

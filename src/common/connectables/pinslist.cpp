@@ -47,9 +47,9 @@ PinsList::PinsList(MainHost *myHost, Object *parent) :
 
 void PinsList::SetContainerId(quint16 id)
 {
-    containerId=id;
+    connInfo.container=id;
     foreach(Pin* pin, listPins) {
-        pin->SetContainerId(containerId);
+        pin->SetContainerId(id);
     }
 }
 

@@ -70,7 +70,6 @@ namespace Connectables {
     protected:
         QPersistentModelIndex modelList;
         Object *parent;
-        quint16 containerId;
         MainHost *myHost;
 
     signals :

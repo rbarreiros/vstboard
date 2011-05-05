@@ -227,8 +227,11 @@ void Container::LoadProgram(int prog)
 
     if(oldProg) {
         //update the saved rendering map
-        if(optimizerFlag && currentProgId!=EMPTY_PROGRAM && currentProgId!=TEMP_PROGRAM)
-            listContainerPrograms.value(currentProgId)->SaveRendererState();
+        if(optimizerFlag && currentProgId!=EMPTY_PROGRAM && currentProgId!=TEMP_PROGRAM) {
+            ContainerProgram *p = listContainerPrograms.value(currentProgId,0);
+            if(p)
+                p->SaveRendererState();
+        }
 
         //remove objects from the old program if not needed anymore
         foreach(QSharedPointer<Object>objPtr, oldProg->listObjects) {

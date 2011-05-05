@@ -19,11 +19,17 @@ namespace Connectables {
         Pin* CreatePin(const ConnectionInfo &info);
 
     protected:
+        /// list of values used by the editor pin (0 and 1)
+        QList<QVariant>listEditorVisible;
+
         QString objScriptName;
         QString scriptText;
         QString comiledScript;
         View::ScriptEditor *editorWnd;
         QMutex mutexScript;
+
+        QScriptValue openScript;
+        QScriptValue renderScript;
 
     signals :
         void _dspMsg(const QString &title, const QString &str);

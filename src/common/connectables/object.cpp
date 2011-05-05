@@ -581,16 +581,7 @@ Pin* Object::CreatePin(const ConnectionInfo &info)
 
                 case PinType::Parameter : {
                     switch(info.pinNumber) {
-                        case FixedPinNumber::editorVisible : {
-                            ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::editorVisible,"hide",&listEditorVisible,false,tr("Editor"));
-                            newPin->SetLimitsEnabled(false);
-                            return newPin;
-                        }
-                        case FixedPinNumber::learningMode : {
-                            ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::learningMode,"off",&listIsLearning,false,tr("Learn"));
-                            newPin->SetLimitsEnabled(false);
-                            return newPin;
-                        }
+
                     }
 
                     break;

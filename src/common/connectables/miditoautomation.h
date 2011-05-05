@@ -39,6 +39,9 @@ namespace Connectables {
         QList<QVariant> listValues;
         QHash<quint16,quint8>listChanged;
 
+        /// list of values used by the learn pin (off, learn, unlearn)
+        QList<QVariant>listIsLearning;
+
         enum paramNumbers {
             para_prog=128,
             para_velocity,

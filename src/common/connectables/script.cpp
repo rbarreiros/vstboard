@@ -55,18 +55,32 @@ bool Script::Open()
 {
     static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::editorVisible))->SetAlwaysVisible(true);
 
+//    if(scriptText.isEmpty()) {
+//        scriptText = "\
+//this.open = function() {\n\
+//    obj.listParameterPinIn.nbPins=1;\n\
+//    obj.listParameterPinOut.nbPins=1;\n\
+//    obj.listAudioPinIn.nbPins=1;\n\
+//    obj.listAudioPinOut.nbPins=1;\n\
+//}\n\
+//\n\
+//this.render = function() {\n\
+//\n\
+//}";
+//    }
+
     if(scriptText.isEmpty()) {
         scriptText = "\
-this.open = function() {\n\
-    obj.listParameterPinIn.nbPins=1;\n\
-    obj.listParameterPinOut.nbPins=1;\n\
-    obj.listAudioPinIn.nbPins=1;\n\
-    obj.listAudioPinOut.nbPins=1;\n\
-}\n\
+({open: function() {\n\
+    this.listParameterPinIn.nbPins=1;\n\
+    this.listParameterPinOut.nbPins=1;\n\
+    this.listAudioPinIn.nbPins=1;\n\
+    this.listAudioPinOut.nbPins=1;\n\
+},\n\
 \n\
-this.render = function() {\n\
+render: function() {\n\
 \n\
-}";
+})}";
     }
 
     mutexScript.lock();
@@ -85,25 +99,31 @@ this.render = function() {\n\
         return false;
     }
 
-    comiledScript = QString( "function %1class(t) { obj=t; %2 }  %1m = new %1class(%1);" ).arg(objScriptName).arg(scriptText);
-    QScriptValue result = myHost->scriptEngine.evaluate(comiledScript);
+//    comiledScript = QString( "function %1class(t) { obj=t; %2 }  %1m = new %1class(%1);" ).arg(objScriptName).arg(scriptText);
+//    QScriptValue result = myHost->scriptEngine.evaluate(comiledScript);
 
-    if(myHost->scriptEngine.hasUncaughtException()) {
-        comiledScript="";
-        mutexScript.unlock();
+//    if(myHost->scriptEngine.hasUncaughtException()) {
+//        comiledScript="";
+//        mutexScript.unlock();
 
-        int line = myHost->scriptEngine.uncaughtExceptionLineNumber();
-        QMessageBox msg(
-            QMessageBox::Critical,
-            tr("Script exception"),
-            tr("line %1\n%2").arg(line).arg(result.toString())
-        );
-        msg.exec();
+//        int line = myHost->scriptEngine.uncaughtExceptionLineNumber();
+//        QMessageBox msg(
+//            QMessageBox::Critical,
+//            tr("Script exception"),
+//            tr("line %1\n%2").arg(line).arg(result.toString())
+//        );
+//        msg.exec();
 
-        return false;
-    }
+//        return false;
+//    }
 
-    myHost->scriptEngine.evaluate( objScriptName+"m.open();" );
+//    myHost->scriptEngine.evaluate( objScriptName+"m.open();" );
+
+    QScriptValue objScript = myHost->scriptEngine.evaluate(scriptText);
+    openScript = objScript.property("open");
+    renderScript = objScript.property("render");
+
+    QScriptValue result = openScript.call(object);
 
     mutexScript.unlock();
 
@@ -137,18 +157,20 @@ void Script::Render()
         static_cast<AudioPinOut*>(pin)->NewRenderLoop();
     }
 
-    if(!comiledScript.isEmpty()) {
-        QScriptValue result = myHost->scriptEngine.evaluate( objScriptName+"m.render();" );
-        if(myHost->scriptEngine.hasUncaughtException()) {
-            comiledScript="";
+    QScriptValue result = renderScript.call(object);
 
-            int line = myHost->scriptEngine.uncaughtExceptionLineNumber();
-            emit _dspMsg(
-                tr("Script exception"),
-                tr("line %1\n%2").arg(line).arg(result.toString())
-            );
-        }
-    }
+//    if(!comiledScript.isEmpty()) {
+//        QScriptValue result = myHost->scriptEngine.evaluate( objScriptName+"m.render();" );
+//        if(myHost->scriptEngine.hasUncaughtException()) {
+//            comiledScript="";
+
+//            int line = myHost->scriptEngine.uncaughtExceptionLineNumber();
+//            emit _dspMsg(
+//                tr("Script exception"),
+//                tr("line %1\n%2").arg(line).arg(result.toString())
+//            );
+//        }
+//    }
 
     foreach(Pin *pin, listAudioPinOut->listPins) {
         static_cast<AudioPinOut*>(pin)->GetBuffer()->ConsumeStack();
@@ -191,9 +213,15 @@ Pin* Script::CreatePin(const ConnectionInfo &info)
     if(info.type == PinType::Parameter) {
         switch(info.direction) {
             case PinDirection::Input :
-                pin = new ParameterPinIn(this,info.pinNumber,0,true,QString("ParamIn%1").arg(info.pinNumber));
-                pin->SetAlwaysVisible(true);
-                return pin;
+                if(info.pinNumber == FixedPinNumber::editorVisible) {
+                    ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::editorVisible,"hide",&listEditorVisible,false,tr("Editor"));
+                    newPin->SetLimitsEnabled(false);
+                    return newPin;
+                } else {
+                    pin = new ParameterPinIn(this,info.pinNumber,0,true,QString("ParamIn%1").arg(info.pinNumber));
+                    pin->SetAlwaysVisible(true);
+                    return pin;
+                }
             case PinDirection::Output :
                 pin = new ParameterPinOut(this,info.pinNumber,0,true,QString("ParamOut%1").arg(info.pinNumber));
                 pin->SetAlwaysVisible(true);
