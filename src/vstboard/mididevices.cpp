@@ -134,7 +134,7 @@ void MidiDevices::BuildModel()
         QList<QStandardItem *>  items;
         const PmDeviceInfo *devInfo = Pm_GetDeviceInfo(i);
 
-        QString devName= QString::fromStdString(devInfo->name);
+        QString devName= QString::fromLocal8Bit(devInfo->name);
         if(lastName == devName) {
             cptDuplicateNames++;
         } else {
@@ -147,7 +147,7 @@ void MidiDevices::BuildModel()
         obj.objType = ObjType::MidiInterface;
         obj.id = i;
         obj.name = devName;
-        obj.apiName = QString::fromStdString( devInfo->interf );
+        obj.apiName = QString::fromLocal8Bit(devInfo->interf );
         obj.duplicateNamesCounter = cptDuplicateNames;
         obj.inputs = devInfo->input;
         obj.outputs = devInfo->output;
