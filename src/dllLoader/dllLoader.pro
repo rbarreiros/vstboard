@@ -4,15 +4,11 @@
 #
 #-------------------------------------------------
 
-top_srcdir  = ..
-srcdir      = dllloader
 include(../config.pri)
 
 DEFINES += APP_NAME=\\\"VstBoardLoader\\\"
 TARGET = VstBoard
 TEMPLATE = lib
-
-INCLUDEPATH += $$top_srcdir/$$VSTSDK_PATH
 
 QT       -= core gui
 LIBS += -ladvapi32
