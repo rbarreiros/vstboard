@@ -27,9 +27,14 @@ namespace Connectables {
 
     class AudioPinOut : public AudioPin
     {
+        Q_OBJECT
+        Q_PROPERTY(AudioBuffer * buffer READ GetBuff WRITE SetBuff)
     public:
         AudioPinOut(Object *parent, int number, unsigned long bufferSize, bool doublePrecision=false, bool externalAllocation = false);
         void SendAudioBuffer();
+
+        AudioBuffer *GetBuff() { return buffer; }
+        void SetBuff(AudioBuffer *buf) { buffer->AddToStack(buf); }
     };
 
 }

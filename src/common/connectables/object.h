@@ -28,8 +28,6 @@
 
 #include "../precomp.h"
 
-//#include <QtScript>
-
 #include "audiopinin.h"
 #include "audiopinout.h"
 #include "midipinin.h"
@@ -165,11 +163,6 @@ namespace Connectables {
           */
         virtual QString GetParameterName(ConnectionInfo pinInfo) {return "";}
 
-        /*!
-          Set this container as the holder of the rendering map
-          */
-        void SetOptimizerFlag(bool opt) { optimizerFlag=opt; }
-
         /// the current model index
         QPersistentModelIndex modelIndex;
 
@@ -249,15 +242,8 @@ namespace Connectables {
         /// ObjectInfo defining the object
         ObjectInfo objInfo;
 
-        /// list of values used by the editor pin (0 and 1)
-        QList<QVariant>listEditorVisible;
-
-        /// list of values used by the learn pin (off, learn, unlearn)
-        QList<QVariant>listIsLearning;
 
 //        QScriptValue scriptObj;
-
-        bool optimizerFlag;
 
     private:
         /// the current container id if not parked

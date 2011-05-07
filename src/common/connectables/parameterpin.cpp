@@ -154,6 +154,11 @@ void ParameterPin::ChangeValue(const QVariant &variant, bool fromObj)
 
 void ParameterPin::SetVariantValue(const QVariant &val)
 {
+    if(!listValues) {
+        ChangeValue(val.toFloat());
+        return;
+    }
+
     int index=listValues->indexOf(val);
     if(index==-1)
         return;

@@ -103,7 +103,8 @@ SOURCES += \
     renderer/optimizestepthread.cpp \
     renderer/renderernode.cpp \
     renderer/node.cpp \
-    views/listaudiodevicesview.cpp
+    views/listaudiodevicesview.cpp \
+    views/scripteditor.cpp
 
 HEADERS  += \
     globals.h \
@@ -180,7 +181,8 @@ HEADERS  += \
     renderer/optimizestepthread.h \
     renderer/renderernode.h \
     renderer/node.h \
-    views/listaudiodevicesview.h
+    views/listaudiodevicesview.h \
+    views/scripteditor.h
 
 FORMS += \
     views/configdialog.ui \
@@ -189,7 +191,8 @@ FORMS += \
     views/programlist.ui \
     views/aboutdialog.ui \
     views/splash.ui \
-    views/viewconfigdialog.ui
+    views/viewconfigdialog.ui \
+    views/scripteditor.ui
 
 PRECOMPILED_HEADER = precomp.h
 

@@ -22,7 +22,6 @@
 #define PROGRAMS_H
 
 #include "precomp.h"
-#include <QtScript>
 #include "globals.h"
 #include "models/programsmodel.h"
 
@@ -69,8 +68,6 @@ private:
     bool projectDirty;
 
     MainWindow *mainWindow;
-
-    QScriptValue scriptObj;
 
 signals:
     void ProgChanged(const QModelIndex &prgIndex);

@@ -56,6 +56,7 @@ ContainerProgram::ContainerProgram(const ContainerProgram& c)
     foreach(RendererNode *node, c.listOfRendererNodes) {
         listOfRendererNodes << new RendererNode(*node);
     }
+    timeSavedRendererNodes = c.timeSavedRendererNodes;
 }
 
 ContainerProgram::~ContainerProgram()
@@ -132,7 +133,6 @@ void ContainerProgram::Load(int progId)
         ++i;
     }
 
-    LoadRendererState();
     dirty=false;
 }
 
@@ -151,12 +151,21 @@ void ContainerProgram::Unload()
 
 void ContainerProgram::SaveRendererState()
 {
+    timeSavedRendererNodes = QTime::currentTime();
     listOfRendererNodes = myHost->GetRenderer()->SaveNodes();
 }
 
 void ContainerProgram::LoadRendererState()
 {
-    myHost->GetRenderer()->LoadNodes( listOfRendererNodes );
+    if(container->parentContainer) {
+        const QTime t = container->parentContainer.toStrongRef()->GetLastUpdate();
+        if(t > timeSavedRendererNodes) {
+            //my renderer map is outdated
+            myHost->SetSolverUpdateNeeded();
+        } else {
+            myHost->GetRenderer()->LoadNodes( listOfRendererNodes );
+        }
+    }
 }
 
 
@@ -188,7 +197,6 @@ bool ContainerProgram::IsDirty()
 
 void ContainerProgram::Save(bool saveChildPrograms)
 {
-    SaveRendererState();
 
     if(saveChildPrograms) {
         foreach(QSharedPointer<Object> objPtr, listObjects) {

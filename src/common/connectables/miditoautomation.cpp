@@ -33,6 +33,12 @@ MidiToAutomation::MidiToAutomation(MainHost *myHost,int index) :
     }
 
     listMidiPinIn->ChangeNumberOfPins(1);
+
+    //learning pin
+    listIsLearning << "off";
+    listIsLearning << "learn";
+    listIsLearning << "unlearn";
+    listParameterPinIn->AddPin(FixedPinNumber::learningMode);
     static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::learningMode))->SetAlwaysVisible(true);
 
     listParameterPinOut->AddPin(para_prog);
@@ -133,6 +139,14 @@ Pin* MidiToAutomation::CreatePin(const ConnectionInfo &info)
     }
 
     switch(info.direction) {
+        case PinDirection::Input : {
+            if(info.pinNumber == FixedPinNumber::learningMode) {
+                ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::learningMode,"off",&listIsLearning,false,tr("Learn"));
+                newPin->SetLimitsEnabled(false);
+                return newPin;
+            }
+            break;
+        }
         case PinDirection::Output : {
             ParameterPin *pin = 0;
 
@@ -163,10 +177,6 @@ Pin* MidiToAutomation::CreatePin(const ConnectionInfo &info)
 
             break;
         }
-        default :
-            debug("MidiToAutomation::CreatePin PinDirection")
-            return 0;
-            break;
     }
     return newPin;
 }

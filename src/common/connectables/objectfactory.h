@@ -58,8 +58,6 @@ namespace Connectables {
         hashObjects listObjects;
         int cptListObjects;
         MainHost *myHost;
-
-//        QScriptValue scriptObj;
     };
 
 }
