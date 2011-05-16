@@ -26,6 +26,8 @@
 
 using namespace Connectables;
 
+QTime ContainerProgram::unsavedTime;
+
 ContainerProgram::ContainerProgram(MainHost *myHost,Container *container) :
         container(container),
         dirty(false),

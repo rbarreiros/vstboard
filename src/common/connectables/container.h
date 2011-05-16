@@ -81,7 +81,7 @@ namespace Connectables {
 
         const QTime & GetLastUpdate() {
             if(!currentProgram)
-                return QTime();
+                return ContainerProgram::unsavedTime;
             return currentProgram->timeSavedRendererNodes;
         }
 
