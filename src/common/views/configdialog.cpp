@@ -223,19 +223,42 @@ const QString ConfigDialog::defaultProjectFile(MainHost *myHost)
 
 const QString ConfigDialog::defaultVstPath(MainHost *myHost)
 {
-    QString vstPath = myHost->GetSetting("defaultVstPath","systemDefault").toString();
+    //if not set, we want the system default path
+    QString vstPathType = myHost->GetSetting("defaultVstPath","systemDefault").toString();
 
-    if(vstPath=="systemDefault") {
-        QSettings vstSettings("HKEY_LOCAL_MACHINE\\Software\\VST", QSettings::NativeFormat);
-        vstPath = vstSettings.value("VSTPluginsPath", "").toString();
-        vstPath.replace("\\","/");
+    QSettings vstSettings("HKEY_LOCAL_MACHINE\\Software\\VST", QSettings::NativeFormat);
+    QString defaultPath = vstSettings.value("VSTPluginsPath", "").toString();
+    defaultPath.replace("\\","/");
+
+    QString lastPath = myHost->GetSetting("lastVstPath", "").toString();
+
+    //if we want the path from the last session
+    if(vstPathType == "fromLastSession") {
+
+        //get the path from the last session
+        if(!lastPath.isEmpty())
+            return lastPath;
+
+        //no last session, return the system default
+        if(!defaultPath.isEmpty())
+            return defaultPath;
+
+        //no system default, return the home dir
+        return QDir::homePath();
     }
 
-    if(vstPath.isEmpty() || vstPath == "fromLastSession") {
-        vstPath = myHost->GetSetting("lastVstPath", QDir::homePath()).toString();
-    }
+    //if we want the system default vst path
 
-    return vstPath;
+    //get the system default
+    if(!defaultPath.isEmpty())
+        return defaultPath;
+
+    //no system default, return the path from last session
+    if(!lastPath.isEmpty())
+        return lastPath;
+
+    //no last session path, return the home dir
+    return QDir::homePath();
 }
 
 const QString ConfigDialog::defaultBankPath(MainHost *myHost)
