@@ -34,6 +34,7 @@ Programs::Programs(MainHost *parent) :
     projectDirty(false),
     mainWindow(0)
 {
+    setObjectName("Programs");
     model=new ProgramsModel(parent);
     connect( model, SIGNAL( rowsRemoved( QModelIndex , int, int )),
             this, SLOT(rowsRemoved( QModelIndex, int, int )));

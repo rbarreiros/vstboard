@@ -31,6 +31,9 @@ class Optimizer;
 class Programs : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(int prog READ GetCurrentMidiProg WRITE ChangeProg)
+    Q_PROPERTY(int group READ GetCurrentMidiGroup WRITE ChangeGroup)
+
 public:
     explicit Programs(MainHost *parent = 0);
     void BuildModel();

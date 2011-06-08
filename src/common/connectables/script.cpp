@@ -4,6 +4,8 @@
 
 using namespace Connectables;
 
+QMutex Script::mutexScript;
+
 Script::Script(MainHost *host, int index, const ObjectInfo &info) :
     Object(host,index,info),
     editorWnd(0)
@@ -13,28 +15,11 @@ Script::Script(MainHost *host, int index, const ObjectInfo &info) :
     objScriptName.append("sc");
 
     scriptThisObj = myHost->scriptEngine.newQObject(this);
-    myHost->scriptEngine.globalObject().setProperty(objScriptName, scriptThisObj);
+    //myHost->scriptEngine.globalObject().setProperty(objScriptName, scriptThisObj);
 
-    //editor pin
     listEditorVisible << "hide";
     listEditorVisible << "show";
     listParameterPinIn->AddPin(FixedPinNumber::editorVisible);
-
-
-//    QString fileName = "C:\\Users\\CtrlBrk\\Documents\\vstboard.shadow.32\\bin\\debug\\script.qs";
-//    QFile scriptFile(fileName);
-//    if (!scriptFile.open(QIODevice::ReadOnly)) {
-//        QMessageBox m(
-//            QMessageBox::Critical,
-//            tr("Script error"),
-//            tr("Can't open %1").arg(fileName)
-//        );
-//        m.exec();
-//    }
-
-//    QTextStream stream(&scriptFile);
-//    scriptText = stream.readAll();
-//    scriptFile.close();
 
     connect(this, SIGNAL(_dspMsg(QString,QString)),
             this, SLOT(DspMsg(QString,QString)),
@@ -55,23 +40,10 @@ bool Script::Open()
 {
     static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::editorVisible))->SetAlwaysVisible(true);
 
-//    if(scriptText.isEmpty()) {
-//        scriptText = "\
-//this.open = function() {\n\
-//    obj.listParameterPinIn.nbPins=1;\n\
-//    obj.listParameterPinOut.nbPins=1;\n\
-//    obj.listAudioPinIn.nbPins=1;\n\
-//    obj.listAudioPinOut.nbPins=1;\n\
-//}\n\
-//\n\
-//this.render = function() {\n\
-//\n\
-//}";
-//    }
-
     if(scriptText.isEmpty()) {
         scriptText = "\
-({open: function(obj) {\n\
+({\n\
+open: function(obj) {\n\
     obj.listParameterPinIn.nbPins=1;\n\
     obj.listParameterPinOut.nbPins=1;\n\
     obj.listAudioPinIn.nbPins=1;\n\
@@ -79,8 +51,10 @@ bool Script::Open()
 },\n\
 \n\
 render: function(obj) {\n\
-\n\
-}})";
+    obj.ParamOut0.value=obj.ParamIn0.value;\n\
+    obj.AudioOut0.buffer=obj.AudioIn0.buffer;\n\
+}\n\
+})";
     }
 
     mutexScript.lock();
@@ -175,18 +149,18 @@ void Script::Render()
 
     QScriptValue result = renderScript.call(objScript, QScriptValueList() << scriptThisObj);
 
-//    if(!comiledScript.isEmpty()) {
-//        QScriptValue result = myHost->scriptEngine.evaluate( objScriptName+"m.render();" );
-//        if(myHost->scriptEngine.hasUncaughtException()) {
-//            comiledScript="";
+    if(!comiledScript.isEmpty()) {
+        QScriptValue result = myHost->scriptEngine.evaluate( objScriptName+"m.render();" );
+        if(myHost->scriptEngine.hasUncaughtException()) {
+            comiledScript="";
 
-//            int line = myHost->scriptEngine.uncaughtExceptionLineNumber();
-//            emit _dspMsg(
-//                tr("Script exception"),
-//                tr("line %1\n%2").arg(line).arg(result.toString())
-//            );
-//        }
-//    }
+            int line = myHost->scriptEngine.uncaughtExceptionLineNumber();
+            emit _dspMsg(
+                tr("Script exception"),
+                tr("line %1\n%2").arg(line).arg(result.toString())
+            );
+        }
+    }
 
     foreach(Pin *pin, listAudioPinOut->listPins) {
         static_cast<AudioPinOut*>(pin)->GetBuffer()->ConsumeStack();
