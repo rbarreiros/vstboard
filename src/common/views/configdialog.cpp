@@ -225,14 +225,14 @@ const QString ConfigDialog::defaultVstPath(MainHost *myHost)
 {
     QString vstPath = myHost->GetSetting("defaultVstPath","systemDefault").toString();
 
-    if(vstPath == "fromLastSession") {
-        vstPath = myHost->GetSetting("lastVstPath","").toString();
+    if(vstPath=="systemDefault") {
+        QSettings vstSettings("HKEY_LOCAL_MACHINE\\Software\\VST", QSettings::NativeFormat);
+        vstPath = vstSettings.value("VSTPluginsPath", "").toString();
+        vstPath.replace("\\","/");
     }
 
-    if(vstPath.isEmpty() || vstPath=="systemDefault") {
-        QSettings vstSettings("HKEY_LOCAL_MACHINE\\Software\\VST", QSettings::NativeFormat);
-        vstPath = vstSettings.value("VSTPluginsPath", QDir::homePath()).toString();
-        vstPath.replace("\\","/");
+    if(vstPath.isEmpty() || vstPath == "fromLastSession") {
+        vstPath = myHost->GetSetting("lastVstPath", QDir::homePath()).toString();
     }
 
     return vstPath;
