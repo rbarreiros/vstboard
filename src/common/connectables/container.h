@@ -113,6 +113,8 @@ namespace Connectables {
         /// id of the progam to change on the next rendering loop
         int progToSet;
 
+        QMutex progLoadMutex;
+
     public slots:
         void UserAddObject(QSharedPointer<Object> objPtr);
         void UserParkObject(QSharedPointer<Object> objPtr);

@@ -212,6 +212,8 @@ void Container::SetSampleRate(float rate)
 
 void Container::LoadProgram(int prog)
 {
+    QMutexLocker ml(&progLoadMutex);
+
     //if prog is already loaded, update model
     if(prog==currentProgId && currentProgram) {
         UpdateModelNode();
