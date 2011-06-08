@@ -31,6 +31,12 @@ class Optimizer;
 class Programs : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(int prog READ GetCurrentMidiProg WRITE ChangeProg)
+    Q_PROPERTY(int group READ GetCurrentMidiGroup WRITE ChangeGroup)
+    Q_PROPERTY(int nbProgs READ GetNbOfProgs)
+    Q_PROPERTY(int nbGroups READ GetNbOfGroups)
+
+
 public:
     explicit Programs(MainHost *parent = 0);
     void BuildModel();
@@ -44,6 +50,9 @@ public:
     int GetCurrentMidiGroup() const;
     int GetCurrentMidiProg() const;
     void SetMainWindow(MainWindow *win) {mainWindow=win;}
+
+    int GetNbOfProgs();
+    int GetNbOfGroups();
 
     Optimizer *optimizer;
 
