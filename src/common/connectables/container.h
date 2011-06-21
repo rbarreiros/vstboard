@@ -79,11 +79,7 @@ namespace Connectables {
                 childContainer.toStrongRef()->Updated();
         }
 
-        const QTime & GetLastUpdate() {
-            if(!currentProgram)
-                return ContainerProgram::unsavedTime;
-            return currentProgram->timeSavedRendererNodes;
-        }
+        const QTime GetLastUpdate();
 
     protected:
         void AddChildObject(QSharedPointer<Object> objPtr);

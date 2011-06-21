@@ -579,13 +579,6 @@ Pin* Object::CreatePin(const ConnectionInfo &info)
                     return new BridgePinIn(this,info.pinNumber,info.bridge);
                 }
 
-                case PinType::Parameter : {
-                    switch(info.pinNumber) {
-
-                    }
-
-                    break;
-                }
                 default :
                     return 0;
             }

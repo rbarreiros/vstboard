@@ -274,6 +274,22 @@ void Container::LoadProgram(int prog)
     //Updated();
 }
 
+const QTime Container::GetLastUpdate() {
+    QTime parentTime;
+    QTime myTime;
+
+    if(parentContainer)
+        parentTime = parentContainer.toStrongRef()->GetLastUpdate();
+
+    if(currentProgram)
+        myTime = currentProgram->timeSavedRendererNodes;
+
+    if(myTime>parentTime)
+        return myTime;
+    else
+        return parentTime;
+}
+
 void Container::SaveProgram()
 {
     if(!currentProgram && currentProgId==TEMP_PROGRAM)
