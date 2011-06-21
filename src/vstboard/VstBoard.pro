@@ -70,6 +70,10 @@ TRANSLATIONS = ../resources/translations/vstboard_fr.ts
 
 RESOURCES += ../resources/resources.qrc
 
+win32-msvc* {
+    RC_FILE = vstboard.rc
+}
+
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../common/release/ -lcommon
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../common/debug/ -lcommon
 else:unix:!symbian: LIBS += -L$$OUT_PWD/../common/ -lcommon

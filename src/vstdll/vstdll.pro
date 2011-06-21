@@ -66,12 +66,7 @@ HEADERS  += \
     views/configdialogvst.h
 
 
-FORMS +=
-
 PRECOMPILED_HEADER = ../common/precomp.h
-
-OTHER_FILES += \
-    vstdll.rc
 
 RESOURCES += ../resources/resources.qrc
 

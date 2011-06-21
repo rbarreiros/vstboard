@@ -35,7 +35,6 @@ extern "C" {
     //------------------------------------------------------------------------
     VST_EXPORT AEffect* VSTPluginMain (audioMasterCallback audioMaster)
     {
-
         // Get VST Version of the Host
         if (!audioMaster (0, audioMasterVersion, 0, 0, 0, 0))
             return 0;  // old version
