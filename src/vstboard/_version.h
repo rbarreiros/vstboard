@@ -1,5 +1,0 @@
-#define APP_VERSION "0.2-9-g8dc5cbd"
-#define APP_VERSION_MAJOR 0
-#define APP_VERSION_MINOR 2
-#define APP_VERSION_BUILD 9
-#define APP_VERSION_PATCH 0
