@@ -32,6 +32,8 @@ namespace Connectables {
     class ParameterPin : public Pin
     {
     Q_OBJECT
+    Q_PROPERTY(QVariant value READ GetVariantValue WRITE SetVariantValue)
+
     public:
         ParameterPin(Object *parent, PinDirection::Enum direction, int number, float defaultValue, bool defaultVisible, const QString &name="", bool nameCanChange=false, bool bridge=false);
         ParameterPin(Object *parent, PinDirection::Enum direction, int number, const QVariant &defaultVariantValue, QList<QVariant> *listValues, bool defaultVisible, const QString &name="", bool nameCanChange=false, bool bridge=false);
@@ -44,7 +46,7 @@ namespace Connectables {
         virtual void OnValueChanged(float val);
 
         inline int GetIndex() {return outStepIndex;}
-        inline QVariant GetVariantValue() {return listValues->at(outStepIndex);}
+        inline QVariant GetVariantValue() {if(!listValues) return outValue; return listValues->at(outStepIndex);}
         void SetVariantValue(const QVariant &val);
 
         void GetDefault(ObjectParameter &param);

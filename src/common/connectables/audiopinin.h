@@ -27,9 +27,13 @@ namespace Connectables {
 
     class AudioPinIn : public AudioPin
     {
+        Q_OBJECT
+        Q_PROPERTY(AudioBuffer * buffer READ GetBuff)
     public:
         AudioPinIn(Object *parent, int number, unsigned long bufferSize, bool doublePrecision=false, bool externalAllocation = false);
         void ReceiveMsg(const PinMessage::Enum msgType,void *data=0);
+
+        AudioBuffer *GetBuff() { return buffer; }
     };
 }
 #endif // CONNECTABLEAUDIOPININ_H

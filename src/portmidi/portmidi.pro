@@ -16,7 +16,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 
-srcdir      = portmidi
 include(../config.pri)
 
 CONFIG -= qt
@@ -26,20 +25,20 @@ CONFIG += staticlib
 
 DEFINES -= UNICODE
 
-INCLUDEPATH += $$top_srcdir/$$PORTMIDI_PATH/porttime
-INCLUDEPATH += $$top_srcdir/$$PORTMIDI_PATH/pm_common
+INCLUDEPATH += $$PORTMIDI_PATH/porttime
+INCLUDEPATH += $$PORTMIDI_PATH/pm_common
 
-SOURCES += $$top_srcdir/$$PORTMIDI_PATH/pm_common/portmidi.c \
-    $$top_srcdir/$$PORTMIDI_PATH/pm_common/pmutil.c
+SOURCES += $$PORTMIDI_PATH/pm_common/portmidi.c \
+    $$PORTMIDI_PATH/pm_common/pmutil.c
 
-win32:SOURCES += $$top_srcdir/$$PORTMIDI_PATH/pm_win/pmwinmm.c \
-    $$top_srcdir/$$PORTMIDI_PATH/pm_win/pmwin.c \
-    $$top_srcdir/$$PORTMIDI_PATH/porttime/ptwinmm.c
+win32:SOURCES += $$PORTMIDI_PATH/pm_win/pmwinmm.c \
+    $$PORTMIDI_PATH/pm_win/pmwin.c \
+    $$PORTMIDI_PATH/porttime/ptwinmm.c
 
 
-unix:SOURCES += $$top_srcdir/$$PORTMIDI_PATH/pm_linux/pmlinux.c \
-    $$top_srcdir/$$PORTMIDI_PATH/pm_linux/finddefault.c \
-    #$$top_srcdir/$$PORTMIDI_PATH/pm_linux/pmlinuxalsa.c \
-    $$top_srcdir/$$PORTMIDI_PATH/porttime/ptlinux.c
+unix:SOURCES += $$PORTMIDI_PATH/pm_linux/pmlinux.c \
+    $$PORTMIDI_PATH/pm_linux/finddefault.c \
+    #$$PORTMIDI_PATH/pm_linux/pmlinuxalsa.c \
+    $$PORTMIDI_PATH/porttime/ptlinux.c
 
 

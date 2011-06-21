@@ -212,6 +212,8 @@ void Container::SetSampleRate(float rate)
 
 void Container::LoadProgram(int prog)
 {
+    QMutexLocker ml(&progLoadMutex);
+
     //if prog is already loaded, update model
     if(prog==currentProgId && currentProgram) {
         UpdateModelNode();
@@ -227,8 +229,11 @@ void Container::LoadProgram(int prog)
 
     if(oldProg) {
         //update the saved rendering map
-        if(optimizerFlag && currentProgId!=EMPTY_PROGRAM && currentProgId!=TEMP_PROGRAM)
-            listContainerPrograms.value(currentProgId)->SaveRendererState();
+        if(optimizerFlag && currentProgId!=EMPTY_PROGRAM && currentProgId!=TEMP_PROGRAM) {
+            ContainerProgram *p = listContainerPrograms.value(currentProgId,0);
+            if(p)
+                p->SaveRendererState();
+        }
 
         //remove objects from the old program if not needed anymore
         foreach(QSharedPointer<Object>objPtr, oldProg->listObjects) {
@@ -267,6 +272,22 @@ void Container::LoadProgram(int prog)
     }
 
     //Updated();
+}
+
+const QTime Container::GetLastUpdate() {
+    QTime parentTime;
+    QTime myTime;
+
+    if(parentContainer)
+        parentTime = parentContainer.toStrongRef()->GetLastUpdate();
+
+    if(currentProgram)
+        myTime = currentProgram->timeSavedRendererNodes;
+
+    if(myTime>parentTime)
+        return myTime;
+    else
+        return parentTime;
 }
 
 void Container::SaveProgram()

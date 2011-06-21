@@ -67,6 +67,7 @@ namespace Connectables {
 
         QList<RendererNode*>listOfRendererNodes;
         QTime timeSavedRendererNodes;
+        static QTime unsavedTime;
 
     protected:
         bool CableExists(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);

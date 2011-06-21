@@ -84,6 +84,7 @@
 #include <QTime>
 #include <QTimer>
 #include <QTreeWidget>
+#include <QtScript>
 #include <QUrl>
 #include <QWidget>
 

@@ -45,8 +45,8 @@ ObjectFactory::ObjectFactory(MainHost *myHost) :
     myHost(myHost)
 {
     setObjectName("ObjectFactory");
-//    scriptObj = myHost->scriptEngine.newQObject(this);
-//    myHost->scriptEngine.globalObject().setProperty("ObjectFactory", scriptObj);
+    QScriptValue scriptObj = myHost->scriptEngine.newQObject(this);
+    myHost->scriptEngine.globalObject().setProperty("ObjectFactory", scriptObj);
 }
 
 ObjectFactory::~ObjectFactory()
@@ -121,17 +121,17 @@ Pin *ObjectFactory::GetPin(const ConnectionInfo &pinInfo)
     return 0;
 }
 
-void ObjectFactory::RemoveObject(int id)
-{
-    if(!listObjects.contains(id)) {
-        debug(QString("ObjectFactory::RemoveObject object %1 already deleted").arg(id).toAscii())
-        return;
-    }
+//void ObjectFactory::RemoveObject(int id)
+//{
+//    if(!listObjects.contains(id)) {
+//        debug(QString("ObjectFactory::RemoveObject object %1 already deleted").arg(id).toAscii())
+//        return;
+//    }
 
-     QSharedPointer<Object> objPtr = listObjects.take(id);
-     if(objPtr.isNull())
-         return;
-}
+//     QSharedPointer<Object> objPtr = listObjects.take(id);
+//     if(objPtr.isNull())
+//         return;
+//}
 
 QSharedPointer<Object> ObjectFactory::GetObj(const QModelIndex & index)
 {

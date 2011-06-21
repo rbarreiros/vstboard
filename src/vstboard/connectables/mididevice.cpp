@@ -187,9 +187,10 @@ bool MidiDevice::FindDeviceByName()
 
     for(int i=0;i<Pm_CountDevices();i++) {
         const PmDeviceInfo *info = Pm_GetDeviceInfo(i);
-        if(QString::fromStdString(info->name) == objInfo.name
-           && info->input == objInfo.inputs
-           && info->output == objInfo.outputs) {
+        if(QString::fromStdString(info->interf) == objInfo.apiName
+            && QString::fromStdString(info->name) == objInfo.name
+            && info->input == objInfo.inputs
+            && info->output == objInfo.outputs) {
             //can be this one, but the interface number can change form a comp to another
             if(cptDuplicateNames==0)
                 canBe=i;

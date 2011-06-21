@@ -1,6 +1,5 @@
 DEFINES += APP_NAME=\\\"VstBoardPlugin\\\"
 
-srcdir      = vstdll
 include(../config.pri)
 
 QT += core gui script
@@ -12,47 +11,31 @@ TEMPLATE = lib
 CONFIG += qtwinmigrate-uselib
 include($${_PRO_FILE_PWD_}/../../libs/qtwinmigrate/src/qtwinmigrate.pri)
 
-LIBS += -L$$top_destdir -lcommon
-
 win32 {
     LIBS += -lwinmm
     LIBS += -ladvapi32
     LIBS += -lws2_32
 }
 
-win32-msvc* {
-    PRE_TARGETDEPS += $$top_destdir/common.lib
-} else {
-    PRE_TARGETDEPS += $$top_destdir/libcommon.a
-}
-
 win32-g++ {
     DEFINES += WINVER=0x0501
     DEFINES += _WIN32_WINNT=0x0501
-    LIBS += -L$$quote($$MINGW_PATH/lib)
-    INCLUDEPATH += $$quote($$MINGW_PATH/include)
+   # LIBS += -L$$quote($$MINGW_PATH/lib)
+    # INCLUDEPATH += $$quote($$MINGW_PATH/include)
     QMAKE_LFLAGS += -static-libgcc
 }
 
 win32-msvc* {
     DEFINES += _CRT_SECURE_NO_WARNINGS
-    INCLUDEPATH += $$quote($$(INCLUDE))
-    LIBS += -L$$quote($$(LIB))
-    QMAKE_CFLAGS += -Fd$$top_destdir/$$TARGET
+   # INCLUDEPATH += $$quote($$(INCLUDE))
+   # LIBS += -L$$quote($$(LIB))
+   # QMAKE_CFLAGS += -Fd$$top_destdir/$$TARGET
     RC_FILE = vstdll.rc
 
 #to add symbols :
 #    QMAKE_CFLAGS_RELEASE +=  -Zi
 #    QMAKE_LFLAGS_RELEASE += /DEBUG
 }
-
-
-vstsdk {
-    DEFINES += VSTSDK
-    INCLUDEPATH += $$top_srcdir/$$VSTSDK_PATH \
-        $$top_srcdir/$$VSTSDK_PATH/public.sdk/source/vst2.x
-}
-
 
 INCLUDEPATH += ../common
 
@@ -83,13 +66,19 @@ HEADERS  += \
     views/configdialogvst.h
 
 
-FORMS +=
-
 PRECOMPILED_HEADER = ../common/precomp.h
-
-OTHER_FILES += \
-    vstdll.rc
 
 RESOURCES += ../resources/resources.qrc
 
 TRANSLATIONS = ../resources/translations/vstdll_fr.ts
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../common/release/ -lcommon
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../common/debug/ -lcommon
+else:unix:!symbian: LIBS += -L$$OUT_PWD/../common/ -lcommon
+
+INCLUDEPATH += $$PWD/../common
+DEPENDPATH += $$PWD/../common
+
+win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../common/release/common.lib
+else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../common/debug/common.lib
+else:unix:!symbian: PRE_TARGETDEPS += $$OUT_PWD/../common/libcommon.a

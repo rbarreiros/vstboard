@@ -37,12 +37,14 @@ namespace Connectables {
     class PinsList : public QObject
     {
         Q_OBJECT
+        Q_PROPERTY(int nbPins READ nbPins WRITE SetNbPins)
+
     public:
         PinsList(MainHost *myHost, Object *parent);
         void SetContainerId(const quint16 id);
         void Hide();
         void SetVisible(bool visible);
-        bool ChangeNumberOfPins(const int newNbIn);
+        void ChangeNumberOfPins(int newNbIn);
         void SetBridge(bool bridge);
         void SetInfo(Object *parent,const ConnectionInfo &connInfo, const ObjectInfo &objInfo);
         Pin * GetPin(int pinNumber, bool autoCreate=false);
@@ -50,6 +52,8 @@ namespace Connectables {
         void ConnectAllTo(Container* container,PinsList *other, bool hidden=false);
         void AsyncAddPin(int nb);
         void AsyncRemovePin(int nb);
+
+        int nbPins() const { return listPins.count(); }
 
         AudioBuffer *GetBuffer(int pinNumber);
         AudioBufferD *GetBufferD(int pinNumber);
@@ -61,17 +65,20 @@ namespace Connectables {
         virtual QDataStream & toStream (QDataStream &) const;
         virtual QDataStream & fromStream (QDataStream &);
 
+        int pinCount;
+
     protected:
         QPersistentModelIndex modelList;
         Object *parent;
-        quint16 containerId;
         MainHost *myHost;
 
     signals :
         void PinAdded(int nb);
         void PinRemoved(int nb);
+        void NbPinChanged(int nb);
 
     public slots:
+        void SetNbPins(int nb);
         Pin * AddPin(int nb);
         void RemovePin(int nb);
     };

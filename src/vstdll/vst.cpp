@@ -61,6 +61,7 @@ Vst::Vst (audioMasterCallback audioMaster) :
     qRegisterMetaType<ObjectInfo>("ObjectInfo");
     qRegisterMetaType<int>("ObjType::Enum");
     qRegisterMetaType<QVariant>("QVariant");
+    qRegisterMetaType<AudioBuffer*>("AudioBuffer*");
 
     qRegisterMetaTypeStreamOperators<ObjectInfo>("ObjectInfo");
 

@@ -34,11 +34,12 @@ Programs::Programs(MainHost *parent) :
     projectDirty(false),
     mainWindow(0)
 {
+    setObjectName("Programs");
     model=new ProgramsModel(parent);
     connect( model, SIGNAL( rowsRemoved( QModelIndex , int, int )),
             this, SLOT(rowsRemoved( QModelIndex, int, int )));
 
-    scriptObj = myHost->scriptEngine.newQObject(this);
+    QScriptValue scriptObj = myHost->scriptEngine.newQObject(this);
     myHost->scriptEngine.globalObject().setProperty("Programs", scriptObj);
 }
 
@@ -468,6 +469,22 @@ void Programs::ChangeGroup(int grpNum)
 
     QModelIndex newGrp = model->item(grpNum)->index();
     ChangeGroup(newGrp);
+}
+
+int Programs::GetNbOfProgs()
+{
+    if(!currentGrp.isValid())
+        return 0;
+
+    if(!currentGrp.child(0,0).isValid())
+        return 0;
+
+    return model->rowCount( currentGrp.child(0,0) );
+}
+
+int Programs::GetNbOfGroups()
+{
+    return model->rowCount();
 }
 
 void Programs::SetProgAutosave(const Autosave::Enum state)

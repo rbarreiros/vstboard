@@ -44,6 +44,18 @@ VstPlugin::VstPlugin(MainHost *myHost,int index, const ObjectInfo & info) :
     for(int i=0;i<128;i++) {
         listValues << i;
     }
+
+    //editor pin
+    listEditorVisible << "hide";
+    listEditorVisible << "show";
+    listParameterPinIn->AddPin(FixedPinNumber::editorVisible);
+
+    //learning pin
+    listIsLearning << "off";
+    listIsLearning << "learn";
+    listIsLearning << "unlearn";
+    listParameterPinIn->AddPin(FixedPinNumber::learningMode);
+
     listParameterPinIn->AddPin(FixedPinNumber::vstProgNumber);
 }
 
@@ -781,28 +793,29 @@ Pin* VstPlugin::CreatePin(const ConnectionInfo &info)
     if(newPin)
         return newPin;
 
-    switch(info.direction) {
-        case PinDirection::Input :
-            if(info.pinNumber==FixedPinNumber::vstProgNumber) {
-                ParameterPinIn *pin = new ParameterPinIn(this,info.pinNumber,0,&listValues,true,"prog",false);
-                pin->SetLimitsEnabled(false);
-                return pin;
-            } else {
+    if(info.type == PinType::Parameter && info.direction == PinDirection::Input) {
+        switch(info.pinNumber) {
+            case FixedPinNumber::vstProgNumber : {
+                ParameterPinIn *newPin = new ParameterPinIn(this,info.pinNumber,0,&listValues,true,"prog",false);
+                newPin->SetLimitsEnabled(false);
+                return newPin;
+            }
+            case FixedPinNumber::editorVisible : {
+                ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::editorVisible,"hide",&listEditorVisible,false,tr("Editor"));
+                newPin->SetLimitsEnabled(false);
+                return newPin;
+            }
+            case FixedPinNumber::learningMode : {
+                ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::learningMode,"off",&listIsLearning,false,tr("Learn"));
+                newPin->SetLimitsEnabled(false);
+                return newPin;
+            }
+            default : {
                 if(closed)
                     return new ParameterPinIn(this,info.pinNumber,0,false,"",true);
                 return new ParameterPinIn(this,info.pinNumber,EffGetParameter(info.pinNumber),false,EffGetParamName(info.pinNumber),true);
             }
-            break;
-
-//        case PinDirection::Output :
-//            if(closed)
-//                return new ParameterPinOut(this,info.pinNumber,0,false,"",true);
-//            return new ParameterPinOut(this,info.pinNumber,EffGetParameter(info.pinNumber),false,EffGetParamName(info.pinNumber),true);
-
-        default :
-            debug("VstPlugin::CreatePin PinDirection")
-            return 0;
-            break;
+        }
     }
 
     return 0;

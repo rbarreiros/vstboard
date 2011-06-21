@@ -63,8 +63,8 @@ Object::Object(MainHost *host, int index, const ObjectInfo &info) :
     setObjectName(QString("%1.%2").arg(objInfo.name).arg(index));
     doublePrecision=myHost->doublePrecision;
 
-//    scriptObj = myHost->scriptEngine.newQObject(this);
-//    myHost->scriptEngine.globalObject().setProperty(QString("Obj%1").arg(index), scriptObj);
+    QScriptValue scriptObj = myHost->scriptEngine.newQObject(this);
+    myHost->scriptEngine.globalObject().setProperty(QString("Obj%1").arg(index), scriptObj);
 
     //init pins lists
     ConnectionInfo i;
@@ -74,26 +74,34 @@ Object::Object(MainHost *host, int index, const ObjectInfo &info) :
     i.type=PinType::Audio;
     i.direction=PinDirection::Input;
     listAudioPinIn->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listAudioIn));
+    listAudioPinIn->setObjectName("listAudioPinIn");
     i.direction=PinDirection::Output;
     listAudioPinOut->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listAudioOut));
+    listAudioPinOut->setObjectName("listAudioPinOut");
 
     i.type=PinType::Midi;
     i.direction=PinDirection::Input;
     listMidiPinIn->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listMidiIn));
+    listMidiPinIn->setObjectName("listMidiPinIn");
     i.direction=PinDirection::Output;
     listMidiPinOut->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listMidiOut));
+    listMidiPinOut->setObjectName("listMidiPinOut");
 
     i.type=PinType::Bridge;
     i.direction=PinDirection::Input;
     listBridgePinIn->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listBridgeIn));
+    listBridgePinIn->setObjectName("listBridgePinIn");
     i.direction=PinDirection::Output;
     listBridgePinOut->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listBridgeOut));
+    listBridgePinOut->setObjectName("listBridgePinOut");
 
     i.type=PinType::Parameter;
     i.direction=PinDirection::Input;
     listParameterPinIn->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listParamIn));
+    listParameterPinIn->setObjectName("listParameterPinIn");
     i.direction=PinDirection::Output;
     listParameterPinOut->SetInfo(this,i,ObjectInfo(NodeType::listPin, ObjType::listParamOut));
+    listParameterPinOut->setObjectName("listParameterPinOut");
 
     pinLists.insert("audioin", listAudioPinIn);
     pinLists.insert("audioout", listAudioPinOut);
@@ -104,18 +112,7 @@ Object::Object(MainHost *host, int index, const ObjectInfo &info) :
     pinLists.insert("parameterin",listParameterPinIn);
     pinLists.insert("parameterout",listParameterPinOut);
 
-    if(objInfo.nodeType != NodeType::container) {
-        //editor pin
-        listEditorVisible << "hide";
-        listEditorVisible << "show";
-        listParameterPinIn->AddPin(FixedPinNumber::editorVisible);
 
-        //learning pin
-        listIsLearning << "off";
-        listIsLearning << "learn";
-        listIsLearning << "unlearn";
-        listParameterPinIn->AddPin(FixedPinNumber::learningMode);
-    }
 }
 
 /*!
@@ -260,10 +257,7 @@ void Object::UnloadProgram()
   */
 void Object::SaveProgram()
 {
-    if(!currentProgram)
-        return;
-
-    if(!currentProgram->isDirty)
+    if(!currentProgram || !currentProgram->isDirty)
         return;
 
     currentProgram->Save(listParameterPinIn,listParameterPinOut);
@@ -574,36 +568,17 @@ Pin* Object::CreatePin(const ConnectionInfo &info)
         case PinDirection::Input :
             switch(info.type) {
                 case PinType::Audio : {
-                    AudioPinIn *newPin = new AudioPinIn(this,info.pinNumber,myHost->GetBufferSize(),doublePrecision);
-                    return newPin;
+                    return new AudioPinIn(this,info.pinNumber,myHost->GetBufferSize(),doublePrecision);
                 }
 
                 case PinType::Midi : {
-                    MidiPinIn *newPin = new MidiPinIn(this,info.pinNumber);
-                    return newPin;
+                    return new MidiPinIn(this,info.pinNumber);
                 }
 
                 case PinType::Bridge : {
-                    BridgePinIn *newPin = new BridgePinIn(this,info.pinNumber,info.bridge);
-                    return newPin;
+                    return new BridgePinIn(this,info.pinNumber,info.bridge);
                 }
 
-                case PinType::Parameter : {
-                    switch(info.pinNumber) {
-                        case FixedPinNumber::editorVisible : {
-                            ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::editorVisible,"hide",&listEditorVisible,false,tr("Editor"));
-                            newPin->SetLimitsEnabled(false);
-                            return newPin;
-                        }
-                        case FixedPinNumber::learningMode : {
-                            ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::learningMode,"off",&listIsLearning,false,tr("Learn"));
-                            newPin->SetLimitsEnabled(false);
-                            return newPin;
-                        }
-                    }
-
-                    break;
-                }
                 default :
                     return 0;
             }
@@ -612,18 +587,15 @@ Pin* Object::CreatePin(const ConnectionInfo &info)
         case PinDirection::Output :
             switch(info.type) {
                 case PinType::Audio : {
-                    AudioPinOut *newPin = new AudioPinOut(this,info.pinNumber,myHost->GetBufferSize(),doublePrecision);
-                    return newPin;
+                    return new AudioPinOut(this,info.pinNumber,myHost->GetBufferSize(),doublePrecision);
                 }
 
                 case PinType::Midi : {
-                    MidiPinOut *newPin = new MidiPinOut(this,info.pinNumber);
-                    return newPin;
+                    return new MidiPinOut(this,info.pinNumber);
                 }
 
                 case PinType::Bridge : {
-                    BridgePinOut *newPin = new BridgePinOut(this,info.pinNumber,info.bridge);
-                    return newPin;
+                    return new BridgePinOut(this,info.pinNumber,info.bridge);
                 }
 
                 default :

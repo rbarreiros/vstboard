@@ -29,11 +29,8 @@
 #include "portaudio.h"
 #include "pa_win_wmme.h"
 #include "pa_win_ds.h"
+#include "pa_win_wasapi.h"
 #include "../circularbuffer.h"
-
-#ifndef bzero
-#define bzero(memArea, len)  memset((memArea), 0, (len))
-#endif
 
 class MainHostHost;
 namespace Connectables {
@@ -44,32 +41,31 @@ namespace Connectables {
     {
         Q_OBJECT
     public:
-        AudioDevice(MainHostHost *myHost,const ObjectInfo &info, QObject *parent=0);
+        AudioDevice(PaDeviceInfo &devInfo, MainHostHost *myHost,const ObjectInfo &info, QObject *parent=0);
         ~AudioDevice();
 
         bool Open();
-        bool Close();
         float GetCpuUsage();
         bool SetObjectInput(AudioDeviceIn *obj);
         bool SetObjectOutput(AudioDeviceOut *obj);
         void SetSleep(bool sleeping);
-        static bool FindDeviceByName(ObjectInfo &objInfo, PaDeviceInfo *devInfo=0);
 
-        /// global audio devices mutex
-        static QMutex listDevMutex;
+        bool DeviceToRingBuffers( const void *inputBuffer, unsigned long framesPerBuffer);
+        void RingBuffersToPins();
+        void PinsToRingBuffers();
+        bool RingBuffersToDevice( void *outputBuffer, unsigned long framesPerBuffer);
+
+        QString errorMessage;
 
     protected:
-
+        bool Close();
         static int paCallback( const void *inputBuffer, void *outputBuffer,
                                unsigned long framesPerBuffer,
                                const PaStreamCallbackTimeInfo* timeInfo,
                                PaStreamCallbackFlags statusFlags,
                                void *userData );
 
-        static void paStreamFinished( void* userData );
-
         bool OpenStream(double sampleRate);
-        bool CloseStream();
 
         void DeleteCircualBuffers();
 
@@ -100,17 +96,26 @@ namespace Connectables {
         /// pointer to the AudioDeviceOut, can be null
         AudioDeviceOut *devOut;
 
-        /// true if the device is closed
-        bool closed;
+        /// true if the device is opened
+        bool opened;
 
-        /// mutex for this device
-        QMutex devicesMutex;
+        /// mutex protecting open/close
+        QMutex mutexOpenClose;
+
+        /// mutex for input and output device
+        QMutex mutexDevicesInOut;
+
+        /// global audio devices mutex
+        static QMutex mutexCountInputDevicesReady;
 
         /// windows mme stream options
         PaWinMmeStreamInfo wmmeStreamInfo;
 
         /// windows directsound stream options
         PaWinDirectSoundStreamInfo directSoundStreamInfo;
+
+        /// windows wasapi stream options
+        PaWasapiStreamInfo wasapiStreamInfo;
 
         /// list of input ring buffers
         QList<CircularBuffer*>listCircularBuffersIn;
@@ -128,15 +133,16 @@ namespace Connectables {
         static int countDevicesReady;
 
         /// check if this device has been counted in the list of ready devices
-        bool bufferReady;
+        bool inputBufferReady;
 
     signals:
         /*!
           emitted when the device is opened or closed, used by AudioDevices
-          \param objInfo object description
+          \param apiId api index
+          \param devId device id
           \param inUse true if the device is in use
           */
-        void InUseChanged(const ObjectInfo &objInfo, bool inUse);
+        void InUseChanged(PaHostApiIndex apiId,PaDeviceIndex devId, bool inUse, PaTime inLatency=0, PaTime outLatency=0, double sampleRate=0);
 
     public slots:
         void SetSampleRate(float rate=44100.0);

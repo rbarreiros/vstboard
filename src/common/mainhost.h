@@ -22,7 +22,6 @@
 #define MAINHOST_H
 
 #include "precomp.h"
-#include <QtScript>
 #include "connectables/objectfactory.h"
 #include "connectables/object.h"
 #include "connectables/maincontainer.h"
@@ -89,7 +88,7 @@ public:
     vst::CVSTHost *vstHost;
 #endif
 
-    quint32 currentFileVersion;
+    static quint32 currentFileVersion;
     bool doublePrecision;
 
     void SetSetting(QString name, QVariant value);
@@ -134,15 +133,12 @@ private:
     QString settingsGroup;
     QSettings settings;
 
-    QScriptValue scriptObj;
-
 signals:
     void SampleRateChanged(float rate);
     void BufferSizeChanged(unsigned long size);
 //    void NewSolver(orderedNodes *renderLines);
     void ObjectRemoved(int contrainerId, int obj);
     void SolverToUpdate();
-    void OnAudioDeviceToggleInUse(const ObjectInfo &objInfo, bool inUse);
     void Rendered();
     void programParkingModelChanged(QStandardItemModel *model);
     void groupParkingModelChanged(QStandardItemModel *model);

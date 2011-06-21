@@ -38,6 +38,7 @@ using namespace Connectables;
 AudioPinIn::AudioPinIn(Object *parent, int number, unsigned long bufferSize, bool doublePrecision, bool externalAllocation) :
     AudioPin(parent,PinDirection::Input,number,bufferSize,doublePrecision,externalAllocation)
 {
+    setObjectName(QString("AudioIn%1").arg(number));
 }
 
 void AudioPinIn::ReceiveMsg(const PinMessage::Enum msgType,void *data)

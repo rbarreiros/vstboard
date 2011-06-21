@@ -79,11 +79,7 @@ namespace Connectables {
                 childContainer.toStrongRef()->Updated();
         }
 
-        const QTime & GetLastUpdate() {
-            if(!currentProgram)
-                return QTime();
-            return currentProgram->timeSavedRendererNodes;
-        }
+        const QTime GetLastUpdate();
 
     protected:
         void AddChildObject(QSharedPointer<Object> objPtr);
@@ -112,6 +108,8 @@ namespace Connectables {
 
         /// id of the progam to change on the next rendering loop
         int progToSet;
+
+        QMutex progLoadMutex;
 
     public slots:
         void UserAddObject(QSharedPointer<Object> objPtr);

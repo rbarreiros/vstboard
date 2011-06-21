@@ -32,7 +32,7 @@
 using namespace Connectables;
 
 //QHash<int,QSharedPointer<AudioDevice> >AudioDevice::listAudioDevices;
-QMutex AudioDevice::listDevMutex;
+QMutex AudioDevice::mutexCountInputDevicesReady;
 int AudioDevice::countDevicesReady=0;
 int AudioDevice::countInputDevices=0;
 
@@ -46,17 +46,18 @@ int AudioDevice::countInputDevices=0;
   /param info ObjectInfo describing the device
   /param parent a parent QObject (unused ?)
   */
-AudioDevice::AudioDevice(MainHostHost *myHost,const ObjectInfo &info, QObject *parent) :
+AudioDevice::AudioDevice(PaDeviceInfo &devInfo,MainHostHost *myHost,const ObjectInfo &info, QObject *parent) :
     QObject(parent),
     sampleRate(44100.0f),
     bufferSize(4096),
     stream(0),
     objInfo(info),
+    devInfo(devInfo),
     devIn(0),
     devOut(0),
-    closed(true),
+    opened(false),
     myHost(myHost),
-    bufferReady(false)
+    inputBufferReady(false)
 {
     devOutClosing=false;
     setObjectName(objInfo.name);
@@ -64,13 +65,25 @@ AudioDevice::AudioDevice(MainHostHost *myHost,const ObjectInfo &info, QObject *p
     connect(myHost,SIGNAL(SampleRateChanged(float)),
             this,SLOT(SetSampleRate(float)));
 
-    connect(this,SIGNAL(InUseChanged(ObjectInfo,bool)),
-            myHost,SIGNAL(OnAudioDeviceToggleInUse(ObjectInfo,bool)));
+    connect(this,SIGNAL(InUseChanged(PaHostApiIndex,PaDeviceIndex,bool,PaTime,PaTime,double)),
+            myHost->audioDevices,SLOT(OnToggleDeviceInUse(PaHostApiIndex,PaDeviceIndex,bool,PaTime,PaTime,double)));
 }
 
 AudioDevice::~AudioDevice()
 {
+    mutexDevicesInOut.lock();
+    if(devIn) {
+        devIn->SetParentDevice(0);
+        devIn=0;
+    }
+    if(devOut) {
+        devOut->SetParentDevice(0);
+        devOut=0;
+    }
+    mutexDevicesInOut.unlock();
+
     Close();
+
     debug("%s deleted",objectName().toAscii().constData())
 }
 
@@ -79,20 +92,22 @@ AudioDevice::~AudioDevice()
   */
 void AudioDevice::DeleteIfUnused()
 {
-    if(isClosing)
+    mutexOpenClose.lock();
+    if(isClosing) {
+        mutexOpenClose.unlock();
         return;
+    }
+    mutexOpenClose.unlock();
 
     bool del=false;
-    devicesMutex.lock();
+    mutexDevicesInOut.lock();
     if(!devIn && !devOut)
         del=true;
-    devicesMutex.unlock();
+    mutexDevicesInOut.unlock();
 
     if(del) {
         SetSleep(true);
-        listDevMutex.lock();
-        myHost->audioDevices->listAudioDevices.remove(objInfo.id);
-        listDevMutex.unlock();
+        myHost->audioDevices->RemoveDevice(objInfo.id);
     }
 
 }
@@ -105,7 +120,7 @@ void AudioDevice::DeleteIfUnused()
   */
 bool AudioDevice::SetObjectInput(AudioDeviceIn *obj)
 {
-    QMutexLocker l(&devicesMutex);
+    QMutexLocker l(&mutexDevicesInOut);
 
     if(devIn && devIn == obj) {
         //it's the same object
@@ -117,11 +132,13 @@ bool AudioDevice::SetObjectInput(AudioDeviceIn *obj)
         return false;
     }
 
+    mutexCountInputDevicesReady.lock();
     if(obj) {
         countInputDevices++;
     } else {
         countInputDevices--;
     }
+    mutexCountInputDevicesReady.unlock();
 
     devIn = obj;
 
@@ -141,7 +158,7 @@ bool AudioDevice::SetObjectInput(AudioDeviceIn *obj)
   */
 bool AudioDevice::SetObjectOutput(AudioDeviceOut *obj)
 {
-    QMutexLocker l(&devicesMutex);
+    QMutexLocker l(&mutexDevicesInOut);
 
     if(devOut && devOut == obj) {
         //it's the same object
@@ -171,64 +188,16 @@ bool AudioDevice::SetObjectOutput(AudioDeviceOut *obj)
   */
 void AudioDevice::SetSampleRate(float rate)
 {
-    if(!closed) {
+    mutexOpenClose.lock();
+    if(opened) {
+        mutexOpenClose.unlock();
         SetSleep(true);
         SetSleep(false);
+    } else {
+        mutexOpenClose.unlock();
     }
 }
 
-/*!
-  Try to find a device in the list return by PortAudio
-  \param[in] objInfo the ObjectInfo we're looking for
-  \param[out] devInfo the PaDeviceInfo of the object found
-  \return true if found
-  */
-bool AudioDevice::FindDeviceByName(ObjectInfo &objInfo, PaDeviceInfo *devInfo)
-{
-    int cptDuplicateNames=0;
-    int canBe=-1;
-    int deviceNumber=-1;
-
-    for(int i=0;i<Pa_GetDeviceCount();i++) {
-        const PaDeviceInfo *info = Pa_GetDeviceInfo(i);
-        QString devName = QString::fromStdString(info->name);
-        //remove " x64" from device name so we can share files with 32bit version
-        devName.remove(QRegExp("( )?x64"));
-
-        if(devName == objInfo.name
-           && info->maxInputChannels == objInfo.inputs
-           && info->maxOutputChannels == objInfo.outputs) {
-            //can be this one, but the interface number can change form a comp to another
-            if(cptDuplicateNames==0)
-                canBe=i;
-
-            //we found the same number and the same name
-            if(objInfo.duplicateNamesCounter == cptDuplicateNames) {
-                if(devInfo)
-                    *devInfo = *info;
-                deviceNumber = i;
-                break;
-            }
-            cptDuplicateNames++;
-        }
-    }
-
-    //didn't found an exact match
-    if(deviceNumber==-1) {
-        //but we found a device with the same name
-        if(canBe!=-1) {
-            deviceNumber=canBe;
-            if(devInfo)
-                *devInfo = *Pa_GetDeviceInfo(deviceNumber);
-        } else {
-            debug("AudioDevice::FindDeviceByName device not found")
-            return false;
-        }
-    }
-
-    objInfo.id = deviceNumber;
-    return true;
-}
 
 /*!
   Open the PortAudio stream, used by AudioDevice::Open
@@ -246,17 +215,18 @@ bool AudioDevice::OpenStream(double sampleRate)
 
     if(devInfo.maxInputChannels > 0) {
 
-        inputParameters = new(PaStreamParameters);
-        bzero( inputParameters, sizeof( PaStreamParameters ) );
+        inputParameters = new PaStreamParameters;
+        ZeroMemory( inputParameters, sizeof( PaStreamParameters ) );
         inputParameters->channelCount = devInfo.maxInputChannels;
         inputParameters->device = objInfo.id;
         inputParameters->hostApiSpecificStreamInfo = NULL;
         inputParameters->sampleFormat = paFloat32 | paNonInterleaved;
-        inputParameters->suggestedLatency = Pa_GetDeviceInfo(objInfo.id)->defaultLowInputLatency ;
+        inputParameters->suggestedLatency = Pa_GetDeviceInfo(objInfo.id)->defaultLowInputLatency;
 
         switch(Pa_GetHostApiInfo( devInfo.hostApi )->type) {
             case paDirectSound :
-                directSoundStreamInfo.size = sizeof(PaWinDirectSoundStreamInfo);
+                ZeroMemory( &directSoundStreamInfo, sizeof( PaWinDirectSoundStreamInfo) );
+                directSoundStreamInfo.size = sizeof( PaWinDirectSoundStreamInfo);
                 directSoundStreamInfo.hostApiType = paDirectSound;
                 directSoundStreamInfo.version = 1;
                 //directSoundStreamInfo.flags = paWinDirectSoundUseChannelMask;
@@ -264,14 +234,14 @@ bool AudioDevice::OpenStream(double sampleRate)
                 inputParameters->hostApiSpecificStreamInfo = &directSoundStreamInfo;
                 break;
             case paMME :
+                ZeroMemory( &wmmeStreamInfo, sizeof(PaWinMmeStreamInfo) );
                 wmmeStreamInfo.size = sizeof(PaWinMmeStreamInfo);
                 wmmeStreamInfo.hostApiType = paMME;
                 wmmeStreamInfo.version = 1;
-                wmmeStreamInfo.flags = paWinMmeUseLowLevelLatencyParameters | paWinMmeDontThrottleOverloadedProcessingThread;
-                wmmeStreamInfo.framesPerBuffer = 512;
-                wmmeStreamInfo.bufferCount = 8;//devInfo->maxInputChannels;
+                wmmeStreamInfo.flags = myHost->GetSetting("api/wmme_flags", MME_DFAULT_FLAGS).toUInt();
+                wmmeStreamInfo.framesPerBuffer = myHost->GetSetting("api/wmme_bufferSize", MME_DEFAULT_BUFFER_SIZE).toUInt();
+                wmmeStreamInfo.bufferCount = myHost->GetSetting("api/wmme_bufferCount", MME_DEFAULT_BUFFER_COUNT).toUInt();
                 inputParameters->hostApiSpecificStreamInfo = &wmmeStreamInfo;
-                inputParameters->suggestedLatency = 0;
                 break;
             case paASIO :
                 break;
@@ -291,8 +261,19 @@ bool AudioDevice::OpenStream(double sampleRate)
                 break;
             case paJACK :
                 break;
-            case paWASAPI :
+            case paWASAPI : {
+                ZeroMemory( &wasapiStreamInfo, sizeof(PaWasapiStreamInfo) );
+                wasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
+                wasapiStreamInfo.hostApiType = paWASAPI;
+                wasapiStreamInfo.version = 1;
+                wasapiStreamInfo.flags = myHost->GetSetting("api/wasapi_flags", WASAPI_DEFAULT_FLAGS).toUInt();
+                inputParameters->hostApiSpecificStreamInfo = &wasapiStreamInfo;
+
+                unsigned int lat = myHost->GetSetting("api/wasapi_inLatency", WASAPI_DEFAULT_INLATENCY).toUInt();
+                if(lat!=0)
+                    inputParameters->suggestedLatency = (PaTime)lat/1000;
                 break;
+            }
             case paAudioScienceHPI :
                 break;
             default:
@@ -302,8 +283,8 @@ bool AudioDevice::OpenStream(double sampleRate)
 
     if(devInfo.maxOutputChannels > 0) {
 
-        outputParameters = new(PaStreamParameters);
-        bzero( outputParameters, sizeof( PaStreamParameters ) );
+        outputParameters = new PaStreamParameters;
+        ZeroMemory( outputParameters, sizeof( PaStreamParameters ) );
         outputParameters->channelCount = devInfo.maxOutputChannels;
         outputParameters->device = objInfo.id;
         outputParameters->hostApiSpecificStreamInfo = NULL;
@@ -312,6 +293,7 @@ bool AudioDevice::OpenStream(double sampleRate)
 
         switch(Pa_GetHostApiInfo( devInfo.hostApi )->type) {
             case paDirectSound :
+                ZeroMemory( &directSoundStreamInfo, sizeof(PaWinDirectSoundStreamInfo) );
                 directSoundStreamInfo.size = sizeof(PaWinDirectSoundStreamInfo);
                 directSoundStreamInfo.hostApiType = paDirectSound;
                 directSoundStreamInfo.version = 1;
@@ -320,14 +302,14 @@ bool AudioDevice::OpenStream(double sampleRate)
                 outputParameters->hostApiSpecificStreamInfo = &directSoundStreamInfo;
                 break;
             case paMME :
+                ZeroMemory( &wmmeStreamInfo, sizeof(PaWinMmeStreamInfo) );
                 wmmeStreamInfo.size = sizeof(PaWinMmeStreamInfo);
                 wmmeStreamInfo.hostApiType = paMME;
                 wmmeStreamInfo.version = 1;
-                wmmeStreamInfo.flags = paWinMmeUseLowLevelLatencyParameters | paWinMmeDontThrottleOverloadedProcessingThread;
-                wmmeStreamInfo.framesPerBuffer = 512;
-                wmmeStreamInfo.bufferCount = 8;//devInfo->maxOutputChannels;
+                wmmeStreamInfo.flags = myHost->GetSetting("api/wmme_flags", MME_DFAULT_FLAGS).toUInt();
+                wmmeStreamInfo.framesPerBuffer = myHost->GetSetting("api/wmme_bufferSize", MME_DEFAULT_BUFFER_SIZE).toUInt();
+                wmmeStreamInfo.bufferCount = myHost->GetSetting("api/wmme_bufferCount", MME_DEFAULT_BUFFER_COUNT).toUInt();
                 outputParameters->hostApiSpecificStreamInfo = &wmmeStreamInfo;
-                outputParameters->suggestedLatency = 0;
                 break;
             case paASIO :
                 break;
@@ -347,8 +329,19 @@ bool AudioDevice::OpenStream(double sampleRate)
                 break;
             case paJACK :
                 break;
-            case paWASAPI :
+            case paWASAPI : {
+                ZeroMemory( &wasapiStreamInfo, sizeof(PaWasapiStreamInfo) );
+                wasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
+                wasapiStreamInfo.hostApiType = paWASAPI;
+                wasapiStreamInfo.version = 1;
+                wasapiStreamInfo.flags = myHost->GetSetting("api/wasapi_flags", WASAPI_DEFAULT_FLAGS).toUInt();
+                outputParameters->hostApiSpecificStreamInfo = &wasapiStreamInfo;
+
+                unsigned int lat = myHost->GetSetting("api/wasapi_outLatency", WASAPI_DEFAULT_OUTLATENCY).toUInt();
+                if(lat!=0)
+                    outputParameters->suggestedLatency = (PaTime)lat/1000;
                 break;
+            }
             case paAudioScienceHPI :
                 break;
             default :
@@ -356,8 +349,9 @@ bool AudioDevice::OpenStream(double sampleRate)
         }
     }
 
-    if(!Pa_IsFormatSupported( inputParameters, outputParameters, sampleRate ) == paFormatIsSupported) {
+    if(Pa_IsFormatSupported( inputParameters, outputParameters, sampleRate ) != paFormatIsSupported) {
         debug("AudioDevice::OpenStream Pa_IsFormatSupported format not supported")
+        errorMessage = tr("Stream format not supported");
         if(inputParameters)
             delete inputParameters;
         if(outputParameters)
@@ -372,29 +366,45 @@ bool AudioDevice::OpenStream(double sampleRate)
             sampleRate,
             framesPerBuffer,
             flags,
-            paCallback, //your callback function
-            (void *)this ); //data to be passed to callback. In C++, it is frequently (void *)this
+            paCallback,
+            (void *)this );
+
+
+
+    if( err != paNoError ) {
+        Pa_CloseStream(stream);
+        debug("AudioDevice::OpenStream Pa_OpenStream %s",Pa_GetErrorText( err ))
+        errorMessage = Pa_GetErrorText( err );
+        if(inputParameters)
+            delete inputParameters;
+        if(outputParameters)
+            delete outputParameters;
+        return false;
+    }
+
+//    err = Pa_SetStreamFinishedCallback( stream, &paStreamFinished );
+//    if( err != paNoError ) {
+//        Pa_CloseStream(stream);
+//        debug("AudioDevice::OpenStream Pa_SetStreamFinishedCallback %s",Pa_GetErrorText( err ))
+//        errorMessage = Pa_GetErrorText( err );
+//        if(inputParameters)
+//            delete inputParameters;
+//        if(outputParameters)
+//            delete outputParameters;
+//        return false;
+//    }
+
+//    const PaStreamInfo *inf = Pa_GetStreamInfo(&stream);
+//    if(inf)
+//        emit InUseChanged(objInfo.api,objInfo.id,true,inf->inputLatency,inf->outputLatency,inf->sampleRate);
+//    else
+//        emit InUseChanged(objInfo.api,objInfo.id,true);
+    emit InUseChanged(objInfo.api, objInfo.id, true, inputParameters?inputParameters->suggestedLatency:0, outputParameters?outputParameters->suggestedLatency:0);
 
     if(inputParameters)
         delete inputParameters;
     if(outputParameters)
         delete outputParameters;
-
-    if( err != paNoError ) {
-        Pa_CloseStream(stream);
-        debug("AudioDevice::OpenStream Pa_OpenStream %s",Pa_GetErrorText( err ))
-        return false;
-    }
-
-    err = Pa_SetStreamFinishedCallback( stream, &paStreamFinished );
-    if( err != paNoError ) {
-        Pa_CloseStream(stream);
-        debug("AudioDevice::OpenStream Pa_SetStreamFinishedCallback %s",Pa_GetErrorText( err ))
-        return false;
-    }
-
-    emit InUseChanged(objInfo,true);
-//    const PaStreamInfo *inf = Pa_GetStreamInfo(&stream);
     return true;
 }
 
@@ -405,19 +415,16 @@ bool AudioDevice::OpenStream(double sampleRate)
 bool AudioDevice::Open()
 {
     //already opened
-    if(!closed) {
+    mutexOpenClose.lock();
+    if(opened) {
+        mutexOpenClose.unlock();
         debug("AudioDevice::Open already opened")
         return true;
     }
-
     isClosing=false;
+    mutexOpenClose.unlock();
 
-//    debug("%s open",objectName().toAscii().constData())
-
-    //find the corresponding device
-    if(!FindDeviceByName(objInfo,&devInfo)) {
-        return false;
-    }
+    errorMessage="";
 
     //try to open at the host rate
     double sampleRate = myHost->GetSampleRate();
@@ -443,9 +450,8 @@ bool AudioDevice::Open()
 
         if(stream)
         {
-            err = Pa_IsStreamActive(stream);
-            err = Pa_AbortStream(stream);
-            err = Pa_CloseStream(stream);
+            Pa_StopStream(stream);
+            Pa_CloseStream(stream);
             stream = 0;
         }
 
@@ -457,90 +463,36 @@ bool AudioDevice::Open()
     for(int i=0; i<devInfo.maxOutputChannels; i++ )
         listCircularBuffersOut << new CircularBuffer();
 
-    closed=false;
+    mutexOpenClose.lock();
+    opened=true;
+    mutexOpenClose.unlock();
     return true;
 }
 
 /*!
-  Close the PortAudio stream, user by AudioDevice::Close and AudioDevice::SetSleep
+  Close the PortAudio stream, used by AudioDevice::Close and AudioDevice::SetSleep
   \return true on success
   */
-bool AudioDevice::CloseStream()
+bool AudioDevice::Close()
 {
-    devicesMutex.lock();
+    mutexOpenClose.lock();
     if(isClosing) {
-        devicesMutex.unlock();
-        debug("AudioDevice::CloseStream already closing")
+        mutexOpenClose.unlock();
+//        debug("AudioDevice::CloseStream already closing")
         return false;
     }
     isClosing=true;
-    closed=true;
+    opened=false;
+    mutexOpenClose.unlock();
 
-    emit InUseChanged(objInfo,false);
+    inputBufferReady=false;
 
-//    foreach(CircularBuffer *buf, listCircularBuffersOut) {
-//        buf->Clear();
-//    }
-//    foreach(CircularBuffer *buf, listCircularBuffersIn) {
-//        buf->Clear();
-//    }
-
-
-    devicesMutex.unlock();
-
-    bufferReady=false;
-
-    PaError err;
+    emit InUseChanged( objInfo.api,objInfo.id,false);
 
     if(stream)
     {
-        err = Pa_IsStreamActive(stream);
-        if( err < 0 ) {
-            debug("AudioDevice::CloseStream Pa_IsStreamActive %s %s",objectName().toAscii().constData(),Pa_GetErrorText( err ))
-
-            //error : abort stream
-
-            err = Pa_AbortStream(stream);
-            if( err != paNoError ) {
-                debug("AudioDevice::CloseStream Pa_AbortStream %s %s",objectName().toAscii().constData(),Pa_GetErrorText( err ))
-            }
-
-        } else {
-            //no error : clean close stream
-
-            if( err > 0 ) {
-                //stream is active
-                debug("pa_stopstream %s",objectName().toAscii().constData())
-                err = Pa_StopStream(stream);
-                if( err != paNoError ) {
-                    debug("AudioDevice::CloseStream Pa_StopStream %s %s",objectName().toAscii().constData(),Pa_GetErrorText( err ))
-
-//                    //retry
-//                    Sleep(1000);
-//                    err = Pa_StopStream(stream);
-//                    if( err != paNoError ) {
-//                        debug("AudioDevice::CloseStream Pa_StopStream 2 %s %s",objectName().toAscii().constData(),Pa_GetErrorText( err ))
-//                        DeleteCircualBuffers();
-//                        return false;
-//                    }
-                }
-            }
-
-            debug("pa_closestream")
-            err = Pa_CloseStream(stream);
-            if( err != paNoError ) {
-                debug("AudioDevice::CloseStream Pa_CloseStream %s %s",objectName().toAscii().constData(),Pa_GetErrorText( err ))
-
-//                //retry
-//                Sleep(1000);
-//                err = Pa_CloseStream(stream);
-//                if( err != paNoError ) {
-//                    debug("AudioDevice::CloseStream Pa_CloseStream 2 %s %s",objectName().toAscii().constData(),Pa_GetErrorText( err ))
-//                    DeleteCircualBuffers();
-//                    return false;
-//                }
-            }
-        }
+        Pa_StopStream(stream);
+        Pa_CloseStream(stream);
         stream = 0;
     }
 
@@ -567,52 +519,23 @@ void AudioDevice::DeleteCircualBuffers()
 }
 
 /*!
-  Close the device
-  \return true on success
-  */
-bool AudioDevice::Close()
-{
-    if(closed)
-        return true;
-
-    closed=true;
-
-    devicesMutex.lock();
-
-    if(devIn) {
-        devIn->parentDevice.clear();
-        devIn=0;
-    }
-    if(devOut) {
-        devOut->parentDevice.clear();
-        devOut=0;
-    }
-    devicesMutex.unlock();
-
-    CloseStream();
-
-    return true;
-}
-
-/*!
   Set the sleep state
   \param sleeping the new state
   */
 void AudioDevice::SetSleep(bool sleeping)
 {
-
     if(!sleeping)
         Open();
 
-    devicesMutex.lock();
+    mutexDevicesInOut.lock();
     if(devIn)
         devIn->SetSleep(sleeping);
     if(devOut)
         devOut->SetSleep(sleeping);
-    devicesMutex.unlock();
+    mutexDevicesInOut.unlock();
 
     if(sleeping)
-        CloseStream();
+        Close();
 }
 
 /*!
@@ -624,14 +547,115 @@ float AudioDevice::GetCpuUsage()
    return Pa_GetStreamCpuLoad(stream);
 }
 
-/*!
-  PortAudio callback on stream finished, unused
-  \param userData pointer to the corresponding AudioDevice
-  */
-void AudioDevice::paStreamFinished( void* userData )
+bool AudioDevice::DeviceToRingBuffers( const void *inputBuffer, unsigned long framesPerBuffer)
 {
-//    AudioDevice* device = (AudioDevice*)userData;
-//    debug("paStreamFinished %s",device->objectName().toAscii().constData())
+    unsigned long hostBuffSize = myHost->GetBufferSize();
+    if(framesPerBuffer > hostBuffSize) {
+       myHost->SetBufferSize(framesPerBuffer);
+       hostBuffSize = framesPerBuffer;
+    }
+
+    mutexOpenClose.lock();
+    if(isClosing) {
+        mutexOpenClose.unlock();
+        return false;
+    }
+    mutexOpenClose.unlock();
+
+    mutexDevicesInOut.lock();
+    if(!devIn) {
+        mutexDevicesInOut.unlock();
+        return true;
+    }
+    mutexDevicesInOut.unlock();
+
+    bool readyToRender=true;
+
+    //fill circular buffer with device audio
+    int cpt=0;
+    foreach(CircularBuffer *buf, listCircularBuffersIn) {
+        buf->Put( ((float **) inputBuffer)[cpt], framesPerBuffer );
+        if(buf->filledSize < hostBuffSize )
+            readyToRender=false;
+        cpt++;
+    }
+
+    //if we filled enough buffer
+    if(readyToRender)
+        RingBuffersToPins();
+
+    return true;
+}
+
+void AudioDevice::RingBuffersToPins()
+{
+    mutexDevicesInOut.lock();
+    if(devIn)
+        devIn->SetBufferFromRingBuffer(listCircularBuffersIn);
+    mutexDevicesInOut.unlock();
+
+    if(!inputBufferReady) {
+        inputBufferReady=true;
+
+        QMutexLocker locker(&mutexCountInputDevicesReady);
+        countDevicesReady++;
+    }
+}
+
+void AudioDevice::PinsToRingBuffers()
+{
+    mutexOpenClose.lock();
+    if(isClosing) {
+        mutexOpenClose.unlock();
+        return;
+    }
+    mutexOpenClose.unlock();
+
+    mutexDevicesInOut.lock();
+    if(devOut)
+        devOut->SetRingBufferFromPins(listCircularBuffersOut);
+    mutexDevicesInOut.unlock();
+
+    inputBufferReady=false;
+}
+
+bool AudioDevice::RingBuffersToDevice( void *outputBuffer, unsigned long framesPerBuffer)
+{
+    mutexOpenClose.lock();
+    if(isClosing) {
+        mutexOpenClose.unlock();
+        return false;
+    }
+    mutexOpenClose.unlock();
+
+    mutexDevicesInOut.lock();
+    if(devOutClosing) {
+        //the device was removed : clear the output buffer one time
+        devOutClosing=false;
+        mutexDevicesInOut.unlock();
+
+        int cpt=0;
+        foreach(CircularBuffer *buf, listCircularBuffersOut) {
+            //empty the circular buffer, in case we reopen this device
+            buf->Clear();
+            //send a blank buffer to the device
+            memcpy(((float **) outputBuffer)[cpt], AudioBuffer::blankBuffer, sizeof(float)*framesPerBuffer );
+            cpt++;
+        }
+        return true;
+
+    }
+    mutexDevicesInOut.unlock();
+
+    //send circular buffer to device if there's enough data
+    int cpt=0;
+    foreach(CircularBuffer *buf, listCircularBuffersOut) {
+        if(buf->filledSize>=framesPerBuffer)
+            buf->Get( ((float **) outputBuffer)[cpt], framesPerBuffer );
+        cpt++;
+    }
+
+    return true;
 }
 
 /*!
@@ -647,173 +671,23 @@ int AudioDevice::paCallback( const void *inputBuffer, void *outputBuffer,
                                  void *userData )
 {
     AudioDevice* device = (AudioDevice*)userData;
-
-    if(!device->myHost)
+    if(!device->DeviceToRingBuffers(inputBuffer, framesPerBuffer))
         return paComplete;
 
-    unsigned long hostBuffSize = device->myHost->GetBufferSize();
-    if(framesPerBuffer > hostBuffSize) {
-       device->myHost->SetBufferSize(framesPerBuffer);
-       hostBuffSize = framesPerBuffer;
+    //all devices are ready : render
+    mutexCountInputDevicesReady.lock();
+    if(countDevicesReady>=countInputDevices) {
+        countDevicesReady=0;
+        mutexCountInputDevicesReady.unlock();
+
+        device->myHost->Render();
+        device->myHost->audioDevices->PutPinsBuffersInRingBuffers();
+    } else {
+        mutexCountInputDevicesReady.unlock();
     }
 
-    {
-        QMutexLocker devLock(&device->devicesMutex);
-
-        if(device->isClosing)
-            return paComplete;
-
-        if(device->devIn) {
-
-            bool readyToRender=true;
-
-            //fill circular buffer with device audio
-            int cpt=0;
-            foreach(CircularBuffer *buf, device->listCircularBuffersIn) {
-
-                buf->Put( ((float **) inputBuffer)[cpt], framesPerBuffer );
-
-                if(buf->filledSize < hostBuffSize )
-                    readyToRender=false;
-
-                cpt++;
-            }
-
-            //if we filled enough buffer
-            //if(device->listCircularBuffersIn.at(0)->filledSize >= hostBuffSize ) {
-            if(readyToRender) {
-                //put circular buffers into pins buffers
-                if(device->devIn->doublePrecision) {
-                    cpt=0;
-                    foreach(CircularBuffer *buf, device->listCircularBuffersIn) {
-                        AudioBufferD *pinBuf = device->devIn->listAudioPinOut->GetBufferD(cpt);
-                        if(pinBuf) {
-
-                            if(pinBuf->GetSize() < hostBuffSize) {
-                                pinBuf->SetSize(hostBuffSize);
-        //                        debug("AudioDevice::paCallback pin buffer too small")
-                                continue;
-                            }
-
-                            if(buf->filledSize >= hostBuffSize)
-                                buf->Get( pinBuf->GetPointer(true), hostBuffSize );
-                        }
-                        cpt++;
-                    }
-                } else {
-                    cpt=0;
-                    foreach(CircularBuffer *buf, device->listCircularBuffersIn) {
-                        AudioBuffer *pinBuf = device->devIn->listAudioPinOut->GetBuffer(cpt);
-                        if(pinBuf) {
-
-                            if(pinBuf->GetSize() < hostBuffSize) {
-                                pinBuf->SetSize(hostBuffSize);
-        //                        debug("AudioDevice::paCallback pin buffer too small")
-                                continue;
-                            }
-
-                            if(buf->filledSize >= hostBuffSize)
-                                buf->Get( pinBuf->GetPointer(true), hostBuffSize );
-                        }
-                        cpt++;
-                    }
-                }
-
-                if(!device->bufferReady) {
-                    device->bufferReady=true;
-
-                    QMutexLocker locker(&listDevMutex);
-                    countDevicesReady++;
-                }
-            }
-        }
-    }
-
-
-    {
-        QMutexLocker locker(&listDevMutex);
-
-        //all devices are ready : render
-        if(countDevicesReady>=countInputDevices) {
-            countDevicesReady=0;
-
-            device->myHost->Render();
-
-            foreach(QSharedPointer<AudioDevice>dev, device->myHost->audioDevices->listAudioDevices) {
-                if(dev.isNull())
-                    continue;
-
-                QMutexLocker devLock(&dev->devicesMutex);
-
-                if(dev->isClosing)
-                    continue;
-
-                if(dev->devOut) {
-                    if(dev->devOut->doublePrecision) {
-                        int cpt=0;
-                        //put pins buffer into circular buffers
-                        foreach(CircularBuffer *buf, dev->listCircularBuffersOut) {
-                            AudioBufferD *pinBuf = dev->devOut->listAudioPinIn->GetBufferD(cpt);
-        //                    if(!pinBuf->IsEmpty()) {
-                                buf->Put( pinBuf->ConsumeStack(), pinBuf->GetSize() );
-                                pinBuf->ResetStackCounter();
-        //                    }
-                            cpt++;
-                        }
-                    } else {
-                        int cpt=0;
-                        //put pins buffer into circular buffers
-                        foreach(CircularBuffer *buf, dev->listCircularBuffersOut) {
-                            AudioBuffer *pinBuf = dev->devOut->listAudioPinIn->GetBuffer(cpt);
-        //                    if(!pinBuf->IsEmpty()) {
-                                buf->Put( pinBuf->ConsumeStack(), pinBuf->GetSize() );
-                                pinBuf->ResetStackCounter();
-        //                    }
-                            cpt++;
-                        }
-                    }
-                }
-                dev->bufferReady=false;
-            }
-        }
-    }
-
-
-    {
-//        QMutexLocker devLock(&device->devicesMutex);
-        if(device->isClosing)
-            return paComplete;
-
-        if(device->devOut) {
-            //send circular buffer to device if there's enough data
-            int cpt=0;
-            foreach(CircularBuffer *buf, device->listCircularBuffersOut) {
-//                while(buf->filledSize >= hostBuffSize+framesPerBuffer ) {
-//                    debug2(<< "AudioDevice::paCallback skip buffer filled:" << buf->filledSize << " host:" << hostBuffSize << " frame:" << framesPerBuffer )
-//                    buf->Skip(framesPerBuffer);
-//                    debug2(<< buf->filledSize)
-//                }
-
-                if(buf->filledSize>=framesPerBuffer)
-                    buf->Get( ((float **) outputBuffer)[cpt], framesPerBuffer );
-                cpt++;
-            }
-        } else {
-            if(device->devOutClosing) {
-                //the device was removed : clear the output buffer one time
-                device->devOutClosing=false;
-                int cpt=0;
-                foreach(CircularBuffer *buf, device->listCircularBuffersOut) {
-                    //empty the circular buffer, in case we reopen this device
-                    buf->Clear();
-                    //send a blank buffer to the device
-                    memcpy(((float **) outputBuffer)[cpt], AudioBuffer::blankBuffer, sizeof(float)*framesPerBuffer );
-                    cpt++;
-                }
-            }
-        }
-    }
+    if(!device->RingBuffersToDevice(outputBuffer, framesPerBuffer))
+        return paComplete;
 
     return paContinue;
-
 }

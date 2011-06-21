@@ -41,7 +41,7 @@ namespace Connectables {
 
         QSharedPointer<Object> NewObject(const ObjectInfo &info);
         QSharedPointer<Object> GetObj(const QModelIndex & index);
-        void RemoveObject(int id);
+//        void RemoveObject(int id);
         void Clear();
 
         QSharedPointer<Object> GetObjectFromId(int id);
@@ -58,8 +58,6 @@ namespace Connectables {
         hashObjects listObjects;
         int cptListObjects;
         MainHost *myHost;
-
-//        QScriptValue scriptObj;
     };
 
 }

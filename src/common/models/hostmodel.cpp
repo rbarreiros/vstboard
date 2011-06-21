@@ -152,20 +152,25 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                 while(!stream.atEnd()) {
                     ObjectInfo info;
                     stream >> info;
-                    info.objType=ObjType::AudioInterfaceIn;
-                    QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
-                    if(objPtr.isNull()) {
-                        debug("HostModel::dropMimeData audioin object not found or already used")
-                    } else {
-                        cntPtr->UserAddObject(objPtr);
+
+                    if(info.inputs!=0) {
+                        info.objType=ObjType::AudioInterfaceIn;
+                        QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
+                        if(objPtr.isNull()) {
+                            debug("HostModel::dropMimeData audioin object not found or already used")
+                        } else {
+                            cntPtr->UserAddObject(objPtr);
+                        }
                     }
 
-                    info.objType=ObjType::AudioInterfaceOut;
-                    objPtr = myHost->objFactory->NewObject(info);
-                    if(objPtr.isNull()) {
-                        debug("HostModel::dropMimeData audioout object not found or already used")
-                    } else {
-                        cntPtr->UserAddObject(objPtr);
+                    if(info.outputs!=0) {
+                        info.objType=ObjType::AudioInterfaceOut;
+                        QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
+                        if(objPtr.isNull()) {
+                            debug("HostModel::dropMimeData audioout object not found or already used")
+                        } else {
+                            cntPtr->UserAddObject(objPtr);
+                        }
                     }
                 }
 

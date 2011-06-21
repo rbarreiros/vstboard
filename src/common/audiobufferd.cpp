@@ -59,6 +59,7 @@ bool AudioBufferD::SetSize(unsigned long size)
             pBuffer=0;
             return false;
         }
+        ZeroMemory( pBuffer, sizeof(double)*size );
     }
 
     nSize = nAllocatedSize = size;

@@ -38,6 +38,7 @@ using namespace Connectables;
 AudioPinOut::AudioPinOut(Object *parent, int number, unsigned long bufferSize, bool doublePrecision, bool externalAllocation) :
     AudioPin(parent,PinDirection::Output,number,bufferSize,doublePrecision,externalAllocation)
 {
+    setObjectName(QString("AudioOut%1").arg(number));
 }
 
 /*!

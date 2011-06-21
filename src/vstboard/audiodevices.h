@@ -29,17 +29,18 @@
 #include "connectables/objectinfo.h"
 #include "connectables/audiodevice.h"
 
-class MainHost;
+class MainHostHost;
 class AudioDevices : public QObject
 {
     Q_OBJECT
 public:
-    explicit AudioDevices(MainHost *myHost);
+    explicit AudioDevices(MainHostHost *myHost);
     ~AudioDevices();
     ListAudioInterfacesModel * GetModel();
+    Connectables::AudioDevice * AddDevice(ObjectInfo &objInfo, QString *errMsg=0);
+    void RemoveDevice(PaDeviceIndex devId);
 
-    /// list of opened AudioDevice
-    QHash<qint32,QSharedPointer<Connectables::AudioDevice> >listAudioDevices;
+    void PutPinsBuffersInRingBuffers();
 
     /// timer to launch the rendering loop when no audio devices are opened
     QTimer fakeRenderTimer;
@@ -47,8 +48,14 @@ public:
     /// model index of the asio devices, used by the view to expand this branch only
     QPersistentModelIndex AsioIndex;
 
+    bool FindPortAudioDevice(ObjectInfo &objInfo, PaDeviceInfo *dInfo);
 private:
     void BuildModel();
+
+    bool closing;
+
+    /// list of opened AudioDevice
+    QHash<qint32,Connectables::AudioDevice* >listAudioDevices;
 
     /// model pointer
     ListAudioInterfacesModel *model;
@@ -57,11 +64,15 @@ private:
     int countActiveDevices;
 
     /// pointer to the MainHost
-    MainHost *myHost;
+    MainHostHost *myHost;
+
+    QMutex mutexDevices;
+
+    QMutex mutexClosing;
 
 public slots:
-    void OnToggleDeviceInUse(const ObjectInfo &objInfo, bool opened);
-
+    void OnToggleDeviceInUse(PaHostApiIndex apiId, PaDeviceIndex devId, bool inUse, PaTime inLatency=0, PaTime outLatency=0, double sampleRate=0);
+    void ConfigDevice(const QModelIndex &index);
 };
 
 #endif // AUDIODEVICES_H

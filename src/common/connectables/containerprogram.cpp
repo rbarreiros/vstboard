@@ -26,6 +26,8 @@
 
 using namespace Connectables;
 
+QTime ContainerProgram::unsavedTime;
+
 ContainerProgram::ContainerProgram(MainHost *myHost,Container *container) :
         container(container),
         dirty(false),
@@ -157,15 +159,15 @@ void ContainerProgram::SaveRendererState()
 
 void ContainerProgram::LoadRendererState()
 {
-    if(container->parentContainer) {
-        const QTime t = container->parentContainer.toStrongRef()->GetLastUpdate();
+    //if(container->parentContainer) {
+        const QTime t = container->GetLastUpdate();
         if(t > timeSavedRendererNodes) {
             //my renderer map is outdated
             myHost->SetSolverUpdateNeeded();
         } else {
             myHost->GetRenderer()->LoadNodes( listOfRendererNodes );
         }
-    }
+    //}
 }
 
 

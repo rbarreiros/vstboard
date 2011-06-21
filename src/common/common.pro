@@ -9,10 +9,6 @@ CONFIG += staticlib
 DEFINES += APP_NAME=\\\"VstBoardCommon\\\"
 
 vstsdk {
-    DEFINES += VSTSDK
-    INCLUDEPATH += $$top_srcdir/$$VSTSDK_PATH \
-        $$top_srcdir/$$VSTSDK_PATH/public.sdk/source/vst2.x
-
     HEADERS += vst/cvsthost.h \
         connectables/vstplugin.h \
         vst/ceffect.h \
@@ -27,8 +23,8 @@ vstsdk {
         vst/vstbank.cpp \
         views/vstpluginwindow.cpp \
         views/vstshellselect.cpp \
-        $$top_srcdir/$$VSTSDK_PATH/public.sdk/source/vst2.x/audioeffectx.cpp \
-        $$top_srcdir/$$VSTSDK_PATH/public.sdk/source/vst2.x/audioeffect.cpp
+        $$VSTSDK_PATH/public.sdk/source/vst2.x/audioeffectx.cpp \
+        $$VSTSDK_PATH/public.sdk/source/vst2.x/audioeffect.cpp
 
     FORMS += views/vstpluginwindow.ui \
         views/vstshellselect.ui
@@ -106,7 +102,9 @@ SOURCES += \
     renderer/optimizer.cpp \
     renderer/optimizestepthread.cpp \
     renderer/renderernode.cpp \
-    renderer/node.cpp
+    renderer/node.cpp \
+    views/listaudiodevicesview.cpp \
+    views/scripteditor.cpp
 
 HEADERS  += \
     globals.h \
@@ -182,7 +180,9 @@ HEADERS  += \
     renderer/optimizer.h \
     renderer/optimizestepthread.h \
     renderer/renderernode.h \
-    renderer/node.h
+    renderer/node.h \
+    views/listaudiodevicesview.h \
+    views/scripteditor.h
 
 FORMS += \
     views/configdialog.ui \
@@ -191,7 +191,8 @@ FORMS += \
     views/programlist.ui \
     views/aboutdialog.ui \
     views/splash.ui \
-    views/viewconfigdialog.ui
+    views/viewconfigdialog.ui \
+    views/scripteditor.ui
 
 PRECOMPILED_HEADER = precomp.h
 

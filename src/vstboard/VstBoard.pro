@@ -1,6 +1,5 @@
 DEFINES += APP_NAME=\\\"VstBoard\\\"
 
-srcdir = vstboard
 include(../config.pri)
 
 QT += core gui script
@@ -8,9 +7,7 @@ QT += core gui script
 TEMPLATE = app
 TARGET = $${APP_NAME}
 
-LIBS += -L$$top_destdir -lportaudio
-LIBS += -L$$top_destdir -lportmidi
-LIBS += -L$$top_destdir -lcommon
+LIBS += -lportmidi
 
 win32 {
     LIBS += -lwinmm
@@ -21,60 +18,11 @@ win32 {
     LIBS += -ldsound
 }
 
-win32-msvc* {
-    PRE_TARGETDEPS += $$top_destdir/portaudio.lib
-    PRE_TARGETDEPS += $$top_destdir/portmidi.lib
-    PRE_TARGETDEPS += $$top_destdir/common.lib
-} else {
-    PRE_TARGETDEPS += $$top_destdir/libportaudio.a
-    PRE_TARGETDEPS += $$top_destdir/libportmidi.a
-    PRE_TARGETDEPS += $$top_destdir/libcommon.a
-}
-
-INCLUDEPATH += $$top_srcdir/$$PORTAUDIO_PATH/include
-INCLUDEPATH += $$top_srcdir/$$PORTMIDI_PATH/porttime
-INCLUDEPATH += $$top_srcdir/$$PORTMIDI_PATH/pm_common
-
-!CONFIG(debug, debug|release) {
-
-    targetdir = $$OUT_PWD/../../bin/$$build_postfix
-    builddir = $$OUT_PWD/../../build/$$build_postfix
-
-#other files included in the release
-    EXTRA_FILES = \
-        $${_PRO_FILE_PWD_}/../../*.txt \
-        $${_PRO_FILE_PWD_}/../../tools/*.nsi \
-
-    linux-g++{
-        for(FILE,EXTRA_FILES){
-            QMAKE_POST_LINK += $$quote(cp $${FILE} $${targetdir} $$escape_expand(\n\t))
-        }
-    }
-
-    win32-msvc* {
-        RC_FILE = vstboard.rc
-    }
-
-    win32 {
-        EXTRA_FILES_WIN = $${EXTRA_FILES}
-        EXTRA_FILES_WIN ~= s,/,\\,g
-        DESTDIR_WIN = $${targetdir}
-        DESTDIR_WIN ~= s,/,\\,g
-        for(FILE,EXTRA_FILES_WIN){
-            QMAKE_POST_LINK += copy /y \"$${FILE}\" \"$${DESTDIR_WIN}\" $$escape_expand(\n\t)
-        }
-    }
-}
+INCLUDEPATH += $$PORTAUDIO_PATH/include
+INCLUDEPATH += $$PORTMIDI_PATH/porttime
+INCLUDEPATH += $$PORTMIDI_PATH/pm_common
 
 INCLUDEPATH += ../common
-
-vstsdk {
-    DEFINES += VSTSDK
-    INCLUDEPATH += $$top_srcdir/$$VSTSDK_PATH \
-        $$top_srcdir/$$VSTSDK_PATH/public.sdk/source/vst2.x
-
-    HEADERS +=
-}
 
 SOURCES += \
     main.cpp \
@@ -90,7 +38,9 @@ SOURCES += \
     audiodevices.cpp \
     mididevices.cpp \
     circularbuffer.cpp \
-    views/configdialoghost.cpp
+    views/configdialoghost.cpp \
+    views/mmeconfigdialog.cpp \
+    views/wasapiconfigdialog.cpp
 
 HEADERS += \
     mainhosthost.h \
@@ -105,21 +55,54 @@ HEADERS += \
     audiodevices.h \
     mididevices.h \
     circularbuffer.h \
-    views/configdialoghost.h
+    views/configdialoghost.h \
+    views/mmeconfigdialog.h \
+    views/wasapiconfigdialog.h
 
 
-FORMS +=
+FORMS += \
+    views/mmeconfigdialog.ui \
+    views/wasapiconfigdialog.ui
 
 PRECOMPILED_HEADER = ../common/precomp.h
-
-OTHER_FILES += \ 
-    ../../README.txt \
-    ../../license.txt \
-    ../../LGPL.txt \
-    ../../GPL.txt \
-    ../../tools/nsis.nsi \
-    vstboard.rc
 
 TRANSLATIONS = ../resources/translations/vstboard_fr.ts
 
 RESOURCES += ../resources/resources.qrc
+
+win32-msvc* {
+    RC_FILE = vstboard.rc
+}
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../common/release/ -lcommon
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../common/debug/ -lcommon
+else:unix:!symbian: LIBS += -L$$OUT_PWD/../common/ -lcommon
+
+INCLUDEPATH += $$PWD/../common
+DEPENDPATH += $$PWD/../common
+
+win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../common/release/common.lib
+else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../common/debug/common.lib
+else:unix:!symbian: PRE_TARGETDEPS += $$OUT_PWD/../common/libcommon.a
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../portaudio/release/ -lportaudio
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../portaudio/debug/ -lportaudio
+else:unix:!symbian: LIBS += -L$$OUT_PWD/../portaudio/ -lportaudio
+
+INCLUDEPATH += $$PWD/../portaudio
+DEPENDPATH += $$PWD/../portaudio
+
+win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../portaudio/release/portaudio.lib
+else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../portaudio/debug/portaudio.lib
+else:unix:!symbian: PRE_TARGETDEPS += $$OUT_PWD/../portaudio/libportaudio.a
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../portmidi/release/ -lportmidi
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../portmidi/debug/ -lportmidi
+else:unix:!symbian: LIBS += -L$$OUT_PWD/../portmidi/ -lportmidi
+
+INCLUDEPATH += $$PWD/../portmidi
+DEPENDPATH += $$PWD/../portmidi
+
+win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../portmidi/release/portmidi.lib
+else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../portmidi/debug/portmidi.lib
+else:unix:!symbian: PRE_TARGETDEPS += $$OUT_PWD/../portmidi/libportmidi.a

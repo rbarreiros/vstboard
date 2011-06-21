@@ -19,6 +19,7 @@
 **************************************************************************/
 
 #include "objectinfo.h"
+#include "mainhost.h"
 
 ObjectInfo::ObjectInfo() :
         nodeType(NodeType::ND),
@@ -29,7 +30,7 @@ ObjectInfo::ObjectInfo() :
         inputs(0),
         outputs(0),
         duplicateNamesCounter(0),
-        api(""),
+        api(0),
         forcedObjId(0)
 {
 
@@ -43,7 +44,7 @@ ObjectInfo::ObjectInfo(NodeType::Enum nodeType, ObjType::Enum objType, QString n
         inputs(0),
         outputs(0),
         duplicateNamesCounter(0),
-        api(""),
+        api(0),
         forcedObjId(0)
 {
 
@@ -64,6 +65,7 @@ QDataStream & ObjectInfo::toStream(QDataStream& stream) const
     stream << inputs;
     stream << outputs;
     stream << duplicateNamesCounter;
+    stream << apiName;
     stream << api;
     stream << forcedObjId;
     return stream;
@@ -79,7 +81,10 @@ QDataStream & ObjectInfo::fromStream(QDataStream& stream)
     stream >> inputs;
     stream >> outputs;
     stream >> duplicateNamesCounter;
-    stream >> api;
+    stream >> apiName;
+    if(MainHost::currentFileVersion >= 13) {
+        stream >> api;
+    }
     stream >> forcedObjId;
     return stream;
 }
