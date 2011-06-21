@@ -20,7 +20,7 @@ copy /y "%QTDIR%\bin\QtCore4.dll" ".\installer"
 copy /y "%QTDIR%\bin\QtGui4.dll" ".\installer"
 copy /y "%QTDIR%\bin\QtScript4.dll" ".\installer"
 copy /y "%QTDIR%\bin\QtSolutions_MFCMigrationFramework-head.dll" ".\installer"
-copy /y "%WindowsSDKDir%\Redist\VC\vcredist_x64.exe" ".\installer"
+copy /y "%WindowsSDKDir%\Redist\VC\vcredist_x86.exe" ".\installer"
 
 set MPRESS_PATH="../../vstboard/tools/mpress/mpress.exe"
 %MPRESS_PATH% -q ".\installer\VstBoard.exe"
