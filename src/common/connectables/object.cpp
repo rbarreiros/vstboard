@@ -393,6 +393,10 @@ QStandardItem *Object::GetParkingItem()
     QStandardItem *modelNode=new QStandardItem();
     modelNode->setData(index,UserRoles::value);
     modelNode->setData(objectName(), Qt::DisplayRole);
+
+    //suspend the object if not used in the next program
+    QTimer::singleShot(50,this,SLOT(SuspendIfParked()));
+
     return modelNode;
 }
 
@@ -408,6 +412,7 @@ QStandardItem *Object::GetFullItem()
     modelNode->setData(index, UserRoles::value);
     modelNode->setData(objectName(), Qt::DisplayRole);
     modelNode->setData(errorMessage, UserRoles::errorMessage);
+    Resume();
     return modelNode;
 }
 

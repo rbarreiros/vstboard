@@ -59,6 +59,7 @@ namespace Connectables {
         virtual void ParkObject(QSharedPointer<Object> objPtr);
         virtual void CopyCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr);
         virtual bool IsDirty();
+        virtual void SetSleep(bool sleeping);
 
         /// shared pointer to the bridge in object
         QSharedPointer<Object> bridgeIn;
@@ -125,8 +126,6 @@ namespace Connectables {
         void SaveProgram();
         void UnloadProgram();
         void LoadProgram(int prog);
-
-        void SetSleep(bool sleeping);
 
         void SetProgram(const QModelIndex &prg);
         void CopyProgram(int ori, int dest);
