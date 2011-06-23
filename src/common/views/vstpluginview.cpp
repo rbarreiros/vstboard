@@ -46,22 +46,30 @@ void VstPluginView::SetModelIndex(QPersistentModelIndex index)
     ConnectableObjectView::SetModelIndex(index);
 
     actSaveBank = new QAction(QIcon(":/img16x16/filesave.png"),tr("Save Bank"),this);
+    actSaveBank->setShortcut( Qt::CTRL + Qt::Key_B );
+    actSaveBank->setShortcutContext(Qt::WidgetShortcut);
     connect(actSaveBank,SIGNAL(triggered()),
             this,SLOT(SaveBank()));
     addAction(actSaveBank);
 
     actSaveBankAs = new QAction(QIcon(":/img16x16/filesaveas.png"),tr("Save Bank As..."),this);
+    actSaveBankAs->setShortcut( Qt::CTRL + Qt::SHIFT + Qt::Key_B );
+    actSaveBankAs->setShortcutContext(Qt::WidgetShortcut);
     connect(actSaveBankAs,SIGNAL(triggered()),
             this,SLOT(SaveBankAs()));
     actSaveBankAs->setEnabled(false);
     addAction(actSaveBankAs);
 
     actSaveProgram = new QAction(QIcon(":/img16x16/filesave.png"),tr("Save Program"),this);
+    actSaveProgram->setShortcut( Qt::CTRL + Qt::Key_P );
+    actSaveProgram->setShortcutContext(Qt::WidgetShortcut);
     connect(actSaveProgram,SIGNAL(triggered()),
             this,SLOT(SaveProgram()));
     addAction(actSaveProgram);
 
     actSaveProgramAs = new QAction(QIcon(":/img16x16/filesaveas.png"),tr("Save Program As..."),this);
+    actSaveProgramAs->setShortcut( Qt::CTRL + Qt::SHIFT + Qt::Key_P );
+    actSaveProgramAs->setShortcutContext(Qt::WidgetShortcut);
     connect(actSaveProgramAs,SIGNAL(triggered()),
             this,SLOT(SaveProgramAs()));
     actSaveProgramAs->setEnabled(false);

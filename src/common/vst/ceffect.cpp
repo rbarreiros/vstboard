@@ -132,7 +132,12 @@ bool CEffect::LoadBank(std::string *name)
 
         if (pEffect->uniqueID != bank.GetFxID()) {
             debug2(<<"CEffect::LoadBank ID doesn't match");
-            throw (int)1;
+            QMessageBox msgBox;
+            msgBox.setText( QObject::tr("Wrong plugin ID.") );
+            msgBox.setInformativeText( QObject::tr("Bank file not designed for that plugin") );
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.exec();
+            return false;
           }
 
         EffBeginLoadBank(bank.GetPatchChunkInfo());
@@ -221,7 +226,12 @@ bool CEffect::LoadProgram(std::string *name)
 
         if (pEffect->uniqueID != progFile.GetFxID()) {
             debug2(<<"CEffect::LoadPreset ID doesn't match");
-            throw (int)1;
+            QMessageBox msgBox;
+            msgBox.setText( QObject::tr("Wrong plugin ID.") );
+            msgBox.setInformativeText( QObject::tr("Program file not designed for that plugin") );
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.exec();
+            return false;
         }
 
         if(progFile.IsChunk()) {
