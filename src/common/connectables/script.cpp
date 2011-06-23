@@ -29,7 +29,7 @@ Script::Script(MainHost *host, int index, const ObjectInfo &info) :
     connect(editorWnd, SIGNAL(Execute(QString)),
             this,SLOT(ReplaceScript(QString)));
     connect(editorWnd, SIGNAL(Hide()),
-            this, SLOT(OnHideEditor()));
+            this, SLOT(OnEditorClosed()));
     connect(editorWnd, SIGNAL(destroyed()),
             this, SLOT(EditorDestroyed()));
 }
