@@ -14,6 +14,7 @@ namespace View {
 
     protected:
         void dragEnterEvent( QGraphicsSceneDragDropEvent *event);
+        void dragLeaveEvent( QGraphicsSceneDragDropEvent *event);
         void dropEvent( QGraphicsSceneDragDropEvent *event);
         QAction *actSaveBank;
         QAction *actSaveBankAs;
@@ -26,6 +27,8 @@ namespace View {
         void SaveProgramAs();
         void SaveProgram();
         void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
+        void HighlightStart();
+        void HighlightStop();
     };
 }
 

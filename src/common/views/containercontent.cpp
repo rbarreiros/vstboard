@@ -27,29 +27,24 @@
 
 using namespace View;
 
-ContainerContent::ContainerContent(QAbstractItemModel *model, QGraphicsItem * parent, Qt::WindowFlags wFlags ) :
+ContainerContent::ContainerContent(MainHost *myHost, QAbstractItemModel *model, QGraphicsItem * parent, Qt::WindowFlags wFlags ) :
     QGraphicsWidget(parent,wFlags),
     model(model)
 {
+    config = &myHost->mainWindow->viewConfig;
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     setGeometry(0,0,50,50);
 
     dropPos.setX(0);
     dropPos.setY(0);
 
+    setAutoFillBackground(true);
+    QPalette pal(palette());
+    pal.setColor(QPalette::Window, config->GetColor(ColorGroups::Panel,Colors::Background) );
+    setPalette( pal );
 
-
-//    QPalette pal;
-//    pal = palette();
-////    pal.setBrush(QPalette::Active, QPalette::Window, Qt::lightGray);
-//    pal.setBrush(QPalette::Active, QPalette::Window, Qt::NoBrush);
-//    setPalette(pal);
-}
-
-void ContainerContent::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
-{
-//    painter->setBrush(palette().brush(QPalette::Window));
-//    painter->drawRect(boundingRect());
+    connect( config, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
+            this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)) );
 }
 
 void ContainerContent::SetModelIndex(QPersistentModelIndex index)
@@ -70,11 +65,10 @@ void ContainerContent::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
     //accepts objects from parking
     if(event->source() == myParking ) {
         QGraphicsWidget::dragEnterEvent(event);
+        HighlightStart();
         return;
     }
 
-#ifdef VSTSDK
-    //accept DLL files
     if (event->mimeData()->hasUrls()) {
         QString fName;
         QFileInfo info;
@@ -82,14 +76,29 @@ void ContainerContent::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
         foreach(QUrl url,event->mimeData()->urls()) {
             fName = url.toLocalFile();
             info.setFile( fName );
-            if ( info.isFile() && info.isReadable() && info.suffix()=="dll" ) {
-                event->setDropAction(Qt::CopyAction);
-                event->accept();
-                return;
+
+            if ( info.isFile() && info.isReadable() ) {
+#ifdef VSTSDK
+                //accept DLL files
+                if( info.suffix()=="dll" ) {
+                    event->setDropAction(Qt::CopyAction);
+                    event->accept();
+                    HighlightStart();
+                    return;
+                }
+#endif
+
+                //accept setup and projects files
+                if ( info.suffix()==SETUP_FILE_EXTENSION || info.suffix()==PROJECT_FILE_EXTENSION ) {
+                    event->setDropAction(Qt::CopyAction);
+                    event->accept();
+                    HighlightStart();
+                    return;
+                }
             }
         }
     }
-#endif
+
 
     //accept Audio interface
     //accept Midi interface
@@ -99,14 +108,52 @@ void ContainerContent::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
        event->mimeData()->hasFormat("application/x-tools")) {
         event->setDropAction(Qt::CopyAction);
         event->accept();
+        HighlightStart();
         return;
     }
     event->ignore();
 }
 
+void ContainerContent::dragLeaveEvent( QGraphicsSceneDragDropEvent *event)
+{
+    HighlightStop();
+}
+
 void ContainerContent::dropEvent( QGraphicsSceneDragDropEvent *event)
 {
+    HighlightStop();
     QGraphicsWidget::dropEvent(event);
     dropPos = mapToScene(event->pos());
     event->setAccepted(model->dropMimeData(event->mimeData(), event->proposedAction(), 0, 0, objIndex));
+}
+
+void ContainerContent::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
+{
+    if(groupId!=ColorGroups::Panel)
+        return;
+
+    switch(colorId) {
+        case Colors::Background : {
+            QPalette pal(palette());
+            pal.setColor(QPalette::Window,color);
+            setPalette( pal );
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void ContainerContent::HighlightStart()
+{
+    QPalette pal(palette());
+    pal.setColor(QPalette::Window, config->GetColor(ColorGroups::Panel,Colors::HighlightBackground) );
+    setPalette( pal );
+}
+
+void ContainerContent::HighlightStop()
+{
+    QPalette pal(palette());
+    pal.setColor(QPalette::Window, config->GetColor(ColorGroups::Panel,Colors::Background) );
+    setPalette( pal );
 }

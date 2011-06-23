@@ -62,9 +62,6 @@ FunctionEnd
 Function getVstDir
   StrCpy $VstDir "$INSTDIR\"
   ReadRegStr $1 HKLM "SOFTWARE\VST" "VSTPluginsPath"
-  ${If} $1 == ""
-	WriteRegStr HKLM "SOFTWARE\VST" "VSTPluginsPath" $VstDir
-  ${EndIf}
 FunctionEnd
 
 Section "VstBoard (required)"

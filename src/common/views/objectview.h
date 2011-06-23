@@ -72,7 +72,8 @@ namespace View {
         virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
         void resizeEvent ( QGraphicsSceneResizeEvent * event );
         virtual void closeEvent ( QCloseEvent * event );
-        QVariant itemChange ( GraphicsItemChange  change, const QVariant & value );
+        virtual void focusInEvent ( QFocusEvent * event );
+        virtual void focusOutEvent ( QFocusEvent * event );
         void mouseReleaseEvent ( QGraphicsSceneMouseEvent * event );
 
         void SetErrorMessage(const QString & msg);
@@ -107,9 +108,13 @@ namespace View {
         /// pointer to the MainHost
         MainHost *myHost;
 
+        bool highlighted;
+
     public slots:
         void ShrinkNow();
         virtual void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
+        virtual void HighlightStart() {}
+        virtual void HighlightStop() {}
 
     friend class PinView;
     };

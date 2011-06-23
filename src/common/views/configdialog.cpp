@@ -38,7 +38,7 @@ ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
     connect( ui->defaultVstPath, SIGNAL(currentIndexChanged(int)),
              this, SLOT(onVstPathIndexChanged(int)));
 
-    QString vstPath = myHost->GetSetting("defaultVstPath", "systemDefault").toString();
+    QString vstPath = myHost->GetSetting("defaultVstPath", "fromLastSession").toString();
     if(vstPath == "systemDefault" || vstPath == "fromLastSession") {
         ui->defaultVstPath->setCurrentIndex( ui->defaultVstPath->findData( vstPath ) );
     } else {
@@ -223,8 +223,7 @@ const QString ConfigDialog::defaultProjectFile(MainHost *myHost)
 
 const QString ConfigDialog::defaultVstPath(MainHost *myHost)
 {
-    //if not set, we want the system default path
-    QString vstPathType = myHost->GetSetting("defaultVstPath","systemDefault").toString();
+    QString vstPathType = myHost->GetSetting("defaultVstPath","fromLastSession").toString();
 
     QSettings vstSettings("HKEY_LOCAL_MACHINE\\Software\\VST", QSettings::NativeFormat);
     QString defaultPath = vstSettings.value("VSTPluginsPath", "").toString();
@@ -248,12 +247,24 @@ const QString ConfigDialog::defaultVstPath(MainHost *myHost)
     }
 
     //if we want the system default vst path
+    if(vstPathType == "systemDefault") {
+        //get the system default
+        if(!defaultPath.isEmpty())
+            return defaultPath;
 
-    //get the system default
-    if(!defaultPath.isEmpty())
-        return defaultPath;
+        //no system default, return the path from last session
+        if(!lastPath.isEmpty())
+            return lastPath;
 
-    //no system default, return the path from last session
+        //no last session path, return the home dir
+        return QDir::homePath();
+    }
+
+    //else return the custom path
+    if(!vstPathType.isEmpty())
+        return vstPathType;
+
+    //no custom path, return the path from last session
     if(!lastPath.isEmpty())
         return lastPath;
 
@@ -269,7 +280,11 @@ const QString ConfigDialog::defaultBankPath(MainHost *myHost)
         bankPath = myHost->GetSetting("lastBankPath","").toString();
     }
 
-    return bankPath;
+    if(!bankPath.isEmpty())
+        return bankPath;
+
+    //no last session path, return the home dir
+    return QDir::homePath();
 }
 
 const float ConfigDialog::defaultSampleRate(MainHost *myHost)

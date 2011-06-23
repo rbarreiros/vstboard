@@ -313,6 +313,9 @@ bool VstPlugin::Open()
         bufferSize = myHost->GetBufferSize();
         sampleRate = myHost->GetSampleRate();
 
+        listAudioPinIn->ChangeNumberOfPins(pEffect->numInputs);
+        listAudioPinOut->ChangeNumberOfPins(pEffect->numOutputs);
+
         EffSetSampleRate(sampleRate);
         EffSetBlockSize(bufferSize);
         EffOpen();
@@ -393,9 +396,6 @@ bool VstPlugin::Open()
             listMidiPinOut->AddPin(0);
         }
     }
-
-    listAudioPinIn->ChangeNumberOfPins(pEffect->numInputs);
-    listAudioPinOut->ChangeNumberOfPins(pEffect->numOutputs);
 
     int nbParam = pEffect->numParams;
     bool nameCanChange=false;
@@ -678,9 +678,16 @@ VstIntPtr VstPlugin::OnMasterCallback(long opcode, long index, long value, void 
             UpdateModelNode();
             return  1L;
 
+        case audioMasterNeedIdle : //14
+            EffIdle();
+            return 1L;
+
         case audioMasterSizeWindow : //15
             emit WindowSizeChange((int)index,(int)value);
             break;
+
+        case audioMasterGetSampleRate : //16
+            return sampleRate;
 
 //        case audioMasterUpdateDisplay : //42
 //            break;

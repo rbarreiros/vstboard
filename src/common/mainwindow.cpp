@@ -42,6 +42,8 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
             this,SLOT(programParkingModelChanges(QStandardItemModel*)));
     connect(myHost,SIGNAL(groupParkingModelChanged(QStandardItemModel*)),
             this,SLOT(groupParkingModelChanges(QStandardItemModel*)));
+    connect(myHost,SIGNAL(currentFileChanged()),
+            this,SLOT(currentFileChanged()));
 
     ui->setupUi(this);
 
@@ -292,37 +294,24 @@ void MainWindow::on_actionLoad_triggered()
 {
     if(!userWantsToUnloadProject())
         return;
-
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open a Project file"), "", tr("Project Files (*.%1)").arg(PROJECT_FILE_EXTENSION));
-
-    if(fileName.isEmpty())
-        return;
-
-    if(ProjectFile::LoadFromFile(myHost,fileName)) {
-        ConfigDialog::AddRecentProjectFile(fileName,myHost);
-        currentProjectFile = fileName;
-        updateRecentFileActions();
-    }
+    myHost->LoadProjectFile(fileName);
 }
 
 void MainWindow::on_actionNew_triggered()
 {
     if(!userWantsToUnloadProject())
         return;
-
-    ProjectFile::Clear(myHost);
-    ConfigDialog::AddRecentProjectFile("",myHost);
-    currentProjectFile = "";
-    updateRecentFileActions();
+    myHost->ClearProject();
 }
 
 void MainWindow::on_actionSave_triggered()
 {
-    if(currentProjectFile.isEmpty()) {
+    if(myHost->currentProjectFile.isEmpty()) {
         on_actionSave_Project_As_triggered();
         return;
     }
-    ProjectFile::SaveToFile(myHost,currentProjectFile);
+    myHost->SaveProjectFile();
 }
 
 void MainWindow::on_actionSave_Project_As_triggered()
@@ -338,50 +327,31 @@ void MainWindow::on_actionSave_Project_As_triggered()
         fileName += PROJECT_FILE_EXTENSION;
     }
 
-    if(ProjectFile::SaveToFile(myHost,fileName)) {
-        myHost->SetSetting("lastProjectDir",QFileInfo(fileName).absolutePath());
-        ConfigDialog::AddRecentProjectFile(fileName,myHost);
-        currentProjectFile = fileName;
-        updateRecentFileActions();
-    }
+    myHost->SaveProjectFile(fileName);
 }
 
 void MainWindow::on_actionLoad_Setup_triggered()
 {
     if(!userWantsToUnloadSetup())
         return;
-
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open a Setup file"), "", tr("Setup Files (*.%1)").arg(SETUP_FILE_EXTENSION));
-
-    if(fileName.isEmpty())
-        return;
-
-    if(SetupFile::LoadFromFile(myHost,fileName)) {
-        ConfigDialog::AddRecentSetupFile(fileName,myHost);
-        currentSetupFile = fileName;
-        updateRecentFileActions();
-    }
+    myHost->LoadSetupFile(fileName);
 }
 
 void MainWindow::on_actionNew_Setup_triggered()
 {
     if(!userWantsToUnloadSetup())
         return;
-
-    SetupFile::Clear(myHost);
-    ConfigDialog::AddRecentSetupFile("",myHost);
-    currentSetupFile = "";
-    updateRecentFileActions();
+    myHost->ClearSetup();
 }
 
 void MainWindow::on_actionSave_Setup_triggered()
 {
-    if(currentSetupFile.isEmpty()) {
+    if(myHost->currentSetupFile.isEmpty()) {
         on_actionSave_Setup_As_triggered();
         return;
     }
-
-    SetupFile::SaveToFile(myHost,currentSetupFile);
+    myHost->SaveSetupFile();
 }
 
 void MainWindow::on_actionSave_Setup_As_triggered()
@@ -397,13 +367,7 @@ void MainWindow::on_actionSave_Setup_As_triggered()
         fileName += SETUP_FILE_EXTENSION;
     }
 
-
-    if(SetupFile::SaveToFile(myHost,fileName)) {
-        myHost->SetSetting("lastSetupDir",QFileInfo(fileName).absolutePath());
-        ConfigDialog::AddRecentSetupFile(fileName,myHost);
-        currentSetupFile = fileName;
-        updateRecentFileActions();
-    }
+    myHost->SaveSetupFile(fileName);
 }
 
 void MainWindow::on_actionShortcuts_toggled(bool onOff)
@@ -481,8 +445,6 @@ void MainWindow::readSettings()
         listRecentProjects << act;
     }
 
-    updateRecentFileActions();
-
     //window state
 
     if(myHost->SettingDefined("MainWindow/geometry")) {
@@ -514,23 +476,21 @@ void MainWindow::readSettings()
 
     viewConfig.LoadFromRegistry(myHost);
 
+    //load default files
+    myHost->LoadSetupFile( ConfigDialog::defaultSetupFile(myHost) );
+    myHost->LoadProjectFile( ConfigDialog::defaultProjectFile(myHost) );
+}
+
+void MainWindow::currentFileChanged()
+{
+    QFileInfo set(myHost->currentSetupFile);
+    QFileInfo proj(myHost->currentProjectFile);
+    setWindowTitle(QString("VstBoard %1:%2").arg( set.baseName() ).arg( proj.baseName() ));
+
+    ui->actionSave_Setup_As->setEnabled(!myHost->currentSetupFile.isEmpty());
+    ui->actionSave_Project_As->setEnabled(!myHost->currentProjectFile.isEmpty());
+
     updateRecentFileActions();
-
-    //load default setup file
-    currentSetupFile = ConfigDialog::defaultSetupFile(myHost);
-    if(!currentSetupFile.isEmpty()) {
-        if(!SetupFile::LoadFromFile(myHost,currentSetupFile))
-            currentSetupFile = "";
-    }
-
-    //load default project file
-    currentProjectFile = ConfigDialog::defaultProjectFile(myHost);
-    if(!currentProjectFile.isEmpty()) {
-        if(!ProjectFile::LoadFromFile(myHost,currentProjectFile))
-            currentProjectFile = "";
-    }
-
-
 }
 
 void MainWindow::resetSettings()
@@ -625,10 +585,6 @@ void MainWindow::updateRecentFileActions()
           for (int j = numRecentFiles; j < NB_RECENT_FILES; ++j)
               listRecentProjects[j]->setVisible(false);
      }
-
-     ui->actionSave_Setup_As->setEnabled(!currentSetupFile.isEmpty());
-     ui->actionSave_Project_As->setEnabled(!currentProjectFile.isEmpty());
-
  }
 
 void MainWindow::openRecentSetup()
@@ -640,13 +596,7 @@ void MainWindow::openRecentSetup()
      if(!action)
          return;
 
-     QString fileName = action->data().toString();
-
-     if(SetupFile::LoadFromFile(myHost,fileName)) {
-         ConfigDialog::AddRecentSetupFile(fileName,myHost);
-         currentSetupFile=fileName;
-         updateRecentFileActions();
-     }
+     myHost->LoadSetupFile( action->data().toString() );
 }
 
 void MainWindow::openRecentProject()
@@ -658,13 +608,7 @@ void MainWindow::openRecentProject()
      if(!action)
          return;
 
-     QString fileName = action->data().toString();
-
-     if(ProjectFile::LoadFromFile(myHost,fileName)) {
-         ConfigDialog::AddRecentProjectFile(fileName,myHost);
-         currentProjectFile=fileName;
-         updateRecentFileActions();
-     }
+     myHost->LoadProjectFile( action->data().toString() );
  }
 
 void MainWindow::programParkingModelChanges(QStandardItemModel *model)

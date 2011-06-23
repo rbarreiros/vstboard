@@ -16,7 +16,8 @@ namespace View {
             ParameterPin,
             Bridge,
             Object,
-            Windows
+            Windows,
+            Panel
         };
     }
 

@@ -21,9 +21,19 @@ void VstPluginView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId,
 
     switch(colorId) {
         case Colors::Background: {
-            QPalette pal(palette());
-            pal.setColor(QPalette::Window,color);
-            setPalette( pal );
+            if(!highlighted) {
+                QPalette pal(palette());
+                pal.setColor(QPalette::Window,color);
+                setPalette( pal );
+            }
+            break;
+        }
+        case Colors::HighlightBackground: {
+            if(highlighted) {
+                QPalette pal(palette());
+                pal.setColor(QPalette::Window,color);
+                setPalette( pal );
+            }
             break;
         }
         default:
@@ -36,22 +46,30 @@ void VstPluginView::SetModelIndex(QPersistentModelIndex index)
     ConnectableObjectView::SetModelIndex(index);
 
     actSaveBank = new QAction(QIcon(":/img16x16/filesave.png"),tr("Save Bank"),this);
+    actSaveBank->setShortcut( Qt::CTRL + Qt::Key_B );
+    actSaveBank->setShortcutContext(Qt::WidgetShortcut);
     connect(actSaveBank,SIGNAL(triggered()),
             this,SLOT(SaveBank()));
     addAction(actSaveBank);
 
     actSaveBankAs = new QAction(QIcon(":/img16x16/filesaveas.png"),tr("Save Bank As..."),this);
+    actSaveBankAs->setShortcut( Qt::CTRL + Qt::SHIFT + Qt::Key_B );
+    actSaveBankAs->setShortcutContext(Qt::WidgetShortcut);
     connect(actSaveBankAs,SIGNAL(triggered()),
             this,SLOT(SaveBankAs()));
     actSaveBankAs->setEnabled(false);
     addAction(actSaveBankAs);
 
     actSaveProgram = new QAction(QIcon(":/img16x16/filesave.png"),tr("Save Program"),this);
+    actSaveProgram->setShortcut( Qt::CTRL + Qt::Key_P );
+    actSaveProgram->setShortcutContext(Qt::WidgetShortcut);
     connect(actSaveProgram,SIGNAL(triggered()),
             this,SLOT(SaveProgram()));
     addAction(actSaveProgram);
 
     actSaveProgramAs = new QAction(QIcon(":/img16x16/filesaveas.png"),tr("Save Program As..."),this);
+    actSaveProgramAs->setShortcut( Qt::CTRL + Qt::SHIFT + Qt::Key_P );
+    actSaveProgramAs->setShortcutContext(Qt::WidgetShortcut);
     connect(actSaveProgramAs,SIGNAL(triggered()),
             this,SLOT(SaveProgramAs()));
     actSaveProgramAs->setEnabled(false);
@@ -145,9 +163,9 @@ void VstPluginView::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
             info.setFile( fName );
             if ( info.isFile() && info.isReadable() ) {
                 if( acceptedFiles.contains( info.suffix(), Qt::CaseInsensitive) ) {
-                    event->setDropAction(Qt::CopyAction);
+                    event->setDropAction(Qt::TargetMoveAction);
                     event->accept();
-
+                    HighlightStart();
                     return;
                 }
             }
@@ -156,9 +174,28 @@ void VstPluginView::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
     event->ignore();
 }
 
+void VstPluginView::dragLeaveEvent( QGraphicsSceneDragDropEvent *event)
+{
+    HighlightStop();
+}
+
 void VstPluginView::dropEvent( QGraphicsSceneDragDropEvent *event)
 {
-
+    HighlightStop();
     QGraphicsWidget::dropEvent(event);
     event->setAccepted(model->dropMimeData(event->mimeData(), event->proposedAction(), 0, 0, objIndex));
+}
+
+void VstPluginView::HighlightStart()
+{
+    QPalette pal(palette());
+    pal.setColor(QPalette::Window, config->GetColor(ColorGroups::VstPlugin,Colors::HighlightBackground) );
+    setPalette( pal );
+}
+
+void VstPluginView::HighlightStop()
+{
+    QPalette pal(palette());
+    pal.setColor(QPalette::Window, config->GetColor(ColorGroups::VstPlugin,Colors::Background) );
+    setPalette( pal );
 }

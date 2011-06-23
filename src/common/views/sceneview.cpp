@@ -52,15 +52,10 @@ SceneView::SceneView(MainHost *myHost,Connectables::ObjectFactory *objFactory, M
     timerFalloff = new QTimer(this);
     timerFalloff->start(50);
 
-//    QPixmap back(":/back.png");
     sceneHost = new QGraphicsScene(this);
-    sceneHost->setBackgroundBrush(Qt::lightGray);
     sceneProject = new QGraphicsScene(this);
-    sceneProject->setBackgroundBrush(Qt::lightGray);
     sceneProgram = new QGraphicsScene(this);
-    sceneProgram->setBackgroundBrush(Qt::lightGray);
     sceneGroup = new QGraphicsScene(this);
-    sceneGroup->setBackgroundBrush(Qt::lightGray);
 
     //we need a root object to avoid a bug when the scene is empty
     rootObjHost = new QGraphicsRectItem(0, sceneHost);
@@ -388,6 +383,10 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                 QPointF pos = parentView->GetDropPos();
                 objView->setPos(pos);
                 model()->setData(index,pos,UserRoles::position);
+
+                //when adding item, the scene set focus to the last item
+                if(objView->scene()->focusItem())
+                    objView->scene()->focusItem()->clearFocus();
 
                 connect(objView,SIGNAL(destroyed(QObject*)),
                         this,SLOT(graphicObjectRemoved(QObject*)));

@@ -254,6 +254,9 @@ namespace Connectables {
         void CloseEditorWindow();
 
     public slots:
+        void SuspendIfParked() {if(!parked) return; SetSleep(true);}
+        void Suspend() {SetSleep(true);}
+        void Resume() {SetSleep(false);}
         virtual void SaveProgram();
         virtual void UnloadProgram();
         virtual void LoadProgram(int prog);

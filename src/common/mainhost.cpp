@@ -27,6 +27,9 @@
 #endif
 
 #include "projectfile/fileversion.h"
+#include "projectfile/setupfile.h"
+#include "projectfile/projectfile.h"
+#include "views/configdialog.h"
 
 quint32 MainHost::currentFileVersion=PROJECT_AND_SETUP_FILE_VERSION;
 
@@ -750,4 +753,72 @@ QVariant MainHost::GetSetting(QString name, QVariant defaultVal)
 bool MainHost::SettingDefined(QString name)
 {
     return settings.contains(settingsGroup + name);
+}
+
+void MainHost::LoadSetupFile(QString filename)
+{
+    if(filename.isEmpty())
+        return;
+
+    if(SetupFile::LoadFromFile(this,filename)) {
+        ConfigDialog::AddRecentSetupFile(filename,this);
+        currentSetupFile = filename;
+        emit currentFileChanged();
+    }
+}
+
+void MainHost::LoadProjectFile(QString filename)
+{
+    if(filename.isEmpty())
+        return;
+
+    if(ProjectFile::LoadFromFile(this,filename)) {
+        ConfigDialog::AddRecentProjectFile(filename,this);
+        currentProjectFile = filename;
+        emit currentFileChanged();
+    }
+}
+
+void MainHost::ClearSetup()
+{
+    SetupFile::Clear(this);
+    ConfigDialog::AddRecentSetupFile("",this);
+    currentSetupFile = "";
+    emit currentFileChanged();
+}
+
+void MainHost::ClearProject()
+{
+    ProjectFile::Clear(this);
+    ConfigDialog::AddRecentProjectFile("",this);
+    currentProjectFile = "";
+    emit currentFileChanged();
+}
+
+void MainHost::SaveSetupFile(QString filename)
+{
+    if(filename.isEmpty())
+        filename=currentSetupFile;
+    if(filename.isEmpty())
+        return;
+    if(SetupFile::SaveToFile(this,filename)) {
+        SetSetting("lastSetupDir",QFileInfo(filename).absolutePath());
+        ConfigDialog::AddRecentSetupFile(filename,this);
+        currentSetupFile = filename;
+        emit currentFileChanged();
+    }
+}
+
+void MainHost::SaveProjectFile(QString filename)
+{
+    if(filename.isEmpty())
+        filename=currentProjectFile;
+    if(filename.isEmpty())
+        return;
+    if(ProjectFile::SaveToFile(this,filename)) {
+        SetSetting("lastProjectDir",QFileInfo(filename).absolutePath());
+        ConfigDialog::AddRecentProjectFile(filename,this);
+        currentProjectFile = filename;
+        emit currentFileChanged();
+    }
 }

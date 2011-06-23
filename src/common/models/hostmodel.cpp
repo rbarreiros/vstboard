@@ -22,6 +22,7 @@
 #include "globals.h"
 #include "connectables/objectfactory.h"
 #include "mainhost.h"
+#include "mainwindow.h"
 #include "connectables/objectinfo.h"
 #include "connectables/vstplugin.h"
 
@@ -111,8 +112,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                 return true;
             }
 
-    #ifdef VSTSDK
-            //vst plugin
+
             if (data->hasUrls()) {
 
                 foreach(QUrl url,data->urls()) {
@@ -120,29 +120,61 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                     QFileInfo info;
                     info.setFile( fName );
 
-                    if ( info.isFile() && info.isReadable() && info.suffix()=="dll" ) {
+                    if ( info.isFile() && info.isReadable() ) {
+#ifdef VSTSDK
+                        //vst plugin
+                        if ( info.suffix()=="dll" ) {
 
-                        ObjectInfo infoVst;
-                        infoVst.nodeType = NodeType::object;
-                        infoVst.objType = ObjType::VstPlugin;
-                        infoVst.filename = fName;
-                        infoVst.name = fName;
+                            ObjectInfo infoVst;
+                            infoVst.nodeType = NodeType::object;
+                            infoVst.objType = ObjType::VstPlugin;
+                            infoVst.filename = fName;
+                            infoVst.name = fName;
 
-                        QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(infoVst);
-                        if(objPtr.isNull()) {
-                            if(Connectables::VstPlugin::shellSelectView) {
-                                Connectables::VstPlugin::shellSelectView->cntPtr=cntPtr;
-                            } else {
-                                debug("HostModel::dropMimeData vstplugin object not found")
+                            QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(infoVst);
+                            if(objPtr.isNull()) {
+                                if(Connectables::VstPlugin::shellSelectView) {
+                                    Connectables::VstPlugin::shellSelectView->cntPtr=cntPtr;
+                                } else {
+                                    debug("HostModel::dropMimeData vstplugin object not found")
+                                }
+                                return false;
                             }
-                            return false;
+                            cntPtr->UserAddObject(objPtr);
                         }
-                        cntPtr->UserAddObject(objPtr);
+#endif
+                        //setup file
+                        if ( info.suffix()==SETUP_FILE_EXTENSION ) {
+                            if(myHost->mainWindow->userWantsToUnloadSetup()) {
+                                //load on the next loop : we have to get out of the container before loading files
+                                QSignalMapper *mapper = new QSignalMapper(this);
+                                QTimer *t1 = new QTimer(this);
+                                t1->setSingleShot(true);
+                                connect(t1, SIGNAL(timeout()), mapper, SLOT(map()));
+                                connect(mapper, SIGNAL(mapped(QString)), myHost, SLOT(LoadSetupFile(QString)));
+                                mapper->setMapping(t1, fName);
+                                t1->start(0);
+                            }
+                        }
+
+                        //project file
+                        if ( info.suffix()==PROJECT_FILE_EXTENSION ) {
+                            if(myHost->mainWindow->userWantsToUnloadProject()) {
+                                //load on the next loop : we have to get out of the container before loading files
+                                QSignalMapper *mapper = new QSignalMapper(this);
+                                QTimer *t1 = new QTimer(this);
+                                t1->setSingleShot(true);
+                                connect(t1, SIGNAL(timeout()), mapper, SLOT(map()));
+                                connect(mapper, SIGNAL(mapped(QString)), myHost, SLOT(LoadProjectFile(QString)));
+                                mapper->setMapping(t1, fName);
+                                t1->start(0);
+                            }
+                        }
                     }
                 }
                 return true;
             }
-    #endif
+
 
             //audio interface
             if(data->hasFormat("application/x-audiointerface")) {
