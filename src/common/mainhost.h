@@ -97,6 +97,9 @@ public:
 
     QScriptEngine scriptEngine;
 
+    QString currentProjectFile;
+    QString currentSetupFile;
+
 protected:
     QTime timeFromStart;
     float sampleRate;
@@ -143,6 +146,7 @@ signals:
     void programParkingModelChanged(QStandardItemModel *model);
     void groupParkingModelChanged(QStandardItemModel *model);
     void TempoChanged(int tempo=120, int sign1=4, int sign2=4);
+    void currentFileChanged();
 
 public slots:
     void SetSolverUpdateNeeded(bool need=true);
@@ -151,6 +155,12 @@ public slots:
     void SetTempo(int tempo=120, int sign1=4, int sign2=4);
 //    void OnNewRenderingOrder(orderedNodes *renderLines);
     virtual void Render(unsigned long samples=0);
+    void LoadSetupFile(QString filename);
+    void LoadProjectFile(QString filename);
+    void ClearSetup();
+    void ClearProject();
+    void SaveSetupFile(QString filename="");
+    void SaveProjectFile(QString filename="");
 
 private slots:
     void UpdateSolver(bool forceUpdate=false);

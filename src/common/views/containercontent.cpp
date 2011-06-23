@@ -69,8 +69,6 @@ void ContainerContent::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
         return;
     }
 
-#ifdef VSTSDK
-    //accept DLL files
     if (event->mimeData()->hasUrls()) {
         QString fName;
         QFileInfo info;
@@ -78,15 +76,29 @@ void ContainerContent::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
         foreach(QUrl url,event->mimeData()->urls()) {
             fName = url.toLocalFile();
             info.setFile( fName );
-            if ( info.isFile() && info.isReadable() && info.suffix()=="dll" ) {
-                event->setDropAction(Qt::CopyAction);
-                event->accept();
-                HighlightStart();
-                return;
+
+            if ( info.isFile() && info.isReadable() ) {
+#ifdef VSTSDK
+                //accept DLL files
+                if( info.suffix()=="dll" ) {
+                    event->setDropAction(Qt::CopyAction);
+                    event->accept();
+                    HighlightStart();
+                    return;
+                }
+#endif
+
+                //accept setup and projects files
+                if ( info.suffix()==SETUP_FILE_EXTENSION || info.suffix()==PROJECT_FILE_EXTENSION ) {
+                    event->setDropAction(Qt::CopyAction);
+                    event->accept();
+                    HighlightStart();
+                    return;
+                }
             }
         }
     }
-#endif
+
 
     //accept Audio interface
     //accept Midi interface

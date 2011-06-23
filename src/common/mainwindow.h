@@ -47,6 +47,9 @@ public:
     View::SceneView *mySceneView;
     View::ViewConfig viewConfig;
 
+    bool userWantsToUnloadProject();
+    bool userWantsToUnloadSetup();
+
 protected:
     void changeEvent(QEvent *e);
 
@@ -55,14 +58,9 @@ protected:
     QFileSystemModel *listVstPluginsModel;
     QFileSystemModel *listVstBanksModel;
 
-    bool userWantsToUnloadProject();
-    bool userWantsToUnloadSetup();
     virtual void BuildListTools();
     virtual void resetSettings();
     void updateRecentFileActions();
-
-    QString currentProjectFile;
-    QString currentSetupFile;
 
     QList<QAction*>listRecentProjects;
     QList<QAction*>listRecentSetups;
@@ -70,11 +68,10 @@ protected:
     Ui::MainWindow *ui;
     MainHost *myHost;
 
-
-
 public slots:
     void programParkingModelChanges(QStandardItemModel *model);
     void groupParkingModelChanges(QStandardItemModel *model);
+    void currentFileChanged();
 
 private slots:
     void on_actionLoad_Setup_triggered();
