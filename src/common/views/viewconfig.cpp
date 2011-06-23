@@ -45,6 +45,7 @@ ViewConfig::ViewConfig(QObject *parent) :
 
     AddColor(ColorGroups::VstPlugin,Colors::Background,QColor(255,255,128,128));
     AddColor(ColorGroups::VstPlugin,Colors::Text,QColor(0,0,0,255));
+    AddColor(ColorGroups::VstPlugin,Colors::HighlightBackground,QColor(255,255,200,128));
 
     AddColor(ColorGroups::AudioPin,Colors::Background,QColor(200,170,160,255));
     AddColor(ColorGroups::AudioPin,Colors::VuMeter,QColor(210,210,100,255));

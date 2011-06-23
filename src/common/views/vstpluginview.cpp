@@ -21,9 +21,19 @@ void VstPluginView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId,
 
     switch(colorId) {
         case Colors::Background: {
-            QPalette pal(palette());
-            pal.setColor(QPalette::Window,color);
-            setPalette( pal );
+            if(!highlighted) {
+                QPalette pal(palette());
+                pal.setColor(QPalette::Window,color);
+                setPalette( pal );
+            }
+            break;
+        }
+        case Colors::HighlightBackground: {
+            if(highlighted) {
+                QPalette pal(palette());
+                pal.setColor(QPalette::Window,color);
+                setPalette( pal );
+            }
             break;
         }
         default:
@@ -148,6 +158,8 @@ void VstPluginView::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
                     event->setDropAction(Qt::CopyAction);
                     event->accept();
 
+                    HighlightStart();
+
                     return;
                 }
             }
@@ -156,9 +168,34 @@ void VstPluginView::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
     event->ignore();
 }
 
+void VstPluginView::dragLeaveEvent( QGraphicsSceneDragDropEvent *event)
+{
+    HighlightStop();
+}
+
 void VstPluginView::dropEvent( QGraphicsSceneDragDropEvent *event)
 {
+    HighlightStop();
 
     QGraphicsWidget::dropEvent(event);
     event->setAccepted(model->dropMimeData(event->mimeData(), event->proposedAction(), 0, 0, objIndex));
+}
+
+void VstPluginView::HighlightStart()
+{
+    border = new QGraphicsRectItem(0,0,geometry().width(),geometry().height(),this,scene());
+    QPalette pal(palette());
+    pal.setColor(QPalette::Window, config->GetColor(ColorGroups::VstPlugin,Colors::HighlightBackground) );
+    setPalette( pal );
+}
+
+void VstPluginView::HighlightStop()
+{
+    if(border) {
+        scene()->removeItem(border);
+        delete border;
+    }
+    QPalette pal(palette());
+    pal.setColor(QPalette::Window, config->GetColor(ColorGroups::VstPlugin,Colors::Background) );
+    setPalette( pal );
 }

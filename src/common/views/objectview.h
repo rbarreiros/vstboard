@@ -107,9 +107,13 @@ namespace View {
         /// pointer to the MainHost
         MainHost *myHost;
 
+        bool highlighted;
+
     public slots:
         void ShrinkNow();
         virtual void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
+        virtual void HighlightStart() {}
+        virtual void HighlightStop() {}
 
     friend class PinView;
     };
