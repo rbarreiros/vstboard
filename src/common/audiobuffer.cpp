@@ -209,39 +209,22 @@ float *AudioBuffer::ConsumeStack()
     float mi = .0f;
     float *buf;
 
-    switch(stackSize) {
-        case 0:
-            //empty stack : clear the stack
-            Clear();
-            break;
+    if(stackSize==0) {
+        //empty stack : return a blank buffer
+        Clear();
+        _maxVal = 0.0f;
+        return pBuffer;
+    } else {
+        //find max value
+        buf = pBuffer;
+        for(unsigned long i=0;i<nSize;i++) {
+            if(*buf > ma)
+                ma = *buf;
+            if(*buf < mi)
+                mi = *buf;
 
-        case 1:
-            //only 1 in stack, no mix needed
-            //find max value
-            buf = pBuffer;
-            for(unsigned long i=0;i<nSize;i++) {
-                if(*buf > ma)
-                    ma = *buf;
-                if(*buf < mi)
-                    mi = *buf;
-
-                ++buf;
-            }
-            break;
-
-        default:
-            //mixdown the stack and find max value
-            buf = pBuffer;
-            for(unsigned long i=0;i<nSize;i++) {
-                *buf/=stackSize; //divide by the number of buffers, maybe not a good mix
-
-                if(*buf > ma)
-                    ma = *buf;
-                if(*buf < mi)
-                    mi = *buf;
-
-                ++buf;
-           }
+            ++buf;
+        }
     }
 
     if( std::max(ma,-mi) > _maxVal)
