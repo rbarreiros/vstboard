@@ -9,9 +9,9 @@ copy /y "*.txt" "%BUILD_PATH%/installer"
 copy /y ".\tools\nsis.nsi" "%BUILD_PATH%/installer"
 
 cd "%BUILD_PATH%"
-qmake -r C:\Users\CtrlBrk\Documents\VstBoard\src\buildall.pro
-nmake clean
-nmake release
+rem qmake -r C:\Users\CtrlBrk\Documents\VstBoard\src\buildall.pro
+rem nmake clean
+rem nmake release
 
 copy /y ".\dllLoader\release\vstboard.dll" ".\installer"
 copy /y ".\vstboard\release\vstboard.exe" ".\installer"
