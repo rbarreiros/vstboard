@@ -26,7 +26,7 @@ using namespace View;
 MainContainerView::MainContainerView(MainHost *myHost,QAbstractItemModel *model) :
         ObjectView(myHost,model)
 {
-    content = new ContainerContent(model,this);
+    content = new ContainerContent(myHost,model,this);
     content->setAcceptDrops(true);
 
     bridgeIn = new BridgeView(myHost, model, this);

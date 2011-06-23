@@ -54,11 +54,11 @@ ObjectView::ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsIte
     model(model),
     actDel(0),
     shrinkAsked(false),
-    myHost(myHost)
+    myHost(myHost),
+    highlighted(false)
 {
     setObjectName("objView");
     config = &myHost->mainWindow->viewConfig;
-//    setFocusPolicy(Qt::StrongFocus);
     setAutoFillBackground(true);
 
     QPalette pal(palette());
@@ -214,28 +214,26 @@ void ObjectView::closeEvent ( QCloseEvent * event )
 }
 
 /*!
-  Reimplements QGraphicsWidget::itemChange \n
-  add borders on the selected object
+  Reimplements QGraphicsItem::focusInEvent
+  draw a border around focused object
   */
-QVariant ObjectView::itemChange ( GraphicsItemChange  change, const QVariant & value )
+void ObjectView::focusInEvent ( QFocusEvent * event )
 {
-    switch(change) {
-        case QGraphicsItem::ItemSelectedChange :
-            if(value.toBool()) {
-                if(selectBorder)
-                    delete selectBorder;
-                selectBorder=new QGraphicsRectItem( -2,-2, size().width()+4, size().height()+4 , this );
-            } else {
-                if(selectBorder) {
-                    delete selectBorder;
-                    selectBorder =0;
-                }
-            }
-            break;
-        default:
-            break;
+    if(selectBorder)
+        delete selectBorder;
+    selectBorder=new QGraphicsRectItem( -2,-2, size().width()+4, size().height()+4 , this );
+}
+
+/*!
+  Reimplements QGraphicsItem::focusOutEvent
+  remove border
+  */
+void ObjectView::focusOutEvent ( QFocusEvent * event )
+{
+    if(selectBorder) {
+        delete selectBorder;
+        selectBorder =0;
     }
-    return QGraphicsItem::itemChange(change, value);
 }
 
 /*!

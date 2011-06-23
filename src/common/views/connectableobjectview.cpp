@@ -34,7 +34,6 @@ ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel
     ObjectView(myHost,model,parent,wFlags)
 {
     setGeometry(QRectF(0,0,105,15));
-    border = new QGraphicsRectItem(geometry(),this,scene());
 
     titleText = new QGraphicsSimpleTextItem(QString("Title"),this);
     titleText->moveBy(2,1);
@@ -46,7 +45,7 @@ ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel
     setLayout(layout);
 
     setFlag(QGraphicsItem::ItemIsMovable, true);
-//    setFlag(QGraphicsItem::ItemIsSelectable, true);
+    setFocusPolicy(Qt::StrongFocus);
 
     listAudioIn = new ListPinsView(this);
     listAudioOut = new ListPinsView(this);

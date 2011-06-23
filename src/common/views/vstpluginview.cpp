@@ -155,11 +155,9 @@ void VstPluginView::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
             info.setFile( fName );
             if ( info.isFile() && info.isReadable() ) {
                 if( acceptedFiles.contains( info.suffix(), Qt::CaseInsensitive) ) {
-                    event->setDropAction(Qt::CopyAction);
+                    event->setDropAction(Qt::TargetMoveAction);
                     event->accept();
-
                     HighlightStart();
-
                     return;
                 }
             }
@@ -176,14 +174,12 @@ void VstPluginView::dragLeaveEvent( QGraphicsSceneDragDropEvent *event)
 void VstPluginView::dropEvent( QGraphicsSceneDragDropEvent *event)
 {
     HighlightStop();
-
     QGraphicsWidget::dropEvent(event);
     event->setAccepted(model->dropMimeData(event->mimeData(), event->proposedAction(), 0, 0, objIndex));
 }
 
 void VstPluginView::HighlightStart()
 {
-    border = new QGraphicsRectItem(0,0,geometry().width(),geometry().height(),this,scene());
     QPalette pal(palette());
     pal.setColor(QPalette::Window, config->GetColor(ColorGroups::VstPlugin,Colors::HighlightBackground) );
     setPalette( pal );
@@ -191,10 +187,6 @@ void VstPluginView::HighlightStart()
 
 void VstPluginView::HighlightStop()
 {
-    if(border) {
-        scene()->removeItem(border);
-        delete border;
-    }
     QPalette pal(palette());
     pal.setColor(QPalette::Window, config->GetColor(ColorGroups::VstPlugin,Colors::Background) );
     setPalette( pal );

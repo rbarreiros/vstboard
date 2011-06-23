@@ -72,7 +72,8 @@ namespace View {
         virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
         void resizeEvent ( QGraphicsSceneResizeEvent * event );
         virtual void closeEvent ( QCloseEvent * event );
-        QVariant itemChange ( GraphicsItemChange  change, const QVariant & value );
+        virtual void focusInEvent ( QFocusEvent * event );
+        virtual void focusOutEvent ( QFocusEvent * event );
         void mouseReleaseEvent ( QGraphicsSceneMouseEvent * event );
 
         void SetErrorMessage(const QString & msg);

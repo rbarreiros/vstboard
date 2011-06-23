@@ -22,29 +22,39 @@
 #define CONTAINERCONTENT_H
 
 #include "precomp.h"
+#include "../mainwindow.h"
 
+class MainHost;
 namespace View {
 
     class ContainerContent : public QGraphicsWidget
     {
     Q_OBJECT
     public:
-        explicit ContainerContent(QAbstractItemModel *model, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
+        explicit ContainerContent(MainHost *myHost, QAbstractItemModel *model, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
         void SetModelIndex(QPersistentModelIndex index);
         QPointF GetDropPos();
         QWidget *myParking;
+
+        ViewConfig *config;
     protected:
         void dragEnterEvent( QGraphicsSceneDragDropEvent *event);
+        void dragLeaveEvent( QGraphicsSceneDragDropEvent *event);
         void dropEvent( QGraphicsSceneDragDropEvent *event);
-        void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
         QAbstractItemModel *model;
         QPersistentModelIndex objIndex;
         QPointF dropPos;
+
+        /// pointer to the MainHost
+        MainHost *myHost;
+
     signals:
 
     public slots:
-
+        void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
+        void HighlightStart();
+        void HighlightStop();
     };
 }
 #endif // CONTAINERCONTENT_H
