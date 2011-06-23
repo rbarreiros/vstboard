@@ -232,7 +232,9 @@ VstIntPtr VSTCALLBACK CVSTHost::AudioMasterCallback(AEffect *effect, VstInt32 op
         case audioMasterProcessEvents : //8
         case audioMasterGetNumAutomatableParameters : //11
         case audioMasterIOChanged : //13
+        case audioMasterNeedIdle : //14
         case audioMasterSizeWindow : //15
+        case audioMasterGetSampleRate : //16
         case audioMasterUpdateDisplay : //42
         case audioMasterBeginEdit : //43
         case audioMasterEndEdit : //44
