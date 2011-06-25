@@ -26,7 +26,7 @@
 
 using namespace View;
 
-QGraphicsLineItem *PinView::currentLine = 0;
+CableView *PinView::currentLine = 0;
 
 /*!
   \class View::PinView
@@ -148,14 +148,14 @@ void PinView::mouseMoveEvent ( QGraphicsSceneMouseEvent  * event )
     drag->setMimeData(mime);
 
     if(!currentLine) {
-        currentLine = new QGraphicsLineItem(this);
-        currentLine->setLine(QLineF(pinPos(), event->pos()));
-        currentLine->setVisible(false);
+        currentLine = new CableView(connectInfo,event->pos(),this);
+        AddCable(currentLine);
     }
 
-    drag->exec();
+    drag->exec(Qt::CopyAction);
 
     if(currentLine) {
+        RemoveCable(currentLine);
         delete currentLine;
         currentLine = 0;
     }
@@ -195,7 +195,7 @@ void PinView::RemovePin()
   Reimplements QGraphicsWidget::dragMoveEvent \n
   if the dragged object is connectable with us : create a temporary cable and highlight the pin
   */
-void PinView::dragMoveEvent ( QGraphicsSceneDragDropEvent * event )
+void PinView::dragEnterEvent ( QGraphicsSceneDragDropEvent * event )
 {
     if(event->mimeData()->hasFormat("application/x-pin")) {
         QByteArray bytes = event->mimeData()->data("application/x-pin");
@@ -210,17 +210,20 @@ void PinView::dragMoveEvent ( QGraphicsSceneDragDropEvent * event )
         event->acceptProposedAction();
 
         if(currentLine) {
-            QLineF newLine(currentLine->line().p1(), currentLine->mapFromScene(mapToScene(pinPos())));
-            currentLine->setLine(newLine);
+            currentLine->UpdatePosition(connectInfo,pinAngle,mapToScene(pinPos()));
             currentLine->setVisible(true);
         }
-//        backupHighlightBrush = outline->brush();
-//        outline->setBrush(highlightBrush);
         if(highlight)
             highlight->setVisible(true);
     } else {
         event->ignore();
     }
+}
+
+void PinView::dragMoveEvent ( QGraphicsSceneDragDropEvent * event )
+{
+    if(currentLine)
+        currentLine->setVisible(true);
 }
 
 /*!
@@ -229,7 +232,6 @@ void PinView::dragMoveEvent ( QGraphicsSceneDragDropEvent * event )
   */
 void PinView::dragLeaveEvent( QGraphicsSceneDragDropEvent  * /*event*/ )
 {
-//    outline->setBrush(backupHighlightBrush);
     if(highlight)
         highlight->setVisible(false);
     if(currentLine)
@@ -242,7 +244,6 @@ void PinView::dragLeaveEvent( QGraphicsSceneDragDropEvent  * /*event*/ )
   */
 void PinView::dropEvent ( QGraphicsSceneDragDropEvent  * event )
 {
-//    outline->setBrush(backupHighlightBrush);
     if(highlight)
         highlight->setVisible(false);
     QByteArray bytes = event->mimeData()->data("application/x-pin");

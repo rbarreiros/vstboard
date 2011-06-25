@@ -22,7 +22,7 @@
 
 using namespace View;
 
-CableView::CableView(ConnectionInfo pinOut, ConnectionInfo pinIn, QGraphicsItem *parent)
+CableView::CableView(const ConnectionInfo &pinOut, const ConnectionInfo &pinIn, QGraphicsItem *parent)
     : QGraphicsPathItem(parent),
     QObject(),
     pinOut(pinOut),
@@ -31,23 +31,32 @@ CableView::CableView(ConnectionInfo pinOut, ConnectionInfo pinIn, QGraphicsItem 
 //    setObjectName("cable");
 }
 
+CableView::CableView(const ConnectionInfo &pinOut, const QPointF &PtIn, QGraphicsItem *parent)
+    : QGraphicsPathItem(parent),
+    QObject(),
+    pinOut(pinOut),
+    PtIn(PtIn)
+{
+
+}
+
 void CableView::UpdatePosition(const ConnectionInfo &pinInfo, const float angle, const QPointF &pt)
 {
     //move one end of the cable
-    if(pinInfo == pinOut)
+    if(pinInfo == pinOut) {
         PtOut=mapFromScene(pt);
-    if(pinInfo == pinIn)
+    } else {
         PtIn=mapFromScene(pt);
+    }
 
     if(pinInfo == pinOut) {
         CtrlPtOut = PtOut;
-        CtrlPtOut.rx()+=50*cos(angle);
-        CtrlPtOut.ry()+=50*sin(angle);
-    }
-    if(pinInfo == pinIn) {
+        CtrlPtOut.rx()+=50*qCos(angle);
+        CtrlPtOut.ry()+=50*qSin(angle);
+    } else {
         CtrlPtIn = PtIn;
-        CtrlPtIn.rx()+=50*cos(angle);
-        CtrlPtIn.ry()+=50*sin(angle);
+        CtrlPtIn.rx()+=50*qCos(angle);
+        CtrlPtIn.ry()+=50*qSin(angle);
     }
 
     QPainterPath newPath;
@@ -57,3 +66,11 @@ void CableView::UpdatePosition(const ConnectionInfo &pinInfo, const float angle,
     setPath(newPath);
 }
 
+void CableView::UpdatePosition(const QPointF &pt)
+{
+    PtIn=mapFromScene(pt);
+    QPainterPath newPath;
+    newPath.moveTo(PtOut);
+    newPath.cubicTo(CtrlPtOut,PtIn,PtIn);
+    setPath(newPath);
+}
