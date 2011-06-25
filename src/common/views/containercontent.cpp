@@ -20,6 +20,8 @@
 
 #include "containercontent.h"
 #include "objectview.h"
+#include "pinview.h"
+#include "cableview.h"
 
 #ifdef _MSC_VER
 #pragma warning( disable: 4100 )
@@ -62,6 +64,18 @@ QPointF ContainerContent::GetDropPos()
 
 void ContainerContent::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
 {
+    //update connecting cable position
+    if(event->mimeData()->hasFormat("application/x-pin")) {
+        if(PinView::currentLine && PinView::currentLine->scene()==scene()) {
+            PinView::currentLine->setVisible(true);
+            event->accept();
+        } else {
+            event->ignore();
+        }
+        QGraphicsWidget::dragEnterEvent(event);
+        return;
+    }
+
     //accepts objects from parking
     if(event->source() == myParking ) {
         QGraphicsWidget::dragEnterEvent(event);
@@ -114,8 +128,21 @@ void ContainerContent::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
     event->ignore();
 }
 
+void ContainerContent::dragMoveEvent( QGraphicsSceneDragDropEvent *event)
+{
+    if(PinView::currentLine) {
+        PinView::currentLine->UpdatePosition( mapToScene(event->pos()) );
+        PinView::currentLine->setVisible(true);
+        event->ignore();
+    }
+    QGraphicsWidget::dragMoveEvent(event);
+}
+
 void ContainerContent::dragLeaveEvent( QGraphicsSceneDragDropEvent *event)
 {
+    if(PinView::currentLine) {
+        PinView::currentLine->setVisible(false);
+    }
     HighlightStop();
 }
 

@@ -65,6 +65,9 @@ namespace View {
 
         virtual const QPointF pinPos() const;
 
+        /// temporary cable for drag&drop
+        static CableView *currentLine;
+
     protected:
         virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
         QVariant itemChange ( GraphicsItemChange change, const QVariant & value );
@@ -73,6 +76,7 @@ namespace View {
         void mouseReleaseEvent ( QGraphicsSceneMouseEvent  * event );
         void mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * event );
         void dragLeaveEvent( QGraphicsSceneDragDropEvent  * event );
+        void dragEnterEvent ( QGraphicsSceneDragDropEvent * event );
         void dragMoveEvent ( QGraphicsSceneDragDropEvent * event );
         void dropEvent ( QGraphicsSceneDragDropEvent  * event );
 
@@ -99,9 +103,6 @@ namespace View {
 
         /// pin angle in rad
         float pinAngle;
-
-        /// temporary cable for drag&drop
-        static QGraphicsLineItem *currentLine;
 
         ViewConfig *config;
 

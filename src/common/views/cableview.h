@@ -27,13 +27,15 @@
 
 namespace View {
 
-    //must inherits from QObject to send destroy signal
+    //inherits from QObject to send destroy signal
     class CableView : public QGraphicsPathItem, public QObject
     {
     public:
-        CableView(ConnectionInfo pinOut, ConnectionInfo pinIn, QGraphicsItem *parent = 0);
+        CableView(const ConnectionInfo &pinOut, const ConnectionInfo &pinIn, QGraphicsItem *parent = 0);
+        CableView(const ConnectionInfo &pinOut, const QPointF &PtIn, QGraphicsItem *parent);
 
         void UpdatePosition(const ConnectionInfo &pinInfo, const float angle, const QPointF &pt);
+        void UpdatePosition(const QPointF &pt);
 
         const ConnectionInfo pinOut;
         const ConnectionInfo pinIn;
@@ -43,7 +45,6 @@ namespace View {
         QPointF PtIn;
         QPointF CtrlPtOut;
         QPointF CtrlPtIn;
-
     };
 }
 

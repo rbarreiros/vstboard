@@ -39,6 +39,7 @@ namespace View {
         ViewConfig *config;
     protected:
         void dragEnterEvent( QGraphicsSceneDragDropEvent *event);
+        void dragMoveEvent( QGraphicsSceneDragDropEvent *event);
         void dragLeaveEvent( QGraphicsSceneDragDropEvent *event);
         void dropEvent( QGraphicsSceneDragDropEvent *event);
 
