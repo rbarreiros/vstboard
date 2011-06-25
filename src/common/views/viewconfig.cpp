@@ -90,6 +90,27 @@ ViewConfig::~ViewConfig()
 }
 
 /*!
+  Translate the first row of keys (1,2,3...) into a float number
+    \param key code
+    \returns value from 0 to 1.0f or -1.0f if key not found
+    */
+float ViewConfig::KeyboardNumber(int key)
+{
+    if(key==QKeySequence(tr("!")) || key==QKeySequence(tr("1"))) return 0.0f;
+    if(key==QKeySequence(tr("@")) || key==QKeySequence(tr("2"))) return 0.1f;
+    if(key==QKeySequence(tr("#")) || key==QKeySequence(tr("3"))) return 0.2f;
+    if(key==QKeySequence(tr("$")) || key==QKeySequence(tr("4"))) return 0.3f;
+    if(key==QKeySequence(tr("%")) || key==QKeySequence(tr("5"))) return 0.4f;
+    if(key==QKeySequence(tr("^")) || key==QKeySequence(tr("6"))) return 0.5f;
+    if(key==QKeySequence(tr("&")) || key==QKeySequence(tr("7"))) return 0.6f;
+    if(key==QKeySequence(tr("*")) || key==QKeySequence(tr("8"))) return 0.7f;
+    if(key==QKeySequence(tr("(")) || key==QKeySequence(tr("9"))) return 0.8f;
+    if(key==QKeySequence(tr(")")) || key==QKeySequence(tr("0"))) return 0.9f;
+    if(key==QKeySequence(tr("_")) || key==QKeySequence(tr("-"))) return 1.0f;
+    return -1.0f;
+}
+
+/*!
   Update all colors with a new list, used by the dialog when changes are discarded
   \param newList list of groups
   */

@@ -75,6 +75,8 @@ namespace View {
 
         bool savedInSetupFile;
 
+        static float KeyboardNumber(int key);
+
     protected:
         void AddColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
         void UpdateAllWidgets();

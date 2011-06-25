@@ -20,6 +20,7 @@
 
 #include "cursorview.h"
 #include "globals.h"
+#include "viewconfig.h"
 
 using namespace View;
 
@@ -59,6 +60,7 @@ CursorView::CursorView(QAbstractItemModel *model,bool isMaxi,bool upsideDown,QGr
     cursor->setBrush(QColor(64,64,64));
 
     setFlag(QGraphicsItem::ItemIsMovable, true);
+    setFocusPolicy(Qt::StrongFocus);
     setCursor(Qt::SplitHCursor);
     resize(cursor->boundingRect().size());
 }
@@ -126,6 +128,9 @@ void CursorView::ValueChanged(float newVal)
 {
     if(value==newVal)
         return;
+    if(newVal>1.0f) newVal=1.0f;
+    if(newVal<0.0f) newVal=0.0f;
+
     model->setData(modelIndex,newVal,UserRoles::value);
 }
 
@@ -148,4 +153,25 @@ QVariant CursorView::itemChange(GraphicsItemChange change, const QVariant &value
         return newPos;
     }
     return QGraphicsWidget::itemChange(change, value);
+}
+
+void CursorView::keyPressEvent ( QKeyEvent * event )
+{
+    int k = event->key();
+
+    if(event->modifiers() & Qt::ControlModifier) {
+        if(k==Qt::Key_Left) { ValueChanged(value-0.01); return; }
+        if(k==Qt::Key_Right) { ValueChanged(value+0.01); return; }
+    } else {
+        if(k==Qt::Key_Left) { ValueChanged(value-0.1); return; }
+        if(k==Qt::Key_Right) { ValueChanged(value+0.1); return; }
+    }
+
+    float val = ViewConfig::KeyboardNumber(k);
+    if(val>=0) {
+        ValueChanged(val);
+        return;
+    }
+
+    QGraphicsWidget::keyPressEvent(event);
 }

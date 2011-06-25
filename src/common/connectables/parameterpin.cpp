@@ -26,17 +26,16 @@
 using namespace Connectables;
 
 //parameter is a float
-ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int number, float defaultValue, bool defaultVisible, const QString &name, bool nameCanChange, bool bridge) :
+ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int number, float defaultValue, const QString &name, bool nameCanChange, bool isRemoveable, bool bridge) :
         Pin(parent,PinType::Parameter,direction,number,bridge),
         listValues(0),
         stepIndex(0),
+        defaultVisible(true),
         defaultValue(defaultValue),
         defaultIndex(0),
-        defaultVisible(defaultVisible),
         loading(false),
         nameCanChange(nameCanChange),
         dirty(false),
-        visibilityCanChange(true),
         limitInMin(.0f),
         limitInMax(1.0f),
         limitOutMin(.0f),
@@ -45,7 +44,8 @@ ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int num
         outValue(.0f),
         limitsEnabled(true)
 {
-    SetVisible(defaultVisible);
+    SetVisible(true);
+    connectInfo.isRemoveable=isRemoveable;
     value = defaultValue;
     setObjectName(name);
     loading=true;
@@ -54,15 +54,14 @@ ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int num
 }
 
 //parameter is a int with a list of possible values
-ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int number, const QVariant &defaultVariantValue, QList<QVariant> *listValues, bool defaultVisible, const QString &name, bool nameCanChange, bool bridge) :
+ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int number, const QVariant &defaultVariantValue, QList<QVariant> *listValues, const QString &name, bool nameCanChange, bool isRemoveable, bool bridge) :
         Pin(parent,PinType::Parameter,direction,number,bridge),
         listValues(listValues),
+        defaultVisible(true),
         defaultValue( .0f ),
-        defaultVisible(defaultVisible),
         loading(false),
         nameCanChange(nameCanChange),
         dirty(false),
-        visibilityCanChange(true),
         limitInMin(.0f),
         limitInMax(1.0f),
         limitOutMin(.0f),
@@ -71,7 +70,8 @@ ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int num
         outValue(.0f),
         limitsEnabled(true)
 {
-    SetVisible(defaultVisible);
+    SetVisible(true);
+    connectInfo.isRemoveable=isRemoveable;
     setObjectName(name);
     stepSize=1.0f/(listValues->size()-1);
     stepIndex=listValues->indexOf(defaultVariantValue);
@@ -80,10 +80,9 @@ ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int num
     loading=false;
 }
 
-void ParameterPin::SetAlwaysVisible(bool /*visible*/)
+void ParameterPin::SetRemoveable()
 {
-    defaultVisible=true;
-    visibilityCanChange=false;
+    connectInfo.isRemoveable=true;
 }
 
 void ParameterPin::GetDefault(ObjectParameter &param)
@@ -277,12 +276,12 @@ void ParameterPin::SetLimit(ObjType::Enum type, float newVal)
 
 void ParameterPin::SetVisible(bool vis)
 {
-    if(visible==vis)
-        return;
+//    if(visible==vis)
+//        return;
 
     Pin::SetVisible(vis);
 
-    if(visible && limitsEnabled) {
+    if(modelIndex.isValid() && limitsEnabled) {
         QStandardItem *pinItem = parent->getHost()->GetModel()->itemFromIndex(modelIndex);
         if(!pinItem)
             return;

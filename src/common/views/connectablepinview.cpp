@@ -148,6 +148,16 @@ void ConnectablePinView::updateVu()
     }
 }
 
+void ConnectablePinView::ValueChanged(float newVal)
+{
+    if(value==newVal)
+        return;
+    if(newVal>1.0f) newVal=1.0f;
+    if(newVal<0.0f) newVal=0.0f;
+
+    model->setData(pinIndex,newVal,UserRoles::value);
+}
+
 void ConnectablePinView::wheelEvent ( QGraphicsSceneWheelEvent * event )
 {
     if(!isParameter)
@@ -159,9 +169,29 @@ void ConnectablePinView::wheelEvent ( QGraphicsSceneWheelEvent * event )
     if(event->delta()<0)
         increm=-1;
 
-    float val = pinIndex.data(UserRoles::value).toFloat() + pinIndex.data(UserRoles::stepSize).toFloat()*increm;
-    if(val>1.0f) val=1.0f;
-    if(val<.0f) val=.0f;
+    ValueChanged( pinIndex.data(UserRoles::value).toFloat()
+                  + pinIndex.data(UserRoles::stepSize).toFloat()*increm);
+}
 
-    model->setData(pinIndex,val,UserRoles::value);
+void ConnectablePinView::keyPressEvent ( QKeyEvent * event )
+{
+    int k = event->key();
+
+    if(connectInfo.type == PinType::Parameter) {
+        if(event->modifiers() & Qt::ControlModifier) {
+            if(k==Qt::Key_Left) { ValueChanged(value-0.01); return; }
+            if(k==Qt::Key_Right) { ValueChanged(value+0.01); return; }
+        } else {
+            if(k==Qt::Key_Left) { ValueChanged(value-0.1); return; }
+            if(k==Qt::Key_Right) { ValueChanged(value+0.1); return; }
+        }
+
+        float val = ViewConfig::KeyboardNumber(k);
+        if(val>=0) {
+            ValueChanged(val);
+            return;
+        }
+    }
+
+    QGraphicsWidget::keyPressEvent(event);
 }

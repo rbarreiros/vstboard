@@ -277,6 +277,8 @@ namespace Connectables {
 
         /// to hide the editor window from another thread
         virtual void OnHideEditor() {}
+
+        virtual void UserRemovePin(const ConnectionInfo &info);
     };
 }
 

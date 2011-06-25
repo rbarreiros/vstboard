@@ -1030,6 +1030,116 @@
         <source>Highlight Background</source>
         <translation>Arrière-plan en évidence</translation>
     </message>
+    <message>
+        <location filename="../../common/views/viewconfig.cpp" line="99"/>
+        <source>!</source>
+        <translation>&amp;</translation>
+    </message>
+    <message>
+        <location filename="../../common/views/viewconfig.cpp" line="99"/>
+        <source>1</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../../common/views/viewconfig.cpp" line="100"/>
+        <source>@</source>
+        <translation>é</translation>
+    </message>
+    <message>
+        <location filename="../../common/views/viewconfig.cpp" line="100"/>
+        <source>2</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../../common/views/viewconfig.cpp" line="101"/>
+        <source>#</source>
+        <translation>&quot;</translation>
+    </message>
+    <message>
+        <location filename="../../common/views/viewconfig.cpp" line="101"/>
+        <source>3</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../../common/views/viewconfig.cpp" line="102"/>
+        <source>$</source>
+        <translation>&apos;</translation>
+    </message>
+    <message>
+        <location filename="../../common/views/viewconfig.cpp" line="102"/>
+        <source>4</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../../common/views/viewconfig.cpp" line="103"/>
+        <source>%</source>
+        <translation>(</translation>
+    </message>
+    <message>
+        <location filename="../../common/views/viewconfig.cpp" line="103"/>
+        <source>5</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../../common/views/viewconfig.cpp" line="104"/>
+        <source>^</source>
+        <translation>-</translation>
+    </message>
+    <message>
+        <location filename="../../common/views/viewconfig.cpp" line="104"/>
+        <source>6</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../../common/views/viewconfig.cpp" line="105"/>
+        <source>&amp;</source>
+        <translation>è</translation>
+    </message>
+    <message>
+        <location filename="../../common/views/viewconfig.cpp" line="105"/>
+        <source>7</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../../common/views/viewconfig.cpp" line="106"/>
+        <source>*</source>
+        <translation>_</translation>
+    </message>
+    <message>
+        <location filename="../../common/views/viewconfig.cpp" line="106"/>
+        <source>8</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../../common/views/viewconfig.cpp" line="107"/>
+        <source>(</source>
+        <translation>ç</translation>
+    </message>
+    <message>
+        <location filename="../../common/views/viewconfig.cpp" line="107"/>
+        <source>9</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../../common/views/viewconfig.cpp" line="108"/>
+        <source>)</source>
+        <translation>à</translation>
+    </message>
+    <message>
+        <location filename="../../common/views/viewconfig.cpp" line="108"/>
+        <source>0</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../../common/views/viewconfig.cpp" line="109"/>
+        <source>_</source>
+        <translation>)</translation>
+    </message>
+    <message>
+        <location filename="../../common/views/viewconfig.cpp" line="109"/>
+        <source>-</source>
+        <translation>°</translation>
+    </message>
 </context>
 <context>
     <name>View::VstPluginView</name>

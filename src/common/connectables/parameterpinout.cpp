@@ -25,14 +25,14 @@
 using namespace Connectables;
 
 //parameter is a float
-ParameterPinOut::ParameterPinOut(Object *parent, int number, float defaultValue, bool defaultVisible, const QString &name, bool nameCanChange) :
-        ParameterPin(parent, PinDirection::Output, number, defaultValue, defaultVisible, name, nameCanChange)
+ParameterPinOut::ParameterPinOut(Object *parent, int number, float defaultValue, const QString &name, bool nameCanChange, bool isRemoveable) :
+        ParameterPin(parent, PinDirection::Output, number, defaultValue, name, nameCanChange, isRemoveable)
 {
 }
 
 //parameter is a int, index in a list of values
-ParameterPinOut::ParameterPinOut(Object *parent, int number, const QVariant &defaultVariantValue, QList<QVariant> *listValues, bool defaultVisible, const QString &name, bool nameCanChange) :
-        ParameterPin(parent, PinDirection::Output, number, defaultVariantValue, listValues, defaultVisible, name, nameCanChange)
+ParameterPinOut::ParameterPinOut(Object *parent, int number, const QVariant &defaultVariantValue, QList<QVariant> *listValues, const QString &name, bool nameCanChange, bool isRemoveable) :
+        ParameterPin(parent, PinDirection::Output, number, defaultVariantValue, listValues, name, nameCanChange, isRemoveable)
 {
 }
 

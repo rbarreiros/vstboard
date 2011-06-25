@@ -34,6 +34,8 @@ namespace View {
         virtual void UpdateModelIndex(const QModelIndex &index);
 
     protected:
+        void keyPressEvent ( QKeyEvent * event );
+        void ValueChanged(float newVal);
         void wheelEvent ( QGraphicsSceneWheelEvent * event );
         QGraphicsSimpleTextItem *textItem;
         QGraphicsRectItem *rectVu;

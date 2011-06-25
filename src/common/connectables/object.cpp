@@ -562,6 +562,26 @@ void Object::SetBufferSize(unsigned long size)
     }
 }
 
+void Object::UserRemovePin(const ConnectionInfo &info)
+{
+    if(info.type!=PinType::Parameter)
+        return;
+
+    if(!info.isRemoveable)
+        return;
+
+    switch(info.direction) {
+        case PinDirection::Input :
+            listParameterPinIn->AsyncRemovePin(info.pinNumber);
+            OnProgramDirty();
+            break;
+        case PinDirection::Output :
+            listParameterPinOut->AsyncRemovePin(info.pinNumber);
+            OnProgramDirty();
+            break;
+    }
+}
+
 /*!
   Called by PinsList to create a pin
   \param info ConnectionInfo defining the pin to be created

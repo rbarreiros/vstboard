@@ -53,6 +53,39 @@ PinView::PinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, 
     setCursor(Qt::PointingHandCursor);
     connect( config, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)) ,
             this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)) );
+
+    actDel = new QAction(QIcon(":/img16x16/delete.png"),tr("Remove"),this);
+    actDel->setShortcut( Qt::Key_Delete );
+    actDel->setShortcutContext(Qt::WidgetShortcut);
+    connect(actDel,SIGNAL(triggered()),
+            this,SLOT(RemovePin()));
+
+    if(connectInfo.isRemoveable)
+        addAction(actDel);
+
+    actUnplug = new QAction(QIcon(":/img16x16/editcut.png"),tr("Unplug"),this);
+    actUnplug->setShortcut( Qt::Key_Backspace );
+    actUnplug->setShortcutContext(Qt::WidgetShortcut);
+    actUnplug->setEnabled(false);
+    connect(actUnplug,SIGNAL(triggered()),
+            this,SLOT(Unplug()));
+    addAction(actUnplug);
+
+
+    setFocusPolicy(Qt::StrongFocus);
+}
+
+/*!
+  Reimplements QGraphicsWidget::contextMenuEvent \n
+  create a menu with all the actions
+  */
+void PinView::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+{
+    if(actions().size()==0)
+        return;
+
+    QMenu menu;
+    menu.exec(actions(),event->screenPos(),actions().at(0),event->widget());
 }
 
 /*!
@@ -144,7 +177,18 @@ void PinView::mouseReleaseEvent ( QGraphicsSceneMouseEvent  * /*event*/ )
   */
 void PinView::mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * /*event*/ )
 {
+    Unplug();
+}
+
+void PinView::Unplug()
+{
     emit RemoveCablesFromPin(connectInfo);
+}
+
+void PinView::RemovePin()
+{
+    if(connectInfo.isRemoveable)
+        emit RemovePin(connectInfo);
 }
 
 /*!
@@ -258,6 +302,7 @@ void PinView::AddCable(CableView *cable)
 {
     cable->UpdatePosition(connectInfo, pinAngle, mapToScene(pinPos()) );
     connectedCables.append(cable);
+    actUnplug->setEnabled(true);
     setFlag(QGraphicsItem::ItemSendsScenePositionChanges, true);
 }
 
@@ -267,6 +312,8 @@ void PinView::AddCable(CableView *cable)
 void PinView::RemoveCable(CableView *cable)
 {
     connectedCables.removeAll(cable);
-    if(connectedCables.isEmpty())
+    if(connectedCables.isEmpty()) {
         setFlag(QGraphicsItem::ItemSendsScenePositionChanges, false);
+        actUnplug->setEnabled(false);
+    }
 }

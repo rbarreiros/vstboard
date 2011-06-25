@@ -44,10 +44,10 @@ MidiSender::MidiSender(MainHost *myHost,int index) :
 
     listMidiPinOut->ChangeNumberOfPins(1);
 
-    listParameterPinIn->listPins.insert(Param_MsgType, new ParameterPinIn(this,Param_MsgType,"Ctrl",&listMsgType,true,"MsgType"));
-    listParameterPinIn->listPins.insert(Param_Value1, new ParameterPinIn(this,Param_Value1,0,&listValues,true,"Value1"));
-    listParameterPinIn->listPins.insert(Param_Value2, new ParameterPinIn(this,Param_Value2,0,&listValues,true,"Value2"));
-    listParameterPinIn->listPins.insert(Param_Channel, new ParameterPinIn(this,Param_Channel,1,&listChannels,true,"Channel"));
+    listParameterPinIn->listPins.insert(Param_MsgType, new ParameterPinIn(this,Param_MsgType,"Ctrl",&listMsgType,"MsgType"));
+    listParameterPinIn->listPins.insert(Param_Value1, new ParameterPinIn(this,Param_Value1,0,&listValues,"Value1"));
+    listParameterPinIn->listPins.insert(Param_Value2, new ParameterPinIn(this,Param_Value2,0,&listValues,"Value2"));
+    listParameterPinIn->listPins.insert(Param_Channel, new ParameterPinIn(this,Param_Channel,1,&listChannels,"Channel"));
 
 
 }

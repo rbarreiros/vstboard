@@ -38,8 +38,6 @@ Script::Script(MainHost *host, int index, const ObjectInfo &info) :
 
 bool Script::Open()
 {
-    static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::editorVisible))->SetAlwaysVisible(true);
-
     if(scriptText.isEmpty()) {
         scriptText = "\
 ({\n\
@@ -198,24 +196,19 @@ Pin* Script::CreatePin(const ConnectionInfo &info)
     if(newPin)
         return newPin;
 
-    ParameterPin *pin=0;
-
     if(info.type == PinType::Parameter) {
         switch(info.direction) {
             case PinDirection::Input :
                 if(info.pinNumber == FixedPinNumber::editorVisible) {
-                    ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::editorVisible,"hide",&listEditorVisible,false,tr("Editor"));
+                    ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::editorVisible,"hide",&listEditorVisible,tr("Editor"));
                     newPin->SetLimitsEnabled(false);
                     return newPin;
-                } else {
-                    pin = new ParameterPinIn(this,info.pinNumber,0,true,QString("ParamIn%1").arg(info.pinNumber));
-                    pin->SetAlwaysVisible(true);
-                    return pin;
                 }
+                return new ParameterPinIn(this,info.pinNumber,0,QString("ParamIn%1").arg(info.pinNumber));
+
             case PinDirection::Output :
-                pin = new ParameterPinOut(this,info.pinNumber,0,true,QString("ParamOut%1").arg(info.pinNumber));
-                pin->SetAlwaysVisible(true);
-                return pin;
+                return new ParameterPinOut(this,info.pinNumber,0,QString("ParamOut%1").arg(info.pinNumber));
+
         }
     }
 
