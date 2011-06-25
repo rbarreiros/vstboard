@@ -23,6 +23,7 @@
 
 #include "objectview.h"
 #include "cableview.h"
+#include "objectdropzone.h"
 
 class MainHost;
 namespace View {
@@ -36,11 +37,16 @@ namespace View {
     protected:
 //        WId backOri;
         QList<CableView*>listCables;
+        ObjectDropZone *dropReplace;
+        ObjectDropZone *dropAttachLeft;
+        ObjectDropZone *dropAttachRight;
 
     signals:
         void CommandStep(ConnectionInfo pinInfo, int delta);
 
-//    public slots:
+    public slots:
+        void ObjectDropped(QGraphicsSceneDragDropEvent *event);
+        virtual void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
 //        void SetBackground();
     };
 

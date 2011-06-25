@@ -23,20 +23,21 @@
 
 #include "precomp.h"
 #include "../mainwindow.h"
+#include "objectdropzone.h"
 
 class MainHost;
 namespace View {
-
-    class ContainerContent : public QGraphicsWidget
+    class MainContainerView;
+    class ContainerContent : public ObjectDropZone
     {
     Q_OBJECT
     public:
-        explicit ContainerContent(MainHost *myHost, QAbstractItemModel *model, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
+        explicit ContainerContent(MainHost *myHost, QAbstractItemModel *model, MainContainerView * parent = 0);
         void SetModelIndex(QPersistentModelIndex index);
         QPointF GetDropPos();
-        QWidget *myParking;
 
         ViewConfig *config;
+
     protected:
         void dragEnterEvent( QGraphicsSceneDragDropEvent *event);
         void dragMoveEvent( QGraphicsSceneDragDropEvent *event);
@@ -50,6 +51,10 @@ namespace View {
         /// pointer to the MainHost
         MainHost *myHost;
 
+        QPersistentModelIndex attachLeft;
+        QPersistentModelIndex attachRight;
+        QGraphicsRectItem *rectAttachLeft;
+        QGraphicsRectItem *rectAttachRight;
     signals:
 
     public slots:

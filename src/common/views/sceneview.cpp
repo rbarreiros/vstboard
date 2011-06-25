@@ -544,7 +544,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                     debug("SceneView::rowsInserted addcable : pin not found")
                             continue;
                 }
-                CableView *cable = new CableView(infoOut,infoIn,cnt);
+                CableView *cable = new CableView(infoOut,infoIn,cnt,&myHost->mainWindow->viewConfig);
                 pinOut->AddCable(cable);
                 pinIn->AddCable(cable);
                 hashItems.insert(index, cable);

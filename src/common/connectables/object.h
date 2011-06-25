@@ -94,12 +94,16 @@ namespace Connectables {
           \return a PinsList
           */
         PinsList* GetListBridgePinIn() {return listBridgePinIn;}
+        PinsList* GetListAudioPinIn() {return listAudioPinIn;}
+        PinsList* GetListMidiPinIn() {return listMidiPinIn;}
 
         /*!
           Get a list of bridge pins ouput, only user by Bridge and Container
           \return a PinsList
           */
         PinsList* GetListBridgePinOut() {return listBridgePinOut;}
+        PinsList* GetListAudioPinOut() {return listAudioPinOut;}
+        PinsList* GetListMidiPinOut() {return listMidiPinOut;}
 
         bool GetSleep();
         void NewRenderLoop();

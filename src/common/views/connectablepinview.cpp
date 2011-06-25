@@ -64,28 +64,32 @@ ConnectablePinView::ConnectablePinView(float angle, QAbstractItemModel *model, Q
     outline->setBrush( config->GetColor(colorGroupId, Colors::Background) );
     vuColor = config->GetColor(colorGroupId, Colors::VuMeter);
     rectVu->setBrush( vuColor );
-    highlight->setBrush( config->GetColor(colorGroupId, Colors::HighlightBackground) );
+    highlight->setBrush( config->GetColor(ColorGroups::Object, Colors::HighlightBackground) );
+    textItem->setBrush(  config->GetColor(ColorGroups::Object, Colors::Text) );
 }
 
 void ConnectablePinView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
 {
-    if(groupId!=colorGroupId)
+    if(groupId==colorGroupId && colorId==Colors::Background) {
+        outline->setBrush(color);
         return;
-
-    switch(colorId) {
-        case Colors::Background :
-            outline->setBrush(color);
-            break;
-        case Colors::VuMeter :
-            vuColor=color;
-            if(connectInfo.type != PinType::Midi) {
-                rectVu->setBrush(color);
-            }
-            break;
-        case Colors::HighlightBackground :
-            highlight->setBrush(color);
+    }
+    if(groupId==colorGroupId && colorId==Colors::VuMeter) {
+        vuColor=color;
+        if(connectInfo.type != PinType::Midi) {
+            rectVu->setBrush(color);
+        }
+        return;
+    }
+    if(groupId==ColorGroups::Object && colorId==Colors::HighlightBackground) {
+        highlight->setBrush(color);
+        return;
     }
 
+    if(groupId==ColorGroups::Object && colorId==Colors::Text) {
+        textItem->setBrush(color);
+        return;
+    }
 }
 
 void ConnectablePinView::UpdateModelIndex(const QModelIndex &index)

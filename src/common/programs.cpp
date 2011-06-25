@@ -23,6 +23,7 @@
 #include "mainhost.h"
 #include "mainwindow.h"
 
+
 Programs::Programs(MainHost *parent) :
     QObject(parent),
     model(0),
@@ -41,6 +42,21 @@ Programs::Programs(MainHost *parent) :
 
     QScriptValue scriptObj = myHost->scriptEngine.newQObject(this);
     myHost->scriptEngine.globalObject().setProperty("Programs", scriptObj);
+
+    //currentProgColor = myHost->mainWindow->viewConfig.GetColor(View::ColorGroups::Programs,View::Colors::HighlightBackground);
+//    connect( &myHost->mainWindow->viewConfig, SIGNAL(ColorChanged(View::ColorGroups::Enum,View::Colors::Enum,QColor)),
+//            this, SLOT(UpdateColor(View::ColorGroups::Enum,View::Colors::Enum,QColor)) );
+}
+
+void Programs::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
+{
+    if(groupId==ColorGroups::Programs && colorId==Colors::HighlightBackground) {
+        currentProgColor = color;
+        if(currentGrp.isValid())
+            model->itemFromIndex( currentGrp )->setBackground(currentProgColor);
+        if(currentPrg.isValid())
+            model->itemFromIndex( currentPrg )->setBackground(currentProgColor);
+    }
 }
 
 void Programs::DisplayedGroupChanged(const QModelIndex &index)
@@ -147,8 +163,8 @@ void Programs::BuildModel()
     currentPrg = model->item(0)->child(0)->child(0)->index();
     model->item(0)->setData(1,UserRoles::type);
     model->item(0)->child(0)->child(0)->setData(1,UserRoles::type);
-    model->item(0)->setBackground(Qt::green);
-    model->item(0)->child(0)->child(0)->setBackground(Qt::green);
+    model->item(0)->setBackground(currentProgColor);
+    model->item(0)->child(0)->child(0)->setBackground(currentProgColor);
 
 
     emit GroupChanged( currentGrp );
@@ -399,7 +415,7 @@ void Programs::ChangeProg(const QModelIndex &newPrg)
 
         QStandardItem *newGrpItem = model->itemFromIndex(currentGrp);
         if(newGrpItem) {
-            newGrpItem->setBackground(Qt::green);
+            newGrpItem->setBackground(currentProgColor);
             newGrpItem->setData(1,UserRoles::type);
 //            for(int i=0; i<newGrpItem->rowCount(); i++)
 //                newGrpItem->child(i,0)->setBackground(Qt::transparent);
@@ -416,7 +432,7 @@ void Programs::ChangeProg(const QModelIndex &newPrg)
         debug("Programs::ChangeProg old prog not found")
     }
 
-    model->itemFromIndex(newPrg)->setBackground(Qt::green);
+    model->itemFromIndex(newPrg)->setBackground(currentProgColor);
     model->itemFromIndex(newPrg)->setData(1,UserRoles::type);
 
     currentPrg = newPrg;

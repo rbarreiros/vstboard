@@ -38,7 +38,7 @@ namespace Connectables {
         virtual ~Container();
 
         void Hide();
-        void ConnectBridges(QSharedPointer<Object> bridgeA, QSharedPointer<Object> bridgeB, bool hidden=true);
+        void ConnectObjects(QSharedPointer<Object> fromObjOutputs, QSharedPointer<Object> toObjInputs, bool hiddenCables);
 //        void RemoveCable(QModelIndex & index);
         void SetContainerId(quint16 id);
         const QModelIndex &GetCablesIndex();

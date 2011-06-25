@@ -148,7 +148,7 @@ void PinView::mouseMoveEvent ( QGraphicsSceneMouseEvent  * event )
     drag->setMimeData(mime);
 
     if(!currentLine) {
-        currentLine = new CableView(connectInfo,event->pos(),this);
+        currentLine = new CableView(connectInfo,event->pos(),this,config);
         AddCable(currentLine);
     }
 

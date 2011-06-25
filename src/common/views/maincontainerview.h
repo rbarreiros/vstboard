@@ -38,6 +38,7 @@ namespace View {
         void SetModelIndex(QPersistentModelIndex index);
         void SetParking(QWidget *parking);
         QPointF GetDropPos();
+        void OnDragMove(const QPointF &pt);
 
         BridgeView *bridgeIn;
         BridgeView *bridgeOut;

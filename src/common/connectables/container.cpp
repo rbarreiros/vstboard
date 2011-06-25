@@ -97,17 +97,19 @@ void Container::SetContainerId(quint16 id)
 }
 
 /*!
-  Connect the output pins of bridgeA to the inputs of bridgeB
-  \param bridgeA the output bridge
-  \param bridgeB the input bridge
+  Connect the output pins of fromObjOutputs to the inputs of toObjInputs
+  \param fromObjOutputs
+  \param toObjInputs
   \param hidden true to create hidden cables
   */
-void Container::ConnectBridges(QSharedPointer<Object> bridgeA, QSharedPointer<Object> bridgeB, bool hidden)
+void Container::ConnectObjects(QSharedPointer<Object> fromObjOutputs, QSharedPointer<Object> toObjInputs, bool hiddenCables)
 {
-    if(bridgeA.isNull() || bridgeB.isNull())
+    if(fromObjOutputs.isNull() || toObjInputs.isNull())
         return;
 
-    bridgeA->GetListBridgePinOut()->ConnectAllTo(this,bridgeB->GetListBridgePinIn(), hidden);
+    fromObjOutputs->GetListAudioPinOut()->ConnectAllTo(this,toObjInputs->GetListAudioPinIn(), hiddenCables);
+    fromObjOutputs->GetListMidiPinOut()->ConnectAllTo(this,toObjInputs->GetListMidiPinIn(), hiddenCables);
+    fromObjOutputs->GetListBridgePinOut()->ConnectAllTo(this,toObjInputs->GetListBridgePinIn(), hiddenCables);
 }
 
 bool Container::Close()
