@@ -29,8 +29,8 @@ namespace Connectables {
     class ParameterPinIn : public ParameterPin
     {
     public:
-        ParameterPinIn(Object *parent, int number, float defaultValue, bool defaultVisible, QString name="", bool nameCanChange=false);
-        ParameterPinIn(Object *parent, int number, const QVariant &defaultVariantValue, QList<QVariant> *listValues, bool defaultVisible, QString name="", bool nameCanChange=false);
+        ParameterPinIn(Object *parent, int number, float defaultValue, QString name="", bool nameCanChange=false, bool isRemoveable=false);
+        ParameterPinIn(Object *parent, int number, const QVariant &defaultVariantValue, QList<QVariant> *listValues, QString name="", bool nameCanChange=false, bool isRemoveable=false);
 
         virtual void ReceiveMsg(const PinMessage::Enum msgType,void *data=0);
     };

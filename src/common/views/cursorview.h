@@ -37,6 +37,7 @@ namespace View {
         void setPos ( qreal x, qreal y );
 
     protected:
+        void keyPressEvent ( QKeyEvent * event );
         void ValueChanged(float newVal);
         QVariant itemChange(GraphicsItemChange change, const QVariant &value);
         void mousePressEvent ( QGraphicsSceneMouseEvent * event );
@@ -49,10 +50,6 @@ namespace View {
         QAbstractItemModel *model;
         QPersistentModelIndex modelIndex;
         QPointF offset;
-
-    signals:
-
-    public slots:
 
     };
 }

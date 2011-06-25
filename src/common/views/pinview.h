@@ -66,7 +66,7 @@ namespace View {
         virtual const QPointF pinPos() const;
 
     protected:
-
+        virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
         QVariant itemChange ( GraphicsItemChange change, const QVariant & value );
         void mousePressEvent ( QGraphicsSceneMouseEvent * event );
         void mouseMoveEvent ( QGraphicsSceneMouseEvent  * event );
@@ -105,6 +105,9 @@ namespace View {
 
         ViewConfig *config;
 
+        QAction *actDel;
+        QAction *actUnplug;
+
     signals:
         /*!
           emitted when a pin is drag&droped over another one
@@ -118,10 +121,14 @@ namespace View {
           */
         void RemoveCablesFromPin(ConnectionInfo pin);
 
+        void RemovePin(ConnectionInfo pin);
+
     public slots:
         /// update the vu-meter, called by a timer
-        virtual void updateVu(){}
-        virtual void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color) {};
+        virtual void updateVu() {}
+        virtual void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color) {}
+        void RemovePin();
+        void Unplug();
 
     friend class Cable;
     };

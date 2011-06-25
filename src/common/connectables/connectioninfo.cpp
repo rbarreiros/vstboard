@@ -32,7 +32,7 @@
   default constructor
   */
 ConnectionInfo::ConnectionInfo()
-    : container(0), objId(0), type(PinType::Audio), direction(PinDirection::Output), pinNumber(0), bridge(false), myHost(0)
+    : container(0), objId(0), type(PinType::Audio), direction(PinDirection::Output), pinNumber(0), bridge(false), isRemoveable(false), myHost(0)
 {
 }
 
@@ -44,13 +44,14 @@ ConnectionInfo::ConnectionInfo()
   \param pinNumber the pin number in a list of pins
   \param bridge true if it's a bridge pin (can connect with the pins of the parent container)
   */
-ConnectionInfo::ConnectionInfo(MainHost *myHost,quint16 objId, PinType::Enum type, PinDirection::Enum direction, quint16 pinNumber, bool bridge) :
+ConnectionInfo::ConnectionInfo(MainHost *myHost,quint16 objId, PinType::Enum type, PinDirection::Enum direction, quint16 pinNumber, bool bridge, bool removeable) :
     container(-1),
     objId(objId),
     type(type),
     direction(direction),
     pinNumber(pinNumber),
     bridge(bridge),
+    isRemoveable(removeable),
     myHost(myHost)
 {
 }

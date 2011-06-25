@@ -502,6 +502,8 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                         this, SLOT(ConnectPins(ConnectionInfo,ConnectionInfo)));
                 connect(pinView,SIGNAL(RemoveCablesFromPin(ConnectionInfo)),
                         this,SLOT(RemoveCablesFromPin(ConnectionInfo)));
+                connect(pinView,SIGNAL(RemovePin(ConnectionInfo)),
+                        this,SLOT(RemovePin(ConnectionInfo)));
 
                 pinView->UpdateModelIndex(index);
                 break;
@@ -566,7 +568,7 @@ void SceneView::graphicObjectRemoved ( QObject* obj)
     hashItems.remove( hashItems.key(obj) );
 }
 
-void SceneView::ConnectPins(ConnectionInfo pinOut,ConnectionInfo pinIn)
+void SceneView::ConnectPins(const ConnectionInfo &pinOut, const ConnectionInfo &pinIn)
 {
     QPersistentModelIndex ixOut = mapConnectionInfo.value(pinOut);
     QPersistentModelIndex ixIn = mapConnectionInfo.value(pinIn);
@@ -586,13 +588,20 @@ void SceneView::ConnectPins(ConnectionInfo pinOut,ConnectionInfo pinIn)
         static_cast<Connectables::Container*>(cntPtr.data())->UserAddCable(pinIn,pinOut);
 }
 
-void SceneView::RemoveCablesFromPin(ConnectionInfo pin)
+void SceneView::RemoveCablesFromPin(const ConnectionInfo &pin)
 {
     QPersistentModelIndex ix = mapConnectionInfo.value(pin);
     QModelIndex parent = ix.parent().parent().parent();
     if(pin.bridge) parent = parent.parent();
     QSharedPointer<Connectables::Object> cntPtr = objFactory->GetObjectFromId(parent.data(UserRoles::value).toInt());
     static_cast<Connectables::Container*>(cntPtr.data())->UserRemoveCableFromPin(pin);
+}
+
+void SceneView::RemovePin(const ConnectionInfo &pin)
+{
+    QPersistentModelIndex ix = mapConnectionInfo.value(pin);
+    QSharedPointer<Connectables::Object> objPtr = objFactory->GetObjectFromId(pin.objId);
+    objPtr->UserRemovePin(pin);
 }
 
 void SceneView::ToggleHostView(bool show)

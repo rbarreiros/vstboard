@@ -35,8 +35,8 @@ namespace Connectables {
     Q_PROPERTY(QVariant value READ GetVariantValue WRITE SetVariantValue)
 
     public:
-        ParameterPin(Object *parent, PinDirection::Enum direction, int number, float defaultValue, bool defaultVisible, const QString &name="", bool nameCanChange=false, bool bridge=false);
-        ParameterPin(Object *parent, PinDirection::Enum direction, int number, const QVariant &defaultVariantValue, QList<QVariant> *listValues, bool defaultVisible, const QString &name="", bool nameCanChange=false, bool bridge=false);
+        ParameterPin(Object *parent, PinDirection::Enum direction, int number, float defaultValue, const QString &name="", bool nameCanChange=false, bool isRemoveable=false, bool bridge=false);
+        ParameterPin(Object *parent, PinDirection::Enum direction, int number, const QVariant &defaultVariantValue, QList<QVariant> *listValues, const QString &name="", bool nameCanChange=false, bool isRemoveable=false, bool bridge=false);
 
         void ChangeValue(float val, bool fromObj=false);
         void ChangeValue(int index, bool fromObj=false);
@@ -53,10 +53,10 @@ namespace Connectables {
         void GetValues(ObjectParameter &param);
 
         void SetDefaultValue(float value) {defaultValue = value;}
-        void SetDefaultVisible(bool visible) {defaultVisible = visible;}
+        void SetDefaultVisible(bool vis) {defaultVisible = vis;}
         void SetFixedName(QString fixedName);
         void SetNameCanChange(bool canChange) {nameCanChange = canChange;}
-        void SetAlwaysVisible(bool visible);
+        void SetRemoveable();
         void SetVisible(bool vis);
 
         void SetLimit(ObjType::Enum type, float newVal);
@@ -65,13 +65,12 @@ namespace Connectables {
     protected:
         QList<QVariant> *listValues;
         int stepIndex;
+        bool defaultVisible;
         float defaultValue;
         int defaultIndex;
-        bool defaultVisible;
         bool loading;
         bool nameCanChange;
         bool dirty;
-        bool visibilityCanChange;
         float limitInMin;
         float limitInMax;
         float limitOutMin;

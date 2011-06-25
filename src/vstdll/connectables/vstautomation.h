@@ -41,6 +41,9 @@ namespace Connectables {
         void ValueFromHost(int pinNum, float value);
         Pin* CreatePin(const ConnectionInfo &info);
     protected:
+        /// list of values used by the learn pin (off, learn, unlearn)
+        QList<QVariant>listIsLearning;
+
         QList<QVariant> listValues;
         QHash<int,float>listChanged;
         int numberOfPins;

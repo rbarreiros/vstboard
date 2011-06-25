@@ -28,27 +28,21 @@ VstAutomation::VstAutomation(MainHost *myHost,int index) :
         Object(myHost,index, ObjectInfo(NodeType::object, ObjType::VstAutomation, tr("VstAutomation")) ),
         numberOfPins(VST_AUTOMATION_DEFAULT_NB_PINS)
 {
-    for(int i=0; i<VST_AUTOMATION_DEFAULT_NB_PINS; i++) {
-        listParameterPinIn->AddPin(i);
-        listParameterPinOut->AddPin(i);
-    }
-
     for(int i=0;i<128;i++) {
         listValues << i;
     }
 
-    int prog=(int)static_cast<MainHostVst*>(myHost)->myVstPlugin->getProgram();
-    ParameterPinOut *progPin = new ParameterPinOut(this,FixedPinNumber::vstProgNumber,prog,&listValues,true,tr("Prog"));
-    progPin->SetAlwaysVisible(true);
-    progPin->SetLimitsEnabled(false);
-    listParameterPinOut->listPins.insert(FixedPinNumber::vstProgNumber, progPin);
+    //learning pin
+    listIsLearning << "off";
+    listIsLearning << "learn";
+    listIsLearning << "unlearn";
+    listParameterPinIn->AddPin(FixedPinNumber::learningMode);
 
-    ParameterPinIn *nbPin = new ParameterPinIn(this,FixedPinNumber::numberOfPins,VST_AUTOMATION_DEFAULT_NB_PINS,&listValues,true,tr("NbPins"));
-    nbPin->SetAlwaysVisible(true);
-    nbPin->SetLimitsEnabled(false);
-    listParameterPinIn->listPins.insert(FixedPinNumber::numberOfPins, nbPin);
+    listParameterPinIn->AddPin(FixedPinNumber::numberOfPins);
+    listParameterPinOut->AddPin(FixedPinNumber::vstProgNumber);
 
-    static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::learningMode))->SetAlwaysVisible(true);
+    listParameterPinIn->SetNbPins(VST_AUTOMATION_DEFAULT_NB_PINS);
+    listParameterPinOut->SetNbPins(VST_AUTOMATION_DEFAULT_NB_PINS);
 
     connect(static_cast<MainHostVst*>(myHost)->myVstPlugin,SIGNAL(HostChangedProg(int)),
             this,SLOT(OnHostChangedProg(int)));
@@ -154,16 +148,33 @@ Pin* VstAutomation::CreatePin(const ConnectionInfo &info)
 
     switch(info.direction) {
         case PinDirection::Output :
-            newPin = new ParameterPinOut(this,info.pinNumber,0,true,QString("autom%1").arg(info.pinNumber),false);
-            break;
+            if(info.pinNumber == FixedPinNumber::vstProgNumber) {
+                int prog=(int)static_cast<MainHostVst*>(myHost)->myVstPlugin->getProgram();
+                ParameterPin *newPin = new ParameterPinOut(this,FixedPinNumber::vstProgNumber,prog,&listValues,tr("Prog"));
+                newPin->SetLimitsEnabled(false);
+                return newPin;
+            }
+
+            return new ParameterPinOut(this,info.pinNumber,0,QString("autom%1").arg(info.pinNumber),false,true);
+
         case PinDirection::Input :
-            newPin = new ParameterPinIn(this,info.pinNumber,0,true,QString("autom%1").arg(info.pinNumber),false);
-            break;
+            if(info.pinNumber == FixedPinNumber::numberOfPins) {
+                ParameterPinIn *newPin = new ParameterPinIn(this,FixedPinNumber::numberOfPins,VST_AUTOMATION_DEFAULT_NB_PINS,&listValues,tr("NbPins"));
+                newPin->SetLimitsEnabled(false);
+                return newPin;
+            }
+            if(info.pinNumber == FixedPinNumber::learningMode) {
+                ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::learningMode,"off",&listIsLearning,tr("Learn"));
+                newPin->SetLimitsEnabled(false);
+                return newPin;
+            }
+
+            return new ParameterPinIn(this,info.pinNumber,0,QString("autom%1").arg(info.pinNumber),false,true);
 
         default :
             debug("VstAutomation::CreatePin PinDirection")
             return 0;
-            break;
+
     }
-    return newPin;
+    return 0;
 }

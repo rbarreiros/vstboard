@@ -397,48 +397,10 @@ bool VstPlugin::Open()
         }
     }
 
-    int nbParam = pEffect->numParams;
-    bool nameCanChange=false;
-    bool defVisible = true;
-
-    //plugin with gui :
-    if((pEffect->flags & effFlagsHasEditor) != 0) {
-        //plugin may change the parameter name
-        nameCanChange=true;
-
-        //only show learned parameters
-        defVisible=false;
-    }
-
     //create all parameters pins
+    int nbParam = pEffect->numParams;
     for(int i=0;i<nbParam;i++) {
-        //input pins
-        ParameterPinIn *pin=0;
-        if(listParameterPinIn->listPins.contains(i)) {
-            pin = static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(i));
-        } else {
-            pin = static_cast<ParameterPinIn*>(listParameterPinIn->AddPin(i));
-        }
-        if(!pin) {
-            debug2(<<"VstPlugin::Open ParameterPinIn"<<i<<"not created")
-            return false;
-        }
-        pin->SetDefaultVisible(defVisible);
-        pin->SetNameCanChange(nameCanChange);
-
-        //output pins
-//        ParameterPinOut *pinOut=0;
-//        if(listParameterPinOut->listPins.contains(i)) {
-//            pinOut = static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(i));
-//        } else {
-//            pinOut = static_cast<ParameterPinOut*>(listParameterPinOut->AddPin(i));
-//        }
-//        if(!pinOut) {
-//            debug2(<<"VstPlugin::Open ParameterPinOut"<<i<<"not created")
-//            return false;
-//        }
-//        pinOut->SetDefaultVisible(defVisible);
-//        pinOut->SetNameCanChange(nameCanChange);
+        listParameterPinIn->AddPin(i);
     }
 
     Object::Open();
@@ -470,9 +432,6 @@ void VstPlugin::CreateEditorWindow()
     //no gui
     if((pEffect->flags & effFlagsHasEditor) == 0)
         return;
-
-    static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::editorVisible))->SetAlwaysVisible(true);
-    static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::learningMode))->SetAlwaysVisible(true);
 
     editorWnd = new View::VstPluginWindow(myHost->mainWindow);
 
@@ -608,6 +567,22 @@ void VstPlugin::processEvents(VstEvents* events)
             debug("other vst event")
         }
     }
+}
+
+void VstPlugin::UserRemovePin(const ConnectionInfo &info)
+{
+    if(info.type!=PinType::Parameter)
+        return;
+
+    if(info.direction!=PinDirection::Input)
+        return;
+
+    if(!info.isRemoveable)
+        return;
+
+    if(listParameterPinIn->listPins.contains(info.pinNumber))
+        static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(info.pinNumber))->SetVisible(false);
+    OnProgramDirty();
 }
 
 VstIntPtr VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr, float opt, long currentReturnCode)
@@ -803,24 +778,31 @@ Pin* VstPlugin::CreatePin(const ConnectionInfo &info)
     if(info.type == PinType::Parameter && info.direction == PinDirection::Input) {
         switch(info.pinNumber) {
             case FixedPinNumber::vstProgNumber : {
-                ParameterPinIn *newPin = new ParameterPinIn(this,info.pinNumber,0,&listValues,true,"prog",false);
+                ParameterPinIn *newPin = new ParameterPinIn(this,info.pinNumber,0,&listValues,"prog");
                 newPin->SetLimitsEnabled(false);
                 return newPin;
             }
             case FixedPinNumber::editorVisible : {
-                ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::editorVisible,"hide",&listEditorVisible,false,tr("Editor"));
+                ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::editorVisible,"hide",&listEditorVisible,tr("Editor"));
                 newPin->SetLimitsEnabled(false);
                 return newPin;
             }
             case FixedPinNumber::learningMode : {
-                ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::learningMode,"off",&listIsLearning,false,tr("Learn"));
+                ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::learningMode,"off",&listIsLearning,tr("Learn"));
                 newPin->SetLimitsEnabled(false);
                 return newPin;
             }
             default : {
-                if(closed)
-                    return new ParameterPinIn(this,info.pinNumber,0,false,"",true);
-                return new ParameterPinIn(this,info.pinNumber,EffGetParameter(info.pinNumber),false,EffGetParamName(info.pinNumber),true);
+                //if the plugin has a gui, the pins can be learned and the name can change
+                bool removeable = ((pEffect->flags & effFlagsHasEditor) == 0)?false:true;
+                ParameterPin *pin=0;
+                if(closed) {
+                    pin = new ParameterPinIn(this,info.pinNumber,0,"",true,removeable);
+                } else {
+                    pin = new ParameterPinIn(this,info.pinNumber,EffGetParameter(info.pinNumber),EffGetParamName(info.pinNumber),removeable,removeable);
+                }
+                pin->SetDefaultVisible(!removeable);
+                return pin;
             }
         }
     }

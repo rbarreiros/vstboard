@@ -29,8 +29,8 @@ namespace Connectables {
     class ParameterPinOut : public ParameterPin
     {
     public:
-        ParameterPinOut(Object *parent, int number, float defaultValue, bool defaultVisible, const QString &name="", bool nameCanChange=false);
-        ParameterPinOut(Object *parent, int number, const QVariant &defaultVariantValue, QList<QVariant> *listValues, bool defaultVisible, const QString &name="", bool nameCanChange=false);
+        ParameterPinOut(Object *parent, int number, float defaultValue, const QString &name="", bool nameCanChange=false, bool isRemoveable=false);
+        ParameterPinOut(Object *parent, int number, const QVariant &defaultVariantValue, QList<QVariant> *listValues, const QString &name="", bool nameCanChange=false, bool isRemoveable=false);
 
         virtual void OnValueChanged(float val);
     };

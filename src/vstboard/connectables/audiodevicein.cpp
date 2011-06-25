@@ -73,8 +73,11 @@ void AudioDeviceIn::Render()
     }
 
     objMutex.lock();
-    if(parentDevice)
-        static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(0))->ChangeValue(parentDevice->GetCpuUsage());
+    if(parentDevice) {
+        ParameterPinOut* pin=static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(0));
+        if(pin)
+            pin->ChangeValue(parentDevice->GetCpuUsage());
+    }
     objMutex.unlock();
 }
 
@@ -132,7 +135,7 @@ Pin* AudioDeviceIn::CreatePin(const ConnectionInfo &info)
     switch(info.direction) {
         case PinDirection::Output :
             if(info.pinNumber==0) {
-                ParameterPinOut *pin = new ParameterPinOut(this,0,0,true,"cpu%",false);
+                ParameterPinOut *pin = new ParameterPinOut(this,0,0,"cpu%");
                 pin->SetLimitsEnabled(false);
                 return pin;
             }
