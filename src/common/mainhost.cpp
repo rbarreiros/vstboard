@@ -197,8 +197,8 @@ void MainHost::SetupHostContainer()
 
     //connect with groupContainer
     if(!groupContainer.isNull()) {
-        mainContainer->ConnectBridges(groupContainer->bridgeSend, hostContainer->bridgeIn);
-        mainContainer->ConnectBridges(hostContainer->bridgeOut, groupContainer->bridgeReturn);
+        mainContainer->ConnectObjects(groupContainer->bridgeSend, hostContainer->bridgeIn,true);
+        mainContainer->ConnectObjects(hostContainer->bridgeOut, groupContainer->bridgeReturn,true);
     }
 
     //send bridge
@@ -227,8 +227,8 @@ void MainHost::SetupHostContainer()
 
     //connect with projectContainer
     if(!projectContainer.isNull()) {
-        mainContainer->ConnectBridges(hostContainer->bridgeSend, projectContainer->bridgeIn);
-        mainContainer->ConnectBridges(projectContainer->bridgeOut, hostContainer->bridgeReturn);
+        mainContainer->ConnectObjects(hostContainer->bridgeSend, projectContainer->bridgeIn,true);
+        mainContainer->ConnectObjects(projectContainer->bridgeOut, hostContainer->bridgeReturn,true);
     }
     hostContainer->listenProgramChanges=false;
 
@@ -287,8 +287,8 @@ void MainHost::SetupProjectContainer()
 
     //connect with hostContainer
     if(!hostContainer.isNull()) {
-        mainContainer->ConnectBridges(hostContainer->bridgeSend, projectContainer->bridgeIn);
-        mainContainer->ConnectBridges(projectContainer->bridgeOut, hostContainer->bridgeReturn);
+        mainContainer->ConnectObjects(hostContainer->bridgeSend, projectContainer->bridgeIn,true);
+        mainContainer->ConnectObjects(projectContainer->bridgeOut, hostContainer->bridgeReturn,true);
     }
 
 
@@ -318,13 +318,13 @@ void MainHost::SetupProjectContainer()
 
     //connect with programContainer
     if(!programContainer.isNull()) {
-        mainContainer->ConnectBridges(projectContainer->bridgeSend, programContainer->bridgeIn);
-        mainContainer->ConnectBridges(programContainer->bridgeOut, projectContainer->bridgeReturn);
+        mainContainer->ConnectObjects(projectContainer->bridgeSend, programContainer->bridgeIn,true);
+        mainContainer->ConnectObjects(programContainer->bridgeOut, projectContainer->bridgeReturn,true);
     }
 
     //connect with itself (pass-though cables)
-    projectContainer->ConnectBridges(projectContainer->bridgeIn, projectContainer->bridgeSend,false);
-    projectContainer->ConnectBridges(projectContainer->bridgeReturn, projectContainer->bridgeOut,false);
+    projectContainer->ConnectObjects(projectContainer->bridgeIn, projectContainer->bridgeSend,false);
+    projectContainer->ConnectObjects(projectContainer->bridgeReturn, projectContainer->bridgeOut,false);
 
     projectContainer->listenProgramChanges=false;
 
@@ -384,8 +384,8 @@ void MainHost::SetupProgramContainer()
 
     //connect with projectContainer
     if(!projectContainer.isNull()) {
-        mainContainer->ConnectBridges(projectContainer->bridgeSend, programContainer->bridgeIn);
-        mainContainer->ConnectBridges(programContainer->bridgeOut, projectContainer->bridgeReturn);
+        mainContainer->ConnectObjects(projectContainer->bridgeSend, programContainer->bridgeIn,true);
+        mainContainer->ConnectObjects(programContainer->bridgeOut, projectContainer->bridgeReturn,true);
     }
 
 
@@ -415,8 +415,8 @@ void MainHost::SetupProgramContainer()
 
     //connect with groupContainer
     if(!groupContainer.isNull()) {
-        mainContainer->ConnectBridges(programContainer->bridgeSend, groupContainer->bridgeIn);
-        mainContainer->ConnectBridges(groupContainer->bridgeOut, programContainer->bridgeReturn);
+        mainContainer->ConnectObjects(programContainer->bridgeSend, groupContainer->bridgeIn,true);
+        mainContainer->ConnectObjects(groupContainer->bridgeOut, programContainer->bridgeReturn,true);
     }
 
     connect(programList, SIGNAL(ProgChanged(QModelIndex)),
@@ -485,8 +485,8 @@ void MainHost::SetupGroupContainer()
 
     //connect with programContainer
     if(!programContainer.isNull()) {
-        mainContainer->ConnectBridges(programContainer->bridgeSend, groupContainer->bridgeIn);
-        mainContainer->ConnectBridges(groupContainer->bridgeOut, programContainer->bridgeReturn);
+        mainContainer->ConnectObjects(programContainer->bridgeSend, groupContainer->bridgeIn,true);
+        mainContainer->ConnectObjects(groupContainer->bridgeOut, programContainer->bridgeReturn,true);
     }
 
     //bridge send
@@ -515,8 +515,8 @@ void MainHost::SetupGroupContainer()
 
     //connect with hostContainer
     if(!hostContainer.isNull()) {
-        mainContainer->ConnectBridges(groupContainer->bridgeSend, hostContainer->bridgeIn);
-        mainContainer->ConnectBridges(hostContainer->bridgeOut, groupContainer->bridgeReturn);
+        mainContainer->ConnectObjects(groupContainer->bridgeSend, hostContainer->bridgeIn,true);
+        mainContainer->ConnectObjects(hostContainer->bridgeOut, groupContainer->bridgeReturn,true);
     }
 
     connect(programList, SIGNAL(GroupChanged(QModelIndex)),

@@ -16,29 +16,25 @@ VstPluginView::VstPluginView(MainHost *myHost,QAbstractItemModel *model,QGraphic
 
 void VstPluginView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
 {
-    if(groupId!=ColorGroups::VstPlugin)
-        return;
-
-    switch(colorId) {
-        case Colors::Background: {
+    if(colorId==Colors::Background)  {
+        if(groupId==ColorGroups::VstPlugin) {
             if(!highlighted) {
                 QPalette pal(palette());
                 pal.setColor(QPalette::Window,color);
                 setPalette( pal );
             }
-            break;
         }
-        case Colors::HighlightBackground: {
-            if(highlighted) {
-                QPalette pal(palette());
-                pal.setColor(QPalette::Window,color);
-                setPalette( pal );
-            }
-            break;
-        }
-        default:
-            break;
+        return;
     }
+
+    if(groupId==ColorGroups::Object && colorId==Colors::HighlightBackground)  {
+        if(highlighted) {
+            QPalette pal(palette());
+            pal.setColor(QPalette::Window,color);
+            setPalette( pal );
+        }
+    }
+    ConnectableObjectView::UpdateColor(groupId,colorId,color);
 }
 
 void VstPluginView::SetModelIndex(QPersistentModelIndex index)
@@ -156,7 +152,7 @@ void VstPluginView::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
         QFileInfo info;
 
         QStringList acceptedFiles;
-        acceptedFiles << "fxb" << "fxp" << "dll";
+        acceptedFiles << "fxb" << "fxp" ;
 
         foreach(QUrl url,event->mimeData()->urls()) {
             fName = url.toLocalFile();
@@ -189,7 +185,7 @@ void VstPluginView::dropEvent( QGraphicsSceneDragDropEvent *event)
 void VstPluginView::HighlightStart()
 {
     QPalette pal(palette());
-    pal.setColor(QPalette::Window, config->GetColor(ColorGroups::VstPlugin,Colors::HighlightBackground) );
+    pal.setColor(QPalette::Window, config->GetColor(ColorGroups::Object,Colors::HighlightBackground) );
     setPalette( pal );
 }
 

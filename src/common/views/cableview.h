@@ -24,15 +24,16 @@
 #include "../precomp.h"
 #include "../globals.h"
 #include "pinview.h"
+#include "viewconfig.h"
 
 namespace View {
 
-    //inherits from QObject to send destroy signal
-    class CableView : public QGraphicsPathItem, public QObject
+    class CableView : public QObject, public QGraphicsPathItem
     {
+    Q_OBJECT
     public:
-        CableView(const ConnectionInfo &pinOut, const ConnectionInfo &pinIn, QGraphicsItem *parent = 0);
-        CableView(const ConnectionInfo &pinOut, const QPointF &PtIn, QGraphicsItem *parent);
+        CableView(const ConnectionInfo &pinOut, const ConnectionInfo &pinIn, QGraphicsItem *parent, ViewConfig *config);
+        CableView(const ConnectionInfo &pinOut, const QPointF &PtIn, QGraphicsItem *parent, ViewConfig *config);
 
         void UpdatePosition(const ConnectionInfo &pinInfo, const float angle, const QPointF &pt);
         void UpdatePosition(const QPointF &pt);
@@ -45,6 +46,10 @@ namespace View {
         QPointF PtIn;
         QPointF CtrlPtOut;
         QPointF CtrlPtIn;
+        ViewConfig *config;
+
+    public slots:
+        void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
     };
 }
 

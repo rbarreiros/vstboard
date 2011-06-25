@@ -36,19 +36,19 @@ void MinMaxPinView::CreateCursors()
     scaledView = new QGraphicsPolygonItem(this);
     scaledView->setBrush(QColor(0,0,0,30));
 
-    inMin=new CursorView(model,false,false,this);
+    inMin=new CursorView(model,false,false,this,config);
     inMin->setPos(rect().topLeft());
     inMin->SetValue(.0f);
 
-    inMax=new CursorView(model,true,false,this);
+    inMax=new CursorView(model,true,false,this,config);
     inMax->setPos(rect().topRight());
     inMax->SetValue(1.0f);
 
-    outMin=new CursorView(model,false,true,this);
+    outMin=new CursorView(model,false,true,this,config);
     outMin->setPos(rect().bottomLeft());
     outMin->SetValue(.0f);
 
-    outMax=new CursorView(model,true,true,this);
+    outMax=new CursorView(model,true,true,this,config);
     outMax->setPos(rect().bottomRight());
     outMax->SetValue(1.0f);
 }

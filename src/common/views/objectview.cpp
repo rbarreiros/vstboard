@@ -94,10 +94,11 @@ void ObjectView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, co
             QPalette pal(palette());
             pal.setColor(QPalette::Text,color);
             setPalette( pal );
+            if(titleText)
+                titleText->setBrush(color);
             break;
         }
 
-        case Colors::Borders :
         default:
             break;
     }
@@ -222,6 +223,7 @@ void ObjectView::focusInEvent ( QFocusEvent * event )
     if(selectBorder)
         delete selectBorder;
     selectBorder=new QGraphicsRectItem( -2,-2, size().width()+4, size().height()+4 , this );
+    QGraphicsWidget::focusInEvent(event);
 }
 
 /*!
@@ -234,6 +236,7 @@ void ObjectView::focusOutEvent ( QFocusEvent * event )
         delete selectBorder;
         selectBorder =0;
     }
+    QGraphicsWidget::focusOutEvent(event);
 }
 
 /*!

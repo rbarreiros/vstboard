@@ -27,14 +27,15 @@ using namespace View;
 #define CURS_WIDTH 5.0f
 #define CURD_HEIGHT 7.5f
 
-CursorView::CursorView(QAbstractItemModel *model,bool isMaxi,bool upsideDown,QGraphicsItem *parent) :
+CursorView::CursorView(QAbstractItemModel *model,bool isMaxi,bool upsideDown,QGraphicsItem *parent, ViewConfig *config) :
         QGraphicsWidget(parent),
         isMaxi(isMaxi),
         upsideDown(upsideDown),
         drag(false),
         value(.0f),
         model(model),
-        offset(QPointF(0,0))
+        offset(QPointF(0,0)),
+        config(config)
 {
     QPolygonF pol;
 
@@ -57,7 +58,9 @@ CursorView::CursorView(QAbstractItemModel *model,bool isMaxi,bool upsideDown,QGr
     }
     cursor = new QGraphicsPolygonItem(pol,this);
     cursor->setPen(Qt::NoPen);
-    cursor->setBrush(QColor(64,64,64));
+    cursor->setBrush( config->GetColor(ColorGroups::Cursor,Colors::Background) );
+    connect( config, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
+            this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)) );
 
     setFlag(QGraphicsItem::ItemIsMovable, true);
     setFocusPolicy(Qt::StrongFocus);
@@ -174,4 +177,27 @@ void CursorView::keyPressEvent ( QKeyEvent * event )
     }
 
     QGraphicsWidget::keyPressEvent(event);
+}
+
+void CursorView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
+{
+    if(groupId==ColorGroups::Cursor && colorId==Colors::Background && !hasFocus()) {
+        cursor->setBrush(color);
+    }
+
+    if(groupId==ColorGroups::Cursor && colorId==Colors::HighlightBackground && hasFocus()) {
+        cursor->setBrush(color);
+    }
+}
+
+void CursorView::focusInEvent ( QFocusEvent * event )
+{
+    cursor->setBrush( config->GetColor(ColorGroups::Cursor,Colors::HighlightBackground) );
+    QGraphicsWidget::focusInEvent(event);
+}
+
+void CursorView::focusOutEvent ( QFocusEvent * event )
+{
+    cursor->setBrush( config->GetColor(ColorGroups::Cursor,Colors::Background) );
+    QGraphicsWidget::focusOutEvent(event);
 }

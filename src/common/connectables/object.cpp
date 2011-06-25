@@ -545,11 +545,13 @@ void Object::CopyStatusTo(QSharedPointer<Object>objPtr)
 
     Connectables::ParameterPinIn* oldEditPin = static_cast<Connectables::ParameterPinIn*>(listParameterPinIn->GetPin(FixedPinNumber::editorVisible));
     Connectables::ParameterPinIn* newEditPin = static_cast<Connectables::ParameterPinIn*>(objPtr->listParameterPinIn->GetPin(FixedPinNumber::editorVisible));
-    newEditPin->ChangeValue(oldEditPin->GetValue());
+    if(newEditPin && oldEditPin)
+        newEditPin->ChangeValue(oldEditPin->GetValue());
 
     Connectables::ParameterPinIn* oldLearnPin = static_cast<Connectables::ParameterPinIn*>(listParameterPinIn->GetPin(FixedPinNumber::learningMode));
     Connectables::ParameterPinIn* newLearnPin = static_cast<Connectables::ParameterPinIn*>(objPtr->listParameterPinIn->GetPin(FixedPinNumber::learningMode));
-    newLearnPin->ChangeValue(oldLearnPin->GetValue());
+    if(newLearnPin && oldLearnPin)
+        newLearnPin->ChangeValue(oldLearnPin->GetValue());
 }
 
 void Object::SetBufferSize(unsigned long size)

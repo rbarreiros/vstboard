@@ -59,11 +59,11 @@ BridgePinView::BridgePinView(float angle, QAbstractItemModel *model,QGraphicsIte
 
     outline = new QGraphicsPolygonItem(pol,this);
     outline->setBrush(Qt::NoBrush);
-    outline->setPen( config->GetColor(ColorGroups::Bridge,Colors::Borders) );
+    outline->setPen( config->GetColor(ColorGroups::Bridge,Colors::Lines) );
 
     highlight = new QGraphicsPolygonItem(pol,this);
     highlight->setVisible(false);
-    highlight->setBrush( config->GetColor(ColorGroups::Bridge, Colors::HighlightBackground) );
+    highlight->setBrush( config->GetColor(ColorGroups::Object, Colors::HighlightBackground) );
 
     QPalette pal(palette());
     pal.setColor(QPalette::Window, config->GetColor(ColorGroups::Bridge,Colors::Background) );
@@ -72,23 +72,20 @@ BridgePinView::BridgePinView(float angle, QAbstractItemModel *model,QGraphicsIte
 
 void BridgePinView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
 {
-    if(groupId!=ColorGroups::Bridge)
+    if(groupId==ColorGroups::Bridge && colorId==Colors::Lines) {
+        outline->setPen( color );
         return;
+    }
 
-    switch(colorId) {
-        case Colors::Borders:
-            outline->setPen( color );
-            break;
-        case Colors::Background: {
-            QPalette pal(palette());
-            pal.setColor(QPalette::Window,color);
-            setPalette( pal );
-            break;
-        }
-        case Colors::HighlightBackground :
-            highlight->setBrush( color );
-        default:
-            break;
+    if(groupId==ColorGroups::Bridge && colorId==Colors::Background) {
+        QPalette pal(palette());
+        pal.setColor(QPalette::Window,color);
+        setPalette( pal );
+        return;
+    }
+
+    if(groupId==ColorGroups::Object && colorId==Colors::HighlightBackground) {
+        highlight->setBrush( color );
     }
 }
 

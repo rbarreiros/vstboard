@@ -24,6 +24,7 @@
 #include "precomp.h"
 #include "globals.h"
 #include "models/programsmodel.h"
+#include "views/viewconfig.h"
 
 class MainWindow;
 class MainHost;
@@ -77,6 +78,7 @@ private:
     bool projectDirty;
 
     MainWindow *mainWindow;
+    QBrush currentProgColor;
 
 signals:
     void ProgChanged(const QModelIndex &prgIndex);
@@ -99,6 +101,8 @@ public slots:
     void rowsRemoved( const QModelIndex & parent, int start, int end );
 
     void DisplayedGroupChanged(const QModelIndex &index);
+
+    void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
 
     friend QDataStream & operator<< (QDataStream&, Programs&);
     friend QDataStream & operator>> (QDataStream&, Programs&);

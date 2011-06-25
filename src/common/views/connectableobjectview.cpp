@@ -31,12 +31,16 @@
 using namespace View;
 
 ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel *model,QGraphicsItem * parent, Qt::WindowFlags wFlags ) :
-    ObjectView(myHost,model,parent,wFlags)
+    ObjectView(myHost,model,parent,wFlags),
+    dropReplace(0),
+    dropAttachLeft(0),
+    dropAttachRight(0)
 {
     setGeometry(QRectF(0,0,105,15));
 
     titleText = new QGraphicsSimpleTextItem(QString("Title"),this);
     titleText->moveBy(2,1);
+    titleText->setBrush( config->GetColor(ColorGroups::Object,Colors::Text) );
 
     layout = new QGraphicsGridLayout() ;
     layout->setSpacing(0);
@@ -61,6 +65,46 @@ ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel
     layout->addItem(listParametersIn,2,0,Qt::AlignLeft | Qt::AlignTop);
     layout->addItem(listParametersOut,2,1,Qt::AlignRight | Qt::AlignTop);
 
-   // setCursor(Qt::UpArrowCursor);
+    dropReplace = new ObjectDropZone(this);
+    connect(dropReplace, SIGNAL(ObjectDropped(QGraphicsSceneDragDropEvent*)),
+            this,SLOT(ObjectDropped(QGraphicsSceneDragDropEvent*)));
+    dropReplace->setGeometry(10,0,85,45);
+
+    dropAttachLeft = new ObjectDropZone(this);
+    connect(dropAttachLeft, SIGNAL(ObjectDropped(QGraphicsSceneDragDropEvent*)),
+            this,SLOT(ObjectDropped(QGraphicsSceneDragDropEvent*)));
+    dropAttachLeft->setGeometry(-10,0,20,45);
+
+    dropAttachRight = new ObjectDropZone(this);
+    connect(dropAttachRight, SIGNAL(ObjectDropped(QGraphicsSceneDragDropEvent*)),
+            this,SLOT(ObjectDropped(QGraphicsSceneDragDropEvent*)));
+    dropAttachRight->setGeometry(95,0,20,45);
+
+    QPalette pal(palette());
+    pal.setColor(QPalette::Window, config->GetColor(ColorGroups::Object,Colors::HighlightBackground) );
+    dropReplace->setPalette( pal );
+    dropAttachLeft->setPalette( pal );
+    dropAttachRight->setPalette( pal );
 }
 
+void ConnectableObjectView::ObjectDropped(QGraphicsSceneDragDropEvent *event)
+{
+    int col=0;
+    if(sender()==dropAttachLeft) col=1;
+    if(sender()==dropReplace) col=2;
+    if(sender()==dropAttachRight) col=3;
+    event->setAccepted(model->dropMimeData(event->mimeData(), event->proposedAction(), 0, col, objIndex));
+}
+
+void ConnectableObjectView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
+{
+    if(groupId==ColorGroups::Object && colorId==Colors::HighlightBackground) {
+        QPalette pal(palette());
+        pal.setColor(QPalette::Window, color );
+        dropReplace->setPalette( pal );
+        dropAttachLeft->setPalette( pal );
+        dropAttachRight->setPalette( pal );
+        return;
+    }
+    ObjectView::UpdateColor(groupId,colorId,color);
+}
