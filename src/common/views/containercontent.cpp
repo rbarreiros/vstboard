@@ -20,6 +20,7 @@
 
 #include "containercontent.h"
 #include "objectview.h"
+#include "maincontainerview.h"
 
 #ifdef _MSC_VER
 #pragma warning( disable: 4100 )
@@ -27,9 +28,12 @@
 
 using namespace View;
 
-ContainerContent::ContainerContent(MainHost *myHost, QAbstractItemModel *model, QGraphicsItem * parent, Qt::WindowFlags wFlags ) :
+ContainerContent::ContainerContent(MainHost *myHost, QAbstractItemModel *model, MainContainerView * parent, Qt::WindowFlags wFlags ) :
     QGraphicsWidget(parent,wFlags),
-    model(model)
+    model(model),
+    containerView(parent),
+    rectAttachLeft(0),
+    rectAttachRight(0)
 {
     config = &myHost->mainWindow->viewConfig;
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
@@ -112,6 +116,96 @@ void ContainerContent::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
         return;
     }
     event->ignore();
+}
+
+void ContainerContent::dragMoveEvent( QGraphicsSceneDragDropEvent *event)
+{
+    if(!objIndex.isValid())
+        return;
+
+    QPointF pt = mapToScene(event->pos());
+    QSizeF attachZoneSize(20,45);
+    QModelIndex idx;
+    int i=0;
+
+    //remove attachLeft on mouseout
+    if(attachLeft.isValid()) {
+        QPointF p = attachLeft.data(UserRoles::position).toPointF();
+        p.rx()-=10;
+        QRectF attachZone(p,attachZoneSize);
+
+        if(!attachZone.contains(pt)) {
+            if(rectAttachLeft) {
+                delete rectAttachLeft;
+                rectAttachLeft = 0;
+            }
+            attachLeft=QModelIndex();
+        }
+    }
+
+    //remove attachRight on mouseout
+    if(attachRight.isValid()) {
+        QPointF p = attachRight.data(UserRoles::position).toPointF();
+        p.rx()+=105;
+        QRectF attachZone(p,attachZoneSize);
+
+        if(!attachZone.contains(pt)) {
+            if(rectAttachRight) {
+                delete rectAttachRight;
+                rectAttachRight = 0;
+            }
+            attachRight=QModelIndex();
+        }
+    }
+
+    //find new attach zones if needed
+    if(!attachLeft.isValid() || !attachRight.isValid()) {
+        while( (idx = objIndex.child(i,0)).isValid() ) {
+            if(idx.data(UserRoles::objInfo).isValid()) {
+                ObjectInfo info = idx.data(UserRoles::objInfo).value<ObjectInfo>();
+
+                if(info.nodeType == NodeType::object) {
+
+                    //check attach left
+                    if(!attachLeft.isValid()) {
+                        QPointF p = idx.data(UserRoles::position).toPointF();
+                        p.rx()-=10;
+                        QRectF attachZone(p,attachZoneSize);
+
+                        //new attachLeft
+                        if(attachZone.contains(pt)) {
+                            attachLeft=idx;
+                            if(rectAttachLeft) {
+                                delete rectAttachLeft;
+                                rectAttachLeft = 0;
+                            }
+                            rectAttachLeft = new QGraphicsRectItem(attachZone,parentItem(),scene());
+                            rectAttachLeft->setBrush(QColor(255,255,0,128));
+                        }
+                    }
+
+                    //check attach right
+                    if(!attachRight.isValid()) {
+                        QPointF p = idx.data(UserRoles::position).toPointF();
+                        p.rx()+=105;
+                        QRectF attachZone(p,attachZoneSize);
+
+                        //new attachRight
+                        if(attachZone.contains(pt)) {
+                            attachRight=idx;
+                            if(rectAttachRight) {
+                                delete rectAttachRight;
+                                rectAttachRight = 0;
+                            }
+                            rectAttachRight = new QGraphicsRectItem(attachZone,parentItem(),scene());
+                            rectAttachRight->setBrush(QColor(255,255,0,128));
+                        }
+                    }
+                }
+            }
+            ++i;
+        }
+    }
 }
 
 void ContainerContent::dragLeaveEvent( QGraphicsSceneDragDropEvent *event)

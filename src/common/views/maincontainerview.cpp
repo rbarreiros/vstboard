@@ -45,6 +45,14 @@ MainContainerView::~MainContainerView()
     }
 }
 
+void MainContainerView::OnDragMove(const QPointF &pt)
+{
+    debug2(<< "pt==")
+    foreach(QGraphicsItem *item, childItems()) {
+        debug2(<< item->pos() << pt)
+    }
+}
+
 QPointF MainContainerView::GetDropPos()
 {
     return mapFromScene( content->GetDropPos() );

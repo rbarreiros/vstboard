@@ -26,12 +26,12 @@
 
 class MainHost;
 namespace View {
-
+    class MainContainerView;
     class ContainerContent : public QGraphicsWidget
     {
     Q_OBJECT
     public:
-        explicit ContainerContent(MainHost *myHost, QAbstractItemModel *model, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
+        explicit ContainerContent(MainHost *myHost, QAbstractItemModel *model, MainContainerView * parent = 0, Qt::WindowFlags wFlags = 0);
         void SetModelIndex(QPersistentModelIndex index);
         QPointF GetDropPos();
         QWidget *myParking;
@@ -39,6 +39,7 @@ namespace View {
         ViewConfig *config;
     protected:
         void dragEnterEvent( QGraphicsSceneDragDropEvent *event);
+        void dragMoveEvent( QGraphicsSceneDragDropEvent * event);
         void dragLeaveEvent( QGraphicsSceneDragDropEvent *event);
         void dropEvent( QGraphicsSceneDragDropEvent *event);
 
@@ -49,6 +50,12 @@ namespace View {
         /// pointer to the MainHost
         MainHost *myHost;
 
+        MainContainerView *containerView;
+
+        QPersistentModelIndex attachLeft;
+        QPersistentModelIndex attachRight;
+        QGraphicsRectItem *rectAttachLeft;
+        QGraphicsRectItem *rectAttachRight;
     signals:
 
     public slots:
