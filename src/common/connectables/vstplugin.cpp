@@ -794,7 +794,7 @@ Pin* VstPlugin::CreatePin(const ConnectionInfo &info)
             }
             default : {
                 //if the plugin has a gui, the pins can be learned and the name can change
-                bool removeable = ((pEffect->flags & effFlagsHasEditor) == 0)?false:true;
+                bool removeable = (!pEffect || (pEffect->flags & effFlagsHasEditor) == 0)?false:true;
                 ParameterPin *pin=0;
                 if(closed) {
                     pin = new ParameterPinIn(this,info.pinNumber,0,"",true,removeable);

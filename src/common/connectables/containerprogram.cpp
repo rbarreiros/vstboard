@@ -101,6 +101,16 @@ void ContainerProgram::Remove(int prgId)
     }
 }
 
+bool ContainerProgram::PinExistAndVisible(const ConnectionInfo &info)
+{
+    Pin* pin=myHost->objFactory->GetPin(info);
+    if(!pin)
+        return false;
+    if(!pin->GetVisible())
+        return false;
+    return true;
+}
+
 void ContainerProgram::Load(int progId)
 {
     foreach(QSharedPointer<Object> objPtr, listObjects) {
@@ -114,8 +124,8 @@ void ContainerProgram::Load(int progId)
 
         //check if the pin exists,
         //if the object is in error mode, dummy pins will be created
-        if(myHost->objFactory->GetPin(cab->GetInfoOut()) &&
-           myHost->objFactory->GetPin(cab->GetInfoIn())) {
+        if(PinExistAndVisible(cab->GetInfoOut()) &&
+           PinExistAndVisible(cab->GetInfoIn())) {
             cab->AddToParentNode(container->GetCablesIndex());
             myHost->OnCableAdded(cab);
         } else {
@@ -263,9 +273,7 @@ bool ContainerProgram::AddCable(const ConnectionInfo &outputPin, const Connectio
 
     //check if the pin exists,
     //if the object is in error mode, dummy pins will be created
-    if(!myHost->objFactory->GetPin(outputPin))
-        return false;
-    if(!myHost->objFactory->GetPin(inputPin))
+    if(!PinExistAndVisible(inputPin) || !PinExistAndVisible(outputPin))
         return false;
 
     Cable *cab = new Cable(myHost,outputPin,inputPin);

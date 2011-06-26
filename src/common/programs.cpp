@@ -407,8 +407,6 @@ void Programs::ChangeProg(const QModelIndex &newPrg)
         if(currentGrp.isValid()) {
             model->itemFromIndex( currentGrp )->setBackground(Qt::transparent);
             model->itemFromIndex( currentGrp )->setData(0,UserRoles::type);
-        } else {
-            debug("Programs::ChangeProg old group not found")
         }
 
         currentGrp=newgrp;
@@ -428,8 +426,6 @@ void Programs::ChangeProg(const QModelIndex &newPrg)
     if(currentPrg.isValid()) {
         model->itemFromIndex(currentPrg)->setBackground(Qt::transparent);
         model->itemFromIndex(currentPrg)->setData(0,UserRoles::type);
-    } else {
-        debug("Programs::ChangeProg old prog not found")
     }
 
     model->itemFromIndex(newPrg)->setBackground(currentProgColor);

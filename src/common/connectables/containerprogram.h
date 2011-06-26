@@ -75,6 +75,7 @@ namespace Connectables {
 
     protected:
         bool CableExists(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
+        bool PinExistAndVisible(const ConnectionInfo &info);
 
         Container *container;
         bool dirty;

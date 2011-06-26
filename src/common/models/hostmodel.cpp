@@ -58,20 +58,6 @@ QMimeData * HostModel::mimeData ( const QModelIndexList & indexes ) const
 
     return QStandardItemModel::mimeData(indexes);
 }
-/*
-QStringList HostModel::mimeTypes () const
-{
-    QStringList list;
-    list << "text/uri-list"
-        << "application/x-audiointerface"
-        << "application/x-midiinterface"
-        << "application/x-tools"
-        << "application/x-pin"
-        <<  QLatin1String("application/x-qstandarditemmodeldatalist");
-
-    return list;
-}
-*/
 
 /*!
     Drop mime data on the model
@@ -407,8 +393,3 @@ bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int
 
     return QStandardItemModel::setData(index,value,role);
 }
-
-//bool HostModel::setItemData ( const QModelIndex & index, const QMap<int, QVariant> & roles )
-//{
-//    return true;
-//}

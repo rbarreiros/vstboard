@@ -25,6 +25,7 @@ namespace View {
         virtual void HighlightStart();
         virtual void HighlightStop();
         void SetParking(QWidget *park) {myParking=park;}
+        void UpdateHeight();
     };
 }
 #endif // OBJECTDROPZONE_H

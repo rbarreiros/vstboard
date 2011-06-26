@@ -95,3 +95,8 @@ void ObjectDropZone::HighlightStop()
 {
     setAutoFillBackground(false);
 }
+
+void ObjectDropZone::UpdateHeight()
+{
+    resize( size().width(), parentWidget()->size().height() );
+}

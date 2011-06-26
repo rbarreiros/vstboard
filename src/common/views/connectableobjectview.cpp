@@ -66,25 +66,31 @@ ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel
     layout->addItem(listParametersOut,2,1,Qt::AlignRight | Qt::AlignTop);
 
     dropReplace = new ObjectDropZone(this,parent->GetParking());
+    dropReplace->setGeometry(10,0,85, size().height());
     connect(parent,SIGNAL(ParkingChanged(QWidget*)),
             dropReplace,SLOT(SetParking(QWidget*)));
     connect(dropReplace, SIGNAL(ObjectDropped(QGraphicsSceneDragDropEvent*)),
             this,SLOT(ObjectDropped(QGraphicsSceneDragDropEvent*)));
-    dropReplace->setGeometry(10,0,85,45);
+    connect(this, SIGNAL(heightChanged()),
+            dropReplace, SLOT(UpdateHeight()));
 
     dropAttachLeft = new ObjectDropZone(this,parent->GetParking());
+    dropAttachLeft->setGeometry(-10,0,20, size().height());
     connect(parent,SIGNAL(ParkingChanged(QWidget*)),
             dropAttachLeft,SLOT(SetParking(QWidget*)));
     connect(dropAttachLeft, SIGNAL(ObjectDropped(QGraphicsSceneDragDropEvent*)),
             this,SLOT(ObjectDropped(QGraphicsSceneDragDropEvent*)));
-    dropAttachLeft->setGeometry(-10,0,20,45);
+    connect(this, SIGNAL(heightChanged()),
+            dropAttachLeft, SLOT(UpdateHeight()));
 
     dropAttachRight = new ObjectDropZone(this,parent->GetParking());
+    dropAttachRight->setGeometry(95,0,20, size().height());
     connect(parent,SIGNAL(ParkingChanged(QWidget*)),
             dropAttachLeft,SLOT(SetParking(QWidget*)));
     connect(dropAttachRight, SIGNAL(ObjectDropped(QGraphicsSceneDragDropEvent*)),
             this,SLOT(ObjectDropped(QGraphicsSceneDragDropEvent*)));
-    dropAttachRight->setGeometry(95,0,20,45);
+    connect(this, SIGNAL(heightChanged()),
+            dropAttachRight, SLOT(UpdateHeight()));
 
     QPalette pal(palette());
     pal.setColor(QPalette::Window, config->GetColor(ColorGroups::Object,Colors::HighlightBackground) );
