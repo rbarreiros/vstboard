@@ -46,7 +46,7 @@ ViewConfig::ViewConfig(QObject *parent) :
 //    colorsNames.insert( Colors::ToolTipText, tr("ToolTip Text") );
 //    colorsNames.insert( Colors::BrightText, tr("BrightText") );
 
-    AddColor(ColorGroups::Programs,Colors::HighlightBackground,QColor(0,255,0,255));
+    AddColor(ColorGroups::Programs,Colors::HighlightBackground,QColor(170,255,100,255));
 
     AddColor(ColorGroups::VstPlugin,Colors::Background,QColor(255,255,128,128));
 
@@ -67,7 +67,7 @@ ViewConfig::ViewConfig(QObject *parent) :
  
     AddColor(ColorGroups::Object,Colors::Background,QColor(120,160,185,128));
     AddColor(ColorGroups::Object,Colors::Text,QColor(0,0,0,255));
-    AddColor(ColorGroups::Object,Colors::HighlightBackground,QColor(255,255,128,60));
+    AddColor(ColorGroups::Object,Colors::HighlightBackground,QColor(255,255,0,127));
 
     AddColor(ColorGroups::Panel,Colors::Lines,QColor(0,0,0,150));
     AddColor(ColorGroups::Panel,Colors::Background,QColor(0,0,0,0));

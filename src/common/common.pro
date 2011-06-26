@@ -105,7 +105,8 @@ SOURCES += \
     renderer/node.cpp \
     views/listaudiodevicesview.cpp \
     views/scripteditor.cpp \
-    views/objectdropzone.cpp
+    views/objectdropzone.cpp \
+    views/gradientwidget.cpp
 
 HEADERS  += \
     globals.h \
@@ -184,7 +185,8 @@ HEADERS  += \
     renderer/node.h \
     views/listaudiodevicesview.h \
     views/scripteditor.h \
-    views/objectdropzone.h
+    views/objectdropzone.h \
+    views/gradientwidget.h
 
 FORMS += \
     views/configdialog.ui \
