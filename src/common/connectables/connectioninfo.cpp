@@ -69,7 +69,7 @@ ConnectionInfo::ConnectionInfo(const ConnectionInfo &c) {
   \param c the other pin
   \return true if it can connect
   */
-bool ConnectionInfo::CanConnectTo(const ConnectionInfo &c) {
+bool ConnectionInfo::CanConnectTo(const ConnectionInfo &c) const {
 
     //don't connect object to itself
     if(objId == c.objId)

@@ -52,7 +52,7 @@ ObjectView::ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsIte
     errorMessage(0),
     layout(0),
     model(model),
-    actDel(0),
+    actRemove(0),
     shrinkAsked(false),
     myHost(myHost),
     highlighted(false)
@@ -129,18 +129,37 @@ void ObjectView::SetModelIndex(QPersistentModelIndex index)
     }
 
     if(info.nodeType != NodeType::bridge) {
-        actDel = new QAction(QIcon(":/img16x16/delete.png"),tr("Delete"),this);
-        actDel->setShortcut( Qt::Key_Delete );
-        actDel->setShortcutContext(Qt::WidgetShortcut);
-        connect(actDel,SIGNAL(triggered()),
+        actRemoveBridge = new QAction(QIcon(":/img16x16/delete.png"),tr("Remove"),this);
+        actRemoveBridge->setShortcut( Qt::Key_Delete );
+        actRemoveBridge->setShortcutContext(Qt::WidgetShortcut);
+        actRemoveBridge->setStatusTip(tr("Removes the object"));
+        connect(actRemoveBridge,SIGNAL(triggered()),
+                this,SLOT(RemoveWithBridge()));
+        addAction(actRemoveBridge);
+
+        actRemove = new QAction(QIcon(":/img16x16/delete.png"),tr("Remove with cables"),this);
+        actRemove->setShortcut( Qt::CTRL + Qt::Key_Delete );
+        actRemove->setShortcutContext(Qt::WidgetShortcut);
+        actRemove->setStatusTip(tr("Removes the object and delete all the connected cables"));
+        connect(actRemove,SIGNAL(triggered()),
                 this,SLOT(close()));
-        addAction(actDel);
+        addAction(actRemove);
     }
 
     objIndex = index;
     if(titleText) {
         titleText->setText(index.data(Qt::DisplayRole).toString());
     }
+}
+
+void ObjectView::RemoveWithBridge()
+{
+    setActive(false);
+    static_cast<Connectables::Container*>(
+        myHost->objFactory->GetObj(objIndex.parent()).data()
+    )->UserParkWithBridge(
+        myHost->objFactory->GetObj(objIndex)
+    );
 }
 
 /*!
@@ -210,7 +229,6 @@ void ObjectView::closeEvent ( QCloseEvent * event )
         )->UserParkObject(
             myHost->objFactory->GetObj(objIndex)
         );
-
     event->ignore();
 }
 
@@ -224,6 +242,10 @@ void ObjectView::focusInEvent ( QFocusEvent * event )
         delete selectBorder;
     selectBorder=new QGraphicsRectItem( -2,-2, size().width()+4, size().height()+4 , this );
     QGraphicsWidget::focusInEvent(event);
+
+    if(actions().size()==0)
+        return;
+    myHost->mainWindow->addActions(actions());
 }
 
 /*!

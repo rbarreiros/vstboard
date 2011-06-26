@@ -408,8 +408,14 @@ void Container::UserParkObject(QSharedPointer<Object> objPtr)
 {
     ParkObject(objPtr);
     myHost->SetSolverUpdateNeeded();
-
     Updated();
+}
+
+void Container::UserParkWithBridge(QSharedPointer<Object> objPtr)
+{
+    if(currentProgram)
+        currentProgram->CreateBridgeOverObj(objPtr->GetIndex());
+    UserParkObject(objPtr);
 }
 
 /*!

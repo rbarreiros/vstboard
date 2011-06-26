@@ -99,8 +99,10 @@ namespace View {
         /// objects model index
         QPersistentModelIndex objIndex;
 
-        /// the delete action
-        QAction *actDel;
+        /// the remove action
+        QAction *actRemove;
+        /// the remove+bridge action
+        QAction *actRemoveBridge;
 
         /// true if a shrink is already in progress
         bool shrinkAsked;
@@ -115,6 +117,7 @@ namespace View {
         virtual void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
         virtual void HighlightStart() {}
         virtual void HighlightStop() {}
+        void RemoveWithBridge();
 
     friend class PinView;
     };

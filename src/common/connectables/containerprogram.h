@@ -56,6 +56,7 @@ namespace Connectables {
         void RemoveCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
         void RemoveCableFromPin(const ConnectionInfo &pin);
         void RemoveCableFromObj(int objId);
+        void CreateBridgeOverObj(int objId);
         void CopyCablesFromObj(int newObjId, int oldObjId);
         void MoveOutputCablesFromObj(int newObjId, int oldObjId);
         void MoveInputCablesFromObj(int newObjId, int oldObjId);

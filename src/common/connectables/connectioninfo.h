@@ -30,7 +30,7 @@ public:
     ConnectionInfo(MainHost *myHost,quint16 objId, PinType::Enum type, PinDirection::Enum direction, quint16 pinNumber, bool bridge, bool removeable=false);
     ConnectionInfo(const ConnectionInfo &c);
 
-    bool CanConnectTo(const ConnectionInfo &c);
+    bool CanConnectTo(const ConnectionInfo &c) const;
 
     QDataStream & toStream(QDataStream& out) const;
     QDataStream & fromStream(QDataStream& in);

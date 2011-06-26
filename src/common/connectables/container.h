@@ -118,6 +118,7 @@ namespace Connectables {
     public slots:
         void UserAddObject(QSharedPointer<Object> objPtr);
         void UserParkObject(QSharedPointer<Object> objPtr);
+        void UserParkWithBridge(QSharedPointer<Object> objPtr);
         void UserAddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
         void UserRemoveCableFromPin(const ConnectionInfo &pin);
 

@@ -258,6 +258,9 @@ bool ContainerProgram::AddCable(const ConnectionInfo &outputPin, const Connectio
     if(CableExists(outputPin,inputPin))
         return true;
 
+    if(!outputPin.CanConnectTo(inputPin))
+        return false;
+
     //check if the pin exists,
     //if the object is in error mode, dummy pins will be created
     if(!myHost->objFactory->GetPin(outputPin))
@@ -325,6 +328,52 @@ void ContainerProgram::RemoveCableFromObj(int objId)
         if(cab->GetInfoOut().objId==objId || cab->GetInfoIn().objId==objId ||
            cab->GetInfoOut().container==objId || cab->GetInfoIn().container==objId) {
             RemoveCable(cab);
+        }
+        --i;
+    }
+}
+
+void ContainerProgram::CreateBridgeOverObj(int objId)
+{
+    int i=listCables.size()-1;
+    while(i>=0) {
+        Cable *cab = listCables.at(i);
+        if(cab->GetInfoOut().objId==objId || cab->GetInfoIn().objId==objId ||
+           cab->GetInfoOut().container==objId || cab->GetInfoIn().container==objId) {
+
+            //for all output cables
+            if(cab->GetInfoOut().objId==objId && cab->GetInfoOut().type!=PinType::Parameter ) {
+                int j=listCables.size()-1;
+                while(j>=0) {
+                    Cable *otherCab = listCables.at(j);
+                    ConnectionInfo otherPin( cab->GetInfoOut() );
+                    otherPin.direction=PinDirection::Input;
+
+                    //find corresponding input cables
+                    if(otherCab->GetInfoIn()==otherPin) {
+                        //create a bridge
+                        AddCable(otherCab->GetInfoOut(), cab->GetInfoIn());
+                    }
+                    --j;
+                }
+            }
+
+            //for all input cables
+            if(cab->GetInfoIn().objId==objId && cab->GetInfoIn().type!=PinType::Parameter ) {
+                int j=listCables.size()-1;
+                while(j>=0) {
+                    Cable *otherCab = listCables.at(j);
+                    ConnectionInfo otherPin( cab->GetInfoOut() );
+                    otherPin.direction=PinDirection::Output;
+
+                    //find corresponding output cables
+                    if(otherCab->GetInfoOut()==otherPin) {
+                        //create a bridge
+                        AddCable(cab->GetInfoOut(), otherCab->GetInfoIn() );
+                    }
+                    --j;
+                }
+            }
         }
         --i;
     }
