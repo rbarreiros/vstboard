@@ -675,22 +675,18 @@ void MainHost::Render(unsigned long samples)
     emit Rendered();
 }
 
-void MainHost::OnCableAdded(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
+void MainHost::OnCableAdded(Connectables::Cable *cab)
 {
     mutexListCables->lock();
-    workingListOfCables.insert(outputPin,inputPin);
+    workingListOfCables.insert(cab->GetInfoOut(),cab->GetInfoIn());
     mutexListCables->unlock();
-
-//    SetSolverUpdateNeeded();
 }
 
-void MainHost::OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
+void MainHost::OnCableRemoved(Connectables::Cable *cab)
 {
     mutexListCables->lock();
-    workingListOfCables.remove(outputPin,inputPin);
+    workingListOfCables.remove(cab->GetInfoOut(),cab->GetInfoIn());
     mutexListCables->unlock();
-
-//    SetSolverUpdateNeeded();
 }
 
 void MainHost::SetTimeInfo(const VstTimeInfo *info)

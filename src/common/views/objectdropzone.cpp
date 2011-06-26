@@ -65,6 +65,11 @@ void ObjectDropZone::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
 
 void ObjectDropZone::dragMoveEvent( QGraphicsSceneDragDropEvent *event)
 {
+    if(event->modifiers() & Qt::ControlModifier)
+        event->setDropAction(Qt::CopyAction);
+    else
+        event->setDropAction(Qt::MoveAction);
+
     QGraphicsWidget::dragMoveEvent(event);
 }
 

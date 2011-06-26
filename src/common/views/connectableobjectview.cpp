@@ -96,8 +96,8 @@ ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel
 void ConnectableObjectView::ObjectDropped(QGraphicsSceneDragDropEvent *event)
 {
     QPointF dropPos(0,0);
-
     int col=0;
+
     if(sender()==dropAttachLeft) {
         col=1;
         dropPos.rx()-=(geometry().width()+10);
@@ -113,7 +113,7 @@ void ConnectableObjectView::ObjectDropped(QGraphicsSceneDragDropEvent *event)
     MainContainerView *cnt = static_cast<MainContainerView*>(parentItem());
     if(cnt)
         cnt->SetDropPos( mapToScene(dropPos) );
-    event->setAccepted(model->dropMimeData(event->mimeData(), event->proposedAction(), 0, col, objIndex));
+    event->setAccepted(model->dropMimeData(event->mimeData(), event->dropAction(), 0, col, objIndex));
 }
 
 void ConnectableObjectView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)

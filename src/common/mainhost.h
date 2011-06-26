@@ -65,6 +65,9 @@ public:
     void OptimizeRenderer() { if(renderer) renderer->Optimize(); }
     Renderer * GetRenderer() { return renderer; }
 
+    void OnCableAdded(Connectables::Cable *cab);
+    void OnCableRemoved(Connectables::Cable *cab);
+
     QSharedPointer<Connectables::MainContainer> mainContainer;
     QSharedPointer<Connectables::MainContainer> hostContainer;
     QSharedPointer<Connectables::MainContainer> projectContainer;
@@ -150,8 +153,6 @@ signals:
 
 public slots:
     void SetSolverUpdateNeeded(bool need=true);
-    void OnCableAdded(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
-    void OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
     void SetTempo(int tempo=120, int sign1=4, int sign2=4);
 //    void OnNewRenderingOrder(orderedNodes *renderLines);
     virtual void Render(unsigned long samples=0);

@@ -74,8 +74,8 @@ QStringList HostModel::mimeTypes () const
 */
 
 /*!
-  Drop mime data on the model
-  if the parent is a connectable object, the column can be set to 1,2 or 3 to autoconnect the new object
+    Drop mime data on the model
+    \param column autoconnect position : 1=before,2=replace,3=after
   */
 bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, int row, int column, const QModelIndex & parent )
 {
@@ -292,6 +292,9 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
 
             //connect left
             if(column==1) {
+                if(action==Qt::MoveAction) {
+                    targetContainer->MoveInputCablesFromObj(objPtr, senderObj);
+                }
                 targetContainer->ConnectObjects(objPtr, senderObj, false);
             }
             //replace object
@@ -302,6 +305,9 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
             }
             //connect right
             if(column==3) {
+                if(action==Qt::MoveAction) {
+                    targetContainer->MoveOutputCablesFromObj(objPtr, senderObj);
+                }
                 targetContainer->ConnectObjects(senderObj, objPtr, false);
             }
         }

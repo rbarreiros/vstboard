@@ -50,12 +50,15 @@ namespace Connectables {
         void RemoveObject(QSharedPointer<Object> objPtr);
         void ReplaceObject(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> replacedObjPtr);
 
-        void AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin, bool hidden=false);
+        bool AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin, bool hidden=false);
+        void RemoveCable(Cable *cab);
         void RemoveCable(const QModelIndex & index);
         void RemoveCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
         void RemoveCableFromPin(const ConnectionInfo &pin);
         void RemoveCableFromObj(int objId);
         void CopyCablesFromObj(int newObjId, int oldObjId);
+        void MoveOutputCablesFromObj(int newObjId, int oldObjId);
+        void MoveInputCablesFromObj(int newObjId, int oldObjId);
 
         bool IsDirty();
 

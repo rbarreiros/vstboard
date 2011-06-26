@@ -450,6 +450,20 @@ void Container::CopyCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPoint
     currentProgram->CopyCablesFromObj( newObjPtr->GetIndex(), ObjPtr->GetIndex() );
 }
 
+void Container::MoveOutputCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr)
+{
+    if(!currentProgram)
+        return;
+    currentProgram->MoveOutputCablesFromObj( newObjPtr->GetIndex(), ObjPtr->GetIndex() );
+}
+
+void Container::MoveInputCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr)
+{
+    if(!currentProgram)
+        return;
+    currentProgram->MoveInputCablesFromObj( newObjPtr->GetIndex(), ObjPtr->GetIndex() );
+}
+
 /*!
   Called by ContainerProgam, move a parked object to the panel
   \param objPtr shared pointer to the object
