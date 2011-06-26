@@ -624,7 +624,8 @@ void MainHost::SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum ms
 
     hashCables::const_iterator i = workingListOfCables.constFind(senderPin);
     while (i != workingListOfCables.constEnd()  && i.key() == senderPin) {
-        Connectables::Pin *pin = objFactory->GetPin(i.value());
+        const ConnectionInfo &destPin = i.value();
+        Connectables::Pin *pin = objFactory->GetPin(destPin);
         if(!pin) {
             debug("MainHost::SendMsg : unknown pin")
             return;
@@ -759,8 +760,10 @@ void MainHost::LoadSetupFile(QString filename)
     if(SetupFile::LoadFromFile(this,filename)) {
         ConfigDialog::AddRecentSetupFile(filename,this);
         currentSetupFile = filename;
-        emit currentFileChanged();
+    } else {
+        ConfigDialog::RemoveRecentSetupFile(filename,this);
     }
+    emit currentFileChanged();
 }
 
 void MainHost::LoadProjectFile(QString filename)
@@ -771,8 +774,10 @@ void MainHost::LoadProjectFile(QString filename)
     if(ProjectFile::LoadFromFile(this,filename)) {
         ConfigDialog::AddRecentProjectFile(filename,this);
         currentProjectFile = filename;
-        emit currentFileChanged();
+    } else {
+        ConfigDialog::RemoveRecentProjectFile(filename,this);
     }
+    emit currentFileChanged();
 }
 
 void MainHost::ClearSetup()

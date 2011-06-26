@@ -21,7 +21,6 @@
 #include "vstaudiodeviceout.h"
 #include "globals.h"
 #include "audiobuffer.h"
-#include "audiobufferd.h"
 #include "mainhostvst.h"
 #include "../vst.h"
 
@@ -48,11 +47,7 @@ bool VstAudioDeviceOut::Close()
 void VstAudioDeviceOut::SetBufferSize(unsigned long size)
 {
     foreach(Pin *pin, listAudioPinIn->listPins) {
-        if(doublePrecision) {
-            static_cast<AudioPinIn*>(pin)->GetBufferD()->SetSize(size);
-        }
-        //the host can choose to use processReplacing even if we use double precision
-        static_cast<AudioPinIn*>(pin)->GetBuffer()->SetSize(size);
+        static_cast<AudioPin*>(pin)->GetBuffer()->SetSize(size);
     }
 }
 
@@ -70,15 +65,8 @@ bool VstAudioDeviceOut::Open()
 void VstAudioDeviceOut::GetBuffers(float **buf, int &cpt, int sampleFrames)
 {
     foreach(Pin *pin, listAudioPinIn->listPins) {
-        AudioBuffer *abuf= static_cast<AudioPinIn*>(pin)->GetBuffer();
-        AudioBufferD *abufD= static_cast<AudioPinIn*>(pin)->GetBufferD();
-
-        if(doublePrecision) {
-            abuf->AddToStack(abufD);
-            abufD->ConsumeStack();
-            abufD->ResetStackCounter();
-        }
-        memcpy(buf[cpt], abuf->ConsumeStack(), sampleFrames*sizeof(float));
+        AudioBuffer *abuf= static_cast<AudioPin*>(pin)->GetBuffer();
+        abuf->DumpToBuffer(buf[cpt],sampleFrames);
         abuf->ResetStackCounter();
         cpt++;
     }
@@ -87,16 +75,9 @@ void VstAudioDeviceOut::GetBuffers(float **buf, int &cpt, int sampleFrames)
 void VstAudioDeviceOut::GetBuffersD(double **buf, int &cpt, int sampleFrames)
 {
     foreach(Pin *pin, listAudioPinIn->listPins) {
-        AudioBuffer *abuf= static_cast<AudioPinIn*>(pin)->GetBuffer();
-        AudioBufferD *abufD= static_cast<AudioPinIn*>(pin)->GetBufferD();
-
-        if(!doublePrecision) {
-            abufD->AddToStack(abuf);
-            abufD->ConsumeStack();
-            abuf->ResetStackCounter();
-        }
-        memcpy(buf[cpt], abufD->ConsumeStack(), sampleFrames*sizeof(double));
-        abufD->ResetStackCounter();
+        AudioBuffer *abuf= static_cast<AudioPin*>(pin)->GetBuffer();
+        abuf->DumpToBuffer(buf[cpt],sampleFrames);
+        abuf->ResetStackCounter();
         cpt++;
     }
 }

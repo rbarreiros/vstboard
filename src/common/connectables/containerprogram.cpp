@@ -103,6 +103,9 @@ void ContainerProgram::Remove(int prgId)
 
 bool ContainerProgram::PinExistAndVisible(const ConnectionInfo &info)
 {
+    if(info.type==PinType::Bridge)
+        return true;
+
     Pin* pin=myHost->objFactory->GetPin(info);
     if(!pin)
         return false;

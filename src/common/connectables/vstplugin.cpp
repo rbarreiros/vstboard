@@ -180,7 +180,8 @@ void VstPlugin::Render()
 
             int cpt=0;
             foreach(Pin* pin,listAudioPinOut->listPins) {
-                tmpBufOut[cpt] = static_cast<AudioPinOut*>(pin)->GetBufferD()->GetPointer(true);
+                AudioPin *audioPin = static_cast<AudioPin*>(pin);
+                tmpBufOut[cpt] = (double*)audioPin->GetBuffer()->GetPointer(true);
                 cpt++;
             }
 
@@ -193,7 +194,7 @@ void VstPlugin::Render()
 
                 cpt=0;
                 foreach(Pin* pin,listAudioPinIn->listPins) {
-                    tmpBufIn[cpt] = static_cast<AudioPinOut*>(pin)->GetBufferD()->ConsumeStack();
+                    tmpBufIn[cpt] = (double*)static_cast<AudioPin*>(pin)->GetBuffer()->ConsumeStack();
                     cpt++;
                 }
             }
@@ -215,7 +216,8 @@ void VstPlugin::Render()
 
         int cpt=0;
         foreach(Pin* pin,listAudioPinOut->listPins) {
-            tmpBufOut[cpt] = static_cast<AudioPinOut*>(pin)->GetBuffer()->GetPointer(true);
+            AudioPin *audioPin = static_cast<AudioPin*>(pin);
+            tmpBufOut[cpt] = (float*)audioPin->GetBuffer()->GetPointer(true);
             cpt++;
         }
 
@@ -228,7 +230,7 @@ void VstPlugin::Render()
 
             cpt=0;
             foreach(Pin* pin,listAudioPinIn->listPins) {
-                tmpBufIn[cpt] = static_cast<AudioPinOut*>(pin)->GetBuffer()->ConsumeStack();
+                tmpBufIn[cpt] = (float*)static_cast<AudioPin*>(pin)->GetBuffer()->ConsumeStack();
                 cpt++;
             }
         }
@@ -260,12 +262,8 @@ void VstPlugin::Render()
     //send result
     //=========================
     foreach(Pin* pin,listAudioPinOut->listPins) {
-        if(doublePrecision) {
-            static_cast<AudioPinOut*>(pin)->GetBufferD()->ConsumeStack();
-        } else {
-            static_cast<AudioPinOut*>(pin)->GetBuffer()->ConsumeStack();
-        }
-        static_cast<AudioPinOut*>(pin)->SendAudioBuffer();
+        static_cast<AudioPin*>(pin)->GetBuffer()->ConsumeStack();
+        static_cast<AudioPin*>(pin)->SendAudioBuffer();
     }
 
     EffIdle();
@@ -313,6 +311,9 @@ bool VstPlugin::Open()
         bufferSize = myHost->GetBufferSize();
         sampleRate = myHost->GetSampleRate();
 
+        if(!(pEffect->flags & effFlagsCanDoubleReplacing))
+            doublePrecision=false;
+
         listAudioPinIn->ChangeNumberOfPins(pEffect->numInputs);
         listAudioPinOut->ChangeNumberOfPins(pEffect->numOutputs);
 
@@ -325,8 +326,6 @@ bool VstPlugin::Open()
         //long canSndMidiEvnt = pEffect->EffCanDo("sendVstMidiEvent");
         bWantMidi = (EffCanDo("receiveVstMidiEvent") == 1);
 
-        if(!(pEffect->flags & effFlagsCanDoubleReplacing))
-            doublePrecision=false;
 
      //   long midiPrgNames = EffCanDo("midiProgramNames");
         VstPinProperties pinProp;

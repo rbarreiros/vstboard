@@ -93,11 +93,11 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     listVstBanksModel = new QFileSystemModel(this);
     //listVstBanksModel->setReadOnly(true);
     listVstBanksModel->setResolveSymlinks(true);
-    QStringList bankFilter;
-    bankFilter << "*.fxb";
-    bankFilter << "*.fxp";
-    listVstBanksModel->setNameFilters(bankFilter);
-    listVstBanksModel->setNameFilterDisables(false);
+//    QStringList bankFilter;
+//    bankFilter << "*.fxb";
+//    bankFilter << "*.fxp";
+//    listVstBanksModel->setNameFilters(bankFilter);
+//    listVstBanksModel->setNameFilterDisables(false);
     listVstBanksModel->setRootPath(ConfigDialog::defaultBankPath(myHost));
     ui->BankBrowser->setModel(listVstBanksModel);
 #endif

@@ -23,8 +23,6 @@
 #include "connectables/audiodevicein.h"
 #include "connectables/audiodeviceout.h"
 #include "globals.h"
-#include "audiobuffer.h"
-#include "audiobufferd.h"
 #include "renderer/renderer.h"
 #include "mainhosthost.h"
 #include "audiodevices.h"
@@ -639,7 +637,8 @@ bool AudioDevice::RingBuffersToDevice( void *outputBuffer, unsigned long framesP
             //empty the circular buffer, in case we reopen this device
             buf->Clear();
             //send a blank buffer to the device
-            memcpy(((float **) outputBuffer)[cpt], AudioBuffer::blankBuffer, sizeof(float)*framesPerBuffer );
+            ZeroMemory( outputBuffer, sizeof(float)*framesPerBuffer );
+//            memcpy(((float **) outputBuffer)[cpt], AudioBuffer::blankBuffer, sizeof(float)*framesPerBuffer );
             cpt++;
         }
         return true;

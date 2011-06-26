@@ -82,8 +82,10 @@ void ObjectDropZone::dragLeaveEvent( QGraphicsSceneDragDropEvent *event)
 void ObjectDropZone::dropEvent( QGraphicsSceneDragDropEvent *event)
 {
     HighlightStop();
-    QGraphicsWidget::dropEvent(event);
     emit(ObjectDropped(event));
+    //reste to copy : we don't really want a moveaction
+    event->setDropAction(Qt::CopyAction);
+    QGraphicsWidget::dropEvent(event);
 }
 
 void ObjectDropZone::HighlightStart()

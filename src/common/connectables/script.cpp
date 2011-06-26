@@ -138,11 +138,11 @@ void Script::Render()
     mutexScript.lock();
 
     foreach(Pin *pin, listAudioPinIn->listPins) {
-        static_cast<AudioPinIn*>(pin)->GetBuffer()->ConsumeStack();
-        static_cast<AudioPinIn*>(pin)->NewRenderLoop();
+        static_cast<AudioPin*>(pin)->GetBuffer()->ConsumeStack();
+        static_cast<AudioPin*>(pin)->NewRenderLoop();
     }
     foreach(Pin *pin, listAudioPinOut->listPins) {
-        static_cast<AudioPinOut*>(pin)->NewRenderLoop();
+        static_cast<AudioPin*>(pin)->NewRenderLoop();
     }
 
     QScriptValue result = renderScript.call(objScript, QScriptValueList() << scriptThisObj);
@@ -161,8 +161,8 @@ void Script::Render()
     }
 
     foreach(Pin *pin, listAudioPinOut->listPins) {
-        static_cast<AudioPinOut*>(pin)->GetBuffer()->ConsumeStack();
-        static_cast<AudioPinOut*>(pin)->SendAudioBuffer();
+        static_cast<AudioPin*>(pin)->GetBuffer()->ConsumeStack();
+        static_cast<AudioPin*>(pin)->SendAudioBuffer();
     }
 
     mutexScript.unlock();

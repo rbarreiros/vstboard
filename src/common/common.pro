@@ -35,8 +35,6 @@ SOURCES += \
     views/connectablepinview.cpp \
     connectables/midipinin.cpp \
     connectables/midipinout.cpp \
-    connectables/audiopinout.cpp \
-    connectables/audiopinin.cpp \
     views/objectview.cpp \
     views/pinview.cpp \
     connectables/objectprogram.cpp \
@@ -88,7 +86,6 @@ SOURCES += \
     views/configdialog.cpp \
     views/maingraphicsview.cpp \
     connectables/hostcontroller.cpp \
-    audiobufferd.cpp \
     connectables/script.cpp \
     views/splash.cpp \
     connectables/audiopin.cpp \
@@ -115,8 +112,6 @@ HEADERS  += \
     connectables/miditoautomation.h \
     connectables/hostcontroller.h \
     connectables/midipinout.h \
-    connectables/audiopinout.h \
-    connectables/audiopinin.h \
     views/configdialog.h \
     views/objectview.h \
     views/pinview.h \
@@ -168,7 +163,6 @@ HEADERS  += \
     views/cursorview.h \
     mainwindow.h \
     views/maingraphicsview.h \
-    audiobufferd.h \
     connectables/script.h \
     views/splash.h \
     connectables/audiopin.h \

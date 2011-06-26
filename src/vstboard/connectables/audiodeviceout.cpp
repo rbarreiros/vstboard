@@ -102,21 +102,14 @@ bool AudioDeviceOut::Open()
 }
 
 void AudioDeviceOut::SetRingBufferFromPins(QList<CircularBuffer*>listCircularBuffers) {
-    if(doublePrecision) {
-        int cpt=0;
-        foreach(CircularBuffer *buf, listCircularBuffers) {
-            AudioBufferD *pinBuf = listAudioPinIn->GetBufferD(cpt);
-            cpt++;
-            buf->Put( pinBuf->ConsumeStack(), pinBuf->GetSize() );
-            pinBuf->ResetStackCounter();
-        }
-    } else {
-        int cpt=0;
-        foreach(CircularBuffer *buf, listCircularBuffers) {
-            AudioBuffer *pinBuf = listAudioPinIn->GetBuffer(cpt);
-            cpt++;
-            buf->Put( pinBuf->ConsumeStack(), pinBuf->GetSize() );
-            pinBuf->ResetStackCounter();
-        }
+    int cpt=0;
+    foreach(CircularBuffer *buf, listCircularBuffers) {
+        AudioBuffer *pinBuf = listAudioPinIn->GetBuffer(cpt);
+        cpt++;
+        if(pinBuf->GetDoublePrecision())
+            buf->Put( (double*)pinBuf->ConsumeStack(), pinBuf->GetSize() );
+        else
+            buf->Put( (float*)pinBuf->ConsumeStack(), pinBuf->GetSize() );
+        pinBuf->ResetStackCounter();
     }
 }

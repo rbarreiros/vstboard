@@ -165,7 +165,6 @@ namespace PinMessage {
     enum Enum {
         ND,
         AudioBuffer,
-        AudioBufferD,
         MidiMsg,
         ParameterValue
     };

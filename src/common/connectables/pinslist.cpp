@@ -21,8 +21,7 @@
 #include "pinslist.h"
 #include "pin.h"
 #include "audiobuffer.h"
-#include "audiopinin.h"
-#include "audiopinout.h"
+#include "audiopin.h"
 #include "midipinin.h"
 #include "midipinout.h"
 #include "bridgepinin.h"
@@ -111,19 +110,6 @@ AudioBuffer *PinsList::GetBuffer(int pinNumber)
     }
 
     return static_cast<AudioPin*>(listPins.value(pinNumber))->GetBuffer();
-}
-
-AudioBufferD *PinsList::GetBufferD(int pinNumber)
-{
-    if(connInfo.type != PinType::Audio)
-        return 0;
-
-    if(!listPins.contains(pinNumber)) {
-        debug2(<<"PinsList::GetBuffer"<< pinNumber <<"not found")
-        return 0;
-    }
-
-    return static_cast<AudioPin*>(listPins.value(pinNumber))->GetBufferD();
 }
 
 void PinsList::ConnectAllTo(Container* container, PinsList *other, bool hidden)

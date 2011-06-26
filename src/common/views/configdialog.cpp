@@ -345,6 +345,20 @@ void ConfigDialog::AddRecentProjectFile(const QString &file,MainHost *myHost)
     myHost->SetSetting("lastProjectFile", file);
 }
 
+void ConfigDialog::RemoveRecentSetupFile(const QString &file,MainHost *myHost)
+{
+    QStringList lstFiles = myHost->GetSetting("recentSetupFiles").toStringList();
+    lstFiles.removeAll(file);
+    myHost->SetSetting("recentSetupFiles",lstFiles);
+}
+
+void ConfigDialog::RemoveRecentProjectFile(const QString &file,MainHost *myHost)
+{
+    QStringList lstFiles = myHost->GetSetting("recentProjectFiles").toStringList();
+    lstFiles.removeAll(file);
+    myHost->SetSetting("recentProjectFiles",lstFiles);
+}
+
 void ConfigDialog::accept()
 {
     bool needRestart=false;

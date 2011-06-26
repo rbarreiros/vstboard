@@ -557,10 +557,10 @@ void Object::CopyStatusTo(QSharedPointer<Object>objPtr)
 void Object::SetBufferSize(unsigned long size)
 {
     foreach(Pin *pin, listAudioPinIn->listPins) {
-        static_cast<AudioPinIn*>(pin)->SetBufferSize(size);
+        static_cast<AudioPin*>(pin)->SetBufferSize(size);
     }
     foreach(Pin *pin, listAudioPinOut->listPins) {
-        static_cast<AudioPinOut*>(pin)->SetBufferSize(size);
+        static_cast<AudioPin*>(pin)->SetBufferSize(size);
     }
 }
 
@@ -595,7 +595,7 @@ Pin* Object::CreatePin(const ConnectionInfo &info)
         case PinDirection::Input :
             switch(info.type) {
                 case PinType::Audio : {
-                    return new AudioPinIn(this,info.pinNumber,myHost->GetBufferSize(),doublePrecision);
+                    return new AudioPin(this,info.direction,info.pinNumber,myHost->GetBufferSize(),doublePrecision);
                 }
 
                 case PinType::Midi : {
@@ -614,7 +614,7 @@ Pin* Object::CreatePin(const ConnectionInfo &info)
         case PinDirection::Output :
             switch(info.type) {
                 case PinType::Audio : {
-                    return new AudioPinOut(this,info.pinNumber,myHost->GetBufferSize(),doublePrecision);
+                    return new AudioPin(this,info.direction,info.pinNumber,myHost->GetBufferSize(),doublePrecision);
                 }
 
                 case PinType::Midi : {

@@ -218,6 +218,11 @@ void Pin::updateView()
         return;
     }
 
+    if(!displayedText.isEmpty()) {
+        parent->getHost()->GetModel()->setData(modelIndex, displayedText, Qt::DisplayRole);
+        displayedText="";
+    }
+
     float newVu = GetValue();
     if(!valueChanged)
         return;
@@ -225,6 +230,6 @@ void Pin::updateView()
     valueChanged=false;
 
     parent->getHost()->GetModel()->setData(modelIndex, newVu, UserRoles::value);
-    if(!displayedText.isEmpty()) parent->getHost()->GetModel()->setData(modelIndex, displayedText, Qt::DisplayRole);
+
 
 }
