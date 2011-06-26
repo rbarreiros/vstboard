@@ -19,7 +19,6 @@
 **************************************************************************/
 
 #include "pinview.h"
-#include "connectableobjectview.h"
 #include "cableview.h"
 #include "../connectables/pin.h"
 #include "../connectables/objectfactory.h"
@@ -40,15 +39,15 @@ CableView *PinView::currentLine = 0;
   \param pinInfo description of the pin
   \todo the model parameter can be removed
   */
-PinView::PinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo) :
-        QGraphicsWidget(parent),
-        outline(0),
-        highlight(0),
-        connectInfo(pinInfo),
-        model(model),
-        pinAngle(angle)
+PinView::PinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo, ViewConfig *config) :
+    QGraphicsWidget(parent),
+    outline(0),
+    highlight(0),
+    connectInfo(pinInfo),
+    model(model),
+    pinAngle(angle),
+    config(config)
 {
-    config = static_cast<ObjectView*>(parentWidget()->parentWidget())->config;
     setAcceptDrops(true);
     setCursor(Qt::PointingHandCursor);
     connect( config, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)) ,

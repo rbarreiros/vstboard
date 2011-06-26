@@ -35,6 +35,7 @@ namespace View {
         explicit ContainerContent(MainHost *myHost, QAbstractItemModel *model, MainContainerView * parent = 0);
         void SetModelIndex(QPersistentModelIndex index);
         QPointF GetDropPos();
+        void SetDropPos(const QPointF &pt);
 
         ViewConfig *config;
 

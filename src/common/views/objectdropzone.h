@@ -8,8 +8,8 @@ namespace View {
     {
         Q_OBJECT
     public:
-        explicit ObjectDropZone(QGraphicsItem *parent = 0);
-        void SetParking(QWidget *park) {myParking=park;}
+        explicit ObjectDropZone(QGraphicsItem *parent = 0, QWidget *parking=0);
+        QWidget *GetParking() {return myParking;}
 
     protected:
         void dragEnterEvent( QGraphicsSceneDragDropEvent *event);
@@ -24,6 +24,7 @@ namespace View {
     public slots:
         virtual void HighlightStart();
         virtual void HighlightStop();
+        void SetParking(QWidget *park) {myParking=park;}
     };
 }
 #endif // OBJECTDROPZONE_H

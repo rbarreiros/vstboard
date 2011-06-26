@@ -64,6 +64,11 @@ QPointF ContainerContent::GetDropPos()
     return p;
 }
 
+void ContainerContent::SetDropPos(const QPointF &pt)
+{
+    dropPos=pt;
+}
+
 void ContainerContent::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
 {
     //update connecting cable position
@@ -107,7 +112,7 @@ void ContainerContent::dragLeaveEvent( QGraphicsSceneDragDropEvent *event)
 void ContainerContent::dropEvent( QGraphicsSceneDragDropEvent *event)
 {
     ObjectDropZone::dropEvent(event);
-    dropPos = mapToScene(event->pos());
+    dropPos = event->scenePos();
     event->setAccepted(model->dropMimeData(event->mimeData(), event->proposedAction(), 0, 0, objIndex));
 }
 

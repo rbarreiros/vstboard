@@ -23,8 +23,8 @@
 
 using namespace View;
 
-ConnectablePinView::ConnectablePinView(float angle, QAbstractItemModel *model, QGraphicsItem * parent, const ConnectionInfo &pinInfo) :
-       PinView(angle,model,parent,pinInfo),
+ConnectablePinView::ConnectablePinView(float angle, QAbstractItemModel *model, QGraphicsItem * parent, const ConnectionInfo &pinInfo, ViewConfig *config) :
+       PinView(angle,model,parent,pinInfo,config),
        value(0),
        isParameter(false)
 {

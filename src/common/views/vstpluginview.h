@@ -8,7 +8,7 @@ namespace View {
     {
     Q_OBJECT
     public:
-        VstPluginView(MainHost *myHost,QAbstractItemModel *model,QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
+        VstPluginView(MainHost *myHost,QAbstractItemModel *model,MainContainerView * parent = 0, Qt::WindowFlags wFlags = 0);
         void SetModelIndex(QPersistentModelIndex index);
         void UpdateModelIndex();
 

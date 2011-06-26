@@ -37,14 +37,13 @@ namespace Connectables {
 
 namespace View {
     class CableView;
-    class ConnectableObjectView;
     class PinView : public QGraphicsWidget
     {
     Q_OBJECT
 
     public:
 
-        explicit PinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo);
+        explicit PinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo, ViewConfig *config);
         const ConnectionInfo GetConnectionInfo() const {return connectInfo;}
         void AddCable(CableView *cable);
         void RemoveCable(CableView *cable);

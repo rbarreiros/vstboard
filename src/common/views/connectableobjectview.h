@@ -24,6 +24,7 @@
 #include "objectview.h"
 #include "cableview.h"
 #include "objectdropzone.h"
+#include "maincontainerview.h"
 
 class MainHost;
 namespace View {
@@ -32,7 +33,7 @@ namespace View {
     {
     Q_OBJECT
     public:
-        ConnectableObjectView(MainHost *myHost,QAbstractItemModel *model,QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
+        ConnectableObjectView(MainHost *myHost,QAbstractItemModel *model,MainContainerView * parent = 0, Qt::WindowFlags wFlags = 0);
 
     protected:
 //        WId backOri;

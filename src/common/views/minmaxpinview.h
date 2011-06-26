@@ -29,7 +29,7 @@ namespace View {
     {
 
     public:
-        MinMaxPinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo);
+        MinMaxPinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo, ViewConfig *config);
         void SetLimitModelIndex(ObjType::Enum type, QPersistentModelIndex index);
         void UpdateLimitModelIndex(const QModelIndex &index);
         void UpdateModelIndex(const QModelIndex &index);

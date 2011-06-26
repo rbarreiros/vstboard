@@ -2,7 +2,7 @@
 
 using namespace View;
 
-VstPluginView::VstPluginView(MainHost *myHost,QAbstractItemModel *model,QGraphicsItem * parent, Qt::WindowFlags wFlags) :
+VstPluginView::VstPluginView(MainHost *myHost,QAbstractItemModel *model,MainContainerView * parent, Qt::WindowFlags wFlags) :
     ConnectableObjectView(myHost,model,parent,wFlags)
 {
     setObjectName("vstPluginView");

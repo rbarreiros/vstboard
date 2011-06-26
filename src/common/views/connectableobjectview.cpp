@@ -30,7 +30,7 @@
 
 using namespace View;
 
-ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel *model,QGraphicsItem * parent, Qt::WindowFlags wFlags ) :
+ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel *model,MainContainerView * parent, Qt::WindowFlags wFlags ) :
     ObjectView(myHost,model,parent,wFlags),
     dropReplace(0),
     dropAttachLeft(0),
@@ -65,17 +65,23 @@ ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel
     layout->addItem(listParametersIn,2,0,Qt::AlignLeft | Qt::AlignTop);
     layout->addItem(listParametersOut,2,1,Qt::AlignRight | Qt::AlignTop);
 
-    dropReplace = new ObjectDropZone(this);
+    dropReplace = new ObjectDropZone(this,parent->GetParking());
+    connect(parent,SIGNAL(ParkingChanged(QWidget*)),
+            dropReplace,SLOT(SetParking(QWidget*)));
     connect(dropReplace, SIGNAL(ObjectDropped(QGraphicsSceneDragDropEvent*)),
             this,SLOT(ObjectDropped(QGraphicsSceneDragDropEvent*)));
     dropReplace->setGeometry(10,0,85,45);
 
-    dropAttachLeft = new ObjectDropZone(this);
+    dropAttachLeft = new ObjectDropZone(this,parent->GetParking());
+    connect(parent,SIGNAL(ParkingChanged(QWidget*)),
+            dropAttachLeft,SLOT(SetParking(QWidget*)));
     connect(dropAttachLeft, SIGNAL(ObjectDropped(QGraphicsSceneDragDropEvent*)),
             this,SLOT(ObjectDropped(QGraphicsSceneDragDropEvent*)));
     dropAttachLeft->setGeometry(-10,0,20,45);
 
-    dropAttachRight = new ObjectDropZone(this);
+    dropAttachRight = new ObjectDropZone(this,parent->GetParking());
+    connect(parent,SIGNAL(ParkingChanged(QWidget*)),
+            dropAttachLeft,SLOT(SetParking(QWidget*)));
     connect(dropAttachRight, SIGNAL(ObjectDropped(QGraphicsSceneDragDropEvent*)),
             this,SLOT(ObjectDropped(QGraphicsSceneDragDropEvent*)));
     dropAttachRight->setGeometry(95,0,20,45);
@@ -89,10 +95,24 @@ ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel
 
 void ConnectableObjectView::ObjectDropped(QGraphicsSceneDragDropEvent *event)
 {
+    QPointF dropPos(0,0);
+
     int col=0;
-    if(sender()==dropAttachLeft) col=1;
-    if(sender()==dropReplace) col=2;
-    if(sender()==dropAttachRight) col=3;
+    if(sender()==dropAttachLeft) {
+        col=1;
+        dropPos.rx()-=(geometry().width()+10);
+    }
+    if(sender()==dropReplace){
+        col=2;
+    }
+    if(sender()==dropAttachRight){
+        col=3;
+        dropPos.rx()+=(geometry().width()+10);
+    }
+
+    MainContainerView *cnt = static_cast<MainContainerView*>(parentItem());
+    if(cnt)
+        cnt->SetDropPos( mapToScene(dropPos) );
     event->setAccepted(model->dropMimeData(event->mimeData(), event->proposedAction(), 0, col, objIndex));
 }
 

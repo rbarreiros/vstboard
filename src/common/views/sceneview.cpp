@@ -37,16 +37,27 @@
 using namespace View;
 
 SceneView::SceneView(MainHost *myHost,Connectables::ObjectFactory *objFactory, MainGraphicsView *viewHost, MainGraphicsView *viewProject, MainGraphicsView *viewProgram, MainGraphicsView *viewGroup,QWidget *parent) :
-        QAbstractItemView(parent),
-        viewHost(viewHost),
-        viewProject(viewProject),
-        viewProgram(viewProgram),
-        viewGroup(viewGroup),
-        sceneHost(0),
-        sceneProgram(0),
-        sceneGroup(0),
-        objFactory(objFactory),
-        myHost(myHost)
+    QAbstractItemView(parent),
+    viewHost(viewHost),
+    viewProject(viewProject),
+    viewProgram(viewProgram),
+    viewGroup(viewGroup),
+    rootObjHost(0),
+    rootObjProject(0),
+    rootObjProgram(0),
+    rootObjInsert(0),
+    sceneHost(0),
+    sceneProgram(0),
+    sceneGroup(0),
+    hostContainerView(0),
+    projectContainerView(0),
+    programContainerView(0),
+    groupContainerView(0),
+    progParking(0),
+    groupParking(0),
+    timerFalloff(0),
+    objFactory(objFactory),
+    myHost(myHost)
 {
     setHidden(true);
     timerFalloff = new QTimer(this);
@@ -73,6 +84,11 @@ void SceneView::SetParkings(QWidget *progPark, QWidget *groupPark)
 {
     progParking = progPark;
     groupParking = groupPark;
+
+    if(programContainerView)
+        programContainerView->SetParking(progParking);
+    if(groupContainerView)
+        groupContainerView->SetParking(groupParking);
 }
 
 void SceneView::dataChanged ( const QModelIndex & topLeft, const QModelIndex & bottomRight  )
@@ -307,7 +323,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                 }
 
                 if(objId == FixedObjId::groupContainer) {
-                    MainContainerView *groupContainerView = new MainContainerView(myHost, model());
+                    groupContainerView = new MainContainerView(myHost, model());
                     objView=groupContainerView;
                     groupContainerView->setParentItem(rootObjInsert);
                     connect(viewGroup,SIGNAL(viewResized(QRectF)),
@@ -464,7 +480,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                     if(parentInfo.objType==ObjType::BridgeSend || parentInfo.objType==ObjType::BridgeReturn)
                         angle=-1.570796f; //-pi/2
 
-                    pinView = static_cast<PinView*>( new BridgePinView(angle, model(), parentList, pin->GetConnectionInfo()) );
+                    pinView = static_cast<PinView*>( new BridgePinView(angle, model(), parentList, pin->GetConnectionInfo(),&myHost->mainWindow->viewConfig) );
                     connect(timerFalloff,SIGNAL(timeout()),
                             pinView,SLOT(updateVu()));
                 } else {
@@ -475,12 +491,12 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
 
 
                     if(pinInfo.type==PinType::Parameter) {
-                        MinMaxPinView *p = new MinMaxPinView(angle,model(),parentList,pin->GetConnectionInfo());
+                        MinMaxPinView *p = new MinMaxPinView(angle,model(),parentList,pin->GetConnectionInfo(),&myHost->mainWindow->viewConfig);
                         connect(timerFalloff,SIGNAL(timeout()),
                                 p,SLOT(updateVu()));
                         pinView = static_cast<PinView*>(p);
                     } else {
-                        ConnectablePinView *p = new ConnectablePinView(angle, model(), parentList, pin->GetConnectionInfo());
+                        ConnectablePinView *p = new ConnectablePinView(angle, model(), parentList, pin->GetConnectionInfo(),&myHost->mainWindow->viewConfig);
                         connect(timerFalloff,SIGNAL(timeout()),
                                 p,SLOT(updateVu()));
                         pinView = static_cast<PinView*>(p);

@@ -3,9 +3,9 @@
 
 using namespace View;
 
-ObjectDropZone::ObjectDropZone(QGraphicsItem *parent) :
+ObjectDropZone::ObjectDropZone(QGraphicsItem *parent, QWidget *parking) :
     QGraphicsWidget(parent),
-    myParking(0)
+    myParking(parking)
 {
     setAcceptDrops(true);
 }
