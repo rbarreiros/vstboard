@@ -9,14 +9,19 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="../../vstdll/connectables/vstautomation.cpp" line="41"/>
+        <location filename="../../vstdll/connectables/vstautomation.cpp" line="153"/>
         <source>Prog</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../vstdll/connectables/vstautomation.cpp" line="46"/>
+        <location filename="../../vstdll/connectables/vstautomation.cpp" line="162"/>
         <source>NbPins</source>
         <translation>NbParam</translation>
+    </message>
+    <message>
+        <location filename="../../vstdll/connectables/vstautomation.cpp" line="167"/>
+        <source>Learn</source>
+        <translation></translation>
     </message>
 </context>
 <context>

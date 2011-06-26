@@ -132,7 +132,6 @@ void ObjectView::SetModelIndex(QPersistentModelIndex index)
         actRemoveBridge = new QAction(QIcon(":/img16x16/delete.png"),tr("Remove"),this);
         actRemoveBridge->setShortcut( Qt::Key_Delete );
         actRemoveBridge->setShortcutContext(Qt::WidgetShortcut);
-        actRemoveBridge->setStatusTip(tr("Removes the object"));
         connect(actRemoveBridge,SIGNAL(triggered()),
                 this,SLOT(RemoveWithBridge()));
         addAction(actRemoveBridge);
@@ -140,7 +139,6 @@ void ObjectView::SetModelIndex(QPersistentModelIndex index)
         actRemove = new QAction(QIcon(":/img16x16/delete.png"),tr("Remove with cables"),this);
         actRemove->setShortcut( Qt::CTRL + Qt::Key_Delete );
         actRemove->setShortcutContext(Qt::WidgetShortcut);
-        actRemove->setStatusTip(tr("Removes the object and delete all the connected cables"));
         connect(actRemove,SIGNAL(triggered()),
                 this,SLOT(close()));
         addAction(actRemove);
@@ -242,10 +240,6 @@ void ObjectView::focusInEvent ( QFocusEvent * event )
         delete selectBorder;
     selectBorder=new QGraphicsRectItem( -2,-2, size().width()+4, size().height()+4 , this );
     QGraphicsWidget::focusInEvent(event);
-
-    if(actions().size()==0)
-        return;
-    myHost->mainWindow->addActions(actions());
 }
 
 /*!

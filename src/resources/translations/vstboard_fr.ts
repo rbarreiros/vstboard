@@ -12,7 +12,7 @@
 <context>
     <name>AudioDeviceIn</name>
     <message>
-        <location filename="../../vstboard/connectables/audiodevicein.cpp" line="115"/>
+        <location filename="../../vstboard/connectables/audiodevicein.cpp" line="118"/>
         <source>Already in use</source>
         <translation>En cours d&apos;utilisation</translation>
     </message>

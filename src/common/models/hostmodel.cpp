@@ -385,7 +385,7 @@ bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int
             }
             break;
         }
-        case NodeType::pinLimit :
+        case NodeType::cursor :
         {
             ConnectionInfo pinInfo = index.parent().data(UserRoles::connectionInfo).value<ConnectionInfo>();
             if(pinInfo.type==PinType::Parameter) {

@@ -58,12 +58,6 @@ namespace Connectables {
         void setObjectName(const QString &name);
 
         /*!
-          get the parent Object
-          \return pointer to parent Object
-          */
-        Object *GetParentObj() {return parent;}
-
-        /*!
           get the pin infos
           \return ConnectionInfo
           */

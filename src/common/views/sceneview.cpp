@@ -141,7 +141,7 @@ void SceneView::dataChanged ( const QModelIndex & topLeft, const QModelIndex & b
 //                view->SetLearningIndex(tmpIndex);
 //                break;
 //            }
-        case NodeType::pinLimit :
+        case NodeType::cursor :
             {
                 PinView *view = static_cast<PinView*>(hashItems.value(tmpIndex.parent(),0));
                 if(!view) {
@@ -524,7 +524,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                 pinView->UpdateModelIndex(index);
                 break;
             }
-            case NodeType::pinLimit :
+            case NodeType::cursor :
             {
                 MinMaxPinView* pin = static_cast<MinMaxPinView*>(hashItems.value( index.parent(),0 ));
                 if(!pin) {

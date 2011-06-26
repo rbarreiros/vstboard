@@ -76,7 +76,7 @@ namespace NodeType {
         cable,
         program,
         programGroup,
-        pinLimit
+        cursor
     };
 }
 

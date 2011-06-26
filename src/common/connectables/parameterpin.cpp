@@ -287,7 +287,7 @@ void ParameterPin::SetVisible(bool vis)
             return;
 
         ObjectInfo info;
-        info.nodeType=NodeType::pinLimit;
+        info.nodeType=NodeType::cursor;
 
 
         QStandardItem *item = new QStandardItem("limitInMin");
