@@ -17,6 +17,10 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+#ifndef QT_NO_DEBUG
+#define new DEBUG_CLIENTBLOCK
+#endif
 
 #include "precomp.h"
 
@@ -86,6 +90,8 @@ public:
 
 int main(int argc, char *argv[])
 {
+    _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+
     qRegisterMetaType<ConnectionInfo>("ConnectionInfo");
     qRegisterMetaType<ObjectInfo>("ObjectInfo");
     qRegisterMetaType<int>("ObjType::Enum");

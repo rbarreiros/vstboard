@@ -17,6 +17,10 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+#ifndef QT_NO_DEBUG
+#define new DEBUG_CLIENTBLOCK
+#endif
 
 #include "mainhost.h"
 #include "mainwindow.h"
@@ -24,6 +28,7 @@
 
 #ifdef VSTSDK
     #include "connectables/vstplugin.h"
+    int MainHost::vstUsersCounter=0;
 #endif
 
 #include "projectfile/fileversion.h"
@@ -51,10 +56,14 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
     QScriptValue scriptObj = scriptEngine.newQObject(this);
     scriptEngine.globalObject().setProperty("MainHost", scriptObj);
 
+#ifdef VSTSDK
     if(!vst::CVSTHost::Get())
         vstHost = new vst::CVSTHost();
     else
         vstHost = vst::CVSTHost::Get();
+
+    vstUsersCounter++
+#endif
 
     model = new HostModel(this);
     model->setObjectName("MainModel");
@@ -111,6 +120,13 @@ MainHost::~MainHost()
     programContainer.clear();
 
     delete objFactory;
+
+#ifdef VSTSDK
+    if(vstUsersCounter==0)
+        delete vstHost;
+#endif
+
+    delete mutexListCables;
 }
 
 void MainHost::Open()

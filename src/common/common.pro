@@ -180,7 +180,8 @@ HEADERS  += \
     views/listaudiodevicesview.h \
     views/scripteditor.h \
     views/objectdropzone.h \
-    views/gradientwidget.h
+    views/gradientwidget.h \
+    heap.h
 
 FORMS += \
     views/configdialog.ui \

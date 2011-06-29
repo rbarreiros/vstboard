@@ -17,6 +17,10 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
+#include "heap.h"
+#ifndef QT_NO_DEBUG
+#define new DEBUG_CLIENTBLOCK
+#endif
 
 #include "ceffect.h"
 #include "cvsthost.h"
@@ -35,15 +39,16 @@ using namespace vst;
 /* CEffect : constructor                                                     */
 /*****************************************************************************/
 
-CEffect::CEffect()
-{
-    pEffect = NULL;
-    bEditOpen = false;
-    bNeedIdle = false;
-    bInEditIdle = false;
-    bWantMidi = false;
-    bInSetProgram = false;
-    pMasterEffect = NULL;
+CEffect::CEffect() :
+    pEffect(0),
+    bEditOpen(false),
+    bNeedIdle(false),
+    bInEditIdle(false),
+    bWantMidi(false),
+    bInSetProgram(false),
+    pMasterEffect(0),
+    pluginLib(0)
+    {
     sName.clear();
 }
 
@@ -60,9 +65,9 @@ CEffect::~CEffect()
 /* Load : loads the effect module                                            */
 /*****************************************************************************/
 
-bool CEffect::Load(MainHost *myHost, const QString &name)
+bool CEffect::Load(MainHost *myHost, QObject *parent, const QString &name)
 {
-    pluginLib = new QLibrary(name);
+    pluginLib = new QLibrary(name,parent);
 
 //    if(!pluginLib->load())
 //        return false;
@@ -111,8 +116,13 @@ bool CEffect::Unload()
 {
     EffClose();
     pEffect = NULL;
-    pluginLib->unload();
-    pluginLib->deleteLater();
+//    if(pluginLib) {
+//        if(pluginLib->isLoaded())
+//            pluginLib->unload();
+//        pluginLib->deleteLater();
+//        delete pluginLib;
+//        pluginLib=0;
+//    }
     return true;
 }
 

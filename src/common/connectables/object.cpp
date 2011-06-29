@@ -17,6 +17,11 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+#ifndef QT_NO_DEBUG
+#define new DEBUG_CLIENTBLOCK
+#endif
+
 
 #include "object.h"
 #include "../globals.h"
@@ -294,8 +299,9 @@ void Object::LoadProgram(int prog)
     UpdateModelNode();
 
     //if the loaded program was a temporary prog, delete it
-    if(progWas==TEMP_PROGRAM)
-        listPrograms.remove(TEMP_PROGRAM);
+    if(progWas==TEMP_PROGRAM) {
+        delete listPrograms.take(TEMP_PROGRAM);
+    }
 }
 
 /*!
@@ -314,6 +320,8 @@ void Object::CopyProgram(int ori, int dest)
         return;
     }
     ObjectProgram *cpy = new ObjectProgram( *listPrograms.value(ori) );
+    if(listPrograms.contains(dest))
+        delete listPrograms.take(dest);
     listPrograms.insert(dest,cpy);
 }
 
@@ -330,6 +338,8 @@ void Object::CopyCurrentProgram(int dest)
     ObjectProgram *cpy = new ObjectProgram( *currentProgram );
     cpy->progId=dest;
     cpy->Save(listParameterPinIn,listParameterPinOut);
+    if(listPrograms.contains(dest))
+        delete listPrograms.take(dest);
     listPrograms.insert(dest,cpy);
 }
 
@@ -342,7 +352,7 @@ void Object::RemoveProgram(int prg)
         debug("Object::RemoveProgram not found")
         return;
     }
-    listPrograms.remove(prg);
+    delete listPrograms.take(prg);
 }
 
 /*!
@@ -683,16 +693,11 @@ QDataStream & Object::fromStream(QDataStream & in)
         quint16 progId;
         in >> progId;
 
-        ObjectProgram *prog=0;
-        if(listPrograms.contains(progId)) {
-            prog=listPrograms.value(progId);
-            delete prog;
-        }
-
-        prog = new ObjectProgram(progId);
-        listPrograms.insert(progId,prog);
-
+        ObjectProgram *prog = new ObjectProgram(progId);
         in >> *prog;
+        if(listPrograms.contains(progId))
+            delete listPrograms.take(progId);
+        listPrograms.insert(progId,prog);
     }
 
     quint16 progId;

@@ -17,6 +17,10 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+#ifndef QT_NO_DEBUG
+#define new DEBUG_CLIENTBLOCK
+#endif
 
 #include "hostmodel.h"
 #include "globals.h"
@@ -34,18 +38,20 @@ HostModel::HostModel(MainHost *parent) :
 
 QMimeData * HostModel::mimeData ( const QModelIndexList & indexes ) const
 {
-    QMimeData *mimeData = new QMimeData;
+
 
     foreach(QModelIndex index, indexes) {
         ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
         switch(info.nodeType) {
             case NodeType::pin :
+                QMimeData *mimeData = new QMimeData;
                 if(index.data(UserRoles::connectionInfo).isValid()) {
                     ConnectionInfo connectInfo = index.data(UserRoles::connectionInfo).value<ConnectionInfo>();
 
                     QByteArray bytes;
                     QDataStream stream(&bytes,QIODevice::WriteOnly);
                     stream << connectInfo;
+
                     mimeData->setData("application/x-pin",bytes);
                 }
                 return mimeData;

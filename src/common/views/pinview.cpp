@@ -17,6 +17,10 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+#ifndef QT_NO_DEBUG
+#define new DEBUG_CLIENTBLOCK
+#endif
 
 #include "pinview.h"
 #include "cableview.h"
@@ -219,7 +223,7 @@ void PinView::dragEnterEvent ( QGraphicsSceneDragDropEvent * event )
     }
 }
 
-void PinView::dragMoveEvent ( QGraphicsSceneDragDropEvent * event )
+void PinView::dragMoveEvent ( QGraphicsSceneDragDropEvent * /*event*/ )
 {
     if(currentLine)
         currentLine->setVisible(true);

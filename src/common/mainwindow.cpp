@@ -17,6 +17,10 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+#ifndef QT_NO_DEBUG
+#define new DEBUG_CLIENTBLOCK
+#endif
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -257,7 +261,7 @@ void MainWindow::BuildListTools()
     QStandardItem *item=0;
     ObjectInfo info;
 
-    listToolsModel = new ListToolsModel();
+    listToolsModel = new ListToolsModel(this);
     listToolsModel->setHorizontalHeaderLabels(headerLabels);
     parentItem = listToolsModel->invisibleRootItem();
 

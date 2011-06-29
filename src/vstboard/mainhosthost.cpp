@@ -17,6 +17,10 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+#ifndef QT_NO_DEBUG
+#define new DEBUG_CLIENTBLOCK
+#endif
 
 #include "mainhosthost.h"
 
@@ -36,9 +40,10 @@ MainHostHost::MainHostHost(QObject *parent, QString settingsGroup) :
 
 MainHostHost::~MainHostHost()
 {
+    //must be set to zero, devices will check this on close
     delete audioDevices;
-    audioDevices=0;
     delete midiDevices;
+    audioDevices=0;
     midiDevices=0;
 }
 

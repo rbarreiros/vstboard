@@ -89,6 +89,7 @@ public:
 
 #ifdef VSTSDK
     vst::CVSTHost *vstHost;
+    static int vstUsersCounter;
 #endif
 
     static quint32 currentFileVersion;

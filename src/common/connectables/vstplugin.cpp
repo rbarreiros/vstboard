@@ -17,6 +17,10 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+#ifndef QT_NO_DEBUG
+#define new DEBUG_CLIENTBLOCK
+#endif
 
 #include "vstplugin.h"
 #include "../globals.h"
@@ -275,7 +279,7 @@ bool VstPlugin::Open()
         QMutexLocker lock(&objMutex);
         VstPlugin::pluginLoading = this;
 
-        if(!Load(myHost, objInfo.filename )) {
+        if(!Load(myHost, this, objInfo.filename )) {
             VstPlugin::pluginLoading = 0;
             errorMessage=tr("Error while loading plugin");
             return true;

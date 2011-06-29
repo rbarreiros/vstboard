@@ -17,6 +17,10 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+#ifndef QT_NO_DEBUG
+#define new DEBUG_CLIENTBLOCK
+#endif
 
 #include "mididevices.h"
 #include "connectables/objectinfo.h"
@@ -38,10 +42,10 @@ MidiDevices::~MidiDevices()
     if(Pt_Started())
         Pt_Stop();
 
-    if(model) {
-        model->deleteLater();
+//    if(model) {
+//        model->deleteLater();
         Pm_Terminate();
-    }
+//    }
 }
 
 ListMidiInterfacesModel* MidiDevices::GetModel()
@@ -123,7 +127,9 @@ void MidiDevices::BuildModel()
     headerLabels << "In";
     headerLabels << "Out";
 
-    model = new ListMidiInterfacesModel();
+    if(model)
+        model->deleteLater();
+    model = new ListMidiInterfacesModel(this);
     model->setHorizontalHeaderLabels(  headerLabels );
     QStandardItem *parentItem = model->invisibleRootItem();
 
