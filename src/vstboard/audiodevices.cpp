@@ -70,10 +70,8 @@ AudioDevices::~AudioDevices()
     }
 
     mutexDevices.lock();
-//    foreach(Connectables::AudioDevice *dev, listAudioDevices) {
-//        dev->DeleteIfUnused();
-//        delete dev;
-//    }
+    foreach(Connectables::AudioDevice *dev, listAudioDevices)
+        dev->DeleteIfUnused();
     listAudioDevices.clear();
     mutexDevices.unlock();
 }

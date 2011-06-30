@@ -318,8 +318,6 @@ void Object::CopyProgram(int ori, int dest)
         return;
     }
     ObjectProgram *cpy = new ObjectProgram( *listPrograms.value(ori) );
-    if(listPrograms.contains(dest))
-        delete listPrograms.take(dest);
     listPrograms.insert(dest,cpy);
 }
 
@@ -336,8 +334,6 @@ void Object::CopyCurrentProgram(int dest)
     ObjectProgram *cpy = new ObjectProgram( *currentProgram );
     cpy->progId=dest;
     cpy->Save(listParameterPinIn,listParameterPinOut);
-    if(listPrograms.contains(dest))
-        delete listPrograms.take(dest);
     listPrograms.insert(dest,cpy);
 }
 
