@@ -29,6 +29,16 @@
 #include "mainhosthost.h"
 #include "audiodevices.h"
 
+#include <qthread.h>
+
+class I : public QThread
+{
+public:
+        static void msleep(unsigned long msecs) {
+                QThread::msleep(msecs);
+        }
+};
+
 using namespace Connectables;
 
 //QHash<int,QSharedPointer<AudioDevice> >AudioDevice::listAudioDevices;
@@ -492,6 +502,13 @@ bool AudioDevice::Close()
     if(stream)
     {
         Pa_StopStream(stream);
+        int count=0;
+        while(Pa_IsStreamActive(stream) && count<200) {
+            I::msleep(10);
+            count++;
+        }
+        debug2(<<"AudioDevice::Close"<<objectName()<<"wait:"<<count)
+
         Pa_CloseStream(stream);
         stream = 0;
     }
