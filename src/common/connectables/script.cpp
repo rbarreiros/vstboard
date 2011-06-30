@@ -80,6 +80,8 @@ render: function(obj) {\n\
 }\n\
 })";
     }
+    if(editorWnd)
+        editorWnd->SetScript(scriptText);
 
     mutexScript.lock();
 
@@ -212,6 +214,8 @@ void Script::DspMsg(const QString &title, const QString &str)
 void Script::ReplaceScript(const QString &str)
 {
     scriptText = str;
+    if(editorWnd)
+        editorWnd->SetScript(scriptText);
     OnProgramDirty();
     Open();
 }
@@ -246,7 +250,7 @@ void Script::OnShowEditor()
     if(!editorWnd || editorWnd->isVisible())
         return;
 
-    editorWnd->SetScript(scriptText);
+
     editorWnd->show();
 }
 
@@ -285,6 +289,8 @@ void Script::LoadProgram(int prog)
         return;
 
     scriptText = currentProgram->listOtherValues.value(0,"").toString();
+    if(editorWnd)
+        editorWnd->SetScript(scriptText);
     Open();
 
     if(editorWnd && editorWnd->isVisible())
