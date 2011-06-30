@@ -17,6 +17,9 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+
+#ifdef SCRIPTENGINE
+
 #include "heap.h"
 
 
@@ -37,8 +40,8 @@ Script::Script(MainHost *host, int index, const ObjectInfo &info) :
     objScriptName = objectName();
     objScriptName.append("sc");
 
-    scriptThisObj = myHost->scriptEngine.newQObject(this);
-    //myHost->scriptEngine.globalObject().setProperty(objScriptName, scriptThisObj);
+    scriptThisObj = myHost->scriptEngine->newQObject(this);
+    //myHost->scriptEngine->globalObject().setProperty(objScriptName, scriptThisObj);
 
     listEditorVisible << "hide";
     listEditorVisible << "show";
@@ -80,7 +83,7 @@ render: function(obj) {\n\
 
     mutexScript.lock();
 
-    QScriptSyntaxCheckResult chk = myHost->scriptEngine.checkSyntax(scriptText);
+    QScriptSyntaxCheckResult chk = myHost->scriptEngine->checkSyntax(scriptText);
     if(chk.state()!=QScriptSyntaxCheckResult::Valid) {
         comiledScript="";
         mutexScript.unlock();
@@ -95,18 +98,18 @@ render: function(obj) {\n\
     }
 
 //    comiledScript = QString( "function %1class(t) { obj=t; %2 }  %1m = new %1class(%1);" ).arg(objScriptName).arg(scriptText);
-//    QScriptValue result = myHost->scriptEngine.evaluate(comiledScript);
+//    QScriptValue result = myHost->scriptEngine->evaluate(comiledScript);
 
 
 
-//    myHost->scriptEngine.evaluate( objScriptName+"m.open();" );
+//    myHost->scriptEngine->evaluate( objScriptName+"m.open();" );
 
-    objScript = myHost->scriptEngine.evaluate(scriptText);
-    if(myHost->scriptEngine.hasUncaughtException()) {
+    objScript = myHost->scriptEngine->evaluate(scriptText);
+    if(myHost->scriptEngine->hasUncaughtException()) {
         comiledScript="";
         mutexScript.unlock();
 
-        int line = myHost->scriptEngine.uncaughtExceptionLineNumber();
+        int line = myHost->scriptEngine->uncaughtExceptionLineNumber();
         QMessageBox msg(
             QMessageBox::Critical,
             tr("Script exception"),
@@ -121,11 +124,11 @@ render: function(obj) {\n\
     renderScript = objScript.property("render");
 
     QScriptValue result = openScript.call(objScript, QScriptValueList() << scriptThisObj);
-    if(myHost->scriptEngine.hasUncaughtException()) {
+    if(myHost->scriptEngine->hasUncaughtException()) {
         comiledScript="";
         mutexScript.unlock();
 
-        int line = myHost->scriptEngine.uncaughtExceptionLineNumber();
+        int line = myHost->scriptEngine->uncaughtExceptionLineNumber();
         QMessageBox msg(
             QMessageBox::Critical,
             tr("Script exception"),
@@ -171,11 +174,11 @@ void Script::Render()
     QScriptValue result = renderScript.call(objScript, QScriptValueList() << scriptThisObj);
 
     if(!comiledScript.isEmpty()) {
-        QScriptValue result = myHost->scriptEngine.evaluate( objScriptName+"m.render();" );
-        if(myHost->scriptEngine.hasUncaughtException()) {
+        QScriptValue result = myHost->scriptEngine->evaluate( objScriptName+"m.render();" );
+        if(myHost->scriptEngine->hasUncaughtException()) {
             comiledScript="";
 
-            int line = myHost->scriptEngine.uncaughtExceptionLineNumber();
+            int line = myHost->scriptEngine->uncaughtExceptionLineNumber();
             emit _dspMsg(
                 tr("Script exception"),
                 tr("line %1\n%2").arg(line).arg(result.toString())
@@ -287,3 +290,4 @@ void Script::LoadProgram(int prog)
     if(editorWnd && editorWnd->isVisible())
         editorWnd->SetScript(scriptText);
 }
+#endif

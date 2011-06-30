@@ -99,7 +99,9 @@ public:
     QVariant GetSetting(QString name, QVariant defaultVal=0);
     bool SettingDefined(QString name);
 
-    QScriptEngine scriptEngine;
+#ifdef SCRIPTENGINE
+    QScriptEngine *scriptEngine;
+#endif
 
     QString currentProjectFile;
     QString currentSetupFile;

@@ -42,9 +42,10 @@ Programs::Programs(MainHost *parent) :
     connect( model, SIGNAL( rowsRemoved( QModelIndex , int, int )),
             this, SLOT(rowsRemoved( QModelIndex, int, int )));
 
-    QScriptValue scriptObj = myHost->scriptEngine.newQObject(this);
-    myHost->scriptEngine.globalObject().setProperty("Programs", scriptObj);
-
+#ifdef SCRIPTENGINE
+    QScriptValue scriptObj = myHost->scriptEngine->newQObject(this);
+    myHost->scriptEngine->globalObject().setProperty("Programs", scriptObj);
+#endif
     //currentProgColor = myHost->mainWindow->viewConfig.GetColor(View::ColorGroups::Programs,View::Colors::HighlightBackground);
 //    connect( &myHost->mainWindow->viewConfig, SIGNAL(ColorChanged(View::ColorGroups::Enum,View::Colors::Enum,QColor)),
 //            this, SLOT(UpdateColor(View::ColorGroups::Enum,View::Colors::Enum,QColor)) );

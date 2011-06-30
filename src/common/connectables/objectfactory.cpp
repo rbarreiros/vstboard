@@ -29,7 +29,10 @@
 #include "maincontainer.h"
 #include "bridge.h"
 #include "mainhost.h"
-#include "script.h"
+
+#ifdef SCRIPTENGINE
+    #include "script.h"
+#endif
 
 #ifdef VSTSDK
     #include "vstplugin.h"
@@ -48,8 +51,11 @@ ObjectFactory::ObjectFactory(MainHost *myHost) :
     myHost(myHost)
 {
     setObjectName("ObjectFactory");
-    QScriptValue scriptObj = myHost->scriptEngine.newQObject(this);
-    myHost->scriptEngine.globalObject().setProperty("ObjectFactory", scriptObj);
+
+#ifdef SCRIPTENGINE
+    QScriptValue scriptObj = myHost->scriptEngine->newQObject(this);
+    myHost->scriptEngine->globalObject().setProperty("ObjectFactory", scriptObj);
+#endif
 }
 
 ObjectFactory::~ObjectFactory()
@@ -172,10 +178,11 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
             case NodeType::object :
 
                 switch(info.objType) {
+#ifdef SCRIPTENGINE
                     case ObjType::Script:
                         obj = new Script(myHost,objId,info);
                         break;
-
+#endif
                     case ObjType::MidiSender:
                         obj = new MidiSender(myHost,objId);
                         break;

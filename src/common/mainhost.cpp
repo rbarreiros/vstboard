@@ -51,8 +51,11 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
 
     setObjectName("MainHost");
 
-    QScriptValue scriptObj = scriptEngine.newQObject(this);
-    scriptEngine.globalObject().setProperty("MainHost", scriptObj);
+#ifdef SCRIPTENGINE
+    scriptEngine = new QScriptEngine(this);
+    QScriptValue scriptObj = scriptEngine->newQObject(this);
+    scriptEngine->globalObject().setProperty("MainHost", scriptObj);
+#endif
 
 #ifdef VSTSDK
     if(!vst::CVSTHost::Get())
@@ -60,7 +63,7 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
     else
         vstHost = vst::CVSTHost::Get();
 
-    vstUsersCounter++
+    vstUsersCounter++;
 #endif
 
     model = new HostModel(this);
@@ -120,6 +123,7 @@ MainHost::~MainHost()
     delete objFactory;
 
 #ifdef VSTSDK
+    vstUsersCounter--;
     if(vstUsersCounter==0)
         delete vstHost;
 #endif

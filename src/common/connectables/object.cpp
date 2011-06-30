@@ -64,8 +64,10 @@ Object::Object(MainHost *host, int index, const ObjectInfo &info) :
     setObjectName(QString("%1.%2").arg(objInfo.name).arg(index));
     doublePrecision=myHost->doublePrecision;
 
-    QScriptValue scriptObj = myHost->scriptEngine.newQObject(this);
-    myHost->scriptEngine.globalObject().setProperty(QString("Obj%1").arg(index), scriptObj);
+#ifdef SCRIPTENGINE
+    QScriptValue scriptObj = myHost->scriptEngine->newQObject(this);
+    myHost->scriptEngine->globalObject().setProperty(QString("Obj%1").arg(index), scriptObj);
+#endif
 
     //init pins lists
     ConnectionInfo i;

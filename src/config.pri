@@ -9,6 +9,8 @@ win32|macx {
         $$VSTSDK_PATH/public.sdk/source/vst2.x
 }
 
+DEFINES += SCRIPTENGINE
+
 CONFIG(debug, debug|release) {
     POST =
     build_postfix=debug
