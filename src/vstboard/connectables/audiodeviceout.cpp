@@ -115,3 +115,10 @@ void AudioDeviceOut::SetRingBufferFromPins(QList<CircularBuffer*>listCircularBuf
         pinBuf->ResetStackCounter();
     }
 }
+
+QStandardItem *AudioDeviceOut::GetFullItem()
+{
+    QStandardItem *modelNode = Object::GetFullItem();
+    modelNode->setData(doublePrecision, UserRoles::isDoublePrecision);
+    return modelNode;
+}

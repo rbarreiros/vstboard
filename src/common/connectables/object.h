@@ -115,7 +115,7 @@ namespace Connectables {
 
         LearningMode::Enum GetLearningMode();
         QStandardItem *GetParkingItem();
-        QStandardItem *GetFullItem();
+        virtual QStandardItem *GetFullItem();
 
         /*!
           Get the current container id

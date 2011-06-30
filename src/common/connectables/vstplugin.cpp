@@ -847,3 +847,10 @@ QDataStream & VstPlugin::fromStream(QDataStream & in)
     }
     return in;
 }
+
+QStandardItem *VstPlugin::GetFullItem()
+{
+    QStandardItem *modelNode = Object::GetFullItem();
+    modelNode->setData(doublePrecision, UserRoles::isDoublePrecision);
+    return modelNode;
+}

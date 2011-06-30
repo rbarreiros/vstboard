@@ -172,3 +172,10 @@ void AudioDeviceIn::SetBufferFromRingBuffer(QList<CircularBuffer*>listCircularBu
         }
     }
 }
+
+QStandardItem *AudioDeviceIn::GetFullItem()
+{
+    QStandardItem *modelNode = Object::GetFullItem();
+    modelNode->setData(doublePrecision, UserRoles::isDoublePrecision);
+    return modelNode;
+}

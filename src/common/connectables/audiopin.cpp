@@ -56,12 +56,6 @@ AudioPin::AudioPin(Object *parent, PinDirection::Enum direction, int number, uns
         setObjectName(QString("AudioIn%1").arg(number));
     else
         setObjectName(QString("AudioOut%1").arg(number));
-
-    if(doublePrecision) {
-        displayedText=objectName()+"=D=";
-    } else {
-        displayedText=objectName()+"=S=";
-    }
 }
 
 /*!

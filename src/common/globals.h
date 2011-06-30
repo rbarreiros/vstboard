@@ -62,7 +62,8 @@ namespace UserRoles {
         isDirty,
         type,
         bankFile,
-        programFile
+        programFile,
+        isDoublePrecision
     };
 }
 namespace NodeType {

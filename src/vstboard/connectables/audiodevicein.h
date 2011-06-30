@@ -43,6 +43,7 @@ namespace Connectables {
         Pin* CreatePin(const ConnectionInfo &info);
         void SetParentDevice( AudioDevice *device );
         void SetBufferFromRingBuffer(QList<CircularBuffer*>listCircularBuffers);
+        QStandardItem *GetFullItem();
 
     protected:
         /// pointer to the linked AudioDevice

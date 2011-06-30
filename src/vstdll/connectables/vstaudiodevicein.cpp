@@ -87,3 +87,10 @@ void VstAudioDeviceIn::SetBuffersD(double **buf, int &cpt, int sampleFrames)
         cpt++;
     }
 }
+
+QStandardItem *VstAudioDeviceIn::GetFullItem()
+{
+    QStandardItem *modelNode = Object::GetFullItem();
+    modelNode->setData(doublePrecision, UserRoles::isDoublePrecision);
+    return modelNode;
+}
