@@ -65,18 +65,25 @@ CEffect::~CEffect()
 
 bool CEffect::Load(MainHost *myHost, QObject *parent, const QString &name)
 {
-    pluginLib = new QLibrary(name,parent);
+    pluginLib = new QLibrary(name);
 
-//    if(!pluginLib->load())
-//        return false;
+    if(!pluginLib->load()) {
+        Unload();
+        return false;
+    }
 
-    vstPluginFuncPtr entryPoint = (vstPluginFuncPtr)pluginLib->resolve("VSTPluginMain");
-    if(!entryPoint)
-        entryPoint = (vstPluginFuncPtr)pluginLib->resolve("main");
+    vstPluginFuncPtr entryPoint=0;
+    try {
+        entryPoint = (vstPluginFuncPtr)pluginLib->resolve("VSTPluginMain");
+        if(!entryPoint)
+            entryPoint = (vstPluginFuncPtr)pluginLib->resolve("main");
+    }
+    catch(...)
+    {
+        pEffect = NULL;
+    }
     if(!entryPoint) {
-//        QMessageBox msgBox;
-//        msgBox.setText(QObject::tr("error loading %1, no entry point").arg(name));
-//        msgBox.exec();
+        Unload();
         return false;
     }
 
@@ -86,20 +93,16 @@ bool CEffect::Load(MainHost *myHost, QObject *parent, const QString &name)
     }
     catch(...)
     {
-//        QMessageBox msgBox;
-//        msgBox.setText(QObject::tr("error loading %1, failed on entry point").arg(name));
-//        msgBox.exec();
         pEffect = NULL;
     }
 
-    if(!pEffect)
+    if(!pEffect) {
+        Unload();
         return false;
+    }
 
     if (pEffect->magic != kEffectMagic) {
-        pEffect = NULL;
-//        QMessageBox msgBox;
-//        msgBox.setText(QObject::tr("error loading %1, not a Vst plugin").arg(name));
-//        msgBox.exec();
+        Unload();
         return false;
     }
     sName = name;
@@ -112,15 +115,18 @@ bool CEffect::Load(MainHost *myHost, QObject *parent, const QString &name)
 
 bool CEffect::Unload()
 {
-    EffClose();
+    if(pEffect)
+        EffClose();
     pEffect = NULL;
-//    if(pluginLib) {
-//        if(pluginLib->isLoaded())
-//            pluginLib->unload();
-//        pluginLib->deleteLater();
-//        delete pluginLib;
-//        pluginLib=0;
-//    }
+
+    if(pluginLib) {
+        if(pluginLib->isLoaded())
+            if(!pluginLib->unload()) {
+                debug2(<<"can't unload plugin"<< sName)
+            }
+        delete pluginLib;
+        pluginLib=0;
+    }
     return true;
 }
 
