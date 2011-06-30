@@ -73,6 +73,10 @@ protected:
 
     View::ViewConfigDialog *viewConfigDlg;
 
+#ifndef QT_NO_DEBUG
+    QAction *heapState;
+#endif
+
 public slots:
     void programParkingModelChanges(QStandardItemModel *model);
     void groupParkingModelChanges(QStandardItemModel *model);
@@ -80,6 +84,9 @@ public slots:
     void OnViewConfigClosed();
 
 private slots:
+#ifndef QT_NO_DEBUG
+    void OnHeapCheck();
+#endif
     void on_actionLoad_Setup_triggered();
     void on_actionRestore_default_layout_triggered();
     void on_actionSave_Setup_As_triggered();

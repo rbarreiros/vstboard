@@ -18,10 +18,6 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #include "heap.h"
-#ifndef QT_NO_DEBUG
-#define new DEBUG_CLIENTBLOCK
-#endif
-
 
 #include "object.h"
 #include "../globals.h"

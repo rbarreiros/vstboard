@@ -18,9 +18,7 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #include "heap.h"
-#ifndef QT_NO_DEBUG
-#define new DEBUG_CLIENTBLOCK
-#endif
+
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -125,7 +123,20 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     connect(&viewConfig, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
             this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)));
 
+#ifndef QT_NO_DEBUG
+    heapState = ui->mainToolBar->addAction("heap check");
+    connect(heapState,SIGNAL(triggered()),
+            this,SLOT(OnHeapCheck()));
+#endif
 }
+
+#ifndef QT_NO_DEBUG
+    void MainWindow::OnHeapCheck() {
+        HeapCheckpoint();
+    }
+
+#endif
+
 
 MainWindow::~MainWindow()
 {

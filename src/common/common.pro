@@ -103,7 +103,8 @@ SOURCES += \
     views/listaudiodevicesview.cpp \
     views/scripteditor.cpp \
     views/objectdropzone.cpp \
-    views/gradientwidget.cpp
+    views/gradientwidget.cpp \
+    heap.cpp
 
 HEADERS  += \
     globals.h \

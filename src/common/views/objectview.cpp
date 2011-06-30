@@ -18,9 +18,7 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #include "heap.h"
-#ifndef QT_NO_DEBUG
-#define new DEBUG_CLIENTBLOCK
-#endif
+
 
 #include "objectview.h"
 #include "pinview.h"
@@ -59,7 +57,7 @@ ObjectView::ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsIte
     actRemove(0),
     shrinkAsked(false),
     myHost(myHost),
-    highlighted(false)
+    highlighted(false),
 {
     setObjectName("objView");
     config = &myHost->mainWindow->viewConfig;

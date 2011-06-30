@@ -18,9 +18,7 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #include "heap.h"
-#ifndef QT_NO_DEBUG
-#define new DEBUG_CLIENTBLOCK
-#endif
+
 
 #define PROJECT_FILE_KEY 0x757b0a5d
 
