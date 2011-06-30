@@ -1,3 +1,25 @@
+/**************************************************************************
+#    Copyright 2010-2011 Raphaël François
+#    Contact : ctrlbrk76@gmail.com
+#
+#    This file is part of VstBoard.
+#
+#    VstBoard is free software: you can redistribute it and/or modify
+#    it under the terms of the under the terms of the GNU Lesser General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    VstBoard is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    under the terms of the GNU Lesser General Public License for more details.
+#
+#    You should have received a copy of the under the terms of the GNU Lesser General Public License
+#    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
+**************************************************************************/
+#include "heap.h"
+
+
 #include "audiopin.h"
 
 #include "pin.h"
@@ -24,17 +46,16 @@ using namespace Connectables;
 AudioPin::AudioPin(Object *parent, PinDirection::Enum direction, int number, unsigned long bufferSize, bool doublePrecision, bool externalAllocation) :
     Pin(parent,PinType::Audio,direction,number),
     doublePrecision(doublePrecision),
-    buffer(0),
-    bufferD(0)
+    buffer(0)
 {
-    if(doublePrecision) {
-        bufferD = new AudioBufferD(externalAllocation);
-    } else {
-        buffer = new AudioBuffer(externalAllocation);
-    }
+    buffer = new AudioBuffer(doublePrecision,externalAllocation);
     SetBufferSize(bufferSize);
-
     visible=true;
+
+    if(connectInfo.direction==PinDirection::Input)
+        setObjectName(QString("AudioIn%1").arg(number));
+    else
+        setObjectName(QString("AudioOut%1").arg(number));
 }
 
 /*!
@@ -44,18 +65,12 @@ AudioPin::~AudioPin()
 {
     if(buffer)
         delete buffer;
-    if(bufferD)
-        delete bufferD;
 }
 
 
 void AudioPin::NewRenderLoop()
 {
-    if(doublePrecision) {
-        bufferD->ResetStackCounter();
-    } else {
-        buffer->ResetStackCounter();
-    }
+    buffer->ResetStackCounter();
 }
 
 /*!
@@ -69,36 +84,45 @@ bool AudioPin::SetDoublePrecision(bool dblp)
         return true;
 
     if(doublePrecision) {
-        if(!bufferD) {
-            debug2(<<"AudioPin::SetDoublePrecision : no double precision buffer : can't convert to single precision")
-            return false;
-        }
-
-        if(!buffer)
-            buffer = new AudioBuffer(bufferD->IsExternallyAllocated());
-
-        buffer->SetSize(bufferD->GetSize());
-        buffer->ResetStackCounter();
-        buffer->AddToStack(bufferD);
-        delete bufferD;
-        bufferD = 0;
+        displayedText=objectName()+"=D=";
     } else {
-        if(!buffer) {
-            debug2(<<"AudioPin::SetDoublePrecision : no single precision buffer : can't convert to double precision")
-            return false;
-        }
-
-        if(!bufferD)
-            bufferD = new AudioBufferD(buffer->IsExternallyAllocated());
-
-        bufferD->SetSize(buffer->GetSize());
-        bufferD->ResetStackCounter();
-        bufferD->AddToStack(buffer);
-        delete buffer;
-        buffer = 0;
+        displayedText=objectName()+"=S=";
     }
 
     doublePrecision=dblp;
+    buffer->SetDoublePrecision(dblp);
+
+//    if(doublePrecision) {
+//        if(!bufferD) {
+//            debug2(<<"AudioPin::SetDoublePrecision : no double precision buffer : can't convert to single precision")
+//            return false;
+//        }
+
+//        if(!buffer)
+//            buffer = new AudioBuffer(bufferD->IsExternallyAllocated());
+
+//        buffer->SetSize(bufferD->GetSize());
+//        buffer->ResetStackCounter();
+//        buffer->AddToStack(bufferD);
+//        delete bufferD;
+//        bufferD = 0;
+//    } else {
+//        if(!buffer) {
+//            debug2(<<"AudioPin::SetDoublePrecision : no single precision buffer : can't convert to double precision")
+//            return false;
+//        }
+
+//        if(!bufferD)
+//            bufferD = new AudioBufferD(buffer->IsExternallyAllocated());
+
+//        bufferD->SetSize(buffer->GetSize());
+//        bufferD->ResetStackCounter();
+//        bufferD->AddToStack(buffer);
+//        delete buffer;
+//        buffer = 0;
+//    }
+
+
     return true;
 }
 
@@ -108,23 +132,32 @@ bool AudioPin::SetDoublePrecision(bool dblp)
   */
 void AudioPin::SetBufferSize(unsigned long size)
 {
-    if(doublePrecision) {
-        bufferD->SetSize(size);
-    } else {
-        buffer->SetSize(size);
-    }
+    buffer->SetSize(size);
 }
 
 float AudioPin::GetValue()
 {
     float newVu=.0f;
-    if(doublePrecision)
-        newVu=bufferD->GetVu();
-    else
-        newVu=buffer->GetVu();
+    newVu=buffer->GetVu();
 
     if(newVu != value) {
         valueChanged=true;
     }
     return newVu;
+}
+
+void AudioPin::ReceiveMsg(const PinMessage::Enum msgType,void *data)
+{
+    if(msgType==PinMessage::AudioBuffer) {
+        AudioBuffer *buf = static_cast<AudioBuffer*>(data);
+        buffer->AddToStack(buf);
+    }
+}
+
+/*!
+  Send the current buffer to all connected pins
+  */
+void AudioPin::SendAudioBuffer()
+{
+    SendMsg(PinMessage::AudioBuffer,(void*)buffer);
 }

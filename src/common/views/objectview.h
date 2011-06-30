@@ -77,6 +77,7 @@ namespace View {
         void mouseReleaseEvent ( QGraphicsSceneMouseEvent * event );
 
         void SetErrorMessage(const QString & msg);
+        void UpdateTitle();
 
         /// the title text
         QGraphicsSimpleTextItem *titleText;

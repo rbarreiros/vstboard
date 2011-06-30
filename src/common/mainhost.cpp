@@ -17,6 +17,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "mainhost.h"
 #include "mainwindow.h"
@@ -24,6 +26,7 @@
 
 #ifdef VSTSDK
     #include "connectables/vstplugin.h"
+    int MainHost::vstUsersCounter=0;
 #endif
 
 #include "projectfile/fileversion.h"
@@ -48,13 +51,20 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
 
     setObjectName("MainHost");
 
-    QScriptValue scriptObj = scriptEngine.newQObject(this);
-    scriptEngine.globalObject().setProperty("MainHost", scriptObj);
+#ifdef SCRIPTENGINE
+    scriptEngine = new QScriptEngine(this);
+    QScriptValue scriptObj = scriptEngine->newQObject(this);
+    scriptEngine->globalObject().setProperty("MainHost", scriptObj);
+#endif
 
+#ifdef VSTSDK
     if(!vst::CVSTHost::Get())
         vstHost = new vst::CVSTHost();
     else
         vstHost = vst::CVSTHost::Get();
+
+    vstUsersCounter++;
+#endif
 
     model = new HostModel(this);
     model->setObjectName("MainModel");
@@ -111,6 +121,14 @@ MainHost::~MainHost()
     programContainer.clear();
 
     delete objFactory;
+
+#ifdef VSTSDK
+    vstUsersCounter--;
+    if(vstUsersCounter==0)
+        delete vstHost;
+#endif
+
+    delete mutexListCables;
 }
 
 void MainHost::Open()
@@ -624,7 +642,8 @@ void MainHost::SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum ms
 
     hashCables::const_iterator i = workingListOfCables.constFind(senderPin);
     while (i != workingListOfCables.constEnd()  && i.key() == senderPin) {
-        Connectables::Pin *pin = objFactory->GetPin(i.value());
+        const ConnectionInfo &destPin = i.value();
+        Connectables::Pin *pin = objFactory->GetPin(destPin);
         if(!pin) {
             debug("MainHost::SendMsg : unknown pin")
             return;
@@ -751,7 +770,18 @@ bool MainHost::SettingDefined(QString name)
     return settings.contains(settingsGroup + name);
 }
 
-void MainHost::LoadSetupFile(QString filename)
+void MainHost::LoadFile(const QString &filename)
+{
+    QFileInfo info(filename);
+    if ( info.suffix()==SETUP_FILE_EXTENSION ) {
+        LoadSetupFile(filename);
+    }
+    if ( info.suffix()==PROJECT_FILE_EXTENSION ) {
+        LoadProjectFile(filename);
+    }
+}
+
+void MainHost::LoadSetupFile(const QString &filename)
 {
     if(filename.isEmpty())
         return;
@@ -759,11 +789,13 @@ void MainHost::LoadSetupFile(QString filename)
     if(SetupFile::LoadFromFile(this,filename)) {
         ConfigDialog::AddRecentSetupFile(filename,this);
         currentSetupFile = filename;
-        emit currentFileChanged();
+    } else {
+        ConfigDialog::RemoveRecentSetupFile(filename,this);
     }
+    emit currentFileChanged();
 }
 
-void MainHost::LoadProjectFile(QString filename)
+void MainHost::LoadProjectFile(const QString &filename)
 {
     if(filename.isEmpty())
         return;
@@ -771,8 +803,10 @@ void MainHost::LoadProjectFile(QString filename)
     if(ProjectFile::LoadFromFile(this,filename)) {
         ConfigDialog::AddRecentProjectFile(filename,this);
         currentProjectFile = filename;
-        emit currentFileChanged();
+    } else {
+        ConfigDialog::RemoveRecentProjectFile(filename,this);
     }
+    emit currentFileChanged();
 }
 
 void MainHost::ClearSetup()

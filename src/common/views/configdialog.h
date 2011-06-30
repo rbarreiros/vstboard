@@ -39,6 +39,8 @@ public:
     static const QString defaultBankPath(MainHost *myHost);
     static void AddRecentSetupFile(const QString &file,MainHost *myHost);
     static void AddRecentProjectFile(const QString &file,MainHost *myHost);
+    static void RemoveRecentSetupFile(const QString &file,MainHost *myHost);
+    static void RemoveRecentProjectFile(const QString &file,MainHost *myHost);
 
     static const float defaultSampleRate(MainHost *myHost);
     static const int defaultBufferSize(MainHost *myHost);

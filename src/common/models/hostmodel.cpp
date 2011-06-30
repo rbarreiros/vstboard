@@ -17,6 +17,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "hostmodel.h"
 #include "globals.h"
@@ -27,29 +29,41 @@
 #include "connectables/vstplugin.h"
 
 HostModel::HostModel(MainHost *parent) :
-        QStandardItemModel(parent)
+        QStandardItemModel(parent),
+    myHost(parent),
+    delayedAction(0),
+    LoadFileMapper(0)
 {
-    myHost = parent;
+    LoadFileMapper = new QSignalMapper(this);
+    delayedAction = new QTimer(this);
+    delayedAction->setSingleShot(true);
+    if(parent) {
+        connect(LoadFileMapper, SIGNAL(mapped(QString)), myHost, SLOT(LoadFile(QString)));
+        connect(delayedAction, SIGNAL(timeout()), LoadFileMapper, SLOT(map()));
+    }
 }
 
 QMimeData * HostModel::mimeData ( const QModelIndexList & indexes ) const
 {
-    QMimeData *mimeData = new QMimeData;
+
 
     foreach(QModelIndex index, indexes) {
         ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
         switch(info.nodeType) {
             case NodeType::pin :
+
                 if(index.data(UserRoles::connectionInfo).isValid()) {
                     ConnectionInfo connectInfo = index.data(UserRoles::connectionInfo).value<ConnectionInfo>();
 
                     QByteArray bytes;
                     QDataStream stream(&bytes,QIODevice::WriteOnly);
                     stream << connectInfo;
+
+                    QMimeData *mimeData = new QMimeData;
                     mimeData->setData("application/x-pin",bytes);
+                    return mimeData;
                 }
-                return mimeData;
-                break;
+
             default:
                 return QStandardItemModel::mimeData(indexes);
 
@@ -147,13 +161,8 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                 if ( info.suffix()==SETUP_FILE_EXTENSION ) {
                     if(myHost->mainWindow->userWantsToUnloadSetup()) {
                         //load on the next loop : we have to get out of the container before loading files
-                        QSignalMapper *mapper = new QSignalMapper(this);
-                        QTimer *t1 = new QTimer(this);
-                        t1->setSingleShot(true);
-                        connect(t1, SIGNAL(timeout()), mapper, SLOT(map()));
-                        connect(mapper, SIGNAL(mapped(QString)), myHost, SLOT(LoadSetupFile(QString)));
-                        mapper->setMapping(t1, fName);
-                        t1->start(0);
+                        LoadFileMapper->setMapping(delayedAction, fName);
+                        delayedAction->start(0);
                         return true;
                     }
                 }
@@ -162,13 +171,8 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                 if ( info.suffix()==PROJECT_FILE_EXTENSION ) {
                     if(myHost->mainWindow->userWantsToUnloadProject()) {
                         //load on the next loop : we have to get out of the container before loading files
-                        QSignalMapper *mapper = new QSignalMapper(this);
-                        QTimer *t1 = new QTimer(this);
-                        t1->setSingleShot(true);
-                        connect(t1, SIGNAL(timeout()), mapper, SLOT(map()));
-                        connect(mapper, SIGNAL(mapped(QString)), myHost, SLOT(LoadProjectFile(QString)));
-                        mapper->setMapping(t1, fName);
-                        t1->start(0);
+                        LoadFileMapper->setMapping(delayedAction, fName);
+                        delayedAction->start(0);
                         return true;
                     }
                 }

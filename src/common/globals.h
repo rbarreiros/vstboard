@@ -62,7 +62,8 @@ namespace UserRoles {
         isDirty,
         type,
         bankFile,
-        programFile
+        programFile,
+        isDoublePrecision
     };
 }
 namespace NodeType {
@@ -165,7 +166,6 @@ namespace PinMessage {
     enum Enum {
         ND,
         AudioBuffer,
-        AudioBufferD,
         MidiMsg,
         ParameterValue
     };

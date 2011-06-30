@@ -17,6 +17,7 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
 
 #include "object.h"
 #include "../globals.h"
@@ -63,8 +64,10 @@ Object::Object(MainHost *host, int index, const ObjectInfo &info) :
     setObjectName(QString("%1.%2").arg(objInfo.name).arg(index));
     doublePrecision=myHost->doublePrecision;
 
-    QScriptValue scriptObj = myHost->scriptEngine.newQObject(this);
-    myHost->scriptEngine.globalObject().setProperty(QString("Obj%1").arg(index), scriptObj);
+#ifdef SCRIPTENGINE
+    QScriptValue scriptObj = myHost->scriptEngine->newQObject(this);
+    myHost->scriptEngine->globalObject().setProperty(QString("Obj%1").arg(index), scriptObj);
+#endif
 
     //init pins lists
     ConnectionInfo i;
@@ -294,8 +297,9 @@ void Object::LoadProgram(int prog)
     UpdateModelNode();
 
     //if the loaded program was a temporary prog, delete it
-    if(progWas==TEMP_PROGRAM)
-        listPrograms.remove(TEMP_PROGRAM);
+    if(progWas==TEMP_PROGRAM) {
+        delete listPrograms.take(TEMP_PROGRAM);
+    }
 }
 
 /*!
@@ -342,7 +346,7 @@ void Object::RemoveProgram(int prg)
         debug("Object::RemoveProgram not found")
         return;
     }
-    listPrograms.remove(prg);
+    delete listPrograms.take(prg);
 }
 
 /*!
@@ -465,11 +469,9 @@ void Object::OnParameterChanged(ConnectionInfo pinInfo, float value)
     if(pinInfo.pinNumber==FixedPinNumber::editorVisible) {
         int val = static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::editorVisible))->GetIndex();
         if(val)
-            //QTimer::singleShot(0, this, SLOT(OnShowEditor()));
-            OnShowEditor();
+            QTimer::singleShot(0, this, SLOT(OnShowEditor()));
         else
-            OnHideEditor();
-            //QTimer::singleShot(0, this, SLOT(OnHideEditor()));
+            QTimer::singleShot(0, this, SLOT(OnHideEditor()));
     }
 }
 
@@ -557,10 +559,10 @@ void Object::CopyStatusTo(QSharedPointer<Object>objPtr)
 void Object::SetBufferSize(unsigned long size)
 {
     foreach(Pin *pin, listAudioPinIn->listPins) {
-        static_cast<AudioPinIn*>(pin)->SetBufferSize(size);
+        static_cast<AudioPin*>(pin)->SetBufferSize(size);
     }
     foreach(Pin *pin, listAudioPinOut->listPins) {
-        static_cast<AudioPinOut*>(pin)->SetBufferSize(size);
+        static_cast<AudioPin*>(pin)->SetBufferSize(size);
     }
 }
 
@@ -595,7 +597,7 @@ Pin* Object::CreatePin(const ConnectionInfo &info)
         case PinDirection::Input :
             switch(info.type) {
                 case PinType::Audio : {
-                    return new AudioPinIn(this,info.pinNumber,myHost->GetBufferSize(),doublePrecision);
+                    return new AudioPin(this,info.direction,info.pinNumber,myHost->GetBufferSize(),doublePrecision);
                 }
 
                 case PinType::Midi : {
@@ -614,7 +616,7 @@ Pin* Object::CreatePin(const ConnectionInfo &info)
         case PinDirection::Output :
             switch(info.type) {
                 case PinType::Audio : {
-                    return new AudioPinOut(this,info.pinNumber,myHost->GetBufferSize(),doublePrecision);
+                    return new AudioPin(this,info.direction,info.pinNumber,myHost->GetBufferSize(),doublePrecision);
                 }
 
                 case PinType::Midi : {
@@ -683,16 +685,11 @@ QDataStream & Object::fromStream(QDataStream & in)
         quint16 progId;
         in >> progId;
 
-        ObjectProgram *prog=0;
-        if(listPrograms.contains(progId)) {
-            prog=listPrograms.value(progId);
-            delete prog;
-        }
-
-        prog = new ObjectProgram(progId);
-        listPrograms.insert(progId,prog);
-
+        ObjectProgram *prog = new ObjectProgram(progId);
         in >> *prog;
+        if(listPrograms.contains(progId))
+            delete listPrograms.take(progId);
+        listPrograms.insert(progId,prog);
     }
 
     quint16 progId;

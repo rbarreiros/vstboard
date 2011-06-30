@@ -17,17 +17,27 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "connectables/audiodevice.h"
 #include "connectables/object.h"
 #include "connectables/audiodevicein.h"
 #include "connectables/audiodeviceout.h"
 #include "globals.h"
-#include "audiobuffer.h"
-#include "audiobufferd.h"
 #include "renderer/renderer.h"
 #include "mainhosthost.h"
 #include "audiodevices.h"
+
+#include <qthread.h>
+
+class I : public QThread
+{
+public:
+        static void msleep(unsigned long msecs) {
+                QThread::msleep(msecs);
+        }
+};
 
 using namespace Connectables;
 
@@ -492,6 +502,13 @@ bool AudioDevice::Close()
     if(stream)
     {
         Pa_StopStream(stream);
+        int count=0;
+        while(Pa_IsStreamActive(stream) && count<200) {
+            I::msleep(10);
+            count++;
+        }
+        debug2(<<"AudioDevice::Close"<<objectName()<<"wait:"<<count)
+
         Pa_CloseStream(stream);
         stream = 0;
     }
@@ -639,7 +656,7 @@ bool AudioDevice::RingBuffersToDevice( void *outputBuffer, unsigned long framesP
             //empty the circular buffer, in case we reopen this device
             buf->Clear();
             //send a blank buffer to the device
-            memcpy(((float **) outputBuffer)[cpt], AudioBuffer::blankBuffer, sizeof(float)*framesPerBuffer );
+            ZeroMemory( ((float **) outputBuffer)[cpt], sizeof(float)*framesPerBuffer );
             cpt++;
         }
         return true;

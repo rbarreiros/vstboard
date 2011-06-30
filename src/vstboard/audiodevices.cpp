@@ -17,6 +17,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "audiodevices.h"
 #include "globals.h"
@@ -64,7 +66,7 @@ AudioDevices::~AudioDevices()
         if(err!=paNoError) {
             debug("AudioDevices::~AudioDevices Pa_Terminate %s",Pa_GetErrorText( err ))
         }
-        model->deleteLater();
+//        model->deleteLater();
     }
 
     mutexDevices.lock();
@@ -151,7 +153,7 @@ ListAudioInterfacesModel * AudioDevices::GetModel()
 void AudioDevices::BuildModel()
 {
     if(!model)
-        model = new ListAudioInterfacesModel();
+        model = new ListAudioInterfacesModel(this);
 
     QStringList headerLabels;
     headerLabels << "Name";

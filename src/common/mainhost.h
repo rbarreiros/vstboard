@@ -89,6 +89,7 @@ public:
 
 #ifdef VSTSDK
     vst::CVSTHost *vstHost;
+    static int vstUsersCounter;
 #endif
 
     static quint32 currentFileVersion;
@@ -98,7 +99,9 @@ public:
     QVariant GetSetting(QString name, QVariant defaultVal=0);
     bool SettingDefined(QString name);
 
-    QScriptEngine scriptEngine;
+#ifdef SCRIPTENGINE
+    QScriptEngine *scriptEngine;
+#endif
 
     QString currentProjectFile;
     QString currentSetupFile;
@@ -156,8 +159,9 @@ public slots:
     void SetTempo(int tempo=120, int sign1=4, int sign2=4);
 //    void OnNewRenderingOrder(orderedNodes *renderLines);
     virtual void Render(unsigned long samples=0);
-    void LoadSetupFile(QString filename);
-    void LoadProjectFile(QString filename);
+    void LoadFile(const QString &filename);
+    void LoadSetupFile(const QString &filename);
+    void LoadProjectFile(const QString &filename);
     void ClearSetup();
     void ClearProject();
     void SaveSetupFile(QString filename="");

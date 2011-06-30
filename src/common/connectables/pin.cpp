@@ -17,6 +17,9 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
+
 
 #include "pin.h"
 #include "../mainhost.h"
@@ -218,6 +221,11 @@ void Pin::updateView()
         return;
     }
 
+    if(!displayedText.isEmpty()) {
+        parent->getHost()->GetModel()->setData(modelIndex, displayedText, Qt::DisplayRole);
+        displayedText="";
+    }
+
     float newVu = GetValue();
     if(!valueChanged)
         return;
@@ -225,6 +233,6 @@ void Pin::updateView()
     valueChanged=false;
 
     parent->getHost()->GetModel()->setData(modelIndex, newVu, UserRoles::value);
-    if(!displayedText.isEmpty()) parent->getHost()->GetModel()->setData(modelIndex, displayedText, Qt::DisplayRole);
+
 
 }

@@ -17,7 +17,6 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-
 #include <algorithm>
 #include <windows.h>
 #include <string>
@@ -76,8 +75,8 @@ extern "C" {
         HMODULE Hgui = LoadLibrary((instDir+L"\\QtGui4.dll").c_str());
         HMODULE Hscript = LoadLibrary((instDir+L"\\QtScript4.dll").c_str());
         HMODULE HwinMigrate = LoadLibrary((instDir+L"\\QtSolutions_MFCMigrationFramework-head.dll").c_str());
-
         HMODULE Hplugin = LoadLibrary((instDir+L"\\VstBoardPlugin.dll").c_str());
+
         if(!Hplugin) {
             FreeLibrary(Hplugin);
             FreeLibrary(HwinMigrate);

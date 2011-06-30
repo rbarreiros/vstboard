@@ -17,10 +17,12 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
+
 
 #include "bridgepinout.h"
 #include "audiobuffer.h"
-#include "audiobufferd.h"
 #include "mainhost.h"
 using namespace Connectables;
 
@@ -39,11 +41,6 @@ void BridgePinOut::SendMsg(const PinMessage::Enum msgType,void *data)
     switch(msgType) {
         case PinMessage::AudioBuffer :
             if(static_cast<AudioBuffer*>(data)->GetCurrentVu() < 0.01)
-                return;
-            valueType=PinType::Audio;
-            break;
-        case PinMessage::AudioBufferD :
-            if(static_cast<AudioBufferD*>(data)->GetCurrentVu() < 0.01)
                 return;
             valueType=PinType::Audio;
             break;

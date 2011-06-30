@@ -17,6 +17,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "objectview.h"
 #include "pinview.h"
@@ -145,8 +147,26 @@ void ObjectView::SetModelIndex(QPersistentModelIndex index)
     }
 
     objIndex = index;
+    UpdateTitle();
+}
+
+void ObjectView::UpdateTitle()
+{
     if(titleText) {
-        titleText->setText(index.data(Qt::DisplayRole).toString());
+        QString newTitle=objIndex.data(Qt::DisplayRole).toString();
+            titleText->setText(newTitle);
+
+        if(objIndex.data(UserRoles::isDirty).isValid()) {
+            if(objIndex.data(UserRoles::isDirty).toBool()) {
+                titleText->setText(newTitle.prepend("*"));
+            }
+        }
+
+        if(objIndex.data(UserRoles::isDoublePrecision).isValid()) {
+            if(objIndex.data(UserRoles::isDoublePrecision).toBool()) {
+                titleText->setText(newTitle.append("(D)"));
+            }
+        }
     }
 }
 
@@ -171,21 +191,12 @@ void ObjectView::UpdateModelIndex()
     if(objIndex.data(UserRoles::position).isValid())
         setPos( objIndex.data(UserRoles::position).toPointF() );
 
-    QString newTitle=objIndex.data(Qt::DisplayRole).toString();
-    if(titleText) {
-        titleText->setText(newTitle);
-    }
-
     if(objIndex.data(UserRoles::errorMessage).isValid()) {
         QString err = objIndex.data(UserRoles::errorMessage).toString();
         SetErrorMessage( err );
     }
 
-    if(objIndex.data(UserRoles::isDirty).isValid()) {
-        if(objIndex.data(UserRoles::isDirty).toBool()) {
-            titleText->setText(newTitle.prepend("*"));
-        }
-    }
+    UpdateTitle();
 }
 
 /*!

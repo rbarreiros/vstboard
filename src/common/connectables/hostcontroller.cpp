@@ -17,6 +17,9 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
+
 
 #include "hostcontroller.h"
 #include "../globals.h"
@@ -123,8 +126,10 @@ void HostController::Render()
     }
 
     pin=static_cast<ParameterPin*>(listParameterPinOut->listPins.value(Param_Bar));
+#ifdef VSTSDK
     if(pin)
         pin->ChangeValue( myHost->vstHost->GetCurrentBarTic() );
+#endif
 }
 
 void HostController::OnParameterChanged(ConnectionInfo pinInfo, float value)

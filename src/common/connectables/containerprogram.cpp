@@ -17,6 +17,9 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
+
 
 #include "containerprogram.h"
 #include "mainhost.h"
@@ -103,6 +106,9 @@ void ContainerProgram::Remove(int prgId)
 
 bool ContainerProgram::PinExistAndVisible(const ConnectionInfo &info)
 {
+    if(info.type==PinType::Bridge)
+        return true;
+
     Pin* pin=myHost->objFactory->GetPin(info);
     if(!pin)
         return false;
@@ -165,6 +171,8 @@ void ContainerProgram::Unload()
 void ContainerProgram::SaveRendererState()
 {
     timeSavedRendererNodes = QTime::currentTime();
+    foreach(RendererNode *node, listOfRendererNodes)
+        delete node;
     listOfRendererNodes = myHost->GetRenderer()->SaveNodes();
 }
 

@@ -17,6 +17,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "programs.h"
 #include "globals.h"
@@ -40,9 +42,10 @@ Programs::Programs(MainHost *parent) :
     connect( model, SIGNAL( rowsRemoved( QModelIndex , int, int )),
             this, SLOT(rowsRemoved( QModelIndex, int, int )));
 
-    QScriptValue scriptObj = myHost->scriptEngine.newQObject(this);
-    myHost->scriptEngine.globalObject().setProperty("Programs", scriptObj);
-
+#ifdef SCRIPTENGINE
+    QScriptValue scriptObj = myHost->scriptEngine->newQObject(this);
+    myHost->scriptEngine->globalObject().setProperty("Programs", scriptObj);
+#endif
     //currentProgColor = myHost->mainWindow->viewConfig.GetColor(View::ColorGroups::Programs,View::Colors::HighlightBackground);
 //    connect( &myHost->mainWindow->viewConfig, SIGNAL(ColorChanged(View::ColorGroups::Enum,View::Colors::Enum,QColor)),
 //            this, SLOT(UpdateColor(View::ColorGroups::Enum,View::Colors::Enum,QColor)) );

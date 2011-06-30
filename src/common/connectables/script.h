@@ -1,6 +1,8 @@
 #ifndef SCRIPT_H
 #define SCRIPT_H
 
+#ifdef SCRIPTENGINE
+
 #include "object.h"
 #include "views/scripteditor.h"
 
@@ -51,4 +53,5 @@ namespace Connectables {
     };
 }
 
+#endif
 #endif // SCRIPT_H

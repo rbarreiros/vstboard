@@ -17,6 +17,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "connectablepinview.h"
 #include "../connectables/objectfactory.h"
@@ -126,6 +128,10 @@ void ConnectablePinView::updateVu()
                 value=-1.0f;
             } else {
                 newVu = geometry().width() * value;
+            }
+            if(newVu<0.0) {
+                debug2(<<"ConnectablePinView::updateVu <0"<<newVu)
+                newVu=0.0;
             }
             rectVu->setRect(0,0, newVu, geometry().height());
             break;

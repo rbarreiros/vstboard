@@ -8,13 +8,13 @@
 
 #include "pin.h"
 #include "../audiobuffer.h"
-#include "../audiobufferd.h"
 
 namespace Connectables {
 
     class AudioPin : public Pin
     {
         Q_OBJECT
+        Q_PROPERTY(AudioBuffer * buffer READ GetBuffer WRITE SetBuffer)
         Q_PROPERTY(float value READ GetVal)
     public:
         AudioPin(Object *parent, PinDirection::Enum direction, int number, unsigned long bufferSize, bool doublePrecision=false, bool externalAllocation=false);
@@ -27,25 +27,20 @@ namespace Connectables {
 
         /// \return pointer to the current buffer
         AudioBuffer * GetBuffer() {return buffer;}
-        /// \return pointer to the current double precision buffer
-        AudioBufferD * GetBufferD() {return bufferD;}
+        void SetBuffer(AudioBuffer *buf) { buffer->AddToStack(buf); }
 
         float GetValue();
         void NewRenderLoop();
 
-        virtual void ReceiveMsg(const PinMessage::Enum msgType,void *data=0) {}
+        void ReceiveMsg(const PinMessage::Enum msgType,void *data=0);
+        void SendAudioBuffer();
 
     protected:
 
         /// true if double precision buffer
         bool doublePrecision;
 
-        /// a single precision AudioBuffer
         AudioBuffer *buffer;
-
-        /// a double precision AudioBufferD
-        AudioBufferD *bufferD;
-
     };
 }
 

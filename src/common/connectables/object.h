@@ -28,8 +28,7 @@
 
 #include "../precomp.h"
 
-#include "audiopinin.h"
-#include "audiopinout.h"
+#include "audiopin.h"
 #include "midipinin.h"
 #include "midipinout.h"
 #include "parameterpinin.h"
@@ -116,7 +115,7 @@ namespace Connectables {
 
         LearningMode::Enum GetLearningMode();
         QStandardItem *GetParkingItem();
-        QStandardItem *GetFullItem();
+        virtual QStandardItem *GetFullItem();
 
         /*!
           Get the current container id

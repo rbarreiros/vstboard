@@ -64,6 +64,8 @@ namespace Connectables {
 
         bool DropFile(const QString &filename);
 
+        QStandardItem *GetFullItem();
+
         QDataStream & toStream (QDataStream &) const;
         QDataStream & fromStream (QDataStream &);
 

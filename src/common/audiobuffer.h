@@ -25,25 +25,26 @@
 
 #include "precomp.h"
 
-class AudioBufferD;
 class AudioBuffer
 {
 public:
-        AudioBuffer(bool externalAllocation = false);
+        AudioBuffer(bool doublePrecision, bool externAlloc);
         ~AudioBuffer();
-        bool SetSize(unsigned long size);
-        void Clear();
+        bool SetSize(unsigned long size, bool forceRealloc=false);
         void AddToStack(AudioBuffer * buff);
-        void AddToStack(AudioBufferD * buff);
+        void SetBufferContent(float *buff, int count);
+        void SetBufferContent(double *buff, int count);
+        void DumpToBuffer(float *buff, unsigned long count);
+        void DumpToBuffer(double *buff, unsigned long count);
 
-        void SetPointer(float * buff, bool tmpBufferToBeFilled=false);
-        float *GetPointer(bool willBeFilled=false);
-        float *ConsumeStack();
-
+        void *GetPointer(bool willBeFilled=false);
+        void *ConsumeStack();
+        void SetDoublePrecision(bool dbl);
+        inline bool GetDoublePrecision() {return doublePrecision;}
         float GetVu();
 
         /// \return the current buffer size
-        inline unsigned long GetSize() {return nSize;}
+        inline unsigned long GetSize() {return bufferSize;}
 
         /*!
          Get the last vu-meter value. Don't reset the peak value (used by bridges)
@@ -56,29 +57,23 @@ public:
           */
         inline void ResetStackCounter() {stackSize=0;}
 
-        /*!
-          \return true if the buffer is empty, no sound
-          */
-        inline bool IsEmpty() {return (stackSize==0);}
-
-        /// \return true if we're not the owner of the buffer
-        inline bool IsExternallyAllocated() {return bExternalAllocation;}
-
         /// a blank buffer
         static float const blankBuffer[BLANK_BUFFER_SIZE];
 
 protected:
+        void Clear();
+
         /// the stack size
         unsigned int stackSize;
 
         /// pointer to the audio buffer
-        float * pBuffer;
+        void * pBuffer;
 
         /// buffer size
-        unsigned long nSize;
+        unsigned long bufferSize;
 
         /// allocated buffer size, can be bigger than the useable buffer size
-        unsigned long nAllocatedSize;
+        unsigned long allocatedSize;
 
         /// vu-meter peak
         float _maxVal;
@@ -87,7 +82,9 @@ protected:
         float currentVu;
 
         /// true if we're not the owned of the buffer
-        bool bExternalAllocation;
+        bool externAlloc;
+
+        bool doublePrecision;
 };
 
 

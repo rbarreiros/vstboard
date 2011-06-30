@@ -17,6 +17,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -93,11 +95,11 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     listVstBanksModel = new QFileSystemModel(this);
     //listVstBanksModel->setReadOnly(true);
     listVstBanksModel->setResolveSymlinks(true);
-    QStringList bankFilter;
-    bankFilter << "*.fxb";
-    bankFilter << "*.fxp";
-    listVstBanksModel->setNameFilters(bankFilter);
-    listVstBanksModel->setNameFilterDisables(false);
+//    QStringList bankFilter;
+//    bankFilter << "*.fxb";
+//    bankFilter << "*.fxp";
+//    listVstBanksModel->setNameFilters(bankFilter);
+//    listVstBanksModel->setNameFilterDisables(false);
     listVstBanksModel->setRootPath(ConfigDialog::defaultBankPath(myHost));
     ui->BankBrowser->setModel(listVstBanksModel);
 #endif
@@ -121,7 +123,20 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     connect(&viewConfig, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
             this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)));
 
+#ifdef DEBUGMEM
+    heapState = ui->mainToolBar->addAction("heap check");
+    connect(heapState,SIGNAL(triggered()),
+            this,SLOT(OnHeapCheck()));
+#endif
 }
+
+#ifdef DEBUGMEM
+    void MainWindow::OnHeapCheck() {
+        HeapCheckpoint();
+    }
+
+#endif
+
 
 MainWindow::~MainWindow()
 {
@@ -257,7 +272,7 @@ void MainWindow::BuildListTools()
     QStandardItem *item=0;
     ObjectInfo info;
 
-    listToolsModel = new ListToolsModel();
+    listToolsModel = new ListToolsModel(this);
     listToolsModel->setHorizontalHeaderLabels(headerLabels);
     parentItem = listToolsModel->invisibleRootItem();
 
