@@ -770,7 +770,18 @@ bool MainHost::SettingDefined(QString name)
     return settings.contains(settingsGroup + name);
 }
 
-void MainHost::LoadSetupFile(QString filename)
+void MainHost::LoadFile(const QString &filename)
+{
+    QFileInfo info(filename);
+    if ( info.suffix()==SETUP_FILE_EXTENSION ) {
+        LoadSetupFile(filename);
+    }
+    if ( info.suffix()==PROJECT_FILE_EXTENSION ) {
+        LoadProjectFile(filename);
+    }
+}
+
+void MainHost::LoadSetupFile(const QString &filename)
 {
     if(filename.isEmpty())
         return;
@@ -784,7 +795,7 @@ void MainHost::LoadSetupFile(QString filename)
     emit currentFileChanged();
 }
 
-void MainHost::LoadProjectFile(QString filename)
+void MainHost::LoadProjectFile(const QString &filename)
 {
     if(filename.isEmpty())
         return;

@@ -32,16 +32,14 @@ HostModel::HostModel(MainHost *parent) :
         QStandardItemModel(parent),
     myHost(parent),
     delayedAction(0),
-    LoadSetupFileMapper(0),
-    LoadProjectFileMapper(0)
+    LoadFileMapper(0)
 {
-    LoadSetupFileMapper = new QSignalMapper(this);
-    LoadProjectFileMapper = new QSignalMapper(this);
+    LoadFileMapper = new QSignalMapper(this);
     delayedAction = new QTimer(this);
     delayedAction->setSingleShot(true);
     if(parent) {
-        connect(LoadSetupFileMapper, SIGNAL(mapped(QString)), myHost, SLOT(LoadSetupFile(QString)));
-        connect(LoadProjectFileMapper, SIGNAL(mapped(QString)), myHost, SLOT(LoadProjectFile(QString)));
+        connect(LoadFileMapper, SIGNAL(mapped(QString)), myHost, SLOT(LoadFile(QString)));
+        connect(delayedAction, SIGNAL(timeout()), LoadFileMapper, SLOT(map()));
     }
 }
 
@@ -163,9 +161,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                 if ( info.suffix()==SETUP_FILE_EXTENSION ) {
                     if(myHost->mainWindow->userWantsToUnloadSetup()) {
                         //load on the next loop : we have to get out of the container before loading files
-                        disconnect(delayedAction);
-                        connect(delayedAction, SIGNAL(timeout()), LoadSetupFileMapper, SLOT(map()));
-                        LoadSetupFileMapper->setMapping(delayedAction, fName);
+                        LoadFileMapper->setMapping(delayedAction, fName);
                         delayedAction->start(0);
                         return true;
                     }
@@ -175,9 +171,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                 if ( info.suffix()==PROJECT_FILE_EXTENSION ) {
                     if(myHost->mainWindow->userWantsToUnloadProject()) {
                         //load on the next loop : we have to get out of the container before loading files
-                        disconnect(delayedAction);
-                        connect(delayedAction, SIGNAL(timeout()), LoadProjectFileMapper, SLOT(map()));
-                        LoadProjectFileMapper->setMapping(delayedAction, fName);
+                        LoadFileMapper->setMapping(delayedAction, fName);
                         delayedAction->start(0);
                         return true;
                     }
