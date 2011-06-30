@@ -639,8 +639,7 @@ bool AudioDevice::RingBuffersToDevice( void *outputBuffer, unsigned long framesP
             //empty the circular buffer, in case we reopen this device
             buf->Clear();
             //send a blank buffer to the device
-            ZeroMemory( outputBuffer, sizeof(float)*framesPerBuffer );
-//            memcpy(((float **) outputBuffer)[cpt], AudioBuffer::blankBuffer, sizeof(float)*framesPerBuffer );
+            ZeroMemory( ((float **) outputBuffer)[cpt], sizeof(float)*framesPerBuffer );
             cpt++;
         }
         return true;
