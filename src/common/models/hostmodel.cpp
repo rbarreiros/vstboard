@@ -29,9 +29,20 @@
 #include "connectables/vstplugin.h"
 
 HostModel::HostModel(MainHost *parent) :
-        QStandardItemModel(parent)
+        QStandardItemModel(parent),
+    myHost(parent),
+    delayedAction(0),
+    LoadSetupFileMapper(0),
+    LoadProjectFileMapper(0)
 {
-    myHost = parent;
+    LoadSetupFileMapper = new QSignalMapper(this);
+    LoadProjectFileMapper = new QSignalMapper(this);
+    delayedAction = new QTimer(this);
+    delayedAction->setSingleShot(true);
+    if(parent) {
+        connect(LoadSetupFileMapper, SIGNAL(mapped(QString)), myHost, SLOT(LoadSetupFile(QString)));
+        connect(LoadProjectFileMapper, SIGNAL(mapped(QString)), myHost, SLOT(LoadProjectFile(QString)));
+    }
 }
 
 QMimeData * HostModel::mimeData ( const QModelIndexList & indexes ) const
@@ -42,7 +53,7 @@ QMimeData * HostModel::mimeData ( const QModelIndexList & indexes ) const
         ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
         switch(info.nodeType) {
             case NodeType::pin :
-                QMimeData *mimeData = new QMimeData;
+
                 if(index.data(UserRoles::connectionInfo).isValid()) {
                     ConnectionInfo connectInfo = index.data(UserRoles::connectionInfo).value<ConnectionInfo>();
 
@@ -50,10 +61,11 @@ QMimeData * HostModel::mimeData ( const QModelIndexList & indexes ) const
                     QDataStream stream(&bytes,QIODevice::WriteOnly);
                     stream << connectInfo;
 
+                    QMimeData *mimeData = new QMimeData;
                     mimeData->setData("application/x-pin",bytes);
+                    return mimeData;
                 }
-                return mimeData;
-                break;
+
             default:
                 return QStandardItemModel::mimeData(indexes);
 
@@ -151,13 +163,10 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                 if ( info.suffix()==SETUP_FILE_EXTENSION ) {
                     if(myHost->mainWindow->userWantsToUnloadSetup()) {
                         //load on the next loop : we have to get out of the container before loading files
-                        QSignalMapper *mapper = new QSignalMapper(this);
-                        QTimer *t1 = new QTimer(this);
-                        t1->setSingleShot(true);
-                        connect(t1, SIGNAL(timeout()), mapper, SLOT(map()));
-                        connect(mapper, SIGNAL(mapped(QString)), myHost, SLOT(LoadSetupFile(QString)));
-                        mapper->setMapping(t1, fName);
-                        t1->start(0);
+                        disconnect(delayedAction);
+                        connect(delayedAction, SIGNAL(timeout()), LoadSetupFileMapper, SLOT(map()));
+                        LoadSetupFileMapper->setMapping(delayedAction, fName);
+                        delayedAction->start(0);
                         return true;
                     }
                 }
@@ -166,13 +175,10 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                 if ( info.suffix()==PROJECT_FILE_EXTENSION ) {
                     if(myHost->mainWindow->userWantsToUnloadProject()) {
                         //load on the next loop : we have to get out of the container before loading files
-                        QSignalMapper *mapper = new QSignalMapper(this);
-                        QTimer *t1 = new QTimer(this);
-                        t1->setSingleShot(true);
-                        connect(t1, SIGNAL(timeout()), mapper, SLOT(map()));
-                        connect(mapper, SIGNAL(mapped(QString)), myHost, SLOT(LoadProjectFile(QString)));
-                        mapper->setMapping(t1, fName);
-                        t1->start(0);
+                        disconnect(delayedAction);
+                        connect(delayedAction, SIGNAL(timeout()), LoadProjectFileMapper, SLOT(map()));
+                        LoadProjectFileMapper->setMapping(delayedAction, fName);
+                        delayedAction->start(0);
                         return true;
                     }
                 }

@@ -36,6 +36,9 @@ public:
 protected:
     QMap<int,QStandardItem*>mapObjects;
     MainHost *myHost;
+    QTimer *delayedAction;
+    QSignalMapper *LoadSetupFileMapper;
+    QSignalMapper *LoadProjectFileMapper;
 };
 
 #endif // HOSTMODEL_H
