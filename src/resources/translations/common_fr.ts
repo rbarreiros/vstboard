@@ -4,7 +4,7 @@
 <context>
     <name>AboutDialog</name>
     <message>
-        <location filename="../../common/views/aboutdialog.cpp" line="38"/>
+        <location filename="../../common/views/aboutdialog.cpp" line="40"/>
         <source>About %1</source>
         <translation>A propos de %1</translation>
     </message>
@@ -87,134 +87,134 @@
         <translation>Projet</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="34"/>
+        <location filename="../../common/views/configdialog.cpp" line="36"/>
         <source>System default</source>
         <translation>Defaut système</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="35"/>
-        <location filename="../../common/views/configdialog.cpp" line="54"/>
-        <location filename="../../common/views/configdialog.cpp" line="73"/>
-        <location filename="../../common/views/configdialog.cpp" line="95"/>
+        <location filename="../../common/views/configdialog.cpp" line="37"/>
+        <location filename="../../common/views/configdialog.cpp" line="56"/>
+        <location filename="../../common/views/configdialog.cpp" line="75"/>
+        <location filename="../../common/views/configdialog.cpp" line="97"/>
         <source>From last session</source>
         <translation>Dernier utilisé</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="36"/>
-        <location filename="../../common/views/configdialog.cpp" line="55"/>
+        <location filename="../../common/views/configdialog.cpp" line="38"/>
+        <location filename="../../common/views/configdialog.cpp" line="57"/>
         <source>Custom path</source>
         <translation>Emplacement personnalisé</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="72"/>
+        <location filename="../../common/views/configdialog.cpp" line="74"/>
         <source>Empty setup</source>
         <translation>Config vide</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="74"/>
+        <location filename="../../common/views/configdialog.cpp" line="76"/>
         <source>Custom setup file</source>
         <translation>Emplacement personnalisé</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="94"/>
+        <location filename="../../common/views/configdialog.cpp" line="96"/>
         <source>Empty project</source>
         <translation>Projet vide</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="96"/>
+        <location filename="../../common/views/configdialog.cpp" line="98"/>
         <source>Custom project file</source>
         <translation>Emplacement personnalisé</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="131"/>
-        <location filename="../../common/views/configdialog.cpp" line="139"/>
+        <location filename="../../common/views/configdialog.cpp" line="133"/>
+        <location filename="../../common/views/configdialog.cpp" line="141"/>
         <source>Always ask</source>
         <translation>Toujours demander</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="132"/>
-        <location filename="../../common/views/configdialog.cpp" line="140"/>
+        <location filename="../../common/views/configdialog.cpp" line="134"/>
+        <location filename="../../common/views/configdialog.cpp" line="142"/>
         <source>Save changes</source>
         <translation>Enregistrer avant de quitter</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="133"/>
-        <location filename="../../common/views/configdialog.cpp" line="141"/>
+        <location filename="../../common/views/configdialog.cpp" line="135"/>
+        <location filename="../../common/views/configdialog.cpp" line="143"/>
         <source>Discard changes</source>
         <translation>Quitter sans sauver</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="359"/>
-        <location filename="../../common/views/configdialog.cpp" line="376"/>
-        <location filename="../../common/views/configdialog.cpp" line="393"/>
-        <location filename="../../common/views/configdialog.cpp" line="410"/>
+        <location filename="../../common/views/configdialog.cpp" line="375"/>
+        <location filename="../../common/views/configdialog.cpp" line="392"/>
+        <location filename="../../common/views/configdialog.cpp" line="409"/>
+        <location filename="../../common/views/configdialog.cpp" line="426"/>
         <source>Error</source>
         <translation>Erreur</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="360"/>
+        <location filename="../../common/views/configdialog.cpp" line="376"/>
         <source>Vst path is not a valid directory</source>
         <translation>Le dossier Vst n&apos;est pas valide</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="377"/>
+        <location filename="../../common/views/configdialog.cpp" line="393"/>
         <source>Bank path is not a valid directory</source>
         <translation>Le dossier Banque Vst n&apos;est pas valide</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="394"/>
+        <location filename="../../common/views/configdialog.cpp" line="410"/>
         <source>Setup file is not valid</source>
         <translation>Le fichier config n&apos;est pas valide</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="411"/>
+        <location filename="../../common/views/configdialog.cpp" line="427"/>
         <source>Project file is not valid</source>
         <translation>Le fichier projet n&apos;est pas valide</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="439"/>
+        <location filename="../../common/views/configdialog.cpp" line="455"/>
         <source>You must restart VstBoard for the changes to take effect</source>
         <translation>VstBoard doit être redémarré pour que les modifications prennent effet</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="467"/>
+        <location filename="../../common/views/configdialog.cpp" line="483"/>
         <source>Default Vst path</source>
         <translation>Dossier Vst par défaut</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="467"/>
-        <location filename="../../common/views/configdialog.cpp" line="547"/>
+        <location filename="../../common/views/configdialog.cpp" line="483"/>
+        <location filename="../../common/views/configdialog.cpp" line="563"/>
         <source>Directory (*.)</source>
         <translation>Dossier (*.)</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="485"/>
+        <location filename="../../common/views/configdialog.cpp" line="501"/>
         <source>Default setup file</source>
         <translation>Fichier Config par défaut</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="485"/>
+        <location filename="../../common/views/configdialog.cpp" line="501"/>
         <source>Setup file (*.%1)</source>
         <translation>Fichier Config (*.%1)</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="498"/>
-        <location filename="../../common/views/configdialog.cpp" line="529"/>
+        <location filename="../../common/views/configdialog.cpp" line="514"/>
+        <location filename="../../common/views/configdialog.cpp" line="545"/>
         <source>Wrong file extension.</source>
         <translation>Extension non valide.</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="516"/>
+        <location filename="../../common/views/configdialog.cpp" line="532"/>
         <source>Default project file</source>
         <translation>Projet par défaut</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="516"/>
+        <location filename="../../common/views/configdialog.cpp" line="532"/>
         <source>Project file (*.%1)</source>
         <translation>Fichier projet (*.%1)</translation>
     </message>
     <message>
-        <location filename="../../common/views/configdialog.cpp" line="547"/>
+        <location filename="../../common/views/configdialog.cpp" line="563"/>
         <source>Default Bank path</source>
         <translation>Dossier banque par défaut</translation>
     </message>
@@ -222,7 +222,7 @@
 <context>
     <name>Connectables::HostController</name>
     <message>
-        <location filename="../../common/connectables/hostcontroller.cpp" line="29"/>
+        <location filename="../../common/connectables/hostcontroller.cpp" line="32"/>
         <source>HostController</source>
         <translation>Contrôleur d&apos;hôte</translation>
     </message>
@@ -230,7 +230,7 @@
 <context>
     <name>Connectables::MidiSender</name>
     <message>
-        <location filename="../../common/connectables/midisender.cpp" line="27"/>
+        <location filename="../../common/connectables/midisender.cpp" line="30"/>
         <source>MidiSender</source>
         <translation>Générateur Midi</translation>
     </message>
@@ -238,12 +238,12 @@
 <context>
     <name>Connectables::MidiToAutomation</name>
     <message>
-        <location filename="../../common/connectables/miditoautomation.cpp" line="29"/>
+        <location filename="../../common/connectables/miditoautomation.cpp" line="32"/>
         <source>Midi to Parameter</source>
         <translation>Midi vers Paramètres</translation>
     </message>
     <message>
-        <location filename="../../common/connectables/miditoautomation.cpp" line="142"/>
+        <location filename="../../common/connectables/miditoautomation.cpp" line="145"/>
         <source>Learn</source>
         <translation></translation>
     </message>
@@ -251,28 +251,28 @@
 <context>
     <name>Connectables::Script</name>
     <message>
-        <location filename="../../common/connectables/script.cpp" line="67"/>
+        <location filename="../../common/connectables/script.cpp" line="95"/>
         <source>Script syntax error</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/connectables/script.cpp" line="68"/>
-        <location filename="../../common/connectables/script.cpp" line="90"/>
-        <location filename="../../common/connectables/script.cpp" line="109"/>
-        <location filename="../../common/connectables/script.cpp" line="158"/>
+        <location filename="../../common/connectables/script.cpp" line="96"/>
+        <location filename="../../common/connectables/script.cpp" line="118"/>
+        <location filename="../../common/connectables/script.cpp" line="137"/>
+        <location filename="../../common/connectables/script.cpp" line="186"/>
         <source>line %1
 %2</source>
         <translation>ligne %1\n%2</translation>
     </message>
     <message>
-        <location filename="../../common/connectables/script.cpp" line="89"/>
-        <location filename="../../common/connectables/script.cpp" line="108"/>
-        <location filename="../../common/connectables/script.cpp" line="157"/>
+        <location filename="../../common/connectables/script.cpp" line="117"/>
+        <location filename="../../common/connectables/script.cpp" line="136"/>
+        <location filename="../../common/connectables/script.cpp" line="185"/>
         <source>Script exception</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/connectables/script.cpp" line="203"/>
+        <location filename="../../common/connectables/script.cpp" line="233"/>
         <source>Editor</source>
         <translation>Editeur</translation>
     </message>
@@ -285,12 +285,12 @@
         <translation>Erreur lors du chargement du plugin</translation>
     </message>
     <message>
-        <location filename="../../common/connectables/vstplugin.cpp" line="786"/>
+        <location filename="../../common/connectables/vstplugin.cpp" line="787"/>
         <source>Editor</source>
         <translation>Editeur</translation>
     </message>
     <message>
-        <location filename="../../common/connectables/vstplugin.cpp" line="791"/>
+        <location filename="../../common/connectables/vstplugin.cpp" line="792"/>
         <source>Learn</source>
         <translation>Learn</translation>
     </message>
@@ -321,7 +321,7 @@
 <context>
     <name>GroupListView</name>
     <message>
-        <location filename="../../common/views/grouplistview.cpp" line="31"/>
+        <location filename="../../common/views/grouplistview.cpp" line="33"/>
         <source>Delete group</source>
         <translation>Supprimer le groupe</translation>
     </message>
@@ -329,12 +329,12 @@
 <context>
     <name>ListAudioDevicesView</name>
     <message>
-        <location filename="../../common/views/listaudiodevicesview.cpp" line="7"/>
+        <location filename="../../common/views/listaudiodevicesview.cpp" line="29"/>
         <source>Config device</source>
         <translation>Config interface</translation>
     </message>
     <message>
-        <location filename="../../common/views/listaudiodevicesview.cpp" line="11"/>
+        <location filename="../../common/views/listaudiodevicesview.cpp" line="33"/>
         <source>Refresh list</source>
         <translation>Rafraîchir la liste</translation>
     </message>
@@ -448,7 +448,7 @@
     </message>
     <message>
         <location filename="../../common/mainwindow.ui" line="811"/>
-        <location filename="../../common/mainwindow.cpp" line="324"/>
+        <location filename="../../common/mainwindow.cpp" line="339"/>
         <source>Save Project</source>
         <translation>Enregistrer le Projet</translation>
     </message>
@@ -470,7 +470,7 @@
     <message>
         <location filename="../../common/mainwindow.ui" line="829"/>
         <location filename="../../common/mainwindow.ui" line="832"/>
-        <location filename="../../common/mainwindow.cpp" line="301"/>
+        <location filename="../../common/mainwindow.cpp" line="316"/>
         <source>Open a Project file</source>
         <translation>Ouvre un fichier Projet</translation>
     </message>
@@ -523,7 +523,7 @@
     </message>
     <message>
         <location filename="../../common/mainwindow.ui" line="897"/>
-        <location filename="../../common/mainwindow.cpp" line="364"/>
+        <location filename="../../common/mainwindow.cpp" line="379"/>
         <source>Save Setup</source>
         <translation>Enregistrer la Config</translation>
     </message>
@@ -676,7 +676,7 @@
     <message>
         <location filename="../../common/mainwindow.ui" line="1084"/>
         <location filename="../../common/mainwindow.ui" line="1087"/>
-        <location filename="../../common/mainwindow.cpp" line="341"/>
+        <location filename="../../common/mainwindow.cpp" line="356"/>
         <source>Open a Setup file</source>
         <translation>Ouvre un fichier Config</translation>
     </message>
@@ -691,56 +691,56 @@
         <translation>Apparence</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.cpp" line="171"/>
+        <location filename="../../common/mainwindow.cpp" line="186"/>
         <source>The setup has been modified.</source>
         <translation>La Config a été modifiée.</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.cpp" line="172"/>
-        <location filename="../../common/mainwindow.cpp" line="221"/>
+        <location filename="../../common/mainwindow.cpp" line="187"/>
+        <location filename="../../common/mainwindow.cpp" line="236"/>
         <source>Do you want to save your changes?</source>
         <translation>Voulez-vous enregistrer les modifications ?</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.cpp" line="220"/>
+        <location filename="../../common/mainwindow.cpp" line="235"/>
         <source>The project has been modified.</source>
         <translation>Le Projet a été modifié.</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.cpp" line="265"/>
+        <location filename="../../common/mainwindow.cpp" line="280"/>
         <source>Script</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.cpp" line="273"/>
+        <location filename="../../common/mainwindow.cpp" line="288"/>
         <source>Midi to parameter</source>
         <translation>Midi vers Paramètres</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.cpp" line="280"/>
+        <location filename="../../common/mainwindow.cpp" line="295"/>
         <source>Midi sender</source>
         <translation>Générateur Midi</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.cpp" line="287"/>
+        <location filename="../../common/mainwindow.cpp" line="302"/>
         <source>Host Controller</source>
         <translation>Contrôleur d&apos;hôte</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.cpp" line="301"/>
-        <location filename="../../common/mainwindow.cpp" line="324"/>
+        <location filename="../../common/mainwindow.cpp" line="316"/>
+        <location filename="../../common/mainwindow.cpp" line="339"/>
         <source>Project Files (*.%1)</source>
         <translation>Fichier Projet (*.%1)</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.cpp" line="341"/>
-        <location filename="../../common/mainwindow.cpp" line="364"/>
+        <location filename="../../common/mainwindow.cpp" line="356"/>
+        <location filename="../../common/mainwindow.cpp" line="379"/>
         <source>Setup Files (*.%1)</source>
         <translation>Fichier Config (*.%1)</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.cpp" line="569"/>
         <location filename="../../common/mainwindow.cpp" line="584"/>
+        <location filename="../../common/mainwindow.cpp" line="599"/>
         <source>&amp;%1 %2</source>
         <translation></translation>
     </message>
@@ -748,7 +748,7 @@
 <context>
     <name>ProgListView</name>
     <message>
-        <location filename="../../common/views/proglistview.cpp" line="31"/>
+        <location filename="../../common/views/proglistview.cpp" line="33"/>
         <source>Delete program</source>
         <translation>Supprimer le programme</translation>
     </message>
@@ -777,18 +777,18 @@
 <context>
     <name>Programs</name>
     <message>
-        <location filename="../../common/programs.cpp" line="214"/>
+        <location filename="../../common/programs.cpp" line="217"/>
         <source>The group has been modified.</source>
         <translation>Le Groupe a été modifié.</translation>
     </message>
     <message>
-        <location filename="../../common/programs.cpp" line="215"/>
-        <location filename="../../common/programs.cpp" line="256"/>
+        <location filename="../../common/programs.cpp" line="218"/>
+        <location filename="../../common/programs.cpp" line="259"/>
         <source>Do you want to save your changes?</source>
         <translation>Voulez-vous enregistrer les modifactions ?</translation>
     </message>
     <message>
-        <location filename="../../common/programs.cpp" line="255"/>
+        <location filename="../../common/programs.cpp" line="258"/>
         <source>The progarm has been modified.</source>
         <translation>Le Programme a été modifié.</translation>
     </message>
@@ -796,28 +796,28 @@
 <context>
     <name>ProjectFile</name>
     <message>
-        <location filename="../../common/projectfile/projectfile.cpp" line="49"/>
-        <location filename="../../common/projectfile/projectfile.cpp" line="63"/>
+        <location filename="../../common/projectfile/projectfile.cpp" line="51"/>
+        <location filename="../../common/projectfile/projectfile.cpp" line="65"/>
         <source>Unable to open %1</source>
         <translation>Impossible d&apos;ouvrir %1</translation>
     </message>
     <message>
-        <location filename="../../common/projectfile/projectfile.cpp" line="123"/>
+        <location filename="../../common/projectfile/projectfile.cpp" line="125"/>
         <source>Unknown file format.</source>
         <translation>Format inconnu.</translation>
     </message>
     <message>
-        <location filename="../../common/projectfile/projectfile.cpp" line="124"/>
+        <location filename="../../common/projectfile/projectfile.cpp" line="126"/>
         <source>Not a VstBoard project file</source>
         <translation>N&apos;est pas un fichier Projet valide</translation>
     </message>
     <message>
-        <location filename="../../common/projectfile/projectfile.cpp" line="134"/>
+        <location filename="../../common/projectfile/projectfile.cpp" line="136"/>
         <source>Wrong file version.</source>
         <translation>Version de fichier non supportée.</translation>
     </message>
     <message>
-        <location filename="../../common/projectfile/projectfile.cpp" line="135"/>
+        <location filename="../../common/projectfile/projectfile.cpp" line="137"/>
         <source>Project file format v%1 can&apos;t be converted to the current file format v%2</source>
         <translation>Les fichiers Projet v%1 ne peuvent être converti au format actuel v%2</translation>
     </message>
@@ -825,18 +825,18 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../../common/vst/ceffect.cpp" line="136"/>
-        <location filename="../../common/vst/ceffect.cpp" line="230"/>
+        <location filename="../../common/vst/ceffect.cpp" line="150"/>
+        <location filename="../../common/vst/ceffect.cpp" line="244"/>
         <source>Wrong plugin ID.</source>
         <translation>Mauvais ID plugin.</translation>
     </message>
     <message>
-        <location filename="../../common/vst/ceffect.cpp" line="137"/>
+        <location filename="../../common/vst/ceffect.cpp" line="151"/>
         <source>Bank file not designed for that plugin</source>
         <translation>Le fichier banque n&apos;est pas conçu pour ce plugin</translation>
     </message>
     <message>
-        <location filename="../../common/vst/ceffect.cpp" line="231"/>
+        <location filename="../../common/vst/ceffect.cpp" line="245"/>
         <source>Program file not designed for that plugin</source>
         <translation>Le fichier programme n&apos;est pas conçu pour ce plugin</translation>
     </message>
@@ -862,28 +862,28 @@
 <context>
     <name>SetupFile</name>
     <message>
-        <location filename="../../common/projectfile/setupfile.cpp" line="45"/>
-        <location filename="../../common/projectfile/setupfile.cpp" line="59"/>
+        <location filename="../../common/projectfile/setupfile.cpp" line="47"/>
+        <location filename="../../common/projectfile/setupfile.cpp" line="61"/>
         <source>Unable to open %1</source>
         <translation>Impossible d&apos;ouvrir %1</translation>
     </message>
     <message>
-        <location filename="../../common/projectfile/setupfile.cpp" line="111"/>
+        <location filename="../../common/projectfile/setupfile.cpp" line="113"/>
         <source>Unknown file format.</source>
         <translation>Format inconnu.</translation>
     </message>
     <message>
-        <location filename="../../common/projectfile/setupfile.cpp" line="112"/>
+        <location filename="../../common/projectfile/setupfile.cpp" line="114"/>
         <source>Not a VstBoard setup file</source>
         <translation>N&apos;est pas un fichier Config valide</translation>
     </message>
     <message>
-        <location filename="../../common/projectfile/setupfile.cpp" line="123"/>
+        <location filename="../../common/projectfile/setupfile.cpp" line="125"/>
         <source>Wrong file version.</source>
         <translation>Version de fichier non supportée.</translation>
     </message>
     <message>
-        <location filename="../../common/projectfile/setupfile.cpp" line="124"/>
+        <location filename="../../common/projectfile/setupfile.cpp" line="126"/>
         <source>Setup file format v%1 can&apos;t be converted to the current file format v%2</source>
         <translation>Les fichiers Config v%1 ne peuvent être converti au format actuel v%2</translation>
     </message>
@@ -899,12 +899,12 @@
 <context>
     <name>View::ObjectView</name>
     <message>
-        <location filename="../../common/views/objectview.cpp" line="132"/>
+        <location filename="../../common/views/objectview.cpp" line="134"/>
         <source>Remove</source>
         <translation>Supprimer</translation>
     </message>
     <message>
-        <location filename="../../common/views/objectview.cpp" line="139"/>
+        <location filename="../../common/views/objectview.cpp" line="141"/>
         <source>Remove with cables</source>
         <translation>Supprimer avec les câbles</translation>
     </message>
@@ -912,12 +912,12 @@
 <context>
     <name>View::PinView</name>
     <message>
-        <location filename="../../common/views/pinview.cpp" line="56"/>
+        <location filename="../../common/views/pinview.cpp" line="58"/>
         <source>Remove</source>
         <translation>Supprimer</translation>
     </message>
     <message>
-        <location filename="../../common/views/pinview.cpp" line="65"/>
+        <location filename="../../common/views/pinview.cpp" line="67"/>
         <source>Unplug</source>
         <translation>Déconnecter</translation>
     </message>
@@ -925,7 +925,7 @@
 <context>
     <name>View::ScriptEditor</name>
     <message>
-        <location filename="../../common/views/scripteditor.cpp" line="13"/>
+        <location filename="../../common/views/scripteditor.cpp" line="35"/>
         <source>Script editor</source>
         <translation>Editeur de script</translation>
     </message>
@@ -933,219 +933,219 @@
 <context>
     <name>View::ViewConfig</name>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="20"/>
-        <location filename="../../common/views/viewconfig.cpp" line="32"/>
+        <location filename="../../common/views/viewconfig.cpp" line="42"/>
+        <location filename="../../common/views/viewconfig.cpp" line="54"/>
         <source>-undefined-</source>
         <translation>-non défini-</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="25"/>
+        <location filename="../../common/views/viewconfig.cpp" line="47"/>
         <source>Vst Plugin</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="26"/>
+        <location filename="../../common/views/viewconfig.cpp" line="48"/>
         <source>Audio Pin</source>
         <translation>Fiche audio</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="27"/>
+        <location filename="../../common/views/viewconfig.cpp" line="49"/>
         <source>Midi Pin</source>
         <translation>Fiche midi</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="28"/>
+        <location filename="../../common/views/viewconfig.cpp" line="50"/>
         <source>Parameter Pin</source>
         <translation>Fiche paramètre</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="23"/>
+        <location filename="../../common/views/viewconfig.cpp" line="45"/>
         <source>Bridge</source>
         <translation>Passerelle</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="24"/>
+        <location filename="../../common/views/viewconfig.cpp" line="46"/>
         <source>Object</source>
         <translation>Objet</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="22"/>
+        <location filename="../../common/views/viewconfig.cpp" line="44"/>
         <source>Panel</source>
         <translation>Panneau</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="35"/>
+        <location filename="../../common/views/viewconfig.cpp" line="57"/>
         <source>Background</source>
         <translation>Arrière-plan</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="39"/>
+        <location filename="../../common/views/viewconfig.cpp" line="61"/>
         <source>Text</source>
         <translation>Textes</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="37"/>
+        <location filename="../../common/views/viewconfig.cpp" line="59"/>
         <source>Vu-meter</source>
         <translation>VU-mètre</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="29"/>
+        <location filename="../../common/views/viewconfig.cpp" line="51"/>
         <source>Cursor</source>
         <translation>Curseur</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="30"/>
+        <location filename="../../common/views/viewconfig.cpp" line="52"/>
         <source>Programs</source>
         <translation>Programmes</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="41"/>
+        <location filename="../../common/views/viewconfig.cpp" line="63"/>
         <source>Button</source>
         <translation>Bouton</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="42"/>
+        <location filename="../../common/views/viewconfig.cpp" line="64"/>
         <source>Button Text</source>
         <translation>Texte bouton</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="21"/>
-        <location filename="../../common/views/viewconfig.cpp" line="33"/>
+        <location filename="../../common/views/viewconfig.cpp" line="43"/>
+        <location filename="../../common/views/viewconfig.cpp" line="55"/>
         <source>Window</source>
         <translation>Fenêtre</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="38"/>
+        <location filename="../../common/views/viewconfig.cpp" line="60"/>
         <source>Window Text</source>
         <translation>Texte fenêtre</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="34"/>
+        <location filename="../../common/views/viewconfig.cpp" line="56"/>
         <source>Base</source>
         <translation>Base</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="36"/>
+        <location filename="../../common/views/viewconfig.cpp" line="58"/>
         <source>Highlight Background</source>
         <translation>Arrière-plan en évidence</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="40"/>
+        <location filename="../../common/views/viewconfig.cpp" line="62"/>
         <source>Lines</source>
         <translation>Lignes</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="103"/>
+        <location filename="../../common/views/viewconfig.cpp" line="125"/>
         <source>!</source>
         <translation>&amp;</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="103"/>
+        <location filename="../../common/views/viewconfig.cpp" line="125"/>
         <source>1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="104"/>
+        <location filename="../../common/views/viewconfig.cpp" line="126"/>
         <source>@</source>
         <translation>é</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="104"/>
+        <location filename="../../common/views/viewconfig.cpp" line="126"/>
         <source>2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="105"/>
+        <location filename="../../common/views/viewconfig.cpp" line="127"/>
         <source>#</source>
         <translation>&quot;</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="105"/>
+        <location filename="../../common/views/viewconfig.cpp" line="127"/>
         <source>3</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="106"/>
+        <location filename="../../common/views/viewconfig.cpp" line="128"/>
         <source>$</source>
         <translation>&apos;</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="106"/>
+        <location filename="../../common/views/viewconfig.cpp" line="128"/>
         <source>4</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="107"/>
+        <location filename="../../common/views/viewconfig.cpp" line="129"/>
         <source>%</source>
         <translation>(</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="107"/>
+        <location filename="../../common/views/viewconfig.cpp" line="129"/>
         <source>5</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="108"/>
+        <location filename="../../common/views/viewconfig.cpp" line="130"/>
         <source>^</source>
         <translation>-</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="108"/>
+        <location filename="../../common/views/viewconfig.cpp" line="130"/>
         <source>6</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="109"/>
+        <location filename="../../common/views/viewconfig.cpp" line="131"/>
         <source>&amp;</source>
         <translation>è</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="109"/>
+        <location filename="../../common/views/viewconfig.cpp" line="131"/>
         <source>7</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="110"/>
+        <location filename="../../common/views/viewconfig.cpp" line="132"/>
         <source>*</source>
         <translation>_</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="110"/>
+        <location filename="../../common/views/viewconfig.cpp" line="132"/>
         <source>8</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="111"/>
+        <location filename="../../common/views/viewconfig.cpp" line="133"/>
         <source>(</source>
         <translation>ç</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="111"/>
+        <location filename="../../common/views/viewconfig.cpp" line="133"/>
         <source>9</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="112"/>
+        <location filename="../../common/views/viewconfig.cpp" line="134"/>
         <source>)</source>
         <translation>à</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="112"/>
+        <location filename="../../common/views/viewconfig.cpp" line="134"/>
         <source>0</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="113"/>
+        <location filename="../../common/views/viewconfig.cpp" line="135"/>
         <source>_</source>
         <translation>)</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="113"/>
+        <location filename="../../common/views/viewconfig.cpp" line="135"/>
         <source>-</source>
         <translation>°</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="152"/>
+        <location filename="../../common/views/viewconfig.cpp" line="174"/>
         <source>-unknown-</source>
         <translation>-inconnu-</translation>
     </message>
@@ -1153,46 +1153,46 @@
 <context>
     <name>View::VstPluginView</name>
     <message>
-        <location filename="../../common/views/vstpluginview.cpp" line="44"/>
-        <location filename="../../common/views/vstpluginview.cpp" line="84"/>
-        <location filename="../../common/views/vstpluginview.cpp" line="102"/>
+        <location filename="../../common/views/vstpluginview.cpp" line="66"/>
+        <location filename="../../common/views/vstpluginview.cpp" line="106"/>
+        <location filename="../../common/views/vstpluginview.cpp" line="124"/>
         <source>Save Bank</source>
         <translation>Enregistrer Banque</translation>
     </message>
     <message>
-        <location filename="../../common/views/vstpluginview.cpp" line="51"/>
+        <location filename="../../common/views/vstpluginview.cpp" line="73"/>
         <source>Save Bank As...</source>
         <translation>Enregistrer Banque Sous...</translation>
     </message>
     <message>
-        <location filename="../../common/views/vstpluginview.cpp" line="59"/>
-        <location filename="../../common/views/vstpluginview.cpp" line="94"/>
-        <location filename="../../common/views/vstpluginview.cpp" line="126"/>
+        <location filename="../../common/views/vstpluginview.cpp" line="81"/>
+        <location filename="../../common/views/vstpluginview.cpp" line="116"/>
+        <location filename="../../common/views/vstpluginview.cpp" line="148"/>
         <source>Save Program</source>
         <translation>Enregistrer Programme</translation>
     </message>
     <message>
-        <location filename="../../common/views/vstpluginview.cpp" line="66"/>
+        <location filename="../../common/views/vstpluginview.cpp" line="88"/>
         <source>Save Program As...</source>
         <translation>Enregistrer Programme Sous...</translation>
     </message>
     <message>
-        <location filename="../../common/views/vstpluginview.cpp" line="81"/>
+        <location filename="../../common/views/vstpluginview.cpp" line="103"/>
         <source>Save Bank (%1)</source>
         <translation>Enregistrer Banque (%1)</translation>
     </message>
     <message>
-        <location filename="../../common/views/vstpluginview.cpp" line="91"/>
+        <location filename="../../common/views/vstpluginview.cpp" line="113"/>
         <source>Save Program (%1)</source>
         <translation>Enregistrer Programme (%1)</translation>
     </message>
     <message>
-        <location filename="../../common/views/vstpluginview.cpp" line="102"/>
+        <location filename="../../common/views/vstpluginview.cpp" line="124"/>
         <source>Bank File (*.%1)</source>
         <translation>Fichier Banque (*.%1)</translation>
     </message>
     <message>
-        <location filename="../../common/views/vstpluginview.cpp" line="126"/>
+        <location filename="../../common/views/vstpluginview.cpp" line="148"/>
         <source>Program File (*.%1)</source>
         <translation>Fichier Programme (*.%1)</translation>
     </message>

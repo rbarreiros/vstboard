@@ -2,6 +2,11 @@
        MPRESS Version History
        ~~~~~~~~~~~~~~~~~~~~~~
 
+v2.18
+ - support for .NET Framework v4.0
+ - support for .NET x64
+ - bugfix: possible deadlock on the overloaded computer
+
 v2.17
  - new option -r to not compress resources
  - bugfix: in processing of relocations
