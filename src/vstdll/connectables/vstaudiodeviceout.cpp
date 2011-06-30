@@ -66,6 +66,7 @@ void VstAudioDeviceOut::GetBuffers(float **buf, int &cpt, int sampleFrames)
 {
     foreach(Pin *pin, listAudioPinIn->listPins) {
         AudioBuffer *abuf= static_cast<AudioPin*>(pin)->GetBuffer();
+        abuf->ConsumeStack();
         abuf->DumpToBuffer(buf[cpt],sampleFrames);
         abuf->ResetStackCounter();
         cpt++;
@@ -76,6 +77,7 @@ void VstAudioDeviceOut::GetBuffersD(double **buf, int &cpt, int sampleFrames)
 {
     foreach(Pin *pin, listAudioPinIn->listPins) {
         AudioBuffer *abuf= static_cast<AudioPin*>(pin)->GetBuffer();
+        abuf->ConsumeStack();
         abuf->DumpToBuffer(buf[cpt],sampleFrames);
         abuf->ResetStackCounter();
         cpt++;

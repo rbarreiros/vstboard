@@ -369,6 +369,7 @@ void AudioBuffer::SetBufferContent(float *buff, int count)
     } else {
         memcpy(pBuffer,buff,count*sizeof(float));
     }
+    stackSize=1;
 }
 
 void AudioBuffer::SetBufferContent(double *buff, int count)
@@ -390,6 +391,7 @@ void AudioBuffer::SetBufferContent(double *buff, int count)
             buff++;
         }
     }
+    stackSize=1;
 }
 
 void AudioBuffer::DumpToBuffer(float *buff, unsigned long count)
