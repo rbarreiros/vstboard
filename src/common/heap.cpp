@@ -1,6 +1,6 @@
 #include "heap.h"
 
-#ifndef QT_NO_DEBUG
+#ifdef DEBUGMEM
     _CrtMemState *checkPt=0;
 
     void HeapCheckpoint() {

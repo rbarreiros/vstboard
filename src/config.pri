@@ -10,6 +10,7 @@ win32|macx {
 }
 
 DEFINES += SCRIPTENGINE
+#DEFINES += DEBUGMEM
 
 CONFIG(debug, debug|release) {
     POST =

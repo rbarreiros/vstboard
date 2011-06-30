@@ -73,7 +73,7 @@ protected:
 
     View::ViewConfigDialog *viewConfigDlg;
 
-#ifndef QT_NO_DEBUG
+#ifdef DEBUGMEM
     QAction *heapState;
 #endif
 
@@ -84,7 +84,7 @@ public slots:
     void OnViewConfigClosed();
 
 private slots:
-#ifndef QT_NO_DEBUG
+#ifdef DEBUGMEM
     void OnHeapCheck();
 #endif
     void on_actionLoad_Setup_triggered();
