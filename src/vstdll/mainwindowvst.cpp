@@ -30,6 +30,7 @@ MainWindowVst::MainWindowVst(MainHost * myHost,QWidget *parent) :
     ui->actionRefresh_Midi_devices->setDisabled(true);
     setWindowTitle(APP_NAME);
     BuildListTools();
+    setAcceptDrops(false);
 }
 
 void MainWindowVst::closeEvent(QCloseEvent *event)
