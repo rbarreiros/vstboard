@@ -17,16 +17,17 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "pinview.h"
-#include "connectableobjectview.h"
 #include "cableview.h"
 #include "../connectables/pin.h"
 #include "../connectables/objectfactory.h"
 
 using namespace View;
 
-QGraphicsLineItem *PinView::currentLine = 0;
+CableView *PinView::currentLine = 0;
 
 /*!
   \class View::PinView
@@ -40,19 +41,52 @@ QGraphicsLineItem *PinView::currentLine = 0;
   \param pinInfo description of the pin
   \todo the model parameter can be removed
   */
-PinView::PinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo) :
-        QGraphicsWidget(parent),
-        outline(0),
-        highlight(0),
-        connectInfo(pinInfo),
-        model(model),
-        pinAngle(angle)
+PinView::PinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo, ViewConfig *config) :
+    QGraphicsWidget(parent),
+    outline(0),
+    highlight(0),
+    connectInfo(pinInfo),
+    model(model),
+    pinAngle(angle),
+    config(config)
 {
-    config = static_cast<ObjectView*>(parentWidget()->parentWidget())->config;
     setAcceptDrops(true);
     setCursor(Qt::PointingHandCursor);
     connect( config, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)) ,
             this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)) );
+
+    actDel = new QAction(QIcon(":/img16x16/delete.png"),tr("Remove"),this);
+    actDel->setShortcut( Qt::Key_Delete );
+    actDel->setShortcutContext(Qt::WidgetShortcut);
+    connect(actDel,SIGNAL(triggered()),
+            this,SLOT(RemovePin()));
+
+    if(connectInfo.isRemoveable)
+        addAction(actDel);
+
+    actUnplug = new QAction(QIcon(":/img16x16/editcut.png"),tr("Unplug"),this);
+    actUnplug->setShortcut( Qt::Key_Backspace );
+    actUnplug->setShortcutContext(Qt::WidgetShortcut);
+    actUnplug->setEnabled(false);
+    connect(actUnplug,SIGNAL(triggered()),
+            this,SLOT(Unplug()));
+    addAction(actUnplug);
+
+
+    setFocusPolicy(Qt::StrongFocus);
+}
+
+/*!
+  Reimplements QGraphicsWidget::contextMenuEvent \n
+  create a menu with all the actions
+  */
+void PinView::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+{
+    if(actions().size()==0)
+        return;
+
+    QMenu menu;
+    menu.exec(actions(),event->screenPos(),actions().at(0),event->widget());
 }
 
 /*!
@@ -115,14 +149,14 @@ void PinView::mouseMoveEvent ( QGraphicsSceneMouseEvent  * event )
     drag->setMimeData(mime);
 
     if(!currentLine) {
-        currentLine = new QGraphicsLineItem(this);
-        currentLine->setLine(QLineF(pinPos(), event->pos()));
-        currentLine->setVisible(false);
+        currentLine = new CableView(connectInfo,event->pos(),this,config);
+        AddCable(currentLine);
     }
 
-    drag->exec();
+    drag->exec(Qt::CopyAction);
 
     if(currentLine) {
+        RemoveCable(currentLine);
         delete currentLine;
         currentLine = 0;
     }
@@ -144,14 +178,25 @@ void PinView::mouseReleaseEvent ( QGraphicsSceneMouseEvent  * /*event*/ )
   */
 void PinView::mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * /*event*/ )
 {
+    Unplug();
+}
+
+void PinView::Unplug()
+{
     emit RemoveCablesFromPin(connectInfo);
+}
+
+void PinView::RemovePin()
+{
+    if(connectInfo.isRemoveable)
+        emit RemovePin(connectInfo);
 }
 
 /*!
   Reimplements QGraphicsWidget::dragMoveEvent \n
   if the dragged object is connectable with us : create a temporary cable and highlight the pin
   */
-void PinView::dragMoveEvent ( QGraphicsSceneDragDropEvent * event )
+void PinView::dragEnterEvent ( QGraphicsSceneDragDropEvent * event )
 {
     if(event->mimeData()->hasFormat("application/x-pin")) {
         QByteArray bytes = event->mimeData()->data("application/x-pin");
@@ -166,17 +211,20 @@ void PinView::dragMoveEvent ( QGraphicsSceneDragDropEvent * event )
         event->acceptProposedAction();
 
         if(currentLine) {
-            QLineF newLine(currentLine->line().p1(), currentLine->mapFromScene(mapToScene(pinPos())));
-            currentLine->setLine(newLine);
+            currentLine->UpdatePosition(connectInfo,pinAngle,mapToScene(pinPos()));
             currentLine->setVisible(true);
         }
-//        backupHighlightBrush = outline->brush();
-//        outline->setBrush(highlightBrush);
         if(highlight)
             highlight->setVisible(true);
     } else {
         event->ignore();
     }
+}
+
+void PinView::dragMoveEvent ( QGraphicsSceneDragDropEvent * /*event*/ )
+{
+    if(currentLine)
+        currentLine->setVisible(true);
 }
 
 /*!
@@ -185,7 +233,6 @@ void PinView::dragMoveEvent ( QGraphicsSceneDragDropEvent * event )
   */
 void PinView::dragLeaveEvent( QGraphicsSceneDragDropEvent  * /*event*/ )
 {
-//    outline->setBrush(backupHighlightBrush);
     if(highlight)
         highlight->setVisible(false);
     if(currentLine)
@@ -198,7 +245,6 @@ void PinView::dragLeaveEvent( QGraphicsSceneDragDropEvent  * /*event*/ )
   */
 void PinView::dropEvent ( QGraphicsSceneDragDropEvent  * event )
 {
-//    outline->setBrush(backupHighlightBrush);
     if(highlight)
         highlight->setVisible(false);
     QByteArray bytes = event->mimeData()->data("application/x-pin");
@@ -258,6 +304,7 @@ void PinView::AddCable(CableView *cable)
 {
     cable->UpdatePosition(connectInfo, pinAngle, mapToScene(pinPos()) );
     connectedCables.append(cable);
+    actUnplug->setEnabled(true);
     setFlag(QGraphicsItem::ItemSendsScenePositionChanges, true);
 }
 
@@ -267,6 +314,8 @@ void PinView::AddCable(CableView *cable)
 void PinView::RemoveCable(CableView *cable)
 {
     connectedCables.removeAll(cable);
-    if(connectedCables.isEmpty())
+    if(connectedCables.isEmpty()) {
         setFlag(QGraphicsItem::ItemSendsScenePositionChanges, false);
+        actUnplug->setEnabled(false);
+    }
 }

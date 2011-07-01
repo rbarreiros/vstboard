@@ -17,6 +17,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "vst.h"
 #include "connectables/connectioninfo.h"
@@ -68,14 +70,14 @@ Vst::Vst (audioMasterCallback audioMaster) :
     QCoreApplication::setOrganizationName("CtrlBrk");
     QCoreApplication::setApplicationName("VstBoard");
 
+#ifdef QT_NO_DEBUG
     if(qtTranslator.load("qt_" + QLocale::system().name(), ":/translations/"))
         qApp->installTranslator(&qtTranslator);
-
     if(commonTranslator.load("common_" + QLocale::system().name(), ":/translations/"))
         qApp->installTranslator(&commonTranslator);
     if(myappTranslator.load("vstboard_" + QLocale::system().name(), ":/translations/"))
         qApp->installTranslator(&myappTranslator);
-
+#endif
     myHost = new MainHostVst(this,0,"plugin/");
     if(myHost->doublePrecision)
         canDoubleReplacing(true);

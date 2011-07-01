@@ -30,10 +30,12 @@ namespace View {
     {
     Q_OBJECT
     public:
-        ConnectablePinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo);
+        ConnectablePinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo, ViewConfig *config);
         virtual void UpdateModelIndex(const QModelIndex &index);
 
     protected:
+        void keyPressEvent ( QKeyEvent * event );
+        void ValueChanged(float newVal);
         void wheelEvent ( QGraphicsSceneWheelEvent * event );
         QGraphicsSimpleTextItem *textItem;
         QGraphicsRectItem *rectVu;

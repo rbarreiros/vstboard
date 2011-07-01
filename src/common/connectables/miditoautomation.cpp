@@ -17,6 +17,9 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
+
 
 #include "miditoautomation.h"
 #include "midipinin.h"
@@ -39,8 +42,6 @@ MidiToAutomation::MidiToAutomation(MainHost *myHost,int index) :
     listIsLearning << "learn";
     listIsLearning << "unlearn";
     listParameterPinIn->AddPin(FixedPinNumber::learningMode);
-    static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::learningMode))->SetAlwaysVisible(true);
-
     listParameterPinOut->AddPin(para_prog);
     listParameterPinOut->AddPin(para_velocity);
     listParameterPinOut->AddPin(para_notepitch);
@@ -141,7 +142,7 @@ Pin* MidiToAutomation::CreatePin(const ConnectionInfo &info)
     switch(info.direction) {
         case PinDirection::Input : {
             if(info.pinNumber == FixedPinNumber::learningMode) {
-                ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::learningMode,"off",&listIsLearning,false,tr("Learn"));
+                ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::learningMode,"off",&listIsLearning,tr("Learn"));
                 newPin->SetLimitsEnabled(false);
                 return newPin;
             }
@@ -150,28 +151,23 @@ Pin* MidiToAutomation::CreatePin(const ConnectionInfo &info)
         case PinDirection::Output : {
             ParameterPin *pin = 0;
 
-            if(info.pinNumber<128) {
-                pin = new ParameterPinOut(this,info.pinNumber,0,&listValues,true,QString("CC%1").arg(info.pinNumber),false);
-                return pin;
-            }
-            if(info.pinNumber>=para_notes) {
-                pin = new ParameterPinOut(this,info.pinNumber,0,&listValues,true,QString("note%1").arg(info.pinNumber),false);
-                return pin;
-            }
+            if(info.pinNumber<128)
+                return new ParameterPinOut(this,info.pinNumber,0,&listValues,QString("CC%1").arg(info.pinNumber),false,true);
+            if(info.pinNumber>=para_notes)
+                return new ParameterPinOut(this,info.pinNumber,0,&listValues,QString("note%1").arg(info.pinNumber),false,true);
             if(info.pinNumber==para_prog)
-                pin = new ParameterPinOut(this,info.pinNumber,0,&listValues,true,"prog",false);
+                return new ParameterPinOut(this,info.pinNumber,0,&listValues,"prog");
             if(info.pinNumber==para_velocity)
-                pin = new ParameterPinOut(this,info.pinNumber,0,&listValues,true,"vel",false);
+                pin = new ParameterPinOut(this,info.pinNumber,0,&listValues,"vel");
             if(info.pinNumber==para_notepitch)
-                pin = new ParameterPinOut(this,info.pinNumber,0,&listValues,true,"note",false);
+                pin = new ParameterPinOut(this,info.pinNumber,0,&listValues,"note");
             if(info.pinNumber==para_pitchbend)
-                pin = new ParameterPinOut(this,info.pinNumber,0,&listValues,true,"p.bend",false);
+                pin = new ParameterPinOut(this,info.pinNumber,0,&listValues,"p.bend");
             if(info.pinNumber==para_chanpress)
-                pin = new ParameterPinOut(this,info.pinNumber,0,&listValues,true,"pressr",false);
+                pin = new ParameterPinOut(this,info.pinNumber,0,&listValues,"pressr");
             if(info.pinNumber==para_aftertouch)
-                pin = new ParameterPinOut(this,info.pinNumber,0,&listValues,true,"aftr.t",false);
+                pin = new ParameterPinOut(this,info.pinNumber,0,&listValues,"aftr.t");
             if(pin) {
-                pin->SetAlwaysVisible(true);
                 return pin;
             }
 

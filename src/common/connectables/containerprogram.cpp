@@ -17,6 +17,9 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
+
 
 #include "containerprogram.h"
 #include "mainhost.h"
@@ -101,6 +104,19 @@ void ContainerProgram::Remove(int prgId)
     }
 }
 
+bool ContainerProgram::PinExistAndVisible(const ConnectionInfo &info)
+{
+    if(info.type==PinType::Bridge)
+        return true;
+
+    Pin* pin=myHost->objFactory->GetPin(info);
+    if(!pin)
+        return false;
+    if(!pin->GetVisible())
+        return false;
+    return true;
+}
+
 void ContainerProgram::Load(int progId)
 {
     foreach(QSharedPointer<Object> objPtr, listObjects) {
@@ -112,13 +128,14 @@ void ContainerProgram::Load(int progId)
 
     foreach(Cable *cab, listCables) {
 
-        if(myHost->objFactory->GetObjectFromId(cab->GetInfoOut().objId) &&
-           myHost->objFactory->GetObjectFromId(cab->GetInfoIn().objId)) {
-
+        //check if the pin exists,
+        //if the object is in error mode, dummy pins will be created
+        if(PinExistAndVisible(cab->GetInfoOut()) &&
+           PinExistAndVisible(cab->GetInfoIn())) {
             cab->AddToParentNode(container->GetCablesIndex());
-            myHost->OnCableAdded(cab->GetInfoOut(),cab->GetInfoIn());
+            myHost->OnCableAdded(cab);
         } else {
-            //delete cable if objects are not found
+            //delete cable from program if pins are not found and can't be created
             listCables.removeAll(cab);
         }
     }
@@ -141,7 +158,7 @@ void ContainerProgram::Load(int progId)
 void ContainerProgram::Unload()
 {
     foreach(Cable *cab, listCables) {
-        myHost->OnCableRemoved(cab->GetInfoOut(),cab->GetInfoIn());
+        myHost->OnCableRemoved(cab);
         cab->RemoveFromParentNode(container->GetCablesIndex());
     }
 
@@ -154,6 +171,8 @@ void ContainerProgram::Unload()
 void ContainerProgram::SaveRendererState()
 {
     timeSavedRendererNodes = QTime::currentTime();
+    foreach(RendererNode *node, listOfRendererNodes)
+        delete node;
     listOfRendererNodes = myHost->GetRenderer()->SaveNodes();
 }
 
@@ -252,10 +271,18 @@ void ContainerProgram::ReplaceObject(QSharedPointer<Object> newObjPtr, QSharedPo
     //RemoveObject(replacedObjPtr);
 }
 
-void ContainerProgram::AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin, bool hidden)
+bool ContainerProgram::AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin, bool hidden)
 {
     if(CableExists(outputPin,inputPin))
-        return;
+        return true;
+
+    if(!outputPin.CanConnectTo(inputPin))
+        return false;
+
+    //check if the pin exists,
+    //if the object is in error mode, dummy pins will be created
+    if(!PinExistAndVisible(inputPin) || !PinExistAndVisible(outputPin))
+        return false;
 
     Cable *cab = new Cable(myHost,outputPin,inputPin);
     listCables << cab;
@@ -263,10 +290,19 @@ void ContainerProgram::AddCable(const ConnectionInfo &outputPin, const Connectio
     if(!hidden && container)
         cab->AddToParentNode(container->GetCablesIndex());
 
-    myHost->OnCableAdded(outputPin,inputPin);
+    myHost->OnCableAdded(cab);
     dirty=true;
+    return true;
 }
 
+void ContainerProgram::RemoveCable(Cable *cab)
+{
+    listCables.removeAll(cab);
+    cab->RemoveFromParentNode(container->GetCablesIndex());
+    myHost->OnCableRemoved(cab);
+    delete cab;
+    dirty=true;
+}
 
 void ContainerProgram::RemoveCable(const QModelIndex & index)
 {
@@ -281,11 +317,7 @@ void ContainerProgram::RemoveCable(const ConnectionInfo &outputPin, const Connec
     while(i>=0) {
         Cable *cab = listCables.at(i);
         if(cab->GetInfoOut()==outputPin && cab->GetInfoIn()==inputPin) {
-            listCables.removeAt(i);
-            cab->RemoveFromParentNode(container->GetCablesIndex());
-            myHost->OnCableRemoved(outputPin,inputPin);
-            delete cab;
-            dirty=true;
+            RemoveCable(cab);
             return;
         }
         --i;
@@ -298,11 +330,7 @@ void ContainerProgram::RemoveCableFromPin(const ConnectionInfo &pin)
     while(i>=0) {
         Cable *cab = listCables.at(i);
         if(cab->GetInfoOut()==pin || cab->GetInfoIn()==pin) {
-            listCables.removeAt(i);
-            cab->RemoveFromParentNode(container->GetCablesIndex());
-            myHost->OnCableRemoved(cab->GetInfoOut(),cab->GetInfoIn());
-            dirty=true;
-            delete cab;
+            RemoveCable(cab);
         }
         --i;
     }
@@ -315,11 +343,53 @@ void ContainerProgram::RemoveCableFromObj(int objId)
         Cable *cab = listCables.at(i);
         if(cab->GetInfoOut().objId==objId || cab->GetInfoIn().objId==objId ||
            cab->GetInfoOut().container==objId || cab->GetInfoIn().container==objId) {
-            listCables.removeAt(i);
-            cab->RemoveFromParentNode(container->GetCablesIndex());
-            myHost->OnCableRemoved(cab->GetInfoOut(),cab->GetInfoIn());
-            dirty=true;
-            delete cab;
+            RemoveCable(cab);
+        }
+        --i;
+    }
+}
+
+void ContainerProgram::CreateBridgeOverObj(int objId)
+{
+    int i=listCables.size()-1;
+    while(i>=0) {
+        Cable *cab = listCables.at(i);
+        if(cab->GetInfoOut().objId==objId || cab->GetInfoIn().objId==objId ||
+           cab->GetInfoOut().container==objId || cab->GetInfoIn().container==objId) {
+
+            //for all output cables
+            if(cab->GetInfoOut().objId==objId && cab->GetInfoOut().type!=PinType::Parameter ) {
+                int j=listCables.size()-1;
+                while(j>=0) {
+                    Cable *otherCab = listCables.at(j);
+                    ConnectionInfo otherPin( cab->GetInfoOut() );
+                    otherPin.direction=PinDirection::Input;
+
+                    //find corresponding input cables
+                    if(otherCab->GetInfoIn()==otherPin) {
+                        //create a bridge
+                        AddCable(otherCab->GetInfoOut(), cab->GetInfoIn());
+                    }
+                    --j;
+                }
+            }
+
+            //for all input cables
+            if(cab->GetInfoIn().objId==objId && cab->GetInfoIn().type!=PinType::Parameter ) {
+                int j=listCables.size()-1;
+                while(j>=0) {
+                    Cable *otherCab = listCables.at(j);
+                    ConnectionInfo otherPin( cab->GetInfoOut() );
+                    otherPin.direction=PinDirection::Output;
+
+                    //find corresponding output cables
+                    if(otherCab->GetInfoOut()==otherPin) {
+                        //create a bridge
+                        AddCable(cab->GetInfoOut(), otherCab->GetInfoIn() );
+                    }
+                    --j;
+                }
+            }
         }
         --i;
     }
@@ -339,6 +409,38 @@ void ContainerProgram::CopyCablesFromObj(int newObjId, int oldObjId)
             ConnectionInfo newConnect = cab->GetInfoIn();
             newConnect.objId = newObjId;
             AddCable(cab->GetInfoOut(), newConnect);
+        }
+        --i;
+    }
+}
+
+void ContainerProgram::MoveOutputCablesFromObj(int newObjId, int oldObjId)
+{
+    int i=listCables.size()-1;
+    while(i>=0) {
+        Cable *cab = listCables.at(i);
+        if(cab->GetInfoOut().objId==oldObjId && cab->GetInfoOut().type!=PinType::Parameter) {
+            ConnectionInfo newConnect = cab->GetInfoOut();
+            newConnect.objId = newObjId;
+            if( AddCable(newConnect, cab->GetInfoIn()) ) {
+                RemoveCable(cab);
+            }
+        }
+        --i;
+    }
+}
+
+void ContainerProgram::MoveInputCablesFromObj(int newObjId, int oldObjId)
+{
+    int i=listCables.size()-1;
+    while(i>=0) {
+        Cable *cab = listCables.at(i);
+        if(cab->GetInfoIn().objId==oldObjId && cab->GetInfoIn().type!=PinType::Parameter) {
+            ConnectionInfo newConnect = cab->GetInfoIn();
+            newConnect.objId = newObjId;
+            if( AddCable(cab->GetInfoOut(), newConnect) ) {
+                RemoveCable(cab);
+            }
         }
         --i;
     }

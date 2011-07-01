@@ -28,11 +28,14 @@
 #include "views/sceneview.h"
 #include "views/viewconfig.h"
 
+
 namespace Ui {
     class MainWindow;
 }
 
-using namespace View;
+namespace View {
+    class ViewConfigDialog;
+}
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -68,12 +71,22 @@ protected:
     Ui::MainWindow *ui;
     MainHost *myHost;
 
+    View::ViewConfigDialog *viewConfigDlg;
+
+#ifdef DEBUGMEM
+    QAction *heapState;
+#endif
+
 public slots:
     void programParkingModelChanges(QStandardItemModel *model);
     void groupParkingModelChanges(QStandardItemModel *model);
     void currentFileChanged();
+    void OnViewConfigClosed();
 
 private slots:
+#ifdef DEBUGMEM
+    void OnHeapCheck();
+#endif
     void on_actionLoad_Setup_triggered();
     void on_actionRestore_default_layout_triggered();
     void on_actionSave_Setup_As_triggered();
@@ -93,8 +106,8 @@ private slots:
     void InitColors();
     void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
 
-    void on_actionAppearance_triggered();
     void on_solverView_clicked(const QModelIndex &index);
+    void on_actionAppearance_toggled(bool arg1);
 };
 
 #endif // MAINWINDOW_H

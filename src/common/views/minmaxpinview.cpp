@@ -17,13 +17,15 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "minmaxpinview.h"
 
 using namespace View;
 
-MinMaxPinView::MinMaxPinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo) :
-        ConnectablePinView(angle,model,parent,pinInfo),
+MinMaxPinView::MinMaxPinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo, ViewConfig *config) :
+        ConnectablePinView(angle,model,parent,pinInfo,config),
         cursorCreated(false)
 {
 
@@ -36,19 +38,19 @@ void MinMaxPinView::CreateCursors()
     scaledView = new QGraphicsPolygonItem(this);
     scaledView->setBrush(QColor(0,0,0,30));
 
-    inMin=new CursorView(model,false,false,this);
+    inMin=new CursorView(model,false,false,this,config);
     inMin->setPos(rect().topLeft());
     inMin->SetValue(.0f);
 
-    inMax=new CursorView(model,true,false,this);
+    inMax=new CursorView(model,true,false,this,config);
     inMax->setPos(rect().topRight());
     inMax->SetValue(1.0f);
 
-    outMin=new CursorView(model,false,true,this);
+    outMin=new CursorView(model,false,true,this,config);
     outMin->setPos(rect().bottomLeft());
     outMin->SetValue(.0f);
 
-    outMax=new CursorView(model,true,true,this);
+    outMax=new CursorView(model,true,true,this,config);
     outMax->setPos(rect().bottomRight());
     outMax->SetValue(1.0f);
 }

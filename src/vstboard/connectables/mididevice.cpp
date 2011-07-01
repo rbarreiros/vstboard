@@ -17,6 +17,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "mainhosthost.h"
 #include "connectables/mididevice.h"
@@ -170,7 +172,8 @@ bool MidiDevice::CloseStream()
 
 bool MidiDevice::Close()
 {
-    MidiDevices *devCtrl = static_cast<MainHostHost*>(myHost)->midiDevices;
+    MainHostHost *host = static_cast<MainHostHost*>(myHost);
+    MidiDevices *devCtrl = host->midiDevices;
     if(devCtrl)
         devCtrl->CloseDevice(this);
 

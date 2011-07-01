@@ -65,6 +65,9 @@ public:
     void OptimizeRenderer() { if(renderer) renderer->Optimize(); }
     Renderer * GetRenderer() { return renderer; }
 
+    void OnCableAdded(Connectables::Cable *cab);
+    void OnCableRemoved(Connectables::Cable *cab);
+
     QSharedPointer<Connectables::MainContainer> mainContainer;
     QSharedPointer<Connectables::MainContainer> hostContainer;
     QSharedPointer<Connectables::MainContainer> projectContainer;
@@ -86,6 +89,7 @@ public:
 
 #ifdef VSTSDK
     vst::CVSTHost *vstHost;
+    static int vstUsersCounter;
 #endif
 
     static quint32 currentFileVersion;
@@ -95,7 +99,9 @@ public:
     QVariant GetSetting(QString name, QVariant defaultVal=0);
     bool SettingDefined(QString name);
 
-    QScriptEngine scriptEngine;
+#ifdef SCRIPTENGINE
+    QScriptEngine *scriptEngine;
+#endif
 
     QString currentProjectFile;
     QString currentSetupFile;
@@ -150,13 +156,12 @@ signals:
 
 public slots:
     void SetSolverUpdateNeeded(bool need=true);
-    void OnCableAdded(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
-    void OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
     void SetTempo(int tempo=120, int sign1=4, int sign2=4);
 //    void OnNewRenderingOrder(orderedNodes *renderLines);
     virtual void Render(unsigned long samples=0);
-    void LoadSetupFile(QString filename);
-    void LoadProjectFile(QString filename);
+    void LoadFile(const QString &filename);
+    void LoadSetupFile(const QString &filename);
+    void LoadProjectFile(const QString &filename);
     void ClearSetup();
     void ClearProject();
     void SaveSetupFile(QString filename="");

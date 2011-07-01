@@ -17,14 +17,16 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "connectablepinview.h"
 #include "../connectables/objectfactory.h"
 
 using namespace View;
 
-ConnectablePinView::ConnectablePinView(float angle, QAbstractItemModel *model, QGraphicsItem * parent, const ConnectionInfo &pinInfo) :
-       PinView(angle,model,parent,pinInfo),
+ConnectablePinView::ConnectablePinView(float angle, QAbstractItemModel *model, QGraphicsItem * parent, const ConnectionInfo &pinInfo, ViewConfig *config) :
+       PinView(angle,model,parent,pinInfo,config),
        value(0),
        isParameter(false)
 {
@@ -64,28 +66,32 @@ ConnectablePinView::ConnectablePinView(float angle, QAbstractItemModel *model, Q
     outline->setBrush( config->GetColor(colorGroupId, Colors::Background) );
     vuColor = config->GetColor(colorGroupId, Colors::VuMeter);
     rectVu->setBrush( vuColor );
-    highlight->setBrush( config->GetColor(colorGroupId, Colors::HighlightBackground) );
+    highlight->setBrush( config->GetColor(ColorGroups::Object, Colors::HighlightBackground) );
+    textItem->setBrush(  config->GetColor(ColorGroups::Object, Colors::Text) );
 }
 
 void ConnectablePinView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
 {
-    if(groupId!=colorGroupId)
+    if(groupId==colorGroupId && colorId==Colors::Background) {
+        outline->setBrush(color);
         return;
-
-    switch(colorId) {
-        case Colors::Background :
-            outline->setBrush(color);
-            break;
-        case Colors::VuMeter :
-            vuColor=color;
-            if(connectInfo.type != PinType::Midi) {
-                rectVu->setBrush(color);
-            }
-            break;
-        case Colors::HighlightBackground :
-            highlight->setBrush(color);
+    }
+    if(groupId==colorGroupId && colorId==Colors::VuMeter) {
+        vuColor=color;
+        if(connectInfo.type != PinType::Midi) {
+            rectVu->setBrush(color);
+        }
+        return;
+    }
+    if(groupId==ColorGroups::Object && colorId==Colors::HighlightBackground) {
+        highlight->setBrush(color);
+        return;
     }
 
+    if(groupId==ColorGroups::Object && colorId==Colors::Text) {
+        textItem->setBrush(color);
+        return;
+    }
 }
 
 void ConnectablePinView::UpdateModelIndex(const QModelIndex &index)
@@ -123,6 +129,10 @@ void ConnectablePinView::updateVu()
             } else {
                 newVu = geometry().width() * value;
             }
+            if(newVu<0.0) {
+                debug2(<<"ConnectablePinView::updateVu <0"<<newVu)
+                newVu=0.0;
+            }
             rectVu->setRect(0,0, newVu, geometry().height());
             break;
         }
@@ -148,6 +158,16 @@ void ConnectablePinView::updateVu()
     }
 }
 
+void ConnectablePinView::ValueChanged(float newVal)
+{
+    if(value==newVal)
+        return;
+    if(newVal>1.0f) newVal=1.0f;
+    if(newVal<0.0f) newVal=0.0f;
+
+    model->setData(pinIndex,newVal,UserRoles::value);
+}
+
 void ConnectablePinView::wheelEvent ( QGraphicsSceneWheelEvent * event )
 {
     if(!isParameter)
@@ -159,9 +179,29 @@ void ConnectablePinView::wheelEvent ( QGraphicsSceneWheelEvent * event )
     if(event->delta()<0)
         increm=-1;
 
-    float val = pinIndex.data(UserRoles::value).toFloat() + pinIndex.data(UserRoles::stepSize).toFloat()*increm;
-    if(val>1.0f) val=1.0f;
-    if(val<.0f) val=.0f;
+    ValueChanged( pinIndex.data(UserRoles::value).toFloat()
+                  + pinIndex.data(UserRoles::stepSize).toFloat()*increm);
+}
 
-    model->setData(pinIndex,val,UserRoles::value);
+void ConnectablePinView::keyPressEvent ( QKeyEvent * event )
+{
+    int k = event->key();
+
+    if(connectInfo.type == PinType::Parameter) {
+        if(event->modifiers() & Qt::ControlModifier) {
+            if(k==Qt::Key_Left) { ValueChanged(value-0.01); return; }
+            if(k==Qt::Key_Right) { ValueChanged(value+0.01); return; }
+        } else {
+            if(k==Qt::Key_Left) { ValueChanged(value-0.1); return; }
+            if(k==Qt::Key_Right) { ValueChanged(value+0.1); return; }
+        }
+
+        float val = ViewConfig::KeyboardNumber(k);
+        if(val>=0) {
+            ValueChanged(val);
+            return;
+        }
+    }
+
+    QGraphicsWidget::keyPressEvent(event);
 }

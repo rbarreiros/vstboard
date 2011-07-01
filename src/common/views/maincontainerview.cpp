@@ -17,6 +17,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "maincontainerview.h"
 #include "../connectables/objectfactory.h"
@@ -50,6 +52,11 @@ QPointF MainContainerView::GetDropPos()
     return mapFromScene( content->GetDropPos() );
 }
 
+void MainContainerView::SetDropPos(const QPointF &pt)
+{
+    content->SetDropPos( pt );
+}
+
 void MainContainerView::SetModelIndex(QPersistentModelIndex index)
 {
     setObjectName(QString("MainContainerView%1").arg(index.data(UserRoles::value).toInt()));
@@ -58,7 +65,13 @@ void MainContainerView::SetModelIndex(QPersistentModelIndex index)
 
 void MainContainerView::SetParking(QWidget *parking)
 {
-    content->myParking = parking;
+    content->SetParking( parking );
+    emit ParkingChanged(parking);
+}
+
+QWidget *MainContainerView::GetParking()
+{
+    return content->GetParking();
 }
 
 void MainContainerView::OnViewChanged(QRectF rect)

@@ -17,6 +17,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "configdialog.h"
 #include "ui_configdialog.h"
@@ -343,6 +345,20 @@ void ConfigDialog::AddRecentProjectFile(const QString &file,MainHost *myHost)
         myHost->SetSetting("recentProjectFiles",lstFiles);
     }
     myHost->SetSetting("lastProjectFile", file);
+}
+
+void ConfigDialog::RemoveRecentSetupFile(const QString &file,MainHost *myHost)
+{
+    QStringList lstFiles = myHost->GetSetting("recentSetupFiles").toStringList();
+    lstFiles.removeAll(file);
+    myHost->SetSetting("recentSetupFiles",lstFiles);
+}
+
+void ConfigDialog::RemoveRecentProjectFile(const QString &file,MainHost *myHost)
+{
+    QStringList lstFiles = myHost->GetSetting("recentProjectFiles").toStringList();
+    lstFiles.removeAll(file);
+    myHost->SetSetting("recentProjectFiles",lstFiles);
 }
 
 void ConfigDialog::accept()

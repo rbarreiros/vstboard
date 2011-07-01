@@ -17,6 +17,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "sceneview.h"
 #include "globals.h"
@@ -37,16 +39,27 @@
 using namespace View;
 
 SceneView::SceneView(MainHost *myHost,Connectables::ObjectFactory *objFactory, MainGraphicsView *viewHost, MainGraphicsView *viewProject, MainGraphicsView *viewProgram, MainGraphicsView *viewGroup,QWidget *parent) :
-        QAbstractItemView(parent),
-        viewHost(viewHost),
-        viewProject(viewProject),
-        viewProgram(viewProgram),
-        viewGroup(viewGroup),
-        sceneHost(0),
-        sceneProgram(0),
-        sceneGroup(0),
-        objFactory(objFactory),
-        myHost(myHost)
+    QAbstractItemView(parent),
+    viewHost(viewHost),
+    viewProject(viewProject),
+    viewProgram(viewProgram),
+    viewGroup(viewGroup),
+    rootObjHost(0),
+    rootObjProject(0),
+    rootObjProgram(0),
+    rootObjInsert(0),
+    sceneHost(0),
+    sceneProgram(0),
+    sceneGroup(0),
+    hostContainerView(0),
+    projectContainerView(0),
+    programContainerView(0),
+    groupContainerView(0),
+    progParking(0),
+    groupParking(0),
+    timerFalloff(0),
+    objFactory(objFactory),
+    myHost(myHost)
 {
     setHidden(true);
     timerFalloff = new QTimer(this);
@@ -73,6 +86,11 @@ void SceneView::SetParkings(QWidget *progPark, QWidget *groupPark)
 {
     progParking = progPark;
     groupParking = groupPark;
+
+    if(programContainerView)
+        programContainerView->SetParking(progParking);
+    if(groupContainerView)
+        groupContainerView->SetParking(groupParking);
 }
 
 void SceneView::dataChanged ( const QModelIndex & topLeft, const QModelIndex & bottomRight  )
@@ -125,7 +143,7 @@ void SceneView::dataChanged ( const QModelIndex & topLeft, const QModelIndex & b
 //                view->SetLearningIndex(tmpIndex);
 //                break;
 //            }
-        case NodeType::pinLimit :
+        case NodeType::cursor :
             {
                 PinView *view = static_cast<PinView*>(hashItems.value(tmpIndex.parent(),0));
                 if(!view) {
@@ -307,7 +325,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                 }
 
                 if(objId == FixedObjId::groupContainer) {
-                    MainContainerView *groupContainerView = new MainContainerView(myHost, model());
+                    groupContainerView = new MainContainerView(myHost, model());
                     objView=groupContainerView;
                     groupContainerView->setParentItem(rootObjInsert);
                     connect(viewGroup,SIGNAL(viewResized(QRectF)),
@@ -464,7 +482,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                     if(parentInfo.objType==ObjType::BridgeSend || parentInfo.objType==ObjType::BridgeReturn)
                         angle=-1.570796f; //-pi/2
 
-                    pinView = static_cast<PinView*>( new BridgePinView(angle, model(), parentList, pin->GetConnectionInfo()) );
+                    pinView = static_cast<PinView*>( new BridgePinView(angle, model(), parentList, pin->GetConnectionInfo(),&myHost->mainWindow->viewConfig) );
                     connect(timerFalloff,SIGNAL(timeout()),
                             pinView,SLOT(updateVu()));
                 } else {
@@ -475,12 +493,12 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
 
 
                     if(pinInfo.type==PinType::Parameter) {
-                        MinMaxPinView *p = new MinMaxPinView(angle,model(),parentList,pin->GetConnectionInfo());
+                        MinMaxPinView *p = new MinMaxPinView(angle,model(),parentList,pin->GetConnectionInfo(),&myHost->mainWindow->viewConfig);
                         connect(timerFalloff,SIGNAL(timeout()),
                                 p,SLOT(updateVu()));
                         pinView = static_cast<PinView*>(p);
                     } else {
-                        ConnectablePinView *p = new ConnectablePinView(angle, model(), parentList, pin->GetConnectionInfo());
+                        ConnectablePinView *p = new ConnectablePinView(angle, model(), parentList, pin->GetConnectionInfo(),&myHost->mainWindow->viewConfig);
                         connect(timerFalloff,SIGNAL(timeout()),
                                 p,SLOT(updateVu()));
                         pinView = static_cast<PinView*>(p);
@@ -502,11 +520,13 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                         this, SLOT(ConnectPins(ConnectionInfo,ConnectionInfo)));
                 connect(pinView,SIGNAL(RemoveCablesFromPin(ConnectionInfo)),
                         this,SLOT(RemoveCablesFromPin(ConnectionInfo)));
+                connect(pinView,SIGNAL(RemovePin(ConnectionInfo)),
+                        this,SLOT(RemovePin(ConnectionInfo)));
 
                 pinView->UpdateModelIndex(index);
                 break;
             }
-            case NodeType::pinLimit :
+            case NodeType::cursor :
             {
                 MinMaxPinView* pin = static_cast<MinMaxPinView*>(hashItems.value( index.parent(),0 ));
                 if(!pin) {
@@ -542,7 +562,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                     debug("SceneView::rowsInserted addcable : pin not found")
                             continue;
                 }
-                CableView *cable = new CableView(infoOut,infoIn,cnt);
+                CableView *cable = new CableView(infoOut,infoIn,cnt,&myHost->mainWindow->viewConfig);
                 pinOut->AddCable(cable);
                 pinIn->AddCable(cable);
                 hashItems.insert(index, cable);
@@ -566,7 +586,7 @@ void SceneView::graphicObjectRemoved ( QObject* obj)
     hashItems.remove( hashItems.key(obj) );
 }
 
-void SceneView::ConnectPins(ConnectionInfo pinOut,ConnectionInfo pinIn)
+void SceneView::ConnectPins(const ConnectionInfo &pinOut, const ConnectionInfo &pinIn)
 {
     QPersistentModelIndex ixOut = mapConnectionInfo.value(pinOut);
     QPersistentModelIndex ixIn = mapConnectionInfo.value(pinIn);
@@ -586,13 +606,20 @@ void SceneView::ConnectPins(ConnectionInfo pinOut,ConnectionInfo pinIn)
         static_cast<Connectables::Container*>(cntPtr.data())->UserAddCable(pinIn,pinOut);
 }
 
-void SceneView::RemoveCablesFromPin(ConnectionInfo pin)
+void SceneView::RemoveCablesFromPin(const ConnectionInfo &pin)
 {
     QPersistentModelIndex ix = mapConnectionInfo.value(pin);
     QModelIndex parent = ix.parent().parent().parent();
     if(pin.bridge) parent = parent.parent();
     QSharedPointer<Connectables::Object> cntPtr = objFactory->GetObjectFromId(parent.data(UserRoles::value).toInt());
     static_cast<Connectables::Container*>(cntPtr.data())->UserRemoveCableFromPin(pin);
+}
+
+void SceneView::RemovePin(const ConnectionInfo &pin)
+{
+    QPersistentModelIndex ix = mapConnectionInfo.value(pin);
+    QSharedPointer<Connectables::Object> objPtr = objFactory->GetObjectFromId(pin.objId);
+    objPtr->UserRemovePin(pin);
 }
 
 void SceneView::ToggleHostView(bool show)

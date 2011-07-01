@@ -1,3 +1,25 @@
+/**************************************************************************
+#    Copyright 2010-2011 Raphaël François
+#    Contact : ctrlbrk76@gmail.com
+#
+#    This file is part of VstBoard.
+#
+#    VstBoard is free software: you can redistribute it and/or modify
+#    it under the terms of the under the terms of the GNU Lesser General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    VstBoard is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    under the terms of the GNU Lesser General Public License for more details.
+#
+#    You should have received a copy of the under the terms of the GNU Lesser General Public License
+#    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
+**************************************************************************/
+#include "heap.h"
+
+
 #include "precomp.h"
 #include "viewconfig.h"
 #include "objectview.h"
@@ -18,67 +40,71 @@ ViewConfig::ViewConfig(QObject *parent) :
     savedInSetupFile(false)
 {
     colorGroupNames.insert( ColorGroups::ND, tr("-undefined-") );
+    colorGroupNames.insert( ColorGroups::Window, tr("Window") );
+    colorGroupNames.insert( ColorGroups::Panel, tr("Panel") );
+    colorGroupNames.insert( ColorGroups::Bridge, tr("Bridge") );
+    colorGroupNames.insert( ColorGroups::Object, tr("Object") );
     colorGroupNames.insert( ColorGroups::VstPlugin, tr("Vst Plugin") );
     colorGroupNames.insert( ColorGroups::AudioPin, tr("Audio Pin") );
     colorGroupNames.insert( ColorGroups::MidiPin, tr("Midi Pin") );
     colorGroupNames.insert( ColorGroups::ParameterPin, tr("Parameter Pin") );
-    colorGroupNames.insert( ColorGroups::Bridge, tr("Bridge") );
-    colorGroupNames.insert( ColorGroups::Object, tr("Object") );
-    colorGroupNames.insert( ColorGroups::Panel, tr("Panel") );
-    colorGroupNames.insert( ColorGroups::Windows, tr("Windows") );
+    colorGroupNames.insert( ColorGroups::Cursor, tr("Cursor") );
+    colorGroupNames.insert( ColorGroups::Programs, tr("Programs") );
 
     colorsNames.insert( Colors::ND, tr("-undefined-") );
+    colorsNames.insert( Colors::Window, tr("Window") );
+    colorsNames.insert( Colors::Base, tr("Base") );
     colorsNames.insert( Colors::Background, tr("Background") );
-    colorsNames.insert( Colors::Borders, tr("Borders") );
-    colorsNames.insert( Colors::Text, tr("Text") );
+    colorsNames.insert( Colors::HighlightBackground, tr("Highlight Background") );
     colorsNames.insert( Colors::VuMeter, tr("Vu-meter") );
+    colorsNames.insert( Colors::WindowText, tr("Window Text") );
+    colorsNames.insert( Colors::Text, tr("Text") );
+    colorsNames.insert( Colors::Lines, tr("Lines") );
     colorsNames.insert( Colors::Button, tr("Button") );
     colorsNames.insert( Colors::ButtonText, tr("Button Text") );
-    colorsNames.insert( Colors::Window, tr("Window") );
-    colorsNames.insert( Colors::WindowText, tr("Window Text") );
-    colorsNames.insert( Colors::Base, tr("Base") );
-    colorsNames.insert( Colors::AlternateBase, tr("Alternate Base") );
-    colorsNames.insert( Colors::ToolTipBase, tr("ToolTip Base") );
-    colorsNames.insert( Colors::ToolTipText, tr("ToolTip Text") );
-    colorsNames.insert( Colors::BrightText, tr("BrightText") );
-    colorsNames.insert( Colors::HighlightBackground, tr("Highlight Background") );
 
+//    colorsNames.insert( Colors::AlternateBase, tr("Alternate Base") );
+//    colorsNames.insert( Colors::ToolTipBase, tr("ToolTip Base") );
+//    colorsNames.insert( Colors::ToolTipText, tr("ToolTip Text") );
+//    colorsNames.insert( Colors::BrightText, tr("BrightText") );
+
+    AddColor(ColorGroups::Programs,Colors::HighlightBackground,QColor(170,255,100,255));
 
     AddColor(ColorGroups::VstPlugin,Colors::Background,QColor(255,255,128,128));
-    AddColor(ColorGroups::VstPlugin,Colors::HighlightBackground,QColor(255,255,128,180));
 
     AddColor(ColorGroups::AudioPin,Colors::Background,QColor(200,170,160,255));
     AddColor(ColorGroups::AudioPin,Colors::VuMeter,QColor(210,210,100,255));
-    AddColor(ColorGroups::AudioPin,Colors::HighlightBackground,QColor(255,255,255,128));
 
     AddColor(ColorGroups::MidiPin,Colors::Background,QColor(190,230,230,255));
     AddColor(ColorGroups::MidiPin,Colors::VuMeter,QColor(210,210,100,255));
-    AddColor(ColorGroups::MidiPin,Colors::HighlightBackground,QColor(255,255,255,128));
 
     AddColor(ColorGroups::ParameterPin,Colors::Background,QColor(160,185,200,255));
     AddColor(ColorGroups::ParameterPin,Colors::VuMeter,QColor(210,210,100,255));
-    AddColor(ColorGroups::ParameterPin,Colors::HighlightBackground,QColor(255,255,255,128));
+
+    AddColor(ColorGroups::Cursor,Colors::Background,QColor(0,0,0,90));
+    AddColor(ColorGroups::Cursor,Colors::HighlightBackground,QColor(0,0,0,255));
 
     AddColor(ColorGroups::Bridge,Colors::Background,QColor(160,170,160,255));
-    AddColor(ColorGroups::Bridge,Colors::Borders,QColor(0,0,0,255));
-    AddColor(ColorGroups::Bridge,Colors::HighlightBackground,QColor(200,255,200,128));
-
+    AddColor(ColorGroups::Bridge,Colors::Lines,QColor(0,0,0,255));
+ 
     AddColor(ColorGroups::Object,Colors::Background,QColor(120,160,185,128));
     AddColor(ColorGroups::Object,Colors::Text,QColor(0,0,0,255));
+    AddColor(ColorGroups::Object,Colors::HighlightBackground,QColor(255,255,0,127));
 
-    AddColor(ColorGroups::Panel,Colors::Background,QColor(190,190,190,255));
-    AddColor(ColorGroups::Panel,Colors::HighlightBackground,QColor(210,210,210,255));
+    AddColor(ColorGroups::Panel,Colors::Lines,QColor(0,0,0,150));
+    AddColor(ColorGroups::Panel,Colors::Background,QColor(0,0,0,0));
+    AddColor(ColorGroups::Panel,Colors::HighlightBackground,QColor(180,180,180,255));
 
-    AddColor(ColorGroups::Windows,Colors::Text,QColor(0,0,0,255));
-    AddColor(ColorGroups::Windows,Colors::Window,QColor(175,165,135,255));
-    AddColor(ColorGroups::Windows,Colors::WindowText,QColor(0,0,0,255));
-    AddColor(ColorGroups::Windows,Colors::Button,QColor(175,165,135,255));
-    AddColor(ColorGroups::Windows,Colors::ButtonText,QColor(0,0,0,255));
-    AddColor(ColorGroups::Windows,Colors::Base,QColor(190,190,190,255));
-    AddColor(ColorGroups::Windows,Colors::AlternateBase,QColor(100,100,100,255));
-    AddColor(ColorGroups::Windows,Colors::ToolTipBase,QColor(200,200,0,255));
-    AddColor(ColorGroups::Windows,Colors::ToolTipText,QColor(0,0,0,255));
-    AddColor(ColorGroups::Windows,Colors::BrightText,QColor(50,0,0,255));
+    AddColor(ColorGroups::Window,Colors::Text,QColor(0,0,0,255));
+    AddColor(ColorGroups::Window,Colors::Window,QColor(175,165,135,255));
+    AddColor(ColorGroups::Window,Colors::WindowText,QColor(0,0,0,255));
+    AddColor(ColorGroups::Window,Colors::Button,QColor(175,165,135,255));
+    AddColor(ColorGroups::Window,Colors::ButtonText,QColor(0,0,0,255));
+    AddColor(ColorGroups::Window,Colors::Base,QColor(190,190,190,255));
+//    AddColor(ColorGroups::Windows,Colors::AlternateBase,QColor(100,100,100,255));
+//    AddColor(ColorGroups::Windows,Colors::ToolTipBase,QColor(200,200,0,255));
+//    AddColor(ColorGroups::Windows,Colors::ToolTipText,QColor(0,0,0,255));
+//    AddColor(ColorGroups::Windows,Colors::BrightText,QColor(50,0,0,255));
 }
 
 /*!
@@ -87,6 +113,27 @@ ViewConfig::ViewConfig(QObject *parent) :
 ViewConfig::~ViewConfig()
 {
 
+}
+
+/*!
+  Translate the first row of keys (1,2,3...) into a float number
+    \param key code
+    \returns value from 0 to 1.0f or -1.0f if key not found
+    */
+float ViewConfig::KeyboardNumber(int key)
+{
+    if(key==QKeySequence(tr("!")) || key==QKeySequence(tr("1"))) return 0.0f;
+    if(key==QKeySequence(tr("@")) || key==QKeySequence(tr("2"))) return 0.1f;
+    if(key==QKeySequence(tr("#")) || key==QKeySequence(tr("3"))) return 0.2f;
+    if(key==QKeySequence(tr("$")) || key==QKeySequence(tr("4"))) return 0.3f;
+    if(key==QKeySequence(tr("%")) || key==QKeySequence(tr("5"))) return 0.4f;
+    if(key==QKeySequence(tr("^")) || key==QKeySequence(tr("6"))) return 0.5f;
+    if(key==QKeySequence(tr("&")) || key==QKeySequence(tr("7"))) return 0.6f;
+    if(key==QKeySequence(tr("*")) || key==QKeySequence(tr("8"))) return 0.7f;
+    if(key==QKeySequence(tr("(")) || key==QKeySequence(tr("9"))) return 0.8f;
+    if(key==QKeySequence(tr(")")) || key==QKeySequence(tr("0"))) return 0.9f;
+    if(key==QKeySequence(tr("_")) || key==QKeySequence(tr("-"))) return 1.0f;
+    return -1.0f;
 }
 
 /*!
@@ -124,7 +171,7 @@ void ViewConfig::UpdateAllWidgets()
 QString ViewConfig::GetColorGroupName(ColorGroups::Enum groupId)
 {
     if(!colorGroupNames.contains(groupId))
-        return "-unknown-";
+        return tr("-unknown-");
     return colorGroupNames.value(groupId);
 }
 
@@ -160,16 +207,16 @@ QPalette::ColorRole ViewConfig::GetPaletteRoleFromColor(Colors::Enum colorId)
             return QPalette::WindowText;
         case Colors::Base:
             return QPalette::Base;
-        case Colors::AlternateBase:
-            return QPalette::AlternateBase;
-        case Colors::ToolTipBase:
-            return QPalette::ToolTipBase;
-        case Colors::ToolTipText:
-            return QPalette::ToolTipText;
-        case Colors::BrightText:
-            return QPalette::BrightText;
+//        case Colors::AlternateBase:
+//            return QPalette::AlternateBase;
+//        case Colors::ToolTipBase:
+//            return QPalette::ToolTipBase;
+//        case Colors::ToolTipText:
+//            return QPalette::ToolTipText;
+//        case Colors::BrightText:
+//            return QPalette::BrightText;
         default:
-            return QPalette::Window;
+            return QPalette::NoRole;
     }
 
 }

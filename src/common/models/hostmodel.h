@@ -30,16 +30,14 @@ class HostModel : public QStandardItemModel
 Q_OBJECT
 public:
     HostModel(MainHost *parent=0);
-
     QMimeData * mimeData ( const QModelIndexList & indexes ) const;
-
-//    QStringList mimeTypes () const;
     bool dropMimeData ( const QMimeData * data, Qt::DropAction action, int row, int column, const QModelIndex & parent );
     bool setData ( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole );
-//    bool setItemData ( const QModelIndex & index, const QMap<int, QVariant> & roles );
 protected:
     QMap<int,QStandardItem*>mapObjects;
     MainHost *myHost;
+    QTimer *delayedAction;
+    QSignalMapper *LoadFileMapper;
 };
 
 #endif // HOSTMODEL_H

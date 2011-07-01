@@ -17,6 +17,9 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
+
 
 #include "container.h"
 #include "objectfactory.h"
@@ -97,17 +100,19 @@ void Container::SetContainerId(quint16 id)
 }
 
 /*!
-  Connect the output pins of bridgeA to the inputs of bridgeB
-  \param bridgeA the output bridge
-  \param bridgeB the input bridge
+  Connect the output pins of fromObjOutputs to the inputs of toObjInputs
+  \param fromObjOutputs
+  \param toObjInputs
   \param hidden true to create hidden cables
   */
-void Container::ConnectBridges(QSharedPointer<Object> bridgeA, QSharedPointer<Object> bridgeB, bool hidden)
+void Container::ConnectObjects(QSharedPointer<Object> fromObjOutputs, QSharedPointer<Object> toObjInputs, bool hiddenCables)
 {
-    if(bridgeA.isNull() || bridgeB.isNull())
+    if(fromObjOutputs.isNull() || toObjInputs.isNull())
         return;
 
-    bridgeA->GetListBridgePinOut()->ConnectAllTo(this,bridgeB->GetListBridgePinIn(), hidden);
+    fromObjOutputs->GetListAudioPinOut()->ConnectAllTo(this,toObjInputs->GetListAudioPinIn(), hiddenCables);
+    fromObjOutputs->GetListMidiPinOut()->ConnectAllTo(this,toObjInputs->GetListMidiPinIn(), hiddenCables);
+    fromObjOutputs->GetListBridgePinOut()->ConnectAllTo(this,toObjInputs->GetListBridgePinIn(), hiddenCables);
 }
 
 bool Container::Close()
@@ -406,8 +411,14 @@ void Container::UserParkObject(QSharedPointer<Object> objPtr)
 {
     ParkObject(objPtr);
     myHost->SetSolverUpdateNeeded();
-
     Updated();
+}
+
+void Container::UserParkWithBridge(QSharedPointer<Object> objPtr)
+{
+    if(currentProgram)
+        currentProgram->CreateBridgeOverObj(objPtr->GetIndex());
+    UserParkObject(objPtr);
 }
 
 /*!
@@ -446,6 +457,20 @@ void Container::CopyCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPoint
     if(!currentProgram)
         return;
     currentProgram->CopyCablesFromObj( newObjPtr->GetIndex(), ObjPtr->GetIndex() );
+}
+
+void Container::MoveOutputCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr)
+{
+    if(!currentProgram)
+        return;
+    currentProgram->MoveOutputCablesFromObj( newObjPtr->GetIndex(), ObjPtr->GetIndex() );
+}
+
+void Container::MoveInputCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr)
+{
+    if(!currentProgram)
+        return;
+    currentProgram->MoveInputCablesFromObj( newObjPtr->GetIndex(), ObjPtr->GetIndex() );
 }
 
 /*!

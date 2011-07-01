@@ -17,6 +17,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "connectables/audiodevicein.h"
 #include "connectables/audiodevice.h"
@@ -64,17 +66,16 @@ void AudioDeviceIn::Render()
 {
 
     foreach(Pin* pin,listAudioPinOut->listPins) {
-        if(doublePrecision) {
-            static_cast<AudioPinOut*>(pin)->GetBufferD()->ConsumeStack();
-        } else {
-            static_cast<AudioPinOut*>(pin)->GetBuffer()->ConsumeStack();
-        }
-        static_cast<AudioPinOut*>(pin)->SendAudioBuffer();
+        static_cast<AudioPin*>(pin)->GetBuffer()->ConsumeStack();
+        static_cast<AudioPin*>(pin)->SendAudioBuffer();
     }
 
     objMutex.lock();
-    if(parentDevice)
-        static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(0))->ChangeValue(parentDevice->GetCpuUsage());
+    if(parentDevice) {
+        ParameterPinOut* pin=static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(0));
+        if(pin)
+            pin->ChangeValue(parentDevice->GetCpuUsage());
+    }
     objMutex.unlock();
 }
 
@@ -132,7 +133,7 @@ Pin* AudioDeviceIn::CreatePin(const ConnectionInfo &info)
     switch(info.direction) {
         case PinDirection::Output :
             if(info.pinNumber==0) {
-                ParameterPinOut *pin = new ParameterPinOut(this,0,0,true,"cpu%",false);
+                ParameterPinOut *pin = new ParameterPinOut(this,0,0,"cpu%");
                 pin->SetLimitsEnabled(false);
                 return pin;
             }
@@ -151,35 +152,30 @@ void AudioDeviceIn::SetBufferFromRingBuffer(QList<CircularBuffer*>listCircularBu
 {
     unsigned long hostBuffSize = myHost->GetBufferSize();
 
-    if(doublePrecision) {
-        int cpt=0;
-        foreach(CircularBuffer *buf, listCircularBuffers) {
-            AudioBufferD *pinBuf = listAudioPinOut->GetBufferD(cpt);
-            cpt++;
-            if(!pinBuf)
-                continue;
+    int cpt=0;
+    foreach(CircularBuffer *buf, listCircularBuffers) {
+        AudioBuffer *pinBuf = listAudioPinOut->GetBuffer(cpt);
+        cpt++;
+        if(!pinBuf)
+            continue;
 
-            if(pinBuf->GetSize() < hostBuffSize)
-                pinBuf->SetSize(hostBuffSize);
-
-            if(buf->filledSize >= hostBuffSize)
-                buf->Get( pinBuf->GetPointer(true), hostBuffSize );
+        if(pinBuf->GetSize() < hostBuffSize) {
+            debug2(<<"resize buffer" << objectName() )
+            pinBuf->SetSize(hostBuffSize);
         }
-    } else {
-        int cpt=0;
-        foreach(CircularBuffer *buf, listCircularBuffers) {
-            AudioBuffer *pinBuf = listAudioPinOut->GetBuffer(cpt);
-            cpt++;
-            if(!pinBuf)
-                continue;
 
-            if(pinBuf->GetSize() < hostBuffSize) {
-                debug2(<<"resize buffer" << objectName() )
-                pinBuf->SetSize(hostBuffSize);
-            }
-
-            if(buf->filledSize >= hostBuffSize)
-                buf->Get( pinBuf->GetPointer(true), hostBuffSize );
+        if(buf->filledSize >= hostBuffSize) {
+            if(pinBuf->GetDoublePrecision())
+                buf->Get( (double*)pinBuf->GetPointer(true), hostBuffSize );
+            else
+                buf->Get( (float*)pinBuf->GetPointer(true), hostBuffSize );
         }
     }
+}
+
+QStandardItem *AudioDeviceIn::GetFullItem()
+{
+    QStandardItem *modelNode = Object::GetFullItem();
+    modelNode->setData(doublePrecision, UserRoles::isDoublePrecision);
+    return modelNode;
 }

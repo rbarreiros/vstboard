@@ -47,10 +47,10 @@ namespace Connectables {
         inline const ConnectionInfo & GetInfoIn() const {return pinIn;}
 
     protected:
-        /// the output pin (the one sending messages)
+        /// the output pin (from the sender object)
         const ConnectionInfo pinOut;
 
-        /// the input pin (the receiver)
+        /// the input pin (the receiver object)
         const ConnectionInfo pinIn;
 
         /// the cable index in the model

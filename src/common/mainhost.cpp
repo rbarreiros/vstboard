@@ -17,6 +17,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "mainhost.h"
 #include "mainwindow.h"
@@ -24,6 +26,7 @@
 
 #ifdef VSTSDK
     #include "connectables/vstplugin.h"
+    int MainHost::vstUsersCounter=0;
 #endif
 
 #include "projectfile/fileversion.h"
@@ -48,13 +51,20 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
 
     setObjectName("MainHost");
 
-    QScriptValue scriptObj = scriptEngine.newQObject(this);
-    scriptEngine.globalObject().setProperty("MainHost", scriptObj);
+#ifdef SCRIPTENGINE
+    scriptEngine = new QScriptEngine(this);
+    QScriptValue scriptObj = scriptEngine->newQObject(this);
+    scriptEngine->globalObject().setProperty("MainHost", scriptObj);
+#endif
 
+#ifdef VSTSDK
     if(!vst::CVSTHost::Get())
         vstHost = new vst::CVSTHost();
     else
         vstHost = vst::CVSTHost::Get();
+
+    vstUsersCounter++;
+#endif
 
     model = new HostModel(this);
     model->setObjectName("MainModel");
@@ -111,6 +121,14 @@ MainHost::~MainHost()
     programContainer.clear();
 
     delete objFactory;
+
+#ifdef VSTSDK
+    vstUsersCounter--;
+    if(vstUsersCounter==0)
+        delete vstHost;
+#endif
+
+    delete mutexListCables;
 }
 
 void MainHost::Open()
@@ -197,8 +215,8 @@ void MainHost::SetupHostContainer()
 
     //connect with groupContainer
     if(!groupContainer.isNull()) {
-        mainContainer->ConnectBridges(groupContainer->bridgeSend, hostContainer->bridgeIn);
-        mainContainer->ConnectBridges(hostContainer->bridgeOut, groupContainer->bridgeReturn);
+        mainContainer->ConnectObjects(groupContainer->bridgeSend, hostContainer->bridgeIn,true);
+        mainContainer->ConnectObjects(hostContainer->bridgeOut, groupContainer->bridgeReturn,true);
     }
 
     //send bridge
@@ -227,8 +245,8 @@ void MainHost::SetupHostContainer()
 
     //connect with projectContainer
     if(!projectContainer.isNull()) {
-        mainContainer->ConnectBridges(hostContainer->bridgeSend, projectContainer->bridgeIn);
-        mainContainer->ConnectBridges(projectContainer->bridgeOut, hostContainer->bridgeReturn);
+        mainContainer->ConnectObjects(hostContainer->bridgeSend, projectContainer->bridgeIn,true);
+        mainContainer->ConnectObjects(projectContainer->bridgeOut, hostContainer->bridgeReturn,true);
     }
     hostContainer->listenProgramChanges=false;
 
@@ -287,8 +305,8 @@ void MainHost::SetupProjectContainer()
 
     //connect with hostContainer
     if(!hostContainer.isNull()) {
-        mainContainer->ConnectBridges(hostContainer->bridgeSend, projectContainer->bridgeIn);
-        mainContainer->ConnectBridges(projectContainer->bridgeOut, hostContainer->bridgeReturn);
+        mainContainer->ConnectObjects(hostContainer->bridgeSend, projectContainer->bridgeIn,true);
+        mainContainer->ConnectObjects(projectContainer->bridgeOut, hostContainer->bridgeReturn,true);
     }
 
 
@@ -318,13 +336,13 @@ void MainHost::SetupProjectContainer()
 
     //connect with programContainer
     if(!programContainer.isNull()) {
-        mainContainer->ConnectBridges(projectContainer->bridgeSend, programContainer->bridgeIn);
-        mainContainer->ConnectBridges(programContainer->bridgeOut, projectContainer->bridgeReturn);
+        mainContainer->ConnectObjects(projectContainer->bridgeSend, programContainer->bridgeIn,true);
+        mainContainer->ConnectObjects(programContainer->bridgeOut, projectContainer->bridgeReturn,true);
     }
 
     //connect with itself (pass-though cables)
-    projectContainer->ConnectBridges(projectContainer->bridgeIn, projectContainer->bridgeSend,false);
-    projectContainer->ConnectBridges(projectContainer->bridgeReturn, projectContainer->bridgeOut,false);
+    projectContainer->ConnectObjects(projectContainer->bridgeIn, projectContainer->bridgeSend,false);
+    projectContainer->ConnectObjects(projectContainer->bridgeReturn, projectContainer->bridgeOut,false);
 
     projectContainer->listenProgramChanges=false;
 
@@ -384,8 +402,8 @@ void MainHost::SetupProgramContainer()
 
     //connect with projectContainer
     if(!projectContainer.isNull()) {
-        mainContainer->ConnectBridges(projectContainer->bridgeSend, programContainer->bridgeIn);
-        mainContainer->ConnectBridges(programContainer->bridgeOut, projectContainer->bridgeReturn);
+        mainContainer->ConnectObjects(projectContainer->bridgeSend, programContainer->bridgeIn,true);
+        mainContainer->ConnectObjects(programContainer->bridgeOut, projectContainer->bridgeReturn,true);
     }
 
 
@@ -415,8 +433,8 @@ void MainHost::SetupProgramContainer()
 
     //connect with groupContainer
     if(!groupContainer.isNull()) {
-        mainContainer->ConnectBridges(programContainer->bridgeSend, groupContainer->bridgeIn);
-        mainContainer->ConnectBridges(groupContainer->bridgeOut, programContainer->bridgeReturn);
+        mainContainer->ConnectObjects(programContainer->bridgeSend, groupContainer->bridgeIn,true);
+        mainContainer->ConnectObjects(groupContainer->bridgeOut, programContainer->bridgeReturn,true);
     }
 
     connect(programList, SIGNAL(ProgChanged(QModelIndex)),
@@ -485,8 +503,8 @@ void MainHost::SetupGroupContainer()
 
     //connect with programContainer
     if(!programContainer.isNull()) {
-        mainContainer->ConnectBridges(programContainer->bridgeSend, groupContainer->bridgeIn);
-        mainContainer->ConnectBridges(groupContainer->bridgeOut, programContainer->bridgeReturn);
+        mainContainer->ConnectObjects(programContainer->bridgeSend, groupContainer->bridgeIn,true);
+        mainContainer->ConnectObjects(groupContainer->bridgeOut, programContainer->bridgeReturn,true);
     }
 
     //bridge send
@@ -515,8 +533,8 @@ void MainHost::SetupGroupContainer()
 
     //connect with hostContainer
     if(!hostContainer.isNull()) {
-        mainContainer->ConnectBridges(groupContainer->bridgeSend, hostContainer->bridgeIn);
-        mainContainer->ConnectBridges(hostContainer->bridgeOut, groupContainer->bridgeReturn);
+        mainContainer->ConnectObjects(groupContainer->bridgeSend, hostContainer->bridgeIn,true);
+        mainContainer->ConnectObjects(hostContainer->bridgeOut, groupContainer->bridgeReturn,true);
     }
 
     connect(programList, SIGNAL(GroupChanged(QModelIndex)),
@@ -624,7 +642,8 @@ void MainHost::SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum ms
 
     hashCables::const_iterator i = workingListOfCables.constFind(senderPin);
     while (i != workingListOfCables.constEnd()  && i.key() == senderPin) {
-        Connectables::Pin *pin = objFactory->GetPin(i.value());
+        const ConnectionInfo &destPin = i.value();
+        Connectables::Pin *pin = objFactory->GetPin(destPin);
         if(!pin) {
             debug("MainHost::SendMsg : unknown pin")
             return;
@@ -675,22 +694,18 @@ void MainHost::Render(unsigned long samples)
     emit Rendered();
 }
 
-void MainHost::OnCableAdded(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
+void MainHost::OnCableAdded(Connectables::Cable *cab)
 {
     mutexListCables->lock();
-    workingListOfCables.insert(outputPin,inputPin);
+    workingListOfCables.insert(cab->GetInfoOut(),cab->GetInfoIn());
     mutexListCables->unlock();
-
-//    SetSolverUpdateNeeded();
 }
 
-void MainHost::OnCableRemoved(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
+void MainHost::OnCableRemoved(Connectables::Cable *cab)
 {
     mutexListCables->lock();
-    workingListOfCables.remove(outputPin,inputPin);
+    workingListOfCables.remove(cab->GetInfoOut(),cab->GetInfoIn());
     mutexListCables->unlock();
-
-//    SetSolverUpdateNeeded();
 }
 
 void MainHost::SetTimeInfo(const VstTimeInfo *info)
@@ -755,7 +770,18 @@ bool MainHost::SettingDefined(QString name)
     return settings.contains(settingsGroup + name);
 }
 
-void MainHost::LoadSetupFile(QString filename)
+void MainHost::LoadFile(const QString &filename)
+{
+    QFileInfo info(filename);
+    if ( info.suffix()==SETUP_FILE_EXTENSION ) {
+        LoadSetupFile(filename);
+    }
+    if ( info.suffix()==PROJECT_FILE_EXTENSION ) {
+        LoadProjectFile(filename);
+    }
+}
+
+void MainHost::LoadSetupFile(const QString &filename)
 {
     if(filename.isEmpty())
         return;
@@ -763,11 +789,13 @@ void MainHost::LoadSetupFile(QString filename)
     if(SetupFile::LoadFromFile(this,filename)) {
         ConfigDialog::AddRecentSetupFile(filename,this);
         currentSetupFile = filename;
-        emit currentFileChanged();
+    } else {
+        ConfigDialog::RemoveRecentSetupFile(filename,this);
     }
+    emit currentFileChanged();
 }
 
-void MainHost::LoadProjectFile(QString filename)
+void MainHost::LoadProjectFile(const QString &filename)
 {
     if(filename.isEmpty())
         return;
@@ -775,8 +803,10 @@ void MainHost::LoadProjectFile(QString filename)
     if(ProjectFile::LoadFromFile(this,filename)) {
         ConfigDialog::AddRecentProjectFile(filename,this);
         currentProjectFile = filename;
-        emit currentFileChanged();
+    } else {
+        ConfigDialog::RemoveRecentProjectFile(filename,this);
     }
+    emit currentFileChanged();
 }
 
 void MainHost::ClearSetup()

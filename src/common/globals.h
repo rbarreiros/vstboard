@@ -62,7 +62,8 @@ namespace UserRoles {
         isDirty,
         type,
         bankFile,
-        programFile
+        programFile,
+        isDoublePrecision
     };
 }
 namespace NodeType {
@@ -76,7 +77,7 @@ namespace NodeType {
         cable,
         program,
         programGroup,
-        pinLimit
+        cursor
     };
 }
 
@@ -165,7 +166,6 @@ namespace PinMessage {
     enum Enum {
         ND,
         AudioBuffer,
-        AudioBufferD,
         MidiMsg,
         ParameterValue
     };

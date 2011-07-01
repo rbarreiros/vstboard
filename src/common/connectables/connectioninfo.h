@@ -27,10 +27,10 @@ class ConnectionInfo
 {
 public:
     ConnectionInfo();
-    ConnectionInfo(MainHost *myHost,quint16 objId, PinType::Enum type, PinDirection::Enum direction, quint16 pinNumber, bool bridge);
+    ConnectionInfo(MainHost *myHost,quint16 objId, PinType::Enum type, PinDirection::Enum direction, quint16 pinNumber, bool bridge, bool removeable=false);
     ConnectionInfo(const ConnectionInfo &c);
 
-    bool CanConnectTo(const ConnectionInfo &c);
+    bool CanConnectTo(const ConnectionInfo &c) const;
 
     QDataStream & toStream(QDataStream& out) const;
     QDataStream & fromStream(QDataStream& in);
@@ -52,6 +52,9 @@ public:
 
     /// true if it's a bridge
     bool bridge;
+
+    /// true if the user can remove the pin
+    bool isRemoveable;
 
     /// pointer to the MainHost
     MainHost *myHost;

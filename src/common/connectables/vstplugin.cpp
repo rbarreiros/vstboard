@@ -17,6 +17,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "vstplugin.h"
 #include "../globals.h"
@@ -180,7 +182,8 @@ void VstPlugin::Render()
 
             int cpt=0;
             foreach(Pin* pin,listAudioPinOut->listPins) {
-                tmpBufOut[cpt] = static_cast<AudioPinOut*>(pin)->GetBufferD()->GetPointer(true);
+                AudioPin *audioPin = static_cast<AudioPin*>(pin);
+                tmpBufOut[cpt] = (double*)audioPin->GetBuffer()->GetPointer(true);
                 cpt++;
             }
 
@@ -193,7 +196,7 @@ void VstPlugin::Render()
 
                 cpt=0;
                 foreach(Pin* pin,listAudioPinIn->listPins) {
-                    tmpBufIn[cpt] = static_cast<AudioPinOut*>(pin)->GetBufferD()->ConsumeStack();
+                    tmpBufIn[cpt] = (double*)static_cast<AudioPin*>(pin)->GetBuffer()->ConsumeStack();
                     cpt++;
                 }
             }
@@ -215,7 +218,8 @@ void VstPlugin::Render()
 
         int cpt=0;
         foreach(Pin* pin,listAudioPinOut->listPins) {
-            tmpBufOut[cpt] = static_cast<AudioPinOut*>(pin)->GetBuffer()->GetPointer(true);
+            AudioPin *audioPin = static_cast<AudioPin*>(pin);
+            tmpBufOut[cpt] = (float*)audioPin->GetBuffer()->GetPointer(true);
             cpt++;
         }
 
@@ -228,7 +232,7 @@ void VstPlugin::Render()
 
             cpt=0;
             foreach(Pin* pin,listAudioPinIn->listPins) {
-                tmpBufIn[cpt] = static_cast<AudioPinOut*>(pin)->GetBuffer()->ConsumeStack();
+                tmpBufIn[cpt] = (float*)static_cast<AudioPin*>(pin)->GetBuffer()->ConsumeStack();
                 cpt++;
             }
         }
@@ -260,12 +264,8 @@ void VstPlugin::Render()
     //send result
     //=========================
     foreach(Pin* pin,listAudioPinOut->listPins) {
-        if(doublePrecision) {
-            static_cast<AudioPinOut*>(pin)->GetBufferD()->ConsumeStack();
-        } else {
-            static_cast<AudioPinOut*>(pin)->GetBuffer()->ConsumeStack();
-        }
-        static_cast<AudioPinOut*>(pin)->SendAudioBuffer();
+        static_cast<AudioPin*>(pin)->GetBuffer()->ConsumeStack();
+        static_cast<AudioPin*>(pin)->SendAudioBuffer();
     }
 
     EffIdle();
@@ -277,7 +277,7 @@ bool VstPlugin::Open()
         QMutexLocker lock(&objMutex);
         VstPlugin::pluginLoading = this;
 
-        if(!Load(myHost, objInfo.filename )) {
+        if(!Load(myHost, this, objInfo.filename )) {
             VstPlugin::pluginLoading = 0;
             errorMessage=tr("Error while loading plugin");
             return true;
@@ -313,6 +313,9 @@ bool VstPlugin::Open()
         bufferSize = myHost->GetBufferSize();
         sampleRate = myHost->GetSampleRate();
 
+        if(!(pEffect->flags & effFlagsCanDoubleReplacing))
+            doublePrecision=false;
+
         listAudioPinIn->ChangeNumberOfPins(pEffect->numInputs);
         listAudioPinOut->ChangeNumberOfPins(pEffect->numOutputs);
 
@@ -325,8 +328,6 @@ bool VstPlugin::Open()
         //long canSndMidiEvnt = pEffect->EffCanDo("sendVstMidiEvent");
         bWantMidi = (EffCanDo("receiveVstMidiEvent") == 1);
 
-        if(!(pEffect->flags & effFlagsCanDoubleReplacing))
-            doublePrecision=false;
 
      //   long midiPrgNames = EffCanDo("midiProgramNames");
         VstPinProperties pinProp;
@@ -397,48 +398,10 @@ bool VstPlugin::Open()
         }
     }
 
-    int nbParam = pEffect->numParams;
-    bool nameCanChange=false;
-    bool defVisible = true;
-
-    //plugin with gui :
-    if((pEffect->flags & effFlagsHasEditor) != 0) {
-        //plugin may change the parameter name
-        nameCanChange=true;
-
-        //only show learned parameters
-        defVisible=false;
-    }
-
     //create all parameters pins
+    int nbParam = pEffect->numParams;
     for(int i=0;i<nbParam;i++) {
-        //input pins
-        ParameterPinIn *pin=0;
-        if(listParameterPinIn->listPins.contains(i)) {
-            pin = static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(i));
-        } else {
-            pin = static_cast<ParameterPinIn*>(listParameterPinIn->AddPin(i));
-        }
-        if(!pin) {
-            debug2(<<"VstPlugin::Open ParameterPinIn"<<i<<"not created")
-            return false;
-        }
-        pin->SetDefaultVisible(defVisible);
-        pin->SetNameCanChange(nameCanChange);
-
-        //output pins
-//        ParameterPinOut *pinOut=0;
-//        if(listParameterPinOut->listPins.contains(i)) {
-//            pinOut = static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(i));
-//        } else {
-//            pinOut = static_cast<ParameterPinOut*>(listParameterPinOut->AddPin(i));
-//        }
-//        if(!pinOut) {
-//            debug2(<<"VstPlugin::Open ParameterPinOut"<<i<<"not created")
-//            return false;
-//        }
-//        pinOut->SetDefaultVisible(defVisible);
-//        pinOut->SetNameCanChange(nameCanChange);
+        listParameterPinIn->AddPin(i);
     }
 
     Object::Open();
@@ -470,9 +433,6 @@ void VstPlugin::CreateEditorWindow()
     //no gui
     if((pEffect->flags & effFlagsHasEditor) == 0)
         return;
-
-    static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::editorVisible))->SetAlwaysVisible(true);
-    static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::learningMode))->SetAlwaysVisible(true);
 
     editorWnd = new View::VstPluginWindow(myHost->mainWindow);
 
@@ -608,6 +568,22 @@ void VstPlugin::processEvents(VstEvents* events)
             debug("other vst event")
         }
     }
+}
+
+void VstPlugin::UserRemovePin(const ConnectionInfo &info)
+{
+    if(info.type!=PinType::Parameter)
+        return;
+
+    if(info.direction!=PinDirection::Input)
+        return;
+
+    if(!info.isRemoveable)
+        return;
+
+    if(listParameterPinIn->listPins.contains(info.pinNumber))
+        static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(info.pinNumber))->SetVisible(false);
+    OnProgramDirty();
 }
 
 VstIntPtr VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr, float opt, long currentReturnCode)
@@ -803,24 +779,31 @@ Pin* VstPlugin::CreatePin(const ConnectionInfo &info)
     if(info.type == PinType::Parameter && info.direction == PinDirection::Input) {
         switch(info.pinNumber) {
             case FixedPinNumber::vstProgNumber : {
-                ParameterPinIn *newPin = new ParameterPinIn(this,info.pinNumber,0,&listValues,true,"prog",false);
+                ParameterPinIn *newPin = new ParameterPinIn(this,info.pinNumber,0,&listValues,"prog");
                 newPin->SetLimitsEnabled(false);
                 return newPin;
             }
             case FixedPinNumber::editorVisible : {
-                ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::editorVisible,"hide",&listEditorVisible,false,tr("Editor"));
+                ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::editorVisible,"hide",&listEditorVisible,tr("Editor"));
                 newPin->SetLimitsEnabled(false);
                 return newPin;
             }
             case FixedPinNumber::learningMode : {
-                ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::learningMode,"off",&listIsLearning,false,tr("Learn"));
+                ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::learningMode,"off",&listIsLearning,tr("Learn"));
                 newPin->SetLimitsEnabled(false);
                 return newPin;
             }
             default : {
-                if(closed)
-                    return new ParameterPinIn(this,info.pinNumber,0,false,"",true);
-                return new ParameterPinIn(this,info.pinNumber,EffGetParameter(info.pinNumber),false,EffGetParamName(info.pinNumber),true);
+                //if the plugin has a gui, the pins can be learned and the name can change
+                bool removeable = (!pEffect || (pEffect->flags & effFlagsHasEditor) == 0)?false:true;
+                ParameterPin *pin=0;
+                if(closed) {
+                    pin = new ParameterPinIn(this,info.pinNumber,0,"",true,removeable);
+                } else {
+                    pin = new ParameterPinIn(this,info.pinNumber,EffGetParameter(info.pinNumber),EffGetParamName(info.pinNumber),removeable,removeable);
+                }
+                pin->SetDefaultVisible(!removeable);
+                return pin;
             }
         }
     }
@@ -863,4 +846,11 @@ QDataStream & VstPlugin::fromStream(QDataStream & in)
         }
     }
     return in;
+}
+
+QStandardItem *VstPlugin::GetFullItem()
+{
+    QStandardItem *modelNode = Object::GetFullItem();
+    modelNode->setData(doublePrecision, UserRoles::isDoublePrecision);
+    return modelNode;
 }

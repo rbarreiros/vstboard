@@ -17,6 +17,9 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
+
 
 #include "cable.h"
 #include "../mainhost.h"
@@ -58,13 +61,10 @@ Cable::Cable(const Cable & c) :
 /*!
   Add the cable in the model
   \param parentIndex the Container index
+  \return true if cable is created
   */
 void Cable::AddToParentNode(const QModelIndex &parentIndex)
 {
-    //check if the pin exists, used by errorneous objects to create the needed pins
-    myHost->objFactory->GetPin(pinOut);
-    myHost->objFactory->GetPin(pinIn);
-
     QStandardItem *item = new QStandardItem(QString("cable %1:%2").arg(pinOut.objId).arg(pinIn.objId));
     item->setData(QVariant::fromValue(ObjectInfo(NodeType::cable)),UserRoles::objInfo);
     item->setData(QVariant::fromValue(pinOut),UserRoles::value);

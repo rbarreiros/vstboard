@@ -17,9 +17,14 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "containercontent.h"
 #include "objectview.h"
+#include "maincontainerview.h"
+#include "pinview.h"
+#include "cableview.h"
 
 #ifdef _MSC_VER
 #pragma warning( disable: 4100 )
@@ -27,9 +32,11 @@
 
 using namespace View;
 
-ContainerContent::ContainerContent(MainHost *myHost, QAbstractItemModel *model, QGraphicsItem * parent, Qt::WindowFlags wFlags ) :
-    QGraphicsWidget(parent,wFlags),
-    model(model)
+ContainerContent::ContainerContent(MainHost *myHost, QAbstractItemModel *model, MainContainerView * parent ) :
+    ObjectDropZone(parent),
+    model(model),
+    rectAttachLeft(0),
+    rectAttachRight(0)
 {
     config = &myHost->mainWindow->viewConfig;
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
@@ -38,9 +45,8 @@ ContainerContent::ContainerContent(MainHost *myHost, QAbstractItemModel *model, 
     dropPos.setX(0);
     dropPos.setY(0);
 
-    setAutoFillBackground(true);
     QPalette pal(palette());
-    pal.setColor(QPalette::Window, config->GetColor(ColorGroups::Panel,Colors::Background) );
+    pal.setColor(QPalette::Window, config->GetColor(ColorGroups::Object,Colors::HighlightBackground) );
     setPalette( pal );
 
     connect( config, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
@@ -60,92 +66,69 @@ QPointF ContainerContent::GetDropPos()
     return p;
 }
 
+void ContainerContent::SetDropPos(const QPointF &pt)
+{
+    dropPos=pt;
+}
+
 void ContainerContent::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
 {
-    //accepts objects from parking
-    if(event->source() == myParking ) {
-        QGraphicsWidget::dragEnterEvent(event);
-        HighlightStart();
-        return;
-    }
-
-    if (event->mimeData()->hasUrls()) {
-        QString fName;
-        QFileInfo info;
-
-        foreach(QUrl url,event->mimeData()->urls()) {
-            fName = url.toLocalFile();
-            info.setFile( fName );
-
-            if ( info.isFile() && info.isReadable() ) {
-#ifdef VSTSDK
-                //accept DLL files
-                if( info.suffix()=="dll" ) {
-                    event->setDropAction(Qt::CopyAction);
-                    event->accept();
-                    HighlightStart();
-                    return;
-                }
-#endif
-
-                //accept setup and projects files
-                if ( info.suffix()==SETUP_FILE_EXTENSION || info.suffix()==PROJECT_FILE_EXTENSION ) {
-                    event->setDropAction(Qt::CopyAction);
-                    event->accept();
-                    HighlightStart();
-                    return;
-                }
-            }
+    //update connecting cable position
+    if(event->mimeData()->hasFormat("application/x-pin")) {
+        if(PinView::currentLine && PinView::currentLine->scene()==scene()) {
+            PinView::currentLine->setVisible(true);
+            event->accept();
+        } else {
+            event->ignore();
         }
-    }
-
-
-    //accept Audio interface
-    //accept Midi interface
-    //accept Tools
-    if(event->mimeData()->hasFormat("application/x-audiointerface") ||
-       event->mimeData()->hasFormat("application/x-midiinterface") ||
-       event->mimeData()->hasFormat("application/x-tools")) {
-        event->setDropAction(Qt::CopyAction);
-        event->accept();
-        HighlightStart();
+        QGraphicsWidget::dragEnterEvent(event);
         return;
     }
-    event->ignore();
+
+    ObjectDropZone::dragEnterEvent(event);
+}
+
+void ContainerContent::dragMoveEvent( QGraphicsSceneDragDropEvent *event)
+{
+    //update connecting cable position
+    if(event->mimeData()->hasFormat("application/x-pin")) {
+        if(PinView::currentLine) {
+            PinView::currentLine->UpdatePosition( mapToScene(event->pos()) );
+            PinView::currentLine->setVisible(true);
+            event->ignore();
+        }
+        QGraphicsWidget::dragMoveEvent(event);
+        return;
+    }
+    ObjectDropZone::dragMoveEvent(event);
 }
 
 void ContainerContent::dragLeaveEvent( QGraphicsSceneDragDropEvent *event)
 {
-    HighlightStop();
+    if(PinView::currentLine) {
+        PinView::currentLine->setVisible(false);
+    }
+    ObjectDropZone::dragLeaveEvent(event);
 }
 
 void ContainerContent::dropEvent( QGraphicsSceneDragDropEvent *event)
 {
-    HighlightStop();
-    QGraphicsWidget::dropEvent(event);
-    dropPos = mapToScene(event->pos());
+    ObjectDropZone::dropEvent(event);
+    dropPos = event->scenePos();
     event->setAccepted(model->dropMimeData(event->mimeData(), event->proposedAction(), 0, 0, objIndex));
 }
 
 void ContainerContent::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
 {
-    if(groupId!=ColorGroups::Panel)
+    if(groupId==ColorGroups::Panel && colorId==Colors::Background) {
+        HighlightStop();
         return;
-
-    switch(colorId) {
-        case Colors::Background : {
-            QPalette pal(palette());
-            pal.setColor(QPalette::Window,color);
-            setPalette( pal );
-            break;
-        }
-        default:
-            break;
     }
 }
 
 void ContainerContent::HighlightStart()
 {
+    setAutoFillBackground( true );
     QPalette pal(palette());
     pal.setColor(QPalette::Window, config->GetColor(ColorGroups::Panel,Colors::HighlightBackground) );
     setPalette( pal );
@@ -153,7 +136,13 @@ void ContainerContent::HighlightStart()
 
 void ContainerContent::HighlightStop()
 {
-    QPalette pal(palette());
-    pal.setColor(QPalette::Window, config->GetColor(ColorGroups::Panel,Colors::Background) );
-    setPalette( pal );
+    QColor color = config->GetColor(ColorGroups::Panel,Colors::Background);
+    if(color.alpha()==0) {
+        setAutoFillBackground( false );
+    } else {
+        setAutoFillBackground( true );
+        QPalette pal(palette());
+        pal.setColor(QPalette::Window, color );
+        setPalette( pal );
+    }
 }

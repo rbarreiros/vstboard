@@ -35,8 +35,6 @@ SOURCES += \
     views/connectablepinview.cpp \
     connectables/midipinin.cpp \
     connectables/midipinout.cpp \
-    connectables/audiopinout.cpp \
-    connectables/audiopinin.cpp \
     views/objectview.cpp \
     views/pinview.cpp \
     connectables/objectprogram.cpp \
@@ -88,7 +86,6 @@ SOURCES += \
     views/configdialog.cpp \
     views/maingraphicsview.cpp \
     connectables/hostcontroller.cpp \
-    audiobufferd.cpp \
     connectables/script.cpp \
     views/splash.cpp \
     connectables/audiopin.cpp \
@@ -104,7 +101,10 @@ SOURCES += \
     renderer/renderernode.cpp \
     renderer/node.cpp \
     views/listaudiodevicesview.cpp \
-    views/scripteditor.cpp
+    views/scripteditor.cpp \
+    views/objectdropzone.cpp \
+    views/gradientwidget.cpp \
+    heap.cpp
 
 HEADERS  += \
     globals.h \
@@ -113,8 +113,6 @@ HEADERS  += \
     connectables/miditoautomation.h \
     connectables/hostcontroller.h \
     connectables/midipinout.h \
-    connectables/audiopinout.h \
-    connectables/audiopinin.h \
     views/configdialog.h \
     views/objectview.h \
     views/pinview.h \
@@ -166,7 +164,6 @@ HEADERS  += \
     views/cursorview.h \
     mainwindow.h \
     views/maingraphicsview.h \
-    audiobufferd.h \
     connectables/script.h \
     views/splash.h \
     connectables/audiopin.h \
@@ -182,7 +179,10 @@ HEADERS  += \
     renderer/renderernode.h \
     renderer/node.h \
     views/listaudiodevicesview.h \
-    views/scripteditor.h
+    views/scripteditor.h \
+    views/objectdropzone.h \
+    views/gradientwidget.h \
+    heap.h
 
 FORMS += \
     views/configdialog.ui \

@@ -37,7 +37,9 @@ namespace View {
         ~MainContainerView();
         void SetModelIndex(QPersistentModelIndex index);
         void SetParking(QWidget *parking);
+        QWidget *GetParking();
         QPointF GetDropPos();
+        void SetDropPos(const QPointF &pt);
 
         BridgeView *bridgeIn;
         BridgeView *bridgeOut;
@@ -47,6 +49,9 @@ namespace View {
     protected:
         ContainerContent *content;
         QList<CableView*>listCables;
+
+    signals:
+        void ParkingChanged(QWidget *parking);
 
     public slots:
         void OnViewChanged(QRectF rect);

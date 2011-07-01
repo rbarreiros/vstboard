@@ -17,6 +17,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "connectables/audiodeviceout.h"
 #include "connectables/audiodevice.h"
@@ -102,21 +104,21 @@ bool AudioDeviceOut::Open()
 }
 
 void AudioDeviceOut::SetRingBufferFromPins(QList<CircularBuffer*>listCircularBuffers) {
-    if(doublePrecision) {
-        int cpt=0;
-        foreach(CircularBuffer *buf, listCircularBuffers) {
-            AudioBufferD *pinBuf = listAudioPinIn->GetBufferD(cpt);
-            cpt++;
-            buf->Put( pinBuf->ConsumeStack(), pinBuf->GetSize() );
-            pinBuf->ResetStackCounter();
-        }
-    } else {
-        int cpt=0;
-        foreach(CircularBuffer *buf, listCircularBuffers) {
-            AudioBuffer *pinBuf = listAudioPinIn->GetBuffer(cpt);
-            cpt++;
-            buf->Put( pinBuf->ConsumeStack(), pinBuf->GetSize() );
-            pinBuf->ResetStackCounter();
-        }
+    int cpt=0;
+    foreach(CircularBuffer *buf, listCircularBuffers) {
+        AudioBuffer *pinBuf = listAudioPinIn->GetBuffer(cpt);
+        cpt++;
+        if(pinBuf->GetDoublePrecision())
+            buf->Put( (double*)pinBuf->ConsumeStack(), pinBuf->GetSize() );
+        else
+            buf->Put( (float*)pinBuf->ConsumeStack(), pinBuf->GetSize() );
+        pinBuf->ResetStackCounter();
     }
+}
+
+QStandardItem *AudioDeviceOut::GetFullItem()
+{
+    QStandardItem *modelNode = Object::GetFullItem();
+    modelNode->setData(doublePrecision, UserRoles::isDoublePrecision);
+    return modelNode;
 }

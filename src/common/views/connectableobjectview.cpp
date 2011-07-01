@@ -17,6 +17,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "connectableobjectview.h"
 #include "connectablepinview.h"
@@ -30,13 +32,17 @@
 
 using namespace View;
 
-ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel *model,QGraphicsItem * parent, Qt::WindowFlags wFlags ) :
-    ObjectView(myHost,model,parent,wFlags)
+ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel *model,MainContainerView * parent, Qt::WindowFlags wFlags ) :
+    ObjectView(myHost,model,parent,wFlags),
+    dropReplace(0),
+    dropAttachLeft(0),
+    dropAttachRight(0)
 {
     setGeometry(QRectF(0,0,105,15));
 
     titleText = new QGraphicsSimpleTextItem(QString("Title"),this);
     titleText->moveBy(2,1);
+    titleText->setBrush( config->GetColor(ColorGroups::Object,Colors::Text) );
 
     layout = new QGraphicsGridLayout() ;
     layout->setSpacing(0);
@@ -61,6 +67,72 @@ ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel
     layout->addItem(listParametersIn,2,0,Qt::AlignLeft | Qt::AlignTop);
     layout->addItem(listParametersOut,2,1,Qt::AlignRight | Qt::AlignTop);
 
-   // setCursor(Qt::UpArrowCursor);
+    dropReplace = new ObjectDropZone(this,parent->GetParking());
+    dropReplace->setGeometry(10,0,85, size().height());
+    connect(parent,SIGNAL(ParkingChanged(QWidget*)),
+            dropReplace,SLOT(SetParking(QWidget*)));
+    connect(dropReplace, SIGNAL(ObjectDropped(QGraphicsSceneDragDropEvent*)),
+            this,SLOT(ObjectDropped(QGraphicsSceneDragDropEvent*)));
+    connect(this, SIGNAL(heightChanged()),
+            dropReplace, SLOT(UpdateHeight()));
+
+    dropAttachLeft = new ObjectDropZone(this,parent->GetParking());
+    dropAttachLeft->setGeometry(-10,0,20, size().height());
+    connect(parent,SIGNAL(ParkingChanged(QWidget*)),
+            dropAttachLeft,SLOT(SetParking(QWidget*)));
+    connect(dropAttachLeft, SIGNAL(ObjectDropped(QGraphicsSceneDragDropEvent*)),
+            this,SLOT(ObjectDropped(QGraphicsSceneDragDropEvent*)));
+    connect(this, SIGNAL(heightChanged()),
+            dropAttachLeft, SLOT(UpdateHeight()));
+
+    dropAttachRight = new ObjectDropZone(this,parent->GetParking());
+    dropAttachRight->setGeometry(95,0,20, size().height());
+    connect(parent,SIGNAL(ParkingChanged(QWidget*)),
+            dropAttachLeft,SLOT(SetParking(QWidget*)));
+    connect(dropAttachRight, SIGNAL(ObjectDropped(QGraphicsSceneDragDropEvent*)),
+            this,SLOT(ObjectDropped(QGraphicsSceneDragDropEvent*)));
+    connect(this, SIGNAL(heightChanged()),
+            dropAttachRight, SLOT(UpdateHeight()));
+
+    QPalette pal(palette());
+    pal.setColor(QPalette::Window, config->GetColor(ColorGroups::Object,Colors::HighlightBackground) );
+    dropReplace->setPalette( pal );
+    dropAttachLeft->setPalette( pal );
+    dropAttachRight->setPalette( pal );
 }
 
+void ConnectableObjectView::ObjectDropped(QGraphicsSceneDragDropEvent *event)
+{
+    QPointF dropPos(0,0);
+    int col=0;
+
+    if(sender()==dropAttachLeft) {
+        col=1;
+        dropPos.rx()-=(geometry().width()+10);
+    }
+    if(sender()==dropReplace){
+        col=2;
+    }
+    if(sender()==dropAttachRight){
+        col=3;
+        dropPos.rx()+=(geometry().width()+10);
+    }
+
+    MainContainerView *cnt = static_cast<MainContainerView*>(parentItem());
+    if(cnt)
+        cnt->SetDropPos( mapToScene(dropPos) );
+    event->setAccepted(model->dropMimeData(event->mimeData(), event->dropAction(), 0, col, objIndex));
+}
+
+void ConnectableObjectView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
+{
+    if(groupId==ColorGroups::Object && colorId==Colors::HighlightBackground) {
+        QPalette pal(palette());
+        pal.setColor(QPalette::Window, color );
+        dropReplace->setPalette( pal );
+        dropAttachLeft->setPalette( pal );
+        dropAttachRight->setPalette( pal );
+        return;
+    }
+    ObjectView::UpdateColor(groupId,colorId,color);
+}

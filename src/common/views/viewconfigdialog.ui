@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>424</width>
-    <height>194</height>
+    <width>599</width>
+    <height>333</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,10 +17,24 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_5">
      <item>
-      <widget class="QListWidget" name="listPalettes"/>
+      <widget class="QListWidget" name="listPalettes">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
      </item>
      <item>
-      <widget class="QListWidget" name="listRoles"/>
+      <widget class="QListWidget" name="listRoles">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -35,162 +49,169 @@
          <property name="title">
           <string>Color</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout">
-            <item>
-             <widget class="QLabel" name="label">
-              <property name="text">
-               <string>Red</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSlider" name="RedSlider">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximum">
-               <number>255</number>
-              </property>
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSpinBox" name="RedSpinBox">
-              <property name="maximum">
-               <number>255</number>
-              </property>
-             </widget>
-            </item>
-           </layout>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="1" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Red</string>
+            </property>
+           </widget>
           </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <item>
-             <widget class="QLabel" name="label_2">
-              <property name="text">
-               <string>Green</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSlider" name="GreenSlider">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximum">
-               <number>255</number>
-              </property>
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSpinBox" name="GreenSpinBox">
-              <property name="maximum">
-               <number>255</number>
-              </property>
-             </widget>
-            </item>
-           </layout>
+          <item row="1" column="1">
+           <widget class="QSlider" name="RedSlider">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximum">
+             <number>255</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
           </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_4">
-            <item>
-             <widget class="QLabel" name="label_4">
-              <property name="text">
-               <string>Blue</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSlider" name="BlueSlider">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximum">
-               <number>255</number>
-              </property>
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSpinBox" name="BlueSpinBox">
-              <property name="maximum">
-               <number>255</number>
-              </property>
-             </widget>
-            </item>
-           </layout>
+          <item row="1" column="2">
+           <widget class="QSpinBox" name="RedSpinBox">
+            <property name="maximum">
+             <number>255</number>
+            </property>
+           </widget>
           </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <item>
-             <widget class="QLabel" name="label_3">
-              <property name="text">
-               <string>Alpha</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSlider" name="AlphaSlider">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximum">
-               <number>255</number>
-              </property>
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSpinBox" name="AlphaSpinBox">
-              <property name="maximum">
-               <number>255</number>
-              </property>
-             </widget>
-            </item>
-           </layout>
+          <item row="2" column="1">
+           <widget class="QSlider" name="GreenSlider">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximum">
+             <number>255</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QSpinBox" name="GreenSpinBox">
+            <property name="maximum">
+             <number>255</number>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Green</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QSlider" name="BlueSlider">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximum">
+             <number>255</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Blue</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QSpinBox" name="BlueSpinBox">
+            <property name="maximum">
+             <number>255</number>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QSlider" name="AlphaSlider">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximum">
+             <number>255</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Alpha</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2">
+           <widget class="QSpinBox" name="AlphaSpinBox">
+            <property name="maximum">
+             <number>255</number>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QSlider" name="HueSlider">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximum">
+             <number>359</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>Hue</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="2">
+           <widget class="QSpinBox" name="HueSpinBox">
+            <property name="maximum">
+             <number>359</number>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0" colspan="3">
+           <widget class="View::GradientWidget" name="picker" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
           </item>
          </layout>
-         <zorder></zorder>
-         <zorder></zorder>
-         <zorder></zorder>
-         <zorder></zorder>
         </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
        </item>
       </layout>
      </item>
@@ -225,6 +246,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>View::GradientWidget</class>
+   <extends>QWidget</extends>
+   <header>gradientwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
@@ -234,8 +263,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>413</x>
-     <y>183</y>
+     <x>588</x>
+     <y>322</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -250,76 +279,12 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>413</x>
-     <y>183</y>
+     <x>588</x>
+     <y>322</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
      <y>193</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>RedSpinBox</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>RedSlider</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>377</x>
-     <y>45</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>339</x>
-     <y>45</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>GreenSlider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>GreenSpinBox</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>339</x>
-     <y>69</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>369</x>
-     <y>69</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>GreenSpinBox</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>GreenSlider</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>372</x>
-     <y>74</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>329</x>
-     <y>75</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>BlueSlider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>BlueSpinBox</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>337</x>
-     <y>98</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>378</x>
-     <y>97</y>
     </hint>
    </hints>
   </connection>
@@ -330,44 +295,44 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>372</x>
-     <y>97</y>
+     <x>576</x>
+     <y>110</y>
     </hint>
     <hint type="destinationlabel">
-     <x>333</x>
-     <y>97</y>
+     <x>528</x>
+     <y>109</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>AlphaSlider</sender>
+   <sender>BlueSlider</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>AlphaSpinBox</receiver>
+   <receiver>BlueSpinBox</receiver>
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>326</x>
-     <y>125</y>
+     <x>528</x>
+     <y>109</y>
     </hint>
     <hint type="destinationlabel">
-     <x>379</x>
-     <y>125</y>
+     <x>576</x>
+     <y>110</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>AlphaSpinBox</sender>
+   <sender>RedSpinBox</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>AlphaSlider</receiver>
+   <receiver>RedSlider</receiver>
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>381</x>
-     <y>126</y>
+     <x>576</x>
+     <y>54</y>
     </hint>
     <hint type="destinationlabel">
-     <x>320</x>
-     <y>126</y>
+     <x>528</x>
+     <y>53</y>
     </hint>
    </hints>
   </connection>
@@ -378,12 +343,108 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>282</x>
-     <y>44</y>
+     <x>528</x>
+     <y>53</y>
     </hint>
     <hint type="destinationlabel">
-     <x>381</x>
-     <y>43</y>
+     <x>576</x>
+     <y>54</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>HueSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>HueSpinBox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>505</x>
+     <y>154</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>550</x>
+     <y>158</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>HueSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>HueSlider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>546</x>
+     <y>153</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>510</x>
+     <y>152</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>GreenSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>GreenSpinBox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>528</x>
+     <y>81</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>576</x>
+     <y>82</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>GreenSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>GreenSlider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>576</x>
+     <y>82</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>81</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AlphaSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>AlphaSpinBox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>528</x>
+     <y>137</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>576</x>
+     <y>138</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AlphaSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>AlphaSlider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>576</x>
+     <y>138</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>137</y>
     </hint>
    </hints>
   </connection>

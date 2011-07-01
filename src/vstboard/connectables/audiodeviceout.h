@@ -41,6 +41,8 @@ namespace Connectables {
         bool Close();
         void SetParentDevice( AudioDevice *device );
         void SetRingBufferFromPins(QList<CircularBuffer*>listCircularBuffers);
+        QStandardItem *GetFullItem();
+
     protected:
         /// pointer to the linked AudioDevice
         AudioDevice *parentDevice;

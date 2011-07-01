@@ -38,7 +38,7 @@ namespace Connectables {
         virtual ~Container();
 
         void Hide();
-        void ConnectBridges(QSharedPointer<Object> bridgeA, QSharedPointer<Object> bridgeB, bool hidden=true);
+        void ConnectObjects(QSharedPointer<Object> fromObjOutputs, QSharedPointer<Object> toObjInputs, bool hiddenCables);
 //        void RemoveCable(QModelIndex & index);
         void SetContainerId(quint16 id);
         const QModelIndex &GetCablesIndex();
@@ -55,11 +55,14 @@ namespace Connectables {
 
         virtual bool Close();
         virtual void AddObject(QSharedPointer<Object> objPtr);
-        virtual void AddParkedObject(QSharedPointer<Object> objPtr);
         virtual void ParkObject(QSharedPointer<Object> objPtr);
-        virtual void CopyCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr);
-        virtual bool IsDirty();
-        virtual void SetSleep(bool sleeping);
+
+        void AddParkedObject(QSharedPointer<Object> objPtr);
+        void CopyCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr);
+        void MoveOutputCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr);
+        void MoveInputCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr);
+        bool IsDirty();
+        void SetSleep(bool sleeping);
 
         /// shared pointer to the bridge in object
         QSharedPointer<Object> bridgeIn;
@@ -115,6 +118,7 @@ namespace Connectables {
     public slots:
         void UserAddObject(QSharedPointer<Object> objPtr);
         void UserParkObject(QSharedPointer<Object> objPtr);
+        void UserParkWithBridge(QSharedPointer<Object> objPtr);
         void UserAddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
         void UserRemoveCableFromPin(const ConnectionInfo &pin);
 

@@ -17,23 +17,27 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "cursorview.h"
 #include "globals.h"
+#include "viewconfig.h"
 
 using namespace View;
 
 #define CURS_WIDTH 5.0f
 #define CURD_HEIGHT 7.5f
 
-CursorView::CursorView(QAbstractItemModel *model,bool isMaxi,bool upsideDown,QGraphicsItem *parent) :
+CursorView::CursorView(QAbstractItemModel *model,bool isMaxi,bool upsideDown,QGraphicsItem *parent, ViewConfig *config) :
         QGraphicsWidget(parent),
         isMaxi(isMaxi),
         upsideDown(upsideDown),
         drag(false),
         value(.0f),
         model(model),
-        offset(QPointF(0,0))
+        offset(QPointF(0,0)),
+        config(config)
 {
     QPolygonF pol;
 
@@ -56,9 +60,12 @@ CursorView::CursorView(QAbstractItemModel *model,bool isMaxi,bool upsideDown,QGr
     }
     cursor = new QGraphicsPolygonItem(pol,this);
     cursor->setPen(Qt::NoPen);
-    cursor->setBrush(QColor(64,64,64));
+    cursor->setBrush( config->GetColor(ColorGroups::Cursor,Colors::Background) );
+    connect( config, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
+            this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)) );
 
     setFlag(QGraphicsItem::ItemIsMovable, true);
+    setFocusPolicy(Qt::StrongFocus);
     setCursor(Qt::SplitHCursor);
     resize(cursor->boundingRect().size());
 }
@@ -126,6 +133,9 @@ void CursorView::ValueChanged(float newVal)
 {
     if(value==newVal)
         return;
+    if(newVal>1.0f) newVal=1.0f;
+    if(newVal<0.0f) newVal=0.0f;
+
     model->setData(modelIndex,newVal,UserRoles::value);
 }
 
@@ -148,4 +158,48 @@ QVariant CursorView::itemChange(GraphicsItemChange change, const QVariant &value
         return newPos;
     }
     return QGraphicsWidget::itemChange(change, value);
+}
+
+void CursorView::keyPressEvent ( QKeyEvent * event )
+{
+    int k = event->key();
+
+    if(event->modifiers() & Qt::ControlModifier) {
+        if(k==Qt::Key_Left) { ValueChanged(value-0.01); return; }
+        if(k==Qt::Key_Right) { ValueChanged(value+0.01); return; }
+    } else {
+        if(k==Qt::Key_Left) { ValueChanged(value-0.1); return; }
+        if(k==Qt::Key_Right) { ValueChanged(value+0.1); return; }
+    }
+
+    float val = ViewConfig::KeyboardNumber(k);
+    if(val>=0) {
+        ValueChanged(val);
+        return;
+    }
+
+    QGraphicsWidget::keyPressEvent(event);
+}
+
+void CursorView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
+{
+    if(groupId==ColorGroups::Cursor && colorId==Colors::Background && !hasFocus()) {
+        cursor->setBrush(color);
+    }
+
+    if(groupId==ColorGroups::Cursor && colorId==Colors::HighlightBackground && hasFocus()) {
+        cursor->setBrush(color);
+    }
+}
+
+void CursorView::focusInEvent ( QFocusEvent * event )
+{
+    cursor->setBrush( config->GetColor(ColorGroups::Cursor,Colors::HighlightBackground) );
+    QGraphicsWidget::focusInEvent(event);
+}
+
+void CursorView::focusOutEvent ( QFocusEvent * event )
+{
+    cursor->setBrush( config->GetColor(ColorGroups::Cursor,Colors::Background) );
+    QGraphicsWidget::focusOutEvent(event);
 }

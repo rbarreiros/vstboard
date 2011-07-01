@@ -23,9 +23,11 @@ namespace View {
         ~ViewConfigDialog();
 
     private:
+        void GetColorFromConf();
         void UpdateSliders();
         void DisableSliders();
-        void UpdateColor(int r,int v,int b, int a);
+        void SaveColor();
+        QColor currentColor;
 
         /// pointer to the dialog ui;
         Ui::ViewConfigDialog *ui;
@@ -54,11 +56,16 @@ namespace View {
         /// set to true whan changes are made
         bool modified;
 
+        bool StartUpdate();
+        void EndUpdate();
+        bool updateInProgress;
+
     public slots:
         void accept();
         void reject();
 
     private slots:
+        void onPickerColorSelected(const QColor &color);
         void on_listPalettes_itemClicked(QListWidgetItem* item);
         void on_listRoles_itemClicked(QListWidgetItem* item);
         void on_checkSavedInSetupFile_clicked(bool checked);
@@ -66,6 +73,7 @@ namespace View {
         void on_GreenSpinBox_valueChanged(int );
         void on_BlueSpinBox_valueChanged(int );
         void on_AlphaSpinBox_valueChanged(int );
+        void on_HueSpinBox_valueChanged(int );
     };
 }
 #endif // VIEWCONFIGDIALOG_H

@@ -17,6 +17,9 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
+
 
 #include "parameterpinin.h"
 #include "object.h"
@@ -25,14 +28,14 @@
 using namespace Connectables;
 
 //parameter is a float
-ParameterPinIn::ParameterPinIn(Object *parent, int number, float defaultValue, bool defaultVisible, QString name, bool nameCanChange) :
-        ParameterPin(parent, PinDirection::Input, number, defaultValue, defaultVisible, name, nameCanChange)
+ParameterPinIn::ParameterPinIn(Object *parent, int number, float defaultValue, QString name, bool nameCanChange, bool isRemoveable) :
+        ParameterPin(parent, PinDirection::Input, number, defaultValue, name, nameCanChange, isRemoveable)
 {
 }
 
 //parameter is a int, index in a list of values
-ParameterPinIn::ParameterPinIn(Object *parent, int number, const QVariant &defaultVariantValue, QList<QVariant> *listValues, bool defaultVisible, QString name, bool nameCanChange) :
-        ParameterPin(parent, PinDirection::Input, number, defaultVariantValue, listValues, defaultVisible, name, nameCanChange)
+ParameterPinIn::ParameterPinIn(Object *parent, int number, const QVariant &defaultVariantValue, QList<QVariant> *listValues, QString name, bool nameCanChange, bool isRemoveable) :
+        ParameterPin(parent, PinDirection::Input, number, defaultVariantValue, listValues, name, nameCanChange, isRemoveable)
 {
 }
 

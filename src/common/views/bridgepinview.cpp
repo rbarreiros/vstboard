@@ -17,6 +17,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "bridgepinview.h"
 #include "objectview.h"
@@ -34,8 +36,8 @@ using namespace View;
   \param parent pointer to the parent object view
   \param pinInfo description of the pin
   */
-BridgePinView::BridgePinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo) :
-        PinView(angle, model,parent, pinInfo),
+BridgePinView::BridgePinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo, ViewConfig *config) :
+        PinView(angle, model,parent, pinInfo,config),
         value(.0f),
         valueType(PinType::ND)
 {
@@ -59,11 +61,11 @@ BridgePinView::BridgePinView(float angle, QAbstractItemModel *model,QGraphicsIte
 
     outline = new QGraphicsPolygonItem(pol,this);
     outline->setBrush(Qt::NoBrush);
-    outline->setPen( config->GetColor(ColorGroups::Bridge,Colors::Borders) );
+    outline->setPen( config->GetColor(ColorGroups::Bridge,Colors::Lines) );
 
     highlight = new QGraphicsPolygonItem(pol,this);
     highlight->setVisible(false);
-    highlight->setBrush( config->GetColor(ColorGroups::Bridge, Colors::HighlightBackground) );
+    highlight->setBrush( config->GetColor(ColorGroups::Object, Colors::HighlightBackground) );
 
     QPalette pal(palette());
     pal.setColor(QPalette::Window, config->GetColor(ColorGroups::Bridge,Colors::Background) );
@@ -72,23 +74,20 @@ BridgePinView::BridgePinView(float angle, QAbstractItemModel *model,QGraphicsIte
 
 void BridgePinView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
 {
-    if(groupId!=ColorGroups::Bridge)
+    if(groupId==ColorGroups::Bridge && colorId==Colors::Lines) {
+        outline->setPen( color );
         return;
+    }
 
-    switch(colorId) {
-        case Colors::Borders:
-            outline->setPen( color );
-            break;
-        case Colors::Background: {
-            QPalette pal(palette());
-            pal.setColor(QPalette::Window,color);
-            setPalette( pal );
-            break;
-        }
-        case Colors::HighlightBackground :
-            highlight->setBrush( color );
-        default:
-            break;
+    if(groupId==ColorGroups::Bridge && colorId==Colors::Background) {
+        QPalette pal(palette());
+        pal.setColor(QPalette::Window,color);
+        setPalette( pal );
+        return;
+    }
+
+    if(groupId==ColorGroups::Object && colorId==Colors::HighlightBackground) {
+        highlight->setBrush( color );
     }
 }
 

@@ -17,6 +17,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
+#include "heap.h"
+
 
 #include "ceffect.h"
 #include "cvsthost.h"
@@ -35,15 +37,16 @@ using namespace vst;
 /* CEffect : constructor                                                     */
 /*****************************************************************************/
 
-CEffect::CEffect()
-{
-    pEffect = NULL;
-    bEditOpen = false;
-    bNeedIdle = false;
-    bInEditIdle = false;
-    bWantMidi = false;
-    bInSetProgram = false;
-    pMasterEffect = NULL;
+CEffect::CEffect() :
+    pEffect(0),
+    bEditOpen(false),
+    bNeedIdle(false),
+    bInEditIdle(false),
+    bWantMidi(false),
+    bInSetProgram(false),
+    pMasterEffect(0),
+    pluginLib(0)
+    {
     sName.clear();
 }
 
@@ -60,20 +63,27 @@ CEffect::~CEffect()
 /* Load : loads the effect module                                            */
 /*****************************************************************************/
 
-bool CEffect::Load(MainHost *myHost, const QString &name)
+bool CEffect::Load(MainHost *myHost, QObject *parent, const QString &name)
 {
     pluginLib = new QLibrary(name);
 
-//    if(!pluginLib->load())
-//        return false;
+    if(!pluginLib->load()) {
+        Unload();
+        return false;
+    }
 
-    vstPluginFuncPtr entryPoint = (vstPluginFuncPtr)pluginLib->resolve("VSTPluginMain");
-    if(!entryPoint)
-        entryPoint = (vstPluginFuncPtr)pluginLib->resolve("main");
+    vstPluginFuncPtr entryPoint=0;
+    try {
+        entryPoint = (vstPluginFuncPtr)pluginLib->resolve("VSTPluginMain");
+        if(!entryPoint)
+            entryPoint = (vstPluginFuncPtr)pluginLib->resolve("main");
+    }
+    catch(...)
+    {
+        pEffect = NULL;
+    }
     if(!entryPoint) {
-//        QMessageBox msgBox;
-//        msgBox.setText(QObject::tr("error loading %1, no entry point").arg(name));
-//        msgBox.exec();
+        Unload();
         return false;
     }
 
@@ -83,20 +93,16 @@ bool CEffect::Load(MainHost *myHost, const QString &name)
     }
     catch(...)
     {
-//        QMessageBox msgBox;
-//        msgBox.setText(QObject::tr("error loading %1, failed on entry point").arg(name));
-//        msgBox.exec();
         pEffect = NULL;
     }
 
-    if(!pEffect)
+    if(!pEffect) {
+        Unload();
         return false;
+    }
 
     if (pEffect->magic != kEffectMagic) {
-        pEffect = NULL;
-//        QMessageBox msgBox;
-//        msgBox.setText(QObject::tr("error loading %1, not a Vst plugin").arg(name));
-//        msgBox.exec();
+        Unload();
         return false;
     }
     sName = name;
@@ -109,10 +115,18 @@ bool CEffect::Load(MainHost *myHost, const QString &name)
 
 bool CEffect::Unload()
 {
-    EffClose();
+    if(pEffect)
+        EffClose();
     pEffect = NULL;
-    pluginLib->unload();
-    pluginLib->deleteLater();
+
+    if(pluginLib) {
+        if(pluginLib->isLoaded())
+            if(!pluginLib->unload()) {
+                debug2(<<"can't unload plugin"<< sName)
+            }
+        delete pluginLib;
+        pluginLib=0;
+    }
     return true;
 }
 

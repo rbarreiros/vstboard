@@ -1,8 +1,30 @@
+/**************************************************************************
+#    Copyright 2010-2011 Raphaël François
+#    Contact : ctrlbrk76@gmail.com
+#
+#    This file is part of VstBoard.
+#
+#    VstBoard is free software: you can redistribute it and/or modify
+#    it under the terms of the under the terms of the GNU Lesser General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    VstBoard is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    under the terms of the GNU Lesser General Public License for more details.
+#
+#    You should have received a copy of the under the terms of the GNU Lesser General Public License
+#    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
+**************************************************************************/
+#include "heap.h"
+
+
 #include "vstpluginview.h"
 
 using namespace View;
 
-VstPluginView::VstPluginView(MainHost *myHost,QAbstractItemModel *model,QGraphicsItem * parent, Qt::WindowFlags wFlags) :
+VstPluginView::VstPluginView(MainHost *myHost,QAbstractItemModel *model,MainContainerView * parent, Qt::WindowFlags wFlags) :
     ConnectableObjectView(myHost,model,parent,wFlags)
 {
     setObjectName("vstPluginView");
@@ -16,29 +38,25 @@ VstPluginView::VstPluginView(MainHost *myHost,QAbstractItemModel *model,QGraphic
 
 void VstPluginView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
 {
-    if(groupId!=ColorGroups::VstPlugin)
-        return;
-
-    switch(colorId) {
-        case Colors::Background: {
+    if(colorId==Colors::Background)  {
+        if(groupId==ColorGroups::VstPlugin) {
             if(!highlighted) {
                 QPalette pal(palette());
                 pal.setColor(QPalette::Window,color);
                 setPalette( pal );
             }
-            break;
         }
-        case Colors::HighlightBackground: {
-            if(highlighted) {
-                QPalette pal(palette());
-                pal.setColor(QPalette::Window,color);
-                setPalette( pal );
-            }
-            break;
-        }
-        default:
-            break;
+        return;
     }
+
+    if(groupId==ColorGroups::Object && colorId==Colors::HighlightBackground)  {
+        if(highlighted) {
+            QPalette pal(palette());
+            pal.setColor(QPalette::Window,color);
+            setPalette( pal );
+        }
+    }
+    ConnectableObjectView::UpdateColor(groupId,colorId,color);
 }
 
 void VstPluginView::SetModelIndex(QPersistentModelIndex index)
@@ -156,7 +174,7 @@ void VstPluginView::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
         QFileInfo info;
 
         QStringList acceptedFiles;
-        acceptedFiles << "fxb" << "fxp" << "dll";
+        acceptedFiles << "fxb" << "fxp" ;
 
         foreach(QUrl url,event->mimeData()->urls()) {
             fName = url.toLocalFile();
@@ -189,7 +207,7 @@ void VstPluginView::dropEvent( QGraphicsSceneDragDropEvent *event)
 void VstPluginView::HighlightStart()
 {
     QPalette pal(palette());
-    pal.setColor(QPalette::Window, config->GetColor(ColorGroups::VstPlugin,Colors::HighlightBackground) );
+    pal.setColor(QPalette::Window, config->GetColor(ColorGroups::Object,Colors::HighlightBackground) );
     setPalette( pal );
 }
 

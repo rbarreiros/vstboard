@@ -26,7 +26,6 @@
 #include "connectioninfo.h"
 #include "objectinfo.h"
 #include "audiobuffer.h"
-#include "audiobufferd.h"
 
 namespace Connectables {
 
@@ -56,7 +55,6 @@ namespace Connectables {
         int nbPins() const { return listPins.count(); }
 
         AudioBuffer *GetBuffer(int pinNumber);
-        AudioBufferD *GetBufferD(int pinNumber);
 
         QMap<quint16,Pin*> listPins;
         ConnectionInfo connInfo;

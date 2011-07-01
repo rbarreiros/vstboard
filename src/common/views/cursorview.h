@@ -22,6 +22,7 @@
 #define CURSORVIEW_H
 
 #include "precomp.h"
+#include "viewconfig.h"
 
 namespace View {
 
@@ -29,7 +30,7 @@ namespace View {
     {
         Q_OBJECT
     public:
-        explicit CursorView(QAbstractItemModel *model,bool isMaxi,bool upsideDown,QGraphicsItem *parent = 0);
+        explicit CursorView(QAbstractItemModel *model,bool isMaxi,bool upsideDown,QGraphicsItem *parent, ViewConfig *config);
         void SetValue(float newVal);
         void SetModelIndex(QPersistentModelIndex index);
         inline float GetValue() const {return value;}
@@ -37,10 +38,14 @@ namespace View {
         void setPos ( qreal x, qreal y );
 
     protected:
+        void keyPressEvent ( QKeyEvent * event );
         void ValueChanged(float newVal);
         QVariant itemChange(GraphicsItemChange change, const QVariant &value);
         void mousePressEvent ( QGraphicsSceneMouseEvent * event );
         void mouseReleaseEvent ( QGraphicsSceneMouseEvent * event );
+        void focusInEvent ( QFocusEvent * event );
+        void focusOutEvent ( QFocusEvent * event );
+
         QGraphicsPolygonItem *cursor;
         bool isMaxi;
         bool upsideDown;
@@ -49,11 +54,10 @@ namespace View {
         QAbstractItemModel *model;
         QPersistentModelIndex modelIndex;
         QPointF offset;
-
-    signals:
+        ViewConfig *config;
 
     public slots:
-
+        void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
     };
 }
 #endif // CURSORVIEW_H

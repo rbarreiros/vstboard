@@ -17,6 +17,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -35,7 +37,8 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
         listToolsModel(0),
         listVstPluginsModel(0),
         ui(new Ui::MainWindow),
-        myHost(myHost)
+        myHost(myHost),
+        viewConfigDlg(0)
 {
     myHost->mainWindow=this;
     connect(myHost,SIGNAL(programParkingModelChanged(QStandardItemModel*)),
@@ -92,11 +95,11 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     listVstBanksModel = new QFileSystemModel(this);
     //listVstBanksModel->setReadOnly(true);
     listVstBanksModel->setResolveSymlinks(true);
-    QStringList bankFilter;
-    bankFilter << "*.fxb";
-    bankFilter << "*.fxp";
-    listVstBanksModel->setNameFilters(bankFilter);
-    listVstBanksModel->setNameFilterDisables(false);
+//    QStringList bankFilter;
+//    bankFilter << "*.fxb";
+//    bankFilter << "*.fxp";
+//    listVstBanksModel->setNameFilters(bankFilter);
+//    listVstBanksModel->setNameFilterDisables(false);
     listVstBanksModel->setRootPath(ConfigDialog::defaultBankPath(myHost));
     ui->BankBrowser->setModel(listVstBanksModel);
 #endif
@@ -114,10 +117,26 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
 
     ui->treeHostModel->setModel(myHost->GetModel());
 
+    connect( &viewConfig, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
+            myHost->programList, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)) );
     InitColors();
     connect(&viewConfig, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
             this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)));
+
+#ifdef DEBUGMEM
+    heapState = ui->mainToolBar->addAction("heap check");
+    connect(heapState,SIGNAL(triggered()),
+            this,SLOT(OnHeapCheck()));
+#endif
 }
+
+#ifdef DEBUGMEM
+    void MainWindow::OnHeapCheck() {
+        HeapCheckpoint();
+    }
+
+#endif
+
 
 MainWindow::~MainWindow()
 {
@@ -127,12 +146,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::InitColors()
 {
-    setPalette( viewConfig.GetPaletteFromColorGroup( ColorGroups::Windows, palette() ));
+    setPalette( viewConfig.GetPaletteFromColorGroup( ColorGroups::Window, palette() ));
 }
 
 void MainWindow::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
 {
-    if(groupId!=ColorGroups::Windows)
+    if(groupId!=ColorGroups::Window)
         return;
 
     QPalette::ColorRole role = viewConfig.GetPaletteRoleFromColor(colorId);
@@ -253,7 +272,7 @@ void MainWindow::BuildListTools()
     QStandardItem *item=0;
     ObjectInfo info;
 
-    listToolsModel = new ListToolsModel();
+    listToolsModel = new ListToolsModel(this);
     listToolsModel->setHorizontalHeaderLabels(headerLabels);
     parentItem = listToolsModel->invisibleRootItem();
 
@@ -626,15 +645,30 @@ void MainWindow::on_actionRestore_default_layout_triggered()
     resetSettings();
 }
 
-
-
-void MainWindow::on_actionAppearance_triggered()
-{
-    View::ViewConfigDialog dlg(myHost,this);
-    dlg.exec();
-}
-
 void MainWindow::on_solverView_clicked(const QModelIndex &index)
 {
     myHost->OptimizeRenderer();
+}
+
+void MainWindow::on_actionAppearance_toggled(bool arg1)
+{
+    if(arg1) {
+        if(viewConfigDlg)
+            return;
+        viewConfigDlg = new View::ViewConfigDialog(myHost,this);
+        connect(viewConfigDlg, SIGNAL(destroyed()),
+                this, SLOT(OnViewConfigClosed()));
+        viewConfigDlg->setAttribute( Qt::WA_DeleteOnClose, true );
+        viewConfigDlg->show();
+    } else {
+        if(!viewConfigDlg)
+            return;
+        viewConfigDlg->close();
+    }
+}
+
+void MainWindow::OnViewConfigClosed()
+{
+    viewConfigDlg=0;
+    ui->actionAppearance->setChecked(false);
 }

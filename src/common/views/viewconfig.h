@@ -5,41 +5,43 @@
 
 class MainHost;
 
+namespace ColorGroups {
+    enum Enum {
+        ND,
+        Window,
+        Panel,
+        Bridge,
+        Object,
+        VstPlugin,
+        AudioPin,
+        MidiPin,
+        ParameterPin,
+        Cursor,
+        Programs
+    };
+}
+
+namespace Colors {
+    enum Enum {
+        ND,
+        Window,
+        Base,
+        Background,
+        HighlightBackground,
+        VuMeter,
+        WindowText,
+        Text,
+        Lines,
+        Button,
+        ButtonText
+//            AlternateBase,
+//            ToolTipBase,
+//            ToolTipText,
+//            BrightText,
+    };
+}
+
 namespace View {
-
-    namespace ColorGroups {
-        enum Enum {
-            ND,
-            VstPlugin,
-            AudioPin,
-            MidiPin,
-            ParameterPin,
-            Bridge,
-            Object,
-            Windows,
-            Panel
-        };
-    }
-
-    namespace Colors {
-        enum Enum {
-            ND,
-            Background,
-            Borders,
-            Text,
-            VuMeter,
-            Window,
-            WindowText,
-            Button,
-            ButtonText,
-            Base,
-            AlternateBase,
-            ToolTipBase,
-            ToolTipText,
-            BrightText,
-            HighlightBackground
-        };
-    }
 
     class ColorGroup
     {
@@ -74,6 +76,8 @@ namespace View {
         QDataStream & fromStream (QDataStream &);
 
         bool savedInSetupFile;
+
+        static float KeyboardNumber(int key);
 
     protected:
         void AddColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);

@@ -17,6 +17,9 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
+
 
 #include "connectioninfo.h"
 #include "object.h"
@@ -32,7 +35,7 @@
   default constructor
   */
 ConnectionInfo::ConnectionInfo()
-    : container(0), objId(0), type(PinType::Audio), direction(PinDirection::Output), pinNumber(0), bridge(false), myHost(0)
+    : container(0), objId(0), type(PinType::Audio), direction(PinDirection::Output), pinNumber(0), bridge(false), isRemoveable(false), myHost(0)
 {
 }
 
@@ -44,13 +47,14 @@ ConnectionInfo::ConnectionInfo()
   \param pinNumber the pin number in a list of pins
   \param bridge true if it's a bridge pin (can connect with the pins of the parent container)
   */
-ConnectionInfo::ConnectionInfo(MainHost *myHost,quint16 objId, PinType::Enum type, PinDirection::Enum direction, quint16 pinNumber, bool bridge) :
+ConnectionInfo::ConnectionInfo(MainHost *myHost,quint16 objId, PinType::Enum type, PinDirection::Enum direction, quint16 pinNumber, bool bridge, bool removeable) :
     container(-1),
     objId(objId),
     type(type),
     direction(direction),
     pinNumber(pinNumber),
     bridge(bridge),
+    isRemoveable(removeable),
     myHost(myHost)
 {
 }
@@ -68,7 +72,7 @@ ConnectionInfo::ConnectionInfo(const ConnectionInfo &c) {
   \param c the other pin
   \return true if it can connect
   */
-bool ConnectionInfo::CanConnectTo(const ConnectionInfo &c) {
+bool ConnectionInfo::CanConnectTo(const ConnectionInfo &c) const {
 
     //don't connect object to itself
     if(objId == c.objId)

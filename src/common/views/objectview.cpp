@@ -17,6 +17,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "objectview.h"
 #include "pinview.h"
@@ -52,7 +54,7 @@ ObjectView::ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsIte
     errorMessage(0),
     layout(0),
     model(model),
-    actDel(0),
+    actRemove(0),
     shrinkAsked(false),
     myHost(myHost),
     highlighted(false)
@@ -94,10 +96,11 @@ void ObjectView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, co
             QPalette pal(palette());
             pal.setColor(QPalette::Text,color);
             setPalette( pal );
+            if(titleText)
+                titleText->setBrush(color);
             break;
         }
 
-        case Colors::Borders :
         default:
             break;
     }
@@ -128,18 +131,53 @@ void ObjectView::SetModelIndex(QPersistentModelIndex index)
     }
 
     if(info.nodeType != NodeType::bridge) {
-        actDel = new QAction(QIcon(":/img16x16/delete.png"),tr("Delete"),this);
-        actDel->setShortcut( Qt::Key_Delete );
-        actDel->setShortcutContext(Qt::WidgetShortcut);
-        connect(actDel,SIGNAL(triggered()),
+        actRemoveBridge = new QAction(QIcon(":/img16x16/delete.png"),tr("Remove"),this);
+        actRemoveBridge->setShortcut( Qt::Key_Delete );
+        actRemoveBridge->setShortcutContext(Qt::WidgetShortcut);
+        connect(actRemoveBridge,SIGNAL(triggered()),
+                this,SLOT(RemoveWithBridge()));
+        addAction(actRemoveBridge);
+
+        actRemove = new QAction(QIcon(":/img16x16/delete.png"),tr("Remove with cables"),this);
+        actRemove->setShortcut( Qt::CTRL + Qt::Key_Delete );
+        actRemove->setShortcutContext(Qt::WidgetShortcut);
+        connect(actRemove,SIGNAL(triggered()),
                 this,SLOT(close()));
-        addAction(actDel);
+        addAction(actRemove);
     }
 
     objIndex = index;
+    UpdateTitle();
+}
+
+void ObjectView::UpdateTitle()
+{
     if(titleText) {
-        titleText->setText(index.data(Qt::DisplayRole).toString());
+        QString newTitle=objIndex.data(Qt::DisplayRole).toString();
+            titleText->setText(newTitle);
+
+        if(objIndex.data(UserRoles::isDirty).isValid()) {
+            if(objIndex.data(UserRoles::isDirty).toBool()) {
+                titleText->setText(newTitle.prepend("*"));
+            }
+        }
+
+        if(objIndex.data(UserRoles::isDoublePrecision).isValid()) {
+            if(objIndex.data(UserRoles::isDoublePrecision).toBool()) {
+                titleText->setText(newTitle.append("(D)"));
+            }
+        }
     }
+}
+
+void ObjectView::RemoveWithBridge()
+{
+    setActive(false);
+    static_cast<Connectables::Container*>(
+        myHost->objFactory->GetObj(objIndex.parent()).data()
+    )->UserParkWithBridge(
+        myHost->objFactory->GetObj(objIndex)
+    );
 }
 
 /*!
@@ -153,21 +191,12 @@ void ObjectView::UpdateModelIndex()
     if(objIndex.data(UserRoles::position).isValid())
         setPos( objIndex.data(UserRoles::position).toPointF() );
 
-    QString newTitle=objIndex.data(Qt::DisplayRole).toString();
-    if(titleText) {
-        titleText->setText(newTitle);
-    }
-
     if(objIndex.data(UserRoles::errorMessage).isValid()) {
         QString err = objIndex.data(UserRoles::errorMessage).toString();
         SetErrorMessage( err );
     }
 
-    if(objIndex.data(UserRoles::isDirty).isValid()) {
-        if(objIndex.data(UserRoles::isDirty).toBool()) {
-            titleText->setText(newTitle.prepend("*"));
-        }
-    }
+    UpdateTitle();
 }
 
 /*!
@@ -209,7 +238,6 @@ void ObjectView::closeEvent ( QCloseEvent * event )
         )->UserParkObject(
             myHost->objFactory->GetObj(objIndex)
         );
-
     event->ignore();
 }
 
@@ -222,6 +250,7 @@ void ObjectView::focusInEvent ( QFocusEvent * event )
     if(selectBorder)
         delete selectBorder;
     selectBorder=new QGraphicsRectItem( -2,-2, size().width()+4, size().height()+4 , this );
+    QGraphicsWidget::focusInEvent(event);
 }
 
 /*!
@@ -234,6 +263,7 @@ void ObjectView::focusOutEvent ( QFocusEvent * event )
         delete selectBorder;
         selectBorder =0;
     }
+    QGraphicsWidget::focusOutEvent(event);
 }
 
 /*!

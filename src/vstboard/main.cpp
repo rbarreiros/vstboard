@@ -17,8 +17,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
 
-#include "precomp.h"
 
 #include <QLibraryInfo>
 #include <QTranslator>
@@ -86,6 +86,10 @@ public:
 
 int main(int argc, char *argv[])
 {
+#ifdef DEBUGMEM
+    _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+#endif
+
     qRegisterMetaType<ConnectionInfo>("ConnectionInfo");
     qRegisterMetaType<ObjectInfo>("ObjectInfo");
     qRegisterMetaType<int>("ObjType::Enum");
@@ -107,15 +111,15 @@ int main(int argc, char *argv[])
 #ifdef QT_NO_DEBUG
     QTranslator qtTranslator;
     if(qtTranslator.load("qt_" + QLocale::system().name(), ":/translations/"))
-        qApp->installTranslator(&qtTranslator);
+        app.installTranslator(&qtTranslator);
 
     QTranslator commonTranslator;
     if(commonTranslator.load("common_" + QLocale::system().name(), ":/translations/"))
-        qApp->installTranslator(&commonTranslator);
+        app.installTranslator(&commonTranslator);
 
     QTranslator myappTranslator;
     if(myappTranslator.load("vstboard_" + QLocale::system().name(), ":/translations/"))
-        qApp->installTranslator(&myappTranslator);
+        app.installTranslator(&myappTranslator);
 #endif
 
     MainHostHost *host = new MainHostHost();

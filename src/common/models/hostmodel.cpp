@@ -17,6 +17,8 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
+#include "heap.h"
+
 
 #include "hostmodel.h"
 #include "globals.h"
@@ -27,29 +29,41 @@
 #include "connectables/vstplugin.h"
 
 HostModel::HostModel(MainHost *parent) :
-        QStandardItemModel(parent)
+        QStandardItemModel(parent),
+    myHost(parent),
+    delayedAction(0),
+    LoadFileMapper(0)
 {
-    myHost = parent;
+    LoadFileMapper = new QSignalMapper(this);
+    delayedAction = new QTimer(this);
+    delayedAction->setSingleShot(true);
+    if(parent) {
+        connect(LoadFileMapper, SIGNAL(mapped(QString)), myHost, SLOT(LoadFile(QString)));
+        connect(delayedAction, SIGNAL(timeout()), LoadFileMapper, SLOT(map()));
+    }
 }
 
 QMimeData * HostModel::mimeData ( const QModelIndexList & indexes ) const
 {
-    QMimeData *mimeData = new QMimeData;
+
 
     foreach(QModelIndex index, indexes) {
         ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
         switch(info.nodeType) {
             case NodeType::pin :
+
                 if(index.data(UserRoles::connectionInfo).isValid()) {
                     ConnectionInfo connectInfo = index.data(UserRoles::connectionInfo).value<ConnectionInfo>();
 
                     QByteArray bytes;
                     QDataStream stream(&bytes,QIODevice::WriteOnly);
                     stream << connectInfo;
+
+                    QMimeData *mimeData = new QMimeData;
                     mimeData->setData("application/x-pin",bytes);
+                    return mimeData;
                 }
-                return mimeData;
-                break;
+
             default:
                 return QStandardItemModel::mimeData(indexes);
 
@@ -58,305 +72,238 @@ QMimeData * HostModel::mimeData ( const QModelIndexList & indexes ) const
 
     return QStandardItemModel::mimeData(indexes);
 }
-/*
-QStringList HostModel::mimeTypes () const
-{
-    QStringList list;
-    list << "text/uri-list"
-        << "application/x-audiointerface"
-        << "application/x-midiinterface"
-        << "application/x-tools"
-        << "application/x-pin"
-        <<  QLatin1String("application/x-qstandarditemmodeldatalist");
 
-    return list;
-}
-*/
+/*!
+    Drop mime data on the model
+    \param column autoconnect position : 1=before,2=replace,3=after
+  */
 bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, int row, int column, const QModelIndex & parent )
 {
-
-    QModelIndex index = parent.sibling(parent.row(),0);
-    if(!index.isValid()) {
-        debug("HostModel::dropMimeData rootIndex not valid")
+    if(!parent.isValid()) {
+        debug("HostModel::dropMimeData parent not valid")
         return false;
     }
-    ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
 
-    switch(info.nodeType) {
+    QModelIndex senderIndex = parent.sibling(parent.row(),0);
+    if(!senderIndex.isValid()) {
+        debug("HostModel::dropMimeData senderIndex not valid")
+        return false;
+    }
+    ObjectInfo senderInfo = senderIndex.data(UserRoles::objInfo).value<ObjectInfo>();
 
+    QSharedPointer<Connectables::Container> targetContainer;
+    switch(senderInfo.nodeType) {
         case NodeType::container :
-        {
-            QSharedPointer<Connectables::Container> cntPtr;
-            if(parent.isValid())
-                cntPtr = myHost->objFactory->GetObj(index).staticCast<Connectables::Container>();
-            if(cntPtr.isNull()) {
-                debug(QString("HostModel::dropMimeData container not found").toAscii())
-                return false;
-            }
-
-            if(data->hasFormat("application/x-qstandarditemmodeldatalist")) {
-                QStandardItemModel mod;
-                mod.dropMimeData(data,action,0,0,QModelIndex());
-                int a=mod.rowCount();
-                for(int i=0;i<a;i++) {
-                    QStandardItem *it = mod.invisibleRootItem()->child(i);
-                    if(it->data(UserRoles::value).isValid()) {
-                        QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->GetObjectFromId( it->data(UserRoles::value).toInt() );
-                        if(objPtr.isNull()) {
-                            debug("HostModel::dropMimeData x-qstandarditemmodeldatalist object not found")
-                            continue;
-                        }
-                        cntPtr->UserAddObject(objPtr);
-                    }
-                }
-                return true;
-            }
-
-
-            if (data->hasUrls()) {
-
-                foreach(QUrl url,data->urls()) {
-                    QString fName = url.toLocalFile();
-                    QFileInfo info;
-                    info.setFile( fName );
-
-                    if ( info.isFile() && info.isReadable() ) {
-#ifdef VSTSDK
-                        //vst plugin
-                        if ( info.suffix()=="dll" ) {
-
-                            ObjectInfo infoVst;
-                            infoVst.nodeType = NodeType::object;
-                            infoVst.objType = ObjType::VstPlugin;
-                            infoVst.filename = fName;
-                            infoVst.name = fName;
-
-                            QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(infoVst);
-                            if(objPtr.isNull()) {
-                                if(Connectables::VstPlugin::shellSelectView) {
-                                    Connectables::VstPlugin::shellSelectView->cntPtr=cntPtr;
-                                } else {
-                                    debug("HostModel::dropMimeData vstplugin object not found")
-                                }
-                                return false;
-                            }
-                            cntPtr->UserAddObject(objPtr);
-                        }
-#endif
-                        //setup file
-                        if ( info.suffix()==SETUP_FILE_EXTENSION ) {
-                            if(myHost->mainWindow->userWantsToUnloadSetup()) {
-                                //load on the next loop : we have to get out of the container before loading files
-                                QSignalMapper *mapper = new QSignalMapper(this);
-                                QTimer *t1 = new QTimer(this);
-                                t1->setSingleShot(true);
-                                connect(t1, SIGNAL(timeout()), mapper, SLOT(map()));
-                                connect(mapper, SIGNAL(mapped(QString)), myHost, SLOT(LoadSetupFile(QString)));
-                                mapper->setMapping(t1, fName);
-                                t1->start(0);
-                            }
-                        }
-
-                        //project file
-                        if ( info.suffix()==PROJECT_FILE_EXTENSION ) {
-                            if(myHost->mainWindow->userWantsToUnloadProject()) {
-                                //load on the next loop : we have to get out of the container before loading files
-                                QSignalMapper *mapper = new QSignalMapper(this);
-                                QTimer *t1 = new QTimer(this);
-                                t1->setSingleShot(true);
-                                connect(t1, SIGNAL(timeout()), mapper, SLOT(map()));
-                                connect(mapper, SIGNAL(mapped(QString)), myHost, SLOT(LoadProjectFile(QString)));
-                                mapper->setMapping(t1, fName);
-                                t1->start(0);
-                            }
-                        }
-                    }
-                }
-                return true;
-            }
-
-
-            //audio interface
-            if(data->hasFormat("application/x-audiointerface")) {
-                QByteArray b = data->data("application/x-audiointerface");
-                QDataStream stream(&b,QIODevice::ReadOnly);
-
-                while(!stream.atEnd()) {
-                    ObjectInfo info;
-                    stream >> info;
-
-                    if(info.inputs!=0) {
-                        info.objType=ObjType::AudioInterfaceIn;
-                        QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
-                        if(objPtr.isNull()) {
-                            debug("HostModel::dropMimeData audioin object not found or already used")
-                        } else {
-                            cntPtr->UserAddObject(objPtr);
-                        }
-                    }
-
-                    if(info.outputs!=0) {
-                        info.objType=ObjType::AudioInterfaceOut;
-                        QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
-                        if(objPtr.isNull()) {
-                            debug("HostModel::dropMimeData audioout object not found or already used")
-                        } else {
-                            cntPtr->UserAddObject(objPtr);
-                        }
-                    }
-                }
-
-                return true;
-            }
-
-            //midi interface
-            if(data->hasFormat("application/x-midiinterface")) {
-                QByteArray b = data->data("application/x-midiinterface");
-                QDataStream stream(&b,QIODevice::ReadOnly);
-
-                while(!stream.atEnd()) {
-                    ObjectInfo info;
-                    stream >> info;
-                    QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
-                    if(objPtr.isNull()) {
-                        debug("HostModel::dropMimeData midi object not found or already used")
-                        continue;
-                    }
-                    cntPtr->UserAddObject(objPtr);
-                }
-                return true;
-            }
-
-            //tools
-            if(data->hasFormat("application/x-tools")) {
-                QByteArray b = data->data("application/x-tools");
-                QDataStream stream(&b,QIODevice::ReadOnly);
-
-                while(!stream.atEnd()) {
-                    ObjectInfo info;
-                    stream >> info;
-                    QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
-                    if(objPtr.isNull()) {
-                        debug("HostModel::dropMimeData tool object not found")
-                        continue;
-                    }
-                    cntPtr->UserAddObject(objPtr);
-                }
-                return true;
-            }
+            targetContainer = myHost->objFactory->GetObj(senderIndex).staticCast<Connectables::Container>();
             break;
-        }
-
-        //drop fxp and fxb file
         case NodeType::object :
-        {
-            if(info.objType == ObjType::VstPlugin) {
-                QSharedPointer<Connectables::VstPlugin> vstPtr;
-                if(parent.isValid())
-                    vstPtr = myHost->objFactory->GetObj(index).staticCast<Connectables::VstPlugin>();
-                if(vstPtr.isNull()) {
-                    debug(QString("HostModel::dropMimeData vstplugin not found").toAscii())
-                    return false;
-                }
-
-                if (data->hasUrls()) {
-                    foreach(QUrl url,data->urls()) {
-                        QString fName = url.toLocalFile();
-                        QFileInfo info;
-                        info.setFile( fName );
-                        if ( !info.isFile() || !info.isReadable() )
-                            continue;
-
-                        if( info.suffix() == VST_BANK_FILE_EXTENSION && vstPtr->LoadBank(fName) ) {
-                            QStandardItem *item = itemFromIndex(index);
-                            if(item)
-                                item->setData(fName,UserRoles::bankFile);
-                        }
-
-                        if( info.suffix() == VST_PROGRAM_FILE_EXTENSION && vstPtr->LoadProgram(fName) ) {
-                            QStandardItem *item = itemFromIndex(index);
-                            if(item)
-                                item->setData(fName,UserRoles::programFile);
-                        }
-
-                        if( info.suffix() == "dll" ) {
-                            QSharedPointer<Connectables::Container> cntPtr = myHost->objFactory->GetObjectFromId(vstPtr->GetContainerId()).staticCast<Connectables::Container>();
-                            if(!cntPtr) {
-                                debug("HostModel::dropMimeData replace plugin, container not found")
-                                return false;
-                            }
-
-                            ObjectInfo infoVst;
-                            infoVst.nodeType = NodeType::object;
-                            infoVst.objType = ObjType::VstPlugin;
-                            infoVst.filename = fName;
-                            infoVst.name = fName;
-
-                            QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(infoVst);
-                            if(objPtr.isNull()) {
-                                if(Connectables::VstPlugin::shellSelectView) {
-                                    Connectables::VstPlugin::shellSelectView->cntPtr=cntPtr;
-                                } else {
-                                    debug("HostModel::dropMimeData replace plugin, new object not found")
-                                }
-                                return false;
-                            }
-
-                            cntPtr->UserAddObject(objPtr);
-                            cntPtr->CopyCablesFromObj(objPtr, vstPtr);
-                            vstPtr->CopyStatusTo(objPtr);
-                            cntPtr->ParkObject(vstPtr);
-
-                        }
-                    }
-                    return true;
-                }
-            }
-        }
-
-        //connect a pin by drag&drop
-//        case NodeType::pin :
-//        {
-//            if(data->hasFormat("application/x-pin")) {
-//                ConnectionInfo parentInfo = index.data(UserRoles::connectionInfo).value<ConnectionInfo>();
-
-//                //                  pin   . listpin .obj    . container
-//                QModelIndex index = index.parent().parent().parent();
-//                if(parentInfo.bridge)
-//                    index=index.parent();
-
-//                int cntId = index.data(Qt::DisplayRole).toInt();;
-//                QSharedPointer<Connectables::Object> cntPtr = myHost->objFactory->GetObjectFromId(cntId);
-//                if(cntPtr.isNull()) {
-//                    debug(QString("HostModel::dropMimeData NodeType::pin the container %1 is deleted").arg(cntId).toAscii())
-//                    return false;
-//                }
-//                Connectables::Container *cnt = static_cast<Connectables::Container*>(cntPtr.data());
-
-
-//                QByteArray bytes = data->data("application/x-pin");
-//                ConnectionInfo droppedInfo;
-
-//                QDataStream stream(&bytes,QIODevice::ReadOnly);
-//                stream >> droppedInfo;
-
-//                if(droppedInfo.CanConnectTo(parentInfo)) {
-//                    if(droppedInfo.direction == PinDirection::Output)
-//                        cnt->UserAddCable(droppedInfo, parentInfo);
-//                     else
-//                        cnt->UserAddCable(parentInfo, droppedInfo);
-//                     return true;
-//                 }
-//            }
-//            break;
-//        }
-        default:
-            return false;
-
-
+            targetContainer = myHost->objFactory->GetObj(senderIndex.parent()).staticCast<Connectables::Container>();
+            break;
     }
 
-    return false;
+    if(!targetContainer) {
+        debug(QString("HostModel::dropMimeData container not found").toAscii())
+        return false;
+    }
+
+    QList< QSharedPointer<Connectables::Object> > listObjToAdd;
+
+    //objects from parking
+    if(data->hasFormat("application/x-qstandarditemmodeldatalist")) {
+        QStandardItemModel mod;
+        mod.dropMimeData(data,action,0,0,QModelIndex());
+        int a=mod.rowCount();
+        for(int i=0;i<a;i++) {
+            QStandardItem *it = mod.invisibleRootItem()->child(i);
+            if(it->data(UserRoles::value).isValid()) {
+                QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->GetObjectFromId( it->data(UserRoles::value).toInt() );
+                if(objPtr.isNull()) {
+                    debug("HostModel::dropMimeData x-qstandarditemmodeldatalist object not found")
+                    continue;
+                }
+                listObjToAdd << objPtr;
+            }
+        }
+    }
+
+
+    //drop a file
+    if (data->hasUrls()) {
+        foreach(QUrl url,data->urls()) {
+            QString fName = url.toLocalFile();
+            QFileInfo info;
+            info.setFile( fName );
+
+            if ( info.isFile() && info.isReadable() ) {
+#ifdef VSTSDK
+                //vst plugin
+                if ( info.suffix()=="dll" ) {
+
+                    ObjectInfo infoVst;
+                    infoVst.nodeType = NodeType::object;
+                    infoVst.objType = ObjType::VstPlugin;
+                    infoVst.filename = fName;
+                    infoVst.name = fName;
+
+                    QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(infoVst);
+                    if(objPtr.isNull()) {
+                        if(Connectables::VstPlugin::shellSelectView) {
+                            Connectables::VstPlugin::shellSelectView->cntPtr=targetContainer;
+                        } else {
+                            debug("HostModel::dropMimeData vstplugin object not found")
+                        }
+                        return false;
+                    }
+                    listObjToAdd << objPtr;
+                }
+#endif
+                //setup file
+                if ( info.suffix()==SETUP_FILE_EXTENSION ) {
+                    if(myHost->mainWindow->userWantsToUnloadSetup()) {
+                        //load on the next loop : we have to get out of the container before loading files
+                        LoadFileMapper->setMapping(delayedAction, fName);
+                        delayedAction->start(0);
+                        return true;
+                    }
+                }
+
+                //project file
+                if ( info.suffix()==PROJECT_FILE_EXTENSION ) {
+                    if(myHost->mainWindow->userWantsToUnloadProject()) {
+                        //load on the next loop : we have to get out of the container before loading files
+                        LoadFileMapper->setMapping(delayedAction, fName);
+                        delayedAction->start(0);
+                        return true;
+                    }
+                }
+
+                //fxb file
+                if( info.suffix() == VST_BANK_FILE_EXTENSION || info.suffix() == VST_PROGRAM_FILE_EXTENSION) {
+                    QSharedPointer<Connectables::VstPlugin> senderObj = myHost->objFactory->GetObj(senderIndex).staticCast<Connectables::VstPlugin>();
+                    if(!senderObj) {
+                        debug("HostModel::dropMimeData fxb fxp target not found")
+                        return false;
+                    }
+
+                    if( info.suffix() == VST_BANK_FILE_EXTENSION && senderObj->LoadBank(fName) ) {
+                        QStandardItem *item = itemFromIndex(senderIndex);
+                        if(item)
+                            item->setData(fName,UserRoles::bankFile);
+                        return true;
+                    }
+
+
+                    if( info.suffix() == VST_PROGRAM_FILE_EXTENSION && senderObj->LoadProgram(fName) ) {
+                        QStandardItem *item = itemFromIndex(senderIndex);
+                        if(item)
+                            item->setData(fName,UserRoles::programFile);
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+
+
+    //audio interface
+    if(data->hasFormat("application/x-audiointerface")) {
+        QByteArray b = data->data("application/x-audiointerface");
+        QDataStream stream(&b,QIODevice::ReadOnly);
+
+        while(!stream.atEnd()) {
+            ObjectInfo info;
+            stream >> info;
+
+            if(info.inputs!=0) {
+                info.objType=ObjType::AudioInterfaceIn;
+                QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
+                if(objPtr.isNull()) {
+                    debug("HostModel::dropMimeData audioin object not found or already used")
+                } else {
+                    listObjToAdd << objPtr;
+                }
+            }
+
+            if(info.outputs!=0) {
+                info.objType=ObjType::AudioInterfaceOut;
+                QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
+                if(objPtr.isNull()) {
+                    debug("HostModel::dropMimeData audioout object not found or already used")
+                } else {
+                    listObjToAdd << objPtr;
+                }
+            }
+        }
+    }
+
+    //midi interface
+    if(data->hasFormat("application/x-midiinterface")) {
+        QByteArray b = data->data("application/x-midiinterface");
+        QDataStream stream(&b,QIODevice::ReadOnly);
+
+        while(!stream.atEnd()) {
+            ObjectInfo info;
+            stream >> info;
+            QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
+            if(objPtr.isNull()) {
+                debug("HostModel::dropMimeData midi object not found or already used")
+                continue;
+            }
+            listObjToAdd << objPtr;
+        }
+    }
+
+    //tools
+    if(data->hasFormat("application/x-tools")) {
+        QByteArray b = data->data("application/x-tools");
+        QDataStream stream(&b,QIODevice::ReadOnly);
+
+        while(!stream.atEnd()) {
+            ObjectInfo info;
+            stream >> info;
+            QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
+            if(objPtr.isNull()) {
+                debug("HostModel::dropMimeData tool object not found")
+                continue;
+            }
+            listObjToAdd << objPtr;
+        }
+    }
+
+    if(listObjToAdd.isEmpty())
+        return false;
+
+    foreach(QSharedPointer<Connectables::Object> objPtr, listObjToAdd) {
+        targetContainer->UserAddObject(objPtr);
+
+        //auto connect
+        if(column!=0) {
+            QSharedPointer<Connectables::Object> senderObj = myHost->objFactory->GetObj(senderIndex);
+
+            //connect left
+            if(column==1) {
+                if(action==Qt::MoveAction) {
+                    targetContainer->MoveInputCablesFromObj(objPtr, senderObj);
+                }
+                targetContainer->ConnectObjects(objPtr, senderObj, false);
+            }
+            //replace object
+            if(column==2) {
+                targetContainer->CopyCablesFromObj(objPtr, senderObj);
+                senderObj->CopyStatusTo(objPtr);
+                targetContainer->ParkObject(senderObj);
+            }
+            //connect right
+            if(column==3) {
+                if(action==Qt::MoveAction) {
+                    targetContainer->MoveOutputCablesFromObj(objPtr, senderObj);
+                }
+                targetContainer->ConnectObjects(senderObj, objPtr, false);
+            }
+        }
+    }
+
+    return true;
 }
 
 bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int role )
@@ -428,7 +375,7 @@ bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int
             }
             break;
         }
-        case NodeType::pinLimit :
+        case NodeType::cursor :
         {
             ConnectionInfo pinInfo = index.parent().data(UserRoles::connectionInfo).value<ConnectionInfo>();
             if(pinInfo.type==PinType::Parameter) {
@@ -450,8 +397,3 @@ bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int
 
     return QStandardItemModel::setData(index,value,role);
 }
-
-//bool HostModel::setItemData ( const QModelIndex & index, const QMap<int, QVariant> & roles )
-//{
-//    return true;
-//}

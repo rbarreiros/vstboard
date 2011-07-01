@@ -37,14 +37,13 @@ namespace Connectables {
 
 namespace View {
     class CableView;
-    class ConnectableObjectView;
     class PinView : public QGraphicsWidget
     {
     Q_OBJECT
 
     public:
 
-        explicit PinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo);
+        explicit PinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo, ViewConfig *config);
         const ConnectionInfo GetConnectionInfo() const {return connectInfo;}
         void AddCable(CableView *cable);
         void RemoveCable(CableView *cable);
@@ -65,14 +64,18 @@ namespace View {
 
         virtual const QPointF pinPos() const;
 
-    protected:
+        /// temporary cable for drag&drop
+        static CableView *currentLine;
 
+    protected:
+        virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
         QVariant itemChange ( GraphicsItemChange change, const QVariant & value );
         void mousePressEvent ( QGraphicsSceneMouseEvent * event );
         void mouseMoveEvent ( QGraphicsSceneMouseEvent  * event );
         void mouseReleaseEvent ( QGraphicsSceneMouseEvent  * event );
         void mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * event );
         void dragLeaveEvent( QGraphicsSceneDragDropEvent  * event );
+        void dragEnterEvent ( QGraphicsSceneDragDropEvent * event );
         void dragMoveEvent ( QGraphicsSceneDragDropEvent * event );
         void dropEvent ( QGraphicsSceneDragDropEvent  * event );
 
@@ -100,10 +103,10 @@ namespace View {
         /// pin angle in rad
         float pinAngle;
 
-        /// temporary cable for drag&drop
-        static QGraphicsLineItem *currentLine;
-
         ViewConfig *config;
+
+        QAction *actDel;
+        QAction *actUnplug;
 
     signals:
         /*!
@@ -118,10 +121,14 @@ namespace View {
           */
         void RemoveCablesFromPin(ConnectionInfo pin);
 
+        void RemovePin(ConnectionInfo pin);
+
     public slots:
         /// update the vu-meter, called by a timer
-        virtual void updateVu(){}
-        virtual void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color) {};
+        virtual void updateVu() {}
+        virtual void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color) {}
+        void RemovePin();
+        void Unplug();
 
     friend class Cable;
     };
