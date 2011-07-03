@@ -21,7 +21,7 @@
 #ifndef AUDIODEVICEOUT_H
 #define AUDIODEVICEOUT_H
 
-#include "precomp.h"
+//#include "precomp.h"
 #include "connectables/object.h"
 #include "connectables/objectinfo.h"
 #include "circularbuffer.h"

@@ -17,85 +17,89 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-
-#ifndef PRECOMP_H
-#define PRECOMP_H
+//#ifndef PRECOMP_H
+//#define PRECOMP_H
 
 #if defined __cplusplus
 
-#define QT_USE_FAST_CONCATENATION
-#define QT_USE_FAST_OPERATOR_PLUS
+    #define QT_USE_FAST_CONCATENATION
+    #define QT_USE_FAST_OPERATOR_PLUS
 
-#define VST_FORCE_DEPRECATED 0
+    #define VST_FORCE_DEPRECATED 0
 
-#ifdef WIN32
-    #define NOMINMAX
-    #include "Windows.h"
+    #ifdef WIN32
+        #define NOMINMAX
+        #include "Windows.h"
+    #endif
+
+    #include <string>
+    #include <cmath>
+    #include <algorithm>
+
+    #include <QAbstractItemView>
+    #include <QtAlgorithms>
+    #include <QtGui/QApplication>
+    #include <QDialog>
+    #include <QDir>
+    #include <QDragEnterEvent>
+    #include <QDropEvent>
+    #include <QFileDialog>
+    #include <QFileSystemModel>
+    #include <QFocusEvent>
+    #include <QFrame>
+    #include <QGraphicsBlurEffect>
+    #include <QGraphicsGridLayout>
+    #include <QGraphicsLinearLayout>
+    #include <QGraphicsLineItem>
+    #include <QGraphicsRectItem>
+    #include <QGraphicsScene>
+    #include <QGraphicsSceneDragDropEvent>
+    #include <QGraphicsSceneMouseEvent>
+    #include <QGraphicsTextItem>
+    #include <QGraphicsView>
+    #include <QGraphicsWidget>
+    #include <QHBoxLayout>
+    #include <QLibrary>
+    #include <QLineEdit>
+    #include <QListWidgetItem>
+    #include <QMainWindow>
+    #include <QMap>
+    #include <qmath.h>
+    #include <QMenu>
+    #include <QMessageBox>
+    #include <QMimeData>
+    #include <QMultiHash>
+    #include <QMutex>
+    #include <QObject>
+    #include <QReadWriteLock>
+    #include <QScrollBar>
+    #include <QSemaphore>
+    #include <QSettings>
+    #include <QSharedData>
+    #include <QSharedPointer>
+    #include <QSignalMapper>
+    #include <QStandardItemModel>
+    #include <QStringList>
+    #include <QStyledItemDelegate>
+    #include <QThread>
+    #include <QTime>
+    #include <QTimer>
+    #include <QTreeWidget>
+    #include <QUrl>
+    #include <QWidget>
+
+    #ifdef SCRIPTENGINE
+        #include <QtScript>
+    #endif
+
+    #ifdef QT_NO_DEBUG
+        #define debug(...)
+        #define debug2(...)
+    #else
+        #include <QDebug>
+        #define debug(...) {qDebug(__VA_ARGS__);}
+        #define debug2(...) {qDebug()__VA_ARGS__;}
+    #endif
+
 #endif
-
-#include <string>
-#include <cmath>
-#include <algorithm>
-
-#include <QAbstractItemView>
-#include <QtAlgorithms>
-#include <QtGui/QApplication>
-#include <QDialog>
-#include <QDir>
-#include <QDragEnterEvent>
-#include <QDropEvent>
-#include <QFileDialog>
-#include <QFileSystemModel>
-#include <QFocusEvent>
-#include <QFrame>
-#include <QGraphicsBlurEffect>
-#include <QGraphicsGridLayout>
-#include <QGraphicsLinearLayout>
-#include <QGraphicsLineItem>
-#include <QGraphicsRectItem>
-#include <QGraphicsScene>
-#include <QGraphicsSceneDragDropEvent>
-#include <QGraphicsSceneMouseEvent>
-#include <QGraphicsTextItem>
-#include <QGraphicsView>
-#include <QGraphicsWidget>
-#include <QHBoxLayout>
-#include <QLibrary>
-#include <QLineEdit>
-#include <QListWidgetItem>
-#include <QMainWindow>
-#include <QMap>
-#include <QMenu>
-#include <QMessageBox>
-#include <QMimeData>
-#include <QMultiHash>
-#include <QMutex>
-#include <QObject>
-#include <QReadWriteLock>
-#include <QScrollBar>
-#include <QSemaphore>
-#include <QSettings>
-#include <QSharedData>
-#include <QSharedPointer>
-#include <QStandardItemModel>
-#include <QStringList>
-#include <QStyledItemDelegate>
-#include <QThread>
-#include <QTime>
-#include <QTimer>
-#include <QTreeWidget>
-#include <QtScript>
-#include <QUrl>
-#include <QWidget>
-
-#ifdef QT_NO_DEBUG
-    #define debug(...)
-    #define debug2(...)
-#else
-    #include <QDebug>
-    #define debug(...) {qDebug(__VA_ARGS__);}
-    #define debug2(...) {qDebug()__VA_ARGS__;}
-#endif
-
-#endif
-#endif // PRECOMP_H
+//#endif // PRECOMP_H

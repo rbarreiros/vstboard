@@ -1,7 +1,7 @@
 #ifndef RENDERTHREAD_H
 #define RENDERTHREAD_H
 
-#include "precomp.h"
+//#include "precomp.h"
 
 class Renderer;
 class RendererNode;

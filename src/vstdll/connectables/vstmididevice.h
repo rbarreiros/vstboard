@@ -21,7 +21,7 @@
 #ifndef VSTMIDIDEVICE_H
 #define VSTMIDIDEVICE_H
 
-#include "precomp.h"
+//#include "precomp.h"
 #include "connectables/object.h"
 
 #define QUEUE_SIZE 1024

@@ -13,6 +13,8 @@ rem qmake -r C:\Users\CtrlBrk\Documents\VstBoard\src\buildall.pro
 rem nmake clean
 rem nmake release
 
+pause
+
 copy /y ".\dllLoader\release\vstboard.dll" ".\installer"
 copy /y ".\vstboard\release\vstboard.exe" ".\installer"
 copy /y ".\vstdll\release\VstBoardPlugin.dll" ".\installer"
@@ -27,9 +29,11 @@ set MPRESS_PATH="../../vstboard/tools/mpress/mpress.exe"
 %MPRESS_PATH% -q ".\installer\VstBoardPlugin.dll"
 %MPRESS_PATH% -q ".\installer\VstBoard.dll"
 %MPRESS_PATH% -q ".\installer\QtGui4.dll"
-%MPRESS_PATH% -q ".\installer\QtCode4.dll"
+%MPRESS_PATH% -q ".\installer\QtCore4.dll"
 %MPRESS_PATH% -q ".\installer\QtScript4.dll"
 %MPRESS_PATH% -q ".\installer\QtSolutions_MFCMigrationFramework-head.dll"
 
 cd "installer"
 %NSIS_PATH% /DARCH=x86 /DOutFile="vstboard_win32_setup.exe" nsis.nsi
+
+pause

@@ -1,8 +1,6 @@
 #ifndef SCRIPT_H
 #define SCRIPT_H
 
-#ifdef SCRIPTENGINE
-
 #include "object.h"
 #include "views/scripteditor.h"
 
@@ -14,7 +12,7 @@ namespace Connectables {
 
     public:
         Script(MainHost *host, int index, const ObjectInfo &info);
-        ~Script();
+        virtual ~Script();
         bool Open();
         bool Close();
         void Render();
@@ -53,5 +51,4 @@ namespace Connectables {
     };
 }
 
-#endif
 #endif // SCRIPT_H

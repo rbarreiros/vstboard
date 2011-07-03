@@ -21,7 +21,7 @@
 #ifndef MIDIDEVICES_H
 #define MIDIDEVICES_H
 
-#include "precomp.h"
+//#include "precomp.h"
 #include "porttime.h"
 #include "portmidi.h"
 #include "models/listmidiinterfacesmodel.h"

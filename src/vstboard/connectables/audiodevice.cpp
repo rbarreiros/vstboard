@@ -17,8 +17,6 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include "heap.h"
-
 
 #include "connectables/audiodevice.h"
 #include "connectables/object.h"
@@ -378,8 +376,6 @@ bool AudioDevice::OpenStream(double sampleRate)
             flags,
             paCallback,
             (void *)this );
-
-
 
     if( err != paNoError ) {
         Pa_CloseStream(stream);

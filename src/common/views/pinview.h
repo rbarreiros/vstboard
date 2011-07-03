@@ -21,7 +21,7 @@
 #ifndef PINVIEW_H
 #define PINVIEW_H
 
-#include "precomp.h"
+//#include "precomp.h"
 #include "globals.h"
 #include "connectables/connectioninfo.h"
 #include "viewconfig.h"

@@ -1,7 +1,7 @@
 #ifndef LISTAUDIODEVICESVIEW_H
 #define LISTAUDIODEVICESVIEW_H
 
-#include "precomp.h"
+//#include "precomp.h"
 
 class ListAudioDevicesView : public QTreeView
 {

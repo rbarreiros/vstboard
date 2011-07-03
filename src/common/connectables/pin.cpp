@@ -17,8 +17,6 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include "heap.h"
-
 
 
 #include "pin.h"
@@ -118,7 +116,8 @@ void Pin::SetContainerId(quint16 id)
 void Pin::Close()
 {
     QMutexLocker l(&objMutex);
-    disconnect(parent->getHost()->updateViewTimer,SIGNAL(timeout()),
+    if(parent && parent->getHost() && parent->getHost()->updateViewTimer )
+        disconnect(parent->getHost()->updateViewTimer,SIGNAL(timeout()),
             this,SLOT(updateView()));
     parentIndex=QModelIndex();
     modelIndex=QModelIndex();

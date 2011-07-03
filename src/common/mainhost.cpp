@@ -17,9 +17,6 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include "heap.h"
-
-
 #include "mainhost.h"
 #include "mainwindow.h"
 #include "connectables/container.h"
@@ -105,7 +102,8 @@ MainHost::~MainHost()
     EnableSolverUpdate(false);
 
     updateViewTimer->stop();
-    updateViewTimer->deleteLater();
+    delete updateViewTimer;
+    updateViewTimer=0;
 
     mutexListCables->lock();
     workingListOfCables.clear();

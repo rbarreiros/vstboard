@@ -1,7 +1,7 @@
 #ifndef VIEWCONFIG_H
 #define VIEWCONFIG_H
 
-#include "precomp.h"
+//#include "precomp.h"
 
 class MainHost;
 

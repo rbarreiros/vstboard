@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "precomp.h"
+//#include "precomp.h"
 #include "mainhost.h"
 #include "mainwindow.h"
 #include "viewconfig.h"

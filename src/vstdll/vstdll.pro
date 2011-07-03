@@ -2,11 +2,14 @@ DEFINES += APP_NAME=\\\"VstBoardPlugin\\\"
 
 include(../config.pri)
 
-QT += core gui script
+QT += core gui
 
 TARGET = "VstBoardPlugin"
 TEMPLATE = lib
 #CONFIG += staticlib
+
+LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/" -lvld
+INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include/"
 
 CONFIG += qtwinmigrate-uselib
 include($${_PRO_FILE_PWD_}/../../libs/qtwinmigrate/src/qtwinmigrate.pri)
@@ -38,6 +41,11 @@ win32-msvc* {
 }
 
 INCLUDEPATH += ../common
+
+scriptengine {
+    DEFINES += SCRIPTENGINE
+    QT += script
+}
 
 SOURCES += \
     main.cpp \

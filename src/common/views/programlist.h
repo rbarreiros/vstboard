@@ -22,7 +22,7 @@
 #define PROGRAMLIST_H
 
 //#include <QWidget>
-#include "precomp.h"
+//#include "precomp.h"
 #include "globals.h"
 #include "mainhost.h"
 

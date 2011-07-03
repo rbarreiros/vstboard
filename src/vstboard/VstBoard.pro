@@ -2,7 +2,7 @@ DEFINES += APP_NAME=\\\"VstBoard\\\"
 
 include(../config.pri)
 
-QT += core gui script
+QT += core gui
 
 TEMPLATE = app
 TARGET = $${APP_NAME}
@@ -23,6 +23,14 @@ INCLUDEPATH += $$PORTMIDI_PATH/porttime
 INCLUDEPATH += $$PORTMIDI_PATH/pm_common
 
 INCLUDEPATH += ../common
+
+scriptengine {
+    DEFINES += SCRIPTENGINE
+    QT += script
+}
+
+LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/" -lvld
+INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include/"
 
 SOURCES += \
     main.cpp \

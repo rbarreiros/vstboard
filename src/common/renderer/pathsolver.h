@@ -21,7 +21,7 @@
 #ifndef PATHSOLVER_H
 #define PATHSOLVER_H
 
-#include "precomp.h"
+//#include "precomp.h"
 #include "connectables/object.h"
 #include "solvernode.h"
 #include "globals.h"

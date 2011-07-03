@@ -21,7 +21,7 @@
 #ifndef VSTAUDIODEVICEOUT_H
 #define VSTAUDIODEVICEOUT_H
 
-#include "precomp.h"
+//#include "precomp.h"
 #include "connectables/object.h"
 #include "connectables/objectinfo.h"
 

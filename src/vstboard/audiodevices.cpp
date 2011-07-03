@@ -17,8 +17,6 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include "heap.h"
-
 
 #include "audiodevices.h"
 #include "globals.h"
@@ -71,7 +69,7 @@ AudioDevices::~AudioDevices()
 
     mutexDevices.lock();
     foreach(Connectables::AudioDevice *dev, listAudioDevices)
-        dev->DeleteIfUnused();
+        delete dev; //dev->DeleteIfUnused();
     listAudioDevices.clear();
     mutexDevices.unlock();
 }

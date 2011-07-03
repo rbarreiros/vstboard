@@ -21,7 +21,7 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#include "precomp.h"
+//#include "precomp.h"
 
 #define EMPTY_PROGRAM 0xffff
 #define TEMP_PROGRAM 0xfffe

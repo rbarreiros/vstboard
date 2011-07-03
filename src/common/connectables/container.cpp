@@ -17,8 +17,6 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include "heap.h"
-
 
 
 #include "container.h"
@@ -42,7 +40,7 @@ Container::Container(MainHost *myHost,int index, const ObjectInfo &info) :
     bridgeIn(0),
     bridgeOut(0),
     optimizerFlag(false),
-    currentProgram(0),
+    currentContainerProgram(0),
     cablesNode(QModelIndex()),
     progToSet(-1)
 {
@@ -127,11 +125,11 @@ bool Container::Close()
     }
     listStaticObjects.clear();
 
-    if(currentProgram) {
-        currentProgram->Unload();
-        currentProgram->ParkAllObj();
-        delete currentProgram;
-        currentProgram=0;
+    if(currentContainerProgram) {
+        currentContainerProgram->Unload();
+        currentContainerProgram->ParkAllObj();
+        delete currentContainerProgram;
+        currentContainerProgram=0;
     }
 
     foreach(ContainerProgram *prog, listContainerPrograms) {
@@ -149,10 +147,10 @@ void Container::SetSleep(bool sleeping)
 {
     Object::SetSleep(sleeping);
 
-    if(!currentProgram)
+    if(!currentContainerProgram)
         return;
 
-    foreach(QSharedPointer<Object> objPtr, currentProgram->listObjects) {
+    foreach(QSharedPointer<Object> objPtr, currentContainerProgram->listObjects) {
         if(!objPtr.isNull())
             objPtr->SetSleep(sleep);
     }
@@ -162,8 +160,8 @@ void Container::Hide()
 {
     cablesNode=QModelIndex();
 
-    if(currentProgram) {
-        foreach(QSharedPointer<Object> objPtr, currentProgram->listObjects) {
+    if(currentContainerProgram) {
+        foreach(QSharedPointer<Object> objPtr, currentContainerProgram->listObjects) {
             if(!objPtr.isNull())
                 objPtr->Hide();
         }
@@ -179,7 +177,7 @@ void Container::Hide()
 
 bool Container::IsDirty()
 {
-    return currentProgram->IsDirty();
+    return currentContainerProgram->IsDirty();
 }
 
 /*!
@@ -220,7 +218,7 @@ void Container::LoadProgram(int prog)
     QMutexLocker ml(&progLoadMutex);
 
     //if prog is already loaded, update model
-    if(prog==currentProgId && currentProgram) {
+    if(prog==currentProgId && currentContainerProgram) {
         UpdateModelNode();
         return;
     }
@@ -228,7 +226,7 @@ void Container::LoadProgram(int prog)
     if(!listContainerPrograms.contains(prog))
         listContainerPrograms.insert(prog,new ContainerProgram(myHost,this));
 
-    ContainerProgram *oldProg = currentProgram;
+    ContainerProgram *oldProg = currentContainerProgram;
     ContainerProgram *newProg = listContainerPrograms.value(prog);
 
 
@@ -258,7 +256,7 @@ void Container::LoadProgram(int prog)
     }
 
     currentProgId=prog;
-    currentProgram = new ContainerProgram(*newProg);
+    currentContainerProgram = new ContainerProgram(*newProg);
 
     //add new objects
     foreach(QSharedPointer<Object>objPtr, newProg->listObjects) {
@@ -267,9 +265,9 @@ void Container::LoadProgram(int prog)
         }
     }
 
-    currentProgram->Load(prog);
+    currentContainerProgram->Load(prog);
     if(optimizerFlag)
-        currentProgram->LoadRendererState();
+        currentContainerProgram->LoadRendererState();
     UpdateModelNode();
 
     if(oldProg) {
@@ -286,8 +284,8 @@ const QTime Container::GetLastUpdate() {
     if(parentContainer)
         parentTime = parentContainer.toStrongRef()->GetLastUpdate();
 
-    if(currentProgram)
-        myTime = currentProgram->timeSavedRendererNodes;
+    if(currentContainerProgram)
+        myTime = currentContainerProgram->timeSavedRendererNodes;
 
     if(myTime>parentTime)
         return myTime;
@@ -297,25 +295,25 @@ const QTime Container::GetLastUpdate() {
 
 void Container::SaveProgram()
 {
-    if(!currentProgram && currentProgId==TEMP_PROGRAM)
+    if(!currentContainerProgram && currentProgId==TEMP_PROGRAM)
         return;
 
-    currentProgram->Save();
+    currentContainerProgram->Save();
 
     delete listContainerPrograms.take(currentProgId);
-    listContainerPrograms.insert(currentProgId,currentProgram);
-    ContainerProgram *tmp = new ContainerProgram(*currentProgram);
-    currentProgram = tmp;
+    listContainerPrograms.insert(currentProgId,currentContainerProgram);
+    ContainerProgram *tmp = new ContainerProgram(*currentContainerProgram);
+    currentContainerProgram = tmp;
 }
 
 void Container::UnloadProgram()
 {
-    if(!currentProgram)
+    if(!currentContainerProgram)
         return;
 
-    currentProgram->Unload();
-    delete currentProgram;
-    currentProgram=0;
+    currentContainerProgram->Unload();
+    delete currentContainerProgram;
+    currentContainerProgram=0;
 
     currentProgId=EMPTY_PROGRAM;
 }
@@ -334,7 +332,7 @@ void Container::CopyProgram(int ori, int dest)
 
     if(ori==currentProgId) {
         //copy the current program
-        ContainerProgram* progCpy = currentProgram->CopyTo(dest);
+        ContainerProgram* progCpy = currentContainerProgram->CopyTo(dest);
         listContainerPrograms.insert(dest,progCpy);
     } else {
         //copy a saved program
@@ -389,7 +387,7 @@ void Container::AddObject(QSharedPointer<Object> objPtr)
 
     if(!listLoadedObjects.contains(objPtr.data()))
         listLoadedObjects << objPtr.data();
-    currentProgram->AddObject(objPtr);
+    currentContainerProgram->AddObject(objPtr);
     objPtr->LoadProgram(currentProgId);
 
 }
@@ -416,8 +414,8 @@ void Container::UserParkObject(QSharedPointer<Object> objPtr)
 
 void Container::UserParkWithBridge(QSharedPointer<Object> objPtr)
 {
-    if(currentProgram)
-        currentProgram->CreateBridgeOverObj(objPtr->GetIndex());
+    if(currentContainerProgram)
+        currentContainerProgram->CreateBridgeOverObj(objPtr->GetIndex());
     UserParkObject(objPtr);
 }
 
@@ -436,8 +434,8 @@ void Container::ParkObject(QSharedPointer<Object> objPtr)
         }
     }
 
-    if(currentProgram)
-        currentProgram->RemoveObject(objPtr);
+    if(currentContainerProgram)
+        currentContainerProgram->RemoveObject(objPtr);
 
     if(objPtr==bridgeIn)
         bridgeIn.clear();
@@ -454,23 +452,23 @@ void Container::ParkObject(QSharedPointer<Object> objPtr)
   */
 void Container::CopyCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr)
 {
-    if(!currentProgram)
+    if(!currentContainerProgram)
         return;
-    currentProgram->CopyCablesFromObj( newObjPtr->GetIndex(), ObjPtr->GetIndex() );
+    currentContainerProgram->CopyCablesFromObj( newObjPtr->GetIndex(), ObjPtr->GetIndex() );
 }
 
 void Container::MoveOutputCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr)
 {
-    if(!currentProgram)
+    if(!currentContainerProgram)
         return;
-    currentProgram->MoveOutputCablesFromObj( newObjPtr->GetIndex(), ObjPtr->GetIndex() );
+    currentContainerProgram->MoveOutputCablesFromObj( newObjPtr->GetIndex(), ObjPtr->GetIndex() );
 }
 
 void Container::MoveInputCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr)
 {
-    if(!currentProgram)
+    if(!currentContainerProgram)
         return;
-    currentProgram->MoveInputCablesFromObj( newObjPtr->GetIndex(), ObjPtr->GetIndex() );
+    currentContainerProgram->MoveInputCablesFromObj( newObjPtr->GetIndex(), ObjPtr->GetIndex() );
 }
 
 /*!
@@ -569,9 +567,9 @@ void Container::UserRemoveCableFromPin(const ConnectionInfo &pin)
   */
 void Container::AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin, bool hidden)
 {
-    if(!currentProgram)
+    if(!currentContainerProgram)
         return;
-    currentProgram->AddCable(outputPin,inputPin, hidden);
+    currentContainerProgram->AddCable(outputPin,inputPin, hidden);
 }
 
 /*!
@@ -592,9 +590,9 @@ void Container::AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &
   */
 void Container::RemoveCableFromPin(const ConnectionInfo &pin)
 {
-    if(!currentProgram)
+    if(!currentContainerProgram)
         return;
-    currentProgram->RemoveCableFromPin(pin);
+    currentContainerProgram->RemoveCableFromPin(pin);
 }
 
 /*!
@@ -744,7 +742,7 @@ QDataStream & Container::fromStream (QDataStream& in)
             //UnloadProgram();
             LoadProgram(prog);
             listLoadingObjects.clear();
-            listContainerPrograms.remove(TEMP_PROGRAM);
+            delete listContainerPrograms.take(TEMP_PROGRAM);
             break;
     }
     return in;

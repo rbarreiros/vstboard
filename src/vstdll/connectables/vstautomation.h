@@ -21,7 +21,7 @@
 #ifndef VSTAUTOMATION_H
 #define VSTAUTOMATION_H
 
-#include "precomp.h"
+//#include "precomp.h"
 #include "connectables/object.h"
 
 #define VST_AUTOMATION_DEFAULT_NB_PINS 2

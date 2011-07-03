@@ -17,7 +17,7 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include "heap.h"
+
 
 #include "object.h"
 #include "../globals.h"
@@ -509,6 +509,8 @@ void Object::SetContainerAttribs(const ObjectContainerAttribs &attr)
         return;
 
     QStandardItem *item = myHost->GetModel()->itemFromIndex(modelIndex);
+    if(!item)
+        return;
 
     item->setData(attr.position, UserRoles::position);
     item->setData(attr.editorVisible, UserRoles::editorVisible);
@@ -686,6 +688,8 @@ QDataStream & Object::fromStream(QDataStream & in)
         in >> progId;
 
         ObjectProgram *prog = new ObjectProgram(progId);
+        debug2(<<"load prog"<<prog<<currentProgram<<objectName())
+
         in >> *prog;
         if(listPrograms.contains(progId))
             delete listPrograms.take(progId);

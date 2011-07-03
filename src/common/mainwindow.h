@@ -21,7 +21,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "precomp.h"
+//#include "precomp.h"
 
 #include "mainhost.h"
 #include "models/listtoolsmodel.h"

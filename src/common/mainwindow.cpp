@@ -17,8 +17,6 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include "heap.h"
-
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -108,7 +106,6 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     mySceneView->SetParkings(ui->programParkList, ui->groupParkList);
     mySceneView->setModel(myHost->GetModel());
 
-    //ui->solverView->setModel(&myHost->solver->model);
     ui->solverView->setModel(myHost->GetRendererModel());
     connect(myHost->GetRendererModel(), SIGNAL(dataChanged(QModelIndex,QModelIndex)),
             ui->solverView, SLOT(resizeColumnsToContents()));
@@ -132,7 +129,7 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
 
 #ifdef DEBUGMEM
     void MainWindow::OnHeapCheck() {
-        HeapCheckpoint();
+
     }
 
 #endif

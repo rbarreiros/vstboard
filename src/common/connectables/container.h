@@ -77,8 +77,8 @@ namespace Connectables {
         QWeakPointer<Container>parentContainer;
 
         void Updated() {
-            if(currentProgram)
-                currentProgram->timeSavedRendererNodes = QTime::currentTime();
+            if(currentContainerProgram)
+                currentContainerProgram->timeSavedRendererNodes = QTime::currentTime();
             if(childContainer)
                 childContainer.toStrongRef()->Updated();
         }
@@ -96,7 +96,7 @@ namespace Connectables {
         QHash<int,ContainerProgram*>listContainerPrograms;
 
         /// pointer to the current program
-        ContainerProgram* currentProgram;
+        ContainerProgram* currentContainerProgram;
 
         /// list of static objects (bridges are static)
         QList< QSharedPointer< Object > >listStaticObjects;

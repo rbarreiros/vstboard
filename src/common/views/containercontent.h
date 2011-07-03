@@ -21,7 +21,7 @@
 #ifndef CONTAINERCONTENT_H
 #define CONTAINERCONTENT_H
 
-#include "precomp.h"
+//#include "precomp.h"
 #include "../mainwindow.h"
 #include "objectdropzone.h"
 

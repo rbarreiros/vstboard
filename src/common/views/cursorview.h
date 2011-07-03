@@ -21,7 +21,7 @@
 #ifndef CURSORVIEW_H
 #define CURSORVIEW_H
 
-#include "precomp.h"
+//#include "precomp.h"
 #include "viewconfig.h"
 
 namespace View {

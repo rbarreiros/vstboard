@@ -23,7 +23,7 @@
 
 #include <QWaitCondition>
 
-#include "precomp.h"
+//#include "precomp.h"
 #include "connectables/object.h"
 #include "connectables/objectinfo.h"
 #include "portaudio.h"
