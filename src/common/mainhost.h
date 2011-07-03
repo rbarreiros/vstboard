@@ -162,6 +162,8 @@ public slots:
     void LoadFile(const QString &filename);
     void LoadSetupFile(const QString &filename);
     void LoadProjectFile(const QString &filename);
+    void ReloadProject();
+    void ReloadSetup();
     void ClearSetup();
     void ClearProject();
     void SaveSetupFile(QString filename="");

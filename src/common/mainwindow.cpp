@@ -495,6 +495,7 @@ void MainWindow::readSettings()
     //load default files
     myHost->LoadSetupFile( ConfigDialog::defaultSetupFile(myHost) );
     myHost->LoadProjectFile( ConfigDialog::defaultProjectFile(myHost) );
+    updateRecentFileActions();
 }
 
 void MainWindow::currentFileChanged()

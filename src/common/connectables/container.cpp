@@ -681,7 +681,6 @@ QDataStream & Container::fromStream (QDataStream& in)
                     ObjectInfo info;
                     quint16 streamSize;
                     QByteArray tmpStream;
-                    QDataStream tmp( &tmpStream , QIODevice::ReadWrite);
 
                     in >> info;
                     in >> streamSize;
@@ -690,6 +689,7 @@ QDataStream & Container::fromStream (QDataStream& in)
                     QSharedPointer<Object> objPtr = myHost->objFactory->NewObject(info);
                     if(!objPtr.isNull()) {
                         AddParkedObject(objPtr);
+                        QDataStream tmp( &tmpStream , QIODevice::ReadWrite);
                         tmp >> *objPtr.data();
 
                         //keep the object alive while loading

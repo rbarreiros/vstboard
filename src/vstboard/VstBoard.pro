@@ -29,8 +29,10 @@ scriptengine {
     QT += script
 }
 
-LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/" -lvld
-INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include/"
+CONFIG(debug, debug|release) {
+    LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/" -lvld
+    INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include/"
+}
 
 SOURCES += \
     main.cpp \

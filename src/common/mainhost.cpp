@@ -84,12 +84,6 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
     updateViewTimer = new QTimer(this);
     updateViewTimer->start(40);
 
-//    connect(solver,SIGNAL(NewRenderingOrder(orderedNodes*)),
-//            renderer, SLOT(OnNewRenderingOrder(orderedNodes*)));
-
-//    connect(solver,SIGNAL(NewRenderingOrder(orderedNodes*)),
-//            this, SLOT(OnNewRenderingOrder(orderedNodes*)));
-
     connect(this,SIGNAL(SolverToUpdate()),
             this,SLOT(UpdateSolver()),
             Qt::QueuedConnection);
@@ -578,7 +572,6 @@ void MainHost::SetSolverUpdateNeeded(bool need)
 
 void MainHost::UpdateSolver(bool forceUpdate)
 {
-
     solverMutex.lock();
 
     if(!solverNeedAnUpdate) {
@@ -805,6 +798,20 @@ void MainHost::LoadProjectFile(const QString &filename)
         ConfigDialog::RemoveRecentProjectFile(filename,this);
     }
     emit currentFileChanged();
+}
+
+void MainHost::ReloadProject()
+{
+    if(currentProjectFile.isEmpty())
+        return;
+    ProjectFile::LoadFromFile(this,currentProjectFile);
+}
+
+void MainHost::ReloadSetup()
+{
+    if(currentSetupFile.isEmpty())
+        return;
+    ConfigDialog::AddRecentSetupFile(currentSetupFile,this);
 }
 
 void MainHost::ClearSetup()

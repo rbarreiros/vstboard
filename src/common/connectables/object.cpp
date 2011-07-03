@@ -688,8 +688,6 @@ QDataStream & Object::fromStream(QDataStream & in)
         in >> progId;
 
         ObjectProgram *prog = new ObjectProgram(progId);
-        debug2(<<"load prog"<<prog<<currentProgram<<objectName())
-
         in >> *prog;
         if(listPrograms.contains(progId))
             delete listPrograms.take(progId);

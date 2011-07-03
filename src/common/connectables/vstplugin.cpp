@@ -832,15 +832,17 @@ QDataStream & VstPlugin::fromStream(QDataStream & in)
     Object::fromStream(in);
     in >> savedChunkSize;
 
+    if(savedChunk) {
+        delete savedChunk;
+        savedChunk=0;
+    }
+
     if(savedChunkSize!=0) {
         savedChunk = new char[savedChunkSize];
         in.readRawData(savedChunk,savedChunkSize);
 
         if(pEffect && (pEffect->flags & effFlagsProgramChunks)) {
             EffSetChunk(savedChunk,savedChunkSize);
-           // EffSetProgram(0);
-            delete savedChunk;
-            savedChunk=0;
         }
     }
     return in;
