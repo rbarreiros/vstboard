@@ -1,7 +1,7 @@
 #ifndef LISTAUDIODEVICESVIEW_H
 #define LISTAUDIODEVICESVIEW_H
 
-//#include "precomp.h"
+#include "precomp.h"
 
 class ListAudioDevicesView : public QTreeView
 {
@@ -12,7 +12,6 @@ public:
 protected:
     QAction *audioDevConfig;
     QAction *updateList;
-    QModelIndex currentDevice;
 
 signals:
     void Config(const QModelIndex &device);

@@ -22,15 +22,23 @@
 #include "globals.h"
 
 ListAudioDevicesView::ListAudioDevicesView(QWidget *parent) :
-    QTreeView(parent)
+    QTreeView(parent),
+    audioDevConfig(0),
+    updateList(0)
 {
     audioDevConfig = new QAction(QIcon(":/img16x16/configure.png"), tr("Config device"), this);
+    audioDevConfig->setShortcut(Qt::Key_F2);
+    audioDevConfig->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     connect(audioDevConfig, SIGNAL(triggered()),
             this, SLOT(ConfigCurrentDevice()));
+    addAction(audioDevConfig);
 
     updateList = new QAction(QIcon(":/img16x16/viewmag+.png"), tr("Refresh list"), this);
+    updateList->setShortcut(Qt::Key_F5);
+    updateList->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     connect(updateList, SIGNAL(triggered()),
             this, SIGNAL(UpdateList()));
+    addAction(updateList);
 
     connect(this, SIGNAL(customContextMenuRequested( const QPoint& )),
             this, SLOT(AudioDevContextMenu(const QPoint &)));
@@ -38,11 +46,9 @@ ListAudioDevicesView::ListAudioDevicesView(QWidget *parent) :
 
 void ListAudioDevicesView::AudioDevContextMenu(const QPoint &pt)
 {
-    currentDevice = indexAt(pt).sibling(0,0);
-
     QList<QAction *> lstActions;
 
-    if(currentDevice.data(UserRoles::objInfo).isValid())
+    if(currentIndex().sibling(0,0).data(UserRoles::objInfo).isValid())
         lstActions << audioDevConfig;
 
     lstActions << updateList;
@@ -51,5 +57,6 @@ void ListAudioDevicesView::AudioDevContextMenu(const QPoint &pt)
 
 void ListAudioDevicesView::ConfigCurrentDevice()
 {
-    emit Config(currentDevice);
+    if(currentIndex().sibling(0,0).data(UserRoles::objInfo).isValid())
+        emit Config(currentIndex().sibling(0,0));
 }
