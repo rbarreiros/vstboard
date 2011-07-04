@@ -169,9 +169,6 @@ namespace Connectables {
         /// the current model index
         QPersistentModelIndex modelIndex;
 
-        /// a string describing the error if the object can't be created
-        QString errorMessage;
-
         /// true if the object is parked (no rendering)
         bool parked;
 
@@ -245,8 +242,8 @@ namespace Connectables {
         /// ObjectInfo defining the object
         ObjectInfo objInfo;
 
-
-//        QScriptValue scriptObj;
+        /// a string describing the error if the object can't be created
+        QString errorMessage;
 
     private:
         /// the current container id if not parked
@@ -282,6 +279,8 @@ namespace Connectables {
         virtual void OnHideEditor() {}
 
         virtual void UserRemovePin(const ConnectionInfo &info);
+
+        void SetErrorMessage(const QString &msg) {errorMessage=msg;}
     };
 }
 

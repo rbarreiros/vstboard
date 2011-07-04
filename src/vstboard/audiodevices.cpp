@@ -25,6 +25,8 @@
 #include "pa_asio.h"
 #include "views/mmeconfigdialog.h"
 #include "views/wasapiconfigdialog.h"
+#include "connectables/audiodevicein.h"
+#include "connectables/audiodeviceout.h"
 
 /*!
   \class AudioDevices
@@ -133,12 +135,20 @@ ListAudioInterfacesModel * AudioDevices::GetModel()
         if(obj.isNull())
             continue;
 
-        if(obj->info().objType == ObjType::AudioInterfaceIn || obj->info().objType == ObjType::AudioInterfaceOut) {
+        ObjectInfo info( obj->info() );
+        if(info.objType == ObjType::AudioInterfaceIn || info.objType == ObjType::AudioInterfaceOut) {
+            QString errMsg;
+            Connectables::AudioDevice *newDevice = AddDevice( info, &errMsg );
+            if(info.objType == ObjType::AudioInterfaceIn)
+                static_cast<Connectables::AudioDeviceIn*>(obj.data())->SetParentDevice(newDevice);
+            if(info.objType == ObjType::AudioInterfaceOut)
+                static_cast<Connectables::AudioDeviceOut*>(obj.data())->SetParentDevice(newDevice);
             if(obj->Open()) {
                 obj->UpdateModelNode();
             } else {
                 static_cast<Connectables::Container*>(myHost->objFactory->GetObjectFromId( obj->GetContainerId() ).data())->UserParkObject( obj );
             }
+            obj->SetErrorMessage(errMsg);
         }
     }
 

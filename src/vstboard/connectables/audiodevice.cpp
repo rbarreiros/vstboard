@@ -214,6 +214,10 @@ void AudioDevice::SetSampleRate(float rate)
   */
 bool AudioDevice::OpenStream(double sampleRate)
 {
+    if(Pa_GetDeviceInfo(objInfo.id)==0) {
+        errorMessage=tr("Device not found");
+        return false;
+    }
 
     unsigned long framesPerBuffer = paFramesPerBufferUnspecified;
 
@@ -503,7 +507,9 @@ bool AudioDevice::Close()
             I::msleep(10);
             count++;
         }
-        debug2(<<"AudioDevice::Close"<<objectName()<<"wait:"<<count)
+        if(count>0) {
+            debug2(<<"AudioDevice::Close"<<objectName()<<"wait:"<<count)
+        }
 
         Pa_CloseStream(stream);
         stream = 0;
