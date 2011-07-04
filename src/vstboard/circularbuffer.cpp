@@ -24,6 +24,7 @@ CircularBuffer::CircularBuffer() :
         buffSize(4096)
 {
     buffer = new float[buffSize];
+    ZeroMemory(buffer,sizeof(float)*buffSize);
     bufStart = &buffer[0];
     bufEnd = &buffer[buffSize-1];
     filledStart = bufStart;
