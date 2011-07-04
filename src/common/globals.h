@@ -171,9 +171,10 @@ namespace PinMessage {
     };
 }
 
+#define FIXED_PIN_STARTINDEX 0xf000
 namespace FixedPinNumber {
     enum Enum {
-        editorVisible = 0xf000,
+        editorVisible = FIXED_PIN_STARTINDEX,
         learningMode,
         vstProgNumber,
         numberOfPins

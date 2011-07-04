@@ -46,7 +46,6 @@ namespace Connectables {
 
         QList<QVariant> listValues;
         QHash<int,float>listChanged;
-        int numberOfPins;
         int progChanged;
 
     public slots:
