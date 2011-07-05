@@ -55,6 +55,8 @@ MainWindowHost::MainWindowHost(MainHostHost * myHost,QWidget *parent) :
             this, SLOT(UpdateAudioDevices()));
 
     QAction *updateMidiList = new QAction(QIcon(":/img16x16/viewmag+.png"), tr("Refresh list"), ui->treeMidiInterfaces);
+    updateMidiList->setShortcut(Qt::Key_F5);
+    updateMidiList->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     connect( updateMidiList, SIGNAL(triggered()),
              this, SLOT(UpdateMidiDevices()));
     ui->treeMidiInterfaces->addAction( updateMidiList );

@@ -178,7 +178,7 @@ void MidiDevices::MidiReceive_poll(PtTimestamp timestamp, void *userData)
         if(device->GetSleep())
             continue;
 
-        if(!device->stream)
+        if(!device->stream || !device->queue)
            continue;
 
         //lock device while processing (no rendering, no delete)

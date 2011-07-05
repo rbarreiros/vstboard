@@ -79,7 +79,7 @@ bool MidiDevice::OpenStream()
     queue = Pm_QueueCreate(QUEUE_SIZE, sizeof(PmEvent));
     if(!queue) {
         debug("MidiDevice::OpenStream can't create queue")
-                return false;
+        return false;
     }
 
     if(objInfo.inputs>0) {
@@ -143,23 +143,28 @@ bool MidiDevice::OpenStream()
 
 bool MidiDevice::CloseStream()
 {
-    if(!deviceOpened)
-        return true;
-
+//    if(!deviceOpened)
+//        return true;
 //    SetSleep(true);
 
     QMutexLocker l(&objMutex);
 
     PmError err = pmNoError;
 
-    err = Pm_Close(stream);
-    if(err!=pmNoError) {
-        debug("MidiDevice::Close error closing midi port");
+    if(stream) {
+        err = Pm_Close(stream);
+        if(err!=pmNoError) {
+            debug("MidiDevice::Close error closing midi port");
+        }
+        stream=0;
     }
 
-    err = Pm_QueueDestroy(queue);
-    if(err!=pmNoError) {
-        debug("error closing midi queue");
+    if(queue) {
+        err = Pm_QueueDestroy(queue);
+        if(err!=pmNoError) {
+            debug("error closing midi queue");
+        }
+        queue=0;
     }
 
     deviceOpened=false;
@@ -235,7 +240,7 @@ bool MidiDevice::Open()
 
     //error while opening device, delete it now
     if(!OpenStream()) {
-        return false;
+        return true;
     }
     listMidiPinOut->ChangeNumberOfPins(devInfo->input);
     listMidiPinIn->ChangeNumberOfPins(devInfo->output);
