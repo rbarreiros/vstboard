@@ -186,7 +186,8 @@ void GradientWidget::updateGradientImage()
         m_gradient_image = QImage(size(), QImage::Format_ARGB32);
 
     float hue = m_main_color.hueF();
-    if(hue<0.0f) hue=0.0;
+    if(hue<0.0f)
+        setHue(0.0f);
 
     float alpha = m_main_color.alphaF();
 
