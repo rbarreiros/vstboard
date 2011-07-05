@@ -9,9 +9,11 @@ copy /y "*.txt" "%BUILD_PATH%/installer"
 copy /y ".\tools\nsis.nsi" "%BUILD_PATH%/installer"
 
 cd "%BUILD_PATH%"
-rem qmake -r C:\Users\CtrlBrk\Documents\VstBoard\src\buildall.pro
-rem nmake clean
-rem nmake release
+qmake -r C:\Users\CtrlBrk\Documents\VstBoard\src\buildall.pro
+nmake clean
+del "%BUILD_PATH%\portaudio\release\portaudio.lib"
+del "%BUILD_PATH%\portmidi\release\portmidi.lib"
+nmake release
 
 pause
 
@@ -22,7 +24,7 @@ copy /y "%QTDIR%\bin\QtCore4.dll" ".\installer"
 copy /y "%QTDIR%\bin\QtGui4.dll" ".\installer"
 copy /y "%QTDIR%\bin\QtScript4.dll" ".\installer"
 copy /y "%QTDIR%\bin\QtSolutions_MFCMigrationFramework-head.dll" ".\installer"
-copy /y "%WindowsSDKDir%\Redist\VC\vcredist_x86.exe" ".\installer"
+rem copy /y "%WindowsSDKDir%\Redist\VC\vcredist_x86.exe" ".\installer"
 
 set MPRESS_PATH="../../vstboard/tools/mpress/mpress.exe"
 %MPRESS_PATH% -q ".\installer\VstBoard.exe"

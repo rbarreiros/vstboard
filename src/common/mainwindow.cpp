@@ -96,19 +96,7 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     InitColors();
     connect(&viewConfig, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
             this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)));
-
-#ifdef DEBUGMEM
-    heapState = ui->mainToolBar->addAction("heap check");
-    connect(heapState,SIGNAL(triggered()),
-            this,SLOT(OnHeapCheck()));
-#endif
 }
-
-#ifdef DEBUGMEM
-void MainWindow::OnHeapCheck() {
-
-}
-#endif
 
 void MainWindow::RemoveBrowsersModels()
 {

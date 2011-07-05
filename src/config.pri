@@ -9,18 +9,12 @@ win32|macx {
         $$VSTSDK_PATH/public.sdk/source/vst2.x
 }
 
-CONFIG += scriptengine
-#CONFIG += debugmem
+CONFIG += SCRIPTENGINE
 
 CONFIG(debug, debug|release) {
     POST =
     build_postfix=debug
     DEFINES += DEBUG
-
-    debugmem {
-        DEFINES += DEBUGMEM
-    }
-
 } else {
     POST =
     build_postfix=release
@@ -40,7 +34,10 @@ win32-msvc* {
  #   QMAKE_CFLAGS += -Fd$$top_destdir/$$TARGET
 
 #to add symbols :
-#    QMAKE_CFLAGS_RELEASE +=  -Zi
+#    QMAKE_CXXFLAGS_RELEASE +=  -Zi
 #    QMAKE_LFLAGS_RELEASE += /DEBUG
 
+#ltcg
+    QMAKE_CXXFLAGS_RELEASE +=  -GL
+    QMAKE_LFLAGS_RELEASE += /LTCG
 }
