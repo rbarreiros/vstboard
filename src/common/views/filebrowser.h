@@ -21,8 +21,6 @@
 #ifndef FILEBROWSER_H
 #define FILEBROWSER_H
 
-#include "../precomp.h"
-
 namespace Ui {
     class FileBrowser;
 }
@@ -33,18 +31,25 @@ public:
     FileBrowser(QWidget *parent = 0);
     ~FileBrowser();
 
-    void setModel(QFileSystemModel *model);
+    void setModel(QFileSystemModel *model=0);
     void setPath(QString dir);
     QString path();
 
 protected:
     void changeEvent(QEvent *e);
+    QAction *actRename;
+    QAction *actDel;
+    QAction *actNewFolder;
 
 private:
     Ui::FileBrowser *ui;
     QStringList dirHistory;
     int historyPosition;
     QFileSystemModel *model;
+
+
+signals:
+    void DeleteFile(const QModelIndexList &listIndex);
 
 private slots:
     void on_nextDir_clicked();
@@ -53,6 +58,10 @@ private slots:
     void on_parentDir_clicked();
     void on_treeFiles_doubleClicked(QModelIndex index);
     void on_path_textEdited(QString );
+    void OnContextMenu(const QPoint & pos);
+    void DeleteItem();
+    void Rename();
+    void NewFolder();
 };
 
 #endif // FILEBROWSER_H

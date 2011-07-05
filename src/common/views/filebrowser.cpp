@@ -17,16 +17,39 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-
+#include "precomp.h"
 #include "filebrowser.h"
 #include "ui_filebrowser.h"
 
 FileBrowser::FileBrowser(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::FileBrowser)
+    ui(new Ui::FileBrowser),
+    historyPosition(0),
+    model(0)
 {
     ui->setupUi(this);
-    historyPosition = 0;
+
+    actRename = new QAction(tr("Rename"),ui->treeFiles);
+    actRename->setShortcut(Qt::Key_F2);
+    actRename->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    ui->treeFiles->addAction(actRename);
+    connect(actRename,SIGNAL(triggered()),
+            this,SLOT(Rename()));
+
+    actDel = new QAction(QIcon(":/img16x16/delete.png"),tr("Delete"),ui->treeFiles);
+    actDel->setShortcut(Qt::Key_Delete);
+    actDel->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    connect(actDel,SIGNAL(triggered()),
+            this,SLOT(DeleteItem()));
+    ui->treeFiles->addAction(actDel);
+
+    actNewFolder = new QAction(QIcon(":img16x16/folder.png"),tr("New Folder"),ui->treeFiles);
+    connect(actNewFolder,SIGNAL(triggered()),
+            this,SLOT(NewFolder()));
+    ui->treeFiles->addAction(actNewFolder);
+
+    connect(ui->treeFiles, SIGNAL(customContextMenuRequested(QPoint)),
+            this, SLOT(OnContextMenu(QPoint)));
 }
 
 FileBrowser::~FileBrowser()
@@ -39,10 +62,21 @@ void FileBrowser::setModel(QFileSystemModel *model)
     this->model = model;
     ui->treeFiles->setModel(model);
 
+    if(!model)
+        return;
+
     ui->treeFiles->setColumnHidden(1,true);
     ui->treeFiles->setColumnHidden(2,true);
     ui->treeFiles->setColumnHidden(3,true);
     setPath(model->rootPath());
+
+    if(model->isReadOnly())
+        ui->treeFiles->setContextMenuPolicy(Qt::NoContextMenu);
+    else
+        ui->treeFiles->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    actRename->setDisabled( model->isReadOnly() );
+    actDel->setDisabled( model->isReadOnly() );
 }
 
 void FileBrowser::changeEvent(QEvent *e)
@@ -84,9 +118,7 @@ void FileBrowser::setPath(QString dir)
 
 QString FileBrowser::path()
 {
-    if(dirHistory.isEmpty())
-        return "";
-    return dirHistory.last();
+    return dirHistory.value(historyPosition,"");
 }
 
 void FileBrowser::on_treeFiles_doubleClicked(QModelIndex index)
@@ -132,4 +164,54 @@ void FileBrowser::on_nextDir_clicked()
         ui->previousDir->setEnabled(true);
     if(historyPosition==dirHistory.size()-1)
         ui->nextDir->setEnabled(false);
+}
+
+void FileBrowser::OnContextMenu(const QPoint & pos)
+{
+    if(ui->treeFiles->indexAt(pos).isValid()) {
+        QMenu menu(this);
+        menu.exec(ui->treeFiles->actions(), mapToGlobal(pos));
+        return;
+    }
+
+    QMenu menu(this);
+    menu.addAction(actNewFolder);
+    menu.exec(mapToGlobal(pos));
+}
+
+void FileBrowser::DeleteItem()
+{
+    emit DeleteFile( ui->treeFiles->selectionModel()->selectedIndexes() );
+}
+
+void FileBrowser::Rename()
+{
+    ui->treeFiles->edit(ui->treeFiles->currentIndex());
+}
+
+void FileBrowser::NewFolder()
+{
+    QString name(tr("New Folder"));
+    QString newFolderName(name);
+    int cpt=1;
+
+    QDir baseFolder( model->rootDirectory().absolutePath() );
+
+    if(ui->treeFiles->currentIndex().isValid()) {
+        QFileInfo info( model->fileInfo(ui->treeFiles->currentIndex()));
+        if(info.isDir())
+            baseFolder.setPath(info.absoluteFilePath());
+    }
+
+    while(baseFolder.exists(newFolderName)) {
+        cpt++;
+        newFolderName=name+" ("+QString::number(cpt)+")";
+    }
+
+    if(!baseFolder.mkdir(newFolderName)) {
+        QMessageBox msgBox(QMessageBox::Information,tr("Can't create folder"),tr("Unable to create folder %1").arg(newFolderName),QMessageBox::Ok , this);
+        msgBox.exec();
+        return;
+    }
+//    ui->treeFiles->edit( ui->treeFiles->currentIndex());
 }

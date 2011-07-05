@@ -34,6 +34,7 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
         mySceneView(0),
         listToolsModel(0),
         listVstPluginsModel(0),
+        listVstBanksModel(0),
         ui(new Ui::MainWindow),
         myHost(myHost),
         viewConfigDlg(0)
@@ -74,33 +75,9 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     connect(ui->Programs, SIGNAL(CurrentDisplayedGroup(QModelIndex)),
             myHost->programList, SLOT(DisplayedGroupChanged(QModelIndex)));
 
-
-#if !defined(__GNUC__)
-    //vst plugins browser
-    //sse2 crash with gcc ?
-
-    listVstPluginsModel = new QFileSystemModel(this);
-    listVstPluginsModel->setReadOnly(true);
-    listVstPluginsModel->setResolveSymlinks(true);
-    QStringList fileFilter;
-    fileFilter << "*.dll";
-    listVstPluginsModel->setNameFilters(fileFilter);
-    listVstPluginsModel->setNameFilterDisables(false);
-    listVstPluginsModel->setRootPath(ConfigDialog::defaultVstPath(myHost));
-    ui->VstBrowser->setModel(listVstPluginsModel);
-
-    //bank file browser
-    listVstBanksModel = new QFileSystemModel(this);
-    //listVstBanksModel->setReadOnly(true);
-    listVstBanksModel->setResolveSymlinks(true);
-//    QStringList bankFilter;
-//    bankFilter << "*.fxb";
-//    bankFilter << "*.fxp";
-//    listVstBanksModel->setNameFilters(bankFilter);
-//    listVstBanksModel->setNameFilterDisables(false);
-    listVstBanksModel->setRootPath(ConfigDialog::defaultBankPath(myHost));
-    ui->BankBrowser->setModel(listVstBanksModel);
-#endif
+    SetupBrowsersModels( ConfigDialog::defaultVstPath(myHost), ConfigDialog::defaultBankPath(myHost));
+    connect(ui->BankBrowser,SIGNAL(DeleteFile(QModelIndexList)),
+            this,SLOT(DeleteFile(QModelIndexList)));
 
     mySceneView = new View::SceneView(myHost, myHost->objFactory, ui->hostView, ui->projectView, ui->programView, ui->groupView, this);
     mySceneView->SetParkings(ui->programParkList, ui->groupParkList);
@@ -128,12 +105,55 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
 }
 
 #ifdef DEBUGMEM
-    void MainWindow::OnHeapCheck() {
+void MainWindow::OnHeapCheck() {
 
-    }
-
+}
 #endif
 
+void MainWindow::RemoveBrowsersModels()
+{
+    ui->VstBrowser->setModel(0);
+    if(listVstPluginsModel) {
+        delete listVstPluginsModel;
+        listVstPluginsModel=0;
+    }
+
+    ui->BankBrowser->setModel(0);
+    if(listVstBanksModel) {
+        delete listVstBanksModel;
+        listVstBanksModel=0;
+    }
+}
+
+void MainWindow::SetupBrowsersModels(const QString &vstPath, const QString &browserPath)
+{
+#if !defined(__GNUC__)
+    //vst plugins browser
+    //sse2 crash with gcc ?
+
+    listVstPluginsModel = new QFileSystemModel(this);
+    listVstPluginsModel->setReadOnly(true);
+    listVstPluginsModel->setResolveSymlinks(true);
+    QStringList fileFilter;
+    fileFilter << "*.dll";
+    listVstPluginsModel->setNameFilters(fileFilter);
+    listVstPluginsModel->setNameFilterDisables(false);
+    listVstPluginsModel->setRootPath(vstPath);
+    ui->VstBrowser->setModel(listVstPluginsModel);
+
+    //bank file browser
+    listVstBanksModel = new QFileSystemModel(this);
+    listVstBanksModel->setReadOnly(false);
+    listVstBanksModel->setResolveSymlinks(true);
+//    QStringList bankFilter;
+//    bankFilter << "*.fxb";
+//    bankFilter << "*.fxp";
+//    listVstBanksModel->setNameFilters(bankFilter);
+//    listVstBanksModel->setNameFilterDisables(false);
+    listVstBanksModel->setRootPath(browserPath);
+    ui->BankBrowser->setModel(listVstBanksModel);
+#endif
+}
 
 MainWindow::~MainWindow()
 {
@@ -669,4 +689,58 @@ void MainWindow::OnViewConfigClosed()
 {
     viewConfigDlg=0;
     ui->actionAppearance->setChecked(false);
+}
+
+void MainWindow::DeleteFile(const QModelIndexList &listIndex)
+{
+    int fileConfirmed=0;
+    int folderConfirmed=0;
+    int skipErrors=0;
+
+    QList<QFileInfo>listInfo;
+    foreach(QModelIndex i, listIndex) {
+        if(i.column()!=0)
+            continue;
+        listInfo << listVstBanksModel->fileInfo(i);
+    }
+
+    QString vstPath=ui->VstBrowser->path();
+    QString browserPath=ui->BankBrowser->path();
+    RemoveBrowsersModels();
+
+    foreach(QFileInfo info, listInfo) {
+        if(info.isFile() && fileConfirmed!=QMessageBox::NoToAll) {
+            if(fileConfirmed!=QMessageBox::YesToAll) {
+                QMessageBox msgBox(QMessageBox::Warning,tr("Delete file"),tr("Delete %1 ?").arg(info.fileName()),QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll, this);
+                msgBox.exec();
+                fileConfirmed=msgBox.result();
+            }
+
+            if(fileConfirmed==QMessageBox::Yes || fileConfirmed==QMessageBox::YesToAll) {
+                if(!QFile::remove(info.absoluteFilePath()) && skipErrors!=QMessageBox::YesToAll) {
+                    QMessageBox msgBox(QMessageBox::Information,tr("Can't delete file"),tr("Unable to delete %1 ?").arg(info.fileName()),QMessageBox::Ok | QMessageBox::YesToAll , this);
+                    msgBox.exec();
+                    skipErrors=msgBox.result();
+                }
+            }
+        }
+
+        if(info.isDir() && folderConfirmed!=QMessageBox::NoToAll) {
+            if(folderConfirmed!=QMessageBox::YesToAll) {
+                QMessageBox msgBox(QMessageBox::Warning,tr("Delete folder"),tr("Delete %1 ?").arg(info.fileName()),QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll, this);
+                msgBox.exec();
+                folderConfirmed=msgBox.result();
+            }
+
+            if(folderConfirmed==QMessageBox::Yes || folderConfirmed==QMessageBox::YesToAll) {
+                if(!QDir(info.absolutePath()).rmdir(info.fileName()) && skipErrors!=QMessageBox::YesToAll) {
+                    QMessageBox msgBox(QMessageBox::Information,tr("Can't delete folder"),tr("Unable to delete %1").arg(info.fileName()),QMessageBox::Ok | QMessageBox::YesToAll , this);
+                    msgBox.exec();
+                    skipErrors=msgBox.result();
+                }
+            }
+        }
+    }
+
+    SetupBrowsersModels(vstPath,browserPath);
 }
