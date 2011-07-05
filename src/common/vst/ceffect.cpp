@@ -380,6 +380,6 @@ QString CEffect::EffGetParamName(long index)
 {
     char txt[32] ={0};
     EffDispatch(effGetParamName, index, 0, txt);
-    return QString::fromAscii(txt);
+    return QString(txt);
 
 }

@@ -384,7 +384,7 @@ bool AudioDevices::FindPortAudioDevice(ObjectInfo &objInfo, PaDeviceInfo *dInfo)
         PaDeviceIndex devIndex = Pa_HostApiDeviceIndexToDeviceIndex( apiIndex, i);
         const PaDeviceInfo *info = Pa_GetDeviceInfo( devIndex );
 
-        QString devName = QString::fromStdString(info->name);
+        QString devName(info->name);
         //remove " x64" from device name so we can share files with 32bit version
         devName.remove(QRegExp("( )?x64"));
 

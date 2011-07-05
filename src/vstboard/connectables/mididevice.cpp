@@ -90,10 +90,10 @@ bool MidiDevice::OpenStream()
                 char msg[255];
                 Pm_GetHostErrorText(msg,255);
                 debug("MidiDevice::OpenStream openInput host %s",msg)
-                msgTxt=QString::fromAscii(msg);
+                msgTxt=msg;
             } else {
                 debug("MidiDevice::OpenStream openInput %s",Pm_GetErrorText(err))
-                msgTxt=QString::fromAscii(Pm_GetErrorText(err));
+                msgTxt=Pm_GetErrorText(err);
             }
             errorMessage=tr("Error while opening midi device %1 %2").arg(objInfo.name).arg(msgTxt);
             return false;
@@ -107,9 +107,9 @@ bool MidiDevice::OpenStream()
                 unsigned int len=20;
                 Pm_GetHostErrorText(msg,len);
                 debug("MidiDevice::OpenStream setFilter host %s",msg)
-                msgTxt=QString::fromAscii(msg);
+                msgTxt=msg;
             } else {
-                msgTxt=QString::fromAscii(Pm_GetErrorText(err));
+                msgTxt=Pm_GetErrorText(err);
                 debug("MidiDevice::OpenStream setFilter %s",Pm_GetErrorText(err))
             }
             errorMessage=tr("Error while opening midi device %1 %2").arg(objInfo.name).arg(msgTxt);
@@ -126,10 +126,10 @@ bool MidiDevice::OpenStream()
                 unsigned int len=20;
                 Pm_GetHostErrorText(msg,len);
                 debug("MidiDevice::Open openInput host %s",msg)
-                msgTxt=QString::fromAscii(msg);
+                msgTxt=msg;
             } else {
                 debug("MidiDevice::Open openInput %s",Pm_GetErrorText(err))
-                msgTxt=QString::fromAscii(Pm_GetErrorText(err));
+                msgTxt=Pm_GetErrorText(err);
             }
             errorMessage=tr("Error while opening midi device %1 %2").arg(objInfo.name).arg(msgTxt);
             return false;
@@ -147,7 +147,6 @@ bool MidiDevice::CloseStream()
         return true;
 
 //    SetSleep(true);
-
 
     QMutexLocker l(&objMutex);
 
@@ -188,8 +187,8 @@ bool MidiDevice::FindDeviceByName()
 
     for(int i=0;i<Pm_CountDevices();i++) {
         const PmDeviceInfo *info = Pm_GetDeviceInfo(i);
-        if(QString::fromStdString(info->interf) == objInfo.apiName
-            && QString::fromStdString(info->name) == objInfo.name
+        if(objInfo.apiName == info->interf
+            && objInfo.name == info->name
             && info->input == objInfo.inputs
             && info->output == objInfo.outputs) {
             //can be this one, but the interface number can change form a comp to another

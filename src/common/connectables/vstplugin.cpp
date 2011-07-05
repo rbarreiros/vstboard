@@ -281,7 +281,7 @@ bool VstPlugin::Open()
             char szName[1024];
             ulong id;
             while ((id = EffGetNextShellPlugin(szName))) {
-                listPlugins.insert(id,QString::fromAscii(szName));
+                listPlugins.insert(id,szName);
             }
 
             if(VstPlugin::shellSelectView) {
