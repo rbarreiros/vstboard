@@ -1,5 +1,3 @@
-DEFINES += APP_NAME=\\\"VstBoardPlugin\\\"
-
 include(../config.pri)
 
 QT += core gui

@@ -6,7 +6,6 @@
 
 include(../config.pri)
 
-DEFINES += APP_NAME=\\\"VstBoardLoader\\\"
 TARGET = VstBoard
 TEMPLATE = lib
 

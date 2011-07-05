@@ -1,3 +1,5 @@
+DEFINES += APP_NAME=\\\"VstBoard\\\"
+
 PORTAUDIO_PATH 	= ../../libs/portaudio
 PORTMIDI_PATH 	= ../../libs/portmidi
 

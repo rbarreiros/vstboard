@@ -5,8 +5,6 @@ QT += core gui
 TEMPLATE = lib
 CONFIG += staticlib
 
-DEFINES += APP_NAME=\\\"VstBoardCommon\\\"
-
 vstsdk {
     HEADERS += vst/cvsthost.h \
         connectables/vstplugin.h \
