@@ -55,7 +55,6 @@ public:
 
 protected:
     void changeEvent(QEvent *e);
-    void RemoveBrowsersModels();
     void SetupBrowsersModels(const QString &vstPath, const QString &browserPath);
 
     ListToolsModel *listToolsModel;
@@ -80,7 +79,6 @@ public slots:
     void groupParkingModelChanges(QStandardItemModel *model);
     void currentFileChanged();
     void OnViewConfigClosed();
-    void DeleteFile(const QModelIndexList &listIndex);
 
 private slots:
     void on_actionLoad_Setup_triggered();

@@ -36,6 +36,7 @@ public:
     QString path();
 
 protected:
+    bool DeleteFile(const QModelIndex &index, int &deleteConfirmed,bool &skipErrors);
     void changeEvent(QEvent *e);
     QAction *actRename;
     QAction *actDel;
@@ -47,10 +48,6 @@ private:
     int historyPosition;
     QFileSystemModel *model;
 
-
-signals:
-    void DeleteFile(const QModelIndexList &listIndex);
-
 private slots:
     void on_nextDir_clicked();
     void on_previousDir_clicked();
@@ -59,7 +56,7 @@ private slots:
     void on_treeFiles_doubleClicked(QModelIndex index);
     void on_path_textEdited(QString );
     void OnContextMenu(const QPoint & pos);
-    void DeleteItem();
+    void DeleteSelectedFile();
     void Rename();
     void NewFolder();
 };

@@ -76,8 +76,6 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
             myHost->programList, SLOT(DisplayedGroupChanged(QModelIndex)));
 
     SetupBrowsersModels( ConfigDialog::defaultVstPath(myHost), ConfigDialog::defaultBankPath(myHost));
-    connect(ui->BankBrowser,SIGNAL(DeleteFile(QModelIndexList)),
-            this,SLOT(DeleteFile(QModelIndexList)));
 
     mySceneView = new View::SceneView(myHost, myHost->objFactory, ui->hostView, ui->projectView, ui->programView, ui->groupView, this);
     mySceneView->SetParkings(ui->programParkList, ui->groupParkList);
@@ -96,21 +94,6 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     InitColors();
     connect(&viewConfig, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
             this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)));
-}
-
-void MainWindow::RemoveBrowsersModels()
-{
-    ui->VstBrowser->setModel(0);
-    if(listVstPluginsModel) {
-        delete listVstPluginsModel;
-        listVstPluginsModel=0;
-    }
-
-    ui->BankBrowser->setModel(0);
-    if(listVstBanksModel) {
-        delete listVstBanksModel;
-        listVstBanksModel=0;
-    }
 }
 
 void MainWindow::SetupBrowsersModels(const QString &vstPath, const QString &browserPath)
@@ -677,58 +660,4 @@ void MainWindow::OnViewConfigClosed()
 {
     viewConfigDlg=0;
     ui->actionAppearance->setChecked(false);
-}
-
-void MainWindow::DeleteFile(const QModelIndexList &listIndex)
-{
-    int fileConfirmed=0;
-    int folderConfirmed=0;
-    int skipErrors=0;
-
-    QList<QFileInfo>listInfo;
-    foreach(QModelIndex i, listIndex) {
-        if(i.column()!=0)
-            continue;
-        listInfo << listVstBanksModel->fileInfo(i);
-    }
-
-    QString vstPath=ui->VstBrowser->path();
-    QString browserPath=ui->BankBrowser->path();
-    RemoveBrowsersModels();
-
-    foreach(QFileInfo info, listInfo) {
-        if(info.isFile() && fileConfirmed!=QMessageBox::NoToAll) {
-            if(fileConfirmed!=QMessageBox::YesToAll) {
-                QMessageBox msgBox(QMessageBox::Warning,tr("Delete file"),tr("Delete %1 ?").arg(info.fileName()),QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll, this);
-                msgBox.exec();
-                fileConfirmed=msgBox.result();
-            }
-
-            if(fileConfirmed==QMessageBox::Yes || fileConfirmed==QMessageBox::YesToAll) {
-                if(!QFile::remove(info.absoluteFilePath()) && skipErrors!=QMessageBox::YesToAll) {
-                    QMessageBox msgBox(QMessageBox::Information,tr("Can't delete file"),tr("Unable to delete %1 ?").arg(info.fileName()),QMessageBox::Ok | QMessageBox::YesToAll , this);
-                    msgBox.exec();
-                    skipErrors=msgBox.result();
-                }
-            }
-        }
-
-        if(info.isDir() && folderConfirmed!=QMessageBox::NoToAll) {
-            if(folderConfirmed!=QMessageBox::YesToAll) {
-                QMessageBox msgBox(QMessageBox::Warning,tr("Delete folder"),tr("Delete %1 ?").arg(info.fileName()),QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll, this);
-                msgBox.exec();
-                folderConfirmed=msgBox.result();
-            }
-
-            if(folderConfirmed==QMessageBox::Yes || folderConfirmed==QMessageBox::YesToAll) {
-                if(!QDir(info.absolutePath()).rmdir(info.fileName()) && skipErrors!=QMessageBox::YesToAll) {
-                    QMessageBox msgBox(QMessageBox::Information,tr("Can't delete folder"),tr("Unable to delete %1").arg(info.fileName()),QMessageBox::Ok | QMessageBox::YesToAll , this);
-                    msgBox.exec();
-                    skipErrors=msgBox.result();
-                }
-            }
-        }
-    }
-
-    SetupBrowsersModels(vstPath,browserPath);
 }

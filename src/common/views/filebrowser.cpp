@@ -40,7 +40,7 @@ FileBrowser::FileBrowser(QWidget *parent) :
     actDel->setShortcut(Qt::Key_Delete);
     actDel->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     connect(actDel,SIGNAL(triggered()),
-            this,SLOT(DeleteItem()));
+            this,SLOT(DeleteSelectedFile()));
     ui->treeFiles->addAction(actDel);
 
     actNewFolder = new QAction(QIcon(":img16x16/folder.png"),tr("New Folder"),ui->treeFiles);
@@ -142,7 +142,17 @@ void FileBrowser::on_rootDir_clicked()
 
 void FileBrowser::on_previousDir_clicked()
 {
-    historyPosition--;
+    int cpt = historyPosition-1;
+    if(cpt<0)
+        return;
+    while(cpt>0 && !QFileInfo(dirHistory[cpt]).exists() )
+        cpt--;
+
+    if(cpt<0)
+        return;
+
+
+    historyPosition=cpt;
 
     ui->path->setText(dirHistory[historyPosition]);
     ui->treeFiles->setRootIndex(model->index(dirHistory[historyPosition]));
@@ -155,7 +165,15 @@ void FileBrowser::on_previousDir_clicked()
 
 void FileBrowser::on_nextDir_clicked()
 {
-    historyPosition++;
+    int cpt = historyPosition+1;
+    if(cpt>=dirHistory.size())
+        return;
+    while(cpt<dirHistory.size() && !QFileInfo(dirHistory[cpt]).exists() )
+        cpt++;
+    if(cpt==dirHistory.size())
+        return;
+
+    historyPosition=cpt;
 
     ui->path->setText(dirHistory[historyPosition]);
     ui->treeFiles->setRootIndex(model->index(dirHistory[historyPosition]));
@@ -179,13 +197,79 @@ void FileBrowser::OnContextMenu(const QPoint & pos)
     menu.exec(mapToGlobal(pos));
 }
 
-void FileBrowser::DeleteItem()
+bool FileBrowser::DeleteFile(const QModelIndex &index, int &deleteConfirmed,bool &skipErrors)
 {
-    emit DeleteFile( ui->treeFiles->selectionModel()->selectedIndexes() );
+    if(!index.isValid())
+        return false;
+
+    bool allChildrenDeleted=true;
+
+    //delete children first
+    if(model->isDir(index)) {
+        int nbChildren = model->rowCount(index);
+        QList<QPersistentModelIndex>listIdx;
+        for(int i=0;i<nbChildren; i++) {
+            listIdx << index.child(i,0);
+        }
+        foreach(QPersistentModelIndex idx, listIdx) {
+            if(!DeleteFile(idx,deleteConfirmed,skipErrors))
+                allChildrenDeleted=false;
+        }
+    }
+
+    //didn't delete all children : return false
+    if(deleteConfirmed==QMessageBox::NoToAll || !allChildrenDeleted)
+        return false;
+
+    //yestoall not clicked yet : ask for confirmation
+    if(deleteConfirmed!=QMessageBox::YesToAll) {
+        ui->treeFiles->scrollTo(index);
+        QMessageBox msgBox(QMessageBox::Warning,tr("Delete file/folder"),tr("Permanently delete %1 ?").arg(model->fileName(index)),QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll, this);
+        msgBox.exec();
+        deleteConfirmed=msgBox.result();
+
+        //not confirmed : return false
+        if(deleteConfirmed==QMessageBox::No || deleteConfirmed==QMessageBox::NoToAll)
+            return false;
+    }
+
+    if(!model->remove(index)) {
+        //can't delete : show error if skipError was not clicked
+        if(!skipErrors) {
+            QMessageBox msgBox(QMessageBox::Information,tr("Can't delete file/folder"),tr("Unable to delete %1").arg(model->fileName(index)),QMessageBox::Ok | QMessageBox::YesToAll , this);
+            msgBox.setDefaultButton(QMessageBox::Ok);
+            msgBox.exec();
+            if(msgBox.result()==QMessageBox::YesToAll)
+                skipErrors=true;
+        }
+
+        return false;
+    }
+
+    //all files and subfolders delete : return true
+    return true;
+}
+
+void FileBrowser::DeleteSelectedFile()
+{
+    int confirmed=0;
+    bool skipErr=false;
+
+    //delete all selected items
+    QList<QPersistentModelIndex>listIdx;
+    foreach(QPersistentModelIndex index, ui->treeFiles->selectionModel()->selectedRows(0) ) {
+        listIdx << index;
+    }
+    foreach(QPersistentModelIndex index, listIdx ) {
+        DeleteFile(index,confirmed,skipErr);
+        if(confirmed==QMessageBox::NoToAll)
+            return;
+    }
 }
 
 void FileBrowser::Rename()
 {
+    ui->treeFiles->scrollTo(ui->treeFiles->currentIndex());
     ui->treeFiles->edit(ui->treeFiles->currentIndex());
 }
 
@@ -195,23 +279,25 @@ void FileBrowser::NewFolder()
     QString newFolderName(name);
     int cpt=1;
 
-    QDir baseFolder( model->rootDirectory().absolutePath() );
+    QModelIndex baseFolder = ui->treeFiles->currentIndex();
 
-    if(ui->treeFiles->currentIndex().isValid()) {
-        QFileInfo info( model->fileInfo(ui->treeFiles->currentIndex()));
-        if(info.isDir())
-            baseFolder.setPath(info.absoluteFilePath());
+    if( !baseFolder.isValid() || !model->isDir(baseFolder) ) {
+        baseFolder=ui->treeFiles->rootIndex();
     }
 
-    while(baseFolder.exists(newFolderName)) {
+    while(model->index( model->filePath(baseFolder)+"/"+newFolderName).isValid()) {
         cpt++;
         newFolderName=name+" ("+QString::number(cpt)+")";
     }
 
-    if(!baseFolder.mkdir(newFolderName)) {
+    QModelIndex newDir = model->mkdir(baseFolder,newFolderName);
+    if(!newDir.isValid()) {
         QMessageBox msgBox(QMessageBox::Information,tr("Can't create folder"),tr("Unable to create folder %1").arg(newFolderName),QMessageBox::Ok , this);
         msgBox.exec();
         return;
+    } else {
+        ui->treeFiles->scrollTo(newDir);
+        ui->treeFiles->edit(newDir);
     }
-//    ui->treeFiles->edit( ui->treeFiles->currentIndex());
 }
+
