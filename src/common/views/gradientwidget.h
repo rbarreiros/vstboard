@@ -12,42 +12,50 @@ namespace View {
 
     public:
         explicit GradientWidget(QWidget *parent = 0);
-        ~GradientWidget();
-        QColor  selectedColor() const;
+
+        QColor getSelectedColor() {return m_selected_color;}
+        int getRed() {return m_selected_color.red();}
+        int getGreen() {return m_selected_color.green();}
+        int getBlue() {return m_selected_color.blue();}
+        qreal getAlpha() {return alpha;}
+        qreal getHue() {return hue;}
+        qreal getSaturation() {return saturation;}
+        qreal getValue() {return value;}
 
     signals:
         void colorSelected(const QColor &color);
 
     public slots:
         void setMainColor(const QColor &col);
-        void setCursorPen(const QPen &pen);
-        void setCursorDiameter(const int diameter);
         void setRed(int r);
         void setGreen(int g);
         void setBlue(int b);
         void setAlpha(int a);
         void setHue(int h);
+        void setSaturation(int s);
+        void setValue(int v);
+
+
 
     protected:
-        void    mouseMoveEvent(QMouseEvent *event);
-        void    mousePressEvent(QMouseEvent *event);
-        void    mouseReleaseEvent(QMouseEvent *event);
-        void    enterEvent(QEvent *event);
-        void    leaveEvent(QEvent *event);
-        void    paintEvent(QPaintEvent *event);
-        void    resizeEvent(QResizeEvent *event);
+        void mouseMoveEvent(QMouseEvent *event);
+        void mousePressEvent(QMouseEvent *event);
+        void mouseReleaseEvent(QMouseEvent *event);
+        void enterEvent(QEvent *event);
+        void leaveEvent(QEvent *event);
+        void paintEvent(QPaintEvent *event);
+        void resizeEvent(QResizeEvent *event);
 
     private:
-        QColor  m_main_color;        // Couleur principale du dégradé
-        QColor  m_selected_color;    // Couleur sélectionné dans le dégradé
-        QImage  m_gradient_image;    // Image contenant le degradé à afficher
-        QPen    m_cursor_pen;        // QPen du point de sélection
-        int     m_cursor_diameter;   // Diamètre du point de sélection
-        QPoint  m_cursor_position;   // Position du point de sélection
-        bool    m_left_button_pressed; // Bouton gauche de la souris pressé ou non
+        qreal hue,saturation,value,alpha;
+        QColor m_selected_color;    // Couleur sélectionné dans le dégradé
+        QImage m_gradient_image;    // Image contenant le degradé à afficher
+        QPoint m_cursor_position;   // Position du point de sélection
+        bool m_left_button_pressed; // Bouton gauche de la souris pressé ou non
 
-        void    updateGradientImage();
-        void    updateSelectedColor();
+        void updateGradientImage();
+        void cursorMoved();
+        void updateCursorPosition();
     };
 }
 #endif // GRADIENTWIDGET_H

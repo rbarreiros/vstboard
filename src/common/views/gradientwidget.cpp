@@ -28,21 +28,13 @@ using namespace View;
 const int default_diameter = 5;
 
 GradientWidget::GradientWidget(QWidget *parent) :
-        QWidget(parent),
-        m_main_color(Qt::red),
-        m_cursor_diameter(default_diameter),
+        QWidget(parent), 
         m_cursor_position(rect().center()),
         m_left_button_pressed(false)
 {
+    m_gradient_image = QImage(128, 128, QImage::Format_RGB32);
     setMainColor(Qt::red);
     updateGradientImage();
-}
-
-GradientWidget::~GradientWidget(){}
-
-QColor GradientWidget::selectedColor() const
-{
-    return m_selected_color;
 }
 
 void GradientWidget::enterEvent(QEvent *event)
@@ -76,7 +68,7 @@ void GradientWidget::mouseMoveEvent(QMouseEvent *event)
     if (m_cursor_position.y() < 0)
         m_cursor_position.setY(0);
 
-    updateSelectedColor();
+    cursorMoved();
     emit colorSelected(m_selected_color);
     event->accept();
 }
@@ -89,7 +81,7 @@ void GradientWidget::mousePressEvent(QMouseEvent *event)
     }
 
     m_cursor_position = event->pos();
-    updateSelectedColor();
+    cursorMoved();
     emit colorSelected(m_selected_color);
     m_left_button_pressed = true;
     event->accept();
@@ -104,7 +96,7 @@ void GradientWidget::mouseReleaseEvent(QMouseEvent *event)
 
     if (rect().contains(event->pos())) {
         m_cursor_position = event->pos();
-        updateSelectedColor();
+        cursorMoved();
         emit colorSelected(m_selected_color);
     }
 
@@ -118,98 +110,117 @@ void GradientWidget::paintEvent(QPaintEvent *event)
 
     QPainter painter(this);
     painter.drawImage(rect(), m_gradient_image);
-
-    m_cursor_pen.setColor( (m_cursor_position.y() > (height() / 3)) ? Qt::white : Qt::black);
-    painter.setPen(m_cursor_pen);
+    painter.setCompositionMode(QPainter::CompositionMode_Difference);
+    painter.setRenderHint(QPainter::Antialiasing);
     painter.setBrush(Qt::NoBrush);
-    painter.drawEllipse(m_cursor_position, m_cursor_diameter, m_cursor_diameter);
+    painter.setPen(Qt::white);
+    painter.drawEllipse(m_cursor_position, 5, 5);
+    painter.setRenderHint(QPainter::Antialiasing,false);
 }
 
-void GradientWidget::resizeEvent(QResizeEvent *event)
+void GradientWidget::resizeEvent(QResizeEvent * /*event*/)
 {
-    Q_UNUSED(event)
-    m_cursor_position = rect().center();
-    updateGradientImage();
-    update();
+    updateCursorPosition();
 }
 
 void GradientWidget::setMainColor(const QColor &col)
 {
-    qreal h,s,v,a;
-    col.getHsvF(&h,&s,&v,&a);
-    m_cursor_position.setX( s*(width()-1) );
-    m_cursor_position.setY( (1.0f-v)*(height()-1) );
-    m_main_color = col;
+    col.getHsvF(&hue,&saturation,&value,&alpha);
+    if(hue<0.0)
+        hue=0.0;
+    m_selected_color.setHsvF(hue,saturation,value,alpha);
+    updateCursorPosition();
     updateGradientImage();
 }
 
 void GradientWidget::setRed(int r)
 {
-    m_main_color.setRed(r);
-    setMainColor(m_main_color);
+    QColor newCol( QColor::fromHsvF(hue,saturation,value,alpha) );
+    newCol.setRed(r);
+    setMainColor(newCol);
 }
 
-void GradientWidget::setGreen(int g){
-    m_main_color.setGreen(g);
-    setMainColor(m_main_color);
+void GradientWidget::setGreen(int g)
+{
+    QColor newCol( QColor::fromHsvF(hue,saturation,value,alpha) );
+    newCol.setGreen(g);
+    setMainColor(newCol);
 }
-void GradientWidget::setBlue(int b){
-    m_main_color.setBlue(b);
-    setMainColor(m_main_color);
+void GradientWidget::setBlue(int b)
+{
+    QColor newCol( QColor::fromHsvF(hue,saturation,value,alpha) );
+    newCol.setBlue(b);
+    setMainColor(newCol);
 }
-void GradientWidget::setAlpha(int a){
-    m_main_color.setAlpha(a);
+void GradientWidget::setAlpha(int a)
+{
+    alpha=(qreal)a/255;
+    m_selected_color.setHsvF(hue,saturation,value,alpha);
     updateGradientImage();
 }
-void GradientWidget::setHue(int val){
-    int h, s, v, a;
-    m_main_color.getHsv(&h,&s,&v,&a);
-    m_main_color.setHsv(val,s,v,a);
+void GradientWidget::setHue(int h)
+{
+    hue=(qreal)h/359;
+    m_selected_color.setHsvF(hue,saturation,value,alpha);
     updateGradientImage();
 }
-
-void GradientWidget::setCursorPen(const QPen &pen)
+void GradientWidget::setSaturation(int s)
 {
-    m_cursor_pen = pen;
-    update();
+    saturation=(qreal)s/255;
+    m_selected_color.setHsvF(hue,saturation,value,alpha);
+    updateGradientImage();
 }
-
-void GradientWidget::setCursorDiameter(const int diameter)
+void GradientWidget::setValue(int v)
 {
-    m_cursor_diameter = diameter;
-    update();
+    value=(qreal)v/255;
+    m_selected_color.setHsvF(hue,saturation,value,alpha);
+    updateGradientImage();
 }
 
 void GradientWidget::updateGradientImage()
 {
-    if (m_gradient_image.rect() != rect())
-        m_gradient_image = QImage(size(), QImage::Format_ARGB32);
+    QPainter painter(&m_gradient_image);
 
-    float hue = m_main_color.hueF();
-    if(hue<0.0f)
-        setHue(0.0f);
-
-    float alpha = m_main_color.alphaF();
-
-    for (int s = 0; s < width(); ++s) {
-        for (int v = 0; v < height(); ++v) {
-            QColor color = QColor::fromHsvF(
-                    hue,
-                    (float)s / (width() - 1),
-                    1.0f - ((float)v / (height() - 1)),
-                    alpha);
-            m_gradient_image.setPixel(s, v, color.rgba());
+    //checker background
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(Qt::white);
+    painter.drawRect(m_gradient_image.rect());
+    painter.setBrush(QColor(200,200,200));
+    for(int x=0;x<m_gradient_image.width();x+=20) {
+        for(int y=0;y<m_gradient_image.height();y+=20) {
+            painter.drawRect(x,y,10,10);
+            painter.drawRect(x+10,y+10,10,10);
         }
     }
-    updateSelectedColor();
+
+    //saturation gradient
+    QLinearGradient hueGrad(0,0,m_gradient_image.width(),0);
+    hueGrad.setColorAt(0, QColor::fromHsvF(hue, 0.0, 1.0, alpha));
+    hueGrad.setColorAt(1, QColor::fromHsvF(hue, 1.0, 1.0, alpha));
+    painter.setBrush(hueGrad);
+    painter.drawRect(m_gradient_image.rect());
+
+    //lightness gradient
+    QLinearGradient lumGrad(0,0,0,m_gradient_image.height());
+    lumGrad.setColorAt(0, QColor(0,0,0,0));
+    lumGrad.setColorAt(1, QColor::fromRgbF(0,0,0,alpha));
+    painter.setBrush(lumGrad);
+    painter.drawRect(m_gradient_image.rect());
+
+    update();
 }
 
-void GradientWidget::updateSelectedColor()
+void GradientWidget::cursorMoved()
 {
-    qreal h,s,v,a;
-    m_main_color.getHsvF(&h,&s,&v,&a);
-    s=(float)m_cursor_position.x()/(width()-1);
-    v=1.0f - (float)m_cursor_position.y()/(height()-1);
-    m_selected_color.setHsvF(h,s,v,a);
+    saturation=(float)m_cursor_position.x()/(width()-1);
+    value=1.0f - (float)m_cursor_position.y()/(height()-1);
+    m_selected_color.setHsvF(hue,saturation,value,alpha);
+
     update();
+}
+
+void GradientWidget::updateCursorPosition()
+{
+    m_cursor_position.setX( saturation*(width()-1) );
+    m_cursor_position.setY( (1.0f-value)*(height()-1) );
 }

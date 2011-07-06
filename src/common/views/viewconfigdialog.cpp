@@ -228,7 +228,7 @@ void View::ViewConfigDialog::on_RedSpinBox_valueChanged(int value)
     if(!StartUpdate())
         return;
     ui->picker->setRed(value);
-    ui->HueSpinBox->setValue( ui->picker->selectedColor().hue() );
+    ui->HueSpinBox->setValue( ui->picker->getHue()*359 );
     EndUpdate();
 }
 
@@ -237,7 +237,7 @@ void View::ViewConfigDialog::on_GreenSpinBox_valueChanged(int value)
     if(!StartUpdate())
         return;
     ui->picker->setGreen(value);
-    ui->HueSpinBox->setValue( ui->picker->selectedColor().hue() );
+    ui->HueSpinBox->setValue( ui->picker->getHue()*359 );
     EndUpdate();
 }
 
@@ -246,7 +246,7 @@ void View::ViewConfigDialog::on_BlueSpinBox_valueChanged(int value)
     if(!StartUpdate())
         return;
     ui->picker->setBlue(value);
-    ui->HueSpinBox->setValue( ui->picker->selectedColor().hue() );
+    ui->HueSpinBox->setValue( ui->picker->getHue()*359 );
     EndUpdate();
 }
 
@@ -263,7 +263,7 @@ void View::ViewConfigDialog::on_HueSpinBox_valueChanged(int value)
     if(!StartUpdate())
         return;
     ui->picker->setHue(value);
-    currentColor=ui->picker->selectedColor();
+    currentColor=ui->picker->getSelectedColor();
     UpdateSliders();
     EndUpdate();
 }
@@ -286,7 +286,7 @@ bool ViewConfigDialog::StartUpdate()
 
 void ViewConfigDialog::EndUpdate()
 {
-    currentColor=ui->picker->selectedColor();
+    currentColor=ui->picker->getSelectedColor();
     SaveColor();
     updateInProgress=false;
 }
