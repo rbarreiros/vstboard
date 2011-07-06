@@ -10,6 +10,12 @@ mkdir "%BUILD_PATH%/installer"
 copy /y "*.txt" "%BUILD_PATH%/installer"
 copy /y ".\tools\nsis.nsi" "%BUILD_PATH%/installer"
 
+pushd "libs\qtwinmigrate\buildlib"
+qmake -r buildlib.pro
+%JOM_PATH% clean
+%JOM_PATH% release
+popd
+
 cd "%BUILD_PATH%"
 qmake -r C:\Users\CtrlBrk\Documents\VstBoard\src\buildall.pro
 %JOM_PATH% clean

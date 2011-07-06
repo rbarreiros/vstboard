@@ -17,9 +17,9 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#ifndef QT_NO_DEBUG
-    #include "vld.h"
-#endif
+//#ifndef QT_NO_DEBUG
+//    #include "vld.h"
+//#endif
 #include <QLibraryInfo>
 #include <QTranslator>
 
