@@ -21,14 +21,15 @@
 #include <QtGui/QMouseEvent>
 #include <QtGui/QPainter>
 
-#include "gradientwidget.h"
+#include "gradientwidgethue.h"
 
 using namespace View;
 
 const int default_diameter = 5;
 
-GradientWidget::GradientWidget(QWidget *parent) :
-        QWidget(parent), 
+
+GradientWidgetHue::GradientWidgetHue(QWidget *parent) :
+        QWidget(parent),
         m_cursor_position(rect().center()),
         m_left_button_pressed(false)
 {
@@ -37,19 +38,19 @@ GradientWidget::GradientWidget(QWidget *parent) :
     updateGradientImage();
 }
 
-void GradientWidget::enterEvent(QEvent *event)
+void GradientWidgetHue::enterEvent(QEvent *event)
 {
     Q_UNUSED(event)
     setCursor(Qt::CrossCursor);
 }
 
-void GradientWidget::leaveEvent(QEvent *event)
+void GradientWidgetHue::leaveEvent(QEvent *event)
 {
     Q_UNUSED(event)
     unsetCursor();
 }
 
-void GradientWidget::mouseMoveEvent(QMouseEvent *event)
+void GradientWidgetHue::mouseMoveEvent(QMouseEvent *event)
 {
      if (!m_left_button_pressed) {
         event->ignore();
@@ -73,7 +74,7 @@ void GradientWidget::mouseMoveEvent(QMouseEvent *event)
     event->accept();
 }
 
-void GradientWidget::mousePressEvent(QMouseEvent *event)
+void GradientWidgetHue::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() != Qt::LeftButton) {
         event->ignore();
@@ -87,7 +88,7 @@ void GradientWidget::mousePressEvent(QMouseEvent *event)
     event->accept();
 }
 
-void GradientWidget::mouseReleaseEvent(QMouseEvent *event)
+void GradientWidgetHue::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() != Qt::LeftButton) {
         event->ignore();
@@ -104,7 +105,7 @@ void GradientWidget::mouseReleaseEvent(QMouseEvent *event)
     event->accept();
 }
 
-void GradientWidget::paintEvent(QPaintEvent *event)
+void GradientWidgetHue::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event)
 
@@ -125,73 +126,101 @@ void GradientWidget::paintEvent(QPaintEvent *event)
     painter.end();
 }
 
-void GradientWidget::resizeEvent(QResizeEvent * /*event*/)
+void GradientWidgetHue::resizeEvent(QResizeEvent * /*event*/)
 {
     updateCursorPosition();
 }
 
-void GradientWidget::setMainColor(const QColor &col)
+void GradientWidgetHue::setMainColor(const QColor &col)
+{
+    updateHueFromColor(col);
+//    updateGradientImage();
+}
+
+void GradientWidgetHue::updateHueFromColor(const QColor &col)
 {
     col.getHsvF(&hue,&saturation,&value,&alpha);
     if(hue<0.0)
         hue=0.0;
     m_selected_color.setHsvF(hue,saturation,value,alpha);
     updateCursorPosition();
-    updateGradientImage();
 }
 
-void GradientWidget::setRed(int r)
+void GradientWidgetHue::setRed(int r)
 {
     QColor newCol( QColor::fromHsvF(hue,saturation,value,alpha) );
     newCol.setRed(r);
     setMainColor(newCol);
 }
 
-void GradientWidget::setGreen(int g)
+void GradientWidgetHue::setGreen(int g)
 {
     QColor newCol( QColor::fromHsvF(hue,saturation,value,alpha) );
     newCol.setGreen(g);
     setMainColor(newCol);
 }
-void GradientWidget::setBlue(int b)
+void GradientWidgetHue::setBlue(int b)
 {
     QColor newCol( QColor::fromHsvF(hue,saturation,value,alpha) );
     newCol.setBlue(b);
     setMainColor(newCol);
 }
-void GradientWidget::setAlpha(int a)
+void GradientWidgetHue::setAlpha(int a)
 {
     alpha=(qreal)a/255;
     m_selected_color.setHsvF(hue,saturation,value,alpha);
-    updateGradientImage();
+    updateCursorPosition();
 }
-void GradientWidget::setHue(int h)
+void GradientWidgetHue::setHue(int h)
 {
     hue=(qreal)h/359;
     m_selected_color.setHsvF(hue,saturation,value,alpha);
-    updateGradientImage();
+    updateCursorPosition();
 }
-void GradientWidget::setSaturation(int s)
+
+void GradientWidgetHue::setSaturation(int s)
 {
     saturation=(qreal)s/255;
     m_selected_color.setHsvF(hue,saturation,value,alpha);
+    updateCursorPosition();
 //    updateGradientImage();
 }
-void GradientWidget::setValue(int v)
+void GradientWidgetHue::setValue(int v)
 {
     value=(qreal)v/255;
     m_selected_color.setHsvF(hue,saturation,value,alpha);
+    updateCursorPosition();
 //    updateGradientImage();
 }
 
-void GradientWidget::updateGradientImage()
+void GradientWidgetHue::updateGradientImage()
 {
     QPainter painter(&m_gradient_image);
 
+    painter.setCompositionMode(QPainter::CompositionMode_Source);
+
+    //alpha gradient
+    QLinearGradient alphaGrad(0,-1,0,m_gradient_image.height()+1);
+    alphaGrad.setColorAt(0.0, QColor(255,255,255,255));
+    alphaGrad.setColorAt(1.0, QColor(255,255,255,0));
+    painter.setBrush(alphaGrad);
+    painter.drawRect(-1,-1,m_gradient_image.width()+1,m_gradient_image.height()+1);
+
+    painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+
+    //hue gradient
+    QLinearGradient hueGrad(-1,0,m_gradient_image.width()+1,0);
+    hueGrad.setColorAt(0.00, QColor::fromHsvF(0.00, 1.0, 1.0, 1.0));
+    hueGrad.setColorAt(0.33, QColor::fromHsvF(0.33, 1.0, 1.0, 1.0));
+    hueGrad.setColorAt(0.66, QColor::fromHsvF(0.66, 1.0, 1.0, 1.0));
+    hueGrad.setColorAt(1.00, QColor::fromHsvF(1.00, 1.0, 1.0, 1.0));
+    painter.setBrush(hueGrad);
+    painter.drawRect(-1,-1,m_gradient_image.width()+1,m_gradient_image.height()+1);
+
+    painter.setCompositionMode(QPainter::CompositionMode_DestinationOver);
+
     //checker background
     painter.setPen(Qt::NoPen);
-    painter.setBrush(QColor(125,125,125));
-    painter.drawRect(m_gradient_image.rect());
     painter.setBrush(QColor(130,130,130));
     for(int x=0;x<m_gradient_image.width();x+=20) {
         for(int y=0;y<m_gradient_image.height();y+=20) {
@@ -199,36 +228,24 @@ void GradientWidget::updateGradientImage()
             painter.drawRect(x+10,y+10,10,10);
         }
     }
-
-    //saturation gradient
-    QLinearGradient hueGrad(0,0,m_gradient_image.width(),0);
-    hueGrad.setColorAt(0, QColor::fromHsvF(hue, 0.0, 1.0, alpha));
-    hueGrad.setColorAt(1, QColor::fromHsvF(hue, 1.0, 1.0, alpha));
-    painter.setBrush(hueGrad);
+    painter.setBrush(QColor(125,125,125));
     painter.drawRect(m_gradient_image.rect());
-
-    //lightness gradient
-    QLinearGradient lumGrad(0,0,0,m_gradient_image.height());
-    lumGrad.setColorAt(0, QColor(0,0,0,0));
-    lumGrad.setColorAt(1, QColor::fromRgbF(0,0,0,alpha));
-    painter.setBrush(lumGrad);
-    painter.drawRect(m_gradient_image.rect());
+    painter.end();
 
     update();
 }
 
-void GradientWidget::cursorMoved()
+void GradientWidgetHue::cursorMoved()
 {
-    saturation=(qreal)m_cursor_position.x()/(width()-1);
-    value=1.0 - (qreal)m_cursor_position.y()/(height()-1);
+    hue=(qreal)m_cursor_position.x()/(width()-1);
+    alpha=1.0-(qreal)m_cursor_position.y()/(height()-1);
     m_selected_color.setHsvF(hue,saturation,value,alpha);
-
     update();
 }
 
-void GradientWidget::updateCursorPosition()
+void GradientWidgetHue::updateCursorPosition()
 {
-    m_cursor_position.setX( saturation*(width()-1) );
-    m_cursor_position.setY( (1.0-value)*(height()-1) );
+    m_cursor_position.setX( hue*(width()-1) );
+    m_cursor_position.setY( (1.0-alpha)*(height()-1) );
     update();
 }

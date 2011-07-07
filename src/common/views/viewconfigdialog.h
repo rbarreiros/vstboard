@@ -66,6 +66,7 @@ namespace View {
 
     private slots:
         void onPickerColorSelected(const QColor &color);
+        void onPickerHueSelected(const QColor &color);
         void on_listPalettes_itemClicked(QListWidgetItem* item);
         void on_listRoles_itemClicked(QListWidgetItem* item);
         void on_checkSavedInSetupFile_clicked(bool checked);
@@ -73,7 +74,6 @@ namespace View {
         void on_GreenSpinBox_valueChanged(int );
         void on_BlueSpinBox_valueChanged(int );
         void on_AlphaSpinBox_valueChanged(int );
-        void on_HueSpinBox_valueChanged(int );
     };
 }
 #endif // VIEWCONFIGDIALOG_H

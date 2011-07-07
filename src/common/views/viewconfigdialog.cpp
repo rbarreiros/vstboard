@@ -64,6 +64,8 @@ ViewConfigDialog::ViewConfigDialog(MainHost *myHost, QWidget *parent) :
 
     connect(ui->picker,SIGNAL(colorSelected(QColor)),
             this,SLOT(onPickerColorSelected(QColor)));
+    connect(ui->picker_hue,SIGNAL(colorSelected(QColor)),
+            this,SLOT(onPickerHueSelected(QColor)));
 }
 
 /*!
@@ -116,8 +118,8 @@ void ViewConfigDialog::GetColorFromConf()
     updateInProgress=true;
     UpdateSliders();
     ui->AlphaSpinBox->setValue(currentColor.alpha());
-    ui->HueSpinBox->setValue(currentColor.hue());
     ui->picker->setMainColor(currentColor);
+    ui->picker_hue->setMainColor(currentColor);
     updateInProgress=false;
 }
 
@@ -228,7 +230,7 @@ void View::ViewConfigDialog::on_RedSpinBox_valueChanged(int value)
     if(!StartUpdate())
         return;
     ui->picker->setRed(value);
-    ui->HueSpinBox->setValue( ui->picker->getHue()*359 );
+    ui->picker_hue->setRed(value);
     EndUpdate();
 }
 
@@ -237,7 +239,7 @@ void View::ViewConfigDialog::on_GreenSpinBox_valueChanged(int value)
     if(!StartUpdate())
         return;
     ui->picker->setGreen(value);
-    ui->HueSpinBox->setValue( ui->picker->getHue()*359 );
+    ui->picker_hue->setGreen(value);
     EndUpdate();
 }
 
@@ -246,7 +248,7 @@ void View::ViewConfigDialog::on_BlueSpinBox_valueChanged(int value)
     if(!StartUpdate())
         return;
     ui->picker->setBlue(value);
-    ui->HueSpinBox->setValue( ui->picker->getHue()*359 );
+    ui->picker_hue->setBlue(value);
     EndUpdate();
 }
 
@@ -255,16 +257,7 @@ void View::ViewConfigDialog::on_AlphaSpinBox_valueChanged(int value)
     if(!StartUpdate())
         return;
     ui->picker->setAlpha(value);
-    EndUpdate();
-}
-
-void View::ViewConfigDialog::on_HueSpinBox_valueChanged(int value)
-{
-    if(!StartUpdate())
-        return;
-    ui->picker->setHue(value);
-    currentColor=ui->picker->getSelectedColor();
-    UpdateSliders();
+    ui->picker_hue->setAlpha(value);
     EndUpdate();
 }
 
@@ -273,6 +266,17 @@ void ViewConfigDialog::onPickerColorSelected(const QColor &color)
     StartUpdate();
     currentColor=color;
     UpdateSliders();
+    ui->picker_hue->setMainColor(currentColor);
+    EndUpdate();
+}
+
+void ViewConfigDialog::onPickerHueSelected(const QColor &color)
+{
+    StartUpdate();
+    currentColor=color;
+    UpdateSliders();
+    ui->AlphaSpinBox->setValue(ui->picker_hue->getAlpha()*255);
+    ui->picker->setMainColor(currentColor);
     EndUpdate();
 }
 
@@ -290,3 +294,4 @@ void ViewConfigDialog::EndUpdate()
     SaveColor();
     updateInProgress=false;
 }
+

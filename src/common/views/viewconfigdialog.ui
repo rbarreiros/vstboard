@@ -15,28 +15,33 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_5">
-     <item>
-      <widget class="QListWidget" name="listPalettes">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QListWidget" name="listRoles">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-      </widget>
-     </item>
-     <item>
+    <widget class="QSplitter" name="splitter">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <widget class="QListWidget" name="listPalettes">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+     <widget class="QListWidget" name="listRoles">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+     <widget class="QWidget" name="">
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <widget class="QGroupBox" name="groupColor">
@@ -170,36 +175,6 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="1">
-           <widget class="QSlider" name="HueSlider">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximum">
-             <number>359</number>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="label_5">
-            <property name="text">
-             <string>Hue</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="2">
-           <widget class="QSpinBox" name="HueSpinBox">
-            <property name="maximum">
-             <number>359</number>
-            </property>
-           </widget>
-          </item>
           <item row="6" column="0" colspan="3">
            <widget class="View::GradientWidget" name="picker" native="true">
             <property name="sizePolicy">
@@ -210,12 +185,23 @@
             </property>
            </widget>
           </item>
+          <item row="5" column="0" colspan="3">
+           <widget class="View::GradientWidgetHue" name="picker_hue" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <zorder>dockWidget</zorder>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
       </layout>
-     </item>
-    </layout>
+     </widget>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_6">
@@ -251,6 +237,12 @@
    <class>View::GradientWidget</class>
    <extends>QWidget</extends>
    <header>gradientwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>View::GradientWidgetHue</class>
+   <extends>QWidget</extends>
+   <header>gradientwidgethue.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
@@ -295,12 +287,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>576</x>
-     <y>110</y>
+     <x>577</x>
+     <y>105</y>
     </hint>
     <hint type="destinationlabel">
-     <x>528</x>
-     <y>109</y>
+     <x>529</x>
+     <y>104</y>
     </hint>
    </hints>
   </connection>
@@ -311,12 +303,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>528</x>
-     <y>109</y>
+     <x>529</x>
+     <y>104</y>
     </hint>
     <hint type="destinationlabel">
-     <x>576</x>
-     <y>110</y>
+     <x>577</x>
+     <y>105</y>
     </hint>
    </hints>
   </connection>
@@ -327,12 +319,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>576</x>
-     <y>54</y>
+     <x>577</x>
+     <y>53</y>
     </hint>
     <hint type="destinationlabel">
-     <x>528</x>
-     <y>53</y>
+     <x>529</x>
+     <y>52</y>
     </hint>
    </hints>
   </connection>
@@ -343,44 +335,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>528</x>
+     <x>529</x>
+     <y>52</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>577</x>
      <y>53</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>576</x>
-     <y>54</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>HueSlider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>HueSpinBox</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>505</x>
-     <y>154</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>550</x>
-     <y>158</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>HueSpinBox</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>HueSlider</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>546</x>
-     <y>153</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>510</x>
-     <y>152</y>
     </hint>
    </hints>
   </connection>
@@ -391,12 +351,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>528</x>
-     <y>81</y>
+     <x>529</x>
+     <y>78</y>
     </hint>
     <hint type="destinationlabel">
-     <x>576</x>
-     <y>82</y>
+     <x>577</x>
+     <y>79</y>
     </hint>
    </hints>
   </connection>
@@ -407,12 +367,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>576</x>
-     <y>82</y>
+     <x>577</x>
+     <y>79</y>
     </hint>
     <hint type="destinationlabel">
-     <x>528</x>
-     <y>81</y>
+     <x>529</x>
+     <y>78</y>
     </hint>
    </hints>
   </connection>
@@ -423,12 +383,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>528</x>
-     <y>137</y>
+     <x>529</x>
+     <y>130</y>
     </hint>
     <hint type="destinationlabel">
-     <x>576</x>
-     <y>138</y>
+     <x>577</x>
+     <y>131</y>
     </hint>
    </hints>
   </connection>
@@ -439,12 +399,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>576</x>
-     <y>138</y>
+     <x>577</x>
+     <y>131</y>
     </hint>
     <hint type="destinationlabel">
-     <x>528</x>
-     <y>137</y>
+     <x>529</x>
+     <y>130</y>
     </hint>
    </hints>
   </connection>
