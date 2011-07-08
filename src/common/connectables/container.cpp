@@ -180,6 +180,11 @@ bool Container::IsDirty()
     return currentContainerProgram->IsDirty();
 }
 
+void Container::SetDirty()
+{
+    currentContainerProgram->SetDirty();
+}
+
 /*!
   Will change program on the next render loop
   \param prg a program model index

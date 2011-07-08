@@ -30,5 +30,7 @@
         <file>translations/vstdll_fr.qm</file>
         <file>img16x16/appearance.png</file>
         <file>img16x16/editcut.png</file>
+        <file>img16x16/edit_add.png</file>
+        <file>img16x16/edit_remove.png</file>
     </qresource>
 </RCC>

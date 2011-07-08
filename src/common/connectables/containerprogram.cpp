@@ -214,6 +214,11 @@ bool ContainerProgram::IsDirty()
     return false;
 }
 
+void ContainerProgram::SetDirty()
+{
+    dirty=true;
+}
+
 void ContainerProgram::Save(bool saveChildPrograms)
 {
 

@@ -57,7 +57,6 @@ namespace View {
 
     public:
         ViewConfig( QObject *parent=0 );
-        ~ViewConfig();
 
         void SetColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
         QColor GetColor(ColorGroups::Enum groupId, Colors::Enum colorId);
@@ -69,18 +68,46 @@ namespace View {
         void SaveInRegistry(MainHost *myHost);
         void LoadFromRegistry(MainHost *myHost);
 
-        /// list of color groups
-        QMap<ColorGroups::Enum,ColorGroup>listColorGroups;
+
+        void LoadPreset(const QString &presetName);
+        inline const QString & GetPresetName() const {return currentPresetName;}
+
+        inline QMap<ColorGroups::Enum,ColorGroup> * ViewConfig::GetCurrentPreset()
+        {
+            return &(*GetListOfPresets())[currentPresetName];
+        }
+
+        inline QMap<QString, QMap<ColorGroups::Enum,ColorGroup> > * ViewConfig::GetListOfPresets()
+        {
+            if(savedInSetupFile)
+                return &listPresetsInSetup;
+            else
+                return &listPresets;
+        }
+
+        bool IsSavedInSetup() {return savedInSetupFile;}
+        void SetSavedInSetup(bool inSetup) {savedInSetupFile=inSetup; }
+
+        void AddPreset(QString &presetName);
+        void RemovePreset(const QString &presetName);
+        void RenamePreset(const QString &oldName, const QString &newName);
+        void CopyPreset(QString &presetName);
 
         QDataStream & toStream (QDataStream &) const;
         QDataStream & fromStream (QDataStream &);
 
-        bool savedInSetupFile;
-
         static float KeyboardNumber(int key);
 
     protected:
-        void AddColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
+        ///list of presets in registry
+        QMap<QString, QMap<ColorGroups::Enum,ColorGroup> >listPresets;
+
+        ///list of presets saved in setup file
+        QMap<QString, QMap<ColorGroups::Enum,ColorGroup> >listPresetsInSetup;
+
+        bool savedInSetupFile;
+        void InitPresets();
+        void AddColor(const QString &preset, ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
         void UpdateAllWidgets();
 
         /// list of groups names
@@ -88,6 +115,8 @@ namespace View {
 
         /// list of colors names
         QMap<Colors::Enum,QString>colorsNames;
+
+        QString currentPresetName;
 
     signals:
         /*!
@@ -97,6 +126,8 @@ namespace View {
             \param color the new color
         */
         void ColorChanged(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
+
+        void NewSetupLoaded();
     };
 
 }

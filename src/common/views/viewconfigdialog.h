@@ -23,10 +23,17 @@ namespace View {
         ~ViewConfigDialog();
 
     private:
+        void InitLists();
+        void LoadPreset(const QString &presetName);
+        bool UserWantsToUnloadPreset();
         void GetColorFromConf();
         void UpdateSliders();
         void DisableSliders();
         void SaveColor();
+
+        void SaveChanges();
+        void DiscardChanges();
+
         QColor currentColor;
 
         /// pointer to the dialog ui;
@@ -63,6 +70,7 @@ namespace View {
     public slots:
         void accept();
         void reject();
+        void InitDialog();
 
     private slots:
         void onPickerColorSelected(const QColor &color);
@@ -74,6 +82,10 @@ namespace View {
         void on_GreenSpinBox_valueChanged(int );
         void on_BlueSpinBox_valueChanged(int );
         void on_AlphaSpinBox_valueChanged(int );
+        void on_listPresets_clicked(const QModelIndex &index);
+        void on_addPreset_clicked();
+        void on_delPreset_clicked();
+        void on_listPresets_itemChanged(QListWidgetItem *item);
     };
 }
 #endif // VIEWCONFIGDIALOG_H

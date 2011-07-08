@@ -68,6 +68,8 @@ public:
     void OnCableAdded(Connectables::Cable *cab);
     void OnCableRemoved(Connectables::Cable *cab);
 
+    void SetSetupDirtyFlag() { if(hostContainer) hostContainer->SetDirty(); }
+
     QSharedPointer<Connectables::MainContainer> mainContainer;
     QSharedPointer<Connectables::MainContainer> hostContainer;
     QSharedPointer<Connectables::MainContainer> projectContainer;

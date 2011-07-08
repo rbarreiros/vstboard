@@ -92,8 +92,9 @@ bool SetupFile::ToStream(MainHost *myHost,QDataStream &out)
 
     myHost->EnableSolverUpdate(true);
 
-    out << myHost->mainWindow->viewConfig.savedInSetupFile;
-    if(myHost->mainWindow->viewConfig.savedInSetupFile)
+    bool savedInFile = myHost->mainWindow->viewConfig.IsSavedInSetup();
+    out << savedInFile;
+    if(savedInFile)
         out << myHost->mainWindow->viewConfig;
 
     return true;
@@ -149,17 +150,17 @@ bool SetupFile::FromStream(MainHost *myHost,QDataStream &in)
     myHost->EnableSolverUpdate(true);
     myHost->hostContainer->Updated();
 
+    bool colorsInSetupFile;
     if(MainHost::currentFileVersion >= 12) {
-        bool colorsInSetupFile;
         in >> colorsInSetupFile;
-        myHost->mainWindow->viewConfig.savedInSetupFile=colorsInSetupFile;
-
-        if(colorsInSetupFile)
-            in >> myHost->mainWindow->viewConfig;
-        else
-            myHost->mainWindow->viewConfig.LoadFromRegistry(myHost);
+    } else {
+        colorsInSetupFile=false;
     }
-
+    myHost->mainWindow->viewConfig.SetSavedInSetup( colorsInSetupFile );
+    if(colorsInSetupFile)
+        in >> myHost->mainWindow->viewConfig;
+    else
+        myHost->mainWindow->viewConfig.LoadFromRegistry(myHost);
 
     return true;
 }

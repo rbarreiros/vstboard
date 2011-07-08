@@ -34,7 +34,8 @@ using namespace View;
   */
 ViewConfig::ViewConfig(QObject *parent) :
     QObject(parent),
-    savedInSetupFile(false)
+    savedInSetupFile(false),
+    currentPresetName("Default")
 {
     colorGroupNames.insert( ColorGroups::ND, tr("-undefined-") );
     colorGroupNames.insert( ColorGroups::Window, tr("Window") );
@@ -65,51 +66,46 @@ ViewConfig::ViewConfig(QObject *parent) :
 //    colorsNames.insert( Colors::ToolTipText, tr("ToolTip Text") );
 //    colorsNames.insert( Colors::BrightText, tr("BrightText") );
 
-    AddColor(ColorGroups::Programs,Colors::HighlightBackground,QColor(170,255,100,255));
-
-    AddColor(ColorGroups::VstPlugin,Colors::Background,QColor(255,255,128,128));
-
-    AddColor(ColorGroups::AudioPin,Colors::Background,QColor(200,170,160,255));
-    AddColor(ColorGroups::AudioPin,Colors::VuMeter,QColor(210,210,100,255));
-
-    AddColor(ColorGroups::MidiPin,Colors::Background,QColor(190,230,230,255));
-    AddColor(ColorGroups::MidiPin,Colors::VuMeter,QColor(210,210,100,255));
-
-    AddColor(ColorGroups::ParameterPin,Colors::Background,QColor(160,185,200,255));
-    AddColor(ColorGroups::ParameterPin,Colors::VuMeter,QColor(210,210,100,255));
-
-    AddColor(ColorGroups::Cursor,Colors::Background,QColor(0,0,0,90));
-    AddColor(ColorGroups::Cursor,Colors::HighlightBackground,QColor(0,0,0,255));
-
-    AddColor(ColorGroups::Bridge,Colors::Background,QColor(160,170,160,255));
-    AddColor(ColorGroups::Bridge,Colors::Lines,QColor(0,0,0,255));
- 
-    AddColor(ColorGroups::Object,Colors::Background,QColor(120,160,185,128));
-    AddColor(ColorGroups::Object,Colors::Text,QColor(0,0,0,255));
-    AddColor(ColorGroups::Object,Colors::HighlightBackground,QColor(255,255,0,127));
-
-    AddColor(ColorGroups::Panel,Colors::Lines,QColor(0,0,0,150));
-    AddColor(ColorGroups::Panel,Colors::Background,QColor(0,0,0,0));
-    AddColor(ColorGroups::Panel,Colors::HighlightBackground,QColor(180,180,180,255));
-
-    AddColor(ColorGroups::Window,Colors::Text,QColor(0,0,0,255));
-    AddColor(ColorGroups::Window,Colors::Window,QColor(175,165,135,255));
-    AddColor(ColorGroups::Window,Colors::WindowText,QColor(0,0,0,255));
-    AddColor(ColorGroups::Window,Colors::Button,QColor(175,165,135,255));
-    AddColor(ColorGroups::Window,Colors::ButtonText,QColor(0,0,0,255));
-    AddColor(ColorGroups::Window,Colors::Base,QColor(190,190,190,255));
-//    AddColor(ColorGroups::Windows,Colors::AlternateBase,QColor(100,100,100,255));
-//    AddColor(ColorGroups::Windows,Colors::ToolTipBase,QColor(200,200,0,255));
-//    AddColor(ColorGroups::Windows,Colors::ToolTipText,QColor(0,0,0,255));
-//    AddColor(ColorGroups::Windows,Colors::BrightText,QColor(50,0,0,255));
+    InitPresets();
 }
 
-/*!
-  Destructor
-  */
-ViewConfig::~ViewConfig()
+void ViewConfig::InitPresets()
 {
+    AddColor("Default",ColorGroups::Programs,Colors::HighlightBackground,QColor(170,255,100,255));
 
+    AddColor("Default",ColorGroups::VstPlugin,Colors::Background,QColor(255,255,128,128));
+
+    AddColor("Default",ColorGroups::AudioPin,Colors::Background,QColor(200,170,160,255));
+    AddColor("Default",ColorGroups::AudioPin,Colors::VuMeter,QColor(210,210,100,255));
+
+    AddColor("Default",ColorGroups::MidiPin,Colors::Background,QColor(190,230,230,255));
+    AddColor("Default",ColorGroups::MidiPin,Colors::VuMeter,QColor(210,210,100,255));
+
+    AddColor("Default",ColorGroups::ParameterPin,Colors::Background,QColor(160,185,200,255));
+    AddColor("Default",ColorGroups::ParameterPin,Colors::VuMeter,QColor(210,210,100,255));
+
+    AddColor("Default",ColorGroups::Cursor,Colors::Background,QColor(0,0,0,90));
+    AddColor("Default",ColorGroups::Cursor,Colors::HighlightBackground,QColor(0,0,0,255));
+
+    AddColor("Default",ColorGroups::Bridge,Colors::Background,QColor(160,170,160,255));
+    AddColor("Default",ColorGroups::Bridge,Colors::Lines,QColor(0,0,0,255));
+
+    AddColor("Default",ColorGroups::Object,Colors::Background,QColor(120,160,185,128));
+    AddColor("Default",ColorGroups::Object,Colors::Text,QColor(0,0,0,255));
+    AddColor("Default",ColorGroups::Object,Colors::HighlightBackground,QColor(255,255,0,127));
+
+    AddColor("Default",ColorGroups::Panel,Colors::Lines,QColor(0,0,0,150));
+    AddColor("Default",ColorGroups::Panel,Colors::Background,QColor(0,0,0,0));
+    AddColor("Default",ColorGroups::Panel,Colors::HighlightBackground,QColor(180,180,180,255));
+
+    AddColor("Default",ColorGroups::Window,Colors::Text,QColor(0,0,0,255));
+    AddColor("Default",ColorGroups::Window,Colors::Window,QColor(175,165,135,255));
+    AddColor("Default",ColorGroups::Window,Colors::WindowText,QColor(0,0,0,255));
+    AddColor("Default",ColorGroups::Window,Colors::Button,QColor(175,165,135,255));
+    AddColor("Default",ColorGroups::Window,Colors::ButtonText,QColor(0,0,0,255));
+    AddColor("Default",ColorGroups::Window,Colors::Base,QColor(190,190,190,255));
+
+    listPresetsInSetup["Default"]=listPresets["Default"];
 }
 
 /*!
@@ -133,13 +129,19 @@ float ViewConfig::KeyboardNumber(int key)
     return -1.0f;
 }
 
+void ViewConfig::LoadPreset(const QString &presetName)
+{
+    currentPresetName=presetName;
+    UpdateAllWidgets();
+}
+
 /*!
   Update all colors with a new list, used by the dialog when changes are discarded
   \param newList list of groups
   */
 void ViewConfig::SetListGroups(QMap<ColorGroups::Enum,ColorGroup> newList)
 {
-    listColorGroups = newList;
+    *GetCurrentPreset() = newList;
     UpdateAllWidgets();
 }
 
@@ -148,8 +150,8 @@ void ViewConfig::SetListGroups(QMap<ColorGroups::Enum,ColorGroup> newList)
   */
 void ViewConfig::UpdateAllWidgets()
 {
-    QMap<ColorGroups::Enum,ColorGroup>::iterator i = listColorGroups.begin();
-    while( i!=listColorGroups.end() ) {
+    QMap<ColorGroups::Enum,ColorGroup>::iterator i = GetCurrentPreset()->begin();
+    while( i!=GetCurrentPreset()->end() ) {
         ColorGroup grp = i.value();
         QMap<Colors::Enum,QColor>::iterator j = grp.listColors.begin();
         while( j!=grp.listColors.end() ) {
@@ -226,10 +228,10 @@ QPalette::ColorRole ViewConfig::GetPaletteRoleFromColor(Colors::Enum colorId)
   */
 QPalette ViewConfig::GetPaletteFromColorGroup(ColorGroups::Enum groupId, const QPalette &oriPalette)
 {
-    if(!listColorGroups.contains(groupId))
+    if(!GetCurrentPreset()->contains(groupId))
         return oriPalette;
 
-    ColorGroup grp = listColorGroups.value(groupId);
+    ColorGroup grp = GetCurrentPreset()->value(groupId);
     QPalette pal(oriPalette);
 
     QMap<Colors::Enum,QColor>::iterator i = grp.listColors.begin();
@@ -242,13 +244,14 @@ QPalette ViewConfig::GetPaletteFromColorGroup(ColorGroups::Enum groupId, const Q
 
 /*!
   Add a color to a group
+  \param preset preset name
   \param groupId group Id
   \param colorId color Id
   \param color the color
   */
-void ViewConfig::AddColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
+void ViewConfig::AddColor(const QString &preset, ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
 {
-    listColorGroups[groupId].listColors[colorId]=color;
+    (*GetListOfPresets())[preset][groupId].listColors[colorId]=color;
     emit ColorChanged(groupId,colorId,color);
 }
 
@@ -260,10 +263,10 @@ void ViewConfig::AddColor(ColorGroups::Enum groupId, Colors::Enum colorId, const
   */
 void ViewConfig::SetColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
 {
-    if( !listColorGroups.contains(groupId) || !listColorGroups.value(groupId).listColors.contains(colorId) )
+    if( !GetCurrentPreset()->contains(groupId) || !GetCurrentPreset()->value(groupId).listColors.contains(colorId) )
         return;
 
-    listColorGroups[groupId].listColors[colorId]=color;
+    (*GetCurrentPreset())[groupId].listColors.insert(colorId,color);
     emit ColorChanged(groupId,colorId,color);
 }
 
@@ -275,10 +278,51 @@ void ViewConfig::SetColor(ColorGroups::Enum groupId, Colors::Enum colorId, const
   */
 QColor ViewConfig::GetColor(ColorGroups::Enum groupId, Colors::Enum colorId)
 {
-    if(!listColorGroups.contains(groupId))
+    if(!GetCurrentPreset()->contains(groupId))
         return QColor();
 
-    return listColorGroups[groupId].listColors[colorId];
+    return GetCurrentPreset()->value(groupId).listColors.value(colorId,QColor());
+}
+
+void ViewConfig::AddPreset(QString &presetName)
+{
+    int count=2;
+    QString newName=presetName;
+    while(GetListOfPresets()->contains( newName )) {
+        newName=presetName+" ("+QString::number(count)+")";
+        count++;
+    }
+    GetListOfPresets()->insert( newName, (*GetListOfPresets())["Default"] );
+    presetName=newName;
+}
+
+void ViewConfig::CopyPreset(QString &presetName)
+{
+    int count=2;
+    QString newName=presetName;
+    while(GetListOfPresets()->contains( newName )) {
+        newName=presetName+" ("+QString::number(count)+")";
+        count++;
+    }
+
+    if(!GetListOfPresets()->contains(presetName))
+        presetName="Default";
+
+    GetListOfPresets()->insert( newName, (*GetListOfPresets())[presetName] );
+    presetName=newName;
+}
+
+void ViewConfig::RemovePreset(const QString &presetName)
+{
+    if(presetName=="Default" || !GetListOfPresets()->contains(presetName))
+        return;
+    GetListOfPresets()->remove(presetName);
+}
+
+void ViewConfig::RenamePreset(const QString &oldName, const QString &newName)
+{
+    (*GetListOfPresets())[newName] = (*GetListOfPresets())[oldName];
+    GetListOfPresets()->remove(oldName);
 }
 
 void ViewConfig::SaveInRegistry(MainHost *myHost)
@@ -313,25 +357,39 @@ void ViewConfig::LoadFromRegistry(MainHost *myHost)
   */
 QDataStream & ViewConfig::toStream(QDataStream & out) const
 {
-    out << (quint16)listColorGroups.count();
+    QMap<QString, QMap<ColorGroups::Enum,ColorGroup> >tmpPresets;
+    if(savedInSetupFile)
+        tmpPresets=listPresetsInSetup;
+    else
+        tmpPresets=listPresets;
 
-    QMap<ColorGroups::Enum,ColorGroup>::const_iterator i = listColorGroups.constBegin();
-    while(i!=listColorGroups.constEnd()) {
-        out << (quint8)i.key();
-        out << (quint8)i.value().listColors.count();
+    out << (quint16)tmpPresets.count();
+    QMap<QString, QMap<ColorGroups::Enum,ColorGroup> >::const_iterator ip = tmpPresets.constBegin();
 
-        QMap<Colors::Enum,QColor>::const_iterator j = i.value().listColors.begin();
-        while(j!=i.value().listColors.end()) {
-            out << (quint8)j.key();
-            out << (quint8)j.value().red();
-            out << (quint8)j.value().green();
-            out << (quint8)j.value().blue();
-            out << (quint8)j.value().alpha();
-            ++j;
+    while(ip!=tmpPresets.constEnd()) {
+        out << ip.key();
+        out << (quint16)ip.value().count();
+
+        QMap<ColorGroups::Enum,ColorGroup>::const_iterator i = ip.value().constBegin();
+        while(i!=ip.value().constEnd()) {
+            out << (quint8)i.key();
+            out << (quint8)i.value().listColors.count();
+
+            QMap<Colors::Enum,QColor>::const_iterator j = i.value().listColors.begin();
+            while(j!=i.value().listColors.end()) {
+                out << (quint8)j.key();
+                out << (quint8)j.value().red();
+                out << (quint8)j.value().green();
+                out << (quint8)j.value().blue();
+                out << (quint8)j.value().alpha();
+                ++j;
+            }
+            ++i;
         }
-        ++i;
+        ++ip;
     }
 
+    out << currentPresetName;
     return out;
 }
 
@@ -342,30 +400,55 @@ QDataStream & ViewConfig::toStream(QDataStream & out) const
   */
 QDataStream & ViewConfig::fromStream(QDataStream & in)
 {
-    quint16 nbGrp;
-    in >> nbGrp;
+    listPresetsInSetup.clear();
 
-    for(int i=0; i<nbGrp; i++) {
-        quint8 grpId;
-        in >> grpId;
-        quint8 nbCol;
-        in >> nbCol;
-        for(int j=0; j<nbCol; j++) {
-            quint8 colId;
-            in >> colId;
+    if(!savedInSetupFile)
+        listPresets.clear();
 
-            quint8 red;
-            in >> red;
-            quint8 green;
-            in >> green;
-            quint8 blue;
-            in >> blue;
-            quint8 alpha;
-            in >> alpha;
+    quint16 nbPreset;
+    in >> nbPreset;
+    for(int p=0; p<nbPreset; p++) {
+        QString presetName;
+        in >> presetName;
 
-            listColorGroups[(ColorGroups::Enum)grpId].listColors[(Colors::Enum)colId] = QColor( red,green,blue,alpha );
+        quint16 nbGrp;
+        in >> nbGrp;
+
+        for(int i=0; i<nbGrp; i++) {
+            quint8 grpId;
+            in >> grpId;
+            quint8 nbCol;
+            in >> nbCol;
+            for(int j=0; j<nbCol; j++) {
+                quint8 colId;
+                in >> colId;
+
+                quint8 red;
+                in >> red;
+                quint8 green;
+                in >> green;
+                quint8 blue;
+                in >> blue;
+                quint8 alpha;
+                in >> alpha;
+
+                if(savedInSetupFile)
+                    listPresetsInSetup[presetName][(ColorGroups::Enum)grpId].listColors[(Colors::Enum)colId] = QColor( red,green,blue,alpha );
+                else {
+                    listPresets[presetName][(ColorGroups::Enum)grpId].listColors[(Colors::Enum)colId] = QColor( red,green,blue,alpha );
+                }
+            }
         }
     }
+    in >> currentPresetName;
+    if(currentPresetName.isEmpty())
+        currentPresetName="Default";
+
+    if(!savedInSetupFile)
+        listPresetsInSetup["Default"]=listPresets["Default"];
+
+    emit NewSetupLoaded();
+
     UpdateAllWidgets();
     return in;
 }

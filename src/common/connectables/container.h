@@ -62,6 +62,7 @@ namespace Connectables {
         void MoveOutputCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr);
         void MoveInputCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr);
         bool IsDirty();
+        void SetDirty();
         void SetSleep(bool sleeping);
 
         /// shared pointer to the bridge in object

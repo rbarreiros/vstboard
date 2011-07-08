@@ -43,29 +43,16 @@ ViewConfigDialog::ViewConfigDialog(MainHost *myHost, QWidget *parent) :
     updateInProgress(false)
 {
     ui->setupUi(this);
-
     conf = &myHost->mainWindow->viewConfig;
-
-    DisableSliders();
-
-    int cpt=0;
-
-    backupColors = conf->listColorGroups;
-    backupSaveInSetup = conf->savedInSetupFile;
-
-    QMap<ColorGroups::Enum,ColorGroup>::iterator i = conf->listColorGroups.begin();
-    while(i!=conf->listColorGroups.end()) {
-        ui->listPalettes->addItem( conf->GetColorGroupName(i.key()) );
-        ui->listPalettes->item(cpt)->setData(Qt::UserRole+1,i.key());
-        cpt++;
-        ++i;
-    }
-    ui->checkSavedInSetupFile->setChecked( conf->savedInSetupFile );
+    connect(conf,SIGNAL(NewSetupLoaded()),
+            this,SLOT(InitDialog()));
 
     connect(ui->picker,SIGNAL(colorSelected(QColor)),
             this,SLOT(onPickerColorSelected(QColor)));
     connect(ui->picker_hue,SIGNAL(colorSelected(QColor)),
             this,SLOT(onPickerHueSelected(QColor)));
+
+    InitDialog();
 }
 
 /*!
@@ -76,14 +63,36 @@ ViewConfigDialog::~ViewConfigDialog()
     delete ui;
 }
 
+void ViewConfigDialog::InitDialog()
+{
+    ui->checkSavedInSetupFile->setChecked( conf->IsSavedInSetup() );
+    InitLists();
+    LoadPreset( conf->GetPresetName() );
+}
+
+void ViewConfigDialog::InitLists()
+{
+    ui->listPresets->clear();
+    ui->listPresets->addItem( "Default" );
+
+    QMap<QString, QMap<ColorGroups::Enum,ColorGroup> >::const_iterator ip = conf->GetListOfPresets()->constBegin();
+    while(ip!=conf->GetListOfPresets()->constEnd()) {
+        if( ip.key()!="Default") {
+            QListWidgetItem *item = new QListWidgetItem( ip.key() );
+            item->setData( Qt::UserRole+1, ip.key() );
+            item->setFlags (item->flags () | Qt::ItemIsEditable);
+            ui->listPresets->addItem( item );
+        }
+        ++ip;
+    }
+}
+
 /*!
   Called when Ok is clicked
   */
 void ViewConfigDialog::accept()
 {
-    if(!ui->checkSavedInSetupFile->isChecked() && modified) {
-        conf->SaveInRegistry(myHost);
-    }
+    SaveChanges();
     QDialog::accept();
 }
 
@@ -92,17 +101,75 @@ void ViewConfigDialog::accept()
   */
 void ViewConfigDialog::reject()
 {
+    DiscardChanges();
+    QDialog::reject();
+}
 
-    if(modified) {
-//        QMessageBox msg(QMessageBox::Question, tr("VstBoard Appearance"), tr("Discard changes ?"), QMessageBox::Ok | QMessageBox::Cancel, this);
-//        if(msg.exec() == QMessageBox::Cancel)
-//            return;
+bool ViewConfigDialog::UserWantsToUnloadPreset()
+{
+    if(!modified)
+        return true;
 
-        conf->SetListGroups( backupColors );
-        conf->savedInSetupFile = backupSaveInSetup;
+    QMessageBox msg(QMessageBox::Question, tr("VstBoard Appearance"), tr("Discard changes ?"), QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, this);
+    msg.exec();
+
+    switch(msg.result()) {
+        case QMessageBox::Cancel:
+            return false;
+        case QMessageBox::Discard:
+            DiscardChanges();
+            break;
+        case QMessageBox::Save:
+            SaveChanges();
+            break;
     }
 
-    QDialog::reject();
+    return true;
+}
+
+void ViewConfigDialog::SaveChanges()
+{
+    if(!modified)
+        return;
+
+    if(ui->checkSavedInSetupFile->isChecked())
+        myHost->SetSetupDirtyFlag();
+    else
+        conf->SaveInRegistry(myHost);
+
+    modified=false;
+}
+
+void ViewConfigDialog::DiscardChanges()
+{
+    conf->SetListGroups( backupColors );
+    conf->SetSavedInSetup( backupSaveInSetup );
+    modified=false;
+}
+
+void ViewConfigDialog::LoadPreset(const QString &presetName)
+{
+    conf->LoadPreset(presetName);
+    backupColors = *conf->GetCurrentPreset();
+    backupSaveInSetup = conf->IsSavedInSetup();
+
+    ui->listPalettes->clear();
+    QMap<ColorGroups::Enum,ColorGroup>::iterator i = conf->GetCurrentPreset()->begin();
+    while(i!=conf->GetCurrentPreset()->end()) {
+        QListWidgetItem *item = new QListWidgetItem( conf->GetColorGroupName(i.key()) );
+        item->setData(Qt::UserRole+1,i.key());
+        ui->listPalettes->addItem( item );
+        ++i;
+    }
+
+    QList<QListWidgetItem*> listItems = ui->listPresets->findItems(conf->GetPresetName(),Qt::MatchExactly);
+    if(!listItems.isEmpty())
+        ui->listPresets->setCurrentItem( listItems.first() );
+
+    ui->listRoles->clear();
+
+    DisableSliders();
+    modified=false;
 }
 
 /*!
@@ -154,6 +221,18 @@ void ViewConfigDialog::SaveColor()
     conf->SetColor(currentGrp,currentCol, currentColor);
 }
 
+void View::ViewConfigDialog::on_listPresets_clicked(const QModelIndex &index)
+{
+    if(!UserWantsToUnloadPreset()) {
+        QListWidgetItem *item = ui->listPresets->findItems(conf->GetPresetName(),Qt::MatchExactly).first();
+        if(item)
+            ui->listPresets->setCurrentItem( item );
+
+        return;
+    }
+    LoadPreset( index.data().toString() );
+}
+
 /*!
   A group was clicked, update the list of colors
   \param item the selected group item
@@ -164,10 +243,10 @@ void View::ViewConfigDialog::on_listPalettes_itemClicked(QListWidgetItem* item)
 
     ui->listRoles->clear();
 
-    if(!conf->listColorGroups.contains(currentGrp))
+    if(!conf->GetCurrentPreset()->contains(currentGrp))
         return;
 
-    ColorGroup grp = conf->listColorGroups.value( currentGrp );
+    ColorGroup grp = conf->GetCurrentPreset()->value( currentGrp );
 
     bool colorExistsInGroup=false;
     int cpt=0;
@@ -210,18 +289,14 @@ void View::ViewConfigDialog::on_listRoles_itemClicked(QListWidgetItem* item)
   */
 void View::ViewConfigDialog::on_checkSavedInSetupFile_clicked(bool checked)
 {
-    modified=true;
-
-    conf->savedInSetupFile=checked;
-
-    if(checked) {
-        if( backupSetupColors.count()!=0 )
-        conf->SetListGroups( backupSetupColors );
-    } else {
-        backupSetupColors = conf->listColorGroups;
-        conf->LoadFromRegistry(myHost);
+    if(!UserWantsToUnloadPreset()) {
+        ui->checkSavedInSetupFile->setChecked(!checked);
+        return;
     }
-    GetColorFromConf();
+
+    conf->SetSavedInSetup( checked );
+    InitLists();
+    LoadPreset("Default");
 }
 
 
@@ -295,3 +370,49 @@ void ViewConfigDialog::EndUpdate()
     updateInProgress=false;
 }
 
+void View::ViewConfigDialog::on_addPreset_clicked()
+{
+    if(!UserWantsToUnloadPreset())
+        return;
+
+    QString name(tr("New preset"));
+
+    QListWidgetItem * item = ui->listPresets->currentItem();
+    if(item) {
+        name=item->text();
+        conf->CopyPreset(name);
+    } else {
+        conf->AddPreset( name );
+    }
+    InitLists();
+    LoadPreset(name);
+
+    if(ui->checkSavedInSetupFile->isChecked())
+        myHost->SetSetupDirtyFlag();
+}
+
+void View::ViewConfigDialog::on_delPreset_clicked()
+{
+    QListWidgetItem * item = ui->listPresets->currentItem();
+    if(!item)
+        return;
+    if(item->text() == "Default")
+        return;
+
+    conf->RemovePreset( item->text() );
+    InitLists();
+    LoadPreset("Default");
+
+    if(ui->checkSavedInSetupFile->isChecked())
+        myHost->SetSetupDirtyFlag();
+}
+
+void View::ViewConfigDialog::on_listPresets_itemChanged(QListWidgetItem *item)
+{
+    QString oldName = item->data(Qt::UserRole+1).toString();
+    conf->RenamePreset( oldName, item->text() );
+    item->setData( Qt::UserRole+1, item->text() );
+
+    if(ui->checkSavedInSetupFile->isChecked())
+        myHost->SetSetupDirtyFlag();
+}

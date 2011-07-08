@@ -62,6 +62,7 @@ namespace Connectables {
         void MoveInputCablesFromObj(int newObjId, int oldObjId);
 
         bool IsDirty();
+        void SetDirty();
 
         void SaveRendererState();
         void LoadRendererState();
