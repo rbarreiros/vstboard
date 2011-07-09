@@ -17,9 +17,6 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include "heap.h"
-
-
 #include "mididevices.h"
 #include "connectables/objectinfo.h"
 #include "mainhost.h"
@@ -181,7 +178,7 @@ void MidiDevices::MidiReceive_poll(PtTimestamp timestamp, void *userData)
         if(device->GetSleep())
             continue;
 
-        if(!device->stream)
+        if(!device->stream || !device->queue)
            continue;
 
         //lock device while processing (no rendering, no delete)

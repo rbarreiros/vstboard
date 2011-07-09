@@ -21,7 +21,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "precomp.h"
+//#include "precomp.h"
 
 #include "mainhost.h"
 #include "models/listtoolsmodel.h"
@@ -48,13 +48,14 @@ public:
     bool openedPrompt;
 
     View::SceneView *mySceneView;
-    View::ViewConfig viewConfig;
+    View::ViewConfig *viewConfig;
 
     bool userWantsToUnloadProject();
     bool userWantsToUnloadSetup();
 
 protected:
     void changeEvent(QEvent *e);
+    void SetupBrowsersModels(const QString &vstPath, const QString &browserPath);
 
     ListToolsModel *listToolsModel;
 
@@ -73,20 +74,14 @@ protected:
 
     View::ViewConfigDialog *viewConfigDlg;
 
-#ifdef DEBUGMEM
-    QAction *heapState;
-#endif
-
 public slots:
     void programParkingModelChanges(QStandardItemModel *model);
     void groupParkingModelChanges(QStandardItemModel *model);
     void currentFileChanged();
     void OnViewConfigClosed();
+    void LoadDefaultFiles();
 
 private slots:
-#ifdef DEBUGMEM
-    void OnHeapCheck();
-#endif
     void on_actionLoad_Setup_triggered();
     void on_actionRestore_default_layout_triggered();
     void on_actionSave_Setup_As_triggered();

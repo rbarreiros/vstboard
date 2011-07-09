@@ -1,7 +1,7 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include "precomp.h"
+//#include "precomp.h"
 #include "connectables/object.h"
 
 class Node

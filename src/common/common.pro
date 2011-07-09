@@ -1,12 +1,9 @@
-srcdir      = common
 include(../config.pri)
 
-QT += core gui script
+QT += core gui
 
 TEMPLATE = lib
 CONFIG += staticlib
-
-DEFINES += APP_NAME=\\\"VstBoardCommon\\\"
 
 vstsdk {
     HEADERS += vst/cvsthost.h \
@@ -30,6 +27,20 @@ vstsdk {
         views/vstshellselect.ui
 }
 
+scriptengine {
+    QT += script
+
+    SOURCES += connectables/script.cpp \
+        views/scripteditor.cpp \
+
+    HEADERS += connectables/script.h \
+        views/scripteditor.h \
+
+    FORMS += views/scripteditor.ui
+}
+
+PRECOMPILED_HEADER = precomp.h
+
 SOURCES += \
     mainhost.cpp \
     views/connectablepinview.cpp \
@@ -46,7 +57,6 @@ SOURCES += \
     connectables/cable.cpp \
     connectables/objectparameter.cpp \
     views/sceneview.cpp \
-    projectfile/setupfile.cpp \
     projectfile/projectfile.cpp \
     models/listtoolsmodel.cpp \
     views/cableview.cpp \
@@ -86,7 +96,6 @@ SOURCES += \
     views/configdialog.cpp \
     views/maingraphicsview.cpp \
     connectables/hostcontroller.cpp \
-    connectables/script.cpp \
     views/splash.cpp \
     connectables/audiopin.cpp \
     views/vstpluginview.cpp \
@@ -101,12 +110,11 @@ SOURCES += \
     renderer/renderernode.cpp \
     renderer/node.cpp \
     views/listaudiodevicesview.cpp \
-    views/scripteditor.cpp \
     views/objectdropzone.cpp \
     views/gradientwidget.cpp \
-    heap.cpp
+    views/gradientwidgethue.cpp
 
-HEADERS  += \
+HEADERS += \
     globals.h \
     mainhost.h \
     connectables/midisender.h \
@@ -126,7 +134,6 @@ HEADERS  += \
     connectables/cable.h \
     connectables/objectparameter.h \
     views/sceneview.h \
-    projectfile/setupfile.h \
     projectfile/projectfile.h \
     models/listtoolsmodel.h \
     views/cableview.h \
@@ -164,7 +171,6 @@ HEADERS  += \
     views/cursorview.h \
     mainwindow.h \
     views/maingraphicsview.h \
-    connectables/script.h \
     views/splash.h \
     connectables/audiopin.h \
     views/vstpluginview.h \
@@ -179,10 +185,9 @@ HEADERS  += \
     renderer/renderernode.h \
     renderer/node.h \
     views/listaudiodevicesview.h \
-    views/scripteditor.h \
     views/objectdropzone.h \
     views/gradientwidget.h \
-    heap.h
+    views/gradientwidgethue.h
 
 FORMS += \
     views/configdialog.ui \
@@ -192,7 +197,7 @@ FORMS += \
     views/aboutdialog.ui \
     views/splash.ui \
     views/viewconfigdialog.ui \
-    views/scripteditor.ui
+
 
 PRECOMPILED_HEADER = precomp.h
 

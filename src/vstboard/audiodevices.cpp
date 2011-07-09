@@ -17,8 +17,6 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include "heap.h"
-
 
 #include "audiodevices.h"
 #include "globals.h"
@@ -27,6 +25,8 @@
 #include "pa_asio.h"
 #include "views/mmeconfigdialog.h"
 #include "views/wasapiconfigdialog.h"
+#include "connectables/audiodevicein.h"
+#include "connectables/audiodeviceout.h"
 
 /*!
   \class AudioDevices
@@ -71,7 +71,7 @@ AudioDevices::~AudioDevices()
 
     mutexDevices.lock();
     foreach(Connectables::AudioDevice *dev, listAudioDevices)
-        dev->DeleteIfUnused();
+        delete dev; //dev->DeleteIfUnused();
     listAudioDevices.clear();
     mutexDevices.unlock();
 }
@@ -135,12 +135,20 @@ ListAudioInterfacesModel * AudioDevices::GetModel()
         if(obj.isNull())
             continue;
 
-        if(obj->info().objType == ObjType::AudioInterfaceIn || obj->info().objType == ObjType::AudioInterfaceOut) {
+        ObjectInfo info( obj->info() );
+        if(info.objType == ObjType::AudioInterfaceIn || info.objType == ObjType::AudioInterfaceOut) {
+            QString errMsg;
+            Connectables::AudioDevice *newDevice = AddDevice( info, &errMsg );
+            if(info.objType == ObjType::AudioInterfaceIn)
+                static_cast<Connectables::AudioDeviceIn*>(obj.data())->SetParentDevice(newDevice);
+            if(info.objType == ObjType::AudioInterfaceOut)
+                static_cast<Connectables::AudioDeviceOut*>(obj.data())->SetParentDevice(newDevice);
             if(obj->Open()) {
                 obj->UpdateModelNode();
             } else {
                 static_cast<Connectables::Container*>(myHost->objFactory->GetObjectFromId( obj->GetContainerId() ).data())->UserParkObject( obj );
             }
+            obj->SetErrorMessage(errMsg);
         }
     }
 
@@ -376,7 +384,7 @@ bool AudioDevices::FindPortAudioDevice(ObjectInfo &objInfo, PaDeviceInfo *dInfo)
         PaDeviceIndex devIndex = Pa_HostApiDeviceIndexToDeviceIndex( apiIndex, i);
         const PaDeviceInfo *info = Pa_GetDeviceInfo( devIndex );
 
-        QString devName = QString::fromStdString(info->name);
+        QString devName(info->name);
         //remove " x64" from device name so we can share files with 32bit version
         devName.remove(QRegExp("( )?x64"));
 

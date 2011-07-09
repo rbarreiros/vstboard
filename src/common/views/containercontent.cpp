@@ -17,8 +17,6 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include "heap.h"
-
 
 #include "containercontent.h"
 #include "objectview.h"
@@ -36,9 +34,9 @@ ContainerContent::ContainerContent(MainHost *myHost, QAbstractItemModel *model, 
     ObjectDropZone(parent),
     model(model),
     rectAttachLeft(0),
-    rectAttachRight(0)
+    rectAttachRight(0),
+    config(myHost->mainWindow->viewConfig)
 {
-    config = &myHost->mainWindow->viewConfig;
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     setGeometry(0,0,50,50);
 

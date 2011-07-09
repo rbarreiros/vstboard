@@ -23,7 +23,7 @@
 
 #define FAKE_RENDER_TIMER_MS 10
 
-#include "precomp.h"
+//#include "precomp.h"
 #include "portaudio.h"
 #include "models/listaudiointerfacesmodel.h"
 #include "connectables/objectinfo.h"

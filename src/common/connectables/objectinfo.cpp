@@ -17,8 +17,6 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include "heap.h"
-
 
 
 #include "objectinfo.h"
@@ -85,9 +83,7 @@ QDataStream & ObjectInfo::fromStream(QDataStream& stream)
     stream >> outputs;
     stream >> duplicateNamesCounter;
     stream >> apiName;
-    if(MainHost::currentFileVersion >= 13) {
-        stream >> api;
-    }
+    stream >> api;
     stream >> forcedObjId;
     return stream;
 }

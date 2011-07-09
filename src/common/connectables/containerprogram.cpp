@@ -17,8 +17,6 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include "heap.h"
-
 
 
 #include "containerprogram.h"
@@ -214,6 +212,11 @@ bool ContainerProgram::IsDirty()
         }
     }
     return false;
+}
+
+void ContainerProgram::SetDirty()
+{
+    dirty=true;
 }
 
 void ContainerProgram::Save(bool saveChildPrograms)
@@ -486,8 +489,10 @@ QDataStream & ContainerProgram::fromStream (QDataStream& in)
     for(quint16 i=0; i<nbobj; i++) {
         quint16 id;
         in >> id;
-        id = myHost->objFactory->IdFromSavedId(id);
-        listObjects << myHost->objFactory->GetObjectFromId(id);
+        int newid = myHost->objFactory->IdFromSavedId(id);
+        if(newid==-1)
+            return in;
+        listObjects << myHost->objFactory->GetObjectFromId(newid);
     }
 
     quint16 nbCables;

@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "precomp.h"
+//#include "precomp.h"
 #include "mainhost.h"
 #include "mainwindow.h"
 #include "viewconfig.h"
@@ -23,10 +23,17 @@ namespace View {
         ~ViewConfigDialog();
 
     private:
+        void InitLists();
+        void LoadPreset(const QString &presetName);
+        bool UserWantsToUnloadPreset();
         void GetColorFromConf();
         void UpdateSliders();
         void DisableSliders();
         void SaveColor();
+
+        void SaveChanges();
+        void DiscardChanges();
+
         QColor currentColor;
 
         /// pointer to the dialog ui;
@@ -45,10 +52,7 @@ namespace View {
         Colors::Enum currentCol;
 
         /// a copy of the original colors, restored if dialog is canceled
-        QMap<ColorGroups::Enum,ColorGroup>backupColors;
-
-        /// a copy of the colors, restored if saved in setup file is checked
-        QMap<ColorGroups::Enum,ColorGroup>backupSetupColors;
+        QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> >backupColors;
 
         /// save in setup file, oriinal state
         bool backupSaveInSetup;
@@ -63,9 +67,11 @@ namespace View {
     public slots:
         void accept();
         void reject();
+        void InitDialog();
 
     private slots:
         void onPickerColorSelected(const QColor &color);
+        void onPickerHueSelected(const QColor &color);
         void on_listPalettes_itemClicked(QListWidgetItem* item);
         void on_listRoles_itemClicked(QListWidgetItem* item);
         void on_checkSavedInSetupFile_clicked(bool checked);
@@ -73,7 +79,10 @@ namespace View {
         void on_GreenSpinBox_valueChanged(int );
         void on_BlueSpinBox_valueChanged(int );
         void on_AlphaSpinBox_valueChanged(int );
-        void on_HueSpinBox_valueChanged(int );
+        void on_listPresets_clicked(const QModelIndex &index);
+        void on_addPreset_clicked();
+        void on_delPreset_clicked();
+        void on_listPresets_itemChanged(QListWidgetItem *item);
     };
 }
 #endif // VIEWCONFIGDIALOG_H

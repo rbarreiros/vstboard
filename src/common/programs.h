@@ -21,7 +21,7 @@
 #ifndef PROGRAMS_H
 #define PROGRAMS_H
 
-#include "precomp.h"
+//#include "precomp.h"
 #include "globals.h"
 #include "models/programsmodel.h"
 #include "views/viewconfig.h"

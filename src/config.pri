@@ -1,3 +1,5 @@
+DEFINES += APP_NAME=\\\"VstBoard\\\"
+
 PORTAUDIO_PATH 	= ../../libs/portaudio
 PORTMIDI_PATH 	= ../../libs/portmidi
 
@@ -9,8 +11,8 @@ win32|macx {
         $$VSTSDK_PATH/public.sdk/source/vst2.x
 }
 
+CONFIG += scriptengine
 DEFINES += SCRIPTENGINE
-#DEFINES += DEBUGMEM
 
 CONFIG(debug, debug|release) {
     POST =
@@ -35,7 +37,10 @@ win32-msvc* {
  #   QMAKE_CFLAGS += -Fd$$top_destdir/$$TARGET
 
 #to add symbols :
-#    QMAKE_CFLAGS_RELEASE +=  -Zi
+#    QMAKE_CXXFLAGS_RELEASE +=  -Zi
 #    QMAKE_LFLAGS_RELEASE += /DEBUG
 
+#ltcg
+    QMAKE_CXXFLAGS_RELEASE +=  -GL
+    QMAKE_LFLAGS_RELEASE += /LTCG
 }

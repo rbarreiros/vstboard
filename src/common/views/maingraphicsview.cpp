@@ -17,8 +17,6 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include "heap.h"
-
 
 #include "maingraphicsview.h"
 #include "../globals.h"
@@ -136,12 +134,12 @@ void MainGraphicsView::SaveProgram()
 }
 
 
-void MainGraphicsView::SetProgram(const QModelIndex &prg)
+void MainGraphicsView::SetViewProgram(const QModelIndex &prg)
 {
-    SetProgram(prg.data(UserRoles::value).toInt());
+    SetViewProgram(prg.data(UserRoles::value).toInt());
 }
 
-void MainGraphicsView::SetProgram(int progId)
+void MainGraphicsView::SetViewProgram(int progId)
 {
     SaveProgram();
 
@@ -161,25 +159,24 @@ void MainGraphicsView::SetProgram(int progId)
     verticalScrollBar()->setValue( state.scrolly );
 }
 
-void MainGraphicsView::CopyProgram(int ori, int dest)
+void MainGraphicsView::CopyViewProgram(int ori, int dest)
 {
     if(!listPrograms.contains(ori))
         return;
     listPrograms.insert(dest, listPrograms.value(ori));
 }
 
-void MainGraphicsView::RemoveProgram(int prg)
+void MainGraphicsView::RemoveViewProgram(int prg)
 {
     if(!listPrograms.contains(prg))
         return;
     listPrograms.remove(prg);
 }
 
-void MainGraphicsView::ClearPrograms()
+void MainGraphicsView::ClearViewPrograms()
 {
-    SetProgram(EMPTY_PROGRAM);
+    SetViewProgram(EMPTY_PROGRAM);
     listPrograms.clear();
-    SetProgram(0);
 }
 
 QDataStream & MainGraphicsView::toStream (QDataStream& out) const
@@ -187,10 +184,12 @@ QDataStream & MainGraphicsView::toStream (QDataStream& out) const
     out << (quint16)listPrograms.size();
     QMap<qint16,SceneProg>::ConstIterator i = listPrograms.constBegin();
     while(i!=listPrograms.constEnd()) {
-        out << i.key();
-        out << i.value().scale;
-        out << i.value().scrollx;
-        out << i.value().scrolly;
+        qint16 prog = i.key();
+        out << prog;
+        SceneProg state = i.value();
+        out << state.scale;
+        out << state.scrollx;
+        out << state.scrolly;
         ++i;
     }
     return out;
@@ -198,6 +197,8 @@ QDataStream & MainGraphicsView::toStream (QDataStream& out) const
 
 QDataStream & MainGraphicsView::fromStream (QDataStream& in)
 {
+    ClearViewPrograms();
+
     quint16 nbProg;
     in >> nbProg;
 

@@ -17,8 +17,6 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include "heap.h"
-
 
 #include "objectview.h"
 #include "pinview.h"
@@ -47,7 +45,6 @@ ObjectView::ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsIte
     listParametersIn(0),
     listParametersOut(0),
     listBridge(0),
-    config(0),
     titleText(0),
     border(0),
     selectBorder(0),
@@ -57,10 +54,11 @@ ObjectView::ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsIte
     actRemove(0),
     shrinkAsked(false),
     myHost(myHost),
-    highlighted(false)
+    highlighted(false),
+    config(myHost->mainWindow->viewConfig)
 {
     setObjectName("objView");
-    config = &myHost->mainWindow->viewConfig;
+
     setAutoFillBackground(true);
 
     QPalette pal(palette());

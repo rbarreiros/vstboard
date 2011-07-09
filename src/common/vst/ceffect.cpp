@@ -17,8 +17,6 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
-#include "heap.h"
-
 
 #include "ceffect.h"
 #include "cvsthost.h"
@@ -382,6 +380,6 @@ QString CEffect::EffGetParamName(long index)
 {
     char txt[32] ={0};
     EffDispatch(effGetParamName, index, 0, txt);
-    return QString::fromAscii(txt);
+    return QString(txt);
 
 }

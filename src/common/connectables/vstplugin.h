@@ -67,7 +67,7 @@ namespace Connectables {
         QStandardItem *GetFullItem();
 
         QDataStream & toStream (QDataStream &) const;
-        QDataStream & fromStream (QDataStream &);
+        bool fromStream (QDataStream &);
 
     protected:
         void processEvents(VstEvents* events);

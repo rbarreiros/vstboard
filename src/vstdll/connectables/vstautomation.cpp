@@ -25,8 +25,7 @@
 using namespace Connectables;
 
 VstAutomation::VstAutomation(MainHost *myHost,int index) :
-        Object(myHost,index, ObjectInfo(NodeType::object, ObjType::VstAutomation, tr("VstAutomation")) ),
-        numberOfPins(VST_AUTOMATION_DEFAULT_NB_PINS)
+        Object(myHost,index, ObjectInfo(NodeType::object, ObjType::VstAutomation, tr("VstAutomation")) )
 {
     for(int i=0;i<128;i++) {
         listValues << i;
@@ -41,8 +40,8 @@ VstAutomation::VstAutomation(MainHost *myHost,int index) :
     listParameterPinIn->AddPin(FixedPinNumber::numberOfPins);
     listParameterPinOut->AddPin(FixedPinNumber::vstProgNumber);
 
-    listParameterPinIn->SetNbPins(VST_AUTOMATION_DEFAULT_NB_PINS);
-    listParameterPinOut->SetNbPins(VST_AUTOMATION_DEFAULT_NB_PINS);
+    listParameterPinIn->SetNbPins(VST_AUTOMATION_DEFAULT_NB_PINS+2);
+    listParameterPinOut->SetNbPins(VST_AUTOMATION_DEFAULT_NB_PINS+1);
 
     connect(static_cast<MainHostVst*>(myHost)->myVstPlugin,SIGNAL(HostChangedProg(int)),
             this,SLOT(OnHostChangedProg(int)));
@@ -99,23 +98,11 @@ void VstAutomation::OnParameterChanged(ConnectionInfo pinInfo, float value)
 {
     Object::OnParameterChanged(pinInfo,value);
     if(pinInfo.pinNumber==FixedPinNumber::numberOfPins) {
-        int nbPins=static_cast<ParameterPin*>(listParameterPinIn->listPins.value(FixedPinNumber::numberOfPins) )->GetIndex();
-
-        if(nbPins>numberOfPins) {
-            for(int i=numberOfPins; i<nbPins; i++) {
-                listParameterPinIn->AddPin(i);
-                listParameterPinOut->AddPin(i);
-            }
-        }
-
-        if(nbPins<numberOfPins) {
-            for(int i=nbPins; i<numberOfPins; i++) {
-                listParameterPinIn->RemovePin(i);
-                listParameterPinOut->RemovePin(i);
-            }
-        }
-
-        numberOfPins=nbPins;
+        int nbPins=static_cast<ParameterPin*>( listParameterPinIn->listPins.value(FixedPinNumber::numberOfPins) )->GetIndex();
+        //count the learn and nbpins pins
+        listParameterPinIn->SetNbPins(nbPins+2);
+        //count the prog pin
+        listParameterPinOut->SetNbPins(nbPins+1);
         return;
     }
 

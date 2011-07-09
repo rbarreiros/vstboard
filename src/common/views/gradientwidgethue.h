@@ -1,17 +1,17 @@
-#ifndef GRADIENTWIDGET_H
-#define GRADIENTWIDGET_H
+#ifndef GRADIENTWIDGETHUE_H
+#define GRADIENTWIDGETHUE_H
 
 #include <QtGui/QWidget>
 #include <QtGui/QPen>
 
 namespace View {
 
-    class GradientWidget : public QWidget
+    class GradientWidgetHue : public QWidget
     {
         Q_OBJECT
 
     public:
-        explicit GradientWidget(QWidget *parent = 0);
+        explicit GradientWidgetHue(QWidget *parent = 0);
 
         QColor getSelectedColor() {return m_selected_color;}
         int getRed() {return m_selected_color.red();}
@@ -56,6 +56,8 @@ namespace View {
         void updateGradientImage();
         void cursorMoved();
         void updateCursorPosition();
+        void updateHueFromColor(const QColor &col);
     };
 }
-#endif // GRADIENTWIDGET_H
+
+#endif // GRADIENTWIDGETHUE_H

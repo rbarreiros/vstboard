@@ -108,14 +108,6 @@ Section "Start Menu Shortcuts"
 	CreateShortCut "${START_LINK_UNINSTALLER}" "$InstFolder\uninst.exe"
 SectionEnd
 
-Section "-VcRedist"
-	SetOutPath "$TEMP"
-	SetOverwrite on
-	File vcredist_${ARCH}.exe
-	ExecWait '"$TEMP\vcredist_${ARCH}.exe" /q'
-	Delete "$TEMP\vcredist_${ARCH}.exe"
-SectionEnd
-
 Section "Uninstall"
         SetShellVarContext current
 	

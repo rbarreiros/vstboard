@@ -17,13 +17,10 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include "heap.h"
-
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "globals.h"
-#include "projectfile/setupfile.h"
 #include "projectfile/projectfile.h"
 #include "views/configdialog.h"
 #include "views/aboutdialog.h"
@@ -36,8 +33,10 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
         mySceneView(0),
         listToolsModel(0),
         listVstPluginsModel(0),
+        listVstBanksModel(0),
         ui(new Ui::MainWindow),
         myHost(myHost),
+        viewConfig( new View::ViewConfig(myHost,this)),
         viewConfigDlg(0)
 {
     myHost->mainWindow=this;
@@ -76,7 +75,29 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     connect(ui->Programs, SIGNAL(CurrentDisplayedGroup(QModelIndex)),
             myHost->programList, SLOT(DisplayedGroupChanged(QModelIndex)));
 
+    SetupBrowsersModels( ConfigDialog::defaultVstPath(myHost), ConfigDialog::defaultBankPath(myHost));
 
+    mySceneView = new View::SceneView(myHost, myHost->objFactory, ui->hostView, ui->projectView, ui->programView, ui->groupView, this);
+    mySceneView->SetParkings(ui->programParkList, ui->groupParkList);
+    mySceneView->setModel(myHost->GetModel());
+
+    ui->solverView->setModel(myHost->GetRendererModel());
+    connect(myHost->GetRendererModel(), SIGNAL(dataChanged(QModelIndex,QModelIndex)),
+            ui->solverView, SLOT(resizeColumnsToContents()));
+    connect(myHost->GetRendererModel(), SIGNAL(dataChanged(QModelIndex,QModelIndex)),
+            ui->solverView, SLOT(resizeRowsToContents()));
+
+    ui->treeHostModel->setModel(myHost->GetModel());
+
+    connect( viewConfig, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
+            myHost->programList, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)) );
+    InitColors();
+    connect( viewConfig, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
+            this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)));
+}
+
+void MainWindow::SetupBrowsersModels(const QString &vstPath, const QString &browserPath)
+{
 #if !defined(__GNUC__)
     //vst plugins browser
     //sse2 crash with gcc ?
@@ -88,55 +109,22 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     fileFilter << "*.dll";
     listVstPluginsModel->setNameFilters(fileFilter);
     listVstPluginsModel->setNameFilterDisables(false);
-    listVstPluginsModel->setRootPath(ConfigDialog::defaultVstPath(myHost));
+    listVstPluginsModel->setRootPath(vstPath);
     ui->VstBrowser->setModel(listVstPluginsModel);
 
     //bank file browser
     listVstBanksModel = new QFileSystemModel(this);
-    //listVstBanksModel->setReadOnly(true);
+    listVstBanksModel->setReadOnly(false);
     listVstBanksModel->setResolveSymlinks(true);
 //    QStringList bankFilter;
 //    bankFilter << "*.fxb";
 //    bankFilter << "*.fxp";
 //    listVstBanksModel->setNameFilters(bankFilter);
 //    listVstBanksModel->setNameFilterDisables(false);
-    listVstBanksModel->setRootPath(ConfigDialog::defaultBankPath(myHost));
+    listVstBanksModel->setRootPath(browserPath);
     ui->BankBrowser->setModel(listVstBanksModel);
 #endif
-
-    mySceneView = new View::SceneView(myHost, myHost->objFactory, ui->hostView, ui->projectView, ui->programView, ui->groupView, this);
-    mySceneView->SetParkings(ui->programParkList, ui->groupParkList);
-    mySceneView->setModel(myHost->GetModel());
-
-    //ui->solverView->setModel(&myHost->solver->model);
-    ui->solverView->setModel(myHost->GetRendererModel());
-    connect(myHost->GetRendererModel(), SIGNAL(dataChanged(QModelIndex,QModelIndex)),
-            ui->solverView, SLOT(resizeColumnsToContents()));
-    connect(myHost->GetRendererModel(), SIGNAL(dataChanged(QModelIndex,QModelIndex)),
-            ui->solverView, SLOT(resizeRowsToContents()));
-
-    ui->treeHostModel->setModel(myHost->GetModel());
-
-    connect( &viewConfig, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
-            myHost->programList, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)) );
-    InitColors();
-    connect(&viewConfig, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
-            this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)));
-
-#ifdef DEBUGMEM
-    heapState = ui->mainToolBar->addAction("heap check");
-    connect(heapState,SIGNAL(triggered()),
-            this,SLOT(OnHeapCheck()));
-#endif
 }
-
-#ifdef DEBUGMEM
-    void MainWindow::OnHeapCheck() {
-        HeapCheckpoint();
-    }
-
-#endif
-
 
 MainWindow::~MainWindow()
 {
@@ -146,7 +134,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::InitColors()
 {
-    setPalette( viewConfig.GetPaletteFromColorGroup( ColorGroups::Window, palette() ));
+    setPalette( viewConfig->GetPaletteFromColorGroup( ColorGroups::Window, palette() ));
 }
 
 void MainWindow::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
@@ -154,7 +142,7 @@ void MainWindow::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, co
     if(groupId!=ColorGroups::Window)
         return;
 
-    QPalette::ColorRole role = viewConfig.GetPaletteRoleFromColor(colorId);
+    QPalette::ColorRole role = viewConfig->GetPaletteRoleFromColor(colorId);
 
     QPalette pal=palette();
     pal.setColor(role, color);
@@ -276,13 +264,14 @@ void MainWindow::BuildListTools()
     listToolsModel->setHorizontalHeaderLabels(headerLabels);
     parentItem = listToolsModel->invisibleRootItem();
 
+#ifdef SCRIPTENGINE
     //script
     item = new QStandardItem(tr("Script"));
     info.nodeType = NodeType::object;
     info.objType = ObjType::Script;
     item->setData(QVariant::fromValue(info), UserRoles::objInfo);
     parentItem->appendRow(item);
-
+#endif
 
     //midi parameters
     item = new QStandardItem(tr("Midi to parameter"));
@@ -493,11 +482,17 @@ void MainWindow::readSettings()
 
     ui->Programs->readSettings(myHost);
 
-    viewConfig.LoadFromRegistry(myHost);
+    viewConfig->LoadFromRegistry();
 
+
+}
+
+void MainWindow::LoadDefaultFiles()
+{
     //load default files
     myHost->LoadSetupFile( ConfigDialog::defaultSetupFile(myHost) );
     myHost->LoadProjectFile( ConfigDialog::defaultProjectFile(myHost) );
+    updateRecentFileActions();
 }
 
 void MainWindow::currentFileChanged()

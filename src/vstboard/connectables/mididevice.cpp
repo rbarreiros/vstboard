@@ -17,8 +17,6 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include "heap.h"
-
 
 #include "mainhosthost.h"
 #include "connectables/mididevice.h"
@@ -81,7 +79,7 @@ bool MidiDevice::OpenStream()
     queue = Pm_QueueCreate(QUEUE_SIZE, sizeof(PmEvent));
     if(!queue) {
         debug("MidiDevice::OpenStream can't create queue")
-                return false;
+        return false;
     }
 
     if(objInfo.inputs>0) {
@@ -92,10 +90,10 @@ bool MidiDevice::OpenStream()
                 char msg[255];
                 Pm_GetHostErrorText(msg,255);
                 debug("MidiDevice::OpenStream openInput host %s",msg)
-                msgTxt=QString::fromAscii(msg);
+                msgTxt=msg;
             } else {
                 debug("MidiDevice::OpenStream openInput %s",Pm_GetErrorText(err))
-                msgTxt=QString::fromAscii(Pm_GetErrorText(err));
+                msgTxt=Pm_GetErrorText(err);
             }
             errorMessage=tr("Error while opening midi device %1 %2").arg(objInfo.name).arg(msgTxt);
             return false;
@@ -109,9 +107,9 @@ bool MidiDevice::OpenStream()
                 unsigned int len=20;
                 Pm_GetHostErrorText(msg,len);
                 debug("MidiDevice::OpenStream setFilter host %s",msg)
-                msgTxt=QString::fromAscii(msg);
+                msgTxt=msg;
             } else {
-                msgTxt=QString::fromAscii(Pm_GetErrorText(err));
+                msgTxt=Pm_GetErrorText(err);
                 debug("MidiDevice::OpenStream setFilter %s",Pm_GetErrorText(err))
             }
             errorMessage=tr("Error while opening midi device %1 %2").arg(objInfo.name).arg(msgTxt);
@@ -128,10 +126,10 @@ bool MidiDevice::OpenStream()
                 unsigned int len=20;
                 Pm_GetHostErrorText(msg,len);
                 debug("MidiDevice::Open openInput host %s",msg)
-                msgTxt=QString::fromAscii(msg);
+                msgTxt=msg;
             } else {
                 debug("MidiDevice::Open openInput %s",Pm_GetErrorText(err))
-                msgTxt=QString::fromAscii(Pm_GetErrorText(err));
+                msgTxt=Pm_GetErrorText(err);
             }
             errorMessage=tr("Error while opening midi device %1 %2").arg(objInfo.name).arg(msgTxt);
             return false;
@@ -145,24 +143,28 @@ bool MidiDevice::OpenStream()
 
 bool MidiDevice::CloseStream()
 {
-    if(!deviceOpened)
-        return true;
-
+//    if(!deviceOpened)
+//        return true;
 //    SetSleep(true);
-
 
     QMutexLocker l(&objMutex);
 
     PmError err = pmNoError;
 
-    err = Pm_Close(stream);
-    if(err!=pmNoError) {
-        debug("MidiDevice::Close error closing midi port");
+    if(stream) {
+        err = Pm_Close(stream);
+        if(err!=pmNoError) {
+            debug("MidiDevice::Close error closing midi port");
+        }
+        stream=0;
     }
 
-    err = Pm_QueueDestroy(queue);
-    if(err!=pmNoError) {
-        debug("error closing midi queue");
+    if(queue) {
+        err = Pm_QueueDestroy(queue);
+        if(err!=pmNoError) {
+            debug("error closing midi queue");
+        }
+        queue=0;
     }
 
     deviceOpened=false;
@@ -190,8 +192,8 @@ bool MidiDevice::FindDeviceByName()
 
     for(int i=0;i<Pm_CountDevices();i++) {
         const PmDeviceInfo *info = Pm_GetDeviceInfo(i);
-        if(QString::fromStdString(info->interf) == objInfo.apiName
-            && QString::fromStdString(info->name) == objInfo.name
+        if(objInfo.apiName == info->interf
+            && objInfo.name == info->name
             && info->input == objInfo.inputs
             && info->output == objInfo.outputs) {
             //can be this one, but the interface number can change form a comp to another
@@ -238,7 +240,7 @@ bool MidiDevice::Open()
 
     //error while opening device, delete it now
     if(!OpenStream()) {
-        return false;
+        return true;
     }
     listMidiPinOut->ChangeNumberOfPins(devInfo->input);
     listMidiPinIn->ChangeNumberOfPins(devInfo->output);

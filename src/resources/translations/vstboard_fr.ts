@@ -4,15 +4,20 @@
 <context>
     <name>AudioDevice</name>
     <message>
-        <location filename="../../vstboard/connectables/audiodevice.cpp" line="364"/>
+        <location filename="../../vstboard/connectables/audiodevice.cpp" line="218"/>
+        <source>Device not found</source>
+        <translation type="unfinished">Interface non trouvée</translation>
+    </message>
+    <message>
+        <location filename="../../vstboard/connectables/audiodevice.cpp" line="366"/>
         <source>Stream format not supported</source>
-        <translation>Format stream non supporté</translation>
+        <translation type="unfinished">Format stream non supporté</translation>
     </message>
 </context>
 <context>
     <name>AudioDeviceIn</name>
     <message>
-        <location filename="../../vstboard/connectables/audiodevicein.cpp" line="116"/>
+        <location filename="../../vstboard/connectables/audiodevicein.cpp" line="114"/>
         <source>Already in use</source>
         <translation>En cours d&apos;utilisation</translation>
     </message>
@@ -20,7 +25,7 @@
 <context>
     <name>AudioDeviceOut</name>
     <message>
-        <location filename="../../vstboard/connectables/audiodeviceout.cpp" line="98"/>
+        <location filename="../../vstboard/connectables/audiodeviceout.cpp" line="96"/>
         <source>Already in use</source>
         <translation>En cours d&apos;utilisation</translation>
     </message>
@@ -33,22 +38,22 @@
         <translation>Impossible d&apos;initialiser le moteur audio : %1</translation>
     </message>
     <message>
-        <location filename="../../vstboard/audiodevices.cpp" line="306"/>
+        <location filename="../../vstboard/audiodevices.cpp" line="314"/>
         <source>Device not found</source>
         <translation>Interface non trouvée</translation>
     </message>
     <message>
-        <location filename="../../vstboard/audiodevices.cpp" line="455"/>
+        <location filename="../../vstboard/audiodevices.cpp" line="463"/>
         <source>Error</source>
         <translation>Erreur</translation>
     </message>
     <message>
-        <location filename="../../vstboard/audiodevices.cpp" line="480"/>
+        <location filename="../../vstboard/audiodevices.cpp" line="488"/>
         <source>No config</source>
         <translation>Pas de config</translation>
     </message>
     <message>
-        <location filename="../../vstboard/audiodevices.cpp" line="481"/>
+        <location filename="../../vstboard/audiodevices.cpp" line="489"/>
         <source>No config dialog for this device</source>
         <translation>Pas de config pour cette interface</translation>
     </message>
@@ -56,7 +61,7 @@
 <context>
     <name>MainWindowHost</name>
     <message>
-        <location filename="../../vstboard/mainwindowhost.cpp" line="60"/>
+        <location filename="../../vstboard/mainwindowhost.cpp" line="57"/>
         <source>Refresh list</source>
         <translation>Rafraîchir la liste</translation>
     </message>
@@ -64,20 +69,20 @@
 <context>
     <name>MidiDevice</name>
     <message>
-        <location filename="../../vstboard/connectables/mididevice.cpp" line="77"/>
-        <location filename="../../vstboard/connectables/mididevice.cpp" line="235"/>
+        <location filename="../../vstboard/connectables/mididevice.cpp" line="75"/>
+        <location filename="../../vstboard/connectables/mididevice.cpp" line="237"/>
         <source>Device not found</source>
         <translation>Interface non trouvée</translation>
     </message>
     <message>
-        <location filename="../../vstboard/connectables/mididevice.cpp" line="100"/>
-        <location filename="../../vstboard/connectables/mididevice.cpp" line="117"/>
-        <location filename="../../vstboard/connectables/mididevice.cpp" line="136"/>
+        <location filename="../../vstboard/connectables/mididevice.cpp" line="98"/>
+        <location filename="../../vstboard/connectables/mididevice.cpp" line="115"/>
+        <location filename="../../vstboard/connectables/mididevice.cpp" line="134"/>
         <source>Error while opening midi device %1 %2</source>
         <translation>Erreur lors de l&apos;ouverture de l&apos;interface Midi %1 %2</translation>
     </message>
     <message>
-        <location filename="../../vstboard/connectables/mididevice.cpp" line="218"/>
+        <location filename="../../vstboard/connectables/mididevice.cpp" line="220"/>
         <source>Error : device was deleted</source>
         <translation>Erreur : l&apos;interface a été supprimée</translation>
     </message>
@@ -85,12 +90,12 @@
 <context>
     <name>MidiDevices</name>
     <message>
-        <location filename="../../vstboard/mididevices.cpp" line="69"/>
+        <location filename="../../vstboard/mididevices.cpp" line="66"/>
         <source>Unable to initialize midi engine : %1</source>
         <translation>Impossible d&apos;initialiser le moteur Midi : %1</translation>
     </message>
     <message>
-        <location filename="../../vstboard/mididevices.cpp" line="78"/>
+        <location filename="../../vstboard/mididevices.cpp" line="75"/>
         <source>Unable to start midi engine</source>
         <translation>Impossible de démarrer le moteur Midi</translation>
     </message>
@@ -133,7 +138,7 @@
         <translation>Ne pas limiter même en cas de surcharge</translation>
     </message>
     <message>
-        <location filename="../../vstboard/views/mmeconfigdialog.cpp" line="34"/>
+        <location filename="../../vstboard/views/mmeconfigdialog.cpp" line="31"/>
         <source>MME Config</source>
         <translation></translation>
     </message>
@@ -161,7 +166,7 @@
         <translation>Mode exclusif</translation>
     </message>
     <message>
-        <location filename="../../vstboard/views/wasapiconfigdialog.cpp" line="34"/>
+        <location filename="../../vstboard/views/wasapiconfigdialog.cpp" line="31"/>
         <source>WASAPI Config</source>
         <translation></translation>
     </message>

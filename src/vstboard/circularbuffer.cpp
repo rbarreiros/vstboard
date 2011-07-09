@@ -17,16 +17,14 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include "heap.h"
-
-
 #include "circularbuffer.h"
-#include "precomp.h"
+//#include "precomp.h"
 
 CircularBuffer::CircularBuffer() :
         buffSize(4096)
 {
     buffer = new float[buffSize];
+    ZeroMemory(buffer,sizeof(float)*buffSize);
     bufStart = &buffer[0];
     bufEnd = &buffer[buffSize-1];
     filledStart = bufStart;

@@ -12,7 +12,6 @@ public:
 protected:
     QAction *audioDevConfig;
     QAction *updateList;
-    QModelIndex currentDevice;
 
 signals:
     void Config(const QModelIndex &device);

@@ -21,7 +21,7 @@
 #ifndef CONTAINERPROGRAM_H
 #define CONTAINERPROGRAM_H
 
-#include "precomp.h"
+//#include "precomp.h"
 #include "cable.h"
 #include "objectinfo.h"
 
@@ -62,6 +62,7 @@ namespace Connectables {
         void MoveInputCablesFromObj(int newObjId, int oldObjId);
 
         bool IsDirty();
+        void SetDirty();
 
         void SaveRendererState();
         void LoadRendererState();

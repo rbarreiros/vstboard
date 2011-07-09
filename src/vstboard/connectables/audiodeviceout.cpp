@@ -17,8 +17,6 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include "heap.h"
-
 
 #include "connectables/audiodeviceout.h"
 #include "connectables/audiodevice.h"
@@ -108,6 +106,8 @@ void AudioDeviceOut::SetRingBufferFromPins(QList<CircularBuffer*>listCircularBuf
     foreach(CircularBuffer *buf, listCircularBuffers) {
         AudioBuffer *pinBuf = listAudioPinIn->GetBuffer(cpt);
         cpt++;
+        if(!pinBuf)
+            continue;
         if(pinBuf->GetDoublePrecision())
             buf->Put( (double*)pinBuf->ConsumeStack(), pinBuf->GetSize() );
         else

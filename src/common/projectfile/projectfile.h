@@ -22,16 +22,23 @@
 #define PROJECTFILE_H
 
 #include "../precomp.h"
+
+#define PROJECT_FILE_KEY 0x757b0a5d
+#define SETUP_FILE_KEY 0x7575e711
+#define SETUPANDPROJECT_FILE_KEY 0x75751337
+
 class MainHost;
 class ProjectFile : public QObject
 {
 Q_OBJECT
 public:
-    static void Clear(MainHost *myHost);
-    static bool SaveToFile(MainHost *myHost,QString filePath);
+    static bool SaveToProjectFile(MainHost *myHost,QString filePath);
+    static bool SaveToSetupFile(MainHost *myHost,QString filePath);
     static bool LoadFromFile(MainHost *myHost,QString filePath);
-    static bool ToStream(MainHost *myHost,QDataStream &out);
+    static bool ToStream(MainHost *myHost,QDataStream &out, quint32 fileKey=SETUPANDPROJECT_FILE_KEY);
     static bool FromStream(MainHost *myHost,QDataStream &in);
+    static bool SaveChunk(const QString &chunkName, QByteArray &ba, QDataStream &out);
+    static bool LoadNextChunk( QString &chunkName, QByteArray &ba, QDataStream &in);
 };
 
 #endif // PROJECTFILE_H

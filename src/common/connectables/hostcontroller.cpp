@@ -17,8 +17,6 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include "heap.h"
-
 
 
 #include "hostcontroller.h"
@@ -156,26 +154,18 @@ void HostController::OnParameterChanged(ConnectionInfo pinInfo, float value)
 
 void HostController::OnHostProgChanged(const QModelIndex &index)
 {
-    if(listParameterPinIn->listPins.contains(Param_Prog))
-        static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Prog))->ChangeValue( index.row(), true );
     if(listParameterPinOut->listPins.contains(Param_Prog))
         static_cast<ParameterPin*>(listParameterPinOut->listPins.value(Param_Prog))->ChangeValue( index.row(), true );
 }
 
 void HostController::OnHostGroupChanged(const QModelIndex &index)
 {
-    if(listParameterPinIn->listPins.contains(Param_Group))
-        static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Group))->ChangeValue( index.row(), true );
     if(listParameterPinOut->listPins.contains(Param_Group))
         static_cast<ParameterPin*>(listParameterPinOut->listPins.value(Param_Group))->ChangeValue( index.row(), true );
 }
 
 void HostController::OnHostTempoChange(int tempo, int sign1, int sign2)
 {
-    static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Tempo))->SetVariantValue( tempo);
-    static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Sign1))->SetVariantValue( sign1 );
-    static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Sign2))->SetVariantValue( sign2 );
-
     static_cast<ParameterPin*>(listParameterPinOut->listPins.value(Param_Tempo))->SetVariantValue( tempo);
     static_cast<ParameterPin*>(listParameterPinOut->listPins.value(Param_Sign1))->SetVariantValue( sign1 );
     static_cast<ParameterPin*>(listParameterPinOut->listPins.value(Param_Sign2))->SetVariantValue( sign2 );

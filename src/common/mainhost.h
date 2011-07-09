@@ -21,7 +21,7 @@
 #ifndef MAINHOST_H
 #define MAINHOST_H
 
-#include "precomp.h"
+//#include "precomp.h"
 #include "connectables/objectfactory.h"
 #include "connectables/object.h"
 #include "connectables/maincontainer.h"
@@ -68,6 +68,8 @@ public:
     void OnCableAdded(Connectables::Cable *cab);
     void OnCableRemoved(Connectables::Cable *cab);
 
+    void SetSetupDirtyFlag() { if(hostContainer) hostContainer->SetDirty(); }
+
     QSharedPointer<Connectables::MainContainer> mainContainer;
     QSharedPointer<Connectables::MainContainer> hostContainer;
     QSharedPointer<Connectables::MainContainer> projectContainer;
@@ -79,8 +81,6 @@ public:
     QTimer *updateViewTimer;
 
     HostModel * GetModel() {return model;}
-
-    int filePass;
 
     Programs *programList;
 
@@ -162,6 +162,8 @@ public slots:
     void LoadFile(const QString &filename);
     void LoadSetupFile(const QString &filename);
     void LoadProjectFile(const QString &filename);
+    void ReloadProject();
+    void ReloadSetup();
     void ClearSetup();
     void ClearProject();
     void SaveSetupFile(QString filename="");

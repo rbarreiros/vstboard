@@ -17,9 +17,9 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include "heap.h"
-
-
+//#ifndef QT_NO_DEBUG
+//    #include "vld.h"
+//#endif
 #include <QLibraryInfo>
 #include <QTranslator>
 
@@ -86,10 +86,6 @@ public:
 
 int main(int argc, char *argv[])
 {
-#ifdef DEBUGMEM
-    _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-#endif
-
     qRegisterMetaType<ConnectionInfo>("ConnectionInfo");
     qRegisterMetaType<ObjectInfo>("ObjectInfo");
     qRegisterMetaType<int>("ObjType::Enum");
@@ -122,13 +118,13 @@ int main(int argc, char *argv[])
         app.installTranslator(&myappTranslator);
 #endif
 
-    MainHostHost *host = new MainHostHost();
-    MainWindowHost *w = new MainWindowHost(host);
-    host->Open();
-    w->readSettings();
-    w->show();
+    MainHostHost host;
+    MainWindowHost w(&host);
+    host.Open();
+    w.readSettings();
+    w.show();
+    w.LoadDefaultFiles();
+
     app.exec();
-    delete host;
-    delete w;
     return 0;
 }

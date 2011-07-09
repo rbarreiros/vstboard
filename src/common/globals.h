@@ -21,7 +21,7 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#include "precomp.h"
+//#include "precomp.h"
 
 #define EMPTY_PROGRAM 0xffff
 #define TEMP_PROGRAM 0xfffe
@@ -171,9 +171,10 @@ namespace PinMessage {
     };
 }
 
+#define FIXED_PIN_STARTINDEX 0xf000
 namespace FixedPinNumber {
     enum Enum {
-        editorVisible = 0xf000,
+        editorVisible = FIXED_PIN_STARTINDEX,
         learningMode,
         vstProgNumber,
         numberOfPins

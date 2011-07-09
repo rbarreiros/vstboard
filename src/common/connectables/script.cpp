@@ -18,11 +18,6 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#ifdef SCRIPTENGINE
-
-#include "heap.h"
-
-
 
 #include "script.h"
 #include "../mainhost.h"
@@ -59,8 +54,6 @@ Script::Script(MainHost *host, int index, const ObjectInfo &info) :
     connect(editorWnd, SIGNAL(destroyed()),
             this, SLOT(EditorDestroyed()));
 }
-
-
 
 bool Script::Open()
 {
@@ -101,8 +94,6 @@ render: function(obj) {\n\
 
 //    comiledScript = QString( "function %1class(t) { obj=t; %2 }  %1m = new %1class(%1);" ).arg(objScriptName).arg(scriptText);
 //    QScriptValue result = myHost->scriptEngine->evaluate(comiledScript);
-
-
 
 //    myHost->scriptEngine->evaluate( objScriptName+"m.open();" );
 
@@ -149,6 +140,7 @@ render: function(obj) {\n\
 Script::~Script()
 {
     Close();
+    delete currentProgram;
 }
 
 bool Script::Close()
@@ -296,4 +288,4 @@ void Script::LoadProgram(int prog)
     if(editorWnd && editorWnd->isVisible())
         editorWnd->SetScript(scriptText);
 }
-#endif
+

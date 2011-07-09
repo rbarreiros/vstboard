@@ -17,8 +17,6 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include "heap.h"
-
 
 
 #include "objectfactory.h"
@@ -203,7 +201,7 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
 
                     case ObjType::dummy :
                         obj = new Object(myHost, objId, info);
-                        obj->errorMessage="Dummy object";
+                        obj->SetErrorMessage("Dummy object");
                         break;
 
                     default:

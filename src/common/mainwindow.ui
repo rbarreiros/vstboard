@@ -783,7 +783,7 @@
   </widget>
   <widget class="QDockWidget" name="dockBankBrowser">
    <property name="windowTitle">
-    <string>VST Banks</string>
+    <string>Browser</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>

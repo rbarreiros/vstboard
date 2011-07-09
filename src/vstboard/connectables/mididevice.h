@@ -21,7 +21,7 @@
 #ifndef MIDIDEVICE_H
 #define MIDIDEVICE_H
 
-#include "precomp.h"
+//#include "precomp.h"
 #include "portmidi.h"
 #include "pmutil.h"
 #include "connectables/object.h"

@@ -63,8 +63,6 @@ namespace Connectables {
         virtual QDataStream & toStream (QDataStream &) const;
         virtual QDataStream & fromStream (QDataStream &);
 
-        int pinCount;
-
     protected:
         QPersistentModelIndex modelList;
         Object *parent;

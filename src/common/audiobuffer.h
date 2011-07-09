@@ -23,7 +23,7 @@
 
 #define BLANK_BUFFER_SIZE 44100
 
-#include "precomp.h"
+//#include "precomp.h"
 
 class AudioBuffer
 {

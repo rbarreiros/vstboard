@@ -26,8 +26,6 @@
 #include "containerprogram.h"
 #include "models/hostmodel.h"
 
-#define LOADSAVE_STAGES 3
-
 namespace Connectables {
 
     class Container : public Object
@@ -44,7 +42,7 @@ namespace Connectables {
         const QModelIndex &GetCablesIndex();
 
         QDataStream & toStream (QDataStream &) const;
-        QDataStream & fromStream (QDataStream &);
+        bool fromStream (QDataStream &);
 
         void OnChildDeleted(Object *obj);
 
@@ -62,6 +60,7 @@ namespace Connectables {
         void MoveOutputCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr);
         void MoveInputCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr);
         bool IsDirty();
+        void SetDirty();
         void SetSleep(bool sleeping);
 
         /// shared pointer to the bridge in object
@@ -77,13 +76,15 @@ namespace Connectables {
         QWeakPointer<Container>parentContainer;
 
         void Updated() {
-            if(currentProgram)
-                currentProgram->timeSavedRendererNodes = QTime::currentTime();
+            if(currentContainerProgram)
+                currentContainerProgram->timeSavedRendererNodes = QTime::currentTime();
             if(childContainer)
                 childContainer.toStrongRef()->Updated();
         }
 
         const QTime GetLastUpdate();
+
+        int GetProgramToSet() { if(progToSet==-1) return currentProgId; else return progToSet; }
 
     protected:
         void AddChildObject(QSharedPointer<Object> objPtr);
@@ -96,7 +97,7 @@ namespace Connectables {
         QHash<int,ContainerProgram*>listContainerPrograms;
 
         /// pointer to the current program
-        ContainerProgram* currentProgram;
+        ContainerProgram* currentContainerProgram;
 
         /// list of static objects (bridges are static)
         QList< QSharedPointer< Object > >listStaticObjects;
@@ -112,6 +113,10 @@ namespace Connectables {
 
         /// id of the progam to change on the next rendering loop
         int progToSet;
+
+        quint32 loadHeaderStream (QDataStream &);
+        bool loadObjectFromStream (QDataStream &);
+        bool loadProgramFromStream (QDataStream &);
 
         QMutex progLoadMutex;
 

@@ -17,9 +17,6 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include "heap.h"
-
-
 #include "mainhost.h"
 #include "mainwindow.h"
 #include "connectables/container.h"
@@ -30,7 +27,6 @@
 #endif
 
 #include "projectfile/fileversion.h"
-#include "projectfile/setupfile.h"
 #include "projectfile/projectfile.h"
 #include "views/configdialog.h"
 
@@ -39,7 +35,6 @@ quint32 MainHost::currentFileVersion=PROJECT_AND_SETUP_FILE_VERSION;
 MainHost::MainHost(QObject *parent, QString settingsGroup) :
     QObject(parent),
     solver(new PathSolver(this)),
-    filePass(0),
     objFactory(0),
     mainWindow(0),
     solverNeedAnUpdate(false),
@@ -87,12 +82,6 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
     updateViewTimer = new QTimer(this);
     updateViewTimer->start(40);
 
-//    connect(solver,SIGNAL(NewRenderingOrder(orderedNodes*)),
-//            renderer, SLOT(OnNewRenderingOrder(orderedNodes*)));
-
-//    connect(solver,SIGNAL(NewRenderingOrder(orderedNodes*)),
-//            this, SLOT(OnNewRenderingOrder(orderedNodes*)));
-
     connect(this,SIGNAL(SolverToUpdate()),
             this,SLOT(UpdateSolver()),
             Qt::QueuedConnection);
@@ -105,7 +94,8 @@ MainHost::~MainHost()
     EnableSolverUpdate(false);
 
     updateViewTimer->stop();
-    updateViewTimer->deleteLater();
+    delete updateViewTimer;
+    updateViewTimer=0;
 
     mutexListCables->lock();
     workingListOfCables.clear();
@@ -171,6 +161,8 @@ void MainHost::SetupHostContainer()
         mainContainer->ParkObject( hostContainer );
         hostContainer.clear();
         UpdateSolver(true);
+        if(mainWindow)
+            mainWindow->mySceneView->viewHost->ClearViewPrograms();
     }
 
     ObjectInfo info;
@@ -260,6 +252,8 @@ void MainHost::SetupProjectContainer()
         mainContainer->ParkObject( projectContainer );
         projectContainer.clear();
         UpdateSolver(true);
+        if(mainWindow)
+            mainWindow->mySceneView->viewProject->ClearViewPrograms();
     }
 
     timeFromStart.restart();
@@ -358,6 +352,8 @@ void MainHost::SetupProgramContainer()
         mainContainer->ParkObject( programContainer );
         programContainer.clear();
         UpdateSolver(true);
+        if(mainWindow)
+            mainWindow->mySceneView->viewProgram->ClearViewPrograms();
     }
 
     ObjectInfo info;
@@ -460,6 +456,8 @@ void MainHost::SetupGroupContainer()
         mainContainer->ParkObject( groupContainer );
         groupContainer.clear();
         UpdateSolver(true);
+        if(mainWindow)
+            mainWindow->mySceneView->viewGroup->ClearViewPrograms();
     }
 
     ObjectInfo info;
@@ -580,7 +578,6 @@ void MainHost::SetSolverUpdateNeeded(bool need)
 
 void MainHost::UpdateSolver(bool forceUpdate)
 {
-
     solverMutex.lock();
 
     if(!solverNeedAnUpdate) {
@@ -786,11 +783,12 @@ void MainHost::LoadSetupFile(const QString &filename)
     if(filename.isEmpty())
         return;
 
-    if(SetupFile::LoadFromFile(this,filename)) {
+    if(ProjectFile::LoadFromFile(this,filename)) {
         ConfigDialog::AddRecentSetupFile(filename,this);
         currentSetupFile = filename;
     } else {
         ConfigDialog::RemoveRecentSetupFile(filename,this);
+        ClearSetup();
     }
     emit currentFileChanged();
 }
@@ -805,13 +803,33 @@ void MainHost::LoadProjectFile(const QString &filename)
         currentProjectFile = filename;
     } else {
         ConfigDialog::RemoveRecentProjectFile(filename,this);
+        ClearProject();
     }
     emit currentFileChanged();
 }
 
+void MainHost::ReloadProject()
+{
+    if(currentProjectFile.isEmpty())
+        return;
+    ProjectFile::LoadFromFile(this,currentProjectFile);
+}
+
+void MainHost::ReloadSetup()
+{
+    if(currentSetupFile.isEmpty())
+        return;
+    ConfigDialog::AddRecentSetupFile(currentSetupFile,this);
+}
+
 void MainHost::ClearSetup()
 {
-    SetupFile::Clear(this);
+    EnableSolverUpdate(false);
+    SetupHostContainer();
+    EnableSolverUpdate(true);
+    if(mainWindow)
+        mainWindow->viewConfig->LoadFromRegistry();
+
     ConfigDialog::AddRecentSetupFile("",this);
     currentSetupFile = "";
     emit currentFileChanged();
@@ -819,7 +837,14 @@ void MainHost::ClearSetup()
 
 void MainHost::ClearProject()
 {
-    ProjectFile::Clear(this);
+    EnableSolverUpdate(false);
+    SetupProjectContainer();
+    SetupProgramContainer();
+    SetupGroupContainer();
+    EnableSolverUpdate(true);
+
+    programList->BuildModel();
+
     ConfigDialog::AddRecentProjectFile("",this);
     currentProjectFile = "";
     emit currentFileChanged();
@@ -831,7 +856,7 @@ void MainHost::SaveSetupFile(QString filename)
         filename=currentSetupFile;
     if(filename.isEmpty())
         return;
-    if(SetupFile::SaveToFile(this,filename)) {
+    if(ProjectFile::SaveToSetupFile(this,filename)) {
         SetSetting("lastSetupDir",QFileInfo(filename).absolutePath());
         ConfigDialog::AddRecentSetupFile(filename,this);
         currentSetupFile = filename;
@@ -845,7 +870,7 @@ void MainHost::SaveProjectFile(QString filename)
         filename=currentProjectFile;
     if(filename.isEmpty())
         return;
-    if(ProjectFile::SaveToFile(this,filename)) {
+    if(ProjectFile::SaveToProjectFile(this,filename)) {
         SetSetting("lastProjectDir",QFileInfo(filename).absolutePath());
         ConfigDialog::AddRecentProjectFile(filename,this);
         currentProjectFile = filename;
