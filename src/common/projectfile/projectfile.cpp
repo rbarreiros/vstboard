@@ -18,50 +18,40 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#define PROJECT_FILE_KEY 0x757b0a5d
-
 #include "projectfile.h"
 #include "../mainhost.h"
 #include "../mainwindow.h"
 #include "fileversion.h"
 
-void ProjectFile::Clear(MainHost *myHost)
-{
-    myHost->EnableSolverUpdate(false);
-    myHost->SetupProjectContainer();
-    myHost->SetupProgramContainer();
-    myHost->SetupGroupContainer();
-    myHost->EnableSolverUpdate(true);
-
-    if(myHost->mainWindow) {
-        myHost->mainWindow->mySceneView->viewProject->ClearPrograms();
-        myHost->mainWindow->mySceneView->viewProgram->ClearPrograms();
-        myHost->mainWindow->mySceneView->viewGroup->ClearPrograms();
-    }
-    myHost->programList->BuildModel();
-}
-
-bool ProjectFile::SaveToFile(MainHost *myHost,QString filePath)
+bool ProjectFile::SaveToProjectFile(MainHost *myHost,QString filePath)
 {
     QFile file(filePath);
     if(!file.open(QIODevice::WriteOnly)) {
-        QMessageBox msgBox;
-        msgBox.setText(tr("Unable to open %1").arg(filePath));
-        msgBox.setIcon(QMessageBox::Critical);
+        QMessageBox msgBox(QMessageBox::Critical, "", tr("Unable to open %1").arg(filePath) );
         msgBox.exec();
         return false;
     }
     QDataStream out(&file);
-    return ToStream(myHost,out);
+    return ToStream(myHost,out,PROJECT_FILE_KEY);
+}
+
+bool ProjectFile::SaveToSetupFile(MainHost *myHost,QString filePath)
+{
+    QFile file(filePath);
+    if(!file.open(QIODevice::WriteOnly)) {
+        QMessageBox msgBox(QMessageBox::Critical, "", tr("Unable to open %1").arg(filePath) );
+        msgBox.exec();
+        return false;
+    }
+    QDataStream out(&file);
+    return ToStream(myHost,out,SETUP_FILE_KEY);
 }
 
 bool ProjectFile::LoadFromFile(MainHost *myHost,QString filePath)
 {
     QFile file(filePath);
     if(!file.open(QIODevice::ReadOnly)) {
-        QMessageBox msgBox;
-        msgBox.setText(tr("Unable to open %1").arg(filePath));
-        msgBox.setIcon(QMessageBox::Critical);
+        QMessageBox msgBox(QMessageBox::Critical, "",tr("Unable to open %1").arg(filePath));
         msgBox.exec();
         return false;
     }
@@ -70,44 +60,99 @@ bool ProjectFile::LoadFromFile(MainHost *myHost,QString filePath)
     return FromStream(myHost,in);
 }
 
-bool ProjectFile::ToStream(MainHost *myHost,QDataStream &out)
+bool ProjectFile::ToStream(MainHost *myHost,QDataStream &out, quint32 fileKey )
 {
     out.setVersion(QDataStream::Qt_4_7);
 
     MainHost::currentFileVersion=PROJECT_AND_SETUP_FILE_VERSION;
 
-    out << (quint32)PROJECT_FILE_KEY;
+    out << (quint32)fileKey;
     out << MainHost::currentFileVersion;
 
     myHost->EnableSolverUpdate(false);
 
-    myHost->groupContainer->SaveProgram();
-    myHost->programContainer->SaveProgram();
-    myHost->projectContainer->SaveProgram();
+    if(fileKey == SETUP_FILE_KEY || fileKey == SETUPANDPROJECT_FILE_KEY) {
 
-    for(myHost->filePass=0; myHost->filePass<LOADSAVE_STAGES ; myHost->filePass++) {
-        out << *myHost->projectContainer;
-        out << *myHost->programContainer;
-        out << *myHost->groupContainer;
+        {
+            //save HostContainer
+            QByteArray tmpBa;
+            QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
+            myHost->hostContainer->SaveProgram();
+            tmpStream << *myHost->hostContainer;
+            SaveChunk( "HostContainer", tmpBa, out);
+        }
+
+        //save HostView
+        if(myHost->mainWindow) {
+            QByteArray tmpBa;
+            QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
+            myHost->mainWindow->mySceneView->viewHost->SaveProgram();
+            tmpStream << *myHost->mainWindow->mySceneView->viewHost;
+            SaveChunk("HostView", tmpBa, out);
+        }
+
+        {
+            //save Colors
+            QByteArray tmpBa;
+            QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
+            myHost->mainWindow->viewConfig->SaveToFile( tmpStream );
+            SaveChunk("Colors", tmpBa, out);
+        }
     }
 
-    out << *myHost->programList;
+    if(fileKey == PROJECT_FILE_KEY || fileKey == SETUPANDPROJECT_FILE_KEY) {
 
-    if(myHost->mainWindow) {
-        out << (quint8)1;
-        myHost->mainWindow->mySceneView->viewProject->SaveProgram();
-        myHost->mainWindow->mySceneView->viewProgram->SaveProgram();
-        myHost->mainWindow->mySceneView->viewGroup->SaveProgram();
+        {
+            //save ProjectContainer
+            QByteArray tmpBa;
+            QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
+            myHost->projectContainer->SaveProgram();
+            tmpStream << *myHost->projectContainer;
+            SaveChunk( "ProjectContainer", tmpBa, out);
+        }
 
-        out << *myHost->mainWindow->mySceneView->viewProject;
-        out << *myHost->mainWindow->mySceneView->viewProgram;
-        out << *myHost->mainWindow->mySceneView->viewGroup;
-    } else {
-        out << (quint8)0;
+        {
+            //save ProgramContainer
+            QByteArray tmpBa;
+            QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
+            myHost->programContainer->SaveProgram();
+            tmpStream << *myHost->programContainer;
+            SaveChunk( "ProgramContainer", tmpBa, out);
+        }
+
+        {
+            //save GroupContainer
+            QByteArray tmpBa;
+            QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
+            myHost->groupContainer->SaveProgram();
+            tmpStream << *myHost->groupContainer;
+            SaveChunk( "GroupContainer", tmpBa, out);
+        }
+
+        {
+            //save ProgramList
+            QByteArray tmpBa;
+            QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
+            tmpStream << *myHost->programList;
+            SaveChunk( "ProgramList", tmpBa, out);
+        }
+
+        //save ProjectViews
+        if(myHost->mainWindow) {
+            myHost->mainWindow->mySceneView->viewProject->SaveProgram();
+            myHost->mainWindow->mySceneView->viewProgram->SaveProgram();
+            myHost->mainWindow->mySceneView->viewGroup->SaveProgram();
+
+            QByteArray tmpBa;
+            QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
+            tmpStream << *myHost->mainWindow->mySceneView->viewProject;
+            tmpStream << *myHost->mainWindow->mySceneView->viewProgram;
+            tmpStream << *myHost->mainWindow->mySceneView->viewGroup;
+            SaveChunk("ProjectViews", tmpBa, out);
+        }
     }
 
     myHost->EnableSolverUpdate(true);
-
     return true;
 }
 
@@ -117,23 +162,15 @@ bool ProjectFile::FromStream(MainHost *myHost,QDataStream &in)
 
     quint32 magic;
     in >> magic;
-    if(magic != PROJECT_FILE_KEY) {
-        QMessageBox msgBox;
-        //msgBox.setWindowTitle(filePath);
-        msgBox.setText( tr("Unknown file format.") );
-        msgBox.setInformativeText( tr("Not a VstBoard project file") );
-        msgBox.setIcon(QMessageBox::Critical);
+    if(magic != PROJECT_FILE_KEY && magic != SETUP_FILE_KEY) {
+        QMessageBox msgBox(QMessageBox::Critical, "", tr("Unknown file format. This file can't be loaded"));
         msgBox.exec();
         return false;
     }
 
     in >> MainHost::currentFileVersion;
-    if(MainHost::currentFileVersion < 11) {
-        QMessageBox msgBox;
-//        msgBox.setWindowTitle(filePath);
-        msgBox.setText( tr("Wrong file version.") );
-        msgBox.setInformativeText( tr("Project file format v%1 can't be converted to the current file format v%2").arg(MainHost::currentFileVersion).arg(PROJECT_AND_SETUP_FILE_VERSION) );
-        msgBox.setIcon(QMessageBox::Critical);
+    if(MainHost::currentFileVersion < 15) {
+        QMessageBox msgBox(QMessageBox::Critical, "", tr("File format v%1 can't be converted to the current file format v%2").arg(MainHost::currentFileVersion).arg(PROJECT_AND_SETUP_FILE_VERSION) );
         msgBox.exec();
         return false;
     }
@@ -141,33 +178,120 @@ bool ProjectFile::FromStream(MainHost *myHost,QDataStream &in)
     myHost->EnableSolverUpdate(false);
     myHost->renderer->SetEnabled(false);
 
-    myHost->SetupProjectContainer();
-    myHost->SetupGroupContainer();
-    myHost->SetupProgramContainer();
+    QString chunkName;
+    QByteArray tmpBa;
 
-    for(myHost->filePass=0; myHost->filePass<LOADSAVE_STAGES ; myHost->filePass++) {
-        in >> *myHost->projectContainer;
-        in >> *myHost->programContainer;
-        in >> *myHost->groupContainer;
+    while( !in.atEnd() ) {
+        QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
+        LoadNextChunk( chunkName, tmpBa, in );
+
+        if(chunkName=="HostContainer") {
+            myHost->SetupHostContainer();
+            if(!myHost->hostContainer->fromStream( tmpStream ))
+                myHost->SetupHostContainer();
+            myHost->hostContainer->Updated();
+        }
+
+        else if(chunkName=="ProjectContainer") {
+            myHost->SetupProjectContainer();
+            if(!myHost->projectContainer->fromStream(tmpStream))
+                myHost->SetupProjectContainer();
+        }
+
+        else if(chunkName=="ProgramContainer") {
+            myHost->SetupProgramContainer();
+            if(!myHost->programContainer->fromStream(tmpStream))
+                myHost->SetupProgramContainer();
+        }
+
+        else if(chunkName=="GroupContainer") {
+            myHost->SetupGroupContainer();
+            if(!myHost->groupContainer->fromStream(tmpStream))
+                myHost->SetupGroupContainer();
+        }
+
+        else if(chunkName=="ProgramList") {
+            tmpStream >> *myHost->programList;
+        }
+
+        else if(chunkName=="HostView") {
+            if(myHost->mainWindow) {
+                tmpStream >> *myHost->mainWindow->mySceneView->viewHost;
+                myHost->mainWindow->mySceneView->viewHost->SetViewProgram( myHost->hostContainer->GetProgramToSet() );
+            }
+        }
+
+        else if(chunkName=="ProjectViews") {
+            if(myHost->mainWindow) {
+                tmpStream >> *myHost->mainWindow->mySceneView->viewProject;
+                tmpStream >> *myHost->mainWindow->mySceneView->viewProgram;
+                tmpStream >> *myHost->mainWindow->mySceneView->viewGroup;
+                myHost->mainWindow->mySceneView->viewProject->SetViewProgram( myHost->projectContainer->GetProgramToSet() );
+                myHost->mainWindow->mySceneView->viewProgram->SetViewProgram( myHost->programContainer->GetProgramToSet() );
+                myHost->mainWindow->mySceneView->viewGroup->SetViewProgram( myHost->groupContainer->GetProgramToSet() );
+            }
+        }
+
+        else if(chunkName=="Colors") {
+            myHost->mainWindow->viewConfig->LoadFromFile( tmpStream );
+        }
+
+        //unknown chunk
+        else {
+            in.setStatus(QDataStream::ReadCorruptData);
+            debug2(<<"ProjectFile::FromStream unknown file section"<<chunkName)
+        }
+
+        if(!tmpStream.atEnd()) {
+            debug2(<<"ProjectFile::FromStream stream not at end, drop remaining data")
+            while(!tmpStream.atEnd()) {
+                char c[1000];
+                int nb=tmpStream.readRawData(c,1000);
+                debug2(<<nb << QByteArray::fromRawData(c,nb).toHex())
+            }
+            in.setStatus(QDataStream::ReadCorruptData);
+        }
+
+        if(tmpStream.status()==QDataStream::ReadCorruptData) {
+            in.setStatus(QDataStream::ReadCorruptData);
+        }
+
+        if(tmpStream.status()==QDataStream::ReadPastEnd) {
+            debug2(<<"ProjectFile::FromStream err"<<tmpStream.status())
+            myHost->objFactory->ResetSavedId();
+            myHost->renderer->SetEnabled(true);
+            myHost->EnableSolverUpdate(true);
+            QMessageBox msg(QMessageBox::Warning, "", tr("The file is corrupted and cannot be loaded"), QMessageBox::Ok );
+            msg.exec();
+            return false;
+        }
     }
 
     myHost->objFactory->ResetSavedId();
-
-    in >> *myHost->programList;
-
-    quint8 gui;
-    in >> gui;
-    if(gui && myHost->mainWindow) {
-        myHost->mainWindow->mySceneView->viewProject->SetProgram(EMPTY_PROGRAM);
-        myHost->mainWindow->mySceneView->viewProgram->SetProgram(EMPTY_PROGRAM);
-        myHost->mainWindow->mySceneView->viewGroup->SetProgram(EMPTY_PROGRAM);
-        in >> *myHost->mainWindow->mySceneView->viewProject;
-        myHost->mainWindow->mySceneView->viewProject->SetProgram(0);
-        in >> *myHost->mainWindow->mySceneView->viewProgram;
-        in >> *myHost->mainWindow->mySceneView->viewGroup;
-    }
-
     myHost->renderer->SetEnabled(true);
     myHost->EnableSolverUpdate(true);
+
+    if(in.status()!=QDataStream::Ok) {
+        QMessageBox msg(QMessageBox::Warning, "", tr("The file is corrupted and cannot be fully loaded"), QMessageBox::Ok );
+        msg.exec();
+    }
+
+    return true;
+}
+
+bool ProjectFile::SaveChunk(const QString &chunkName, QByteArray &ba, QDataStream &out)
+{
+    out << chunkName;
+    out << ba;
+    return true;
+}
+
+bool ProjectFile::LoadNextChunk( QString &chunkName, QByteArray &ba, QDataStream &in)
+{
+    if(in.atEnd())
+        return false;
+
+    in >> chunkName;
+    in >> ba;
     return true;
 }

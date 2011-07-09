@@ -79,6 +79,7 @@ public slots:
     void groupParkingModelChanges(QStandardItemModel *model);
     void currentFileChanged();
     void OnViewConfigClosed();
+    void LoadDefaultFiles();
 
 private slots:
     void on_actionLoad_Setup_triggered();

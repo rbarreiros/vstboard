@@ -21,7 +21,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "globals.h"
-#include "projectfile/setupfile.h"
 #include "projectfile/projectfile.h"
 #include "views/configdialog.h"
 #include "views/aboutdialog.h"
@@ -265,13 +264,14 @@ void MainWindow::BuildListTools()
     listToolsModel->setHorizontalHeaderLabels(headerLabels);
     parentItem = listToolsModel->invisibleRootItem();
 
+#ifdef SCRIPTENGINE
     //script
     item = new QStandardItem(tr("Script"));
     info.nodeType = NodeType::object;
     info.objType = ObjType::Script;
     item->setData(QVariant::fromValue(info), UserRoles::objInfo);
     parentItem->appendRow(item);
-
+#endif
 
     //midi parameters
     item = new QStandardItem(tr("Midi to parameter"));
@@ -484,6 +484,11 @@ void MainWindow::readSettings()
 
     viewConfig->LoadFromRegistry();
 
+
+}
+
+void MainWindow::LoadDefaultFiles()
+{
     //load default files
     myHost->LoadSetupFile( ConfigDialog::defaultSetupFile(myHost) );
     myHost->LoadProjectFile( ConfigDialog::defaultProjectFile(myHost) );

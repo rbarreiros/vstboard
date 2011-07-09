@@ -17,11 +17,10 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-
-
 #include "container.h"
 #include "objectfactory.h"
 #include "mainhost.h"
+#include "projectfile/projectfile.h"
 
 using namespace Connectables;
 
@@ -616,139 +615,158 @@ void Container::RemoveCableFromPin(const ConnectionInfo &pin)
   */
 QDataStream & Container::toStream (QDataStream& out) const
 {
-    switch(myHost->filePass) {
 
-        //save all loaded objects
-        case 0:
-        {
-            out << (qint16)index;
-            out << objectName();
-            out << sleep;
+    {
+        QByteArray tmpBa;
+        QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
 
-            out << (quint16)listLoadedObjects.size();
-            foreach(Object* obj, listLoadedObjects) {
-                QByteArray tmpStream;
-                QDataStream tmp( &tmpStream , QIODevice::ReadWrite);
-                tmp << *obj;
+        //save container header
+        tmpStream << (qint16)index;
+        tmpStream << objectName();
+        tmpStream << sleep;
+        tmpStream << (quint32)currentProgId;
+        ProjectFile::SaveChunk( "CntHead", tmpBa, out);
+    }
 
-                out << obj->info();
-                out << (quint16)tmpStream.size();
-                out << tmpStream;
-            }
-            break;
-        }
+    //save all loaded objects
+    foreach(Object* obj, listLoadedObjects) {
+        QByteArray tmpBa;
+        QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
+        tmpStream << obj->info();
+        tmpStream << *obj;
+        ProjectFile::SaveChunk( "CntObj", tmpBa, out);
+    }
 
-        //save all programs
-        case 1:
-        {
-            out << (quint32)listContainerPrograms.size();
-            QHash<int,ContainerProgram*>::const_iterator i = listContainerPrograms.constBegin();
-            while(i!=listContainerPrograms.constEnd()) {
-                out << (quint32)i.key();
-                out << *(i.value());
-                ++i;
-            }
-            break;
-        }
-        case 2:
-            out << (quint32)currentProgId;
-            break;
+    //save all programs
+    QHash<int,ContainerProgram*>::const_iterator i = listContainerPrograms.constBegin();
+    while(i!=listContainerPrograms.constEnd()) {
+        QByteArray tmpBa;
+        QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
+        tmpStream << (quint32)i.key();
+        tmpStream << *(i.value());
+        ProjectFile::SaveChunk( "CntProg", tmpBa, out);
+        ++i;
     }
 
     return out;
-
 }
 
 /*!
   Read the container from a data stream, creates all the ContainerProgram and children Objects
   */
-QDataStream & Container::fromStream (QDataStream& in)
+bool Container::fromStream (QDataStream& in)
 {
-    switch(myHost->filePass) {
-
-        //load all objects
-        case 0:
-        {
-            LoadProgram(TEMP_PROGRAM);
-
-            qint16 id;
-            in >> id;
-            savedIndex = id;
-            QString name;
-            in >> name;
-            setObjectName(name);
-            in >> sleep;
-
-            quint16 nbObj;
-            in >> nbObj;
-            for(quint16 i=0; i<nbObj; i++) {
-
-                    ObjectInfo info;
-                    quint16 streamSize;
-                    QByteArray tmpStream;
-
-                    in >> info;
-                    in >> streamSize;
-                    in >> tmpStream;
-
-                    QSharedPointer<Object> objPtr = myHost->objFactory->NewObject(info);
-                    if(!objPtr.isNull()) {
-                        AddParkedObject(objPtr);
-                        QDataStream tmp( &tmpStream , QIODevice::ReadWrite);
-                        tmp >> *objPtr.data();
-
-                        //keep the object alive while loading
-                        listLoadingObjects << objPtr;
-                    } else {
-                        //error while creating the object, build a dummy object with the same saved id
-                        info.objType=ObjType::dummy;
-                        objPtr = myHost->objFactory->NewObject(info);
-                        QDataStream tmp2( &tmpStream , QIODevice::ReadWrite);
-                        if(!objPtr.isNull()) {
-                            AddParkedObject(objPtr);
-                            tmp2 >> *objPtr.data();
-
-                            //keep the object alive while loading
-                            listLoadingObjects << objPtr;
-                        } else {
-                            //can't even create a dummy object ?
-                            debug("Container::fromStream dummy object not created")
-                        }
-                    }
-            }
-            break;
-        }
-
-        //load the programs
-        case 1:
-        {
-            foreach(ContainerProgram *prog, listContainerPrograms) {
-                delete prog;
-            }
-            listContainerPrograms.clear();
-
-            quint32 nbProg;
-            in >> nbProg;
-            for(quint32 i=0; i<nbProg; i++) {
-                quint32 progId;
-                in >> progId;
-
-                ContainerProgram *prog = new ContainerProgram(myHost,this);
-                in >> *prog;
-                listContainerPrograms.insert(progId,prog);
-            }
-            break;
-        }
-
-        //clear the loading list : delete unused objects
-        case 2:
-            quint32 prog;
-            in >> prog;
-            //UnloadProgram();
-            LoadProgram(prog);
-            listLoadingObjects.clear();
-            delete listContainerPrograms.take(TEMP_PROGRAM);
-            break;
+    //clear programs
+    foreach(ContainerProgram *prog, listContainerPrograms) {
+        delete prog;
     }
-    return in;
+    listContainerPrograms.clear();
+
+    LoadProgram(TEMP_PROGRAM);
+
+    int savedProgId=0;
+
+    QString chunkName;
+    QByteArray tmpBa;
+
+    while( !in.atEnd() ) {
+        QDataStream tmpStream( &tmpBa , QIODevice::ReadWrite);
+        ProjectFile::LoadNextChunk( chunkName, tmpBa, in );
+
+        if(chunkName=="CntHead")
+            savedProgId=loadHeaderStream(tmpStream);
+
+        else if(chunkName=="CntObj")
+            loadObjectFromStream(tmpStream);
+
+        else if(chunkName=="CntProg")
+            loadProgramFromStream(tmpStream);
+
+        //unknown chunk
+        else {
+            in.setStatus(QDataStream::ReadCorruptData);
+            debug2(<<"Container::fromStream unknown section"<<chunkName<<tmpBa.size())
+        }
+
+        if(!tmpStream.atEnd()) {
+            debug2(<<"Container::fromStream stream not at end, drop remaining data :")
+            while(!tmpStream.atEnd()) {
+                char c[1000];
+                int nb=tmpStream.readRawData(c,1000);
+                debug2(<<nb << QByteArray::fromRawData(c,nb).toHex())
+            }
+            in.setStatus(QDataStream::ReadCorruptData);
+        }
+
+        if(tmpStream.status()==QDataStream::ReadPastEnd) {
+            debug2(<<"Container::fromStream ReadPastEnd"<<tmpStream.status())
+            return false;
+        }
+    }
+
+    //load the saved program
+    LoadProgram(savedProgId);
+
+    //clear the loading list : delete unused objects
+    listLoadingObjects.clear();
+    delete listContainerPrograms.take(TEMP_PROGRAM);
+
+    return true;
 }
+
+quint32 Container::loadHeaderStream (QDataStream &in)
+{
+    //load header
+    qint16 id;
+    in >> id;
+    savedIndex = id;
+
+    QString name;
+    in >> name;
+    setObjectName(name);
+
+    in >> sleep;
+
+    quint32 savedProgId=0;
+    in >> savedProgId;
+    return savedProgId;
+}
+
+bool Container::loadObjectFromStream (QDataStream &in)
+{
+    ObjectInfo info;
+    in >> info;
+
+    QSharedPointer<Object> objPtr = myHost->objFactory->NewObject(info);
+
+    //error while creating the object, build a dummy object with the same saved id
+    if(objPtr.isNull()) {
+        objPtr = myHost->objFactory->NewObject(info);
+    }
+
+    //can't even create a dummy object ?
+    if(objPtr.isNull()) {
+        debug("Container::fromStream dummy object not created")
+    }
+
+    if(!objPtr.isNull()) {
+        AddParkedObject(objPtr);
+        if(objPtr->fromStream( in ))
+            listLoadingObjects << objPtr; //keep the object alive while loading
+    }
+
+    return true;
+}
+
+bool Container::loadProgramFromStream (QDataStream &in)
+{
+    quint32 progId;
+    in >> progId;
+
+    ContainerProgram *prog = new ContainerProgram(myHost,this);
+    in >> *prog;
+    listContainerPrograms.insert(progId,prog);
+
+    return true;
+}
+

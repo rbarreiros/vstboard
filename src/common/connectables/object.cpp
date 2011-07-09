@@ -673,7 +673,7 @@ QDataStream & Object::toStream(QDataStream & out) const
   \param[in] in a QDataStream
   \return the stream
   */
-QDataStream & Object::fromStream(QDataStream & in)
+bool Object::fromStream(QDataStream & in)
 {
     qint16 id;
     in >> id;
@@ -697,7 +697,12 @@ QDataStream & Object::fromStream(QDataStream & in)
     quint16 progId;
     in >> progId;
 
-    return in;
+    if(in.status()!=QDataStream::Ok) {
+        debug2(<<"Object::fromStream err"<<in.status())
+        return false;
+    }
+
+    return true;
 }
 
 /*!
@@ -711,7 +716,7 @@ QDataStream & operator<< (QDataStream & out, const Connectables::Object& value)
 /*!
   overload stream in
   */
-QDataStream & operator>> (QDataStream & in, Connectables::Object& value)
-{
-    return value.fromStream(in);
-}
+//QDataStream & operator>> (QDataStream & in, Connectables::Object& value)
+//{
+//    return value.fromStream(in);
+//}

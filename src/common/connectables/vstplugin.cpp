@@ -834,9 +834,11 @@ QDataStream & VstPlugin::toStream(QDataStream & out) const
     return out;
 }
 
-QDataStream & VstPlugin::fromStream(QDataStream & in)
+bool VstPlugin::fromStream(QDataStream & in)
 {
-    Object::fromStream(in);
+    if(!Object::fromStream(in))
+        return false;
+
     in >> savedChunkSize;
 
     if(savedChunk) {
@@ -852,7 +854,7 @@ QDataStream & VstPlugin::fromStream(QDataStream & in)
             EffSetChunk(savedChunk,savedChunkSize);
         }
     }
-    return in;
+    return true;
 }
 
 QStandardItem *VstPlugin::GetFullItem()

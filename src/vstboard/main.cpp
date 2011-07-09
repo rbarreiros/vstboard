@@ -123,6 +123,8 @@ int main(int argc, char *argv[])
     host.Open();
     w.readSettings();
     w.show();
+    w.LoadDefaultFiles();
+
     app.exec();
     return 0;
 }

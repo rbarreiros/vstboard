@@ -82,8 +82,6 @@ public:
 
     HostModel * GetModel() {return model;}
 
-    int filePass;
-
     Programs *programList;
 
     Connectables::ObjectFactory *objFactory;

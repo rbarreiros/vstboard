@@ -28,7 +28,6 @@ vstsdk {
 }
 
 scriptengine {
-    DEFINES += SCRIPTENGINE
     QT += script
 
     SOURCES += connectables/script.cpp \
@@ -58,7 +57,6 @@ SOURCES += \
     connectables/cable.cpp \
     connectables/objectparameter.cpp \
     views/sceneview.cpp \
-    projectfile/setupfile.cpp \
     projectfile/projectfile.cpp \
     models/listtoolsmodel.cpp \
     views/cableview.cpp \
@@ -136,7 +134,6 @@ HEADERS += \
     connectables/cable.h \
     connectables/objectparameter.h \
     views/sceneview.h \
-    projectfile/setupfile.h \
     projectfile/projectfile.h \
     models/listtoolsmodel.h \
     views/cableview.h \

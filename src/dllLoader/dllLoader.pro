@@ -13,10 +13,6 @@ QT       -= core gui
 LIBS += -ladvapi32
 LIBS += -luser32
 
-scriptengine {
-    DEFINES += SCRIPTENGINE
-}
-
 SOURCES += \
     main.cpp
 

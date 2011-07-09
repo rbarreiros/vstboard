@@ -26,8 +26,6 @@
 #include "containerprogram.h"
 #include "models/hostmodel.h"
 
-#define LOADSAVE_STAGES 3
-
 namespace Connectables {
 
     class Container : public Object
@@ -44,7 +42,7 @@ namespace Connectables {
         const QModelIndex &GetCablesIndex();
 
         QDataStream & toStream (QDataStream &) const;
-        QDataStream & fromStream (QDataStream &);
+        bool fromStream (QDataStream &);
 
         void OnChildDeleted(Object *obj);
 
@@ -86,6 +84,8 @@ namespace Connectables {
 
         const QTime GetLastUpdate();
 
+        int GetProgramToSet() { if(progToSet==-1) return currentProgId; else return progToSet; }
+
     protected:
         void AddChildObject(QSharedPointer<Object> objPtr);
         void ParkChildObject(QSharedPointer<Object> objPtr);
@@ -113,6 +113,10 @@ namespace Connectables {
 
         /// id of the progam to change on the next rendering loop
         int progToSet;
+
+        quint32 loadHeaderStream (QDataStream &);
+        bool loadObjectFromStream (QDataStream &);
+        bool loadProgramFromStream (QDataStream &);
 
         QMutex progLoadMutex;
 

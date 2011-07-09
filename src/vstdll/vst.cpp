@@ -21,7 +21,6 @@
 #include "connectables/connectioninfo.h"
 #include "connectables/objectinfo.h"
 #include "mainhost.h"
-#include "projectfile/setupfile.h"
 #include "projectfile/projectfile.h"
 #include "views/configdialog.h"
 
@@ -126,7 +125,7 @@ void Vst::open()
      //load default setup file
      QString currentSetupFile = ConfigDialog::defaultSetupFile(myHost);
      if(!currentSetupFile.isEmpty()) {
-         if(!SetupFile::LoadFromFile(myHost,currentSetupFile))
+         if(!ProjectFile::LoadFromFile(myHost,currentSetupFile))
              currentSetupFile = "";
      }
 
@@ -139,6 +138,7 @@ void Vst::open()
 
     opened=true;
     myWindow->readSettings();
+    myWindow->LoadDefaultFiles();
 }
 
 void Vst::close()
@@ -549,8 +549,10 @@ VstInt32 Vst::setChunk ( void* data, VstInt32 byteSize, bool isPreset)
     QByteArray tmpStream;
     tmpStream.setRawData((const char*)data,byteSize);
     QDataStream tmp( &tmpStream , QIODevice::ReadOnly);
-    SetupFile::FromStream(myHost,tmp);
-    ProjectFile::FromStream(myHost,tmp);
+    if(!ProjectFile::FromStream(myHost,tmp)) {
+        myHost->ClearSetup();
+        myHost->ClearProject();
+    }
     return 0;
 }
 
@@ -558,7 +560,6 @@ VstInt32 Vst::getChunk (void** data, bool isPreset)
 {
     QByteArray tmpStream;
     QDataStream tmp( &tmpStream , QIODevice::WriteOnly);
-    SetupFile::ToStream(myHost,tmp);
     ProjectFile::ToStream(myHost,tmp);
 
     chunkData = new char[tmpStream.size()];

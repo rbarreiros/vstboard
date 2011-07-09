@@ -25,6 +25,7 @@ Splash::Splash(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Splash)
 {
+    setAttribute(Qt::WA_DeleteOnClose);
     QString ver = APP_VERSION;
     ver=ver.section("-",0,1);
 

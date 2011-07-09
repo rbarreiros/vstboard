@@ -489,8 +489,10 @@ QDataStream & ContainerProgram::fromStream (QDataStream& in)
     for(quint16 i=0; i<nbobj; i++) {
         quint16 id;
         in >> id;
-        id = myHost->objFactory->IdFromSavedId(id);
-        listObjects << myHost->objFactory->GetObjectFromId(id);
+        int newid = myHost->objFactory->IdFromSavedId(id);
+        if(newid==-1)
+            return in;
+        listObjects << myHost->objFactory->GetObjectFromId(newid);
     }
 
     quint16 nbCables;

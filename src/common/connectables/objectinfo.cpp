@@ -83,9 +83,7 @@ QDataStream & ObjectInfo::fromStream(QDataStream& stream)
     stream >> outputs;
     stream >> duplicateNamesCounter;
     stream >> apiName;
-    if(MainHost::currentFileVersion >= 13) {
-        stream >> api;
-    }
+    stream >> api;
     stream >> forcedObjId;
     return stream;
 }

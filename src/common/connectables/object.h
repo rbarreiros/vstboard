@@ -139,7 +139,7 @@ namespace Connectables {
         virtual Pin * GetPin(const ConnectionInfo &pinInfo);
         virtual void SetSleep(bool sleeping);
         virtual QDataStream & toStream (QDataStream &) const;
-        virtual QDataStream & fromStream (QDataStream &);
+        virtual bool fromStream (QDataStream &);
         virtual void SetContainerId(quint16 id);
         virtual QStandardItem * UpdateModelNode();
         virtual void SetBridgePinsInVisible(bool visible);
@@ -285,7 +285,7 @@ namespace Connectables {
 }
 
 QDataStream & operator<< (QDataStream & out, const Connectables::Object& value);
-QDataStream & operator>> (QDataStream & in, Connectables::Object& value);
+//QDataStream & operator>> (QDataStream & in, Connectables::Object& value);
 
 #ifdef _MSC_VER
 #pragma warning( pop )

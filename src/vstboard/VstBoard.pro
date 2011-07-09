@@ -23,7 +23,6 @@ INCLUDEPATH += $$PORTMIDI_PATH/pm_common
 INCLUDEPATH += ../common
 
 scriptengine {
-    DEFINES += SCRIPTENGINE
     QT += script
 }
 

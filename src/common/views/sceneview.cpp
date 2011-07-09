@@ -78,6 +78,20 @@ SceneView::SceneView(MainHost *myHost,Connectables::ObjectFactory *objFactory, M
     viewProject->setScene(sceneProject);
     viewProgram->setScene(sceneProgram);
     viewGroup->setScene(sceneGroup);
+
+    connect(myHost->programList,SIGNAL(ProgChanged(QModelIndex)),
+            viewProgram, SLOT(SetViewProgram(QModelIndex)));
+    connect(myHost->programList,SIGNAL(ProgCopy(int,int)),
+            viewProgram, SLOT(CopyViewProgram(int,int)));
+    connect(myHost->programList,SIGNAL(ProgDelete(int)),
+            viewProgram, SLOT(RemoveViewProgram(int)));
+
+    connect(myHost->programList,SIGNAL(GroupChanged(QModelIndex)),
+            viewGroup, SLOT(SetViewProgram(QModelIndex)));
+    connect(myHost->programList,SIGNAL(GroupCopy(int,int)),
+            viewGroup, SLOT(CopyViewProgram(int,int)));
+    connect(myHost->programList,SIGNAL(GroupDelete(int)),
+            viewGroup, SLOT(RemoveViewProgram(int)));
 }
 
 void SceneView::SetParkings(QWidget *progPark, QWidget *groupPark)
@@ -312,12 +326,6 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                     programContainerView->setParentItem(rootObjProgram);
                     connect(viewProgram,SIGNAL(viewResized(QRectF)),
                             programContainerView,SLOT(OnViewChanged(QRectF)));
-                    connect(myHost->programList,SIGNAL(ProgChanged(QModelIndex)),
-                            viewProgram, SLOT(SetProgram(QModelIndex)));
-                    connect(myHost->programList,SIGNAL(ProgCopy(int,int)),
-                            viewProgram, SLOT(CopyProgram(int,int)));
-                    connect(myHost->programList,SIGNAL(ProgDelete(int)),
-                            viewProgram, SLOT(RemoveProgram(int)));
                     QTimer::singleShot(0, viewProgram, SLOT(ForceResize()));
                     programContainerView->SetParking(progParking);
                 }
@@ -328,12 +336,6 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                     groupContainerView->setParentItem(rootObjInsert);
                     connect(viewGroup,SIGNAL(viewResized(QRectF)),
                             groupContainerView,SLOT(OnViewChanged(QRectF)));
-                    connect(myHost->programList,SIGNAL(GroupChanged(QModelIndex)),
-                            viewGroup, SLOT(SetProgram(QModelIndex)));
-                    connect(myHost->programList,SIGNAL(GroupCopy(int,int)),
-                            viewGroup, SLOT(CopyProgram(int,int)));
-                    connect(myHost->programList,SIGNAL(GroupDelete(int)),
-                            viewGroup, SLOT(RemoveProgram(int)));
                     QTimer::singleShot(0, viewGroup, SLOT(ForceResize()));
                     groupContainerView->SetParking(groupParking);
                 }

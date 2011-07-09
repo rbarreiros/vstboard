@@ -62,11 +62,11 @@
         void zoomOut();
         void zoomReset();
         void ForceResize();
-        void SetProgram(int progId);
-        void SetProgram(const QModelIndex &prg);
-        void CopyProgram(int ori, int dest);
-        void RemoveProgram(int prg);
-        void ClearPrograms();
+        void SetViewProgram(int progId);
+        void SetViewProgram(const QModelIndex &prg);
+        void CopyViewProgram(int ori, int dest);
+        void RemoveViewProgram(int prg);
+        void ClearViewPrograms();
     };
 
 //}

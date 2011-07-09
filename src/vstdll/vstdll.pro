@@ -31,7 +31,6 @@ win32-msvc* {
 INCLUDEPATH += ../common
 
 scriptengine {
-    DEFINES += SCRIPTENGINE
     QT += script
 }
 

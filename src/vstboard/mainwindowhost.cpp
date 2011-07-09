@@ -89,8 +89,8 @@ void MainWindowHost::readSettings()
 
     QSettings settings;
     if( !settings.value("splashHide",false).toBool() ) {
-        Splash spl;
-        spl.exec();
+        Splash *spl = new Splash(this);
+        spl->show();
     }
 
     QList<QDockWidget*>listDocks;
