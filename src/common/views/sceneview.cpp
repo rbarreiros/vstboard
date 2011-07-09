@@ -480,7 +480,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                     if(parentInfo.objType==ObjType::BridgeSend || parentInfo.objType==ObjType::BridgeReturn)
                         angle=-1.570796f; //-pi/2
 
-                    pinView = static_cast<PinView*>( new BridgePinView(angle, model(), parentList, pin->GetConnectionInfo(),&myHost->mainWindow->viewConfig) );
+                    pinView = static_cast<PinView*>( new BridgePinView(angle, model(), parentList, pin->GetConnectionInfo(),myHost->mainWindow->viewConfig) );
                     connect(timerFalloff,SIGNAL(timeout()),
                             pinView,SLOT(updateVu()));
                 } else {
@@ -491,12 +491,12 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
 
 
                     if(pinInfo.type==PinType::Parameter) {
-                        MinMaxPinView *p = new MinMaxPinView(angle,model(),parentList,pin->GetConnectionInfo(),&myHost->mainWindow->viewConfig);
+                        MinMaxPinView *p = new MinMaxPinView(angle,model(),parentList,pin->GetConnectionInfo(),myHost->mainWindow->viewConfig);
                         connect(timerFalloff,SIGNAL(timeout()),
                                 p,SLOT(updateVu()));
                         pinView = static_cast<PinView*>(p);
                     } else {
-                        ConnectablePinView *p = new ConnectablePinView(angle, model(), parentList, pin->GetConnectionInfo(),&myHost->mainWindow->viewConfig);
+                        ConnectablePinView *p = new ConnectablePinView(angle, model(), parentList, pin->GetConnectionInfo(),myHost->mainWindow->viewConfig);
                         connect(timerFalloff,SIGNAL(timeout()),
                                 p,SLOT(updateVu()));
                         pinView = static_cast<PinView*>(p);
@@ -560,7 +560,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                     debug("SceneView::rowsInserted addcable : pin not found")
                             continue;
                 }
-                CableView *cable = new CableView(infoOut,infoIn,cnt,&myHost->mainWindow->viewConfig);
+                CableView *cable = new CableView(infoOut,infoIn,cnt,myHost->mainWindow->viewConfig);
                 pinOut->AddCable(cable);
                 pinIn->AddCable(cable);
                 hashItems.insert(index, cable);

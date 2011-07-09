@@ -40,10 +40,11 @@ ViewConfigDialog::ViewConfigDialog(MainHost *myHost, QWidget *parent) :
     currentGrp(ColorGroups::ND),
     currentCol(Colors::ND),
     modified(false),
-    updateInProgress(false)
+    updateInProgress(false),
+    conf(myHost->mainWindow->viewConfig)
 {
     ui->setupUi(this);
-    conf = &myHost->mainWindow->viewConfig;
+
     connect(conf,SIGNAL(NewSetupLoaded()),
             this,SLOT(InitDialog()));
 
@@ -75,7 +76,7 @@ void ViewConfigDialog::InitLists()
     ui->listPresets->clear();
     ui->listPresets->addItem( "Default" );
 
-    QMap<QString, QMap<ColorGroups::Enum,ColorGroup> >::const_iterator ip = conf->GetListOfPresets()->constBegin();
+    QMap<QString, QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> > >::const_iterator ip = conf->GetListOfPresets()->constBegin();
     while(ip!=conf->GetListOfPresets()->constEnd()) {
         if( ip.key()!="Default") {
             QListWidgetItem *item = new QListWidgetItem( ip.key() );
@@ -135,7 +136,7 @@ void ViewConfigDialog::SaveChanges()
     if(ui->checkSavedInSetupFile->isChecked())
         myHost->SetSetupDirtyFlag();
     else
-        conf->SaveInRegistry(myHost);
+        conf->SaveInRegistry();
 
     modified=false;
 }
@@ -154,7 +155,7 @@ void ViewConfigDialog::LoadPreset(const QString &presetName)
     backupSaveInSetup = conf->IsSavedInSetup();
 
     ui->listPalettes->clear();
-    QMap<ColorGroups::Enum,ColorGroup>::iterator i = conf->GetCurrentPreset()->begin();
+    QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> >::iterator i = conf->GetCurrentPreset()->begin();
     while(i!=conf->GetCurrentPreset()->end()) {
         QListWidgetItem *item = new QListWidgetItem( conf->GetColorGroupName(i.key()) );
         item->setData(Qt::UserRole+1,i.key());
@@ -246,12 +247,12 @@ void View::ViewConfigDialog::on_listPalettes_itemClicked(QListWidgetItem* item)
     if(!conf->GetCurrentPreset()->contains(currentGrp))
         return;
 
-    ColorGroup grp = conf->GetCurrentPreset()->value( currentGrp );
+    QMap<Colors::Enum,QColor> grp = conf->GetCurrentPreset()->value( currentGrp );
 
     bool colorExistsInGroup=false;
     int cpt=0;
-    QMap<Colors::Enum,QColor>::iterator i = grp.listColors.begin();
-    while(i!=grp.listColors.end()) {
+    QMap<Colors::Enum,QColor>::iterator i = grp.begin();
+    while(i!=grp.end()) {
 
         ui->listRoles->addItem( conf->GetColorName( i.key() ) );
         ui->listRoles->item(cpt)->setData(Qt::UserRole+1,i.key());

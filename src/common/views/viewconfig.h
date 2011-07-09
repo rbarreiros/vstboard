@@ -43,11 +43,12 @@ namespace Colors {
 
 namespace View {
 
-    class ColorGroup
-    {
-    public:
-        QMap<Colors::Enum,QColor>listColors;
-    };
+//    class ColorGroup
+//    {
+//    public:
+//        QMap<Colors::Enum,QColor>listColors;
+
+//    };
 
 
     class ObjectView;
@@ -56,7 +57,7 @@ namespace View {
     Q_OBJECT
 
     public:
-        ViewConfig( QObject *parent=0 );
+        ViewConfig( MainHost *myHost,  QObject *parent=0 );
 
         void SetColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
         QColor GetColor(ColorGroups::Enum groupId, Colors::Enum colorId);
@@ -64,20 +65,23 @@ namespace View {
         QString GetColorName(Colors::Enum colorId);
         QPalette::ColorRole GetPaletteRoleFromColor(Colors::Enum colorId);
         QPalette GetPaletteFromColorGroup(ColorGroups::Enum groupId, const QPalette &oriPalette);
-        void SetListGroups(QMap<ColorGroups::Enum,ColorGroup> newList);
-        void SaveInRegistry(MainHost *myHost);
-        void LoadFromRegistry(MainHost *myHost);
+        void SetListGroups(QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> > newList);
+
+        void SaveToFile( QDataStream & out );
+        void LoadFromFile( QDataStream & in );
+        void SaveInRegistry();
+        void LoadFromRegistry();
 
 
         void LoadPreset(const QString &presetName);
         inline const QString & GetPresetName() const {return currentPresetName;}
 
-        inline QMap<ColorGroups::Enum,ColorGroup> * ViewConfig::GetCurrentPreset()
+        inline QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> > * ViewConfig::GetCurrentPreset()
         {
             return &(*GetListOfPresets())[currentPresetName];
         }
 
-        inline QMap<QString, QMap<ColorGroups::Enum,ColorGroup> > * ViewConfig::GetListOfPresets()
+        inline QMap<QString, QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> > > * ViewConfig::GetListOfPresets()
         {
             if(savedInSetupFile)
                 return &listPresetsInSetup;
@@ -86,7 +90,7 @@ namespace View {
         }
 
         bool IsSavedInSetup() {return savedInSetupFile;}
-        void SetSavedInSetup(bool inSetup) {savedInSetupFile=inSetup; }
+        void SetSavedInSetup(bool inSetup) {if(savedInSetupFile==inSetup) return; savedInSetupFile=inSetup; currentPresetName="Default";}
 
         void AddPreset(QString &presetName);
         void RemovePreset(const QString &presetName);
@@ -100,10 +104,10 @@ namespace View {
 
     protected:
         ///list of presets in registry
-        QMap<QString, QMap<ColorGroups::Enum,ColorGroup> >listPresets;
+        QMap<QString, QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> > >listPresets;
 
         ///list of presets saved in setup file
-        QMap<QString, QMap<ColorGroups::Enum,ColorGroup> >listPresetsInSetup;
+        QMap<QString, QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> > >listPresetsInSetup;
 
         bool savedInSetupFile;
         void InitPresets();
@@ -118,6 +122,7 @@ namespace View {
 
         QString currentPresetName;
 
+        MainHost *myHost;
     signals:
         /*!
             emited when a color changed
@@ -131,9 +136,6 @@ namespace View {
     };
 
 }
-
-QDataStream & operator<< (QDataStream & out, const View::ViewConfig& value);
-QDataStream & operator>> (QDataStream & in, View::ViewConfig& value);
 
 
 #endif // VIEWCONFIG_H

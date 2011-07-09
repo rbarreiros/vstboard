@@ -34,9 +34,9 @@ ContainerContent::ContainerContent(MainHost *myHost, QAbstractItemModel *model, 
     ObjectDropZone(parent),
     model(model),
     rectAttachLeft(0),
-    rectAttachRight(0)
+    rectAttachRight(0),
+    config(myHost->mainWindow->viewConfig)
 {
-    config = &myHost->mainWindow->viewConfig;
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     setGeometry(0,0,50,50);
 

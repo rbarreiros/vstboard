@@ -37,6 +37,7 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
         listVstBanksModel(0),
         ui(new Ui::MainWindow),
         myHost(myHost),
+        viewConfig( new View::ViewConfig(myHost,this)),
         viewConfigDlg(0)
 {
     myHost->mainWindow=this;
@@ -89,10 +90,10 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
 
     ui->treeHostModel->setModel(myHost->GetModel());
 
-    connect( &viewConfig, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
+    connect( viewConfig, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
             myHost->programList, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)) );
     InitColors();
-    connect(&viewConfig, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
+    connect( viewConfig, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
             this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)));
 }
 
@@ -134,7 +135,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::InitColors()
 {
-    setPalette( viewConfig.GetPaletteFromColorGroup( ColorGroups::Window, palette() ));
+    setPalette( viewConfig->GetPaletteFromColorGroup( ColorGroups::Window, palette() ));
 }
 
 void MainWindow::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
@@ -142,7 +143,7 @@ void MainWindow::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, co
     if(groupId!=ColorGroups::Window)
         return;
 
-    QPalette::ColorRole role = viewConfig.GetPaletteRoleFromColor(colorId);
+    QPalette::ColorRole role = viewConfig->GetPaletteRoleFromColor(colorId);
 
     QPalette pal=palette();
     pal.setColor(role, color);
@@ -481,7 +482,7 @@ void MainWindow::readSettings()
 
     ui->Programs->readSettings(myHost);
 
-    viewConfig.LoadFromRegistry(myHost);
+    viewConfig->LoadFromRegistry();
 
     //load default files
     myHost->LoadSetupFile( ConfigDialog::defaultSetupFile(myHost) );

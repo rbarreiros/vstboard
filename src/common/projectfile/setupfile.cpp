@@ -34,7 +34,7 @@ void SetupFile::Clear(MainHost *myHost)
     if(myHost->mainWindow) {
         myHost->mainWindow->mySceneView->viewHost->ClearPrograms();
     }
-    myHost->mainWindow->viewConfig.LoadFromRegistry(myHost);
+    myHost->mainWindow->viewConfig->LoadFromRegistry();
 }
 
 bool SetupFile::SaveToFile(MainHost *myHost, QString filePath)
@@ -92,10 +92,7 @@ bool SetupFile::ToStream(MainHost *myHost,QDataStream &out)
 
     myHost->EnableSolverUpdate(true);
 
-    bool savedInFile = myHost->mainWindow->viewConfig.IsSavedInSetup();
-    out << savedInFile;
-    if(savedInFile)
-        out << myHost->mainWindow->viewConfig;
+    myHost->mainWindow->viewConfig->SaveToFile( out );
 
     return true;
 }
@@ -150,17 +147,11 @@ bool SetupFile::FromStream(MainHost *myHost,QDataStream &in)
     myHost->EnableSolverUpdate(true);
     myHost->hostContainer->Updated();
 
-    bool colorsInSetupFile;
-    if(MainHost::currentFileVersion >= 12) {
-        in >> colorsInSetupFile;
+    if(MainHost::currentFileVersion >= 14) {
+        myHost->mainWindow->viewConfig->LoadFromFile( in );
     } else {
-        colorsInSetupFile=false;
+        myHost->mainWindow->viewConfig->LoadFromRegistry();
     }
-    myHost->mainWindow->viewConfig.SetSavedInSetup( colorsInSetupFile );
-    if(colorsInSetupFile)
-        in >> myHost->mainWindow->viewConfig;
-    else
-        myHost->mainWindow->viewConfig.LoadFromRegistry(myHost);
 
     return true;
 }

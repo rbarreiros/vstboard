@@ -32,10 +32,11 @@ using namespace View;
 /*!
   Constructor
   */
-ViewConfig::ViewConfig(QObject *parent) :
+ViewConfig::ViewConfig(MainHost *myHost, QObject *parent) :
     QObject(parent),
     savedInSetupFile(false),
-    currentPresetName("Default")
+    currentPresetName("Default"),
+    myHost(myHost)
 {
     colorGroupNames.insert( ColorGroups::ND, tr("-undefined-") );
     colorGroupNames.insert( ColorGroups::Window, tr("Window") );
@@ -133,13 +134,15 @@ void ViewConfig::LoadPreset(const QString &presetName)
 {
     currentPresetName=presetName;
     UpdateAllWidgets();
+    if(!savedInSetupFile)
+        myHost->SetSetting("ColorPreset",currentPresetName);
 }
 
 /*!
   Update all colors with a new list, used by the dialog when changes are discarded
   \param newList list of groups
   */
-void ViewConfig::SetListGroups(QMap<ColorGroups::Enum,ColorGroup> newList)
+void ViewConfig::SetListGroups(QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> > newList)
 {
     *GetCurrentPreset() = newList;
     UpdateAllWidgets();
@@ -150,11 +153,11 @@ void ViewConfig::SetListGroups(QMap<ColorGroups::Enum,ColorGroup> newList)
   */
 void ViewConfig::UpdateAllWidgets()
 {
-    QMap<ColorGroups::Enum,ColorGroup>::iterator i = GetCurrentPreset()->begin();
+    QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> >::iterator i = GetCurrentPreset()->begin();
     while( i!=GetCurrentPreset()->end() ) {
-        ColorGroup grp = i.value();
-        QMap<Colors::Enum,QColor>::iterator j = grp.listColors.begin();
-        while( j!=grp.listColors.end() ) {
+        QMap<Colors::Enum,QColor> grp = i.value();
+        QMap<Colors::Enum,QColor>::iterator j = grp.begin();
+        while( j!=grp.end() ) {
             emit ColorChanged( i.key(), j.key(), j.value() );
             ++j;
         }
@@ -231,11 +234,11 @@ QPalette ViewConfig::GetPaletteFromColorGroup(ColorGroups::Enum groupId, const Q
     if(!GetCurrentPreset()->contains(groupId))
         return oriPalette;
 
-    ColorGroup grp = GetCurrentPreset()->value(groupId);
+    QMap<Colors::Enum,QColor> grp = GetCurrentPreset()->value(groupId);
     QPalette pal(oriPalette);
 
-    QMap<Colors::Enum,QColor>::iterator i = grp.listColors.begin();
-    while(i != grp.listColors.end()) {
+    QMap<Colors::Enum,QColor>::iterator i = grp.begin();
+    while(i != grp.end()) {
         pal.setColor( GetPaletteRoleFromColor( i.key() ), i.value() );
         ++i;
     }
@@ -251,7 +254,7 @@ QPalette ViewConfig::GetPaletteFromColorGroup(ColorGroups::Enum groupId, const Q
   */
 void ViewConfig::AddColor(const QString &preset, ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
 {
-    (*GetListOfPresets())[preset][groupId].listColors[colorId]=color;
+    (*GetListOfPresets())[preset][groupId][colorId]=color;
     emit ColorChanged(groupId,colorId,color);
 }
 
@@ -263,10 +266,10 @@ void ViewConfig::AddColor(const QString &preset, ColorGroups::Enum groupId, Colo
   */
 void ViewConfig::SetColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
 {
-    if( !GetCurrentPreset()->contains(groupId) || !GetCurrentPreset()->value(groupId).listColors.contains(colorId) )
+    if( !GetCurrentPreset()->contains(groupId) || !GetCurrentPreset()->value(groupId).contains(colorId) )
         return;
 
-    (*GetCurrentPreset())[groupId].listColors.insert(colorId,color);
+    (*GetCurrentPreset())[groupId].insert(colorId,color);
     emit ColorChanged(groupId,colorId,color);
 }
 
@@ -281,7 +284,7 @@ QColor ViewConfig::GetColor(ColorGroups::Enum groupId, Colors::Enum colorId)
     if(!GetCurrentPreset()->contains(groupId))
         return QColor();
 
-    return GetCurrentPreset()->value(groupId).listColors.value(colorId,QColor());
+    return GetCurrentPreset()->value(groupId).value(colorId,QColor());
 }
 
 void ViewConfig::AddPreset(QString &presetName)
@@ -325,29 +328,62 @@ void ViewConfig::RenamePreset(const QString &oldName, const QString &newName)
     GetListOfPresets()->remove(oldName);
 }
 
-void ViewConfig::SaveInRegistry(MainHost *myHost)
+void ViewConfig::SaveToFile( QDataStream & out )
 {
-    QByteArray tmpStream;
-    QDataStream tmp( &tmpStream , QIODevice::ReadWrite);
-    tmp << *this;
-    QVariant lVar=QVariant::fromValue(tmpStream);
-    myHost->SetSetting("Colors",lVar);
+    bool lastMode = savedInSetupFile;
+    QString lastPreset = currentPresetName;
+    SetSavedInSetup(true);
+
+    out << lastMode;
+    toStream( out );
+    out << currentPresetName;
+
+    SetSavedInSetup(lastMode);
+    currentPresetName=lastPreset;
 }
 
-void ViewConfig::LoadFromRegistry(MainHost *myHost)
+void ViewConfig::LoadFromFile( QDataStream & in )
 {
-    QVariant lVar = myHost->GetSetting("Colors", QVariant::Invalid);
+    SetSavedInSetup(true);
+    bool newSavedInSetup;
+    QString presetName;
 
+    in >> newSavedInSetup;
+    fromStream( in );
+    in >> presetName;
+
+    SetSavedInSetup(newSavedInSetup);
+
+    if(savedInSetupFile)
+        LoadPreset(presetName);
+    else
+        LoadFromRegistry();
+}
+
+void ViewConfig::SaveInRegistry()
+{
+    SetSavedInSetup(false);
+    QByteArray tmpBa;
+    QDataStream tmpStream( &tmpBa , QIODevice::ReadWrite);
+    toStream( tmpStream );
+    QVariant lVar=QVariant::fromValue(tmpBa);
+    myHost->SetSetting("Colors",lVar);
+    myHost->SetSetting("ColorPreset",currentPresetName);
+}
+
+void ViewConfig::LoadFromRegistry()
+{
+    SetSavedInSetup(false);
+    QVariant lVar = myHost->GetSetting("Colors", QVariant::Invalid);
     if( !lVar.isValid() ) {
-        SaveInRegistry(myHost);
+        SaveInRegistry();
         lVar = myHost->GetSetting("Colors");
     }
-
-    QByteArray ba( lVar.value<QByteArray>() );
-    QDataStream tmp( &ba , QIODevice::ReadWrite);
-    tmp >> *this;
-    UpdateAllWidgets();
-    savedInSetupFile=false;
+    QByteArray tmpBa( lVar.value<QByteArray>() );
+    QDataStream tmpStream( &tmpBa , QIODevice::ReadWrite);
+    fromStream( tmpStream );
+    QString name = myHost->GetSetting("ColorPreset", "Default").toString();
+    LoadPreset(name);
 }
 
 /*!
@@ -357,26 +393,26 @@ void ViewConfig::LoadFromRegistry(MainHost *myHost)
   */
 QDataStream & ViewConfig::toStream(QDataStream & out) const
 {
-    QMap<QString, QMap<ColorGroups::Enum,ColorGroup> >tmpPresets;
+    QMap<QString, QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> > >tmpPresets;
     if(savedInSetupFile)
         tmpPresets=listPresetsInSetup;
     else
         tmpPresets=listPresets;
 
     out << (quint16)tmpPresets.count();
-    QMap<QString, QMap<ColorGroups::Enum,ColorGroup> >::const_iterator ip = tmpPresets.constBegin();
+    QMap<QString, QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> > >::const_iterator ip = tmpPresets.constBegin();
 
     while(ip!=tmpPresets.constEnd()) {
         out << ip.key();
         out << (quint16)ip.value().count();
 
-        QMap<ColorGroups::Enum,ColorGroup>::const_iterator i = ip.value().constBegin();
+        QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> >::const_iterator i = ip.value().constBegin();
         while(i!=ip.value().constEnd()) {
             out << (quint8)i.key();
-            out << (quint8)i.value().listColors.count();
+            out << (quint8)i.value().count();
 
-            QMap<Colors::Enum,QColor>::const_iterator j = i.value().listColors.begin();
-            while(j!=i.value().listColors.end()) {
+            QMap<Colors::Enum,QColor>::const_iterator j = i.value().begin();
+            while(j!=i.value().end()) {
                 out << (quint8)j.key();
                 out << (quint8)j.value().red();
                 out << (quint8)j.value().green();
@@ -388,8 +424,6 @@ QDataStream & ViewConfig::toStream(QDataStream & out) const
         }
         ++ip;
     }
-
-    out << currentPresetName;
     return out;
 }
 
@@ -400,10 +434,11 @@ QDataStream & ViewConfig::toStream(QDataStream & out) const
   */
 QDataStream & ViewConfig::fromStream(QDataStream & in)
 {
-    listPresetsInSetup.clear();
-
-    if(!savedInSetupFile)
+    if(savedInSetupFile) {
+        listPresetsInSetup.clear();
+    } else {
         listPresets.clear();
+    }
 
     quint16 nbPreset;
     in >> nbPreset;
@@ -433,32 +468,14 @@ QDataStream & ViewConfig::fromStream(QDataStream & in)
                 in >> alpha;
 
                 if(savedInSetupFile)
-                    listPresetsInSetup[presetName][(ColorGroups::Enum)grpId].listColors[(Colors::Enum)colId] = QColor( red,green,blue,alpha );
+                    listPresetsInSetup[presetName][(ColorGroups::Enum)grpId][(Colors::Enum)colId] = QColor( red,green,blue,alpha );
                 else {
-                    listPresets[presetName][(ColorGroups::Enum)grpId].listColors[(Colors::Enum)colId] = QColor( red,green,blue,alpha );
+                    listPresets[presetName][(ColorGroups::Enum)grpId][(Colors::Enum)colId] = QColor( red,green,blue,alpha );
                 }
             }
         }
     }
-    in >> currentPresetName;
-    if(currentPresetName.isEmpty())
-        currentPresetName="Default";
-
-    if(!savedInSetupFile)
-        listPresetsInSetup["Default"]=listPresets["Default"];
 
     emit NewSetupLoaded();
-
-    UpdateAllWidgets();
     return in;
-}
-
-QDataStream & operator<< (QDataStream & out, const View::ViewConfig& value)
-{
-    return value.toStream(out);
-}
-
-QDataStream & operator>> (QDataStream & in, View::ViewConfig& value)
-{
-    return value.fromStream(in);
 }

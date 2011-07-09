@@ -48,7 +48,7 @@ public:
     bool openedPrompt;
 
     View::SceneView *mySceneView;
-    View::ViewConfig viewConfig;
+    View::ViewConfig *viewConfig;
 
     bool userWantsToUnloadProject();
     bool userWantsToUnloadSetup();
