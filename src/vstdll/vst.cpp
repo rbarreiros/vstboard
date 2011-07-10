@@ -259,11 +259,15 @@ VstInt32 Vst::getNumMidiOutputChannels()
 
 void Vst::setProgramName (char* name)
 {
+    if(!name)
+        return;
     vst_strncpy (programName, name, kVstMaxProgNameLen);
 }
 
 void Vst::getProgramName (char* name)
 {
+    if(!name)
+        return;
     vst_strncpy (name, QString("prog%1").arg(currentHostProg).toAscii(), kVstMaxProgNameLen);
 }
 
@@ -297,11 +301,15 @@ float Vst::getParameter (VstInt32 index)
 
 void Vst::getParameterName (VstInt32 index, char* label)
 {
+    if(!label)
+        return;
     vst_strncpy (label, QString("p%1").arg(index).toAscii(), kVstMaxParamStrLen);
 }
 
 void Vst::getParameterDisplay (VstInt32 index, char* text)
 {
+    if(!text)
+        return;
     QMutexLocker m(&mutexParam);
     float val=.0f;
     if(listParameters.contains(index))
@@ -323,23 +331,31 @@ void Vst::updateParameter(int index, float value)
 
 void Vst::getParameterLabel (VstInt32 index, char* label)
 {
+    if(!label)
+        return;
     vst_strncpy (label, "", kVstMaxParamStrLen);
 }
 
 bool Vst::getEffectName (char* name)
 {
+    if(!name)
+        return false;
     vst_strncpy (name, "VstBoard", kVstMaxEffectNameLen);
     return true;
 }
 
 bool Vst::getProductString (char* text)
 {
+    if(!text)
+        return false;
     vst_strncpy (text, "VstBoard", kVstMaxProductStrLen);
     return true;
 }
 
 bool Vst::getVendorString (char* text)
 {
+    if(!text)
+        return false;
     vst_strncpy (text, "CtrlBrk", kVstMaxVendorStrLen);
     return true;
 }
@@ -351,6 +367,9 @@ VstInt32 Vst::getVendorVersion ()
 
 VstInt32 Vst::canDo(char* text)
 {
+    if(!text)
+        return 0;
+
 //     "offline", plug-in supports offline functions (offlineNotify, offlinePrepare, offlineRun)
 //     "midiProgramNames", plug-in supports function getMidiProgramName ()
 //     "bypass", plug-in supports function setBypass ()
@@ -370,7 +389,7 @@ VstInt32 Vst::canDo(char* text)
 
 VstInt32 Vst::processEvents(VstEvents* events)
 {
-    if(!hostSendVstEvents || !hostSendVstMidiEvent)
+    if(!events || !hostSendVstEvents || !hostSendVstMidiEvent)
         return 0;
 
     VstEvent *evnt=0;
@@ -395,6 +414,9 @@ VstInt32 Vst::processEvents(VstEvents* events)
 
 void Vst::processReplacing (float** inputs, float** outputs, VstInt32 sampleFrames)
 {
+    if(!inputs || !outputs || sampleFrames<=0)
+        return;
+
     if(hostSendVstTimeInfo)
         myHost->SetTimeInfo( getTimeInfo( -1));
 
@@ -452,6 +474,9 @@ void Vst::processReplacing (float** inputs, float** outputs, VstInt32 sampleFram
 
 void Vst::processDoubleReplacing (double** inputs, double** outputs, VstInt32 sampleFrames)
 {
+    if(!inputs || !outputs || sampleFrames<=0)
+        return;
+
     if(hostSendVstTimeInfo)
         myHost->SetTimeInfo( getTimeInfo( -1));
 
@@ -509,11 +534,15 @@ void Vst::processDoubleReplacing (double** inputs, double** outputs, VstInt32 sa
 
 void Vst::setSampleRate(float sampleRate)
 {
+    if(sampleRate<=0)
+        return;
     myHost->SetSampleRate(sampleRate);
 }
 
 void Vst::setBlockSize (VstInt32 blockSize)
 {
+    if(blockSize<=0)
+        return;
     bufferSize=blockSize;
     myHost->SetBufferSize((unsigned long)blockSize);
 }
@@ -546,6 +575,8 @@ void Vst::deleteChunkData()
 
 VstInt32 Vst::setChunk ( void* data, VstInt32 byteSize, bool isPreset)
 {
+    if(!data || byteSize<=0)
+        return 0;
     QByteArray tmpStream;
     tmpStream.setRawData((const char*)data,byteSize);
     QDataStream tmp( &tmpStream , QIODevice::ReadOnly);
@@ -558,6 +589,8 @@ VstInt32 Vst::setChunk ( void* data, VstInt32 byteSize, bool isPreset)
 
 VstInt32 Vst::getChunk (void** data, bool isPreset)
 {
+    if(!data)
+        return 0;
     QByteArray tmpStream;
     QDataStream tmp( &tmpStream , QIODevice::WriteOnly);
     ProjectFile::ToStream(myHost,tmp);
