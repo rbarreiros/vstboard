@@ -22,6 +22,7 @@
 #define MAINHOST_H
 
 //#include "precomp.h"
+#include <QUndoStack>
 #include "connectables/objectfactory.h"
 #include "connectables/object.h"
 #include "connectables/maincontainer.h"
@@ -105,6 +106,8 @@ public:
 
     QString currentProjectFile;
     QString currentSetupFile;
+
+    QUndoStack undoStack;
 
 protected:
     QTime timeFromStart;

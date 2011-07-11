@@ -33,6 +33,8 @@
 #include "mainhost.h"
 #include "vstpluginview.h"
 #include <QSplitter>
+#include "models/comaddcable.h"
+#include "models/comdisconnectpin.h"
 
 using namespace View;
 
@@ -588,31 +590,35 @@ void SceneView::graphicObjectRemoved ( QObject* obj)
 
 void SceneView::ConnectPins(const ConnectionInfo &pinOut, const ConnectionInfo &pinIn)
 {
-    QPersistentModelIndex ixOut = mapConnectionInfo.value(pinOut);
-    QPersistentModelIndex ixIn = mapConnectionInfo.value(pinIn);
+//    QPersistentModelIndex ixOut = mapConnectionInfo.value(pinOut);
+//    QPersistentModelIndex ixIn = mapConnectionInfo.value(pinIn);
 
-    //                      pin  . list   . object . container
-    QModelIndex parentOut = ixOut.parent().parent().parent();
-    QModelIndex parentIn = ixIn.parent().parent().parent();
+//    //                      pin  . list   . object . container
+//    QModelIndex parentOut = ixOut.parent().parent().parent();
+//    QModelIndex parentIn = ixIn.parent().parent().parent();
 
-    if(pinOut.bridge) parentOut = parentOut.parent();
-    if(pinIn.bridge) parentIn = parentIn.parent();
+//    if(pinOut.bridge) parentOut = parentOut.parent();
+//    if(pinIn.bridge) parentIn = parentIn.parent();
 
-    QSharedPointer<Connectables::Object> cntPtr = objFactory->GetObjectFromId(parentOut.data(UserRoles::value).toInt());
+//    QSharedPointer<Connectables::Object> cntPtr = objFactory->GetObjectFromId(parentOut.data(UserRoles::value).toInt());
 
-    if(pinOut.direction==PinDirection::Output)
-        static_cast<Connectables::Container*>(cntPtr.data())->UserAddCable(pinOut,pinIn);
-    else
-        static_cast<Connectables::Container*>(cntPtr.data())->UserAddCable(pinIn,pinOut);
+//    if(pinOut.direction==PinDirection::Output) {
+//        static_cast<Connectables::Container*>(cntPtr.data())->UserAddCable(pinOut,pinIn);
+//    } else {
+//        static_cast<Connectables::Container*>(cntPtr.data())->UserAddCable(pinIn,pinOut);
+//    }
+
+    myHost->undoStack.push( new ComAddCable(myHost,pinOut,pinIn) );
 }
 
 void SceneView::RemoveCablesFromPin(const ConnectionInfo &pin)
 {
-    QPersistentModelIndex ix = mapConnectionInfo.value(pin);
-    QModelIndex parent = ix.parent().parent().parent();
-    if(pin.bridge) parent = parent.parent();
-    QSharedPointer<Connectables::Object> cntPtr = objFactory->GetObjectFromId(parent.data(UserRoles::value).toInt());
-    static_cast<Connectables::Container*>(cntPtr.data())->UserRemoveCableFromPin(pin);
+//    QPersistentModelIndex ix = mapConnectionInfo.value(pin);
+//    QModelIndex parent = ix.parent().parent().parent();
+//    if(pin.bridge) parent = parent.parent();
+//    QSharedPointer<Connectables::Object> cntPtr = objFactory->GetObjectFromId(parent.data(UserRoles::value).toInt());
+//    static_cast<Connectables::Container*>(cntPtr.data())->UserRemoveCableFromPin(pin);
+    myHost->undoStack.push( new ComDisconnectPin(myHost,pin) );
 }
 
 void SceneView::RemovePin(const ConnectionInfo &pin)

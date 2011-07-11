@@ -21,6 +21,7 @@
 #include "objectview.h"
 #include "pinview.h"
 #include "../globals.h"
+#include "models/comremoveobject.h"
 
 using namespace View;
 
@@ -168,16 +169,6 @@ void ObjectView::UpdateTitle()
     }
 }
 
-void ObjectView::RemoveWithBridge()
-{
-    setActive(false);
-    static_cast<Connectables::Container*>(
-        myHost->objFactory->GetObj(objIndex.parent()).data()
-    )->UserParkWithBridge(
-        myHost->objFactory->GetObj(objIndex)
-    );
-}
-
 /*!
   Update the view, base on the model index
   */
@@ -230,13 +221,14 @@ void ObjectView::SetErrorMessage(const QString & msg)
 void ObjectView::closeEvent ( QCloseEvent * event )
 {
     setActive(false);
-
-    static_cast<Connectables::Container*>(
-            myHost->objFactory->GetObj(objIndex.parent()).data()
-        )->UserParkObject(
-            myHost->objFactory->GetObj(objIndex)
-        );
+    myHost->undoStack.push( new ComRemoveObject(myHost, objIndex , RemoveType::RemoveWithCables) );
     event->ignore();
+}
+
+void ObjectView::RemoveWithBridge()
+{
+    setActive(false);
+    myHost->undoStack.push( new ComRemoveObject(myHost, objIndex, RemoveType::BridgeCables) );
 }
 
 /*!

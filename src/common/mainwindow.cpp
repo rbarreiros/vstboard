@@ -94,6 +94,18 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     InitColors();
     connect( viewConfig, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
             this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)));
+
+    QAction *undo = myHost->undoStack.createUndoAction(ui->mainToolBar);
+    undo->setIcon(QIcon(":/img16x16/undo.png"));
+    undo->setShortcut( QKeySequence( Qt::CTRL | Qt::Key_Z) );
+    undo->setShortcutContext(Qt::ApplicationShortcut);
+    ui->mainToolBar->addAction( undo );
+
+    QAction *redo = myHost->undoStack.createRedoAction(ui->mainToolBar);
+    redo->setIcon(QIcon(":/img16x16/redo.png"));
+    redo->setShortcut( QKeySequence( Qt::CTRL | Qt::Key_Y) );
+    redo->setShortcutContext(Qt::ApplicationShortcut);
+    ui->mainToolBar->addAction( redo );
 }
 
 void MainWindow::SetupBrowsersModels(const QString &vstPath, const QString &browserPath)

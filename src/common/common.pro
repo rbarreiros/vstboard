@@ -112,7 +112,11 @@ SOURCES += \
     views/listaudiodevicesview.cpp \
     views/objectdropzone.cpp \
     views/gradientwidget.cpp \
-    views/gradientwidgethue.cpp
+    views/gradientwidgethue.cpp \
+    models/comdisconnectpin.cpp \
+    models/comaddobject.cpp \
+    models/comaddcable.cpp \
+    models/comremoveobject.cpp
 
 HEADERS += \
     globals.h \
@@ -187,7 +191,11 @@ HEADERS += \
     views/listaudiodevicesview.h \
     views/objectdropzone.h \
     views/gradientwidget.h \
-    views/gradientwidgethue.h
+    views/gradientwidgethue.h \
+    models/comdisconnectpin.h \
+    models/comaddobject.h \
+    models/comaddcable.h \
+    models/comremoveobject.h
 
 FORMS += \
     views/configdialog.ui \

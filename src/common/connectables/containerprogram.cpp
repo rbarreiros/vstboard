@@ -30,18 +30,21 @@ using namespace Connectables;
 QTime ContainerProgram::unsavedTime;
 
 ContainerProgram::ContainerProgram(MainHost *myHost,Container *container) :
-        container(container),
-        dirty(false),
-        myHost(myHost)
+    container(container),
+    dirty(false),
+    myHost(myHost),
+    collectedListOfAddedCables(0),
+    collectedListOfRemovedCables(0)
 {
 }
 
-ContainerProgram::ContainerProgram(const ContainerProgram& c)
+ContainerProgram::ContainerProgram(const ContainerProgram& c) :
+    container(c.container),
+    dirty(false),
+    myHost(c.myHost),
+    collectedListOfAddedCables(0),
+    collectedListOfRemovedCables(0)
 {
-    myHost = c.myHost;
-    container = c.container;
-    dirty=false;
-
     foreach(QSharedPointer<Object> objPtr, c.listObjects) {
         listObjects << objPtr;
     }
@@ -290,6 +293,9 @@ bool ContainerProgram::AddCable(const ConnectionInfo &outputPin, const Connectio
     Cable *cab = new Cable(myHost,outputPin,inputPin);
     listCables << cab;
 
+    if(collectedListOfAddedCables)
+        *collectedListOfAddedCables << QPair<ConnectionInfo,ConnectionInfo>(outputPin,inputPin);
+
     if(!hidden && container)
         cab->AddToParentNode(container->GetCablesIndex());
 
@@ -300,6 +306,9 @@ bool ContainerProgram::AddCable(const ConnectionInfo &outputPin, const Connectio
 
 void ContainerProgram::RemoveCable(Cable *cab)
 {
+    if(collectedListOfRemovedCables)
+        *collectedListOfRemovedCables << QPair<ConnectionInfo,ConnectionInfo>(cab->GetInfoOut(),cab->GetInfoIn());
+
     listCables.removeAll(cab);
     cab->RemoveFromParentNode(container->GetCablesIndex());
     myHost->OnCableRemoved(cab);
@@ -445,6 +454,19 @@ void ContainerProgram::MoveInputCablesFromObj(int newObjId, int oldObjId)
                 RemoveCable(cab);
             }
         }
+        --i;
+    }
+}
+
+void ContainerProgram::GetListOfConnectedPinsTo(const ConnectionInfo &pin, QList<ConnectionInfo> &list)
+{
+    int i=listCables.size()-1;
+    while(i>=0) {
+        Cable *cab = listCables.at(i);
+        if(cab->GetInfoIn()==pin)
+            list << cab->GetInfoOut();
+        if(cab->GetInfoOut()==pin)
+            list << cab->GetInfoIn();
         --i;
     }
 }

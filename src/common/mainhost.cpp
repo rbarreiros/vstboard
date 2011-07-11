@@ -783,6 +783,8 @@ void MainHost::LoadSetupFile(const QString &filename)
     if(filename.isEmpty())
         return;
 
+    undoStack.clear();
+
     if(ProjectFile::LoadFromFile(this,filename)) {
         ConfigDialog::AddRecentSetupFile(filename,this);
         currentSetupFile = filename;
@@ -798,6 +800,8 @@ void MainHost::LoadProjectFile(const QString &filename)
     if(filename.isEmpty())
         return;
 
+    undoStack.clear();
+
     if(ProjectFile::LoadFromFile(this,filename)) {
         ConfigDialog::AddRecentProjectFile(filename,this);
         currentProjectFile = filename;
@@ -812,6 +816,9 @@ void MainHost::ReloadProject()
 {
     if(currentProjectFile.isEmpty())
         return;
+
+    undoStack.clear();
+
     ProjectFile::LoadFromFile(this,currentProjectFile);
 }
 
@@ -819,11 +826,16 @@ void MainHost::ReloadSetup()
 {
     if(currentSetupFile.isEmpty())
         return;
+
+    undoStack.clear();
+
     ConfigDialog::AddRecentSetupFile(currentSetupFile,this);
 }
 
 void MainHost::ClearSetup()
 {
+    undoStack.clear();
+
     EnableSolverUpdate(false);
     SetupHostContainer();
     EnableSolverUpdate(true);
@@ -837,6 +849,8 @@ void MainHost::ClearSetup()
 
 void MainHost::ClearProject()
 {
+    undoStack.clear();
+
     EnableSolverUpdate(false);
     SetupProjectContainer();
     SetupProgramContainer();
@@ -860,6 +874,7 @@ void MainHost::SaveSetupFile(QString filename)
         SetSetting("lastSetupDir",QFileInfo(filename).absolutePath());
         ConfigDialog::AddRecentSetupFile(filename,this);
         currentSetupFile = filename;
+        undoStack.clear();
         emit currentFileChanged();
     }
 }
@@ -874,6 +889,7 @@ void MainHost::SaveProjectFile(QString filename)
         SetSetting("lastProjectDir",QFileInfo(filename).absolutePath());
         ConfigDialog::AddRecentProjectFile(filename,this);
         currentProjectFile = filename;
+        undoStack.clear();
         emit currentFileChanged();
     }
 }

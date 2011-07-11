@@ -60,12 +60,19 @@ namespace Connectables {
         void CopyCablesFromObj(int newObjId, int oldObjId);
         void MoveOutputCablesFromObj(int newObjId, int oldObjId);
         void MoveInputCablesFromObj(int newObjId, int oldObjId);
+        void GetListOfConnectedPinsTo(const ConnectionInfo &pin, QList<ConnectionInfo> &list);
 
         bool IsDirty();
         void SetDirty();
 
         void SaveRendererState();
         void LoadRendererState();
+
+        void CollectCableUpdates(QList< QPair<ConnectionInfo,ConnectionInfo> > *addedCables=0,
+                                QList< QPair<ConnectionInfo,ConnectionInfo> > *removedCables=0) {
+            collectedListOfAddedCables=addedCables;
+            collectedListOfRemovedCables=removedCables;
+        }
 
         QDataStream & toStream (QDataStream &) const;
         QDataStream & fromStream (QDataStream &);
@@ -87,6 +94,8 @@ namespace Connectables {
 
         QMap<int,ObjectContainerAttribs>mapObjAttribs;
 
+        QList< QPair<ConnectionInfo,ConnectionInfo> > *collectedListOfAddedCables;
+        QList< QPair<ConnectionInfo,ConnectionInfo> > *collectedListOfRemovedCables;
 
         friend class Container;
         friend class ParkingContainer;

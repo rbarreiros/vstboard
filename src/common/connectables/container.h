@@ -59,6 +59,7 @@ namespace Connectables {
         void CopyCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr);
         void MoveOutputCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr);
         void MoveInputCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr);
+        void GetListOfConnectedPinsTo(const ConnectionInfo &pin, QList<ConnectionInfo> &list);
         bool IsDirty();
         void SetDirty();
         void SetSleep(bool sleeping);
@@ -85,6 +86,8 @@ namespace Connectables {
         const QTime GetLastUpdate();
 
         int GetProgramToSet() { if(progToSet==-1) return currentProgId; else return progToSet; }
+
+        inline ContainerProgram * GetCurrentProgram() {return currentContainerProgram;}
 
     protected:
         void AddChildObject(QSharedPointer<Object> objPtr);
@@ -121,15 +124,24 @@ namespace Connectables {
         QMutex progLoadMutex;
 
     public slots:
-        void UserAddObject(QSharedPointer<Object> objPtr);
-        void UserParkObject(QSharedPointer<Object> objPtr);
-        void UserParkWithBridge(QSharedPointer<Object> objPtr);
+        void UserAddObject(const QSharedPointer<Object> &objPtr,
+                           InsertionType::Enum insertType = InsertionType::NoInsertion,
+                           QList< QPair<ConnectionInfo,ConnectionInfo> > *listOfAddedCables=0,
+                           QList< QPair<ConnectionInfo,ConnectionInfo> > *listOfRemovedCables=0,
+                           const QSharedPointer<Object> &targetPtr=QSharedPointer<Object>());
+        void UserParkObject(QSharedPointer<Object> objPtr,
+                            RemoveType::Enum removeType = RemoveType::RemoveWithCables,
+                            QList< QPair<ConnectionInfo,ConnectionInfo> > *listOfAddedCables=0,
+                            QList< QPair<ConnectionInfo,ConnectionInfo> > *listOfRemovedCables=0);
         void UserAddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
+        void UserAddCable(const QPair<ConnectionInfo,ConnectionInfo>&pair);
         void UserRemoveCableFromPin(const ConnectionInfo &pin);
+        void UserRemoveCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
+        void UserRemoveCable(const QPair<ConnectionInfo,ConnectionInfo>&pair);
 
         void AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin, bool hidden=false);
-//        void RemoveCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
         void RemoveCableFromPin(const ConnectionInfo &pin);
+        void RemoveCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
 //        void RemoveCableFromObj(int objId);
 
         void SaveProgram();

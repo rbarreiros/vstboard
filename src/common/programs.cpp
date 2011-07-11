@@ -420,6 +420,7 @@ void Programs::ChangeProg(const QModelIndex &newPrg)
 //                newGrpItem->child(i,0)->setBackground(Qt::transparent);
         }
 
+        myHost->undoStack.clear();
         emit GroupChanged( currentGrp );
     }
 
@@ -433,6 +434,7 @@ void Programs::ChangeProg(const QModelIndex &newPrg)
     model->itemFromIndex(newPrg)->setData(1,UserRoles::type);
 
     currentPrg = newPrg;
+    myHost->undoStack.clear();
     emit ProgChanged( currentPrg );
 
     projectDirty=true;

@@ -284,9 +284,6 @@ namespace Connectables {
     };
 }
 
-QDataStream & operator<< (QDataStream & out, const Connectables::Object& value);
-//QDataStream & operator>> (QDataStream & in, Connectables::Object& value);
-
 #ifdef _MSC_VER
 #pragma warning( pop )
 #endif

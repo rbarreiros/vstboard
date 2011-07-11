@@ -357,14 +357,6 @@ void Container::RemoveProgram(int prg)
     delete prog;
 }
 
-void Container::UserAddObject(QSharedPointer<Object> objPtr)
-{
-    AddObject(objPtr);
-    myHost->SetSolverUpdateNeeded();
-
-    Updated();
-}
-
 /*!
   Add a new object in the current program
   \param objPtr shared pointer to the object
@@ -408,19 +400,64 @@ void Container::AddParkedObject(QSharedPointer<Object> objPtr)
     ParkChildObject(objPtr);
 }
 
-
-void Container::UserParkObject(QSharedPointer<Object> objPtr)
+void Container::UserAddObject(const QSharedPointer<Object> &objPtr,
+                              InsertionType::Enum insertType,
+                              QList< QPair<ConnectionInfo,ConnectionInfo> > *listOfAddedCables,
+                              QList< QPair<ConnectionInfo,ConnectionInfo> > *listOfRemovedCables,
+                              const QSharedPointer<Object> &targetPtr)
 {
-    ParkObject(objPtr);
+    AddObject(objPtr);
+
+    if(targetPtr) {
+        currentContainerProgram->CollectCableUpdates( listOfAddedCables, listOfRemovedCables );
+
+        switch(insertType) {
+            case InsertionType::InsertBefore:
+                MoveInputCablesFromObj(objPtr, targetPtr);
+                ConnectObjects(objPtr, targetPtr, false);
+                break;
+            case InsertionType::InsertAfter:
+                MoveOutputCablesFromObj(objPtr, targetPtr);
+                ConnectObjects(targetPtr, objPtr, false);
+                break;
+            case InsertionType::AddBefore:
+                ConnectObjects(objPtr, targetPtr, false);
+                break;
+            case InsertionType::AddAfter:
+                ConnectObjects(targetPtr, objPtr, false);
+                break;
+            case InsertionType::Replace:
+                CopyCablesFromObj(objPtr, targetPtr);
+                (targetPtr)->CopyStatusTo(objPtr);
+                ParkObject(targetPtr);
+                break;
+            case InsertionType::NoInsertion:
+                break;
+        }
+        currentContainerProgram->CollectCableUpdates();
+    }
+
     myHost->SetSolverUpdateNeeded();
     Updated();
 }
 
-void Container::UserParkWithBridge(QSharedPointer<Object> objPtr)
+
+void Container::UserParkObject(QSharedPointer<Object> objPtr,
+                               RemoveType::Enum removeType,
+                               QList< QPair<ConnectionInfo,ConnectionInfo> > *listOfAddedCables,
+                               QList< QPair<ConnectionInfo,ConnectionInfo> > *listOfRemovedCables)
 {
-    if(currentContainerProgram)
+    currentContainerProgram->CollectCableUpdates( listOfAddedCables, listOfRemovedCables );
+
+    if(removeType==RemoveType::BridgeCables)
         currentContainerProgram->CreateBridgeOverObj(objPtr->GetIndex());
-    UserParkObject(objPtr);
+
+    ParkObject(objPtr);
+
+    currentContainerProgram->CollectCableUpdates();
+
+    myHost->SetSolverUpdateNeeded();
+    Updated();
 }
 
 /*!
@@ -473,6 +510,13 @@ void Container::MoveInputCablesFromObj(QSharedPointer<Object> newObjPtr, QShared
     if(!currentContainerProgram)
         return;
     currentContainerProgram->MoveInputCablesFromObj( newObjPtr->GetIndex(), ObjPtr->GetIndex() );
+}
+
+void Container::GetListOfConnectedPinsTo(const ConnectionInfo &pin, QList<ConnectionInfo> &list)
+{
+    if(!currentContainerProgram)
+        return;
+    currentContainerProgram->GetListOfConnectedPinsTo(pin,list);
 }
 
 /*!
@@ -555,12 +599,29 @@ void Container::UserAddCable(const ConnectionInfo &outputPin, const ConnectionIn
     Updated();
 }
 
+void Container::UserAddCable(const QPair<ConnectionInfo,ConnectionInfo>&pair)
+{
+    UserAddCable(pair.first,pair.second);
+}
+
 void Container::UserRemoveCableFromPin(const ConnectionInfo &pin)
 {
     RemoveCableFromPin(pin);
     myHost->SetSolverUpdateNeeded();
 
     Updated();
+}
+
+void  Container::UserRemoveCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
+{
+    RemoveCable(outputPin,inputPin);
+    myHost->SetSolverUpdateNeeded();
+    Updated();
+}
+
+void Container::UserRemoveCable(const QPair<ConnectionInfo,ConnectionInfo>&pair)
+{
+    UserRemoveCable(pair.first,pair.second);
 }
 
 /*!
@@ -581,12 +642,12 @@ void Container::AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &
   \param outputPin the output pin (messages sender)
   \param inputPin the input pin (messages receiver)
   */
-//void Container::RemoveCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
-//{
-//    if(!currentProgram)
-//        return;
-//    currentProgram->RemoveCable(outputPin,inputPin);
-//}
+void Container::RemoveCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
+{
+    if(!currentContainerProgram)
+        return;
+    currentContainerProgram->RemoveCable(outputPin,inputPin);
+}
 
 /*!
   Remove all cables from a Pin
@@ -633,7 +694,7 @@ QDataStream & Container::toStream (QDataStream& out) const
         QByteArray tmpBa;
         QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
         tmpStream << obj->info();
-        tmpStream << *obj;
+        obj->toStream( tmpStream );
         ProjectFile::SaveChunk( "CntObj", tmpBa, out);
     }
 
