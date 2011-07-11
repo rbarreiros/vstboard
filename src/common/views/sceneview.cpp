@@ -33,8 +33,8 @@
 #include "mainhost.h"
 #include "vstpluginview.h"
 #include <QSplitter>
-#include "models/comaddcable.h"
-#include "models/comdisconnectpin.h"
+#include "commands/comaddcable.h"
+#include "commands/comdisconnectpin.h"
 
 using namespace View;
 

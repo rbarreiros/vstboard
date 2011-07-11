@@ -3,7 +3,11 @@
 #include "connectables/container.h"
 #include "mainhost.h"
 
-ComAddCable::ComAddCable(MainHost *myHost,const ConnectionInfo &outInfo, const ConnectionInfo &inInfo) :
+ComAddCable::ComAddCable(MainHost *myHost,
+                         const ConnectionInfo &outInfo,
+                         const ConnectionInfo &inInfo,
+                         QUndoCommand  *parent) :
+    QUndoCommand(parent),
     myHost(myHost),
     outInfo(outInfo),
     inInfo(inInfo)

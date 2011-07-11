@@ -113,10 +113,11 @@ SOURCES += \
     views/objectdropzone.cpp \
     views/gradientwidget.cpp \
     views/gradientwidgethue.cpp \
-    models/comdisconnectpin.cpp \
-    models/comaddobject.cpp \
-    models/comaddcable.cpp \
-    models/comremoveobject.cpp
+    commands/comdisconnectpin.cpp \
+    commands/comaddobject.cpp \
+    commands/comaddcable.cpp \
+    commands/comremoveobject.cpp \
+    commands/comchangeprogram.cpp
 
 HEADERS += \
     globals.h \
@@ -192,10 +193,11 @@ HEADERS += \
     views/objectdropzone.h \
     views/gradientwidget.h \
     views/gradientwidgethue.h \
-    models/comdisconnectpin.h \
-    models/comaddobject.h \
-    models/comaddcable.h \
-    models/comremoveobject.h
+    commands/comdisconnectpin.h \
+    commands/comaddobject.h \
+    commands/comaddcable.h \
+    commands/comremoveobject.h \
+    commands/comchangeprogram.h
 
 FORMS += \
     views/configdialog.ui \

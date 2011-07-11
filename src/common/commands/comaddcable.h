@@ -8,7 +8,10 @@ class MainHost;
 class ComAddCable : public QUndoCommand
 {
 public:
-    ComAddCable(MainHost *myHost, const ConnectionInfo &outInfo, const ConnectionInfo &inInfo);
+    ComAddCable(MainHost *myHost,
+                const ConnectionInfo &outInfo,
+                const ConnectionInfo &inInfo,
+                QUndoCommand  *parent=0);
     void undo ();
     void redo ();
 

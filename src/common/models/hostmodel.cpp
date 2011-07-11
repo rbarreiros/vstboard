@@ -25,7 +25,7 @@
 #include "mainwindow.h"
 #include "connectables/objectinfo.h"
 #include "connectables/vstplugin.h"
-#include "comaddobject.h"
+#include "commands/comaddobject.h"
 
 HostModel::HostModel(MainHost *parent) :
         QStandardItemModel(parent),

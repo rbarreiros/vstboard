@@ -21,7 +21,7 @@
 #include "objectview.h"
 #include "pinview.h"
 #include "../globals.h"
-#include "models/comremoveobject.h"
+#include "commands/comremoveobject.h"
 
 using namespace View;
 

@@ -8,7 +8,9 @@ class MainHost;
 class ComDisconnectPin : public QUndoCommand
 {
 public:
-    ComDisconnectPin(MainHost *myHost, const ConnectionInfo &pinInfo);
+    ComDisconnectPin(MainHost *myHost,
+                     const ConnectionInfo &pinInfo,
+                     QUndoCommand  *parent=0);
     void undo ();
     void redo ();
 

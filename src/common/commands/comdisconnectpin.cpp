@@ -3,7 +3,10 @@
 #include "connectables/container.h"
 #include "mainhost.h"
 
-ComDisconnectPin::ComDisconnectPin(MainHost *myHost,const ConnectionInfo &pinInfo) :
+ComDisconnectPin::ComDisconnectPin(MainHost *myHost,
+                                   const ConnectionInfo &pinInfo,
+                                   QUndoCommand  *parent) :
+    QUndoCommand(parent),
     myHost(myHost),
     pinInfo(pinInfo)
 {
