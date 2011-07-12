@@ -60,9 +60,6 @@ public:
     Optimizer *optimizer;
 
 private:
-    void ChangeProg(int midiProgNum);
-    void ChangeGroup(int miniGroupNum);
-
     QDataStream & toStream (QDataStream &);
     QDataStream & fromStream (QDataStream &);
 
@@ -94,6 +91,8 @@ signals:
     void GroupAutosaveChanged(const Autosave::Enum state);
 
 public slots:
+    void ChangeProg(int midiProgNum);
+    void ChangeGroup(int miniGroupNum);
     bool ChangeProg(const QModelIndex &newPrg);
     bool ChangeGroup(const QModelIndex &newGrp);
     void SetProgAutosave(const Autosave::Enum state);
