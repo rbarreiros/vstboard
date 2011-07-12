@@ -41,14 +41,28 @@ namespace Connectables {
 
         QSharedPointer<Object> NewObject(const ObjectInfo &info);
         QSharedPointer<Object> GetObj(const QModelIndex & index);
-//        void RemoveObject(int id);
-        void Clear();
+        inline void RemoveObject(int id) {
+            listObjects.remove(id);
+        }
 
-        QSharedPointer<Object> GetObjectFromId(int id);
+        inline QSharedPointer<Object> GetObjectFromId(int id) {
+            if(id==0)
+                return QSharedPointer<Object>();
+
+            if(!listObjects.contains(id)) {
+                debug("ObjectFactory::GetObjectFromId : object not found %d",id)
+                return QSharedPointer<Object>();
+            }
+
+            return listObjects.value(id);
+        }
+
         int IdFromSavedId(int savedId);
         void ResetSavedId();
         Pin *GetPin(const ConnectionInfo &pinInfo);
-        Pin *GetPin(const QModelIndex & index);
+        inline Pin *GetPin(const QModelIndex & index) {
+            return GetPin( index.data(UserRoles::connectionInfo).value<ConnectionInfo>() );
+        }
 
         const hashObjects &GetListObjects() {return listObjects;}
 

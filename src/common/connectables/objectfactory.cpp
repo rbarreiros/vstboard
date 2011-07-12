@@ -58,23 +58,7 @@ ObjectFactory::ObjectFactory(MainHost *myHost) :
 
 ObjectFactory::~ObjectFactory()
 {
-    Clear();
-}
-
-void ObjectFactory::Clear()
-{
-    cptListObjects=0;
     listObjects.clear();
-}
-
-QSharedPointer<Object> ObjectFactory::GetObjectFromId(int id)
-{
-    if(!listObjects.contains(id)) {
-        debug("ObjectFactory::GetObjectFromId : object not found %d",id)
-        return QSharedPointer<Object>();
-    }
-
-    return listObjects.value(id);
 }
 
 void ObjectFactory::ResetSavedId()
@@ -108,16 +92,10 @@ int ObjectFactory::IdFromSavedId(int savedId)
     return -1;
 }
 
-Pin *ObjectFactory::GetPin(const QModelIndex & index)
-{
-    ConnectionInfo info = index.data(UserRoles::connectionInfo).value<ConnectionInfo>();
-    return GetPin(info);
-}
-
 Pin *ObjectFactory::GetPin(const ConnectionInfo &pinInfo)
 {
     if(!listObjects.contains(pinInfo.objId)) {
-        debug("objectfactory getpin : obj not found")
+        debug2(<<"objectfactory getpin : obj not found"<<pinInfo.objId)
         return 0;
     }
 
@@ -127,18 +105,6 @@ Pin *ObjectFactory::GetPin(const ConnectionInfo &pinInfo)
 
     return 0;
 }
-
-//void ObjectFactory::RemoveObject(int id)
-//{
-//    if(!listObjects.contains(id)) {
-//        debug(QString("ObjectFactory::RemoveObject object %1 already deleted").arg(id).toAscii())
-//        return;
-//    }
-
-//     QSharedPointer<Object> objPtr = listObjects.take(id);
-//     if(objPtr.isNull())
-//         return;
-//}
 
 QSharedPointer<Object> ObjectFactory::GetObj(const QModelIndex & index)
 {
@@ -154,8 +120,11 @@ QSharedPointer<Object> ObjectFactory::GetObj(const QModelIndex & index)
 QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
 {
     int objId = cptListObjects;
-    if(info.forcedObjId) {
+    if(info.forcedObjId!=0) {
         objId = info.forcedObjId;
+        if(listObjects.contains(objId)) {
+            debug2(<<"ObjectFactory::NewObject forcedId already exists"<<objId)
+        }
     }
 
     Object *obj=0;

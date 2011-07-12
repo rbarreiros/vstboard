@@ -61,6 +61,8 @@ Object::Object(MainHost *host, int index, const ObjectInfo &info) :
     objInfo(info),
     containerId(FixedObjId::noContainer)
 {
+    objInfo.forcedObjId = index;
+
     setObjectName(QString("%1.%2").arg(objInfo.name).arg(index));
     doublePrecision=myHost->doublePrecision;
 
@@ -133,6 +135,8 @@ Object::~Object()
         }
     }
     Close();
+
+    myHost->objFactory->RemoveObject(index);
 }
 
 /*!
