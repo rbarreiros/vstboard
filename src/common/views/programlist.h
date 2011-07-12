@@ -30,6 +30,7 @@ namespace Ui {
     class ProgramList;
 }
 
+class MainHost;
 class ProgramList : public QWidget
 {
     Q_OBJECT
@@ -38,19 +39,20 @@ public:
     explicit ProgramList(QWidget *parent = 0);
     ~ProgramList();
 
-    void SetModel(QAbstractItemModel *model);
+    void SetModel(MainHost *myHost, QAbstractItemModel *model);
     void writeSettings(MainHost *myHost);
     void readSettings(MainHost *myHost);
     void resetSettings();
 
 private:
+    MainHost *myHost;
     Ui::ProgramList *ui;
     QAbstractItemModel *model;
     QPersistentModelIndex currentPrg;
 
 signals:
-    void ChangeProg(const QModelIndex &index);
-    void ChangeGroup(const QModelIndex &index);
+//    void ChangeProg(const QModelIndex &index);
+//    void ChangeGroup(const QModelIndex &index);
     void ProgAutoSave(const Autosave::Enum state);
     void GroupAutoSave(const Autosave::Enum state);
     void CurrentDisplayedGroup(const QModelIndex &index);

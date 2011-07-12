@@ -19,12 +19,15 @@
 **************************************************************************/
 
 #include "programlist.h"
+#include "mainhost.h"
 #include "ui_programlist.h"
+#include "commands/comchangeprogram.h"
 
 ProgramList::ProgramList(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ProgramList),
-    model(0)
+    model(0),
+    myHost(0)
 {
     ui->setupUi(this);
 
@@ -48,8 +51,9 @@ ProgramList::~ProgramList()
     delete ui;
 }
 
-void ProgramList::SetModel(QAbstractItemModel *model)
+void ProgramList::SetModel(MainHost *myHost, QAbstractItemModel *model)
 {
+    this->myHost=myHost;
     this->model=model;
     ui->listGrps->setModel(model);
     ui->listProgs->setModel(model);
@@ -91,12 +95,16 @@ void ProgramList::on_listGrps_clicked(QModelIndex index)
 {
     ui->listProgs->setRootIndex(index.child(0,0));
     emit CurrentDisplayedGroup(index);
-    emit ChangeGroup(index);
+//    emit ChangeGroup(index);
+    if(currentPrg.parent().parent()!=index)
+        myHost->undoStack.push( new ComChangeProgram(myHost, currentPrg, index) );
 }
 
 void ProgramList::on_listProgs_clicked(QModelIndex index)
 {
-    emit ChangeProg(index);
+//    emit ChangeProg(index);
+    if(currentPrg!=index)
+        myHost->undoStack.push( new ComChangeProgram(myHost, currentPrg, index) );
 }
 
 void ProgramList::writeSettings(MainHost *myHost)

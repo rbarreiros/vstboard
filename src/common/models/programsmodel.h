@@ -30,13 +30,13 @@ public:
     explicit ProgramsModel(MainHost *parent = 0);
     bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
     bool removeRows ( int row, int count, const QModelIndex & parent = QModelIndex() );
-protected:
-    int movingItems;
+private:
     MainHost *myHost;
-signals:
-
-public slots:
-
+    int movingItemCount;
+    int movingItemLeft;
+    int movingDestRow;
+    QModelIndex movingToParent;
+    QList< QPair<QPersistentModelIndex,QPersistentModelIndex> >listMovedIndex;
 };
 
 #endif // PROGRAMSMODEL_H

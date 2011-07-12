@@ -54,13 +54,13 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
 
     //programs
     myHost->programList->SetMainWindow(this);
-    ui->Programs->SetModel(myHost->programList->GetModel());
+    ui->Programs->SetModel(myHost, myHost->programList->GetModel());
     connect(myHost->programList, SIGNAL(ProgChanged(QModelIndex)),
             ui->Programs,SLOT(OnProgChange(QModelIndex)));
-    connect(ui->Programs,SIGNAL(ChangeProg(QModelIndex)),
-            myHost->programList,SLOT(ChangeProg(QModelIndex)));
-    connect(ui->Programs,SIGNAL(ChangeGroup(QModelIndex)),
-            myHost->programList,SLOT(ChangeGroup(QModelIndex)));
+//    connect(ui->Programs,SIGNAL(ChangeProg(QModelIndex)),
+//            myHost->programList,SLOT(ChangeProg(QModelIndex)));
+//    connect(ui->Programs,SIGNAL(ChangeGroup(QModelIndex)),
+//            myHost->programList,SLOT(ChangeGroup(QModelIndex)));
 
     connect(ui->Programs,SIGNAL(ProgAutoSave(Autosave::Enum)),
             myHost->programList, SLOT(SetProgAutosave(Autosave::Enum)));

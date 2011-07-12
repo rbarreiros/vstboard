@@ -21,10 +21,13 @@
 #include "programsmodel.h"
 #include "globals.h"
 #include "mainhost.h"
+#include "commands/commoveprogram.h"
 
 ProgramsModel::ProgramsModel(MainHost *parent) :
     QStandardItemModel(parent),
-    movingItems(0),
+    movingItemCount(0),
+    movingItemLeft(0),
+    movingDestRow(0),
     myHost(parent)
 {
 }
@@ -59,12 +62,27 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
             break;
         }
         case Qt::MoveAction : {
-            //note that we're moving items : remove items but don't delete the associated programs
-            QStandardItemModel mod;
-            mod.dropMimeData(data,action,0,0,QModelIndex());
-            movingItems=mod.rowCount();
-            return QStandardItemModel::dropMimeData(data, action,row, column, parent);
-            break;
+            //drag&drop to reorder items : the model will delete and recreate new indexes, losing track of persistentmodelindex
+            //we need to track the "currently moving items" to prevent their deletion
+
+            //count the number or moved items
+            QStandardItemModel *item = new QStandardItemModel(this);
+            item->dropMimeData(data,action,0,0,QModelIndex());
+            movingItemCount+=item->rowCount();
+            movingItemLeft+=item->rowCount();
+
+            //get the target row
+            movingDestRow=row;
+
+            if(movingDestRow==-1)
+                //-1 => items are moved to the end
+                movingDestRow=itemFromIndex(parent)->rowCount();
+
+            //get the targeted parent
+            movingToParent=parent;
+
+            QStandardItemModel::dropMimeData(data, action,row, column, parent);
+            return true;
         }
         default : {
             return QStandardItemModel::dropMimeData(data, action,row, column, parent);
@@ -75,8 +93,42 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
 
 bool ProgramsModel::removeRows ( int row, int count, const QModelIndex & parent )
 {
-    if(movingItems>0) {
-        movingItems--;
+    //don't delete if the user is reordering with drag&drop
+    if(movingItemLeft>0) {
+        for(int i=0;i<count;i++) {
+
+            //get the index about to be removed, if there's a persistentIndex on it, we have to change it
+            QModelIndex oriIdx = index(row+i, 0, parent);
+            if( oriIdx.isValid() && persistentIndexList().contains(oriIdx) ) {
+
+                //find the corresponding index in the destination list
+                for(int j=0; j<movingItemCount; j++) {
+                    QModelIndex destIdx = index(movingDestRow+j, 0, movingToParent);
+
+                    //found it, update persistent index
+                    if(destIdx.isValid()
+                        && destIdx.data(UserRoles::value) == oriIdx.data(UserRoles::value)
+                        && itemFromIndex(oriIdx) != itemFromIndex(destIdx)) {
+
+                        changePersistentIndex( oriIdx , destIdx );
+                        listMovedIndex << QPair<QPersistentModelIndex,QPersistentModelIndex>(oriIdx,destIdx);
+                        break;
+                    }
+                }
+            } else {
+                debug2(<<"ProgramsModel::removeRows invalid oriIdx"<<row<<i<<parent)
+            }
+
+            movingItemLeft--;
+        }
+
+        //we're done moving items for now
+        if(movingItemLeft==0) {
+            movingItemCount=0;
+            myHost->undoStack.push( new ComMoveProgram(myHost, listMovedIndex) );
+            listMovedIndex.clear();
+        }
+        return true;
     } else {
         QModelIndex idx = index(row,0,parent);
         if(!myHost->programList->RemoveIndex(idx))
