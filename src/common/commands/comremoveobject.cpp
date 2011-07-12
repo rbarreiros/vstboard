@@ -25,12 +25,6 @@ ComRemoveObject::ComRemoveObject( MainHost *myHost,
     //save references
     ContainerPtr = container;
     objectInfo = object->info();
-    objectInfo.forcedObjId = object->GetIndex();
-
-    object->GetContainerAttribs(attr);
-//    QDataStream stream(&objState, QIODevice::ReadWrite);
-//    object->SaveProgram();
-//    object->toStream( stream );
 
     currentGroup = myHost->programList->GetCurrentMidiGroup();
     currentProg =  myHost->programList->GetCurrentMidiProg();
@@ -51,19 +45,19 @@ void ComRemoveObject::undo ()
         return;
 
     objectInfo = obj->info();
-    objectInfo.forcedObjId = obj->GetIndex();
 
     //get the container
     QSharedPointer<Connectables::Container> container = ContainerPtr.toStrongRef();
     if(!container)
         return;
 
+    QDataStream stream(&objState, QIODevice::ReadWrite);
+    obj->fromStream( stream );
+    objState.clear();
+
     container->UserAddObject( obj );
 
     obj->SetContainerAttribs(attr);
-//    QDataStream stream(&objState, QIODevice::ReadWrite);
-//    obj->fromStream( stream );
-//    obj->LoadProgram( container->GetCurrentProgId() );
 
     //remove cables added at creation
     QPair<ConnectionInfo,ConnectionInfo>pair;
@@ -92,6 +86,11 @@ void ComRemoveObject::redo()
     QSharedPointer<Connectables::Container> container = ContainerPtr.toStrongRef();
     if(!container)
         return;
+
+    QDataStream stream(&objState, QIODevice::ReadWrite);
+    obj->SaveProgram();
+    obj->toStream( stream );
+    obj->GetContainerAttribs(attr);
 
     //remove the object
     container->UserParkObject(obj,removeType,&listAddedCables,&listRemovedCables);

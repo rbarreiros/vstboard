@@ -23,6 +23,7 @@ private:
 
     ObjectInfo objectInfo;
     ObjectInfo targetInfo;
+
     QWeakPointer<Connectables::Container>ContainerPtr;
     InsertionType::Enum insertType;
     ObjectContainerAttribs attr;
@@ -30,7 +31,7 @@ private:
     QList< QPair<ConnectionInfo,ConnectionInfo> >listAddedCables;
     QList< QPair<ConnectionInfo,ConnectionInfo> >listRemovedCables;
 
-//    QByteArray objState;
+    QByteArray objState;
 
     int currentGroup;
     int currentProg;

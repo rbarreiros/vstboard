@@ -12,14 +12,17 @@ ComAddObject::ComAddObject(MainHost *myHost,
     QUndoCommand(parent),
     myHost(myHost),
     objectInfo(objInfo),
+    targetInfo(ObjectInfo()),
     ContainerPtr(container),
-    targetInfo(targetObj->info()),
     insertType(insertType),
     currentGroup(0),
     currentProg(0)
 {
     setText(QObject::tr("Add object"));
-    targetInfo.forcedObjId=targetObj->GetIndex();
+
+    if(targetObj)
+        targetInfo = targetObj->info();
+
     currentGroup = myHost->programList->GetCurrentMidiGroup();
     currentProg =  myHost->programList->GetCurrentMidiProg();
 }
@@ -38,9 +41,9 @@ void ComAddObject::undo ()
     if(!container)
         return;
 
-//    QDataStream stream(&objState, QIODevice::ReadWrite);
-//    obj->SaveProgram();
-//    obj->toStream( stream );
+    QDataStream stream(&objState, QIODevice::ReadWrite);
+    obj->SaveProgram();
+    obj->toStream( stream );
     obj->GetContainerAttribs(attr);
 
     //remove the object
@@ -53,8 +56,9 @@ void ComAddObject::undo ()
             //the target has been deleted, create it back
             target = myHost->objFactory->NewObject( targetInfo );
         }
-        if(target)
+        if(target) {
             container->UserAddObject(target);
+        }
     }
 
     //remove cables added at creation
@@ -86,7 +90,6 @@ void ComAddObject::redo ()
 
     setText(QObject::tr("Add %1").arg(obj->objectName()));
     objectInfo = obj->info();
-    objectInfo.forcedObjId = obj->GetIndex();
 
     //get the container
     QSharedPointer<Connectables::Container> container = ContainerPtr.toStrongRef();
@@ -95,9 +98,13 @@ void ComAddObject::redo ()
 
     //get the target
     QSharedPointer<Connectables::Object> target = myHost->objFactory->GetObjectFromId( targetInfo.forcedObjId );
-    if(target) {
+    if(target)
         targetInfo = target->info();
-        targetInfo.forcedObjId = target->GetIndex();
+
+    if(objState.size()!=0) {
+        QDataStream stream(&objState, QIODevice::ReadWrite);
+        obj->fromStream( stream );
+        objState.clear();
     }
 
     //add the object to the container
@@ -107,11 +114,6 @@ void ComAddObject::redo ()
         obj->SetContainerAttribs(attr);
     }
 
-//    if(objState.size()!=0) {
-//        QDataStream stream(&objState, QIODevice::ReadWrite);
-//        obj->fromStream( stream );
-//        objState.clear();
-//        obj->LoadProgram( container->GetCurrentProgId() );
-//    }
+
 
 }
