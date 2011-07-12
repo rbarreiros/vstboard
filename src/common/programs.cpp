@@ -383,26 +383,26 @@ bool Programs::RemoveIndex(const QModelIndex &index)
     return true;
 }
 
-void Programs::ChangeProg(const QModelIndex &newPrg)
+bool Programs::ChangeProg(const QModelIndex &newPrg)
 {
     if(!newPrg.isValid()) {
         debug("Programs::ChangeProg newprg not valid")
-        return;
+        return false;
     }
 
     if(newPrg==currentPrg)
-        return;
+        return false;
 
     if(!userWantsToUnloadProgram()) {
         emit ProgChanged( currentPrg );
-        return;
+        return false;
     }
 
     QModelIndex newgrp = newPrg.parent().parent();
     if(newgrp!=currentGrp) {
         if(!userWantsToUnloadGroup()) {
             emit ProgChanged( currentPrg );
-            return;
+            return false;
         }
 
         if(currentGrp.isValid()) {
@@ -416,11 +416,8 @@ void Programs::ChangeProg(const QModelIndex &newPrg)
         if(newGrpItem) {
             newGrpItem->setBackground(currentProgColor);
             newGrpItem->setData(1,UserRoles::type);
-//            for(int i=0; i<newGrpItem->rowCount(); i++)
-//                newGrpItem->child(i,0)->setBackground(Qt::transparent);
         }
 
-//        myHost->undoStack.clear();
         emit GroupChanged( currentGrp );
     }
 
@@ -434,34 +431,32 @@ void Programs::ChangeProg(const QModelIndex &newPrg)
     model->itemFromIndex(newPrg)->setData(1,UserRoles::type);
 
     currentPrg = newPrg;
-//    myHost->undoStack.clear();
     emit ProgChanged( currentPrg );
 
     projectDirty=true;
+    return true;
 }
 
-//void Programs::ChangeProg(const QModelIndex &prgIndex)
-//{
-//    QStandardItem *newPrg = model->itemFromIndex( prgIndex );
-//    ChangeProg(newPrg);
-//}
-
 void Programs::ChangeProg(int midiProgNum) {
-    if(!currentPrg.isValid())
+    if(!currentGrp.isValid())
         return;
-    QModelIndex index = currentPrg.parent().child(midiProgNum,0);
-    if(!index.isValid())
-        return;
+
+    QStandardItem* progList = model->itemFromIndex(currentGrp)->child(0,0);
+
+    if(midiProgNum>=progList->rowCount())
+        midiProgNum=progList->rowCount()-1;
+
+    QModelIndex index = progList->child(midiProgNum,0)->index();
     ChangeProg(index);
 }
 
-void Programs::ChangeGroup(const QModelIndex &newGrp)
+bool Programs::ChangeGroup(const QModelIndex &newGrp)
 {
     if(!newGrp.isValid())
-        return;
+        return false;
 
     if(newGrp==currentGrp)
-        return;
+        return false;
 
     QModelIndex newPrg = newGrp.child(0,0).child(0,0);
 
@@ -471,19 +466,37 @@ void Programs::ChangeGroup(const QModelIndex &newGrp)
 
     if(!newPrg.isValid()) {
         debug("Programs::ChangeGroup prog 0 not found")
-        return;
+        return false;
     }
 
-    ChangeProg(newPrg);
+    return ChangeProg(newPrg);
 }
 
-void Programs::ChangeGroup(int grpNum)
+void Programs::ChangeGroup(int miniGroupNum)
 {
-    if(grpNum>=model->rowCount())
-        return;
+    if(miniGroupNum>=model->rowCount())
+        miniGroupNum=model->rowCount()-1;
 
-    QModelIndex newGrp = model->item(grpNum)->index();
+    QModelIndex newGrp = model->item(miniGroupNum)->index();
     ChangeGroup(newGrp);
+}
+
+bool Programs::ChangeProgNow(int miniGroupNum, int midiProgNum)
+{
+    if(miniGroupNum>=model->rowCount())
+        miniGroupNum=model->rowCount()-1;
+
+    QStandardItem* progList = model->item(miniGroupNum)->child(0,0);
+    if(midiProgNum>=progList->rowCount())
+        midiProgNum=progList->rowCount()-1;
+
+    //if the program has not been changed, just return
+    if( !ChangeProg( progList->child(midiProgNum)->index() ) )
+        return false;
+
+    //if program changed, force the host to update
+    myHost->UpdateSolverNow();
+    return true;
 }
 
 int Programs::GetNbOfProgs()
@@ -500,6 +513,24 @@ int Programs::GetNbOfProgs()
 int Programs::GetNbOfGroups()
 {
     return model->rowCount();
+}
+
+void Programs::SetGroupName(int groupNum, const QString &name)
+{
+    if(groupNum>=model->rowCount())
+        return;
+    model->item(groupNum)->setText(name);
+}
+
+void Programs::SetProgName(int groupNum, int progNum, const QString &name)
+{
+    if(groupNum>=model->rowCount() || groupNum<0)
+        return;
+    QStandardItem *listProgs = model->invisibleRootItem();
+
+    if(progNum>=listProgs->rowCount())
+        return;
+    listProgs->child(progNum)->setText(name);
 }
 
 void Programs::SetProgAutosave(const Autosave::Enum state)

@@ -22,6 +22,7 @@
 #include "globals.h"
 #include "mainhost.h"
 #include "commands/commoveprogram.h"
+#include "commands/comrenameprogram.h"
 
 ProgramsModel::ProgramsModel(MainHost *parent) :
     QStandardItemModel(parent),
@@ -76,7 +77,11 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
 
             if(movingDestRow==-1)
                 //-1 => items are moved to the end
-                movingDestRow=itemFromIndex(parent)->rowCount();
+                if(parent.isValid())
+                    movingDestRow=itemFromIndex(parent)->rowCount();
+                else
+                    //we're moving a group, it's parent is not valid
+                    movingDestRow=rowCount();
 
             //get the targeted parent
             movingToParent=parent;
@@ -97,9 +102,9 @@ bool ProgramsModel::removeRows ( int row, int count, const QModelIndex & parent 
     if(movingItemLeft>0) {
         for(int i=0;i<count;i++) {
 
-            //get the index about to be removed, if there's a persistentIndex on it, we have to change it
+            //get the index about to be removed
             QModelIndex oriIdx = index(row+i, 0, parent);
-            if( oriIdx.isValid() && persistentIndexList().contains(oriIdx) ) {
+            if( oriIdx.isValid() ) {
 
                 //find the corresponding index in the destination list
                 for(int j=0; j<movingItemCount; j++) {
@@ -136,4 +141,3 @@ bool ProgramsModel::removeRows ( int row, int count, const QModelIndex & parent 
     }
     return QStandardItemModel::removeRows(row,count,parent);
 }
-

@@ -14,14 +14,20 @@ ComAddObject::ComAddObject(MainHost *myHost,
     objectInfo(objInfo),
     ContainerPtr(container),
     targetInfo(targetObj->info()),
-    insertType(insertType)
+    insertType(insertType),
+    currentGroup(0),
+    currentProg(0)
 {
     setText(QObject::tr("Add object"));
     targetInfo.forcedObjId=targetObj->GetIndex();
+    currentGroup = myHost->programList->GetCurrentMidiGroup();
+    currentProg =  myHost->programList->GetCurrentMidiProg();
 }
 
 void ComAddObject::undo ()
 {
+    myHost->programList->ChangeProgNow(currentGroup,currentProg);
+
     //get the object
     QSharedPointer<Connectables::Object> obj = myHost->objFactory->GetObjectFromId( objectInfo.forcedObjId );
     if(!obj)
@@ -67,6 +73,8 @@ void ComAddObject::undo ()
 
 void ComAddObject::redo ()
 {
+    myHost->programList->ChangeProgNow(currentGroup,currentProg);
+
     //get the object
     QSharedPointer<Connectables::Object> obj = myHost->objFactory->GetObjectFromId( objectInfo.forcedObjId );
     if(!obj) {

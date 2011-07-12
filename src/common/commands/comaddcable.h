@@ -19,6 +19,8 @@ private:
     MainHost *myHost;
     ConnectionInfo outInfo;
     ConnectionInfo inInfo;
+    int currentGroup;
+    int currentProg;
 };
 
 #endif // COMCONNECTPIN_H

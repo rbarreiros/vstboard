@@ -29,7 +29,10 @@ private:
     QList< QPair<ConnectionInfo,ConnectionInfo> >listAddedCables;
     QList< QPair<ConnectionInfo,ConnectionInfo> >listRemovedCables;
 
-//    QByteArray objState;
+    //    QByteArray objState;
+
+    int currentGroup;
+    int currentProg;
 };
 
 #endif // COMREMOVEOBJECT_H

@@ -8,7 +8,7 @@ ComMoveProgram::ComMoveProgram(MainHost *myHost,
     myHost(myHost),
     firstMove(true)
 {
-    setText(QObject::tr("Move program"));
+    setText(QObject::tr("Move programs"));
 
     QPair<QPersistentModelIndex,QPersistentModelIndex>pair;
     foreach(pair,listMovedIndex) {
@@ -30,8 +30,14 @@ void ComMoveProgram::undo()
 
     QStandardItemModel *model = myHost->programList->GetModel();
 
-    QStandardItem *lstProgOri = model->item(groupOri)->child(0,0);
-    QStandardItem *lstProgDest = model->item(groupDest)->child(0,0);
+    QStandardItem *lstProgOri = model->invisibleRootItem();
+    if(groupOri!=-1)
+        lstProgOri = model->item(groupOri)->child(0,0);
+
+
+    QStandardItem *lstProgDest = model->invisibleRootItem();
+    if(groupDest!=-1)
+        lstProgDest = model->item(groupDest)->child(0,0);
 
     foreach(int i, listOri) {
         lstProgOri->insertRows(i,1);
@@ -54,8 +60,14 @@ void ComMoveProgram::redo()
 
     QStandardItemModel *model = myHost->programList->GetModel();
 
-    QStandardItem *lstProgOri = model->item(groupOri)->child(0,0);
-    QStandardItem *lstProgDest = model->item(groupDest)->child(0,0);
+    QStandardItem *lstProgOri = model->invisibleRootItem();
+    if(groupOri!=-1)
+        lstProgOri = model->item(groupOri)->child(0,0);
+
+
+    QStandardItem *lstProgDest = model->invisibleRootItem();
+    if(groupDest!=-1)
+        lstProgDest = model->item(groupDest)->child(0,0);
 
     if(!firstMove) {
         foreach(int i, listDest) {

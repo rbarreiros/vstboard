@@ -8,13 +8,20 @@ ComDisconnectPin::ComDisconnectPin(MainHost *myHost,
                                    QUndoCommand  *parent) :
     QUndoCommand(parent),
     myHost(myHost),
-    pinInfo(pinInfo)
+    pinInfo(pinInfo),
+    currentGroup(0),
+    currentProg(0)
 {
     setText(QObject::tr("Disconnect pin"));
+
+    currentGroup = myHost->programList->GetCurrentMidiGroup();
+    currentProg =  myHost->programList->GetCurrentMidiProg();
 }
 
 void ComDisconnectPin::undo ()
 {
+    myHost->programList->ChangeProgNow(currentGroup,currentProg);
+
     QSharedPointer<Connectables::Container>cntPtr = myHost->objFactory->GetObjectFromId( pinInfo.container ).staticCast<Connectables::Container>();
     if(!cntPtr)
         return;
@@ -30,6 +37,8 @@ void ComDisconnectPin::undo ()
 
 void ComDisconnectPin::redo ()
 {
+    myHost->programList->ChangeProgNow(currentGroup,currentProg);
+
     QSharedPointer<Connectables::Container>cntPtr = myHost->objFactory->GetObjectFromId( pinInfo.container ).staticCast<Connectables::Container>();
     if(!cntPtr)
         return;

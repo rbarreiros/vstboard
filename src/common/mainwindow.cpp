@@ -57,10 +57,10 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     ui->Programs->SetModel(myHost, myHost->programList->GetModel());
     connect(myHost->programList, SIGNAL(ProgChanged(QModelIndex)),
             ui->Programs,SLOT(OnProgChange(QModelIndex)));
-//    connect(ui->Programs,SIGNAL(ChangeProg(QModelIndex)),
-//            myHost->programList,SLOT(ChangeProg(QModelIndex)));
-//    connect(ui->Programs,SIGNAL(ChangeGroup(QModelIndex)),
-//            myHost->programList,SLOT(ChangeGroup(QModelIndex)));
+    connect(ui->Programs,SIGNAL(ChangeProg(QModelIndex)),
+            myHost->programList,SLOT(ChangeProg(QModelIndex)));
+    connect(ui->Programs,SIGNAL(ChangeGroup(QModelIndex)),
+            myHost->programList,SLOT(ChangeGroup(QModelIndex)));
 
     connect(ui->Programs,SIGNAL(ProgAutoSave(Autosave::Enum)),
             myHost->programList, SLOT(SetProgAutosave(Autosave::Enum)));
@@ -106,6 +106,8 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     redo->setShortcut( QKeySequence( Qt::CTRL | Qt::Key_Y) );
     redo->setShortcutContext(Qt::ApplicationShortcut);
     ui->mainToolBar->addAction( redo );
+
+    ui->listUndo->setStack(&myHost->undoStack);
 }
 
 void MainWindow::SetupBrowsersModels(const QString &vstPath, const QString &browserPath)
@@ -429,6 +431,7 @@ void MainWindow::readSettings()
     listDocks << ui->dockVstBrowser;
     listDocks << ui->dockBankBrowser;
     listDocks << ui->dockPrograms;
+    listDocks << ui->dockUndo;
     foreach(QDockWidget *dock, listDocks) {
         ui->menuView->addAction(dock->toggleViewAction());
         ui->mainToolBar->addAction(dock->toggleViewAction());
@@ -526,6 +529,7 @@ void MainWindow::resetSettings()
     listDocksVisible << ui->dockVstBrowser;
     listDocksVisible << ui->dockBankBrowser;
     listDocksVisible << ui->dockPrograms;
+    listDocksVisible << ui->dockUndo;
     foreach(QDockWidget *dock, listDocksVisible) {
         dock->setFloating(false);
         dock->setVisible(true);
@@ -546,6 +550,7 @@ void MainWindow::resetSettings()
     addDockWidget(Qt::LeftDockWidgetArea,  ui->dockBankBrowser);
 
     addDockWidget(Qt::RightDockWidgetArea,  ui->dockPrograms);
+    addDockWidget(Qt::RightDockWidgetArea,  ui->dockUndo);
     addDockWidget(Qt::RightDockWidgetArea,  ui->dockSolver);
     addDockWidget(Qt::RightDockWidgetArea,  ui->dockHostModel);
 

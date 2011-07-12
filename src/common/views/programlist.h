@@ -51,8 +51,8 @@ private:
     QPersistentModelIndex currentPrg;
 
 signals:
-//    void ChangeProg(const QModelIndex &index);
-//    void ChangeGroup(const QModelIndex &index);
+    void ChangeProg(const QModelIndex &index);
+    void ChangeGroup(const QModelIndex &index);
     void ProgAutoSave(const Autosave::Enum state);
     void GroupAutoSave(const Autosave::Enum state);
     void CurrentDisplayedGroup(const QModelIndex &index);

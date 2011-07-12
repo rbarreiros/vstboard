@@ -40,7 +40,8 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
     solverNeedAnUpdate(false),
     solverUpdateEnabled(true),
     mutexListCables(new QMutex(QMutex::Recursive)),
-    settingsGroup(settingsGroup)
+    settingsGroup(settingsGroup),
+    undoProgramChangesEnabled(false)
 {
     doublePrecision=GetSetting("doublePrecision",false).toBool();
 
@@ -563,72 +564,51 @@ bool MainHost::EnableSolverUpdate(bool enable)
     return ret;
 }
 
-//bool MainHost::IsSolverUpdateEnabled()
-//{
-//    QMutexLocker l(&solverMutex);
-//    return solverUpdateEnabled;
-//}
-
-void MainHost::SetSolverUpdateNeeded(bool need)
-{
-    solverMutex.lock();
-    solverNeedAnUpdate = need;
-    solverMutex.unlock();
-}
-
 void MainHost::UpdateSolver(bool forceUpdate)
 {
     solverMutex.lock();
 
-    if(!solverNeedAnUpdate) {
-        solverMutex.unlock();
-        return;
-    }
-
-//    solverNeedAnUpdate=false;
-        //solver needs an update
-//        solverNeedAnUpdate = true;
-
-        bool solverWasEnabled=solverUpdateEnabled;
-
-        //return if solver update was disabled
-        if(!solverUpdateEnabled && !forceUpdate) {
+        //update not forced, not needed or disabled : return
+        if( (!solverUpdateEnabled || !solverNeedAnUpdate) && !forceUpdate) {
             solverMutex.unlock();
             return;
         }
 
         //disable other solver updates
+        bool solverWasEnabled=solverUpdateEnabled;
         solverUpdateEnabled = false;
+
+        //allow others to ask for a new update while we're updating
+        solverNeedAnUpdate = false;
 
     solverMutex.unlock();
 
-    //if forced : wait the end of rendering
-    if(forceUpdate)
+    //if forced : lock rendering
+    if(forceUpdate) {
         mutexRender.lock();
-    else {
+    } else {
         //not forced : do it later if we can't do it now
         if(!mutexRender.tryLock()) {
+            //can't lock, ask for a ne update
+            SetSolverUpdateNeeded();
             EnableSolverUpdate(solverWasEnabled);
             return;
         }
     }
 
+    //update the solver
     mutexListCables->lock();
         solver->Resolve(workingListOfCables, renderer);
     mutexListCables->unlock();
 
-    SetSolverUpdateNeeded(false);
-
-    //allow rendering
     mutexRender.unlock();
-
     EnableSolverUpdate(solverWasEnabled);
 }
 
 void MainHost::ChangeNbThreads(int nbThreads)
 {
     renderer->SetNbThreads(nbThreads);
-    SetSolverUpdateNeeded(true);
+    SetSolverUpdateNeeded();
 
 }
 
@@ -874,7 +854,6 @@ void MainHost::SaveSetupFile(QString filename)
         SetSetting("lastSetupDir",QFileInfo(filename).absolutePath());
         ConfigDialog::AddRecentSetupFile(filename,this);
         currentSetupFile = filename;
-        undoStack.clear();
         emit currentFileChanged();
     }
 }
@@ -889,7 +868,6 @@ void MainHost::SaveProjectFile(QString filename)
         SetSetting("lastProjectDir",QFileInfo(filename).absolutePath());
         ConfigDialog::AddRecentProjectFile(filename,this);
         currentProjectFile = filename;
-        undoStack.clear();
         emit currentFileChanged();
     }
 }

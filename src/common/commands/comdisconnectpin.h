@@ -18,6 +18,9 @@ private:
     MainHost *myHost;
     ConnectionInfo pinInfo;
     QList<ConnectionInfo>listConnectedPins;
+
+    int currentGroup;
+    int currentProg;
 };
 
 #endif // COMDISCONNECTPIN_H

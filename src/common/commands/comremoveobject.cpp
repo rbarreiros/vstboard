@@ -8,7 +8,9 @@ ComRemoveObject::ComRemoveObject( MainHost *myHost,
                                   QUndoCommand  *parent) :
     QUndoCommand(parent),
     myHost(myHost),
-    removeType(removeType)
+    removeType(removeType),
+    currentGroup(0),
+    currentProg(0)
 {
     QSharedPointer<Connectables::Container>container = myHost->objFactory->GetObj( objIndex.parent() ).staticCast<Connectables::Container>();
     if(!container)
@@ -29,10 +31,15 @@ ComRemoveObject::ComRemoveObject( MainHost *myHost,
 //    QDataStream stream(&objState, QIODevice::ReadWrite);
 //    object->SaveProgram();
 //    object->toStream( stream );
+
+    currentGroup = myHost->programList->GetCurrentMidiGroup();
+    currentProg =  myHost->programList->GetCurrentMidiProg();
 }
 
 void ComRemoveObject::undo ()
 {
+    myHost->programList->ChangeProgNow(currentGroup,currentProg);
+
     //get the object
     QSharedPointer<Connectables::Object> obj = myHost->objFactory->GetObjectFromId( objectInfo.forcedObjId );
     if(!obj) {
@@ -74,6 +81,8 @@ void ComRemoveObject::undo ()
 
 void ComRemoveObject::redo()
 {
+    myHost->programList->ChangeProgNow(currentGroup,currentProg);
+
     //get the object
     QSharedPointer<Connectables::Object> obj = myHost->objFactory->GetObjectFromId( objectInfo.forcedObjId );
     if(!obj)

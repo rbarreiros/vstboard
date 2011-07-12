@@ -10,7 +10,9 @@ ComAddCable::ComAddCable(MainHost *myHost,
     QUndoCommand(parent),
     myHost(myHost),
     outInfo(outInfo),
-    inInfo(inInfo)
+    inInfo(inInfo),
+    currentGroup(0),
+    currentProg(0)
 {
     if(outInfo.direction==PinDirection::Input) {
         ConnectionInfo tmp(outInfo);
@@ -18,10 +20,15 @@ ComAddCable::ComAddCable(MainHost *myHost,
         this->inInfo=ConnectionInfo(tmp);
     }
     setText(QObject::tr("Add cable"));
+
+    currentGroup = myHost->programList->GetCurrentMidiGroup();
+    currentProg =  myHost->programList->GetCurrentMidiProg();
 }
 
 void ComAddCable::undo ()
 {
+    myHost->programList->ChangeProgNow(currentGroup,currentProg);
+
     QSharedPointer<Connectables::Container>cntPtr = myHost->objFactory->GetObjectFromId( inInfo.container ).staticCast<Connectables::Container>();
     if(!cntPtr)
         return;
@@ -30,6 +37,8 @@ void ComAddCable::undo ()
 
 void ComAddCable::redo ()
 {
+    myHost->programList->ChangeProgNow(currentGroup,currentProg);
+
     QSharedPointer<Connectables::Container>cntPtr = myHost->objFactory->GetObjectFromId( inInfo.container ).staticCast<Connectables::Container>();
     if(!cntPtr)
         return;

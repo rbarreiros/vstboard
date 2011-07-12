@@ -52,13 +52,16 @@ public:
     int GetCurrentMidiProg() const;
     void SetMainWindow(MainWindow *win) {mainWindow=win;}
 
+    bool ChangeProgNow(int miniGroupNum, int midiProgNum);
+
     int GetNbOfProgs();
     int GetNbOfGroups();
 
     Optimizer *optimizer;
 
 private:
-//    void ChangeProg(QStandardItem *newPrg);
+    void ChangeProg(int midiProgNum);
+    void ChangeGroup(int miniGroupNum);
 
     QDataStream & toStream (QDataStream &);
     QDataStream & fromStream (QDataStream &);
@@ -91,12 +94,12 @@ signals:
     void GroupAutosaveChanged(const Autosave::Enum state);
 
 public slots:
-    void ChangeProg(int midiPrgId);
-    void ChangeGroup(int grpNum);
-    void ChangeProg(const QModelIndex &newPrg);
-    void ChangeGroup(const QModelIndex &newGrp);
+    bool ChangeProg(const QModelIndex &newPrg);
+    bool ChangeGroup(const QModelIndex &newGrp);
     void SetProgAutosave(const Autosave::Enum state);
     void SetGroupAutosave(const Autosave::Enum state);
+    void SetGroupName(int groupNum, const QString &name);
+    void SetProgName(int groupNum, int progNum, const QString &name);
 
     void rowsRemoved( const QModelIndex & parent, int start, int end );
 

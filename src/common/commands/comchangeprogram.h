@@ -9,16 +9,17 @@ class ComChangeProgram : public QUndoCommand
 {
 public:
     ComChangeProgram(MainHost *myHost,
-                     const QModelIndex &oldProg,
-                     const QModelIndex &newProg,
+                     const QModelIndex &newProgIndex,
                      QUndoCommand  *parent=0);
     void undo ();
     void redo ();
 private:
     MainHost *myHost;
 
-    QPersistentModelIndex oldProg;
-    QPersistentModelIndex newProg;
+    int oldGroup;
+    int oldProg;
+    int newGroup;
+    int newProg;
 };
 
 #endif // COMCHANGEPROGRAM_H

@@ -31,6 +31,9 @@ private:
     QList< QPair<ConnectionInfo,ConnectionInfo> >listRemovedCables;
 
 //    QByteArray objState;
+
+    int currentGroup;
+    int currentProg;
 };
 
 #endif // COMADDOBJECT_H

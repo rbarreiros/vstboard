@@ -22,6 +22,7 @@
 #include "mainhost.h"
 #include "ui_programlist.h"
 #include "commands/comchangeprogram.h"
+#include "commands/comchangegroup.h"
 
 ProgramList::ProgramList(QWidget *parent) :
     QWidget(parent),
@@ -93,18 +94,29 @@ void ProgramList::OnProgChange(const QModelIndex &index)
 
 void ProgramList::on_listGrps_clicked(QModelIndex index)
 {
+    if(index==currentPrg.parent().parent())
+        return;
+
     ui->listProgs->setRootIndex(index.child(0,0));
     emit CurrentDisplayedGroup(index);
-//    emit ChangeGroup(index);
-    if(currentPrg.parent().parent()!=index)
-        myHost->undoStack.push( new ComChangeProgram(myHost, currentPrg, index) );
+
+    if(myHost->undoProgramChanges()) {
+        myHost->undoStack.push( new ComChangeGroup(myHost, index) );
+    } else {
+        emit ChangeGroup(index);
+    }
 }
 
 void ProgramList::on_listProgs_clicked(QModelIndex index)
 {
-//    emit ChangeProg(index);
-    if(currentPrg!=index)
-        myHost->undoStack.push( new ComChangeProgram(myHost, currentPrg, index) );
+    if(index==currentPrg)
+        return;
+
+    if(myHost->undoProgramChanges()) {
+        myHost->undoStack.push( new ComChangeProgram(myHost, index) );
+    } else {
+        emit ChangeProg(index);
+    }
 }
 
 void ProgramList::writeSettings(MainHost *myHost)

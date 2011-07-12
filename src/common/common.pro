@@ -118,7 +118,9 @@ SOURCES += \
     commands/comaddcable.cpp \
     commands/comremoveobject.cpp \
     commands/comchangeprogram.cpp \
-    commands/commoveprogram.cpp
+    commands/commoveprogram.cpp \
+    commands/comchangegroup.cpp \
+    commands/comrenameprogram.cpp
 
 HEADERS += \
     globals.h \
@@ -199,7 +201,9 @@ HEADERS += \
     commands/comaddcable.h \
     commands/comremoveobject.h \
     commands/comchangeprogram.h \
-    commands/commoveprogram.h
+    commands/commoveprogram.h \
+    commands/comchangegroup.h \
+    commands/comrenameprogram.h
 
 FORMS += \
     views/configdialog.ui \
