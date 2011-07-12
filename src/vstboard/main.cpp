@@ -38,14 +38,6 @@
          switch (type) {
 
          case QtWarningMsg:
-#ifdef _MSC_VER
-                //__asm int 3
-             __debugbreak();
-#else
-                __asm("int3");
-#endif
-            break;
-
          case QtCriticalMsg:
          case QtFatalMsg:
 #ifdef _MSC_VER
