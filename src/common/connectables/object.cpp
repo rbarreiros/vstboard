@@ -679,6 +679,8 @@ QDataStream & Object::toStream(QDataStream & out) const
   */
 bool Object::fromStream(QDataStream & in)
 {
+    LoadProgram(TEMP_PROGRAM);
+
     qint16 id;
     in >> id;
     savedIndex=id;
@@ -698,13 +700,15 @@ bool Object::fromStream(QDataStream & in)
         listPrograms.insert(progId,prog);
     }
 
-    quint16 progId;
-    in >> progId;
+    quint16 savedProgId;
+    in >> savedProgId;
 
     if(in.status()!=QDataStream::Ok) {
         debug2(<<"Object::fromStream err"<<in.status())
         return false;
     }
+
+    LoadProgram(savedProgId);
 
     return true;
 }
