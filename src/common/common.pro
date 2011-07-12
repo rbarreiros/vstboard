@@ -203,7 +203,8 @@ HEADERS += \
     commands/comchangeprogram.h \
     commands/commoveprogram.h \
     commands/comchangegroup.h \
-    commands/comrenameprogram.h
+    commands/comrenameprogram.h \
+    projectfile/fileversion.h
 
 FORMS += \
     views/configdialog.ui \

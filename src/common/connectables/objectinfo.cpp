@@ -68,7 +68,6 @@ QDataStream & ObjectInfo::toStream(QDataStream& stream) const
     stream << duplicateNamesCounter;
     stream << apiName;
     stream << api;
-    stream << forcedObjId;
     return stream;
 }
 
@@ -84,7 +83,6 @@ QDataStream & ObjectInfo::fromStream(QDataStream& stream)
     stream >> duplicateNamesCounter;
     stream >> apiName;
     stream >> api;
-    stream >> forcedObjId;
     return stream;
 }
 
