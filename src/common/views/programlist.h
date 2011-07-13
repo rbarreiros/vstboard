@@ -70,8 +70,10 @@ private slots:
     void on_progAutosaveOff_clicked();
     void on_progAutosaveAsk_clicked();
     void on_progAutosaveOn_clicked();
-    void on_listProgs_clicked(QModelIndex index);
-    void on_listGrps_clicked(QModelIndex index);
+    void on_listProgs_activated(QModelIndex index);
+    void on_listGrps_activated(QModelIndex index);
+    void on_listProgs_clicked(QModelIndex index) {on_listProgs_activated(index);}
+    void on_listGrps_clicked(QModelIndex index) {on_listGrps_activated(index);}
 };
 
 #endif // PROGRAMLIST_H

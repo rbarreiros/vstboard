@@ -48,14 +48,27 @@ public:
     bool userWantsToUnloadGroup();
     bool userWantsToUnloadProgram();
     bool isDirty() {return projectDirty;}
-    int GetCurrentMidiGroup() const;
-    int GetCurrentMidiProg() const;
+
+    inline int GetCurrentMidiGroup() const {
+        if(!currentGrp.isValid())
+            return 0;
+        return currentGrp.row();
+    }
+
+    inline int GetCurrentMidiProg() const {
+        if(!currentPrg.isValid())
+            return 0;
+        return currentPrg.row();
+    }
+
     void SetMainWindow(MainWindow *win) {mainWindow=win;}
 
-    bool ChangeProgNow(int miniGroupNum, int midiProgNum);
+    bool ChangeProgNow(int midiGroupNum, int midiProgNum);
 
     int GetNbOfProgs();
     int GetNbOfGroups();
+
+    bool GetIndexFromProgNum(int midiGroupNum, int midiProgNum, QModelIndex &index);
 
     Optimizer *optimizer;
 
@@ -92,13 +105,13 @@ signals:
 
 public slots:
     void ChangeProg(int midiProgNum);
-    void ChangeGroup(int miniGroupNum);
+    void ChangeGroup(int midiGroupNum);
     bool ChangeProg(const QModelIndex &newPrg);
     bool ChangeGroup(const QModelIndex &newGrp);
     void SetProgAutosave(const Autosave::Enum state);
     void SetGroupAutosave(const Autosave::Enum state);
-    void SetGroupName(int groupNum, const QString &name);
-    void SetProgName(int groupNum, int progNum, const QString &name);
+    void SetGroupName(int midiGroupNum, const QString &name);
+    void SetProgName(int midiGroupNum, int midiProgNum, const QString &name);
 
     void rowsRemoved( const QModelIndex & parent, int start, int end );
 

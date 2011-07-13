@@ -90,14 +90,26 @@
         </layout>
        </item>
        <item>
-        <widget class="GroupListView" name="listGrps" native="true">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+        <widget class="GroupListView" name="listGrps">
+         <property name="minimumSize">
+          <size>
+           <width>1</width>
+           <height>0</height>
+          </size>
          </property>
-         <property name="acceptDrops">
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::DragDrop</enum>
+         </property>
+         <property name="defaultDropAction">
+          <enum>Qt::MoveAction</enum>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
+         <property name="uniformItemSizes">
           <bool>true</bool>
          </property>
         </widget>
@@ -163,12 +175,27 @@
         </layout>
        </item>
        <item>
-        <widget class="ProgListView" name="listProgs" native="true">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+        <widget class="ProgListView" name="listProgs">
+         <property name="minimumSize">
+          <size>
+           <width>1</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::DragDrop</enum>
+         </property>
+         <property name="defaultDropAction">
+          <enum>Qt::MoveAction</enum>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
+         <property name="uniformItemSizes">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -180,16 +207,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>GroupListView</class>
-   <extends>QWidget</extends>
-   <header>views/grouplistview.h</header>
-   <container>1</container>
+   <class>ProgListView</class>
+   <extends>QListView</extends>
+   <header>views/proglistview.h</header>
   </customwidget>
   <customwidget>
-   <class>ProgListView</class>
-   <extends>QWidget</extends>
-   <header>views/proglistview.h</header>
-   <container>1</container>
+   <class>GroupListView</class>
+   <extends>QListView</extends>
+   <header>views/grouplistview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

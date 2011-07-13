@@ -23,13 +23,16 @@
 #include "mainhost.h"
 #include "commands/commoveprogram.h"
 #include "commands/comrenameprogram.h"
+#include "commands/comaddprogram.h"
+#include "commands/comremoveprogram.h"
 
 ProgramsModel::ProgramsModel(MainHost *parent) :
     QStandardItemModel(parent),
     movingItemCount(0),
     movingItemLeft(0),
     movingDestRow(0),
-    myHost(parent)
+    myHost(parent),
+    fromCom(false)
 {
 }
 
@@ -98,6 +101,10 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
 
 bool ProgramsModel::removeRows ( int row, int count, const QModelIndex & parent )
 {
+    if(fromCom)
+        return QStandardItemModel::removeRows ( row, count, parent );
+
+
     //don't delete if the user is reordering with drag&drop
     if(movingItemLeft>0) {
         for(int i=0;i<count;i++) {
@@ -135,9 +142,19 @@ bool ProgramsModel::removeRows ( int row, int count, const QModelIndex & parent 
         }
         return true;
     } else {
-        QModelIndex idx = index(row,0,parent);
-        if(!myHost->programList->RemoveIndex(idx))
-            return false;
+        myHost->undoStack.push( new ComRemoveProgram(myHost, row, count, parent) );
+        return true;
+//        if(!myHost->programList->RemoveIndex(idx))
+//            return false;
     }
     return QStandardItemModel::removeRows(row,count,parent);
+}
+
+bool ProgramsModel::insertRows ( int row, int count, const QModelIndex & parent )
+{
+    if(fromCom || movingItemLeft>0)
+        return QStandardItemModel::insertRows ( row, count, parent );
+
+    myHost->undoStack.push( new ComAddProgram(myHost,row,count,parent) );
+    return true;
 }

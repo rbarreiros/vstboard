@@ -104,7 +104,7 @@ void ComAddObject::redo ()
     if(objState.size()!=0) {
         QDataStream stream(&objState, QIODevice::ReadWrite);
         obj->fromStream( stream );
-        objState.clear();
+        objState.resize(0);
     }
 
     //add the object to the container

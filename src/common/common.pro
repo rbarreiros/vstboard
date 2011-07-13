@@ -120,7 +120,9 @@ SOURCES += \
     commands/comchangeprogram.cpp \
     commands/commoveprogram.cpp \
     commands/comchangegroup.cpp \
-    commands/comrenameprogram.cpp
+    commands/comrenameprogram.cpp \
+    commands/comaddprogram.cpp \
+    commands/comremoveprogram.cpp
 
 HEADERS += \
     globals.h \
@@ -204,7 +206,9 @@ HEADERS += \
     commands/commoveprogram.h \
     commands/comchangegroup.h \
     commands/comrenameprogram.h \
-    projectfile/fileversion.h
+    projectfile/fileversion.h \
+    commands/comaddprogram.h \
+    commands/comremoveprogram.h
 
 FORMS += \
     views/configdialog.ui \

@@ -179,6 +179,9 @@ namespace Connectables {
         /// \todo cleaup container and maincontainer and remove this
         bool listenProgramChanges;
 
+        virtual void ProgramToStream (int progId, QDataStream &out);
+        virtual void ProgramFromStream (int progId, QDataStream &in);
+
     protected:
         /// pointer to the MainHost
         MainHost *myHost;

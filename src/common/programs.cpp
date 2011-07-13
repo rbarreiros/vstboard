@@ -67,58 +67,59 @@ void Programs::DisplayedGroupChanged(const QModelIndex &index)
 
 void Programs::rowsRemoved( const QModelIndex & parent, int start, int end )
 {
-    //a row was removed, after a delete or a move
-    QModelIndex parentIndex;
 
-    if(!parent.isValid()) {
-        //dragging a group
+//    //a row was removed, after a delete or a move
+//    QModelIndex parentIndex;
 
-        if(currentGrp.isValid()) {
-            //current group is still valid : send the new midi prog number and leave
-            emit GroupChanged( currentGrp );
-            return;
+//    if(!parent.isValid()) {
+//        //dragging a group
 
-        } else {
-            //search the current group in the list
-            for(int i=0; i<model->rowCount(); i++) {
-                if (model->hasIndex(i,0)) {
-                    QModelIndex index = model->index(i,0);
-                    if(index.data(UserRoles::type).toInt()==1) {
-                        parentIndex = index.child(0,0);
-                    }
-                }
-            }
-        }
-    } else {
-        //a program is dragged
+//        if(currentGrp.isValid()) {
+//            //current group is still valid : send the new midi prog number and leave
+//            emit GroupChanged( currentGrp );
+//            return;
 
-        if(displayedGroup.isValid() && displayedGroup!=currentGrp) {
-            //dragging a program in another group
-            parentIndex = displayedGroup.child(0,0);
+//        } else {
+//            //search the current group in the list
+//            for(int i=0; i<model->rowCount(); i++) {
+//                if (model->hasIndex(i,0)) {
+//                    QModelIndex index = model->index(i,0);
+//                    if(index.data(UserRoles::type).toInt()==1) {
+//                        parentIndex = index.child(0,0);
+//                    }
+//                }
+//            }
+//        }
+//    } else {
+//        //a program is dragged
 
-        } else {
-            if(currentPrg.isValid()) {
-                //the current prog is still valid, send the new midi number
-                emit ProgChanged( currentPrg );
-                return;
-            }
+//        if(displayedGroup.isValid() && displayedGroup!=currentGrp) {
+//            //dragging a program in another group
+//            parentIndex = displayedGroup.child(0,0);
 
-            parentIndex = parent;
-        }
-    }
+//        } else {
+//            if(currentPrg.isValid()) {
+//                //the current prog is still valid, send the new midi number
+//                emit ProgChanged( currentPrg );
+//                return;
+//            }
 
-    //now that we have the current group, search the current program
+//            parentIndex = parent;
+//        }
+//    }
 
-    QStandardItem *parentItem = model->itemFromIndex(parentIndex);
-    for(int i=0; i<parentItem->rowCount(); i++) {
-        if (model->hasIndex(i,0,parentIndex)) {
-            QModelIndex indexPrg = model->index(i,0,parentIndex);
-            if(indexPrg.data(UserRoles::type).toInt()==1) {
-                ChangeProg(indexPrg);
-                return;
-            }
-        }
-    }
+//    //now that we have the current group, search the current program
+
+//    QStandardItem *parentItem = model->itemFromIndex(parentIndex);
+//    for(int i=0; i<parentItem->rowCount(); i++) {
+//        if (model->hasIndex(i,0,parentIndex)) {
+//            QModelIndex indexPrg = model->index(i,0,parentIndex);
+//            if(indexPrg.data(UserRoles::type).toInt()==1) {
+//                ChangeProg(indexPrg);
+//                return;
+//            }
+//        }
+//    }
 }
 
 void Programs::BuildModel()
@@ -175,20 +176,6 @@ void Programs::BuildModel()
     emit ProgAutosaveChanged(progAutosaveState);
 
     projectDirty=false;
-}
-
-int Programs::GetCurrentMidiGroup() const
-{
-    if(!currentGrp.isValid())
-        return 0;
-    return currentGrp.row();
-}
-
-int Programs::GetCurrentMidiProg() const
-{
-    if(!currentPrg.isValid())
-        return 0;
-    return currentPrg.row();
 }
 
 bool Programs::userWantsToUnloadGroup()
@@ -472,26 +459,42 @@ bool Programs::ChangeGroup(const QModelIndex &newGrp)
     return ChangeProg(newPrg);
 }
 
-void Programs::ChangeGroup(int miniGroupNum)
+void Programs::ChangeGroup(int midiGroupNum)
 {
-    if(miniGroupNum>=model->rowCount())
-        miniGroupNum=model->rowCount()-1;
+    if(midiGroupNum>=model->rowCount())
+        midiGroupNum=model->rowCount()-1;
 
-    QModelIndex newGrp = model->item(miniGroupNum)->index();
+    QModelIndex newGrp = model->item(midiGroupNum)->index();
     ChangeGroup(newGrp);
 }
 
-bool Programs::ChangeProgNow(int miniGroupNum, int midiProgNum)
+bool Programs::GetIndexFromProgNum(int midiGroupNum, int midiProgNum, QModelIndex &index)
 {
-    if(miniGroupNum>=model->rowCount())
-        miniGroupNum=model->rowCount()-1;
+    index = QModelIndex();
 
-    QStandardItem* progList = model->item(miniGroupNum)->child(0,0);
-    if(midiProgNum>=progList->rowCount())
-        midiProgNum=progList->rowCount()-1;
+    if(midiGroupNum>=model->rowCount() || midiGroupNum<0)
+        return false;
+
+    QStandardItem* progList = model->item(midiGroupNum)->child(0,0);
+    if(midiProgNum>=progList->rowCount() || midiProgNum<0)
+        return false;
+
+    QStandardItem* progItem = progList->child(midiProgNum);
+    if(!progItem)
+        return false;
+
+    index = progItem->index();
+    return true;
+}
+
+bool Programs::ChangeProgNow(int midiGroupNum, int midiProgNum)
+{
+    QModelIndex index;
+    if(!GetIndexFromProgNum(midiGroupNum,midiProgNum,index))
+        return false;
 
     //if the program has not been changed, just return
-    if( !ChangeProg( progList->child(midiProgNum)->index() ) )
+    if( !ChangeProg( index ) )
         return false;
 
     //if program changed, force the host to update
@@ -515,22 +518,20 @@ int Programs::GetNbOfGroups()
     return model->rowCount();
 }
 
-void Programs::SetGroupName(int groupNum, const QString &name)
+void Programs::SetGroupName(int midiGroupNum, const QString &name)
 {
-    if(groupNum>=model->rowCount())
+    if(midiGroupNum>=model->rowCount())
         return;
-    model->item(groupNum)->setText(name);
+    model->item(midiGroupNum)->setText(name);
 }
 
-void Programs::SetProgName(int groupNum, int progNum, const QString &name)
+void Programs::SetProgName(int midiGroupNum, int midiProgNum, const QString &name)
 {
-    if(groupNum>=model->rowCount() || groupNum<0)
+   QModelIndex index;
+    if(!GetIndexFromProgNum(midiGroupNum,midiProgNum,index))
         return;
-    QStandardItem *listProgs = model->invisibleRootItem();
 
-    if(progNum>=listProgs->rowCount())
-        return;
-    listProgs->child(progNum)->setText(name);
+    model->itemFromIndex(index)->setText(name);
 }
 
 void Programs::SetProgAutosave(const Autosave::Enum state)
@@ -644,6 +645,7 @@ QDataStream & Programs::fromStream (QDataStream &in)
     projectDirty=false;
     return in;
 }
+
 
 QDataStream & operator<< (QDataStream& out, Programs& value)
 {

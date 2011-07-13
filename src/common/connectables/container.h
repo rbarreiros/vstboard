@@ -44,6 +44,9 @@ namespace Connectables {
         QDataStream & toStream (QDataStream &) const;
         bool fromStream (QDataStream &);
 
+        void ProgramToStream (int progId, QDataStream &out);
+        void ProgramFromStream (int progId, QDataStream &in);
+
         void OnChildDeleted(Object *obj);
 
         /*!

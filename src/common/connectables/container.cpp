@@ -831,3 +831,54 @@ bool Container::loadProgramFromStream (QDataStream &in)
     return true;
 }
 
+void Container::ProgramToStream (int progId, QDataStream &out)
+{
+    ContainerProgram *prog = listContainerPrograms.value(progId);
+    if(!prog) {
+        out << (bool)false;
+        return;
+    }
+
+    out << prog;
+    out << (quint16)prog->listObjects.count();
+    foreach(QSharedPointer<Object>obj, prog->listObjects) {
+        QByteArray tmpBa;
+        QDataStream tmpStream( &tmpBa , QIODevice::ReadWrite);
+        if(obj) {
+            tmpStream << obj->info();
+            obj->ProgramToStream( progId, tmpStream );
+        }
+        out << tmpBa;
+    }
+}
+
+void Container::ProgramFromStream (int progId, QDataStream &in)
+{
+    bool valid=false;
+    in >> valid;
+    if(!valid)
+        return;
+
+    in >> *listContainerPrograms[progId];
+    quint16 nbObj;
+    in >> nbObj;
+    for(int i=0; i<nbObj; i++) {
+        QByteArray tmpBa;
+        QDataStream tmpStream( &tmpBa , QIODevice::ReadWrite);
+        in >> tmpBa;
+
+        ObjectInfo info;
+        tmpStream >> info;
+        QSharedPointer<Object>obj = myHost->objFactory->GetObjectFromId( info.forcedObjId );
+        if(!obj) {
+            obj = myHost->objFactory->NewObject(info);
+        }
+        if(!obj) {
+            debug2(<<"Container::ProgramFromStream can't create obj"<<info.id<<info.name)
+        }
+        if(obj) {
+            obj->ProgramFromStream(progId, tmpStream);
+        }
+
+    }
+}

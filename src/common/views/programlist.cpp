@@ -32,19 +32,9 @@ ProgramList::ProgramList(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    ui->listGrps->setDragDropMode(QAbstractItemView::DragDrop);
-    ui->listGrps->setDefaultDropAction(Qt::MoveAction);
-    ui->listGrps->setFrameShape(QFrame::NoFrame);
-    ui->listGrps->setContextMenuPolicy(Qt::CustomContextMenu);
-    ui->listGrps->setMinimumWidth(1);
     connect( ui->listGrps, SIGNAL(DragOverItemFromWidget(QWidget*,QModelIndex)),
              this, SLOT(OnDragOverGroups(QWidget*,QModelIndex)));
 
-    ui->listProgs->setDragDropMode(QAbstractItemView::DragDrop);
-    ui->listProgs->setDefaultDropAction(Qt::MoveAction);
-    ui->listProgs->setFrameShape(QFrame::NoFrame);
-    ui->listProgs->setContextMenuPolicy(Qt::CustomContextMenu);
-    ui->listProgs->setMinimumWidth(1);
 }
 
 ProgramList::~ProgramList()
@@ -92,7 +82,7 @@ void ProgramList::OnProgChange(const QModelIndex &index)
     ui->listProgs->scrollTo(currentPrg);
 }
 
-void ProgramList::on_listGrps_clicked(QModelIndex index)
+void ProgramList::on_listGrps_activated(QModelIndex index)
 {
     if(index==currentPrg.parent().parent())
         return;
@@ -107,7 +97,7 @@ void ProgramList::on_listGrps_clicked(QModelIndex index)
     }
 }
 
-void ProgramList::on_listProgs_clicked(QModelIndex index)
+void ProgramList::on_listProgs_activated(QModelIndex index)
 {
     if(index==currentPrg)
         return;

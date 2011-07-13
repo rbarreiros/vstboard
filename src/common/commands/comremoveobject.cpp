@@ -53,7 +53,7 @@ void ComRemoveObject::undo ()
 
     QDataStream stream(&objState, QIODevice::ReadWrite);
     obj->fromStream( stream );
-    objState.clear();
+    objState.resize(0);
 
     container->UserAddObject( obj );
 

@@ -713,6 +713,16 @@ bool Object::fromStream(QDataStream & in)
     return true;
 }
 
+void Object::ProgramToStream (int progId, QDataStream &out)
+{
+    out << *listPrograms.value(progId);
+}
+
+void Object::ProgramFromStream (int progId, QDataStream &in)
+{
+    in >> *listPrograms[progId];
+}
+
 /*!
   overload stream out
   */
