@@ -38,6 +38,9 @@
 
         void SaveProgram();
 
+        void ProgramToStream (int progId, QDataStream &out);
+        void ProgramFromStream (int progId, QDataStream &in);
+
     protected:
         void wheelEvent(QWheelEvent * event);
         void mousePressEvent ( QMouseEvent * event );

@@ -1,5 +1,6 @@
 #include "comremovegroup.h"
 #include "mainhost.h"
+#include "mainwindow.h"
 
 ComRemoveGroup::ComRemoveGroup(MainHost *myHost,
                                const QModelIndexList &listToRemove,
@@ -44,6 +45,7 @@ void ComRemoveGroup::undo()
         model->fromCom=false;
 
         myHost->groupContainer->ProgramFromStream(progId,stream);
+        myHost->mainWindow->mySceneView->viewGroup->ProgramFromStream(progId, stream);
     }
 
     progData.resize(0);
@@ -56,7 +58,7 @@ void ComRemoveGroup::redo()
     ProgramsModel *model = myHost->programList->GetModel();
     QDataStream stream(&progData, QIODevice::ReadWrite);
 
-    if(rows.contains( myHost->programList->GetCurrentMidiProg() )) {
+    if(rows.contains( myHost->programList->GetCurrentMidiGroup() )) {
         //go to another program
         int i=0;
         while(i<model->rowCount() && !rows.contains(i)) {
@@ -72,6 +74,7 @@ void ComRemoveGroup::redo()
             int progId = groupIndex.data(UserRoles::value).toInt();
             progIds << progId;
             myHost->groupContainer->ProgramToStream(progId, stream);
+            myHost->mainWindow->mySceneView->viewGroup->ProgramToStream(progId, stream);
 
             if(!myHost->programList->RemoveIndex(groupIndex)) {
                 rows.removeAt(i);

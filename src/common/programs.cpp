@@ -318,6 +318,7 @@ bool Programs::RemoveIndex(const QModelIndex &index)
             return false;
 
         //move to another program
+
         if(index==currentPrg) {
             if(currentPrg.row()==0) {
                 ChangeProg(1);

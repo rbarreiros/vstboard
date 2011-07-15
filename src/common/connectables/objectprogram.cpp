@@ -24,8 +24,7 @@
 
 using namespace Connectables;
 
-ObjectProgram::ObjectProgram(int progId,PinsList *in, PinsList *out) :
-    progId(progId)
+ObjectProgram::ObjectProgram(PinsList *in, PinsList *out)
 {
     ResetDirty();
 
@@ -128,8 +127,6 @@ void ObjectProgram::Save(PinsList *in,PinsList *out)
 
 QDataStream & ObjectProgram::toStream(QDataStream& out) const
 {
-    out << (quint16)progId;
-
     out << (quint16)listParametersIn.size();
     QMap<ushort,ObjectParameter>::ConstIterator i = listParametersIn.constBegin();
     while(i!=listParametersIn.constEnd()) {
@@ -159,8 +156,6 @@ QDataStream & ObjectProgram::toStream(QDataStream& out) const
 
 QDataStream & ObjectProgram::fromStream(QDataStream& in)
 {
-    in >> (quint16&)progId;
-
     quint16 nbParam;
     in >> nbParam;
     for(int i=0; i<nbParam; i++) {

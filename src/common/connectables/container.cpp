@@ -352,6 +352,12 @@ void Container::RemoveProgram(int prg)
 //        debug("Container::RemoveProgram not found")
         return;
     }
+
+    if(prg == currentProgId) {
+        debug2(<<"Container::RemoveProgram removing current program ! "<<prg<<objectName())
+        return;
+    }
+
     ContainerProgram* prog = listContainerPrograms.take(prg);
     prog->Remove(prg);
     delete prog;
@@ -840,10 +846,10 @@ void Container::ProgramToStream (int progId, QDataStream &out)
 
     ContainerProgram *prog = listContainerPrograms.value(progId);
     if(!prog) {
-        out << (bool)false;
+        out << (quint8)0;
         return;
     }
-    out << true;
+    out << (quint8)1;
 
     quint16 nbObj = prog->listObjects.size();
     out << nbObj;
@@ -863,9 +869,9 @@ void Container::ProgramToStream (int progId, QDataStream &out)
 
 void Container::ProgramFromStream (int progId, QDataStream &in)
 {
-    bool valid=false;
+    quint8 valid=0;
     in >> valid;
-    if(!valid)
+    if(valid!=1)
         return;
 
     QList<QSharedPointer<Object> >tmpListObj;

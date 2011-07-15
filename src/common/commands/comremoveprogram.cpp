@@ -1,5 +1,6 @@
 #include "comremoveprogram.h"
 #include "mainhost.h"
+#include "mainwindow.h"
 
 ComRemoveProgram::ComRemoveProgram(MainHost *myHost,
                                    const QModelIndexList &listToRemove,
@@ -46,6 +47,7 @@ void ComRemoveProgram::undo()
         model->fromCom=false;
 
         myHost->programContainer->ProgramFromStream(progId,stream);
+        myHost->mainWindow->mySceneView->viewProgram->ProgramFromStream(progId, stream);
     }
 
     progData.resize(0);
@@ -92,6 +94,7 @@ void ComRemoveProgram::redo()
             int progId = index.data(UserRoles::value).toInt();
             progIds << progId;
             myHost->programContainer->ProgramToStream(progId, stream);
+            myHost->mainWindow->mySceneView->viewProgram->ProgramToStream(progId, stream);
 
             if(!myHost->programList->RemoveIndex(index)) {
                 rows.removeAt(i);

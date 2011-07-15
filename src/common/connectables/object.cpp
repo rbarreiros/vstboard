@@ -293,12 +293,9 @@ void Object::LoadProgram(int prog)
     currentProgId=prog;
 
     if(!listPrograms.contains(currentProgId))
-        listPrograms.insert(currentProgId,new ObjectProgram(prog,listParameterPinIn,listParameterPinOut));
+        listPrograms.insert(currentProgId,new ObjectProgram(listParameterPinIn,listParameterPinOut));
 
     currentProgram=listPrograms.value(currentProgId);
-    if(currentProgram->progId!=currentProgId) {
-        debug2(<<"err")
-    }
     currentProgram->Load(listParameterPinIn,listParameterPinOut);
 
     UpdateModelNode();
@@ -339,7 +336,6 @@ void Object::CopyCurrentProgram(int dest)
         return;
     }
     ObjectProgram *cpy = new ObjectProgram( *currentProgram );
-    cpy->progId=dest;
     cpy->Save(listParameterPinIn,listParameterPinOut);
     listPrograms.insert(dest,cpy);
 }
@@ -349,6 +345,11 @@ void Object::CopyCurrentProgram(int dest)
   */
 void Object::RemoveProgram(int prg)
 {
+    if(prg == currentProgId) {
+        debug2(<<"Object::RemoveProgram removing current program ! "<<prg<<objectName())
+        return;
+    }
+
     if(!listPrograms.contains(prg)) {
         debug("Object::RemoveProgram not found")
         return;
@@ -667,11 +668,7 @@ QDataStream & Object::toStream(QDataStream & out) const
         ++i;
     }
 
-    if(currentProgram)
-        out << (quint16)currentProgram->progId;
-    else
-        out << (quint16)EMPTY_PROGRAM;
-
+    out << currentProgId;
     return out;
 }
 
@@ -696,7 +693,7 @@ bool Object::fromStream(QDataStream & in)
         quint16 progId;
         in >> progId;
 
-        ObjectProgram *prog = new ObjectProgram(progId);
+        ObjectProgram *prog = new ObjectProgram();
         in >> *prog;
         if(listPrograms.contains(progId))
             delete listPrograms.take(progId);
@@ -724,7 +721,7 @@ void Object::ProgramToStream (int progId, QDataStream &out)
 
 void Object::ProgramFromStream (int progId, QDataStream &in)
 {
-    ObjectProgram *prog = new ObjectProgram(progId);
+    ObjectProgram *prog = new ObjectProgram();
     in >> *prog;
     if(listPrograms.contains(progId))
         delete listPrograms.take(progId);

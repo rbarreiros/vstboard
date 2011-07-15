@@ -26,6 +26,7 @@
 #include "commands/comremoveprogram.h"
 #include "commands/comremovegroup.h"
 #include "commands/comcopyprogram.h"
+#include "commands/comcopygroup.h"
 
 ProgramsModel::ProgramsModel(MainHost *parent) :
     QStandardItemModel(parent),
@@ -45,14 +46,40 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
     switch(action) {
         case Qt::CopyAction : {
 
-            //copying a program
+            //copying programs
             if(tmpModel.item(0)->data(UserRoles::nodeType).toInt() == NodeType::program) {
                 QList<int>progIds;
                 for(int i=0; i<tmpModel.rowCount(); i++) {
-                    QStandardItem *tmpItem = tmpModel.item(i);
-                    progIds<<tmpItem->data(UserRoles::value).toInt();
+                    progIds<<tmpModel.item(i)->data(UserRoles::value).toInt();
                 }
-                myHost->undoStack.push( new ComCopyProgram(myHost,progIds,parent.parent(),row) );
+                myHost->undoStack.push( new ComCopyProgram(myHost,progIds,parent.parent().row(),row) );
+            }
+            //copying groups
+            if(tmpModel.item(0)->data(UserRoles::nodeType).toInt() == NodeType::programGroup) {
+
+                QUndoCommand *comm = new QUndoCommand( tr("Copy group") );
+                int destGroupRow = row;
+                if(destGroupRow==-1)
+                    destGroupRow=rowCount();
+
+                //copy the group
+                QList<int>grpIds;
+                for(int i=0; i<tmpModel.rowCount(); i++) {
+                    grpIds<<tmpModel.item(i)->data(UserRoles::value).toInt();
+                }
+                new ComCopyGroup(myHost,grpIds,destGroupRow,comm);
+
+                //copy the childen
+                for(int i=0; i<tmpModel.rowCount(); i++) {
+                    QStandardItem *listProgs = tmpModel.item(i)->child(0,0);
+                    QList<int> tmpLst;
+                    for(int j=0; j<listProgs->rowCount(); j++) {
+                        tmpLst << listProgs->child(j,0)->data(UserRoles::value).toInt();
+                    }
+                    new ComCopyProgram(myHost,tmpLst, destGroupRow+i, 0, comm);
+                }
+
+                myHost->undoStack.push( comm );
             }
             break;
         }
@@ -131,6 +158,7 @@ bool ProgramsModel::removeRows ( int row, int count, const QModelIndex & parent 
         }
         return true;
     }
+
     return QStandardItemModel::removeRows(row,count,parent);
 }
 

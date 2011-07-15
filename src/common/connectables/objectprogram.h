@@ -32,8 +32,8 @@ namespace Connectables {
     {
 
     public:
-        ObjectProgram(int progId) : progId(progId) { ResetDirty(); }
-        ObjectProgram(int progId,PinsList *in, PinsList *out);
+        ObjectProgram() { ResetDirty(); }
+        ObjectProgram(PinsList *in, PinsList *out);
 
         ObjectProgram(const ObjectProgram &c) {
             *this = c;
@@ -42,8 +42,6 @@ namespace Connectables {
 
         void Load(PinsList *in, PinsList *out);
         void Save(PinsList *in,PinsList *out);
-
-        int progId;
 
         QMap<ushort,ObjectParameter> listParametersIn;
         QMap<ushort,ObjectParameter> listParametersOut;

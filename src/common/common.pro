@@ -124,7 +124,8 @@ SOURCES += \
     commands/comaddprogram.cpp \
     commands/comremoveprogram.cpp \
     commands/comremovegroup.cpp \
-    commands/comcopyprogram.cpp
+    commands/comcopyprogram.cpp \
+    commands/comcopygroup.cpp
 
 HEADERS += \
     globals.h \
@@ -212,7 +213,8 @@ HEADERS += \
     commands/comaddprogram.h \
     commands/comremoveprogram.h \
     commands/comremovegroup.h \
-    commands/comcopyprogram.h
+    commands/comcopyprogram.h \
+    commands/comcopygroup.h
 
 FORMS += \
     views/configdialog.ui \

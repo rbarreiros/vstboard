@@ -70,6 +70,14 @@ public:
 
     bool GetIndexFromProgNum(int midiGroupNum, int midiProgNum, QModelIndex &index);
 
+    inline uint GetNextProgId() {
+        return nextProgId++;
+    }
+
+    inline uint GetNextGroupId() {
+        return nextGroupId++;
+    }
+
     Optimizer *optimizer;
 
 private:
