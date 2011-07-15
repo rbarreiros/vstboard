@@ -20,6 +20,11 @@ private:
     int row;
     int count;
     int groupNum;
+    int progNum;
+
+    QList<int> progIds;
+    QStringList progNames;
+    QByteArray progData;
 };
 
 #endif // COMADDPROGRAM_H

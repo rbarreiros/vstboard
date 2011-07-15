@@ -63,7 +63,9 @@ namespace Connectables {
         void GetListOfConnectedPinsTo(const ConnectionInfo &pin, QList<ConnectionInfo> &list);
 
         bool IsDirty();
-        void SetDirty();
+        inline void SetDirty() {
+            dirty=true;
+        }
 
         void SaveRendererState();
         void LoadRendererState();
@@ -82,6 +84,10 @@ namespace Connectables {
         static QTime unsavedTime;
 
     protected:
+        inline void ResetDirty() {
+            dirty=false;
+        }
+
         bool CableExists(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
         bool PinExistAndVisible(const ConnectionInfo &info);
 

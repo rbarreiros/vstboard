@@ -49,10 +49,8 @@ namespace Connectables {
             if(id==0)
                 return QSharedPointer<Object>();
 
-            if(!listObjects.contains(id)) {
-                debug("ObjectFactory::GetObjectFromId : object not found %d",id)
+            if(!listObjects.contains(id))
                 return QSharedPointer<Object>();
-            }
 
             return listObjects.value(id);
         }

@@ -153,7 +153,7 @@ void ContainerProgram::Load(int progId)
         ++i;
     }
 
-    dirty=false;
+    ResetDirty();
 }
 
 void ContainerProgram::Unload()
@@ -217,11 +217,6 @@ bool ContainerProgram::IsDirty()
     return false;
 }
 
-void ContainerProgram::SetDirty()
-{
-    dirty=true;
-}
-
 void ContainerProgram::Save(bool saveChildPrograms)
 {
 
@@ -252,14 +247,14 @@ void ContainerProgram::Save(bool saveChildPrograms)
             mapObjAttribs.insert(obj->GetIndex(),attr);
         }
     }
-    dirty=false;
+    ResetDirty();
 }
 
 void ContainerProgram::AddObject(QSharedPointer<Object> objPtr)
 {
     listObjects << objPtr;
     container->AddChildObject(objPtr);
-    dirty=true;
+    SetDirty();
 }
 
 void ContainerProgram::RemoveObject(QSharedPointer<Object> objPtr)
@@ -267,7 +262,7 @@ void ContainerProgram::RemoveObject(QSharedPointer<Object> objPtr)
     RemoveCableFromObj(objPtr->GetIndex());
     listObjects.removeAll(objPtr);
     container->ParkChildObject(objPtr);
-    dirty=true;
+    SetDirty();
 }
 
 void ContainerProgram::ReplaceObject(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> replacedObjPtr)
@@ -300,7 +295,7 @@ bool ContainerProgram::AddCable(const ConnectionInfo &outputPin, const Connectio
         cab->AddToParentNode(container->GetCablesIndex());
 
     myHost->OnCableAdded(cab);
-    dirty=true;
+    SetDirty();
     return true;
 }
 
@@ -313,7 +308,7 @@ void ContainerProgram::RemoveCable(Cable *cab)
     cab->RemoveFromParentNode(container->GetCablesIndex());
     myHost->OnCableRemoved(cab);
     delete cab;
-    dirty=true;
+    SetDirty();
 }
 
 void ContainerProgram::RemoveCable(const QModelIndex & index)
@@ -482,7 +477,8 @@ bool ContainerProgram::CableExists(const ConnectionInfo &outputPin, const Connec
 
 QDataStream & ContainerProgram::toStream (QDataStream& out) const
 {
-    out << (quint16)listObjects.size();
+    quint16 nbObj = listObjects.size();
+    out << nbObj;
     foreach(QSharedPointer<Object> objPtr, listObjects) {
         out << (qint16)objPtr->GetIndex();
     }
@@ -547,7 +543,7 @@ QDataStream & ContainerProgram::fromStream (QDataStream& in)
         mapObjAttribs.insert(objId,attr);
     }
 
-    dirty=false;
+    ResetDirty();
     return in;
 }
 

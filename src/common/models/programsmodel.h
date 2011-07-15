@@ -30,8 +30,10 @@ public:
     explicit ProgramsModel(MainHost *parent = 0);
     bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
     bool removeRows ( int row, int count, const QModelIndex & parent = QModelIndex() );
+    void removeRows ( QModelIndexList &listToRemove, const QModelIndex & parent = QModelIndex() );
     bool insertRows ( int row, int count, const QModelIndex & parent = QModelIndex() );
     bool fromCom;
+
 private:
     MainHost *myHost;
     int movingItemCount;
@@ -39,6 +41,7 @@ private:
     int movingDestRow;
     QModelIndex movingToParent;
     QList< QPair<QPersistentModelIndex,QPersistentModelIndex> >listMovedIndex;
+
 };
 
 #endif // PROGRAMSMODEL_H

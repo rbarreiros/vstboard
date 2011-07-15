@@ -2,48 +2,51 @@
 #include "mainhost.h"
 
 ComRemoveProgram::ComRemoveProgram(MainHost *myHost,
-                                   int row,
-                                   int count,
+                                   const QModelIndexList &listToRemove,
                                    const QModelIndex &parentIndex,
                                    QUndoCommand *parent) :
     QUndoCommand(parent),
-    myHost(myHost),
-    row(row),
-    count(count)
+    myHost(myHost)
 {
     setText(QObject::tr("Remove program"));
 
-    if(parentIndex.isValid()) {
-        //removing a program
-        groupNum = parentIndex.parent().row();
-        progNum = row;
-    } else {
-        //removing a group
-        progNum = -1;
-        groupNum = row;
+    currentGroup = parentIndex.parent().row();
+
+    foreach(QModelIndex index, listToRemove) {
+        rows << index.row();
     }
+
+    qSort(rows);
 }
 
 void ComRemoveProgram::undo()
 {
     ProgramsModel *model = myHost->programList->GetModel();
-    model->fromCom=true;
-    if(progNum==-1)
-        model->insertRows( groupNum, count );
-    else {
-        QStandardItem *parentItem = model->item(groupNum)->child(0);
-        QDataStream stream(&progData, QIODevice::ReadWrite);
 
-        for(int i=0; i<count; i++) {
-            QStandardItem *newItem = new QStandardItem( progNames.at(i) );
-            int progId = progIds.at(i);
-            newItem->setData(progId, UserRoles::value);
-            parentItem->insertRow( progNum+i, newItem );
-            myHost->programContainer->ProgramFromStream(progId,stream);
-        }
-
+    QStandardItem *progList = model->item(currentGroup)->child(0);
+    if(!progList) {
+        debug2(<<"ComRemoveProgram::undo progList==0")
+        return;
     }
-    model->fromCom=false;
+    QDataStream stream(&progData, QIODevice::ReadWrite);
+
+    for(int i=0; i<rows.size(); i++) {
+        int progId = progIds.at(i);
+
+        QStandardItem *prgItem = new QStandardItem( progNames.at(i) );
+        prgItem->setData(progId, UserRoles::value);
+        prgItem->setData(NodeType::program, UserRoles::nodeType);
+        prgItem->setData(0,UserRoles::type);
+        prgItem->setDragEnabled(true);
+        prgItem->setDropEnabled(false);
+        prgItem->setEditable(true);
+
+        model->fromCom=true;
+        progList->insertRow( rows.at(i), prgItem );
+        model->fromCom=false;
+
+        myHost->programContainer->ProgramFromStream(progId,stream);
+    }
 
     progData.resize(0);
     progIds.clear();
@@ -53,41 +56,56 @@ void ComRemoveProgram::undo()
 void ComRemoveProgram::redo()
 {
     ProgramsModel *model = myHost->programList->GetModel();
+    QStandardItem *progList = model->item(currentGroup)->child(0,0);
 
-    if(progNum==-1)
-        model->removeRows( groupNum, count );
-    else {
-
-        bool currentProgRemoved=false;
-        int currentProg = myHost->programList->GetCurrentMidiProg();
-
-        //check if the current prog will be removed
-        if( myHost->programList->GetCurrentMidiGroup() == groupNum ) {
-            if(currentProg>=row && currentProg<=row+count) {
-                currentProgRemoved=true;
+    if(myHost->programList->GetCurrentMidiGroup()==currentGroup) {
+        if(rows.contains( myHost->programList->GetCurrentMidiProg() )) {
+            //go to another program
+            if(rows.count() == progList->rowCount()) {
+                //find another group
+                int i=0;
+                while(i<model->rowCount() && i==currentGroup) {
+                    i++;
+                }
+                if(i==model->rowCount()) {
+                    rows.clear();
+                    return;
+                }
+                myHost->programList->ChangeGroup(i);
+            } else {
+                int i=0;
+                while(i<progList->rowCount() && !rows.contains(i)) {
+                    i++;
+                }
+                if(i!=progList->rowCount())
+                    myHost->programList->ChangeProg(i);
             }
         }
+    }
 
-        //save the program
-        QModelIndex index;
-        QDataStream stream(&progData, QIODevice::ReadWrite);
-        for(int i=0; i<count; i++) {
-            if(! myHost->programList->GetIndexFromProgNum(groupNum,progNum+i, index) )
-                    continue;
+    QModelIndex index;
+    QDataStream stream(&progData, QIODevice::ReadWrite);
+
+    for(int i=0; i<rows.size(); i++) {
+        if(myHost->programList->GetIndexFromProgNum(currentGroup,rows.at(i), index) ) {
             progNames << index.data(Qt::DisplayRole).toString();
             int progId = index.data(UserRoles::value).toInt();
             progIds << progId;
             myHost->programContainer->ProgramToStream(progId, stream);
+
+            if(!myHost->programList->RemoveIndex(index)) {
+                rows.removeAt(i);
+                i++;
+            }
+        } else {
+            rows.removeAt(i);
+            i--;
         }
-
-        //remove rows
-        model->fromCom=true;
-        model->removeRows( progNum, count, index.parent() );
-        model->fromCom=false;
-
-        //the current prog has been removed, change to the next one
-        if(currentProgRemoved)
-            myHost->programList->ChangeProg( currentProg );
     }
 
+    model->fromCom=true;
+    for(int i=rows.size()-1; i>=0; i--) {
+        model->removeRows( rows.at(i), 1, progList->index() );
+    }
+    model->fromCom=false;
 }

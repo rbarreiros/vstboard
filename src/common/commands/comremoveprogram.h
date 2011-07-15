@@ -8,8 +8,7 @@ class ComRemoveProgram : public QUndoCommand
 {
 public:
     ComRemoveProgram(MainHost *myHost,
-                     int row,
-                     int count,
+                     const QModelIndexList &listToRemove,
                      const QModelIndex &parentIndex,
                      QUndoCommand  *parent=0);
     void undo();
@@ -17,14 +16,12 @@ public:
 
 private:
     MainHost *myHost;
-    int row;
-    int count;
-    int groupNum;
-    int progNum;
-
+    QList<int> rows;
     QList<int> progIds;
     QStringList progNames;
     QByteArray progData;
+
+    int currentGroup;
 };
 
 #endif // COMREMOVEPROGRAM_H

@@ -364,6 +364,7 @@ void Container::RemoveProgram(int prg)
 void Container::AddObject(QSharedPointer<Object> objPtr)
 {
     objPtr->SetContainerId(index);
+    objPtr->UnloadProgram();
 
     //bridges are not stored in program
     if(objPtr->info().nodeType==NodeType::bridge ) {
@@ -385,7 +386,6 @@ void Container::AddObject(QSharedPointer<Object> objPtr)
         listLoadedObjects << objPtr.data();
     currentContainerProgram->AddObject(objPtr);
     objPtr->LoadProgram(currentProgId);
-
 }
 
 /*!
@@ -395,6 +395,7 @@ void Container::AddObject(QSharedPointer<Object> objPtr)
 void Container::AddParkedObject(QSharedPointer<Object> objPtr)
 {
     objPtr->SetContainerId(index);
+    objPtr->UnloadProgram();
 
     listLoadedObjects << objPtr.data();
     ParkChildObject(objPtr);
@@ -797,6 +798,7 @@ bool Container::loadObjectFromStream (QDataStream &in)
 {
     ObjectInfo info;
     in >> info;
+    info.forcedObjId=0;
 
     QSharedPointer<Object> objPtr = myHost->objFactory->NewObject(info);
 
@@ -833,14 +835,18 @@ bool Container::loadProgramFromStream (QDataStream &in)
 
 void Container::ProgramToStream (int progId, QDataStream &out)
 {
+    if(progId == currentProgId)
+        SaveProgram();
+
     ContainerProgram *prog = listContainerPrograms.value(progId);
     if(!prog) {
         out << (bool)false;
         return;
     }
+    out << true;
 
-    out << prog;
-    out << (quint16)prog->listObjects.count();
+    quint16 nbObj = prog->listObjects.size();
+    out << nbObj;
     foreach(QSharedPointer<Object>obj, prog->listObjects) {
         QByteArray tmpBa;
         QDataStream tmpStream( &tmpBa , QIODevice::ReadWrite);
@@ -850,6 +856,9 @@ void Container::ProgramToStream (int progId, QDataStream &out)
         }
         out << tmpBa;
     }
+
+    out << *prog;
+    out << (quint32)currentProgId;
 }
 
 void Container::ProgramFromStream (int progId, QDataStream &in)
@@ -859,19 +868,24 @@ void Container::ProgramFromStream (int progId, QDataStream &in)
     if(!valid)
         return;
 
-    in >> *listContainerPrograms[progId];
+    QList<QSharedPointer<Object> >tmpListObj;
+
     quint16 nbObj;
     in >> nbObj;
     for(int i=0; i<nbObj; i++) {
         QByteArray tmpBa;
         QDataStream tmpStream( &tmpBa , QIODevice::ReadWrite);
         in >> tmpBa;
-
         ObjectInfo info;
         tmpStream >> info;
         QSharedPointer<Object>obj = myHost->objFactory->GetObjectFromId( info.forcedObjId );
         if(!obj) {
             obj = myHost->objFactory->NewObject(info);
+            AddParkedObject(obj);
+            tmpListObj << obj;
+        } else {
+            obj->SetContainerId(index);
+            obj->ResetSavedIndex(info.forcedObjId);
         }
         if(!obj) {
             debug2(<<"Container::ProgramFromStream can't create obj"<<info.id<<info.name)
@@ -879,6 +893,15 @@ void Container::ProgramFromStream (int progId, QDataStream &in)
         if(obj) {
             obj->ProgramFromStream(progId, tmpStream);
         }
-
     }
+
+    if(!listContainerPrograms.contains(progId))
+        listContainerPrograms.insert(progId, new ContainerProgram(myHost,this));
+
+    in >> *listContainerPrograms.value(progId);
+
+    quint32 savedProgId;
+    in >> savedProgId;
+
+    myHost->objFactory->ResetSavedId();
 }

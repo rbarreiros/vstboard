@@ -23,8 +23,9 @@
 #include "mainhost.h"
 #include "commands/commoveprogram.h"
 #include "commands/comrenameprogram.h"
-#include "commands/comaddprogram.h"
 #include "commands/comremoveprogram.h"
+#include "commands/comremovegroup.h"
+#include "commands/comcopyprogram.h"
 
 ProgramsModel::ProgramsModel(MainHost *parent) :
     QStandardItemModel(parent),
@@ -38,30 +39,20 @@ ProgramsModel::ProgramsModel(MainHost *parent) :
 
 bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent)
 {
+    QStandardItemModel tmpModel;
+    tmpModel.dropMimeData(data,action,0,0,QModelIndex());
+
     switch(action) {
         case Qt::CopyAction : {
-            QStandardItemModel mod;
-            mod.dropMimeData(data,action,0,0,QModelIndex());
 
-            for(int i=0; i<mod.rowCount(); i++) {
-                QStandardItem *it = mod.invisibleRootItem()->child(i);
-
-                if(it->data(UserRoles::nodeType).toInt() == NodeType::program) {
-                    QStandardItem *cpy = myHost->programList->CopyProgram(it);
-                    QStandardItem *par = itemFromIndex(parent);
-                    if(row==-1)
-                        par->appendRow(cpy);
-                    else
-                        par->insertRow(row,cpy);
+            //copying a program
+            if(tmpModel.item(0)->data(UserRoles::nodeType).toInt() == NodeType::program) {
+                QList<int>progIds;
+                for(int i=0; i<tmpModel.rowCount(); i++) {
+                    QStandardItem *tmpItem = tmpModel.item(i);
+                    progIds<<tmpItem->data(UserRoles::value).toInt();
                 }
-
-                if(it->data(UserRoles::nodeType).toInt() == NodeType::programGroup) {
-                    QStandardItem *cpy = myHost->programList->CopyGroup(it);
-                    if(row==-1)
-                        appendRow(cpy);
-                    else
-                        invisibleRootItem()->insertRow(row,cpy);
-                }
+                myHost->undoStack.push( new ComCopyProgram(myHost,progIds,parent.parent(),row) );
             }
             break;
         }
@@ -70,10 +61,8 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
             //we need to track the "currently moving items" to prevent their deletion
 
             //count the number or moved items
-            QStandardItemModel *item = new QStandardItemModel(this);
-            item->dropMimeData(data,action,0,0,QModelIndex());
-            movingItemCount+=item->rowCount();
-            movingItemLeft+=item->rowCount();
+            movingItemCount+=tmpModel.rowCount();
+            movingItemLeft+=tmpModel.rowCount();
 
             //get the target row
             movingDestRow=row;
@@ -83,7 +72,7 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
                 if(parent.isValid())
                     movingDestRow=itemFromIndex(parent)->rowCount();
                 else
-                    //we're moving a group, it's parent is not valid
+                    //we're moving a group
                     movingDestRow=rowCount();
 
             //get the targeted parent
@@ -101,9 +90,9 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
 
 bool ProgramsModel::removeRows ( int row, int count, const QModelIndex & parent )
 {
-    if(fromCom)
+    if(fromCom) {
         return QStandardItemModel::removeRows ( row, count, parent );
-
+    }
 
     //don't delete if the user is reordering with drag&drop
     if(movingItemLeft>0) {
@@ -141,20 +130,47 @@ bool ProgramsModel::removeRows ( int row, int count, const QModelIndex & parent 
             listMovedIndex.clear();
         }
         return true;
-    } else {
-        myHost->undoStack.push( new ComRemoveProgram(myHost, row, count, parent) );
-        return true;
-//        if(!myHost->programList->RemoveIndex(idx))
-//            return false;
     }
     return QStandardItemModel::removeRows(row,count,parent);
 }
 
+void ProgramsModel::removeRows ( QModelIndexList &listToRemove, const QModelIndex & parent )
+{
+    if(parent.isValid()) {
+        //keep one program
+        if(listToRemove.size() == itemFromIndex(parent)->rowCount())
+            listToRemove.takeFirst();
+        if(listToRemove.isEmpty())
+            return;
+
+        myHost->undoStack.push( new ComRemoveProgram(myHost, listToRemove, parent) );
+    } else {
+        //keep one group
+        if(listToRemove.size() == rowCount())
+            listToRemove.takeFirst();
+        if(listToRemove.isEmpty())
+            return;
+
+        QUndoCommand *comm = new QUndoCommand( tr("Remove group") );
+        foreach(QModelIndex index, listToRemove) {
+            QStandardItem *listProgs = itemFromIndex(index)->child(0,0);
+            QModelIndexList tmpLst;
+            for(int i=0; i<listProgs->rowCount(); i++) {
+                tmpLst << listProgs->child(i,0)->index();
+            }
+            new ComRemoveProgram(myHost, tmpLst, listProgs->index(), comm);
+        }
+        new ComRemoveGroup(myHost, listToRemove, comm);
+        myHost->undoStack.push( comm );
+    }
+}
+
 bool ProgramsModel::insertRows ( int row, int count, const QModelIndex & parent )
 {
-    if(fromCom || movingItemLeft>0)
+    if(fromCom || movingItemLeft>0) {
         return QStandardItemModel::insertRows ( row, count, parent );
+    }
 
-    myHost->undoStack.push( new ComAddProgram(myHost,row,count,parent) );
+//    myHost->undoStack.push( new ComAddProgram(myHost,row,count,parent) );
     return true;
 }

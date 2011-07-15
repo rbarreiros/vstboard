@@ -236,7 +236,7 @@ bool Object::IsDirty()
 {
     if(!currentProgram)
         return false;
-    return currentProgram->isDirty;
+    return currentProgram->IsDirty();
 }
 
 /*!
@@ -248,7 +248,7 @@ void Object::OnProgramDirty()
     if(!currentProgram)
         return;
 
-    currentProgram->isDirty=true;
+    currentProgram->SetDirty();
 }
 
 /*!
@@ -256,6 +256,7 @@ void Object::OnProgramDirty()
   */
 void Object::UnloadProgram()
 {
+    currentProgram=0;
     currentProgId=EMPTY_PROGRAM;
 }
 
@@ -264,7 +265,7 @@ void Object::UnloadProgram()
   */
 void Object::SaveProgram()
 {
-    if(!currentProgram || !currentProgram->isDirty)
+    if(!currentProgram || !currentProgram->IsDirty())
         return;
 
     currentProgram->Save(listParameterPinIn,listParameterPinOut);
@@ -279,7 +280,6 @@ void Object::SaveProgram()
 void Object::LoadProgram(int prog)
 {
     //if prog is already loaded, update model
-
     if(prog==currentProgId && currentProgram) {
         UpdateModelNode();
         return;
@@ -296,6 +296,9 @@ void Object::LoadProgram(int prog)
         listPrograms.insert(currentProgId,new ObjectProgram(prog,listParameterPinIn,listParameterPinOut));
 
     currentProgram=listPrograms.value(currentProgId);
+    if(currentProgram->progId!=currentProgId) {
+        debug2(<<"err")
+    }
     currentProgram->Load(listParameterPinIn,listParameterPinOut);
 
     UpdateModelNode();
@@ -679,7 +682,7 @@ QDataStream & Object::toStream(QDataStream & out) const
   */
 bool Object::fromStream(QDataStream & in)
 {
-    LoadProgram(TEMP_PROGRAM);
+//    LoadProgram(TEMP_PROGRAM);
 
     qint16 id;
     in >> id;
@@ -708,19 +711,24 @@ bool Object::fromStream(QDataStream & in)
         return false;
     }
 
-    LoadProgram(savedProgId);
-
     return true;
 }
 
 void Object::ProgramToStream (int progId, QDataStream &out)
 {
+    if(progId == currentProgId) {
+        SaveProgram();
+    }
     out << *listPrograms.value(progId);
 }
 
 void Object::ProgramFromStream (int progId, QDataStream &in)
 {
-    in >> *listPrograms[progId];
+    ObjectProgram *prog = new ObjectProgram(progId);
+    in >> *prog;
+    if(listPrograms.contains(progId))
+        delete listPrograms.take(progId);
+    listPrograms.insert(progId,prog);
 }
 
 /*!

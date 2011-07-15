@@ -25,9 +25,10 @@
 using namespace Connectables;
 
 ObjectProgram::ObjectProgram(int progId,PinsList *in, PinsList *out) :
-    progId(progId),
-    isDirty(false)
+    progId(progId)
 {
+    ResetDirty();
+
     ObjectParameter param;
     QMap<quint16,Pin*>::const_iterator i = in->listPins.constBegin();
     while(i!=in->listPins.constEnd()) {
@@ -102,7 +103,7 @@ void ObjectProgram::Load(PinsList *in, PinsList *out)
         ++l;
     }
 
-    isDirty=false;
+    ResetDirty();
 }
 
 void ObjectProgram::Save(PinsList *in,PinsList *out)
@@ -121,7 +122,7 @@ void ObjectProgram::Save(PinsList *in,PinsList *out)
         ++j;
     }
 
-    isDirty=false;
+    ResetDirty();
 }
 
 
@@ -188,7 +189,7 @@ QDataStream & ObjectProgram::fromStream(QDataStream& in)
         listOtherValues.insert(id,value);
     }
 
-    isDirty=false;
+    ResetDirty();
     return in;
 }
 

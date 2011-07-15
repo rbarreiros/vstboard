@@ -20,6 +20,7 @@
 //#include "precomp.h"
 #include "proglistview.h"
 #include "globals.h"
+#include "models/programsmodel.h"
 
 ProgListView::ProgListView(QWidget *parent) :
     QListView(parent)
@@ -36,6 +37,12 @@ ProgListView::ProgListView(QWidget *parent) :
     setSelectionMode(ExtendedSelection);
 }
 
+//void ProgListView::startDrag(Qt::DropActions supportedActions)
+//{
+//    listDragItems = selectionModel()->selectedIndexes();
+//    QListView::startDrag(supportedActions);
+//}
+
 void ProgListView::dragMoveEvent ( QDragMoveEvent * event )
 {
     if(event->source() != this) {
@@ -50,6 +57,11 @@ void ProgListView::dragMoveEvent ( QDragMoveEvent * event )
 
     QListView::dragMoveEvent(event);
 }
+
+//void ProgListView::dropEvent(QDropEvent *e)
+//{
+//    QListView::dropEvent(e);
+//}
 
 void ProgListView::OnContextMenu(const QPoint & pos)
 {
@@ -66,8 +78,9 @@ void ProgListView::OnContextMenu(const QPoint & pos)
 
 void ProgListView::DeleteItem()
 {
-    if(currentIndex().isValid()) {
-        model()->removeRow( currentIndex().row(), currentIndex().parent() );
+    ProgramsModel *progModel = qobject_cast<ProgramsModel*>(model());
+    if(!progModel)
         return;
-    }
+
+    progModel->removeRows(selectedIndexes(),currentIndex().parent());
 }

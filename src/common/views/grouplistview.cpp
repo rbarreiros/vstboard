@@ -20,6 +20,7 @@
 //#include "precomp.h"
 #include "grouplistview.h"
 #include "globals.h"
+#include "models/programsmodel.h"
 
 GroupListView::GroupListView(QWidget *parent) :
     QListView(parent)
@@ -64,8 +65,9 @@ void GroupListView::OnContextMenu(const QPoint & pos)
 
 void GroupListView::DeleteItem()
 {
-    if(currentIndex().isValid()) {
-        model()->removeRow( currentIndex().row() );
+    ProgramsModel *progModel = qobject_cast<ProgramsModel*>(model());
+    if(!progModel)
         return;
-    }
+
+    progModel->removeRows(selectedIndexes(),currentIndex().parent());
 }

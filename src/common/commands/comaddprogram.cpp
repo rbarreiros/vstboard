@@ -6,14 +6,22 @@ ComAddProgram::ComAddProgram(MainHost *myHost,
                              int count,
                              const QModelIndex & parentIndex,
                              QUndoCommand  *parent) :
-        QUndoCommand(parent),
-        myHost(myHost),
-        row(row),
-        count(count)
+    QUndoCommand(parent),
+    myHost(myHost),
+    row(row),
+    count(count)
 {
     setText(QObject::tr("Add program"));
 
-    groupNum = parentIndex.parent().row();
+    if(parentIndex.isValid()) {
+        //removing a program
+        groupNum = parentIndex.parent().row();
+        progNum = row;
+    } else {
+        //removing a group
+        progNum = -1;
+        groupNum = row;
+    }
 }
 
 void ComAddProgram::undo ()
