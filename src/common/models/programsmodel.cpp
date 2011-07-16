@@ -245,10 +245,19 @@ bool ProgramsModel::removeRows ( int row, int count, const QModelIndex & parent 
         return QStandardItemModel::removeRows(row,count,parent);
 
     if(currentCommand) {
-        for(int i=0; i<count; ++i)
-            new ComRemoveProgram( this, row, parent.parent().row(), currentCommand);
-
         droppedItemsCount-=count;
+
+        while(count>0) {
+            if(parent.isValid()) {
+                if( myHost->programList->RemoveIndex( parent.child(row+count-1,0) ) )
+                    new ComRemoveProgram( this, row+count-1, parent.parent().row(), currentCommand);
+            } else {
+                if( myHost->programList->RemoveIndex(index(row+count-1,0)) )
+                    new ComRemoveGroup( this, row+count-1, currentCommand);
+            }
+            --count;
+        }
+
         if(droppedItemsCount==0) {
             myHost->undoStack.push( currentCommand );
             currentCommand=0;
@@ -264,6 +273,9 @@ void ProgramsModel::removeRows ( QModelIndexList &listToRemove, const QModelInde
 {
     currentCommand = new QUndoCommand(tr("Remove programs"));
     droppedItemsCount = listToRemove.size();
+
+    qSort(listToRemove.begin(),listToRemove.end(),qGreater<QModelIndex>());
+
     foreach(QModelIndex index, listToRemove) {
         removeRow( index.row(), parent);
     }

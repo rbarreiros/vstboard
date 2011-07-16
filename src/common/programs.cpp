@@ -201,53 +201,42 @@ bool Programs::userWantsToUnloadProgram()
   */
 bool Programs::GoAwayFromIndex( const QModelIndex &index)
 {
+    QModelIndex target;
+
     if(index == currentPrg) {
         //find another program
         int i=0;
-        QModelIndex target = currentPrg.sibling(i,0);
+        target = currentPrg.sibling(i,0);
         while( target.isValid() && currentPrg==target) {
             ++i;
             target = currentPrg.sibling(i,0);
         }
 
-        if(target.isValid()) {
+        if(target.isValid())
             return ChangeProg( target );
-        } else {
-            //no valid program in this group, find another group
-            i=0;
-            QModelIndex groupTarget = currentGrp.sibling(i,0);
-            while( groupTarget.isValid() && currentGrp==groupTarget) {
-                ++i;
-                groupTarget = currentGrp.sibling(i,0);
-            }
-
-            if(groupTarget.isValid()) {
-                target = groupTarget.child(0,0).child(0,0);
-            } else {
-                debug2(<<"Programs::GoAwayFromIndex no good prog found"<<currentGrp.row()<<currentPrg.row())
-                return false;
-            }
-            return ChangeProg( target );
-        }
     }
 
-    if(index == currentGrp) {
-        int i=0;
-        QModelIndex groupTarget = currentGrp.sibling(i,0);
-        while( groupTarget.isValid() && currentGrp==groupTarget) {
+    //no valid program in this group, find another group
+    int i=0;
+    QModelIndex groupTarget = currentGrp.sibling(i,0);
+    while( groupTarget.isValid() && !target.isValid()) {
+        groupTarget = currentGrp.sibling(i,0);
+        if(currentGrp==groupTarget) {
             ++i;
-            groupTarget = currentGrp.sibling(i,0);
+            continue;
         }
 
-        if(groupTarget.isValid()) {
-            return ChangeGroup( groupTarget );
-        } else {
-            debug2(<<"Programs::GoAwayFromIndex no good group found"<<currentGrp.row()<<currentPrg.row())
-            return false;
-        }
+        if(groupTarget.isValid() && groupTarget.child(0,0).isValid())
+            target = groupTarget.child(0,0).child(0,0);
+
+        ++i;
     }
 
-    return true;
+    if(!target.isValid()) {
+        debug2(<<"Programs::GoAwayFromIndex no good prog found"<<currentGrp.row()<<currentPrg.row())
+        return false;
+    }
+    return ChangeProg( target );
 }
 
 bool Programs::RemoveIndex(const QModelIndex &index)
@@ -255,11 +244,12 @@ bool Programs::RemoveIndex(const QModelIndex &index)
     if(mainWindow->openedPrompt)
         return false;
 
-    if(index.data(UserRoles::nodeType).toInt() == NodeType::program) {
+    //move to another program
+    if( (index == currentPrg || index == currentGrp)
+            && !GoAwayFromIndex(index) )
+        return false;
 
-        //move to another program
-        if(!GoAwayFromIndex(index))
-            return false;
+    if(index.data(UserRoles::nodeType).toInt() == NodeType::program) {
 
         //delete program
         int prgId = index.data(UserRoles::value).toInt();
@@ -269,19 +259,6 @@ bool Programs::RemoveIndex(const QModelIndex &index)
         return true;
     } else
     if(index.data(UserRoles::nodeType).toInt() == NodeType::programGroup) {
-
-        //keep one group
-        if(model->rowCount()==1)
-            return false;
-
-        //move to another group
-        if(index==currentGrp) {
-            if(currentGrp.row()==0) {
-                ChangeGroup(1);
-            }  else {
-                ChangeGroup(0);
-            }
-        }
 
         //delete all programs from group
         QStandardItem *lstPrg = model->itemFromIndex(index.child(0,0));
@@ -451,22 +428,6 @@ int Programs::GetNbOfProgs()
 int Programs::GetNbOfGroups()
 {
     return model->rowCount();
-}
-
-void Programs::SetGroupName(int midiGroupNum, const QString &name)
-{
-    if(midiGroupNum>=model->rowCount())
-        return;
-    model->item(midiGroupNum)->setText(name);
-}
-
-void Programs::SetProgName(int midiGroupNum, int midiProgNum, const QString &name)
-{
-   QModelIndex index;
-    if(!GetIndexFromProgNum(midiGroupNum,midiProgNum,index))
-        return;
-
-    model->itemFromIndex(index)->setText(name);
 }
 
 void Programs::SetProgAutosave(const Autosave::Enum state)

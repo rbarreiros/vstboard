@@ -79,6 +79,8 @@ public:
 
     Optimizer *optimizer;
 
+    QPersistentModelIndex currentPrg;
+
 private:
     bool GoAwayFromIndex( const QModelIndex &index);
 
@@ -87,7 +89,7 @@ private:
 
     ProgramsModel *model;
     QPersistentModelIndex currentGrp;
-    QPersistentModelIndex currentPrg;
+
 
     unsigned int nextGroupId;
     unsigned int nextProgId;
@@ -117,9 +119,6 @@ public slots:
     bool ChangeGroup(const QModelIndex &newGrp);
     void SetProgAutosave(const Autosave::Enum state);
     void SetGroupAutosave(const Autosave::Enum state);
-    void SetGroupName(int midiGroupNum, const QString &name);
-    void SetProgName(int midiGroupNum, int midiProgNum, const QString &name);
-
 
     void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
 
