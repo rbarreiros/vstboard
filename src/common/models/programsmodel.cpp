@@ -256,19 +256,24 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
 
 bool ProgramsModel::removeRows ( int row, int count, const QModelIndex & parent )
 {
-    if(fromCom)
+    if(fromCom) {
+        //check if we can remove those rows
+        for(int i=0; i<count; i++) {
+            QModelIndex idx = index(row,0, parent);
+            if( !myHost->programList->RemoveIndex( idx ) )
+                count = i;
+        }
         return QStandardItemModel::removeRows(row,count,parent);
+    }
 
     if(currentCommand) {
         droppedItemsCount-=count;
 
         while(count>0) {
             if(parent.isValid()) {
-                if( myHost->programList->RemoveIndex( parent.child(row+count-1,0) ) )
-                    new ComRemoveProgram( this, row+count-1, parent.parent().row(), currentCommand);
+                new ComRemoveProgram( this, row+count-1, parent.parent().row(), currentCommand);
             } else {
-                if( myHost->programList->RemoveIndex(index(row+count-1,0)) )
-                    new ComRemoveGroup( this, row+count-1, currentCommand);
+                new ComRemoveGroup( this, row+count-1, currentCommand);
             }
             --count;
         }
@@ -281,7 +286,7 @@ bool ProgramsModel::removeRows ( int row, int count, const QModelIndex & parent 
     }
 
     debug2(<<"ProgramsModel::removeRows remove row with no undoCommand")
-    return QStandardItemModel::removeRows(row,count,parent);
+    return false;
 }
 
 void ProgramsModel::removeRows ( QModelIndexList &listToRemove, const QModelIndex & parent )

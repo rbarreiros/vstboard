@@ -30,7 +30,7 @@ public:
     explicit ProgListView(QWidget *parent = 0);
 
 protected:
-//    void startDrag(Qt::DropActions supportedActions);
+    void startDrag(Qt::DropActions supportedActions);
     void dragMoveEvent ( QDragMoveEvent * event );
 //    void dropEvent(QDropEvent *e);
 
@@ -38,6 +38,7 @@ private:
     QModelIndexList listDragItems;
 
 signals:
+    void DragFinished();
 
 public slots:
     void OnContextMenu(const QPoint & pos);

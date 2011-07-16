@@ -51,11 +51,14 @@ ProgListView::ProgListView(QWidget *parent) :
 
 }
 
-//void ProgListView::startDrag(Qt::DropActions supportedActions)
-//{
-//    listDragItems = selectionModel()->selectedIndexes();
-//    QListView::startDrag(supportedActions);
-//}
+void ProgListView::startDrag(Qt::DropActions supportedActions)
+{
+    listDragItems = selectionModel()->selectedIndexes();
+    QListView::startDrag(supportedActions);
+
+    //go back to the current group
+    emit DragFinished();
+}
 
 void ProgListView::dragMoveEvent ( QDragMoveEvent * event )
 {

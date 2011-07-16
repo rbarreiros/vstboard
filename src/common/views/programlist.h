@@ -58,7 +58,8 @@ signals:
 
 public slots:
     void OnProgChange(const QModelIndex &index);
-    void OnDragOverGroups( QWidget *source, const QModelIndex & index);
+    void OnGroupHovered(const QModelIndex & index);
+    void BackToCurrentGroup();
     void OnProgAutoSaveChanged(const Autosave::Enum state);
     void OnGroupAutoSaveChanged(const Autosave::Enum state);
 

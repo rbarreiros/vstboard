@@ -34,7 +34,7 @@ protected:
     void dropEvent(QDropEvent *event);
 
 signals:
-    void DragOverItemFromWidget( QWidget *source, const QModelIndex &index);
+    void DragOverItemFromWidget( const QModelIndex &index);
 
 public slots:
     void OnContextMenu(const QPoint & pos);

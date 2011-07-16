@@ -63,20 +63,18 @@ void GroupListView::dragMoveEvent ( QDragMoveEvent * event )
     event->ignore();
     setDropIndicatorShown(false);
 
-    //show the content of the group hovered
     QModelIndex i = indexAt(event->pos());
-    if(i.isValid()) {
-        emit DragOverItemFromWidget( event->source(), i);
+    if(i.isValid() && event->mimeData()->formats().contains("application/x-programsdata")) {
+
+        //show the content of the group hovered
+        emit DragOverItemFromWidget( i );
 
         //hack to allow program drop on a group
-        if(event->mimeData()->formats().contains("application/x-programsdata")) {
-            event->accept();
-
-            if (event->keyboardModifiers() & Qt::ControlModifier)
-                event->setDropAction(Qt::CopyAction);
-            else
-                event->setDropAction(Qt::MoveAction);
-        }
+        event->accept();
+        if (event->keyboardModifiers() & Qt::ControlModifier)
+            event->setDropAction(Qt::CopyAction);
+        else
+            event->setDropAction(Qt::MoveAction);
 
     } else {
         event->setDropAction(Qt::IgnoreAction);

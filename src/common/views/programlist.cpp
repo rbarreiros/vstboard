@@ -32,8 +32,10 @@ ProgramList::ProgramList(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect( ui->listGrps, SIGNAL(DragOverItemFromWidget(QWidget*,QModelIndex)),
-             this, SLOT(OnDragOverGroups(QWidget*,QModelIndex)));
+    connect( ui->listGrps, SIGNAL(DragOverItemFromWidget(QModelIndex)),
+             this, SLOT(OnGroupHovered(QModelIndex)));
+    connect( ui->listProgs, SIGNAL(DragFinished()),
+             this, SLOT(BackToCurrentGroup()));
 }
 
 ProgramList::~ProgramList()
@@ -49,13 +51,23 @@ void ProgramList::SetModel(MainHost *myHost, QAbstractItemModel *model)
     ui->listProgs->setModel(model);
 }
 
-void ProgramList::OnDragOverGroups( QWidget *source, const QModelIndex & index)
+void ProgramList::OnGroupHovered(const QModelIndex & index)
 {
-    if(source == ui->listProgs) {
-        ui->listGrps->setCurrentIndex(index);
-        ui->listGrps->scrollTo(index);
-        ui->listProgs->setRootIndex( index.child(0,0) );
-    }
+    ui->listGrps->setCurrentIndex(index);
+    ui->listGrps->scrollTo(index);
+    ui->listProgs->setRootIndex( index.child(0,0) );
+}
+
+void ProgramList::BackToCurrentGroup()
+{
+    ui->listGrps->setCurrentIndex( currentPrg.parent().parent() );
+    ui->listGrps->scrollTo( currentPrg.parent().parent() );
+    ui->listGrps->selectionModel()->clear();
+
+    ui->listProgs->setRootIndex( currentPrg.parent() );
+    ui->listGrps->setCurrentIndex( currentPrg );
+    ui->listGrps->scrollTo( currentPrg );
+    ui->listProgs->selectionModel()->clear();
 }
 
 void ProgramList::OnProgChange(const QModelIndex &index)
@@ -83,8 +95,6 @@ void ProgramList::on_listGrps_activated(QModelIndex index)
 {
     if(index==currentPrg.parent().parent())
         return;
-
-//    ui->listProgs->setRootIndex(index.child(0,0));
 
     if(myHost->undoProgramChanges()) {
         myHost->undoStack.push( new ComChangeGroup(myHost, index) );
