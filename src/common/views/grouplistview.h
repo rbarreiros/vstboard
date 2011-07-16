@@ -39,6 +39,7 @@ signals:
 public slots:
     void OnContextMenu(const QPoint & pos);
     void DeleteItem();
+    void InsertItem();
     void Copy();
     void Paste();
 };

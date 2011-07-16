@@ -60,35 +60,34 @@ void ProgramList::OnGroupHovered(const QModelIndex & index)
 
 void ProgramList::BackToCurrentGroup()
 {
-    ui->listGrps->setCurrentIndex( currentPrg.parent().parent() );
     ui->listGrps->scrollTo( currentPrg.parent().parent() );
     ui->listGrps->selectionModel()->clear();
+    ui->listGrps->setCurrentIndex( currentPrg.parent().parent() );
 
     ui->listProgs->setRootIndex( currentPrg.parent() );
-    ui->listGrps->setCurrentIndex( currentPrg );
-    ui->listGrps->scrollTo( currentPrg );
+    ui->listProgs->scrollTo( currentPrg );
     ui->listProgs->selectionModel()->clear();
+    ui->listProgs->setCurrentIndex( currentPrg );
 }
 
 void ProgramList::OnProgChange(const QModelIndex &index)
 {
-    if(!index.isValid()) {
+    if(!index.isValid() || !index.parent().isValid() || !index.parent().parent().isValid() ) {
         debug("ProgramList::OnProgChange invalid index")
         return;
     }
 
-    //change group if needed
-    QModelIndex parIndex = index.parent().parent();
-    if(!parIndex.isValid()) {
-        debug("ProgramList::OnProgChange invalid group")
-        return;
+    if(currentPrg.parent() != index.parent()) {
+        ui->listGrps->scrollTo( index.parent().parent() );
+//        ui->listGrps->setCurrentIndex( index.parent().parent() );
+
+        ui->listProgs->setRootIndex( index.parent() );
     }
 
-    currentPrg = index;
+    ui->listProgs->scrollTo( index );
+//    ui->listProgs->setCurrentIndex( index );
 
-    ui->listGrps->scrollTo(parIndex);
-    ui->listProgs->setRootIndex( currentPrg.parent() );
-    ui->listProgs->scrollTo(currentPrg);
+    currentPrg = index;
 }
 
 void ProgramList::on_listGrps_activated(QModelIndex index)

@@ -37,18 +37,16 @@ ProgramsModel::ProgramsModel(MainHost *parent) :
 {
 }
 
-bool ProgramsModel::GroupFromStream( QDataStream &stream, int row)
+bool ProgramsModel::AddEmptyGroup(QModelIndex &index, int row)
 {
     int groupId = myHost->programList->GetNextGroupId();
 
-    QString name;
-    stream >> name;
+    QString name("New grp");
 
     //create the group
     QStandardItem *groupItem = new QStandardItem( name );
-    groupItem->setData(NodeType::programGroup,UserRoles::nodeType);
-    groupItem->setData(groupId,UserRoles::value);
-    groupItem->setData(0,UserRoles::type);
+    groupItem->setData(GroupNode,UserRoles::nodeType);
+    groupItem->setData(groupId,ProgramId);
     groupItem->setDragEnabled(true);
     groupItem->setDropEnabled(false);
     groupItem->setEditable(true);
@@ -64,25 +62,11 @@ bool ProgramsModel::GroupFromStream( QDataStream &stream, int row)
         row=rowCount();
     insertRow( row, groupItem );
 
-    //send the group data to the host
-    myHost->groupContainer->ProgramFromStream( groupId, stream );
-    myHost->mainWindow->mySceneView->viewGroup->ProgramFromStream( groupId, stream );
-
-    //add the programs
-    QByteArray programs;
-    stream >> programs;
-    QDataStream streamProgs( &programs, QIODevice::ReadOnly);
-    int i=0;
-    while(!streamProgs.atEnd()) {
-        if(!ProgramFromStream(streamProgs, i, groupItem->row()))
-            return false;
-        ++i;
-    }
-
+    index = groupItem->index();
     return true;
 }
 
-bool ProgramsModel::ProgramFromStream( QDataStream &stream, int row, int groupNum)
+bool ProgramsModel::AddEmptyProgram(int groupNum, QModelIndex &index, int row)
 {
     QStandardItem *groupItem = item(groupNum);
     QStandardItem *prgList = groupItem->child(0);
@@ -96,17 +80,14 @@ bool ProgramsModel::ProgramFromStream( QDataStream &stream, int row, int groupNu
         groupItem->appendRow(prgList);
     }
 
-
     int progId = myHost->programList->GetNextProgId();
 
-    QString name;
-    stream >> name;
+    QString name("New prog");
 
     //create the program item
     QStandardItem *prgItem = new QStandardItem( name );
-    prgItem->setData(NodeType::program,UserRoles::nodeType);
-    prgItem->setData(progId,UserRoles::value);
-    prgItem->setData(0,UserRoles::type);
+    prgItem->setData(ProgramNode,NodeType);
+    prgItem->setData(progId,ProgramId);
     prgItem->setDragEnabled(true);
     prgItem->setDropEnabled(false);
     prgItem->setEditable(true);
@@ -115,10 +96,58 @@ bool ProgramsModel::ProgramFromStream( QDataStream &stream, int row, int groupNu
         row=prgList->rowCount();
     prgList->insertRow(row, prgItem);
 
+    index = prgItem->index();
+    return true;
+}
+
+bool ProgramsModel::GroupFromStream( QDataStream &stream, int row)
+{
+    QModelIndex grpIndex;
+    if(!AddEmptyGroup(grpIndex, row))
+        return false;
+
+    if(!grpIndex.isValid())
+        return false;
+
+    QString name;
+    stream >> name;
+    itemFromIndex(grpIndex)->setText(name);
+
+    //send the group data to the host
+    int groupId = grpIndex.data(ProgramId).toInt();
+    myHost->groupContainer->ProgramFromStream( groupId, stream );
+    myHost->mainWindow->mySceneView->viewGroup->ProgramFromStream( groupId, stream );
+
+    //add the programs
+    QByteArray programs;
+    stream >> programs;
+    QDataStream streamProgs( &programs, QIODevice::ReadOnly);
+    int i=0;
+    while(!streamProgs.atEnd()) {
+        if(!ProgramFromStream(streamProgs, i, grpIndex.row()))
+            return false;
+        ++i;
+    }
+    return true;
+}
+
+bool ProgramsModel::ProgramFromStream( QDataStream &stream, int row, int groupNum)
+{
+    QModelIndex prgIndex;
+    if(!AddEmptyProgram(groupNum,prgIndex,row))
+        return false;
+
+    if(!prgIndex.isValid())
+        return false;
+
+    QString name;
+    stream >> name;
+    itemFromIndex(prgIndex)->setText(name);
+
     //send the data to the host
+    int progId = prgIndex.data(ProgramId).toInt();
     myHost->programContainer->ProgramFromStream( progId, stream );
     myHost->mainWindow->mySceneView->viewProgram->ProgramFromStream( progId, stream );
-
     return true;
 }
 
@@ -129,9 +158,14 @@ bool ProgramsModel::GroupToStream( QDataStream &stream, int row) const
 
 bool ProgramsModel::GroupToStream( QDataStream &stream, const QModelIndex &groupIndex) const
 {
+    if(!groupIndex.isValid()) {
+        debug2(<<"ProgramsModel::GroupToStream invalid index")
+        return false;
+    }
+
     stream << groupIndex.data().toString();
 
-    int groupId = groupIndex.data(UserRoles::value).toInt();
+    int groupId = groupIndex.data(ProgramId).toInt();
     myHost->groupContainer->ProgramToStream( groupId, stream );
     myHost->mainWindow->mySceneView->viewGroup->ProgramToStream( groupId, stream );
 
@@ -156,9 +190,14 @@ bool ProgramsModel::ProgramToStream( QDataStream &stream, int row, int groupNum)
 
 bool ProgramsModel::ProgramToStream( QDataStream &stream, const QModelIndex &progIndex) const
 {
+    if(!progIndex.isValid()) {
+        debug2(<<"ProgramsModel::ProgramToStream invalid index")
+        return false;
+    }
+
     stream << progIndex.data().toString();
 
-    int progId = progIndex.data(UserRoles::value).toInt();
+    int progId = progIndex.data(ProgramId).toInt();
     myHost->programContainer->ProgramToStream( progId, stream );
     myHost->mainWindow->mySceneView->viewProgram->ProgramToStream( progId, stream );
 
@@ -206,30 +245,6 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
             row=rowCount();
     }
 
-    if(data->hasFormat("application/x-programsdata")) {
-        int groupNum;
-        if(parent.isValid()) {
-            groupNum = parent.parent().row();
-        } else {
-            //drop programs on a group
-            groupNum = row;
-            if(!item(groupNum)) {
-                delete currentCommand;
-                currentCommand=0;
-                return false;
-            }
-            row = item(groupNum)->child(0)->rowCount();
-        }
-
-        QDataStream stream( &data->data( "application/x-programsdata" ), QIODevice::ReadOnly);
-        while(!stream.atEnd()) {
-            QByteArray tmpBa;
-            stream >> tmpBa;
-            new ComAddProgram( this, &tmpBa, row+countRows, groupNum , currentCommand );
-            ++countRows;
-        }
-    }
-
     if(data->hasFormat("application/x-groupsdata")) {
         QDataStream stream( &data->data( "application/x-groupsdata" ), QIODevice::ReadOnly);
         while(!stream.atEnd()) {
@@ -237,6 +252,30 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
             stream >> tmpBa;
             new ComAddGroup( this, &tmpBa, row+countRows, currentCommand );
             ++countRows;
+        }
+    } else {
+        if(data->hasFormat("application/x-programsdata")) {
+            int groupNum;
+            if(parent.isValid()) {
+                groupNum = parent.parent().row();
+            } else {
+                //drop programs on a group
+                groupNum = row;
+                if(!item(groupNum)) {
+                    delete currentCommand;
+                    currentCommand=0;
+                    return false;
+                }
+                row = item(groupNum)->child(0)->rowCount();
+            }
+
+            QDataStream stream( &data->data( "application/x-programsdata" ), QIODevice::ReadOnly);
+            while(!stream.atEnd()) {
+                QByteArray tmpBa;
+                stream >> tmpBa;
+                new ComAddProgram( this, &tmpBa, row+countRows, groupNum , currentCommand );
+                ++countRows;
+            }
         }
     }
 
@@ -271,9 +310,11 @@ bool ProgramsModel::removeRows ( int row, int count, const QModelIndex & parent 
 
         while(count>0) {
             if(parent.isValid()) {
-                new ComRemoveProgram( this, row+count-1, parent.parent().row(), currentCommand);
+                if( myHost->programList->RemoveIndex( parent.child(row+count-1,0) ) )
+                    new ComRemoveProgram( this, row+count-1, parent.parent().row(), currentCommand);
             } else {
-                new ComRemoveGroup( this, row+count-1, currentCommand);
+                if( myHost->programList->RemoveIndex( index(row+count-1,0) ) )
+                    new ComRemoveGroup( this, row+count-1, currentCommand);
             }
             --count;
         }
@@ -335,13 +376,13 @@ QMimeData * ProgramsModel::mimeData ( const QModelIndexList & indexes ) const
     QDataStream streamProg( &programs, QIODevice::WriteOnly);
 
     foreach(QModelIndex index, indexes) {
-        if(index.data(UserRoles::nodeType).toInt() == NodeType::programGroup) {
+        if(index.data(UserRoles::nodeType).toInt() == GroupNode) {
             QByteArray tmpBa;
             QDataStream tmpStream(&tmpBa, QIODevice::WriteOnly);
             GroupToStream(tmpStream,index);
             streamGroup << tmpBa;
         }
-        if(index.data(UserRoles::nodeType).toInt() == NodeType::program) {
+        if(index.data(NodeType).toInt() == ProgramNode) {
             QByteArray tmpBa;
             QDataStream tmpStream(&tmpBa, QIODevice::WriteOnly);
             ProgramToStream(tmpStream,index);

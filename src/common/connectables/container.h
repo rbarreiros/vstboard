@@ -37,7 +37,6 @@ namespace Connectables {
 
         void Hide();
         void ConnectObjects(QSharedPointer<Object> fromObjOutputs, QSharedPointer<Object> toObjInputs, bool hiddenCables);
-//        void RemoveCable(QModelIndex & index);
         void SetContainerId(quint16 id);
         const QModelIndex &GetCablesIndex();
 
@@ -145,13 +144,12 @@ namespace Connectables {
         void AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin, bool hidden=false);
         void RemoveCableFromPin(const ConnectionInfo &pin);
         void RemoveCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
-//        void RemoveCableFromObj(int objId);
 
         void SaveProgram();
         void UnloadProgram();
         void LoadProgram(int prog);
 
-        void SetProgram(const QModelIndex &prg);
+        void SetProgram(int prg);
         void RemoveProgram(int prg=-1);
         void Render();
 

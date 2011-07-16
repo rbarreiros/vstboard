@@ -66,7 +66,6 @@
         void zoomReset();
         void ForceResize();
         void SetViewProgram(int progId);
-        void SetViewProgram(const QModelIndex &prg);
         void CopyViewProgram(int ori, int dest);
         void RemoveViewProgram(int prg);
         void ClearViewPrograms();

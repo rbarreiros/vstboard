@@ -27,6 +27,15 @@ class ProgramsModel : public QStandardItemModel
 {
     Q_OBJECT
 public:
+    enum ItemTypesEnum {
+        ProgramNode,
+        GroupNode
+    };
+    enum RolesEnum{
+        NodeType = Qt::UserRole+1,
+        ProgramId
+    };
+
     explicit ProgramsModel(MainHost *parent = 0);
     bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
     bool removeRows ( int row, int count, const QModelIndex & parent = QModelIndex() );
@@ -42,6 +51,9 @@ public:
     bool ProgramToStream( QDataStream &stream, const QModelIndex &progIndex) const;
     bool GroupToStream( QDataStream &stream, int row) const;
     bool ProgramToStream( QDataStream &stream, int row, int groupNum) const;
+
+    bool AddEmptyGroup(QModelIndex &index=QModelIndex(), int row=-1);
+    bool AddEmptyProgram(int groupNum, QModelIndex &index=QModelIndex(), int row=-1);
 
 private:
     bool RemoveProgram( int row, int groupNum );

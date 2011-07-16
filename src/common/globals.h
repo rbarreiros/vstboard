@@ -75,8 +75,6 @@ namespace NodeType {
         listPin,
         pin,
         cable,
-        program,
-        programGroup,
         cursor
     };
 }

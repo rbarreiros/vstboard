@@ -79,8 +79,6 @@ public:
 
     Optimizer *optimizer;
 
-    QPersistentModelIndex currentPrg;
-
 private:
     bool GoAwayFromIndex( const QModelIndex &index);
 
@@ -89,7 +87,7 @@ private:
 
     ProgramsModel *model;
     QPersistentModelIndex currentGrp;
-
+    QPersistentModelIndex currentPrg;
 
     unsigned int nextGroupId;
     unsigned int nextProgId;
@@ -103,7 +101,9 @@ private:
     QBrush currentProgColor;
 
 signals:
+    void ProgChanged(int prgId);
     void ProgChanged(const QModelIndex &prgIndex);
+    void GroupChanged(int prgId);
     void GroupChanged(const QModelIndex &grpIndex);
     void ProgCopy(int ori, int dest);
     void GroupCopy(int ori, int dest);

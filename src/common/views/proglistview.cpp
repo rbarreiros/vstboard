@@ -35,6 +35,13 @@ ProgListView::ProgListView(QWidget *parent) :
             this,SLOT(DeleteItem()));
     addAction(actDel);
 
+    QAction *actAddNew = new QAction(QIcon(":/img16x16/edit_add.png"),tr("Insert a new program"),this);
+    actAddNew->setShortcut( Qt::Key_Insert );
+    actAddNew->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    connect(actAddNew,SIGNAL(triggered()),
+            this,SLOT(InsertItem()));
+    addAction(actAddNew);
+
     QAction *actCopy = new QAction( QIcon(":/img16x16/editcopy.png"), "Copy", this);
     actCopy->setShortcuts(QKeySequence::Copy);
     actCopy->setShortcutContext(Qt::WidgetWithChildrenShortcut);
@@ -82,8 +89,8 @@ void ProgListView::dragMoveEvent ( QDragMoveEvent * event )
 
 void ProgListView::OnContextMenu(const QPoint & pos)
 {
-    NodeType::Enum t = (NodeType::Enum)currentIndex().data(UserRoles::nodeType).toInt();
-    if(t == NodeType::program) {
+    ProgramsModel::RolesEnum t = (ProgramsModel::RolesEnum)currentIndex().data(ProgramsModel::NodeType).toInt();
+    if(t == ProgramsModel::ProgramNode) {
         //item context
         QMenu menu;
         menu.exec(actions(), mapToGlobal(pos), actions().at(0), this);
@@ -100,6 +107,23 @@ void ProgListView::DeleteItem()
         return;
 
     progModel->removeRows(selectedIndexes(),currentIndex().parent());
+}
+
+void ProgListView::InsertItem()
+{
+    ProgramsModel *progModel = qobject_cast<ProgramsModel*>(model());
+    if(!progModel)
+        return;
+
+    int row=-1;
+    QModelIndex target = currentIndex();
+    if(target.isValid())
+        row=target.row();
+
+    QModelIndex index;
+    if( progModel->AddEmptyProgram( rootIndex().parent().row(), index, row ) ) {
+        emit activated(index);
+    }
 }
 
 void ProgListView::Copy()

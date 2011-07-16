@@ -434,8 +434,8 @@ void MainHost::SetupProgramContainer()
         mainContainer->ConnectObjects(groupContainer->bridgeOut, programContainer->bridgeReturn,true);
     }
 
-    connect(programList, SIGNAL(ProgChanged(QModelIndex)),
-            programContainer.data(), SLOT(SetProgram(QModelIndex)));
+    connect(programList, SIGNAL(ProgChanged(int)),
+            programContainer.data(), SLOT(SetProgram(int)));
     connect(programList, SIGNAL(ProgDelete(int)),
             programContainer.data(), SLOT(RemoveProgram(int)));
     connect(this,SIGNAL(Rendered()),
@@ -534,8 +534,8 @@ void MainHost::SetupGroupContainer()
         mainContainer->ConnectObjects(hostContainer->bridgeOut, groupContainer->bridgeReturn,true);
     }
 
-    connect(programList, SIGNAL(GroupChanged(QModelIndex)),
-            groupContainer.data(), SLOT(SetProgram(QModelIndex)));
+    connect(programList, SIGNAL(GroupChanged(int)),
+            groupContainer.data(), SLOT(SetProgram(int)));
     connect(programList, SIGNAL(GroupDelete(int)),
             groupContainer.data(), SLOT(RemoveProgram(int)));
     connect(this,SIGNAL(Rendered()),

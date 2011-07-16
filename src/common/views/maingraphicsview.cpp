@@ -19,7 +19,7 @@
 **************************************************************************/
 
 #include "maingraphicsview.h"
-#include "../globals.h"
+#include "globals.h"
 
 //using namespace View;
 
@@ -131,12 +131,6 @@ void MainGraphicsView::SaveProgram()
     state.scrollx=horizontalScrollBar()->value();
     state.scrolly=verticalScrollBar()->value();
     listPrograms.insert(currentProgId,state);
-}
-
-
-void MainGraphicsView::SetViewProgram(const QModelIndex &prg)
-{
-    SetViewProgram(prg.data(UserRoles::value).toInt());
 }
 
 void MainGraphicsView::SetViewProgram(int progId)

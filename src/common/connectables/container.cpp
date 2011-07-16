@@ -188,9 +188,9 @@ void Container::SetDirty()
   Will change program on the next render loop
   \param prg a program model index
   */
-void Container::SetProgram(const QModelIndex &prg)
+void Container::SetProgram(int prg)
 {
-    progToSet=prg.data(UserRoles::value).toInt();
+    progToSet=prg;
 }
 
 void Container::Render()
@@ -585,15 +585,6 @@ void Container::OnChildDeleted(Object *obj)
     }
 }
 
-/*!
-  User removed a cable from the program
-  \param index model index of the cable
-  */
-//void Container::RemoveCable(QModelIndex & index)
-//{
-//    currentProgram->RemoveCable(index);
-//}
-
 void Container::UserAddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
 {
     AddCable(outputPin,inputPin,false);
@@ -664,17 +655,6 @@ void Container::RemoveCableFromPin(const ConnectionInfo &pin)
 }
 
 /*!
-  Remove all cables from an Object
-  \param objId the object index to disconnect
-  */
-//void Container::RemoveCableFromObj(int objId)
-//{
-//    if(!currentProgram)
-//        return;
-//    currentProgram->RemoveCableFromObj(objId);
-//}
-
-/*!
   Put all the ContainerProgram and children Objects in a data stream
   */
 QDataStream & Container::toStream (QDataStream& out) const
@@ -688,7 +668,6 @@ QDataStream & Container::toStream (QDataStream& out) const
         tmpStream << (qint16)index;
         tmpStream << objectName();
         tmpStream << sleep;
-//        tmpStream << (quint32)currentProgId;
         ProjectFile::SaveChunk( "CntHead", tmpBa, out);
     }
 
@@ -728,8 +707,6 @@ bool Container::fromStream (QDataStream& in)
 
     LoadProgram(TEMP_PROGRAM);
 
-//    int savedProgId=0;
-
     QString chunkName;
     QByteArray tmpBa;
 
@@ -768,8 +745,8 @@ bool Container::fromStream (QDataStream& in)
         }
     }
 
-    //load the saved program
-//    LoadProgram(savedProgId);
+    //load the default program
+    LoadProgram(0);
 
     //clear the loading list : delete unused objects
     listLoadingObjects.clear();
@@ -791,9 +768,6 @@ bool Container::loadHeaderStream (QDataStream &in)
 
     in >> sleep;
 
-//    quint32 savedProgId=0;
-//    in >> savedProgId;
-//    return savedProgId;
     return true;
 }
 

@@ -28,12 +28,19 @@ GroupListView::GroupListView(QWidget *parent) :
     connect(this, SIGNAL(customContextMenuRequested(QPoint)),
             this, SLOT(OnContextMenu(QPoint)));
 
-    QAction *actDel = new QAction(QIcon(":/img16x16/delete.png"),tr("Delete group"),this);
+    QAction *actDel = new QAction(QIcon(":/img16x16/edit_remove.png"),tr("Delete group"),this);
     actDel->setShortcut( Qt::Key_Delete );
     actDel->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     connect(actDel,SIGNAL(triggered()),
             this,SLOT(DeleteItem()));
     addAction(actDel);
+
+    QAction *actAddNew = new QAction(QIcon(":/img16x16/edit_add.png"),tr("Insert a new group"),this);
+    actAddNew->setShortcut( Qt::Key_Insert );
+    actAddNew->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    connect(actAddNew,SIGNAL(triggered()),
+            this,SLOT(InsertItem()));
+    addAction(actAddNew);
 
     QAction *actCopy = new QAction( QIcon(":/img16x16/editcopy.png"), "Copy", this);
     actCopy->setShortcuts(QKeySequence::Copy);
@@ -105,7 +112,7 @@ void GroupListView::dropEvent(QDropEvent *event)
 void GroupListView::OnContextMenu(const QPoint & pos)
 {
     NodeType::Enum t = (NodeType::Enum)currentIndex().data(UserRoles::nodeType).toInt();
-    if(t == NodeType::programGroup) {
+    if(t == ProgramsModel::GroupNode) {
         //group context
         QMenu menu;
         menu.exec(actions(), mapToGlobal(pos), actions().at(0), this);
@@ -121,6 +128,24 @@ void GroupListView::DeleteItem()
         return;
 
     progModel->removeRows(selectedIndexes(),currentIndex().parent());
+}
+
+void GroupListView::InsertItem()
+{
+    ProgramsModel *progModel = qobject_cast<ProgramsModel*>(model());
+    if(!progModel)
+        return;
+
+    int row=-1;
+    QModelIndex target = currentIndex();
+    if(target.isValid())
+        row=target.row();
+
+    QModelIndex index;
+    if( progModel->AddEmptyGroup( index, row )
+            && progModel->AddEmptyProgram( index.row() ) ) {
+        emit activated(index);
+    }
 }
 
 void GroupListView::Copy()

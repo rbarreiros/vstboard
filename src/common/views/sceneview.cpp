@@ -81,15 +81,15 @@ SceneView::SceneView(MainHost *myHost,Connectables::ObjectFactory *objFactory, M
     viewProgram->setScene(sceneProgram);
     viewGroup->setScene(sceneGroup);
 
-    connect(myHost->programList,SIGNAL(ProgChanged(QModelIndex)),
-            viewProgram, SLOT(SetViewProgram(QModelIndex)));
+    connect(myHost->programList,SIGNAL(ProgChanged(int)),
+            viewProgram, SLOT(SetViewProgram(int)));
     connect(myHost->programList,SIGNAL(ProgCopy(int,int)),
             viewProgram, SLOT(CopyViewProgram(int,int)));
     connect(myHost->programList,SIGNAL(ProgDelete(int)),
             viewProgram, SLOT(RemoveViewProgram(int)));
 
-    connect(myHost->programList,SIGNAL(GroupChanged(QModelIndex)),
-            viewGroup, SLOT(SetViewProgram(QModelIndex)));
+    connect(myHost->programList,SIGNAL(GroupChanged(int)),
+            viewGroup, SLOT(SetViewProgram(int)));
     connect(myHost->programList,SIGNAL(GroupCopy(int,int)),
             viewGroup, SLOT(CopyViewProgram(int,int)));
     connect(myHost->programList,SIGNAL(GroupDelete(int)),
