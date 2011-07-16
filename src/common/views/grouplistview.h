@@ -31,6 +31,7 @@ public:
 
 protected:
     void dragMoveEvent ( QDragMoveEvent * event );
+    void dropEvent(QDropEvent *event);
 
 signals:
     void DragOverItemFromWidget( QWidget *source, const QModelIndex &index);

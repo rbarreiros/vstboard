@@ -199,29 +199,44 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
 
     int countRows=0;
 
-    if(parent.isValid()) {
-        if(data->hasFormat("application/x-programsdata")) {
-            if(row==-1)
-                row=itemFromIndex(parent)->rowCount();
-            QDataStream stream( &data->data( "application/x-programsdata" ), QIODevice::ReadOnly);
-            while(!stream.atEnd()) {
-                QByteArray tmpBa;
-                stream >> tmpBa;
-                new ComAddProgram( this, &tmpBa, row+countRows, parent.parent().row() , currentCommand );
-                ++countRows;
+    if(row==-1) {
+        if(parent.isValid())
+            row=itemFromIndex(parent)->rowCount();
+        else
+            row=rowCount();
+    }
+
+    if(data->hasFormat("application/x-programsdata")) {
+        int groupNum;
+        if(parent.isValid()) {
+            groupNum = parent.parent().row();
+        } else {
+            //drop programs on a group
+            groupNum = row;
+            if(!item(groupNum)) {
+                delete currentCommand;
+                currentCommand=0;
+                return false;
             }
+            row = item(groupNum)->child(0)->rowCount();
         }
-    } else {
-        if(data->hasFormat("application/x-groupsdata")) {
-            if(row==-1)
-                row=rowCount();
-            QDataStream stream( &data->data( "application/x-groupsdata" ), QIODevice::ReadOnly);
-            while(!stream.atEnd()) {
-                QByteArray tmpBa;
-                stream >> tmpBa;
-                new ComAddGroup( this, &tmpBa, row+countRows, currentCommand );
-                ++countRows;
-            }
+
+        QDataStream stream( &data->data( "application/x-programsdata" ), QIODevice::ReadOnly);
+        while(!stream.atEnd()) {
+            QByteArray tmpBa;
+            stream >> tmpBa;
+            new ComAddProgram( this, &tmpBa, row+countRows, groupNum , currentCommand );
+            ++countRows;
+        }
+    }
+
+    if(data->hasFormat("application/x-groupsdata")) {
+        QDataStream stream( &data->data( "application/x-groupsdata" ), QIODevice::ReadOnly);
+        while(!stream.atEnd()) {
+            QByteArray tmpBa;
+            stream >> tmpBa;
+            new ComAddGroup( this, &tmpBa, row+countRows, currentCommand );
+            ++countRows;
         }
     }
 

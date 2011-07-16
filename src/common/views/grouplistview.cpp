@@ -52,15 +52,55 @@ GroupListView::GroupListView(QWidget *parent) :
 
 void GroupListView::dragMoveEvent ( QDragMoveEvent * event )
 {
+    //default behavior
     if(event->source() == this) {
         setDropIndicatorShown(true);
         QListView::dragMoveEvent(event);
+        return;
+    }
+
+    //ignore by default
+    event->ignore();
+    setDropIndicatorShown(false);
+
+    //show the content of the group hovered
+    QModelIndex i = indexAt(event->pos());
+    if(i.isValid()) {
+        emit DragOverItemFromWidget( event->source(), i);
+
+        //hack to allow program drop on a group
+        if(event->mimeData()->formats().contains("application/x-programsdata")) {
+            event->accept();
+
+            if (event->keyboardModifiers() & Qt::ControlModifier)
+                event->setDropAction(Qt::CopyAction);
+            else
+                event->setDropAction(Qt::MoveAction);
+        }
+
     } else {
-        event->setAccepted(false);
-        setDropIndicatorShown(false);
+        event->setDropAction(Qt::IgnoreAction);
+    }
+
+}
+
+void GroupListView::dropEvent(QDropEvent *event)
+{
+    //default behavior
+    if(event->source() == this) {
+        QListView::dropEvent(event);
+        return;
+    }
+
+    //hack to allow program drop on a group
+    if(event->mimeData()->formats().contains("application/x-programsdata")) {
         QModelIndex i = indexAt(event->pos());
-        if(i.isValid())
-            emit DragOverItemFromWidget( event->source(), i);
+        if(i.isValid()) {
+            model()->dropMimeData( event->mimeData(), event->dropAction(), i.row(), 0, QModelIndex() );
+        } else {
+            event->ignore();
+            event->setDropAction(Qt::IgnoreAction);
+        }
     }
 }
 
