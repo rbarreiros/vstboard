@@ -72,9 +72,6 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     connect(myHost->programList,SIGNAL(GroupAutosaveChanged(Autosave::Enum)),
             ui->Programs,SLOT(OnGroupAutoSaveChanged(Autosave::Enum)));
 
-    connect(ui->Programs, SIGNAL(CurrentDisplayedGroup(QModelIndex)),
-            myHost->programList, SLOT(DisplayedGroupChanged(QModelIndex)));
-
     SetupBrowsersModels( ConfigDialog::defaultVstPath(myHost), ConfigDialog::defaultBankPath(myHost));
 
     mySceneView = new View::SceneView(myHost, myHost->objFactory, ui->hostView, ui->projectView, ui->programView, ui->groupView, this);

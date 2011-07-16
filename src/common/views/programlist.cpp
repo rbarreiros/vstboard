@@ -52,7 +52,6 @@ void ProgramList::SetModel(MainHost *myHost, QAbstractItemModel *model)
 void ProgramList::OnDragOverGroups( QWidget *source, const QModelIndex & index)
 {
     if(source == ui->listProgs) {
-        emit CurrentDisplayedGroup(index);
         ui->listGrps->setCurrentIndex(index);
         ui->listGrps->scrollTo(index);
         ui->listProgs->setRootIndex( index.child(0,0) );
@@ -73,7 +72,6 @@ void ProgramList::OnProgChange(const QModelIndex &index)
         return;
     }
 
-    emit CurrentDisplayedGroup(parIndex);
     currentPrg = index;
 
     ui->listGrps->scrollTo(parIndex);
@@ -87,7 +85,6 @@ void ProgramList::on_listGrps_activated(QModelIndex index)
         return;
 
 //    ui->listProgs->setRootIndex(index.child(0,0));
-//    emit CurrentDisplayedGroup(index);
 
     if(myHost->undoProgramChanges()) {
         myHost->undoStack.push( new ComChangeGroup(myHost, index) );

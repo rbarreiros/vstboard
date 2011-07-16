@@ -19,6 +19,7 @@ private:
     int row;
     int groupNum;
     QByteArray data;
+    bool done;
 };
 
 #endif // COMREMOVEPROGRAM_H

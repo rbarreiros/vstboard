@@ -436,8 +436,6 @@ void MainHost::SetupProgramContainer()
 
     connect(programList, SIGNAL(ProgChanged(QModelIndex)),
             programContainer.data(), SLOT(SetProgram(QModelIndex)));
-    connect(programList, SIGNAL(ProgCopy(int,int)),
-            programContainer.data(), SLOT(CopyProgram(int,int)));
     connect(programList, SIGNAL(ProgDelete(int)),
             programContainer.data(), SLOT(RemoveProgram(int)));
     connect(this,SIGNAL(Rendered()),
@@ -538,8 +536,6 @@ void MainHost::SetupGroupContainer()
 
     connect(programList, SIGNAL(GroupChanged(QModelIndex)),
             groupContainer.data(), SLOT(SetProgram(QModelIndex)));
-    connect(programList, SIGNAL(GroupCopy(int,int)),
-            groupContainer.data(), SLOT(CopyProgram(int,int)));
     connect(programList, SIGNAL(GroupDelete(int)),
             groupContainer.data(), SLOT(RemoveProgram(int)));
     connect(this,SIGNAL(Rendered()),

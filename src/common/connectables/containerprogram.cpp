@@ -80,24 +80,6 @@ ContainerProgram::~ContainerProgram()
     }
 }
 
-ContainerProgram * ContainerProgram::Copy(int fromId, int toId)
-{
-    foreach(QSharedPointer<Object> objPtr, listObjects) {
-        objPtr->CopyProgram(fromId,toId);
-    }
-    return new ContainerProgram(*this);
-}
-
-ContainerProgram * ContainerProgram::CopyTo(int toId)
-{
-    foreach(QSharedPointer<Object> objPtr, listObjects) {
-        objPtr->CopyCurrentProgram(toId);
-    }
-    ContainerProgram *newPrg = new ContainerProgram(*this);
-    newPrg->Save(false);
-    return newPrg;
-}
-
 void ContainerProgram::Remove(int prgId)
 {
     foreach(QSharedPointer<Object> objPtr, listObjects) {

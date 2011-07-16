@@ -20,6 +20,7 @@ private:
     int row;
     int groupNum;
     QByteArray data;
+    bool done;
 };
 
 #endif // COMADDPROGRAM_H

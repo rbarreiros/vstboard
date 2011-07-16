@@ -42,8 +42,7 @@ public:
     explicit Programs(MainHost *parent = 0);
     void BuildModel();
     ProgramsModel *GetModel() {return model;}
-    QStandardItem *CopyProgram(QStandardItem *progOri);
-    QStandardItem *CopyGroup(QStandardItem *grpOri);
+
     bool RemoveIndex(const QModelIndex &index);
     bool userWantsToUnloadGroup();
     bool userWantsToUnloadProgram();
@@ -90,8 +89,6 @@ private:
     QPersistentModelIndex currentGrp;
     QPersistentModelIndex currentPrg;
 
-    QModelIndex displayedGroup;
-
     unsigned int nextGroupId;
     unsigned int nextProgId;
     MainHost *myHost;
@@ -123,9 +120,6 @@ public slots:
     void SetGroupName(int midiGroupNum, const QString &name);
     void SetProgName(int midiGroupNum, int midiProgNum, const QString &name);
 
-    void rowsRemoved( const QModelIndex & parent, int start, int end );
-
-    void DisplayedGroupChanged(const QModelIndex &index);
 
     void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
 

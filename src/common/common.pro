@@ -119,11 +119,11 @@ SOURCES += \
     commands/comremoveobject.cpp \
     commands/comchangeprogram.cpp \
     commands/comchangegroup.cpp \
-    commands/comrenameprogram.cpp \
     commands/comaddprogram.cpp \
     commands/comremoveprogram.cpp \
     commands/comremovegroup.cpp \
-    commands/comaddgroup.cpp
+    commands/comaddgroup.cpp \
+    commands/comchangeprogramitem.cpp
 
 HEADERS += \
     globals.h \
@@ -205,12 +205,12 @@ HEADERS += \
     commands/comremoveobject.h \
     commands/comchangeprogram.h \
     commands/comchangegroup.h \
-    commands/comrenameprogram.h \
     projectfile/fileversion.h \
     commands/comaddprogram.h \
     commands/comremoveprogram.h \
     commands/comremovegroup.h \
-    commands/comaddgroup.h
+    commands/comaddgroup.h \
+    commands/comchangeprogramitem.h
 
 FORMS += \
     views/configdialog.ui \

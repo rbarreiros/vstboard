@@ -18,6 +18,7 @@ private:
     ProgramsModel *model;
     int row;
     QByteArray data;
+    bool done;
 };
 
 #endif // COMADDGROUP_H

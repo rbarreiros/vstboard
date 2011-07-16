@@ -8,29 +8,35 @@ ComRemoveProgram::ComRemoveProgram(ProgramsModel *model,
     QUndoCommand(parent),
     model(model),
     row(row),
-    groupNum(groupNum)
+    groupNum(groupNum),
+    done(false)
 
 {
     setText(QObject::tr("Remove program"));
+
+    done=true;
+    redo();
+    done=false;
 }
 
 void ComRemoveProgram::undo()
 {
     model->fromCom=true;
-
     QDataStream stream(&data, QIODevice::ReadOnly);
     model->ProgramFromStream(stream,row,groupNum);
-
     model->fromCom=false;
 }
 
 void ComRemoveProgram::redo()
 {
-    model->fromCom=true;
+    if(!done) {
+        done=true;
+        return;
+    }
 
+    model->fromCom=true;
     QDataStream stream(&data, QIODevice::WriteOnly);
     model->ProgramToStream(stream,row,groupNum);
     model->RemoveProgram(row,groupNum);
-
     model->fromCom=false;
 }

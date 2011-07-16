@@ -322,30 +322,6 @@ void Container::UnloadProgram()
     currentProgId=EMPTY_PROGRAM;
 }
 
-void Container::CopyProgram(int ori, int dest)
-{
-    if(!listContainerPrograms.contains(ori)) {
-        //not important : the program is empty and will be created when needed
-        //debug("Container::CopyProgram ori not found")
-        return;
-    }
-    if(listContainerPrograms.contains(dest)) {
-        debug("Container::CopyProgram dest already exists")
-        return;
-    }
-
-    if(ori==currentProgId) {
-        //copy the current program
-        ContainerProgram* progCpy = currentContainerProgram->CopyTo(dest);
-        listContainerPrograms.insert(dest,progCpy);
-    } else {
-        //copy a saved program
-        ContainerProgram* progOri = listContainerPrograms.value(ori);
-        ContainerProgram* progCpy = progOri->Copy(ori,dest);
-        listContainerPrograms.insert(dest,progCpy);
-    }
-}
-
 /*!
   Try to remove the program now, retry later if we try to remove the current program
   */
@@ -712,7 +688,7 @@ QDataStream & Container::toStream (QDataStream& out) const
         tmpStream << (qint16)index;
         tmpStream << objectName();
         tmpStream << sleep;
-        tmpStream << (quint32)currentProgId;
+//        tmpStream << (quint32)currentProgId;
         ProjectFile::SaveChunk( "CntHead", tmpBa, out);
     }
 
@@ -752,7 +728,7 @@ bool Container::fromStream (QDataStream& in)
 
     LoadProgram(TEMP_PROGRAM);
 
-    int savedProgId=0;
+//    int savedProgId=0;
 
     QString chunkName;
     QByteArray tmpBa;
@@ -762,7 +738,7 @@ bool Container::fromStream (QDataStream& in)
         ProjectFile::LoadNextChunk( chunkName, tmpBa, in );
 
         if(chunkName=="CntHead")
-            savedProgId=loadHeaderStream(tmpStream);
+            loadHeaderStream(tmpStream);
 
         else if(chunkName=="CntObj")
             loadObjectFromStream(tmpStream);
@@ -777,7 +753,7 @@ bool Container::fromStream (QDataStream& in)
         }
 
         if(!tmpStream.atEnd()) {
-            debug2(<<"Container::fromStream stream not at end, drop remaining data :")
+            debug2(<<"Container::fromStream stream not at end"<<chunkName<<"drop remaining data :")
             while(!tmpStream.atEnd()) {
                 char c[1000];
                 int nb=tmpStream.readRawData(c,1000);
@@ -793,7 +769,7 @@ bool Container::fromStream (QDataStream& in)
     }
 
     //load the saved program
-    LoadProgram(savedProgId);
+//    LoadProgram(savedProgId);
 
     //clear the loading list : delete unused objects
     listLoadingObjects.clear();
@@ -802,7 +778,7 @@ bool Container::fromStream (QDataStream& in)
     return true;
 }
 
-quint32 Container::loadHeaderStream (QDataStream &in)
+bool Container::loadHeaderStream (QDataStream &in)
 {
     //load header
     qint16 id;
@@ -815,9 +791,10 @@ quint32 Container::loadHeaderStream (QDataStream &in)
 
     in >> sleep;
 
-    quint32 savedProgId=0;
-    in >> savedProgId;
-    return savedProgId;
+//    quint32 savedProgId=0;
+//    in >> savedProgId;
+//    return savedProgId;
+    return true;
 }
 
 bool Container::loadObjectFromStream (QDataStream &in)

@@ -21,7 +21,7 @@
 #include "programsmodel.h"
 #include "globals.h"
 #include "mainhost.h"
-#include "commands/comrenameprogram.h"
+#include "commands/comchangeprogramitem.h"
 #include "commands/comremoveprogram.h"
 #include "commands/comaddprogram.h"
 #include "commands/comremovegroup.h"
@@ -31,8 +31,6 @@
 ProgramsModel::ProgramsModel(MainHost *parent) :
     QStandardItemModel(parent),
     droppedItemsCount(0),
-    movingItemLeft(0),
-    movingDestRow(0),
     myHost(parent),
     fromCom(false),
     currentCommand(0)
@@ -209,7 +207,7 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
             while(!stream.atEnd()) {
                 QByteArray tmpBa;
                 stream >> tmpBa;
-                new ComAddProgram( this, &tmpBa, row+countRows, parent.parent().row(), currentCommand );
+                new ComAddProgram( this, &tmpBa, row+countRows, parent.parent().row() , currentCommand );
                 ++countRows;
             }
         }
@@ -231,6 +229,7 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
     case Qt::CopyAction :
         myHost->undoStack.push( currentCommand );
         currentCommand = 0;
+        droppedItemsCount = 0;
         break;
     case Qt::MoveAction :
         droppedItemsCount = countRows;
@@ -242,31 +241,15 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
 
 bool ProgramsModel::removeRows ( int row, int count, const QModelIndex & parent )
 {
-    if(fromCom) {
-        myHost->programList->RemoveIndex( index(row,0, parent) );
-        return QStandardItemModel::removeRows ( row, count, parent );
-    }
+    if(fromCom)
+        return QStandardItemModel::removeRows(row,count,parent);
 
     if(currentCommand) {
-        static QList<int>removedRows;
-
         for(int i=0; i<count; ++i)
-            removedRows << i+row;
+            new ComRemoveProgram( this, row, parent.parent().row(), currentCommand);
 
         droppedItemsCount-=count;
-
         if(droppedItemsCount==0) {
-            qSort(removedRows);
-
-            if(parent.isValid()) {
-                int groupNum = parent.parent().row();
-                while(!removedRows.isEmpty())
-                    new ComRemoveProgram( this, removedRows.takeLast(), groupNum, currentCommand);
-            } else {
-                while(!removedRows.isEmpty())
-                    new ComRemoveGroup( this, removedRows.takeLast(), currentCommand);
-            }
-
             myHost->undoStack.push( currentCommand );
             currentCommand=0;
         }
@@ -284,6 +267,23 @@ void ProgramsModel::removeRows ( QModelIndexList &listToRemove, const QModelInde
     foreach(QModelIndex index, listToRemove) {
         removeRow( index.row(), parent);
     }
+}
+
+bool ProgramsModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if(!fromCom && role == Qt::EditRole) {
+        int groupNum=-1;
+        if(index.parent().isValid() && index.parent().parent().isValid())
+            groupNum=index.parent().parent().row();
+
+        if(index.data(role)==value)
+            return true;
+
+        myHost->undoStack.push( new ComChangeProgramItem( this, index.row(), groupNum, index.data(role), value, role ) );
+        return true;
+    }
+
+    return QStandardItemModel::setData(index,value,role);
 }
 
 QStringList ProgramsModel::mimeTypes () const
@@ -321,7 +321,6 @@ QMimeData * ProgramsModel::mimeData ( const QModelIndexList & indexes ) const
         mime->setData("application/x-groupsdata", groups);
     if(!programs.isEmpty())
         mime->setData("application/x-programsdata", programs);
-    mime->setText( groups.toHex() + programs.toHex() );
     return mime;
 }
 

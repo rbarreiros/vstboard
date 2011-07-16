@@ -31,6 +31,7 @@ public:
     bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
     bool removeRows ( int row, int count, const QModelIndex & parent = QModelIndex() );
     void removeRows ( QModelIndexList &listToRemove, const QModelIndex & parent = QModelIndex() );
+    bool setData(const QModelIndex &index, const QVariant &value, int role);
 
     QStringList mimeTypes () const;
     QMimeData * mimeData ( const QModelIndexList & indexes ) const;
@@ -51,15 +52,12 @@ private:
     QUndoCommand *currentCommand;
     MainHost *myHost;
     int droppedItemsCount;
-    int movingItemLeft;
-    int movingDestRow;
-    QModelIndex movingToParent;
-    QList< QPair<QPersistentModelIndex,QPersistentModelIndex> >listMovedIndex;
 
     friend class ComAddProgram;
     friend class ComAddGroup;
     friend class ComRemoveProgram;
     friend class ComRemoveGroup;
+    friend class ComChangeProgramItem;
 };
 
 #endif // PROGRAMSMODEL_H

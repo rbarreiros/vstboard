@@ -55,7 +55,6 @@ signals:
     void ChangeGroup(const QModelIndex &index);
     void ProgAutoSave(const Autosave::Enum state);
     void GroupAutoSave(const Autosave::Enum state);
-    void CurrentDisplayedGroup(const QModelIndex &index);
 
 public slots:
     void OnProgChange(const QModelIndex &index);

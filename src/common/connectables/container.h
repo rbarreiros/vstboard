@@ -120,7 +120,7 @@ namespace Connectables {
         /// id of the progam to change on the next rendering loop
         int progToSet;
 
-        quint32 loadHeaderStream (QDataStream &);
+        bool loadHeaderStream (QDataStream &);
         bool loadObjectFromStream (QDataStream &);
         bool loadProgramFromStream (QDataStream &);
 
@@ -152,7 +152,6 @@ namespace Connectables {
         void LoadProgram(int prog);
 
         void SetProgram(const QModelIndex &prg);
-        void CopyProgram(int ori, int dest);
         void RemoveProgram(int prg=-1);
         void Render();
 

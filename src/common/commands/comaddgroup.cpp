@@ -8,30 +8,35 @@ ComAddGroup::ComAddGroup(ProgramsModel *model,
     QUndoCommand(parent),
     model(model),
     row(row),
-    data(*data)
+    data(*data),
+    done(false)
 
 {
     setText(QObject::tr("Add group"));
+
+    done=true;
+    redo();
+    done=false;
 }
 
 void ComAddGroup::undo()
 {
     model->fromCom=true;
-
     QDataStream stream(&data, QIODevice::WriteOnly);
-
     model->GroupToStream(stream,row);
     model->removeRow(row);
-
     model->fromCom=false;
 }
 
 void ComAddGroup::redo()
 {
-    model->fromCom=true;
+    if(!done) {
+        done=true;
+        return;
+    }
 
+    model->fromCom=true;
     QDataStream stream(&data, QIODevice::ReadOnly);
     model->GroupFromStream(stream,row);
-
     model->fromCom=false;
 }

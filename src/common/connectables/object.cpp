@@ -307,40 +307,6 @@ void Object::LoadProgram(int prog)
 }
 
 /*!
-  Copy a program
-  \param ori program number to copy
-  \param dest destination program number
-  */
-void Object::CopyProgram(int ori, int dest)
-{
-    if(!listPrograms.contains(ori)) {
-        debug("Object::CopyProgram ori not found")
-        return;
-    }
-    if(listPrograms.contains(dest)) {
-        debug("Object::CopyProgram dest already exists")
-        return;
-    }
-    ObjectProgram *cpy = new ObjectProgram( *listPrograms.value(ori) );
-    listPrograms.insert(dest,cpy);
-}
-
-/*!
-  Save the current program, in it's current state, as a new program without reseting the dirty flag
-  \param dest destination program number
-  */
-void Object::CopyCurrentProgram(int dest)
-{
-    if(listPrograms.contains(dest)) {
-        debug("Object::CopyCurrentProgram dest already exists")
-        return;
-    }
-    ObjectProgram *cpy = new ObjectProgram( *currentProgram );
-    cpy->Save(listParameterPinIn,listParameterPinOut);
-    listPrograms.insert(dest,cpy);
-}
-
-/*!
   Remove a program from the program list
   */
 void Object::RemoveProgram(int prg)
@@ -668,7 +634,7 @@ QDataStream & Object::toStream(QDataStream & out) const
         ++i;
     }
 
-    out << currentProgId;
+    out << (quint16)currentProgId;
     return out;
 }
 
