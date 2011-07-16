@@ -1,43 +1,39 @@
 #include "comaddprogram.h"
-#include "mainhost.h"
+#include "models/programsmodel.h"
 
-ComAddProgram::ComAddProgram(MainHost *myHost,
+ComAddProgram::ComAddProgram(ProgramsModel *model,
+                             QByteArray *data,
                              int row,
-                             int count,
-                             const QModelIndex & parentIndex,
-                             QUndoCommand  *parent) :
+                             int groupNum,
+                             QUndoCommand *parent) :
     QUndoCommand(parent),
-    myHost(myHost),
+    model(model),
     row(row),
-    count(count)
+    groupNum(groupNum),
+    data(*data)
+
 {
     setText(QObject::tr("Add program"));
-
-    if(parentIndex.isValid()) {
-        //removing a program
-        groupNum = parentIndex.parent().row();
-        progNum = row;
-    } else {
-        //removing a group
-        progNum = -1;
-        groupNum = row;
-    }
 }
 
-void ComAddProgram::undo ()
+void ComAddProgram::undo()
 {
-    ProgramsModel *model = myHost->programList->GetModel();
-    QStandardItem *lstProg = model->item(groupNum)->child(0,0);
     model->fromCom=true;
-    lstProg->removeRows(row,count);
+
+    QDataStream stream(&data, QIODevice::WriteOnly);
+
+    model->ProgramToStream(stream,row,groupNum);
+    model->RemoveProgram(row,groupNum);
+    
     model->fromCom=false;
 }
 
-void ComAddProgram::redo ()
+void ComAddProgram::redo()
 {
-    ProgramsModel *model = myHost->programList->GetModel();
-    QStandardItem *lstProg = model->item(groupNum)->child(0,0);
     model->fromCom=true;
-    lstProg->insertRows(row,count);
+
+    QDataStream stream(&data, QIODevice::ReadOnly);
+    model->ProgramFromStream(stream,row,groupNum);
+
     model->fromCom=false;
 }

@@ -17,7 +17,7 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-//#include "precomp.h"
+#include "precomp.h"
 #include "proglistview.h"
 #include "globals.h"
 #include "models/programsmodel.h"
@@ -34,7 +34,21 @@ ProgListView::ProgListView(QWidget *parent) :
     connect(actDel,SIGNAL(triggered()),
             this,SLOT(DeleteItem()));
     addAction(actDel);
-    setSelectionMode(ExtendedSelection);
+
+    QAction *actCopy = new QAction( QIcon(":/img16x16/editcopy.png"), "Copy", this);
+    actCopy->setShortcuts(QKeySequence::Copy);
+    actCopy->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    connect(actCopy, SIGNAL(triggered()),
+            this, SLOT(Copy()));
+    addAction(actCopy);
+
+    QAction *actPaste = new QAction( QIcon(":/img16x16/editpaste.png"), "Paste", this);
+    actPaste->setShortcuts(QKeySequence::Paste);
+    actPaste->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    connect(actPaste, SIGNAL(triggered()),
+            this, SLOT(Paste()));
+    addAction(actPaste);
+
 }
 
 //void ProgListView::startDrag(Qt::DropActions supportedActions)
@@ -83,4 +97,29 @@ void ProgListView::DeleteItem()
         return;
 
     progModel->removeRows(selectedIndexes(),currentIndex().parent());
+}
+
+void ProgListView::Copy()
+{
+    QMimeData *mime = model()->mimeData( selectionModel()->selectedIndexes() );
+    QApplication::clipboard()->setMimeData( mime );
+}
+
+void ProgListView::Paste()
+{
+    QModelIndex target = currentIndex();
+    if(!target.isValid())
+        return;
+
+    int row = target.row();
+    int column = 0;
+
+    const QClipboard *clipboard = QApplication::clipboard();
+    const QMimeData *mimeData = clipboard->mimeData();
+    foreach(QString type, mimeData->formats()) {
+        if( model()->mimeTypes().contains( type ) ) {
+            model()->dropMimeData( mimeData, Qt::CopyAction, row, column, target.parent() );
+            return;
+        }
+    }
 }

@@ -3,23 +3,20 @@
 
 #include <QUndoCommand>
 
-class MainHost;
+class ProgramsModel;
 class ComRemoveGroup : public QUndoCommand
 {
 public:
-    ComRemoveGroup(MainHost *myHost,
-                   const QModelIndexList &listToRemove,
-                   QUndoCommand  *parent=0);
+    ComRemoveGroup(ProgramsModel *model,
+                   int row,
+                   QUndoCommand *parent=0);
   void undo();
   void redo();
 
 private:
-  MainHost *myHost;
-  QList<int> rows;
-  QList<int> progIds;
-  QStringList progNames;
-  QByteArray progData;
-
+  ProgramsModel *model;
+  int row;
+  QByteArray data;
 };
 
 #endif // COMREMOVEGROUP_H

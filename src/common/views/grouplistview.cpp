@@ -34,7 +34,20 @@ GroupListView::GroupListView(QWidget *parent) :
     connect(actDel,SIGNAL(triggered()),
             this,SLOT(DeleteItem()));
     addAction(actDel);
-    setSelectionMode(ExtendedSelection);
+
+    QAction *actCopy = new QAction( QIcon(":/img16x16/editcopy.png"), "Copy", this);
+    actCopy->setShortcuts(QKeySequence::Copy);
+    actCopy->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    connect(actCopy, SIGNAL(triggered()),
+            this, SLOT(Copy()));
+    addAction(actCopy);
+
+    QAction *actPaste = new QAction( QIcon(":/img16x16/editpaste.png"), "Paste", this);
+    actPaste->setShortcuts(QKeySequence::Paste);
+    actPaste->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    connect(actPaste, SIGNAL(triggered()),
+            this, SLOT(Paste()));
+    addAction(actPaste);
 }
 
 void GroupListView::dragMoveEvent ( QDragMoveEvent * event )
@@ -70,4 +83,29 @@ void GroupListView::DeleteItem()
         return;
 
     progModel->removeRows(selectedIndexes(),currentIndex().parent());
+}
+
+void GroupListView::Copy()
+{
+    QMimeData *mime = model()->mimeData( selectionModel()->selectedIndexes() );
+    QApplication::clipboard()->setMimeData( mime );
+}
+
+void GroupListView::Paste()
+{
+    QModelIndex target = currentIndex();
+    if(!target.isValid())
+        return;
+
+    int row = target.row();
+    int column = 0;
+
+    const QClipboard *clipboard = QApplication::clipboard();
+    const QMimeData *mimeData = clipboard->mimeData();
+    foreach(QString type, mimeData->formats()) {
+        if( model()->mimeTypes().contains( type ) ) {
+            model()->dropMimeData( mimeData, Qt::CopyAction, row, column, target.parent() );
+            return;
+        }
+    }
 }

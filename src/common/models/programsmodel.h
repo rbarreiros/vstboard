@@ -20,8 +20,8 @@
 
 #ifndef PROGRAMSMODEL_H
 #define PROGRAMSMODEL_H
+#include "precomp.h"
 
-#include <QStandardItemModel>
 class MainHost;
 class ProgramsModel : public QStandardItemModel
 {
@@ -31,17 +31,35 @@ public:
     bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
     bool removeRows ( int row, int count, const QModelIndex & parent = QModelIndex() );
     void removeRows ( QModelIndexList &listToRemove, const QModelIndex & parent = QModelIndex() );
-    bool insertRows ( int row, int count, const QModelIndex & parent = QModelIndex() );
-    bool fromCom;
+
+    QStringList mimeTypes () const;
+    QMimeData * mimeData ( const QModelIndexList & indexes ) const;
+
+    bool GroupFromStream( QDataStream &stream, int row);
+    bool ProgramFromStream( QDataStream &stream, int row, int groupNum);
+    bool GroupToStream( QDataStream &stream, const QModelIndex &groupIndex) const;
+    bool ProgramToStream( QDataStream &stream, const QModelIndex &progIndex) const;
+    bool GroupToStream( QDataStream &stream, int row) const;
+    bool ProgramToStream( QDataStream &stream, int row, int groupNum) const;
 
 private:
+    bool RemoveProgram( int row, int groupNum );
+    bool RemoveGroup( int row );
+
+    bool fromCom;
+
+    QUndoCommand *currentCommand;
     MainHost *myHost;
-    int movingItemCount;
+    int droppedItemsCount;
     int movingItemLeft;
     int movingDestRow;
     QModelIndex movingToParent;
     QList< QPair<QPersistentModelIndex,QPersistentModelIndex> >listMovedIndex;
 
+    friend class ComAddProgram;
+    friend class ComAddGroup;
+    friend class ComRemoveProgram;
+    friend class ComRemoveGroup;
 };
 
 #endif // PROGRAMSMODEL_H

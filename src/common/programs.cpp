@@ -306,6 +306,60 @@ QStandardItem *Programs::CopyGroup(QStandardItem *grpOri)
     return grpItem;
 }
 
+/*!
+  move to another program or another group (before deletion)
+  */
+bool Programs::GoAwayFromIndex( const QModelIndex &index)
+{
+    if(index == currentPrg) {
+        //find another program
+        int i=0;
+        QModelIndex target = currentPrg.sibling(i,0);
+        while( target.isValid() && currentPrg==target) {
+            ++i;
+            target = currentPrg.sibling(i,0);
+        }
+
+        if(target.isValid()) {
+            return ChangeProg( target );
+        } else {
+            //no valid program in this group, find another group
+            i=0;
+            QModelIndex groupTarget = currentGrp.sibling(i,0);
+            while( groupTarget.isValid() && currentGrp==groupTarget) {
+                ++i;
+                groupTarget = currentGrp.sibling(i,0);
+            }
+
+            if(groupTarget.isValid()) {
+                target = groupTarget.child(0,0).child(0,0);
+            } else {
+                debug2(<<"Programs::GoAwayFromIndex no good prog found"<<currentGrp.row()<<currentPrg.row())
+                return false;
+            }
+            return ChangeProg( target );
+        }
+    }
+
+    if(index == currentGrp) {
+        int i=0;
+        QModelIndex groupTarget = currentGrp.sibling(i,0);
+        while( groupTarget.isValid() && currentGrp==groupTarget) {
+            ++i;
+            groupTarget = currentGrp.sibling(i,0);
+        }
+
+        if(groupTarget.isValid()) {
+            return ChangeGroup( groupTarget );
+        } else {
+            debug2(<<"Programs::GoAwayFromIndex no good group found"<<currentGrp.row()<<currentPrg.row())
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool Programs::RemoveIndex(const QModelIndex &index)
 {
     if(mainWindow->openedPrompt)
@@ -313,19 +367,9 @@ bool Programs::RemoveIndex(const QModelIndex &index)
 
     if(index.data(UserRoles::nodeType).toInt() == NodeType::program) {
 
-        //keep one program
-        if(model->rowCount(index.parent()) == 1)
-            return false;
-
         //move to another program
-
-        if(index==currentPrg) {
-            if(currentPrg.row()==0) {
-                ChangeProg(1);
-            }  else {
-                ChangeProg(0);
-            }
-        }
+        if(!GoAwayFromIndex(index))
+            return false;
 
         //delete program
         int prgId = index.data(UserRoles::value).toInt();
@@ -425,9 +469,9 @@ bool Programs::ChangeProg(const QModelIndex &newPrg)
     return true;
 }
 
-void Programs::ChangeProg(int midiProgNum) {
+bool Programs::ChangeProg(int midiProgNum) {
     if(!currentGrp.isValid())
-        return;
+        return false;
 
     QStandardItem* progList = model->itemFromIndex(currentGrp)->child(0,0);
 
@@ -435,7 +479,7 @@ void Programs::ChangeProg(int midiProgNum) {
         midiProgNum=progList->rowCount()-1;
 
     QModelIndex index = progList->child(midiProgNum,0)->index();
-    ChangeProg(index);
+    return ChangeProg(index);
 }
 
 bool Programs::ChangeGroup(const QModelIndex &newGrp)
@@ -460,13 +504,13 @@ bool Programs::ChangeGroup(const QModelIndex &newGrp)
     return ChangeProg(newPrg);
 }
 
-void Programs::ChangeGroup(int midiGroupNum)
+bool Programs::ChangeGroup(int midiGroupNum)
 {
     if(midiGroupNum>=model->rowCount())
         midiGroupNum=model->rowCount()-1;
 
     QModelIndex newGrp = model->item(midiGroupNum)->index();
-    ChangeGroup(newGrp);
+    return ChangeGroup(newGrp);
 }
 
 bool Programs::GetIndexFromProgNum(int midiGroupNum, int midiProgNum, QModelIndex &index)

@@ -42,6 +42,8 @@ signals:
 public slots:
     void OnContextMenu(const QPoint & pos);
     void DeleteItem();
+    void Copy();
+    void Paste();
 };
 
 #endif // PROGLISTVIEW_H

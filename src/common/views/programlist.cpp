@@ -34,7 +34,6 @@ ProgramList::ProgramList(QWidget *parent) :
 
     connect( ui->listGrps, SIGNAL(DragOverItemFromWidget(QWidget*,QModelIndex)),
              this, SLOT(OnDragOverGroups(QWidget*,QModelIndex)));
-
 }
 
 ProgramList::~ProgramList()
@@ -87,8 +86,8 @@ void ProgramList::on_listGrps_activated(QModelIndex index)
     if(index==currentPrg.parent().parent())
         return;
 
-    ui->listProgs->setRootIndex(index.child(0,0));
-    emit CurrentDisplayedGroup(index);
+//    ui->listProgs->setRootIndex(index.child(0,0));
+//    emit CurrentDisplayedGroup(index);
 
     if(myHost->undoProgramChanges()) {
         myHost->undoStack.push( new ComChangeGroup(myHost, index) );

@@ -889,9 +889,6 @@
    <property name="statusTip">
     <string>Show the configuration dialog</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+C</string>
-   </property>
   </action>
   <action name="actionShortcuts">
    <property name="checkable">

@@ -153,7 +153,7 @@ namespace Connectables {
 
         void SetProgram(const QModelIndex &prg);
         void CopyProgram(int ori, int dest);
-        void RemoveProgram(int prg);
+        void RemoveProgram(int prg=-1);
         void Render();
 
         void SetBufferSize(unsigned long size);

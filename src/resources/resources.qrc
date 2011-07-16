@@ -34,5 +34,7 @@
         <file>img16x16/edit_remove.png</file>
         <file>img16x16/redo.png</file>
         <file>img16x16/undo.png</file>
+        <file>img16x16/editcopy.png</file>
+        <file>img16x16/editpaste.png</file>
     </qresource>
 </RCC>

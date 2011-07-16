@@ -141,7 +141,8 @@ void MainGraphicsView::SetViewProgram(const QModelIndex &prg)
 
 void MainGraphicsView::SetViewProgram(int progId)
 {
-    SaveProgram();
+    if(progId!=currentProgId)
+        SaveProgram();
 
     currentProgId = progId;
     if(!listPrograms.contains(progId)) {
@@ -244,6 +245,9 @@ void MainGraphicsView::ProgramFromStream (int progId, QDataStream &in)
     in >> p.scrollx;
     in >> p.scrolly;
     listPrograms.insert(progId,p);
+
+    if(progId==currentProgId)
+        SetViewProgram(progId);
 }
 
 QDataStream & operator<< (QDataStream & out, const MainGraphicsView& value)

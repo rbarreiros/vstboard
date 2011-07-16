@@ -81,6 +81,8 @@ public:
     Optimizer *optimizer;
 
 private:
+    bool GoAwayFromIndex( const QModelIndex &index);
+
     QDataStream & toStream (QDataStream &);
     QDataStream & fromStream (QDataStream &);
 
@@ -112,8 +114,8 @@ signals:
     void GroupAutosaveChanged(const Autosave::Enum state);
 
 public slots:
-    void ChangeProg(int midiProgNum);
-    void ChangeGroup(int midiGroupNum);
+    bool ChangeProg(int midiProgNum);
+    bool ChangeGroup(int midiGroupNum);
     bool ChangeProg(const QModelIndex &newPrg);
     bool ChangeGroup(const QModelIndex &newGrp);
     void SetProgAutosave(const Autosave::Enum state);

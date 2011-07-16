@@ -264,7 +264,7 @@ void Container::LoadProgram(int prog)
 
     //add new objects
     foreach(QSharedPointer<Object>objPtr, newProg->listObjects) {
-        if(!oldProg->listObjects.contains(objPtr)) {
+        if(!oldProg || !oldProg->listObjects.contains(objPtr)) {
             AddChildObject(objPtr);
         }
     }
@@ -346,21 +346,41 @@ void Container::CopyProgram(int ori, int dest)
     }
 }
 
+/*!
+  Try to remove the program now, retry later if we try to remove the current program
+  */
 void Container::RemoveProgram(int prg)
 {
-    if(!listContainerPrograms.contains(prg)) {
-//        debug("Container::RemoveProgram not found")
-        return;
+    static QList<int> listProgToRemove;
+
+     if(prg!=-1)
+        listProgToRemove << prg;
+
+    QList<int>remainingProgs;
+
+    while(!listProgToRemove.isEmpty()) {
+        int p = listProgToRemove.takeFirst();
+
+        if(listContainerPrograms.contains(p)) {
+            if(p == currentProgId) {
+                remainingProgs << p;
+                if(progToSet==-1) {
+                    debug2(<<"Container::RemoveProgram removing current program and no scheduled progChange "<<p<<objectName())
+                }
+            } else {
+                delete listContainerPrograms.take(p);
+            }
+        } /*else {
+            //the program does not exist, nothing to do
+            debug2(<<"Container::RemoveProgram unknown prog"<<p<<objectName())
+        }*/
     }
 
-    if(prg == currentProgId) {
-        debug2(<<"Container::RemoveProgram removing current program ! "<<prg<<objectName())
-        return;
+    //some programs where not removed, retry later
+    if(!remainingProgs.isEmpty()) {
+        listProgToRemove = remainingProgs;
+        QTimer::singleShot(10, this, SLOT(RemoveProgram()));
     }
-
-    ContainerProgram* prog = listContainerPrograms.take(prg);
-    prog->Remove(prg);
-    delete prog;
 }
 
 /*!
@@ -834,6 +854,9 @@ bool Container::loadProgramFromStream (QDataStream &in)
 
     ContainerProgram *prog = new ContainerProgram(myHost,this);
     in >> *prog;
+
+    if(listContainerPrograms.contains(progId))
+        delete listContainerPrograms.take(progId);
     listContainerPrograms.insert(progId,prog);
 
     return true;
@@ -864,7 +887,6 @@ void Container::ProgramToStream (int progId, QDataStream &out)
     }
 
     out << *prog;
-    out << (quint32)currentProgId;
 }
 
 void Container::ProgramFromStream (int progId, QDataStream &in)
@@ -901,13 +923,17 @@ void Container::ProgramFromStream (int progId, QDataStream &in)
         }
     }
 
-    if(!listContainerPrograms.contains(progId))
-        listContainerPrograms.insert(progId, new ContainerProgram(myHost,this));
+    ContainerProgram *prog = new ContainerProgram(myHost,this);
+    in >> *prog;
 
-    in >> *listContainerPrograms.value(progId);
-
-    quint32 savedProgId;
-    in >> savedProgId;
+    if(listContainerPrograms.contains(progId))
+        delete listContainerPrograms.take(progId);
+    listContainerPrograms.insert(progId,prog);
 
     myHost->objFactory->ResetSavedId();
+
+    if(progId==currentProgId) {
+        LoadProgram(TEMP_PROGRAM);
+        LoadProgram(progId);
+    }
 }

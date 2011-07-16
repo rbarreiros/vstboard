@@ -3,28 +3,23 @@
 
 #include <QUndoCommand>
 
-class MainHost;
+class ProgramsModel;
 class ComAddProgram : public QUndoCommand
 {
 public:
-    ComAddProgram(MainHost *myHost,
+    ComAddProgram(ProgramsModel *model,
+                  QByteArray *data,
                   int row,
-                  int count,
-                  const QModelIndex & parentIndex,
+                  int groupNum,
                   QUndoCommand  *parent=0);
-    void undo ();
-    void redo ();
+    void undo();
+    void redo();
 
 private:
-    MainHost *myHost;
+    ProgramsModel *model;
     int row;
-    int count;
     int groupNum;
-    int progNum;
-
-    QList<int> progIds;
-    QStringList progNames;
-    QByteArray progData;
+    QByteArray data;
 };
 
 #endif // COMADDPROGRAM_H
