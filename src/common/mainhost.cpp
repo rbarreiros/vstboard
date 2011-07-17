@@ -19,6 +19,7 @@
 **************************************************************************/
 #include "mainhost.h"
 #include "mainwindow.h"
+#include "models/programsmodel.h"
 #include "connectables/container.h"
 
 #ifdef VSTSDK
@@ -75,7 +76,7 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
 
     renderer = new Renderer(this);
 
-    programList = new Programs(this);
+    programsModel = new ProgramsModel(this);
 
     //timer
     timeFromStart.start();
@@ -133,7 +134,7 @@ void MainHost::Open()
     SetupGroupContainer();
 
     EnableSolverUpdate(true);
-    programList->BuildModel();
+    programsModel->BuildDefaultModel();
 }
 
 void MainHost::SetupMainContainer()
@@ -434,9 +435,9 @@ void MainHost::SetupProgramContainer()
         mainContainer->ConnectObjects(groupContainer->bridgeOut, programContainer->bridgeReturn,true);
     }
 
-    connect(programList, SIGNAL(ProgChanged(int)),
+    connect(programsModel, SIGNAL(ProgChanged(int)),
             programContainer.data(), SLOT(SetProgram(int)));
-    connect(programList, SIGNAL(ProgDelete(int)),
+    connect(programsModel, SIGNAL(ProgDelete(int)),
             programContainer.data(), SLOT(RemoveProgram(int)));
     connect(this,SIGNAL(Rendered()),
             programContainer.data(), SLOT(Render()));
@@ -534,9 +535,9 @@ void MainHost::SetupGroupContainer()
         mainContainer->ConnectObjects(hostContainer->bridgeOut, groupContainer->bridgeReturn,true);
     }
 
-    connect(programList, SIGNAL(GroupChanged(int)),
+    connect(programsModel, SIGNAL(GroupChanged(int)),
             groupContainer.data(), SLOT(SetProgram(int)));
-    connect(programList, SIGNAL(GroupDelete(int)),
+    connect(programsModel, SIGNAL(GroupDelete(int)),
             groupContainer.data(), SLOT(RemoveProgram(int)));
     connect(this,SIGNAL(Rendered()),
             groupContainer.data(), SLOT(Render()));
@@ -756,16 +757,26 @@ void MainHost::LoadFile(const QString &filename)
 
 void MainHost::LoadSetupFile(const QString &filename)
 {
-    if(filename.isEmpty())
+    if(!programsModel->userWantsToUnloadSetup())
+        return;
+
+    QString name = filename;
+
+    if(name.isEmpty()) {
+        QString lastDir = GetSetting("lastSetupDir").toString();
+        name = QFileDialog::getOpenFileName(mainWindow, tr("Open a Setup file"), lastDir, tr("Setup Files (*.%1)").arg(SETUP_FILE_EXTENSION));
+    }
+
+    if(name.isEmpty())
         return;
 
     undoStack.clear();
 
-    if(ProjectFile::LoadFromFile(this,filename)) {
-        ConfigDialog::AddRecentSetupFile(filename,this);
-        currentSetupFile = filename;
+    if(ProjectFile::LoadFromFile(this,name)) {
+        ConfigDialog::AddRecentSetupFile(name,this);
+        currentSetupFile = name;
     } else {
-        ConfigDialog::RemoveRecentSetupFile(filename,this);
+        ConfigDialog::RemoveRecentSetupFile(name,this);
         ClearSetup();
     }
     emit currentFileChanged();
@@ -773,16 +784,26 @@ void MainHost::LoadSetupFile(const QString &filename)
 
 void MainHost::LoadProjectFile(const QString &filename)
 {
-    if(filename.isEmpty())
+    if(!programsModel->userWantsToUnloadProject())
+        return;
+
+    QString name = filename;
+
+    if(name.isEmpty()) {
+        QString lastDir = GetSetting("lastProjectDir").toString();
+        name = QFileDialog::getOpenFileName(mainWindow, tr("Open a Project file"), lastDir, tr("Project Files (*.%1)").arg(PROJECT_FILE_EXTENSION));
+    }
+
+    if(name.isEmpty())
         return;
 
     undoStack.clear();
 
-    if(ProjectFile::LoadFromFile(this,filename)) {
-        ConfigDialog::AddRecentProjectFile(filename,this);
-        currentProjectFile = filename;
+    if(ProjectFile::LoadFromFile(this,name)) {
+        ConfigDialog::AddRecentProjectFile(name,this);
+        currentProjectFile = name;
     } else {
-        ConfigDialog::RemoveRecentProjectFile(filename,this);
+        ConfigDialog::RemoveRecentProjectFile(name,this);
         ClearProject();
     }
     emit currentFileChanged();
@@ -810,6 +831,9 @@ void MainHost::ReloadSetup()
 
 void MainHost::ClearSetup()
 {
+    if(!programsModel->userWantsToUnloadSetup())
+        return;
+
     undoStack.clear();
 
     EnableSolverUpdate(false);
@@ -825,6 +849,9 @@ void MainHost::ClearSetup()
 
 void MainHost::ClearProject()
 {
+    if(!programsModel->userWantsToUnloadProject())
+        return;
+
     undoStack.clear();
 
     EnableSolverUpdate(false);
@@ -833,19 +860,30 @@ void MainHost::ClearProject()
     SetupGroupContainer();
     EnableSolverUpdate(true);
 
-    programList->BuildModel();
+    programsModel->BuildDefaultModel();
 
     ConfigDialog::AddRecentProjectFile("",this);
     currentProjectFile = "";
     emit currentFileChanged();
 }
 
-void MainHost::SaveSetupFile(QString filename)
+void MainHost::SaveSetupFile(bool saveAs)
 {
-    if(filename.isEmpty())
-        filename=currentSetupFile;
-    if(filename.isEmpty())
-        return;
+    QString filename;
+
+    if(currentSetupFile.isEmpty() || saveAs) {
+        QString lastDir = GetSetting("lastSetupDir").toString();
+        filename = QFileDialog::getSaveFileName(mainWindow, tr("Save Setup"), lastDir, tr("Setup Files (*.%1)").arg(SETUP_FILE_EXTENSION));
+
+        if(filename.isEmpty())
+            return;
+
+        if(!filename.endsWith(SETUP_FILE_EXTENSION, Qt::CaseInsensitive)) {
+            filename += ".";
+            filename += SETUP_FILE_EXTENSION;
+        }
+    }
+
     if(ProjectFile::SaveToSetupFile(this,filename)) {
         SetSetting("lastSetupDir",QFileInfo(filename).absolutePath());
         ConfigDialog::AddRecentSetupFile(filename,this);
@@ -854,12 +892,23 @@ void MainHost::SaveSetupFile(QString filename)
     }
 }
 
-void MainHost::SaveProjectFile(QString filename)
+void MainHost::SaveProjectFile(bool saveAs)
 {
-    if(filename.isEmpty())
-        filename=currentProjectFile;
-    if(filename.isEmpty())
-        return;
+    QString filename;
+
+    if(currentProjectFile.isEmpty() || saveAs) {
+        QString lastDir = GetSetting("lastProjectDir").toString();
+        filename = QFileDialog::getSaveFileName(mainWindow, tr("Save Project"), lastDir, tr("Project Files (*.%1)").arg(PROJECT_FILE_EXTENSION));
+
+        if(filename.isEmpty())
+            return;
+
+        if(!filename.endsWith(PROJECT_FILE_EXTENSION, Qt::CaseInsensitive)) {
+            filename += ".";
+            filename += PROJECT_FILE_EXTENSION;
+        }
+    }
+
     if(ProjectFile::SaveToProjectFile(this,filename)) {
         SetSetting("lastProjectDir",QFileInfo(filename).absolutePath());
         ConfigDialog::AddRecentProjectFile(filename,this);

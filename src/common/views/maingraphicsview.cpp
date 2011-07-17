@@ -154,13 +154,6 @@ void MainGraphicsView::SetViewProgram(int progId)
     verticalScrollBar()->setValue( state.scrolly );
 }
 
-void MainGraphicsView::CopyViewProgram(int ori, int dest)
-{
-    if(!listPrograms.contains(ori))
-        return;
-    listPrograms.insert(dest, listPrograms.value(ori));
-}
-
 void MainGraphicsView::RemoveViewProgram(int prg)
 {
     if(!listPrograms.contains(prg))

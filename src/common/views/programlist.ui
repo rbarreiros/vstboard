@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>202</width>
+    <width>158</width>
     <height>198</height>
    </rect>
   </property>
@@ -49,6 +49,12 @@
          </property>
          <item>
           <widget class="QToolButton" name="btAddGroup">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="toolTip">
             <string>Add a group</string>
            </property>
@@ -61,7 +67,7 @@
            </property>
            <property name="iconSize">
             <size>
-             <width>13</width>
+             <width>10</width>
              <height>10</height>
             </size>
            </property>
@@ -69,6 +75,12 @@
          </item>
          <item>
           <widget class="QToolButton" name="btDelGroup">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="toolTip">
             <string>Remove a group</string>
            </property>
@@ -81,9 +93,28 @@
            </property>
            <property name="iconSize">
             <size>
-             <width>13</width>
+             <width>10</width>
              <height>10</height>
             </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>1</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Groups</string>
            </property>
           </widget>
          </item>
@@ -101,76 +132,22 @@
           </spacer>
          </item>
          <item>
-          <widget class="QRadioButton" name="grpAutosaveOn">
+          <widget class="QCheckBox" name="GroupAutosave">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
            <property name="toolTip">
-            <string>Autosave changes</string>
+            <string>Autosave groups</string>
            </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="checked">
+           <property name="tristate">
             <bool>true</bool>
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QRadioButton" name="grpAutosaveAsk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>Prompt</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QRadioButton" name="grpAutosaveOff">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>Discard unsaved changes</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
         </layout>
-       </item>
-       <item>
-        <widget class="QLabel" name="label">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>1</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Groups</string>
-         </property>
-        </widget>
        </item>
        <item>
         <widget class="GroupListView" name="listGrps">
@@ -214,6 +191,12 @@
          </property>
          <item>
           <widget class="QToolButton" name="btAddProgram">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="toolTip">
             <string>Add a program</string>
            </property>
@@ -226,7 +209,7 @@
            </property>
            <property name="iconSize">
             <size>
-             <width>13</width>
+             <width>10</width>
              <height>10</height>
             </size>
            </property>
@@ -234,6 +217,12 @@
          </item>
          <item>
           <widget class="QToolButton" name="btDelProgram">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="toolTip">
             <string>Remove a program</string>
            </property>
@@ -246,9 +235,28 @@
            </property>
            <property name="iconSize">
             <size>
-             <width>13</width>
+             <width>10</width>
              <height>10</height>
             </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>1</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Programs</string>
            </property>
           </widget>
          </item>
@@ -266,76 +274,25 @@
           </spacer>
          </item>
          <item>
-          <widget class="QRadioButton" name="progAutosaveOn">
+          <widget class="QCheckBox" name="ProgAutosave">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
            <property name="toolTip">
-            <string>Autosave changes</string>
+            <string>Autosave programs</string>
            </property>
            <property name="text">
             <string/>
            </property>
-           <property name="checked">
+           <property name="tristate">
             <bool>true</bool>
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QRadioButton" name="progAutosaveAsk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>Prompt</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QRadioButton" name="progAutosaveOff">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>Discard unsaved changes</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
         </layout>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_2">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>1</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Programs</string>
-         </property>
-        </widget>
        </item>
        <item>
         <widget class="ProgListView" name="listProgs">

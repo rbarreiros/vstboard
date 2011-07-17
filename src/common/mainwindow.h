@@ -22,12 +22,10 @@
 #define MAINWINDOW_H
 
 //#include "precomp.h"
-
 #include "mainhost.h"
 #include "models/listtoolsmodel.h"
 #include "views/sceneview.h"
 #include "views/viewconfig.h"
-
 
 namespace Ui {
     class MainWindow;
@@ -45,13 +43,12 @@ public:
     virtual ~MainWindow();
     virtual void readSettings();
     void writeSettings();
-    bool openedPrompt;
+
 
     View::SceneView *mySceneView;
     View::ViewConfig *viewConfig;
 
-    bool userWantsToUnloadProject();
-    bool userWantsToUnloadSetup();
+
 
 protected:
     void changeEvent(QEvent *e);
@@ -89,7 +86,6 @@ private slots:
     void on_actionAbout_triggered();
     void on_actionNew_Setup_triggered();
     void on_actionSave_Setup_triggered();
-    void on_actionShortcuts_toggled(bool );
     void on_actionNew_triggered();
     void on_actionLoad_triggered();
     void on_actionSave_triggered();

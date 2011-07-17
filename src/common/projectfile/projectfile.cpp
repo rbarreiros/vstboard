@@ -19,8 +19,9 @@
 **************************************************************************/
 
 #include "projectfile.h"
-#include "../mainhost.h"
-#include "../mainwindow.h"
+#include "mainhost.h"
+#include "mainwindow.h"
+#include "models/programsmodel.h"
 #include "fileversion.h"
 
 bool ProjectFile::SaveToProjectFile(MainHost *myHost,QString filePath)
@@ -133,7 +134,7 @@ bool ProjectFile::ToStream(MainHost *myHost,QDataStream &out, quint32 fileKey )
             //save ProgramList
             QByteArray tmpBa;
             QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
-            tmpStream << *myHost->programList;
+            tmpStream << *myHost->programsModel;
             SaveChunk( "ProgramList", tmpBa, out);
         }
 
@@ -211,7 +212,7 @@ bool ProjectFile::FromStream(MainHost *myHost,QDataStream &in)
         }
 
         else if(chunkName=="ProgramList") {
-            tmpStream >> *myHost->programList;
+            tmpStream >> *myHost->programsModel;
         }
 
         else if(chunkName=="HostView") {
@@ -243,13 +244,15 @@ bool ProjectFile::FromStream(MainHost *myHost,QDataStream &in)
         }
 
         if(!tmpStream.atEnd()) {
+            in.setStatus(QDataStream::ReadCorruptData);
+#ifndef QT_NO_DEBUG
             debug2(<<"ProjectFile::FromStream stream not at end, drop remaining data")
             while(!tmpStream.atEnd()) {
                 char c[1000];
                 int nb=tmpStream.readRawData(c,1000);
                 debug2(<<nb << QByteArray::fromRawData(c,nb).toHex())
             }
-            in.setStatus(QDataStream::ReadCorruptData);
+#endif
         }
 
         if(tmpStream.status()==QDataStream::ReadCorruptData) {

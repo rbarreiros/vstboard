@@ -21,7 +21,7 @@
 #ifndef HOSTCONTROLLER_H
 #define HOSTCONTROLLER_H
 
-#include "../precomp.h"
+//#include "precomp.h"
 #include "object.h"
 
 namespace Connectables {
@@ -60,8 +60,8 @@ namespace Connectables {
         void tempoChange(int tempo, int sign1, int sign2);
 
     public slots:
-        void OnHostProgChanged(const QModelIndex &index);
-        void OnHostGroupChanged(const QModelIndex &index);
+        void OnHostProgChanged(int prg);
+        void OnHostGroupChanged(int grp);
         void OnHostTempoChange(int tempo, int sign1, int sign2);
         void OnParameterChanged(ConnectionInfo pinInfo, float value);
     };

@@ -23,30 +23,41 @@
 
 #include <QListView>
 
+class ProgramsModel;
 class GroupListView : public QListView
 {
     Q_OBJECT
 public:
     explicit GroupListView(QWidget *parent = 0);
+    virtual void setModel(ProgramsModel *model);
 
 protected:
-    void dragMoveEvent ( QDragMoveEvent * event );
-    void dropEvent(QDropEvent *event);
+    virtual void dragEnterEvent(QDragEnterEvent *event);
+    virtual void dragMoveEvent ( QDragMoveEvent * event );
+    virtual void dropEvent(QDropEvent *event);
+    virtual void currentChanged (const QModelIndex &current, const QModelIndex &previous);
 
+    virtual QStringList MimeTypes();
+
+    QAction *actRename;
     QAction *actDel;
     QAction *actAddNew;
     QAction *actCopy;
     QAction *actPaste;
+    QAction *actCut;
 
-signals:
-    void DragOverItemFromWidget( const QModelIndex &index);
+private:
+    void CreateActions();
 
 public slots:
-    void OnContextMenu(const QPoint & pos);
-    void DeleteItem();
-    void InsertItem();
-    void Copy();
-    void Paste();
+    virtual void SetCurrentNoSelect(const QModelIndex &index);
+    virtual void OnContextMenu(const QPoint & pos);
+    virtual void EditItem();
+    virtual void DeleteItem();
+    virtual void InsertItem();
+    virtual void Copy();
+    virtual void Paste();
+    virtual void Cut();
 };
 
 #endif // GROUPLISTVIEW_H

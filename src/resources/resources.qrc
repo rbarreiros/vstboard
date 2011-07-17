@@ -36,5 +36,6 @@
         <file>img16x16/undo.png</file>
         <file>img16x16/editcopy.png</file>
         <file>img16x16/editpaste.png</file>
+        <file>img16x16/cell_edit.png</file>
     </qresource>
 </RCC>

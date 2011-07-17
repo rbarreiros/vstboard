@@ -4,18 +4,21 @@
 #include "precomp.h"
 #include <QUndoCommand>
 
-class MainHost;
+class ProgramsModel;
 class ComChangeProgram : public QUndoCommand
 {
 public:
-    ComChangeProgram(MainHost *myHost,
-                     const QModelIndex &newProgIndex,
+    ComChangeProgram(ProgramsModel *model,
+                     int oldGroup,
+                     int oldProg,
+                     int newGroup,
+                     int newProg,
                      QUndoCommand  *parent=0);
-    void undo ();
-    void redo ();
-private:
-    MainHost *myHost;
+    void undo();
+    void redo();
 
+private:
+    ProgramsModel *model;
     int oldGroup;
     int oldProg;
     int newGroup;

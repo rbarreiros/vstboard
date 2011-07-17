@@ -25,18 +25,35 @@
 GroupListView::GroupListView(QWidget *parent) :
     QListView(parent)
 {
+    CreateActions();
+
     connect(this, SIGNAL(customContextMenuRequested(QPoint)),
             this, SLOT(OnContextMenu(QPoint)));
+}
 
-    actAddNew = new QAction(QIcon(":/img16x16/edit_add.png"),tr("Insert a new group"),this);
+QStringList GroupListView::MimeTypes()
+{
+    return QStringList() << MIMETYPE_GROUP << MIMETYPE_PROGRAM;
+}
+
+void GroupListView::CreateActions()
+{
+    actRename = new QAction(QIcon(":/img16x16/cell_edit.png"),tr("Rename"),this);
+    actRename->setShortcut( Qt::Key_F2 );
+    actRename->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    connect(actRename,SIGNAL(triggered()),
+            this,SLOT(EditItem()));
+    addAction(actRename);
+
+    actAddNew = new QAction(QIcon(":/img16x16/edit_add.png"),tr("Insert new"),this);
     actAddNew->setShortcut( Qt::Key_Insert );
     actAddNew->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     connect(actAddNew,SIGNAL(triggered()),
             this,SLOT(InsertItem()));
     addAction(actAddNew);
 
-    actDel = new QAction(QIcon(":/img16x16/edit_remove.png"),tr("Delete group"),this);
-    actDel->setShortcut(Qt::Key_Delete);
+    actDel = new QAction(QIcon(":/img16x16/edit_remove.png"),tr("Delete"),this);
+    actDel->setShortcut(QKeySequence::Delete);
     actDel->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     connect(actDel,SIGNAL(triggered()),
             this,SLOT(DeleteItem()));
@@ -55,74 +72,98 @@ GroupListView::GroupListView(QWidget *parent) :
     connect(actPaste, SIGNAL(triggered()),
             this, SLOT(Paste()));
     addAction(actPaste);
+
+    actCut = new QAction( QIcon(":/img16x16/editcut.png"), "Cut", this);
+    actCut->setShortcuts(QKeySequence::Cut);
+    actCut->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    connect(actCut, SIGNAL(triggered()),
+            this, SLOT(Cut()));
+    addAction(actCut);
+}
+
+void GroupListView::setModel(ProgramsModel *model)
+{
+    QListView::setModel(model);
+
+    connect(model, SIGNAL(GroupChanged(QModelIndex)),
+            this,SLOT(SetCurrentNoSelect(QModelIndex)));
+}
+
+void GroupListView::SetCurrentNoSelect(const QModelIndex &index)
+{
+    selectionModel()->setCurrentIndex(index, QItemSelectionModel::NoUpdate);
+}
+
+void GroupListView::dragEnterEvent(QDragEnterEvent *event)
+{
+    //accept programs, will add the at the end of the list
+    if(event->mimeData()->formats().contains(MIMETYPE_PROGRAM))
+        event->accept();
+
+    //default behavior
+    QListView::dragEnterEvent(event);
+
 }
 
 void GroupListView::dragMoveEvent ( QDragMoveEvent * event )
 {
-    //default behavior
+    //default behavior for ourself (groups reordering)
     if(event->source() == this) {
         setDropIndicatorShown(true);
         QListView::dragMoveEvent(event);
         return;
     }
 
-    //ignore by default
-    event->ignore();
-    setDropIndicatorShown(false);
-
+    //accept if we drag a program over a group +switch to the group hovered
     QModelIndex i = indexAt(event->pos());
     if(i.isValid() && event->mimeData()->formats().contains(MIMETYPE_PROGRAM)) {
-
-        //show the content of the group hovered
-        emit DragOverItemFromWidget( i );
-
-        //allow program drop on a group
         event->accept();
-
-    } else {
-        event->setDropAction(Qt::IgnoreAction);
+        setDropIndicatorShown(false);
+        selectionModel()->setCurrentIndex(i, QItemSelectionModel::NoUpdate);
+        return;
     }
 
+    //ignore if we're not over a program
+    event->ignore();
 }
 
 void GroupListView::dropEvent(QDropEvent *event)
 {
-    //default behavior
-    if(event->source() == this) {
-        QListView::dropEvent(event);
-        return;
-    }
-
     //allow program drop on a group
     if(event->mimeData()->formats().contains(MIMETYPE_PROGRAM)) {
         QModelIndex i = indexAt(event->pos());
         if(i.isValid()) {
+            event->accept();
             model()->dropMimeData( event->mimeData(), event->dropAction(), i.row(), 0, QModelIndex() );
-        } else {
-            event->ignore();
-            event->setDropAction(Qt::IgnoreAction);
+            return;
         }
     }
+
+    //default behavior (reorder groups)
+    QListView::dropEvent(event);
+}
+
+void GroupListView::currentChanged (const QModelIndex &current, const QModelIndex &previous)
+{
+    Q_UNUSED(previous)
+
+    ProgramsModel *progModel = qobject_cast<ProgramsModel*>(model());
+    if(!progModel)
+        return;
+
+    progModel->UserChangeGroup( current );
 }
 
 void GroupListView::OnContextMenu(const QPoint & pos)
 {
-    if(!selectedIndexes().isEmpty()) {
-        actDel->setEnabled(true);
-        actCopy->setEnabled(true);
-    } else {
-        actDel->setEnabled(false);
-        actCopy->setEnabled(false);
-    }
-
-    const QMimeData *mime = QApplication::clipboard()->mimeData();
-    if( mime->hasFormat(MIMETYPE_PROGRAM) || mime->hasFormat(MIMETYPE_GROUP) )
-        actPaste->setEnabled(true);
-    else
-        actPaste->setEnabled(false);
-
     QMenu menu;
     menu.exec(actions(), mapToGlobal(pos), actions().at(0), this);
+}
+
+void GroupListView::EditItem()
+{
+    if(currentIndex().isValid())
+        edit(currentIndex());
 }
 
 void GroupListView::DeleteItem()
@@ -172,5 +213,16 @@ void GroupListView::Paste()
         row=currentIndex().row();
 
     const QMimeData *mime = QApplication::clipboard()->mimeData();
-    model()->dropMimeData( mime, Qt::CopyAction, row, 0, rootIndex() );
+    foreach( const QString &t, MimeTypes() ) {
+        if(mime->hasFormat(t)) {
+            model()->dropMimeData( mime, Qt::CopyAction, row, 0, rootIndex() );
+            return;
+        }
+    }
+}
+
+void GroupListView::Cut()
+{
+    Copy();
+    DeleteItem();
 }

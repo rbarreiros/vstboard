@@ -1,36 +1,28 @@
 #include "comchangeprogram.h"
-#include "mainhost.h"
+#include "models/programsmodel.h"
 
-ComChangeProgram::ComChangeProgram(MainHost *myHost,
-                                   const QModelIndex &newProgIndex,
+ComChangeProgram::ComChangeProgram(ProgramsModel *model,
+                                   int oldGroup,
+                                   int oldProg,
+                                   int newGroup,
+                                   int newProg,
                                    QUndoCommand *parent) :
     QUndoCommand(parent),
-    myHost(myHost),
-    oldGroup(-1),
-    oldProg(-1),
-    newGroup(-1),
-    newProg(-1)
+    model(model),
+    oldGroup(oldGroup),
+    oldProg(oldProg),
+    newGroup(newGroup),
+    newProg(newProg)
 {
-    if(!newProgIndex.isValid())
-        return;
-
-    setText( QObject::tr("Prog:%1").arg( newProgIndex.data().toString() ));
-    oldGroup = myHost->programList->GetCurrentMidiGroup();
-    oldProg = myHost->programList->GetCurrentMidiProg();
-    newGroup = newProgIndex.parent().parent().row();
-    newProg = newProgIndex.row();
+    setText(QObject::tr("Program change"));
 }
 
 void ComChangeProgram::undo()
 {
-    if(oldProg==-1)
-        return;
-    myHost->programList->ChangeProgNow(oldGroup,oldProg);
+    model->ChangeProgNow(oldGroup,oldProg);
 }
 
 void ComChangeProgram::redo()
 {
-    if(newProg==-1)
-        return;
-    myHost->programList->ChangeProgNow(newGroup,newProg);
+    model->ChangeProgNow(newGroup,newProg);
 }

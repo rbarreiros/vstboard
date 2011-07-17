@@ -18,10 +18,12 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #include "mainwindowhost.h"
+#include "mainhosthost.h"
 #include "views/configdialoghost.h"
 #include "views/splash.h"
 #include "audiodevices.h"
 #include "mididevices.h"
+#include "models/programsmodel.h"
 
 MainWindowHost::MainWindowHost(MainHostHost * myHost,QWidget *parent) :
     MainWindow(myHost,parent)
@@ -66,12 +68,12 @@ MainWindowHost::MainWindowHost(MainHostHost * myHost,QWidget *parent) :
 
 void MainWindowHost::closeEvent(QCloseEvent *event)
 {
-    if(!userWantsToUnloadSetup()) {
+    if(!myHost->programsModel->userWantsToUnloadSetup()) {
         event->ignore();
         return;
     }
 
-    if(!userWantsToUnloadProject()) {
+    if(!myHost->programsModel->userWantsToUnloadProject()) {
         event->ignore();
         return;
     }

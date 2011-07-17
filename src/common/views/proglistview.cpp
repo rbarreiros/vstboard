@@ -23,89 +23,62 @@
 #include "models/programsmodel.h"
 
 ProgListView::ProgListView(QWidget *parent) :
-    QListView(parent)
+    GroupListView(parent)
 {
-    connect(this, SIGNAL(customContextMenuRequested(QPoint)),
-            this, SLOT(OnContextMenu(QPoint)));
-
-    actAddNew = new QAction(QIcon(":/img16x16/edit_add.png"),tr("Insert a new program"),this);
-    actAddNew->setShortcut( Qt::Key_Insert );
-    actAddNew->setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    connect(actAddNew,SIGNAL(triggered()),
-            this,SLOT(InsertItem()));
-    addAction(actAddNew);
-
-    actDel = new QAction(QIcon(":/img16x16/delete.png"),tr("Delete program"),this);
-    actDel->setShortcut(Qt::Key_Delete);
-    actDel->setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    connect(actDel,SIGNAL(triggered()),
-            this,SLOT(DeleteItem()));
-    addAction(actDel);
-
-    actCopy = new QAction( QIcon(":/img16x16/editcopy.png"), "Copy", this);
-    actCopy->setShortcuts(QKeySequence::Copy);
-    actCopy->setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    connect(actCopy, SIGNAL(triggered()),
-            this, SLOT(Copy()));
-    addAction(actCopy);
-
-    actPaste = new QAction( QIcon(":/img16x16/editpaste.png"), "Paste", this);
-    actPaste->setShortcuts(QKeySequence::Paste);
-    actPaste->setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    connect(actPaste, SIGNAL(triggered()),
-            this, SLOT(Paste()));
-    addAction(actPaste);
 }
 
-void ProgListView::startDrag(Qt::DropActions supportedActions)
+QStringList ProgListView::MimeTypes()
 {
-    QListView::startDrag(supportedActions);
+    return QStringList() << MIMETYPE_PROGRAM;
+}
 
-    //go back to the current group
-    emit DragFinished();
+void ProgListView::setModel(ProgramsModel *model)
+{
+    QListView::setModel(model);
+
+    connect(model, SIGNAL(GroupChanged(QModelIndex)),
+            this, SLOT(setRootIndex(QModelIndex)));
+    connect(model, SIGNAL(ProgChanged(QModelIndex)),
+            this, SLOT(SetCurrentNoSelect(QModelIndex)));
+}
+
+void ProgListView::dragEnterEvent(QDragEnterEvent *event)
+{
+    //the root index (a group) is set to 'no-drop'
+    //(otherwise dragging a group on top of another one will move it as a child of the group instead of reordering )
+    //we have to force accept to allow reordering
+    if(event->source() == this)
+        event->accept();
+    else
+        event->ignore();
 }
 
 void ProgListView::dragMoveEvent ( QDragMoveEvent * event )
 {
-    if(event->source() != this) {
+    //don't allow drop on itself
+    QModelIndex idx = indexAt( event->pos() );
+    if(idx.isValid() && selectionModel()->selectedIndexes().contains( idx )) {
         event->ignore();
         return;
     }
+
+    //default hover highlight - but no dropindicator :(
     QListView::dragMoveEvent(event);
+
+    //force accept and we'll get the drop
+    if(event->source() == this)
+        event->accept();
 }
 
-void ProgListView::OnContextMenu(const QPoint & pos)
+void ProgListView::currentChanged (const QModelIndex &current, const QModelIndex &previous)
 {
-    if(!selectedIndexes().isEmpty()) {
-        actDel->setEnabled(true);
-        actCopy->setEnabled(true);
-    } else {
-        actDel->setEnabled(false);
-        actCopy->setEnabled(false);
-    }
+    Q_UNUSED(previous)
 
-    actPaste->setEnabled(false);
-
-    const QMimeData *mime =  QApplication::clipboard()->mimeData();
-    if( mime->hasFormat(MIMETYPE_PROGRAM) )
-        actPaste->setEnabled(true);
-    else
-        actPaste->setEnabled(false);
-
-    QMenu menu;
-    menu.exec(actions(), mapToGlobal(pos), actions().at(0), this);
-}
-
-void ProgListView::DeleteItem()
-{
     ProgramsModel *progModel = qobject_cast<ProgramsModel*>(model());
     if(!progModel)
         return;
 
-    if(!selectedIndexes().isEmpty())
-        progModel->removeRows(selectedIndexes(),rootIndex());
-    else if(currentIndex().isValid())
-        progModel->removeRows(QModelIndexList()<<currentIndex(),rootIndex());
+    progModel->UserChangeProg( current );
 }
 
 void ProgListView::InsertItem()
@@ -118,30 +91,5 @@ void ProgListView::InsertItem()
     if(currentIndex().isValid())
         row=currentIndex().row();
 
-    progModel->NewProgram( rootIndex().parent().row(), row );
-}
-
-void ProgListView::Copy()
-{
-    QMimeData *mime=0;
-
-    if(!selectedIndexes().isEmpty())
-        mime = model()->mimeData( selectedIndexes() );
-    else if(currentIndex().isValid())
-        mime = model()->mimeData( QModelIndexList() << currentIndex() );
-
-    if(!mime)
-        return;
-
-    QApplication::clipboard()->setMimeData( mime );
-}
-
-void ProgListView::Paste()
-{
-    int row=-1;
-    if(currentIndex().isValid())
-        row=currentIndex().row();
-
-    const QMimeData *mime = QApplication::clipboard()->mimeData();
-    model()->dropMimeData( mime, Qt::CopyAction, row, 0, rootIndex() );
+    progModel->NewProgram( rootIndex().row(), row );
 }

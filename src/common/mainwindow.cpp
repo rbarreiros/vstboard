@@ -26,18 +26,18 @@
 #include "views/aboutdialog.h"
 #include "connectables/objectinfo.h"
 #include "views/viewconfigdialog.h"
+#include "models/programsmodel.h"
 
 MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
-        QMainWindow(parent),
-        openedPrompt(false),
-        mySceneView(0),
-        listToolsModel(0),
-        listVstPluginsModel(0),
-        listVstBanksModel(0),
-        ui(new Ui::MainWindow),
-        myHost(myHost),
-        viewConfig( new View::ViewConfig(myHost,this)),
-        viewConfigDlg(0)
+    QMainWindow(parent),
+    mySceneView(0),
+    listToolsModel(0),
+    listVstPluginsModel(0),
+    listVstBanksModel(0),
+    ui(new Ui::MainWindow),
+    myHost(myHost),
+    viewConfig( new View::ViewConfig(myHost,this)),
+    viewConfigDlg(0)
 {
     myHost->mainWindow=this;
     connect(myHost,SIGNAL(programParkingModelChanged(QStandardItemModel*)),
@@ -53,24 +53,7 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
             ui->actionTool_bar, SLOT(setChecked(bool)));
 
     //programs
-    myHost->programList->SetMainWindow(this);
-    ui->Programs->SetModel(myHost, myHost->programList->GetModel());
-    connect(myHost->programList, SIGNAL(ProgChanged(QModelIndex)),
-            ui->Programs,SLOT(OnProgChange(QModelIndex)));
-    connect(ui->Programs,SIGNAL(ChangeProg(QModelIndex)),
-            myHost->programList,SLOT(ChangeProg(QModelIndex)));
-    connect(ui->Programs,SIGNAL(ChangeGroup(QModelIndex)),
-            myHost->programList,SLOT(ChangeGroup(QModelIndex)));
-
-    connect(ui->Programs,SIGNAL(ProgAutoSave(Autosave::Enum)),
-            myHost->programList, SLOT(SetProgAutosave(Autosave::Enum)));
-    connect(myHost->programList,SIGNAL(ProgAutosaveChanged(Autosave::Enum)),
-            ui->Programs,SLOT(OnProgAutoSaveChanged(Autosave::Enum)));
-
-    connect(ui->Programs,SIGNAL(GroupAutoSave(Autosave::Enum)),
-            myHost->programList, SLOT(SetGroupAutosave(Autosave::Enum)));
-    connect(myHost->programList,SIGNAL(GroupAutosaveChanged(Autosave::Enum)),
-            ui->Programs,SLOT(OnGroupAutoSaveChanged(Autosave::Enum)));
+    ui->Programs->SetModel( myHost->programsModel );
 
     SetupBrowsersModels( ConfigDialog::defaultVstPath(myHost), ConfigDialog::defaultBankPath(myHost));
 
@@ -87,20 +70,20 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     ui->treeHostModel->setModel(myHost->GetModel());
 
     connect( viewConfig, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
-            myHost->programList, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)) );
+             myHost->programsModel, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)) );
     InitColors();
     connect( viewConfig, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
-            this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)));
+             this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)));
 
     QAction *undo = myHost->undoStack.createUndoAction(ui->mainToolBar);
     undo->setIcon(QIcon(":/img16x16/undo.png"));
-    undo->setShortcut( QKeySequence( Qt::CTRL | Qt::Key_Z) );
+    undo->setShortcut( QKeySequence::Undo );
     undo->setShortcutContext(Qt::ApplicationShortcut);
     ui->mainToolBar->addAction( undo );
 
     QAction *redo = myHost->undoStack.createRedoAction(ui->mainToolBar);
     redo->setIcon(QIcon(":/img16x16/redo.png"));
-    redo->setShortcut( QKeySequence( Qt::CTRL | Qt::Key_Y) );
+    redo->setShortcut( QKeySequence::Redo );
     redo->setShortcutContext(Qt::ApplicationShortcut);
     ui->mainToolBar->addAction( redo );
 
@@ -127,11 +110,11 @@ void MainWindow::SetupBrowsersModels(const QString &vstPath, const QString &brow
     listVstBanksModel = new QFileSystemModel(this);
     listVstBanksModel->setReadOnly(false);
     listVstBanksModel->setResolveSymlinks(true);
-//    QStringList bankFilter;
-//    bankFilter << "*.fxb";
-//    bankFilter << "*.fxp";
-//    listVstBanksModel->setNameFilters(bankFilter);
-//    listVstBanksModel->setNameFilterDisables(false);
+    //    QStringList bankFilter;
+    //    bankFilter << "*.fxb";
+    //    bankFilter << "*.fxp";
+    //    listVstBanksModel->setNameFilters(bankFilter);
+    //    listVstBanksModel->setNameFilterDisables(false);
     listVstBanksModel->setRootPath(browserPath);
     ui->BankBrowser->setModel(listVstBanksModel);
 #endif
@@ -158,96 +141,6 @@ void MainWindow::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, co
     QPalette pal=palette();
     pal.setColor(role, color);
     setPalette(pal);
-}
-
-bool MainWindow::userWantsToUnloadSetup()
-{
-    if(openedPrompt)
-        return false;
-
-    Autosave::Enum onUnsaved = (Autosave::Enum)myHost->GetSetting("onUnsavedSetup",Autosave::prompt).toInt();
-
-    if(onUnsaved == Autosave::discard)
-        return true;
-
-    if(!myHost->hostContainer->IsDirty())
-        return true;
-
-    if(onUnsaved == Autosave::save) {
-        MainWindow::on_actionSave_Setup_triggered();
-        return true;
-    }
-
-    //prompt
-    QMessageBox msgBox;
-    openedPrompt=true;
-    msgBox.setIcon(QMessageBox::Question);
-    msgBox.setText(tr("The setup has been modified."));
-    msgBox.setInformativeText(tr("Do you want to save your changes?"));
-    msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-    msgBox.setDefaultButton(QMessageBox::Save);
-
-    int res=msgBox.exec();
-    openedPrompt=false;
-
-    switch(res) {
-        case QMessageBox::Cancel :
-            return false;
-        case QMessageBox::Save :
-            MainWindow::on_actionSave_Setup_triggered();
-            break;
-        default :
-            break;
-    }
-
-    return true;
-}
-
-bool MainWindow::userWantsToUnloadProject()
-{
-    if(openedPrompt)
-        return false;
-
-    Autosave::Enum onUnsaved = (Autosave::Enum)myHost->GetSetting("onUnsavedProject",Autosave::prompt).toInt();
-
-    if(onUnsaved == Autosave::discard)
-        return true;
-
-    if(!myHost->programList->userWantsToUnloadProgram())
-        return false;
-
-    if(!myHost->programList->userWantsToUnloadGroup())
-        return false;
-
-    if(!myHost->programList->isDirty())
-        return true;
-
-    if(onUnsaved == Autosave::save) {
-        MainWindow::on_actionSave_triggered();
-        return true;
-    }
-
-    //prompt
-    QMessageBox msgBox;
-    openedPrompt=true;
-    msgBox.setIcon(QMessageBox::Question);
-    msgBox.setText(tr("The project has been modified."));
-    msgBox.setInformativeText(tr("Do you want to save your changes?"));
-    msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-    msgBox.setDefaultButton(QMessageBox::Save);
-
-    int res=msgBox.exec();
-    openedPrompt=false;
-
-    switch(res) {
-        case QMessageBox::Cancel :
-            return false;
-        case QMessageBox::Save :
-            MainWindow::on_actionSave_triggered();
-            return true;
-    }
-
-    return true;
 }
 
 void MainWindow::changeEvent(QEvent *e)
@@ -311,56 +204,31 @@ void MainWindow::BuildListTools()
 
 void MainWindow::on_actionLoad_triggered()
 {
-    if(!userWantsToUnloadProject())
-        return;
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open a Project file"), "", tr("Project Files (*.%1)").arg(PROJECT_FILE_EXTENSION));
-    myHost->LoadProjectFile(fileName);
+    myHost->LoadProjectFile();
 }
 
 void MainWindow::on_actionNew_triggered()
 {
-    if(!userWantsToUnloadProject())
-        return;
     myHost->ClearProject();
 }
 
 void MainWindow::on_actionSave_triggered()
 {
-    if(myHost->currentProjectFile.isEmpty()) {
-        on_actionSave_Project_As_triggered();
-        return;
-    }
     myHost->SaveProjectFile();
 }
 
 void MainWindow::on_actionSave_Project_As_triggered()
 {
-    QString lastDir = myHost->GetSetting("lastProjectDir").toString();
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save Project"), lastDir, tr("Project Files (*.%1)").arg(PROJECT_FILE_EXTENSION));
-
-    if(fileName.isEmpty())
-        return;
-
-    if(!fileName.endsWith(PROJECT_FILE_EXTENSION, Qt::CaseInsensitive)) {
-        fileName += ".";
-        fileName += PROJECT_FILE_EXTENSION;
-    }
-
-    myHost->SaveProjectFile(fileName);
+    myHost->SaveProjectFile(true);
 }
 
 void MainWindow::on_actionLoad_Setup_triggered()
 {
-    if(!userWantsToUnloadSetup())
-        return;
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open a Setup file"), "", tr("Setup Files (*.%1)").arg(SETUP_FILE_EXTENSION));
-    myHost->LoadSetupFile(fileName);
+    myHost->LoadSetupFile();
 }
 
 void MainWindow::on_actionNew_Setup_triggered()
 {
-    if(!userWantsToUnloadSetup())
-        return;
     myHost->ClearSetup();
 }
 
@@ -375,24 +243,7 @@ void MainWindow::on_actionSave_Setup_triggered()
 
 void MainWindow::on_actionSave_Setup_As_triggered()
 {
-    QString lastDir = myHost->GetSetting("lastSetupDir").toString();
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save Setup"), lastDir, tr("Setup Files (*.%1)").arg(SETUP_FILE_EXTENSION));
-
-    if(fileName.isEmpty())
-        return;
-
-    if(!fileName.endsWith(SETUP_FILE_EXTENSION, Qt::CaseInsensitive)) {
-        fileName += ".";
-        fileName += SETUP_FILE_EXTENSION;
-    }
-
-    myHost->SaveSetupFile(fileName);
-}
-
-void MainWindow::on_actionShortcuts_toggled(bool onOff)
-{
-//    myHost->mainConfig->shortcutConfig = onOff;
-    ui->dockMidiDevices->setMouseTracking(onOff);
+    myHost->SaveSetupFile(true);
 }
 
 void MainWindow::on_actionConfig_triggered()
@@ -446,7 +297,7 @@ void MainWindow::readSettings()
         QAction *act = new QAction(this);
         act->setVisible(false);
         connect(act, SIGNAL(triggered()),
-             this, SLOT(openRecentSetup()));
+                this, SLOT(openRecentSetup()));
 
         ui->menuRecent_Setups->addAction(act);
 
@@ -458,7 +309,7 @@ void MainWindow::readSettings()
         QAction *act = new QAction(this);
         act->setVisible(false);
         connect(act, SIGNAL(triggered()),
-             this, SLOT(openRecentProject()));
+                this, SLOT(openRecentProject()));
 
         ui->menuRecent_Projects->addAction(act);
 
@@ -502,8 +353,14 @@ void MainWindow::readSettings()
 void MainWindow::LoadDefaultFiles()
 {
     //load default files
-    myHost->LoadSetupFile( ConfigDialog::defaultSetupFile(myHost) );
-    myHost->LoadProjectFile( ConfigDialog::defaultProjectFile(myHost) );
+    QString file = ConfigDialog::defaultSetupFile(myHost);
+    if(!file.isEmpty())
+        myHost->LoadSetupFile( file );
+
+    file = ConfigDialog::defaultProjectFile(myHost);
+    if(!file.isEmpty())
+        myHost->LoadProjectFile( file );
+
     updateRecentFileActions();
 }
 
@@ -583,61 +440,55 @@ void MainWindow::on_actionAbout_triggered()
 }
 
 void MainWindow::updateRecentFileActions()
- {
-     {
-         QStringList files = myHost->GetSetting("recentSetupFiles").toStringList();
+{
+    {
+        QStringList files = myHost->GetSetting("recentSetupFiles").toStringList();
 
-         int numRecentFiles = qMin(files.size(), (int)NB_RECENT_FILES);
+        int numRecentFiles = qMin(files.size(), (int)NB_RECENT_FILES);
 
-         for (int i = 0; i < numRecentFiles; ++i) {
-             QString text = tr("&%1 %2").arg(i + 1).arg( QFileInfo(files[i]).fileName() );
-             listRecentSetups[i]->setText(text);
-             listRecentSetups[i]->setData(files[i]);
-             listRecentSetups[i]->setVisible(true);
-         }
-         for (int j = numRecentFiles; j < NB_RECENT_FILES; ++j)
-             listRecentSetups[j]->setVisible(false);
+        for (int i = 0; i < numRecentFiles; ++i) {
+            QString text = tr("&%1 %2").arg(i + 1).arg( QFileInfo(files[i]).fileName() );
+            listRecentSetups[i]->setText(text);
+            listRecentSetups[i]->setData(files[i]);
+            listRecentSetups[i]->setVisible(true);
+        }
+        for (int j = numRecentFiles; j < NB_RECENT_FILES; ++j)
+            listRecentSetups[j]->setVisible(false);
     }
 
-     {
-         QStringList files = myHost->GetSetting("recentProjectFiles").toStringList();
+    {
+        QStringList files = myHost->GetSetting("recentProjectFiles").toStringList();
 
-          int numRecentFiles = qMin(files.size(), (int)NB_RECENT_FILES);
+        int numRecentFiles = qMin(files.size(), (int)NB_RECENT_FILES);
 
-          for (int i = 0; i < numRecentFiles; ++i) {
-              QString text = tr("&%1 %2").arg(i + 1).arg( QFileInfo(files[i]).fileName() );
-              listRecentProjects[i]->setText(text);
-              listRecentProjects[i]->setData(files[i]);
-              listRecentProjects[i]->setVisible(true);
-          }
-          for (int j = numRecentFiles; j < NB_RECENT_FILES; ++j)
-              listRecentProjects[j]->setVisible(false);
-     }
- }
+        for (int i = 0; i < numRecentFiles; ++i) {
+            QString text = tr("&%1 %2").arg(i + 1).arg( QFileInfo(files[i]).fileName() );
+            listRecentProjects[i]->setText(text);
+            listRecentProjects[i]->setData(files[i]);
+            listRecentProjects[i]->setVisible(true);
+        }
+        for (int j = numRecentFiles; j < NB_RECENT_FILES; ++j)
+            listRecentProjects[j]->setVisible(false);
+    }
+}
 
 void MainWindow::openRecentSetup()
- {
-    if(!userWantsToUnloadSetup())
+{
+    QAction *action = qobject_cast<QAction *>(sender());
+    if(!action)
         return;
 
-     QAction *action = qobject_cast<QAction *>(sender());
-     if(!action)
-         return;
-
-     myHost->LoadSetupFile( action->data().toString() );
+    myHost->LoadSetupFile( action->data().toString() );
 }
 
 void MainWindow::openRecentProject()
- {
-    if(!userWantsToUnloadProject())
+{
+    QAction *action = qobject_cast<QAction *>(sender());
+    if(!action)
         return;
 
-     QAction *action = qobject_cast<QAction *>(sender());
-     if(!action)
-         return;
-
-     myHost->LoadProjectFile( action->data().toString() );
- }
+    myHost->LoadProjectFile( action->data().toString() );
+}
 
 void MainWindow::programParkingModelChanges(QStandardItemModel *model)
 {

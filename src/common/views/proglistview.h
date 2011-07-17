@@ -21,32 +21,25 @@
 #ifndef PROGLISTVIEW_H
 #define PROGLISTVIEW_H
 
-#include <QListView>
+#include "grouplistview.h"
 
-class ProgListView : public QListView
+class ProgramsModel;
+class ProgListView : public GroupListView
 {
     Q_OBJECT
 public:
     explicit ProgListView(QWidget *parent = 0);
+    void setModel(ProgramsModel *model);
 
 protected:
-    void startDrag(Qt::DropActions supportedActions);
+    void dragEnterEvent(QDragEnterEvent *event);
     void dragMoveEvent ( QDragMoveEvent * event );
+    void currentChanged (const QModelIndex &current, const QModelIndex &previous);
 
-    QAction *actDel;
-    QAction *actAddNew;
-    QAction *actCopy;
-    QAction *actPaste;
-
-signals:
-    void DragFinished();
+    QStringList MimeTypes();
 
 public slots:
-    void OnContextMenu(const QPoint & pos);
-    void DeleteItem();
     void InsertItem();
-    void Copy();
-    void Paste();
 };
 
 #endif // PROGLISTVIEW_H

@@ -30,13 +30,13 @@
 #include "renderer/renderer.h"
 #include "globals.h"
 #include "models/hostmodel.h"
-#include "programs.h"
 
 #ifdef VSTSDK
     #include "vst/cvsthost.h"
 #endif
 
 class MainWindow;
+class ProgramsModel;
 class MainHost : public QObject
 {
 Q_OBJECT
@@ -91,14 +91,10 @@ public:
     QSharedPointer<Connectables::MainContainer> programContainer;
     QSharedPointer<Connectables::MainContainer> groupContainer;
 
-    PathSolver *solver;
-
     QTimer *updateViewTimer;
 
     HostModel * GetModel() {return model;}
-
-    Programs *programList;
-
+    ProgramsModel *programsModel;
     Connectables::ObjectFactory *objFactory;
     MainWindow *mainWindow;
 
@@ -161,6 +157,8 @@ private:
 
     bool undoProgramChangesEnabled;
 
+    PathSolver *solver;
+
 signals:
     void SampleRateChanged(float rate);
     void BufferSizeChanged(unsigned long size);
@@ -176,14 +174,14 @@ public slots:
     void SetTempo(int tempo=120, int sign1=4, int sign2=4);
     virtual void Render(unsigned long samples=0);
     void LoadFile(const QString &filename);
-    void LoadSetupFile(const QString &filename);
-    void LoadProjectFile(const QString &filename);
+    void LoadSetupFile(const QString &filename = QString());
+    void LoadProjectFile(const QString &filename = QString());
     void ReloadProject();
     void ReloadSetup();
     void ClearSetup();
     void ClearProject();
-    void SaveSetupFile(QString filename="");
-    void SaveProjectFile(QString filename="");
+    void SaveSetupFile(bool saveAs=false);
+    void SaveProjectFile(bool saveAs=false);
 
 private slots:
     void UpdateSolver(bool forceUpdate=false);

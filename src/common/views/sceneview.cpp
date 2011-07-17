@@ -35,6 +35,7 @@
 #include <QSplitter>
 #include "commands/comaddcable.h"
 #include "commands/comdisconnectpin.h"
+#include "models/programsmodel.h"
 
 using namespace View;
 
@@ -81,18 +82,14 @@ SceneView::SceneView(MainHost *myHost,Connectables::ObjectFactory *objFactory, M
     viewProgram->setScene(sceneProgram);
     viewGroup->setScene(sceneGroup);
 
-    connect(myHost->programList,SIGNAL(ProgChanged(int)),
+    connect(myHost->programsModel,SIGNAL(ProgChanged(int)),
             viewProgram, SLOT(SetViewProgram(int)));
-    connect(myHost->programList,SIGNAL(ProgCopy(int,int)),
-            viewProgram, SLOT(CopyViewProgram(int,int)));
-    connect(myHost->programList,SIGNAL(ProgDelete(int)),
+    connect(myHost->programsModel,SIGNAL(ProgDelete(int)),
             viewProgram, SLOT(RemoveViewProgram(int)));
 
-    connect(myHost->programList,SIGNAL(GroupChanged(int)),
+    connect(myHost->programsModel,SIGNAL(GroupChanged(int)),
             viewGroup, SLOT(SetViewProgram(int)));
-    connect(myHost->programList,SIGNAL(GroupCopy(int,int)),
-            viewGroup, SLOT(CopyViewProgram(int,int)));
-    connect(myHost->programList,SIGNAL(GroupDelete(int)),
+    connect(myHost->programsModel,SIGNAL(GroupDelete(int)),
             viewGroup, SLOT(RemoveViewProgram(int)));
 }
 

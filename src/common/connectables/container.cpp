@@ -730,13 +730,15 @@ bool Container::fromStream (QDataStream& in)
         }
 
         if(!tmpStream.atEnd()) {
+            in.setStatus(QDataStream::ReadCorruptData);
+#ifndef QT_NO_DEBUG
             debug2(<<"Container::fromStream stream not at end"<<chunkName<<"drop remaining data :")
             while(!tmpStream.atEnd()) {
                 char c[1000];
                 int nb=tmpStream.readRawData(c,1000);
                 debug2(<<nb << QByteArray::fromRawData(c,nb).toHex())
             }
-            in.setStatus(QDataStream::ReadCorruptData);
+#endif
         }
 
         if(tmpStream.status()==QDataStream::ReadPastEnd) {

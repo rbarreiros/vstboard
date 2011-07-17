@@ -20,7 +20,7 @@
 #include "vst.h"
 #include "connectables/connectioninfo.h"
 #include "connectables/objectinfo.h"
-#include "mainhost.h"
+#include "mainhostvst.h"
 #include "projectfile/projectfile.h"
 #include "views/configdialog.h"
 

@@ -20,7 +20,8 @@
 
 #ifndef PROGRAMSMODEL_H
 #define PROGRAMSMODEL_H
-#include "precomp.h"
+//#include "precomp.h"
+#include "views/viewconfig.h"
 
 #define MIMETYPE_GROUP "application/x-groupsdata"
 #define MIMETYPE_PROGRAM "application/x-programsdata"
@@ -53,6 +54,25 @@ public:
     void NewGroup(int row=-1);
     void NewProgram(int groupNum, int row=-1);
 
+    bool userWantsToUnloadGroup();
+    bool userWantsToUnloadProgram();
+    bool userWantsToUnloadProject();
+    bool userWantsToUnloadSetup();
+
+    inline int GetCurrentMidiGroup() const {
+        if(!currentGrp.isValid())
+            return 0;
+        return currentGrp.row();
+    }
+
+    inline int GetCurrentMidiProg() const {
+        if(!currentPrg.isValid())
+            return 0;
+        return currentPrg.row();
+    }
+
+    void BuildDefaultModel();
+
 private:
     bool AddGroup(QModelIndex &index=QModelIndex(), int row=-1);
     bool AddProgram(int groupNum, QModelIndex &index=QModelIndex(), int row=-1);
@@ -66,17 +86,85 @@ private:
     bool GroupToStream( QDataStream &stream, int row) const;
     bool ProgramToStream( QDataStream &stream, int row, int groupNum) const;
 
-    bool fromCom;
+    bool GoAwayFromIndex( const QModelIndex &index);
+    bool RemoveIndex(const QModelIndex &index);
 
-    QUndoCommand *currentCommand;
+    bool ValidateProgChange(const QModelIndex &newPrg);
+    bool ChangeProgNow(int midiGroupNum, int midiProgNum);
+
+    QDataStream & toStream (QDataStream &);
+    QDataStream & fromStream (QDataStream &);
+
+    inline bool IsDirty() {
+        return dirtyFlag;
+    }
+    inline void SetDirty(bool dirty=true) {
+        dirtyFlag=dirty;
+    }
+
+    inline uint GetNextProgId() {
+        return nextProgId++;
+    }
+
+    inline uint GetNextGroupId() {
+        return nextGroupId++;
+    }
+
+
     MainHost *myHost;
-    int droppedItemsCount;
+    QPersistentModelIndex currentGrp;
+    QPersistentModelIndex currentPrg;
+    unsigned int nextGroupId;
+    unsigned int nextProgId;
+    Qt::CheckState progAutosaveState;
+    Qt::CheckState groupAutosaveState;
+    bool dirtyFlag;
+    QBrush currentProgColor;
+    bool fromCom;
+    QUndoCommand *currentCommand;
+    int countItemsToMove;
+    bool openedPrompt;
 
     friend class ComAddProgram;
     friend class ComAddGroup;
     friend class ComRemoveProgram;
     friend class ComRemoveGroup;
+    friend class ComChangeProgram;
     friend class ComChangeProgramItem;
+    friend class ComAddCable;
+    friend class ComDisconnectPin;
+    friend class ComAddObject;
+    friend class ComRemoveObject;
+
+    friend QDataStream & operator<< (QDataStream&, ProgramsModel&);
+    friend QDataStream & operator>> (QDataStream&, ProgramsModel&);
+
+signals:
+    void ProgChanged(int prgId);
+    void ProgChanged(const QModelIndex &prgIndex);
+    void GroupChanged(int prgId);
+    void GroupChanged(const QModelIndex &grpIndex);
+
+    void ProgAutosaveChanged(const Qt::CheckState state);
+    void GroupAutosaveChanged(const Qt::CheckState state);
+
+    void NewProgramAdded(const QModelIndex &prgIndex);
+
+    void ProgDelete(int prg);
+    void GroupDelete(int prg);
+
+public slots:
+    void UserChangeProg(const QModelIndex &newPrg);
+    void UserChangeGroup(const QModelIndex &newGrp);
+    void UserChangeProg(int prg);
+    void UserChangeGroup(int grp);
+    void UserChangeProgAutosave(const Qt::CheckState state);
+    void UserChangeGroupAutosave(const Qt::CheckState state);
+
+    void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
 };
+
+QDataStream & operator<< (QDataStream& out, ProgramsModel& value);
+QDataStream & operator>> (QDataStream& in, ProgramsModel& value);
 
 #endif // PROGRAMSMODEL_H

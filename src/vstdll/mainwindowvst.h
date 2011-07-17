@@ -26,9 +26,9 @@
 #endif
 
 #include "mainwindow.h"
-#include "mainhostvst.h"
 #include "../common/ui_mainwindow.h"
 
+class MainHostVst;
 class MainWindowVst : public MainWindow {
     Q_OBJECT
 

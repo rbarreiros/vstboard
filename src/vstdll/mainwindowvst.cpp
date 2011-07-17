@@ -18,6 +18,7 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #include "mainwindowvst.h"
+#include "mainhostvst.h"
 #include "views/configdialogvst.h"
 
 MainWindowVst::MainWindowVst(MainHost * myHost,QWidget *parent) :

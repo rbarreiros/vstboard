@@ -22,7 +22,7 @@
 #include "globals.h"
 #include "connectables/objectfactory.h"
 #include "mainhost.h"
-#include "mainwindow.h"
+#include "models/programsmodel.h"
 #include "connectables/objectinfo.h"
 #include "connectables/vstplugin.h"
 #include "commands/comaddobject.h"
@@ -161,7 +161,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
 #endif
                 //setup file
                 if ( info.suffix()==SETUP_FILE_EXTENSION ) {
-                    if(myHost->mainWindow->userWantsToUnloadSetup()) {
+                    if(myHost->programsModel->userWantsToUnloadSetup()) {
                         //load on the next loop : we have to get out of the container before loading files
                         LoadFileMapper->setMapping(delayedAction, fName);
                         delayedAction->start(0);
@@ -171,7 +171,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
 
                 //project file
                 if ( info.suffix()==PROJECT_FILE_EXTENSION ) {
-                    if(myHost->mainWindow->userWantsToUnloadProject()) {
+                    if(myHost->programsModel->userWantsToUnloadProject()) {
                         //load on the next loop : we have to get out of the container before loading files
                         LoadFileMapper->setMapping(delayedAction, fName);
                         delayedAction->start(0);

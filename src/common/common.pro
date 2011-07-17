@@ -77,7 +77,6 @@ SOURCES += \
     renderer/pathsolver.cpp \
     renderer/renderer.cpp \
     models/hostmodel.cpp \
-    programs.cpp \
     connectables/connectioninfo.cpp \
     connectables/objectinfo.cpp \
     connectables/pin.cpp \
@@ -118,7 +117,6 @@ SOURCES += \
     commands/comaddcable.cpp \
     commands/comremoveobject.cpp \
     commands/comchangeprogram.cpp \
-    commands/comchangegroup.cpp \
     commands/comaddprogram.cpp \
     commands/comremoveprogram.cpp \
     commands/comremovegroup.cpp \
@@ -165,7 +163,6 @@ HEADERS += \
     renderer/pathsolver.h \
     renderer/renderer.h \
     models/hostmodel.h \
-    programs.h \
     connectables/connectioninfo.h \
     connectables/objectinfo.h \
     connectables/pin.h \
@@ -204,7 +201,6 @@ HEADERS += \
     commands/comaddcable.h \
     commands/comremoveobject.h \
     commands/comchangeprogram.h \
-    commands/comchangegroup.h \
     projectfile/fileversion.h \
     commands/comaddprogram.h \
     commands/comremoveprogram.h \
