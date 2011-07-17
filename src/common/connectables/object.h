@@ -144,8 +144,6 @@ namespace Connectables {
         virtual QStandardItem * UpdateModelNode();
         virtual void SetBridgePinsInVisible(bool visible);
         virtual void SetBridgePinsOutVisible(bool visible);
-        virtual void CopyProgram(int ori, int dest);
-        virtual void CopyCurrentProgram(int dest);
         virtual void RemoveProgram(int prg);
         virtual void SetContainerAttribs(const ObjectContainerAttribs &attr);
         virtual void GetContainerAttribs(ObjectContainerAttribs &attr);
@@ -178,6 +176,9 @@ namespace Connectables {
         /// true if the object is programmable
         /// \todo cleaup container and maincontainer and remove this
         bool listenProgramChanges;
+
+        virtual void ProgramToStream (int progId, QDataStream &out);
+        virtual void ProgramFromStream (int progId, QDataStream &in);
 
     protected:
         /// pointer to the MainHost
@@ -283,9 +284,6 @@ namespace Connectables {
         void SetErrorMessage(const QString &msg) {errorMessage=msg;}
     };
 }
-
-QDataStream & operator<< (QDataStream & out, const Connectables::Object& value);
-//QDataStream & operator>> (QDataStream & in, Connectables::Object& value);
 
 #ifdef _MSC_VER
 #pragma warning( pop )

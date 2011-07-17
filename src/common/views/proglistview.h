@@ -30,13 +30,23 @@ public:
     explicit ProgListView(QWidget *parent = 0);
 
 protected:
+    void startDrag(Qt::DropActions supportedActions);
     void dragMoveEvent ( QDragMoveEvent * event );
 
+    QAction *actDel;
+    QAction *actAddNew;
+    QAction *actCopy;
+    QAction *actPaste;
+
 signals:
+    void DragFinished();
 
 public slots:
     void OnContextMenu(const QPoint & pos);
     void DeleteItem();
+    void InsertItem();
+    void Copy();
+    void Paste();
 };
 
 #endif // PROGLISTVIEW_H

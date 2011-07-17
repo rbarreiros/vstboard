@@ -46,7 +46,7 @@ public:
     quint16 forcedObjId;
 };
 
-Q_DECLARE_METATYPE(ObjectInfo)
+Q_DECLARE_METATYPE(ObjectInfo);
 
 QDataStream & operator<< (QDataStream& stream, const ObjectInfo& objInfo);
 QDataStream & operator>> (QDataStream& stream, ObjectInfo& objInfo);
@@ -55,17 +55,15 @@ class ObjectContainerAttribs
 {
 public:
     ObjectContainerAttribs() :
-        position(QPointF(0,0)),
-//        size(QSizeF(0,0)),
+        position(QPointF(0.0f,0.0f)),
         editorVisible(false),
-        editorPosition(QPoint(0,0)),
+        editorPosition(QPoint(0.0f,0.0f)),
         editorSize(QSize(0,0)),
         editorHScroll(0),
         editorVScroll(0)
         {}
 
     QPointF position;
-//    QSizeF size;
     bool editorVisible;
     QPoint editorPosition;
     QSize editorSize;

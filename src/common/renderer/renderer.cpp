@@ -110,7 +110,7 @@ void Renderer::SetNbThreads(int nbThreads)
 void Renderer::LoadNodes(const QList<RendererNode*> & listNodes)
 {
     if(listNodes.isEmpty()) {
-        myHost->SetSolverUpdateNeeded(true);
+        myHost->SetSolverUpdateNeeded();
         return;
     }
 

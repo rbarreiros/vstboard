@@ -44,8 +44,6 @@ bool MainContainer::Close()
 
 void MainContainer::AddObject(QSharedPointer<Object> objPtr)
 {
-    objPtr->SetContainerId(index);
-
     //bridges are not stored in program
     if(objPtr->info().nodeType == NodeType::bridge) {
         if(objPtr->info().objType==ObjType::BridgeIn) {
@@ -62,6 +60,7 @@ void MainContainer::AddObject(QSharedPointer<Object> objPtr)
             bridgeReturn=objPtr;
         }
 
+        objPtr->SetContainerId(index);
         objPtr->listenProgramChanges=false;
         listStaticObjects << objPtr;
         AddChildObject(objPtr);
@@ -70,7 +69,6 @@ void MainContainer::AddObject(QSharedPointer<Object> objPtr)
     }
 
     Container::AddObject(objPtr);
-
 }
 
 void MainContainer::ParkObject(QSharedPointer<Object> objPtr)

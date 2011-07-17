@@ -17,9 +17,10 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-//#include "precomp.h"
+#include "precomp.h"
 #include "proglistview.h"
 #include "globals.h"
+#include "models/programsmodel.h"
 
 ProgListView::ProgListView(QWidget *parent) :
     QListView(parent)
@@ -27,13 +28,41 @@ ProgListView::ProgListView(QWidget *parent) :
     connect(this, SIGNAL(customContextMenuRequested(QPoint)),
             this, SLOT(OnContextMenu(QPoint)));
 
-    QAction *actDel = new QAction(QIcon(":/img16x16/delete.png"),tr("Delete program"),this);
+    actAddNew = new QAction(QIcon(":/img16x16/edit_add.png"),tr("Insert a new program"),this);
+    actAddNew->setShortcut( Qt::Key_Insert );
+    actAddNew->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    connect(actAddNew,SIGNAL(triggered()),
+            this,SLOT(InsertItem()));
+    addAction(actAddNew);
+
+    actDel = new QAction(QIcon(":/img16x16/delete.png"),tr("Delete program"),this);
     actDel->setShortcut(Qt::Key_Delete);
     actDel->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     connect(actDel,SIGNAL(triggered()),
             this,SLOT(DeleteItem()));
     addAction(actDel);
-    setSelectionMode(ExtendedSelection);
+
+    actCopy = new QAction( QIcon(":/img16x16/editcopy.png"), "Copy", this);
+    actCopy->setShortcuts(QKeySequence::Copy);
+    actCopy->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    connect(actCopy, SIGNAL(triggered()),
+            this, SLOT(Copy()));
+    addAction(actCopy);
+
+    actPaste = new QAction( QIcon(":/img16x16/editpaste.png"), "Paste", this);
+    actPaste->setShortcuts(QKeySequence::Paste);
+    actPaste->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    connect(actPaste, SIGNAL(triggered()),
+            this, SLOT(Paste()));
+    addAction(actPaste);
+}
+
+void ProgListView::startDrag(Qt::DropActions supportedActions)
+{
+    QListView::startDrag(supportedActions);
+
+    //go back to the current group
+    emit DragFinished();
 }
 
 void ProgListView::dragMoveEvent ( QDragMoveEvent * event )
@@ -42,32 +71,77 @@ void ProgListView::dragMoveEvent ( QDragMoveEvent * event )
         event->ignore();
         return;
     }
-
-    if (event->keyboardModifiers() & Qt::ControlModifier)
-        event->setDropAction(Qt::CopyAction);
-    else
-        event->setDropAction(Qt::MoveAction);
-
     QListView::dragMoveEvent(event);
 }
 
 void ProgListView::OnContextMenu(const QPoint & pos)
 {
-    NodeType::Enum t = (NodeType::Enum)currentIndex().data(UserRoles::nodeType).toInt();
-    if(t == NodeType::program) {
-        //item context
-        QMenu menu;
-        menu.exec(actions(), mapToGlobal(pos), actions().at(0), this);
+    if(!selectedIndexes().isEmpty()) {
+        actDel->setEnabled(true);
+        actCopy->setEnabled(true);
     } else {
-        //widget context
-
+        actDel->setEnabled(false);
+        actCopy->setEnabled(false);
     }
+
+    actPaste->setEnabled(false);
+
+    const QMimeData *mime =  QApplication::clipboard()->mimeData();
+    if( mime->hasFormat(MIMETYPE_PROGRAM) )
+        actPaste->setEnabled(true);
+    else
+        actPaste->setEnabled(false);
+
+    QMenu menu;
+    menu.exec(actions(), mapToGlobal(pos), actions().at(0), this);
 }
 
 void ProgListView::DeleteItem()
 {
-    if(currentIndex().isValid()) {
-        model()->removeRow( currentIndex().row(), currentIndex().parent() );
+    ProgramsModel *progModel = qobject_cast<ProgramsModel*>(model());
+    if(!progModel)
         return;
-    }
+
+    if(!selectedIndexes().isEmpty())
+        progModel->removeRows(selectedIndexes(),rootIndex());
+    else if(currentIndex().isValid())
+        progModel->removeRows(QModelIndexList()<<currentIndex(),rootIndex());
+}
+
+void ProgListView::InsertItem()
+{
+    ProgramsModel *progModel = qobject_cast<ProgramsModel*>(model());
+    if(!progModel)
+        return;
+
+    int row=-1;
+    if(currentIndex().isValid())
+        row=currentIndex().row();
+
+    progModel->NewProgram( rootIndex().parent().row(), row );
+}
+
+void ProgListView::Copy()
+{
+    QMimeData *mime=0;
+
+    if(!selectedIndexes().isEmpty())
+        mime = model()->mimeData( selectedIndexes() );
+    else if(currentIndex().isValid())
+        mime = model()->mimeData( QModelIndexList() << currentIndex() );
+
+    if(!mime)
+        return;
+
+    QApplication::clipboard()->setMimeData( mime );
+}
+
+void ProgListView::Paste()
+{
+    int row=-1;
+    if(currentIndex().isValid())
+        row=currentIndex().row();
+
+    const QMimeData *mime = QApplication::clipboard()->mimeData();
+    model()->dropMimeData( mime, Qt::CopyAction, row, 0, rootIndex() );
 }

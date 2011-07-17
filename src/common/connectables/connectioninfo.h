@@ -60,19 +60,17 @@ public:
     MainHost *myHost;
 };
 
-Q_DECLARE_METATYPE(ConnectionInfo)
+Q_DECLARE_METATYPE(ConnectionInfo);
 
 /*!
   overload == for ConnectionInfo
   */
 inline bool operator==(const ConnectionInfo &c1, const ConnectionInfo &c2)
 {
-    return c1.container == c2.container
-        && c1.objId == c2.objId
+    return c1.objId == c2.objId
         && c1.type == c2.type
         && c1.direction == c2.direction
-        && c1.pinNumber == c2.pinNumber
-        && c1.bridge == c2.bridge;
+        && c1.pinNumber == c2.pinNumber;
 }
 
 /*!

@@ -42,23 +42,45 @@ public:
     explicit Programs(MainHost *parent = 0);
     void BuildModel();
     ProgramsModel *GetModel() {return model;}
-    QStandardItem *CopyProgram(QStandardItem *progOri);
-    QStandardItem *CopyGroup(QStandardItem *grpOri);
+
     bool RemoveIndex(const QModelIndex &index);
     bool userWantsToUnloadGroup();
     bool userWantsToUnloadProgram();
     bool isDirty() {return projectDirty;}
-    int GetCurrentMidiGroup() const;
-    int GetCurrentMidiProg() const;
+
+    inline int GetCurrentMidiGroup() const {
+        if(!currentGrp.isValid())
+            return 0;
+        return currentGrp.row();
+    }
+
+    inline int GetCurrentMidiProg() const {
+        if(!currentPrg.isValid())
+            return 0;
+        return currentPrg.row();
+    }
+
     void SetMainWindow(MainWindow *win) {mainWindow=win;}
+
+    bool ChangeProgNow(int midiGroupNum, int midiProgNum);
 
     int GetNbOfProgs();
     int GetNbOfGroups();
 
+    bool GetIndexFromProgNum(int midiGroupNum, int midiProgNum, QModelIndex &index);
+
+    inline uint GetNextProgId() {
+        return nextProgId++;
+    }
+
+    inline uint GetNextGroupId() {
+        return nextGroupId++;
+    }
+
     Optimizer *optimizer;
 
 private:
-//    void ChangeProg(QStandardItem *newPrg);
+    bool GoAwayFromIndex( const QModelIndex &index);
 
     QDataStream & toStream (QDataStream &);
     QDataStream & fromStream (QDataStream &);
@@ -66,8 +88,6 @@ private:
     ProgramsModel *model;
     QPersistentModelIndex currentGrp;
     QPersistentModelIndex currentPrg;
-
-    QModelIndex displayedGroup;
 
     unsigned int nextGroupId;
     unsigned int nextProgId;
@@ -81,7 +101,9 @@ private:
     QBrush currentProgColor;
 
 signals:
+    void ProgChanged(int prgId);
     void ProgChanged(const QModelIndex &prgIndex);
+    void GroupChanged(int prgId);
     void GroupChanged(const QModelIndex &grpIndex);
     void ProgCopy(int ori, int dest);
     void GroupCopy(int ori, int dest);
@@ -91,16 +113,12 @@ signals:
     void GroupAutosaveChanged(const Autosave::Enum state);
 
 public slots:
-    void ChangeProg(int midiPrgId);
-    void ChangeGroup(int grpNum);
-    void ChangeProg(const QModelIndex &newPrg);
-    void ChangeGroup(const QModelIndex &newGrp);
+    bool ChangeProg(int midiProgNum);
+    bool ChangeGroup(int midiGroupNum);
+    bool ChangeProg(const QModelIndex &newPrg);
+    bool ChangeGroup(const QModelIndex &newGrp);
     void SetProgAutosave(const Autosave::Enum state);
     void SetGroupAutosave(const Autosave::Enum state);
-
-    void rowsRemoved( const QModelIndex & parent, int start, int end );
-
-    void DisplayedGroupChanged(const QModelIndex &index);
 
     void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
 

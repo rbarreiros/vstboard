@@ -19,28 +19,23 @@
 **************************************************************************/
 
 #include "programlist.h"
+#include "mainhost.h"
 #include "ui_programlist.h"
+#include "commands/comchangeprogram.h"
+#include "commands/comchangegroup.h"
 
 ProgramList::ProgramList(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ProgramList),
-    model(0)
+    model(0),
+    myHost(0)
 {
     ui->setupUi(this);
 
-    ui->listGrps->setDragDropMode(QAbstractItemView::DragDrop);
-    ui->listGrps->setDefaultDropAction(Qt::MoveAction);
-    ui->listGrps->setFrameShape(QFrame::NoFrame);
-    ui->listGrps->setContextMenuPolicy(Qt::CustomContextMenu);
-    ui->listGrps->setMinimumWidth(1);
-    connect( ui->listGrps, SIGNAL(DragOverItemFromWidget(QWidget*,QModelIndex)),
-             this, SLOT(OnDragOverGroups(QWidget*,QModelIndex)));
-
-    ui->listProgs->setDragDropMode(QAbstractItemView::DragDrop);
-    ui->listProgs->setDefaultDropAction(Qt::MoveAction);
-    ui->listProgs->setFrameShape(QFrame::NoFrame);
-    ui->listProgs->setContextMenuPolicy(Qt::CustomContextMenu);
-    ui->listProgs->setMinimumWidth(1);
+    connect( ui->listGrps, SIGNAL(DragOverItemFromWidget(QModelIndex)),
+             this, SLOT(OnGroupHovered(QModelIndex)));
+    connect( ui->listProgs, SIGNAL(DragFinished()),
+             this, SLOT(BackToCurrentGroup()));
 }
 
 ProgramList::~ProgramList()
@@ -48,55 +43,71 @@ ProgramList::~ProgramList()
     delete ui;
 }
 
-void ProgramList::SetModel(QAbstractItemModel *model)
+void ProgramList::SetModel(MainHost *myHost, QAbstractItemModel *model)
 {
+    this->myHost=myHost;
     this->model=model;
     ui->listGrps->setModel(model);
     ui->listProgs->setModel(model);
 }
 
-void ProgramList::OnDragOverGroups( QWidget *source, const QModelIndex & index)
+void ProgramList::OnGroupHovered(const QModelIndex & index)
 {
-    if(source == ui->listProgs) {
-        emit CurrentDisplayedGroup(index);
-        ui->listGrps->setCurrentIndex(index);
-        ui->listGrps->scrollTo(index);
-        ui->listProgs->setRootIndex( index.child(0,0) );
-    }
+    ui->listGrps->setCurrentIndex(index);
+    ui->listGrps->scrollTo(index);
+    ui->listProgs->setRootIndex( index.child(0,0) );
+}
+
+void ProgramList::BackToCurrentGroup()
+{
+    ui->listGrps->scrollTo( currentPrg.parent().parent() );
+    ui->listGrps->selectionModel()->clear();
+    ui->listGrps->setCurrentIndex( currentPrg.parent().parent() );
+
+    ui->listProgs->setRootIndex( currentPrg.parent() );
+    ui->listProgs->scrollTo( currentPrg );
+    ui->listProgs->selectionModel()->clear();
+    ui->listProgs->setCurrentIndex( currentPrg );
 }
 
 void ProgramList::OnProgChange(const QModelIndex &index)
 {
-    if(!index.isValid()) {
+    if(!index.isValid() || !index.parent().isValid() || !index.parent().parent().isValid() ) {
         debug("ProgramList::OnProgChange invalid index")
         return;
     }
 
-    //change group if needed
-    QModelIndex parIndex = index.parent().parent();
-    if(!parIndex.isValid()) {
-        debug("ProgramList::OnProgChange invalid group")
-        return;
+    if(currentPrg.parent() != index.parent()) {
+        ui->listGrps->scrollTo( index.parent().parent() );
+        ui->listProgs->setRootIndex( index.parent() );
     }
 
-    emit CurrentDisplayedGroup(parIndex);
+    ui->listProgs->scrollTo( index );
     currentPrg = index;
-
-    ui->listGrps->scrollTo(parIndex);
-    ui->listProgs->setRootIndex( currentPrg.parent() );
-    ui->listProgs->scrollTo(currentPrg);
 }
 
-void ProgramList::on_listGrps_clicked(QModelIndex index)
+void ProgramList::on_listGrps_activated(QModelIndex index)
 {
-    ui->listProgs->setRootIndex(index.child(0,0));
-    emit CurrentDisplayedGroup(index);
-    emit ChangeGroup(index);
+    if(index==currentPrg.parent().parent())
+        return;
+
+    if(myHost->undoProgramChanges()) {
+        myHost->undoStack.push( new ComChangeGroup(myHost, index) );
+    } else {
+        emit ChangeGroup(index);
+    }
 }
 
-void ProgramList::on_listProgs_clicked(QModelIndex index)
+void ProgramList::on_listProgs_activated(QModelIndex index)
 {
-    emit ChangeProg(index);
+    if(index==currentPrg)
+        return;
+
+    if(myHost->undoProgramChanges()) {
+        myHost->undoStack.push( new ComChangeProgram(myHost, index) );
+    } else {
+        emit ChangeProg(index);
+    }
 }
 
 void ProgramList::writeSettings(MainHost *myHost)

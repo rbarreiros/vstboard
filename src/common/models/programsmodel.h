@@ -20,23 +20,63 @@
 
 #ifndef PROGRAMSMODEL_H
 #define PROGRAMSMODEL_H
+#include "precomp.h"
 
-#include <QStandardItemModel>
+#define MIMETYPE_GROUP "application/x-groupsdata"
+#define MIMETYPE_PROGRAM "application/x-programsdata"
+
+
 class MainHost;
 class ProgramsModel : public QStandardItemModel
 {
     Q_OBJECT
 public:
+
+    enum ItemTypesEnum {
+        ProgramNode,
+        GroupNode
+    };
+    enum RolesEnum{
+        NodeType = Qt::UserRole+1,
+        ProgramId
+    };
+
     explicit ProgramsModel(MainHost *parent = 0);
     bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
     bool removeRows ( int row, int count, const QModelIndex & parent = QModelIndex() );
-protected:
-    int movingItems;
+    void removeRows ( const QModelIndexList &listToRemove, const QModelIndex & parent = QModelIndex() );
+    bool setData(const QModelIndex &index, const QVariant &value, int role);
+
+    QStringList mimeTypes () const;
+    QMimeData * mimeData ( const QModelIndexList & indexes ) const;
+
+    void NewGroup(int row=-1);
+    void NewProgram(int groupNum, int row=-1);
+
+private:
+    bool AddGroup(QModelIndex &index=QModelIndex(), int row=-1);
+    bool AddProgram(int groupNum, QModelIndex &index=QModelIndex(), int row=-1);
+    bool RemoveProgram( int row, int groupNum );
+    bool RemoveGroup( int row );
+
+    bool GroupFromStream( QDataStream &stream, int row);
+    bool ProgramFromStream( QDataStream &stream, int row, int groupNum);
+    bool GroupToStream( QDataStream &stream, const QModelIndex &groupIndex) const;
+    bool ProgramToStream( QDataStream &stream, const QModelIndex &progIndex) const;
+    bool GroupToStream( QDataStream &stream, int row) const;
+    bool ProgramToStream( QDataStream &stream, int row, int groupNum) const;
+
+    bool fromCom;
+
+    QUndoCommand *currentCommand;
     MainHost *myHost;
-signals:
+    int droppedItemsCount;
 
-public slots:
-
+    friend class ComAddProgram;
+    friend class ComAddGroup;
+    friend class ComRemoveProgram;
+    friend class ComRemoveGroup;
+    friend class ComChangeProgramItem;
 };
 
 #endif // PROGRAMSMODEL_H

@@ -42,8 +42,6 @@ namespace Connectables {
         void Unload();
         void Save(bool saveChildPrograms=true);
         void ParkAllObj();
-        ContainerProgram * Copy(int fromId, int toId);
-        ContainerProgram * CopyTo(int toId);
         void Remove(int prgId);
 
         void AddObject(QSharedPointer<Object> objPtr);
@@ -60,12 +58,21 @@ namespace Connectables {
         void CopyCablesFromObj(int newObjId, int oldObjId);
         void MoveOutputCablesFromObj(int newObjId, int oldObjId);
         void MoveInputCablesFromObj(int newObjId, int oldObjId);
+        void GetListOfConnectedPinsTo(const ConnectionInfo &pin, QList<ConnectionInfo> &list);
 
         bool IsDirty();
-        void SetDirty();
+        inline void SetDirty() {
+            dirty=true;
+        }
 
         void SaveRendererState();
         void LoadRendererState();
+
+        void CollectCableUpdates(QList< QPair<ConnectionInfo,ConnectionInfo> > *addedCables=0,
+                                QList< QPair<ConnectionInfo,ConnectionInfo> > *removedCables=0) {
+            collectedListOfAddedCables=addedCables;
+            collectedListOfRemovedCables=removedCables;
+        }
 
         QDataStream & toStream (QDataStream &) const;
         QDataStream & fromStream (QDataStream &);
@@ -75,6 +82,10 @@ namespace Connectables {
         static QTime unsavedTime;
 
     protected:
+        inline void ResetDirty() {
+            dirty=false;
+        }
+
         bool CableExists(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
         bool PinExistAndVisible(const ConnectionInfo &info);
 
@@ -87,6 +98,8 @@ namespace Connectables {
 
         QMap<int,ObjectContainerAttribs>mapObjAttribs;
 
+        QList< QPair<ConnectionInfo,ConnectionInfo> > *collectedListOfAddedCables;
+        QList< QPair<ConnectionInfo,ConnectionInfo> > *collectedListOfRemovedCables;
 
         friend class Container;
         friend class ParkingContainer;

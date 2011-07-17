@@ -75,8 +75,6 @@ namespace NodeType {
         listPin,
         pin,
         cable,
-        program,
-        programGroup,
         cursor
     };
 }
@@ -236,4 +234,21 @@ namespace Autosave {
     };
 }
 
+namespace InsertionType {
+    enum Enum {
+        NoInsertion,
+        InsertBefore,
+        InsertAfter,
+        Replace,
+        AddBefore,
+        AddAfter
+    };
+}
+
+namespace RemoveType {
+    enum Enum {
+        RemoveWithCables,
+        BridgeCables
+    };
+}
 #endif // GLOBALS_H

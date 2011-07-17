@@ -31,13 +31,22 @@ public:
 
 protected:
     void dragMoveEvent ( QDragMoveEvent * event );
+    void dropEvent(QDropEvent *event);
+
+    QAction *actDel;
+    QAction *actAddNew;
+    QAction *actCopy;
+    QAction *actPaste;
 
 signals:
-    void DragOverItemFromWidget( QWidget *source, const QModelIndex &index);
+    void DragOverItemFromWidget( const QModelIndex &index);
 
 public slots:
     void OnContextMenu(const QPoint & pos);
     void DeleteItem();
+    void InsertItem();
+    void Copy();
+    void Paste();
 };
 
 #endif // GROUPLISTVIEW_H

@@ -188,9 +188,9 @@ void Container::SetDirty()
   Will change program on the next render loop
   \param prg a program model index
   */
-void Container::SetProgram(const QModelIndex &prg)
+void Container::SetProgram(int prg)
 {
-    progToSet=prg.data(UserRoles::value).toInt();
+    progToSet=prg;
 }
 
 void Container::Render()
@@ -264,7 +264,7 @@ void Container::LoadProgram(int prog)
 
     //add new objects
     foreach(QSharedPointer<Object>objPtr, newProg->listObjects) {
-        if(!oldProg->listObjects.contains(objPtr)) {
+        if(!oldProg || !oldProg->listObjects.contains(objPtr)) {
             AddChildObject(objPtr);
         }
     }
@@ -322,47 +322,41 @@ void Container::UnloadProgram()
     currentProgId=EMPTY_PROGRAM;
 }
 
-void Container::CopyProgram(int ori, int dest)
-{
-    if(!listContainerPrograms.contains(ori)) {
-        //not important : the program is empty and will be created when needed
-        //debug("Container::CopyProgram ori not found")
-        return;
-    }
-    if(listContainerPrograms.contains(dest)) {
-        debug("Container::CopyProgram dest already exists")
-        return;
-    }
-
-    if(ori==currentProgId) {
-        //copy the current program
-        ContainerProgram* progCpy = currentContainerProgram->CopyTo(dest);
-        listContainerPrograms.insert(dest,progCpy);
-    } else {
-        //copy a saved program
-        ContainerProgram* progOri = listContainerPrograms.value(ori);
-        ContainerProgram* progCpy = progOri->Copy(ori,dest);
-        listContainerPrograms.insert(dest,progCpy);
-    }
-}
-
+/*!
+  Try to remove the program now, retry later if we try to remove the current program
+  */
 void Container::RemoveProgram(int prg)
 {
-    if(!listContainerPrograms.contains(prg)) {
-//        debug("Container::RemoveProgram not found")
-        return;
+    static QList<int> listProgToRemove;
+
+     if(prg!=-1)
+        listProgToRemove << prg;
+
+    QList<int>remainingProgs;
+
+    while(!listProgToRemove.isEmpty()) {
+        int p = listProgToRemove.takeFirst();
+
+        if(listContainerPrograms.contains(p)) {
+            if(p == currentProgId) {
+                remainingProgs << p;
+                if(progToSet==-1) {
+                    debug2(<<"Container::RemoveProgram removing current program and no scheduled progChange "<<p<<objectName())
+                }
+            } else {
+                delete listContainerPrograms.take(p);
+            }
+        } /*else {
+            //the program does not exist, nothing to do
+            debug2(<<"Container::RemoveProgram unknown prog"<<p<<objectName())
+        }*/
     }
-    ContainerProgram* prog = listContainerPrograms.take(prg);
-    prog->Remove(prg);
-    delete prog;
-}
 
-void Container::UserAddObject(QSharedPointer<Object> objPtr)
-{
-    AddObject(objPtr);
-    myHost->SetSolverUpdateNeeded();
-
-    Updated();
+    //some programs where not removed, retry later
+    if(!remainingProgs.isEmpty()) {
+        listProgToRemove = remainingProgs;
+        QTimer::singleShot(10, this, SLOT(RemoveProgram()));
+    }
 }
 
 /*!
@@ -372,6 +366,7 @@ void Container::UserAddObject(QSharedPointer<Object> objPtr)
 void Container::AddObject(QSharedPointer<Object> objPtr)
 {
     objPtr->SetContainerId(index);
+    objPtr->UnloadProgram();
 
     //bridges are not stored in program
     if(objPtr->info().nodeType==NodeType::bridge ) {
@@ -393,7 +388,6 @@ void Container::AddObject(QSharedPointer<Object> objPtr)
         listLoadedObjects << objPtr.data();
     currentContainerProgram->AddObject(objPtr);
     objPtr->LoadProgram(currentProgId);
-
 }
 
 /*!
@@ -403,24 +397,70 @@ void Container::AddObject(QSharedPointer<Object> objPtr)
 void Container::AddParkedObject(QSharedPointer<Object> objPtr)
 {
     objPtr->SetContainerId(index);
+    objPtr->UnloadProgram();
 
     listLoadedObjects << objPtr.data();
     ParkChildObject(objPtr);
 }
 
-
-void Container::UserParkObject(QSharedPointer<Object> objPtr)
+void Container::UserAddObject(const QSharedPointer<Object> &objPtr,
+                              InsertionType::Enum insertType,
+                              QList< QPair<ConnectionInfo,ConnectionInfo> > *listOfAddedCables,
+                              QList< QPair<ConnectionInfo,ConnectionInfo> > *listOfRemovedCables,
+                              const QSharedPointer<Object> &targetPtr)
 {
-    ParkObject(objPtr);
+    AddObject(objPtr);
+
+    if(targetPtr) {
+        currentContainerProgram->CollectCableUpdates( listOfAddedCables, listOfRemovedCables );
+
+        switch(insertType) {
+            case InsertionType::InsertBefore:
+                MoveInputCablesFromObj(objPtr, targetPtr);
+                ConnectObjects(objPtr, targetPtr, false);
+                break;
+            case InsertionType::InsertAfter:
+                MoveOutputCablesFromObj(objPtr, targetPtr);
+                ConnectObjects(targetPtr, objPtr, false);
+                break;
+            case InsertionType::AddBefore:
+                ConnectObjects(objPtr, targetPtr, false);
+                break;
+            case InsertionType::AddAfter:
+                ConnectObjects(targetPtr, objPtr, false);
+                break;
+            case InsertionType::Replace:
+                CopyCablesFromObj(objPtr, targetPtr);
+                (targetPtr)->CopyStatusTo(objPtr);
+                ParkObject(targetPtr);
+                break;
+            case InsertionType::NoInsertion:
+                break;
+        }
+        currentContainerProgram->CollectCableUpdates();
+    }
+
     myHost->SetSolverUpdateNeeded();
     Updated();
 }
 
-void Container::UserParkWithBridge(QSharedPointer<Object> objPtr)
+
+void Container::UserParkObject(QSharedPointer<Object> objPtr,
+                               RemoveType::Enum removeType,
+                               QList< QPair<ConnectionInfo,ConnectionInfo> > *listOfAddedCables,
+                               QList< QPair<ConnectionInfo,ConnectionInfo> > *listOfRemovedCables)
 {
-    if(currentContainerProgram)
+    currentContainerProgram->CollectCableUpdates( listOfAddedCables, listOfRemovedCables );
+
+    if(removeType==RemoveType::BridgeCables)
         currentContainerProgram->CreateBridgeOverObj(objPtr->GetIndex());
-    UserParkObject(objPtr);
+
+    ParkObject(objPtr);
+
+    currentContainerProgram->CollectCableUpdates();
+
+    myHost->SetSolverUpdateNeeded();
+    Updated();
 }
 
 /*!
@@ -473,6 +513,13 @@ void Container::MoveInputCablesFromObj(QSharedPointer<Object> newObjPtr, QShared
     if(!currentContainerProgram)
         return;
     currentContainerProgram->MoveInputCablesFromObj( newObjPtr->GetIndex(), ObjPtr->GetIndex() );
+}
+
+void Container::GetListOfConnectedPinsTo(const ConnectionInfo &pin, QList<ConnectionInfo> &list)
+{
+    if(!currentContainerProgram)
+        return;
+    currentContainerProgram->GetListOfConnectedPinsTo(pin,list);
 }
 
 /*!
@@ -538,15 +585,6 @@ void Container::OnChildDeleted(Object *obj)
     }
 }
 
-/*!
-  User removed a cable from the program
-  \param index model index of the cable
-  */
-//void Container::RemoveCable(QModelIndex & index)
-//{
-//    currentProgram->RemoveCable(index);
-//}
-
 void Container::UserAddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
 {
     AddCable(outputPin,inputPin,false);
@@ -555,12 +593,29 @@ void Container::UserAddCable(const ConnectionInfo &outputPin, const ConnectionIn
     Updated();
 }
 
+void Container::UserAddCable(const QPair<ConnectionInfo,ConnectionInfo>&pair)
+{
+    UserAddCable(pair.first,pair.second);
+}
+
 void Container::UserRemoveCableFromPin(const ConnectionInfo &pin)
 {
     RemoveCableFromPin(pin);
     myHost->SetSolverUpdateNeeded();
 
     Updated();
+}
+
+void  Container::UserRemoveCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
+{
+    RemoveCable(outputPin,inputPin);
+    myHost->SetSolverUpdateNeeded();
+    Updated();
+}
+
+void Container::UserRemoveCable(const QPair<ConnectionInfo,ConnectionInfo>&pair)
+{
+    UserRemoveCable(pair.first,pair.second);
 }
 
 /*!
@@ -581,12 +636,12 @@ void Container::AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &
   \param outputPin the output pin (messages sender)
   \param inputPin the input pin (messages receiver)
   */
-//void Container::RemoveCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
-//{
-//    if(!currentProgram)
-//        return;
-//    currentProgram->RemoveCable(outputPin,inputPin);
-//}
+void Container::RemoveCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
+{
+    if(!currentContainerProgram)
+        return;
+    currentContainerProgram->RemoveCable(outputPin,inputPin);
+}
 
 /*!
   Remove all cables from a Pin
@@ -598,17 +653,6 @@ void Container::RemoveCableFromPin(const ConnectionInfo &pin)
         return;
     currentContainerProgram->RemoveCableFromPin(pin);
 }
-
-/*!
-  Remove all cables from an Object
-  \param objId the object index to disconnect
-  */
-//void Container::RemoveCableFromObj(int objId)
-//{
-//    if(!currentProgram)
-//        return;
-//    currentProgram->RemoveCableFromObj(objId);
-//}
 
 /*!
   Put all the ContainerProgram and children Objects in a data stream
@@ -624,7 +668,6 @@ QDataStream & Container::toStream (QDataStream& out) const
         tmpStream << (qint16)index;
         tmpStream << objectName();
         tmpStream << sleep;
-        tmpStream << (quint32)currentProgId;
         ProjectFile::SaveChunk( "CntHead", tmpBa, out);
     }
 
@@ -633,7 +676,7 @@ QDataStream & Container::toStream (QDataStream& out) const
         QByteArray tmpBa;
         QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
         tmpStream << obj->info();
-        tmpStream << *obj;
+        obj->toStream( tmpStream );
         ProjectFile::SaveChunk( "CntObj", tmpBa, out);
     }
 
@@ -664,8 +707,6 @@ bool Container::fromStream (QDataStream& in)
 
     LoadProgram(TEMP_PROGRAM);
 
-    int savedProgId=0;
-
     QString chunkName;
     QByteArray tmpBa;
 
@@ -674,7 +715,7 @@ bool Container::fromStream (QDataStream& in)
         ProjectFile::LoadNextChunk( chunkName, tmpBa, in );
 
         if(chunkName=="CntHead")
-            savedProgId=loadHeaderStream(tmpStream);
+            loadHeaderStream(tmpStream);
 
         else if(chunkName=="CntObj")
             loadObjectFromStream(tmpStream);
@@ -689,7 +730,7 @@ bool Container::fromStream (QDataStream& in)
         }
 
         if(!tmpStream.atEnd()) {
-            debug2(<<"Container::fromStream stream not at end, drop remaining data :")
+            debug2(<<"Container::fromStream stream not at end"<<chunkName<<"drop remaining data :")
             while(!tmpStream.atEnd()) {
                 char c[1000];
                 int nb=tmpStream.readRawData(c,1000);
@@ -704,8 +745,8 @@ bool Container::fromStream (QDataStream& in)
         }
     }
 
-    //load the saved program
-    LoadProgram(savedProgId);
+    //load the default program
+    LoadProgram(0);
 
     //clear the loading list : delete unused objects
     listLoadingObjects.clear();
@@ -714,7 +755,7 @@ bool Container::fromStream (QDataStream& in)
     return true;
 }
 
-quint32 Container::loadHeaderStream (QDataStream &in)
+bool Container::loadHeaderStream (QDataStream &in)
 {
     //load header
     qint16 id;
@@ -727,15 +768,14 @@ quint32 Container::loadHeaderStream (QDataStream &in)
 
     in >> sleep;
 
-    quint32 savedProgId=0;
-    in >> savedProgId;
-    return savedProgId;
+    return true;
 }
 
 bool Container::loadObjectFromStream (QDataStream &in)
 {
     ObjectInfo info;
     in >> info;
+    info.forcedObjId=0;
 
     QSharedPointer<Object> objPtr = myHost->objFactory->NewObject(info);
 
@@ -765,8 +805,86 @@ bool Container::loadProgramFromStream (QDataStream &in)
 
     ContainerProgram *prog = new ContainerProgram(myHost,this);
     in >> *prog;
+
+    if(listContainerPrograms.contains(progId))
+        delete listContainerPrograms.take(progId);
     listContainerPrograms.insert(progId,prog);
 
     return true;
 }
 
+void Container::ProgramToStream (int progId, QDataStream &out)
+{
+    if(progId == currentProgId)
+        SaveProgram();
+
+    ContainerProgram *prog = listContainerPrograms.value(progId);
+    if(!prog) {
+        out << (quint8)0;
+        return;
+    }
+    out << (quint8)1;
+
+    quint16 nbObj = prog->listObjects.size();
+    out << nbObj;
+    foreach(QSharedPointer<Object>obj, prog->listObjects) {
+        QByteArray tmpBa;
+        QDataStream tmpStream( &tmpBa , QIODevice::ReadWrite);
+        if(obj) {
+            tmpStream << obj->info();
+            obj->ProgramToStream( progId, tmpStream );
+        }
+        out << tmpBa;
+    }
+
+    out << *prog;
+}
+
+void Container::ProgramFromStream (int progId, QDataStream &in)
+{
+    quint8 valid=0;
+    in >> valid;
+    if(valid!=1)
+        return;
+
+    QList<QSharedPointer<Object> >tmpListObj;
+
+    quint16 nbObj;
+    in >> nbObj;
+    for(int i=0; i<nbObj; i++) {
+        QByteArray tmpBa;
+        QDataStream tmpStream( &tmpBa , QIODevice::ReadWrite);
+        in >> tmpBa;
+        ObjectInfo info;
+        tmpStream >> info;
+        QSharedPointer<Object>obj = myHost->objFactory->GetObjectFromId( info.forcedObjId );
+        if(!obj) {
+            obj = myHost->objFactory->NewObject(info);
+            AddParkedObject(obj);
+            tmpListObj << obj;
+        } else {
+            obj->SetContainerId(index);
+            obj->ResetSavedIndex(info.forcedObjId);
+        }
+        if(!obj) {
+            debug2(<<"Container::ProgramFromStream can't create obj"<<info.id<<info.name)
+        }
+        if(obj) {
+            obj->ProgramFromStream(progId, tmpStream);
+        }
+    }
+
+    ContainerProgram *prog = new ContainerProgram(myHost,this);
+    in >> *prog;
+
+    if(listContainerPrograms.contains(progId))
+        delete listContainerPrograms.take(progId);
+    listContainerPrograms.insert(progId,prog);
+
+    myHost->objFactory->ResetSavedId();
+
+    if(progId==currentProgId) {
+        LoadProgram(TEMP_PROGRAM);
+        LoadProgram(progId);
+    }
+}

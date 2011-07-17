@@ -61,6 +61,8 @@ Object::Object(MainHost *host, int index, const ObjectInfo &info) :
     objInfo(info),
     containerId(FixedObjId::noContainer)
 {
+    objInfo.forcedObjId = index;
+
     setObjectName(QString("%1.%2").arg(objInfo.name).arg(index));
     doublePrecision=myHost->doublePrecision;
 
@@ -133,6 +135,8 @@ Object::~Object()
         }
     }
     Close();
+
+    myHost->objFactory->RemoveObject(index);
 }
 
 /*!
@@ -232,7 +236,7 @@ bool Object::IsDirty()
 {
     if(!currentProgram)
         return false;
-    return currentProgram->isDirty;
+    return currentProgram->IsDirty();
 }
 
 /*!
@@ -244,7 +248,7 @@ void Object::OnProgramDirty()
     if(!currentProgram)
         return;
 
-    currentProgram->isDirty=true;
+    currentProgram->SetDirty();
 }
 
 /*!
@@ -252,6 +256,7 @@ void Object::OnProgramDirty()
   */
 void Object::UnloadProgram()
 {
+    currentProgram=0;
     currentProgId=EMPTY_PROGRAM;
 }
 
@@ -260,7 +265,7 @@ void Object::UnloadProgram()
   */
 void Object::SaveProgram()
 {
-    if(!currentProgram || !currentProgram->isDirty)
+    if(!currentProgram || !currentProgram->IsDirty())
         return;
 
     currentProgram->Save(listParameterPinIn,listParameterPinOut);
@@ -275,7 +280,6 @@ void Object::SaveProgram()
 void Object::LoadProgram(int prog)
 {
     //if prog is already loaded, update model
-
     if(prog==currentProgId && currentProgram) {
         UpdateModelNode();
         return;
@@ -289,7 +293,7 @@ void Object::LoadProgram(int prog)
     currentProgId=prog;
 
     if(!listPrograms.contains(currentProgId))
-        listPrograms.insert(currentProgId,new ObjectProgram(prog,listParameterPinIn,listParameterPinOut));
+        listPrograms.insert(currentProgId,new ObjectProgram(listParameterPinIn,listParameterPinOut));
 
     currentProgram=listPrograms.value(currentProgId);
     currentProgram->Load(listParameterPinIn,listParameterPinOut);
@@ -303,45 +307,15 @@ void Object::LoadProgram(int prog)
 }
 
 /*!
-  Copy a program
-  \param ori program number to copy
-  \param dest destination program number
-  */
-void Object::CopyProgram(int ori, int dest)
-{
-    if(!listPrograms.contains(ori)) {
-        debug("Object::CopyProgram ori not found")
-        return;
-    }
-    if(listPrograms.contains(dest)) {
-        debug("Object::CopyProgram dest already exists")
-        return;
-    }
-    ObjectProgram *cpy = new ObjectProgram( *listPrograms.value(ori) );
-    listPrograms.insert(dest,cpy);
-}
-
-/*!
-  Save the current program, in it's current state, as a new program without reseting the dirty flag
-  \param dest destination program number
-  */
-void Object::CopyCurrentProgram(int dest)
-{
-    if(listPrograms.contains(dest)) {
-        debug("Object::CopyCurrentProgram dest already exists")
-        return;
-    }
-    ObjectProgram *cpy = new ObjectProgram( *currentProgram );
-    cpy->progId=dest;
-    cpy->Save(listParameterPinIn,listParameterPinOut);
-    listPrograms.insert(dest,cpy);
-}
-
-/*!
   Remove a program from the program list
   */
 void Object::RemoveProgram(int prg)
 {
+    if(prg == currentProgId) {
+        debug2(<<"Object::RemoveProgram removing current program ! "<<prg<<objectName())
+        return;
+    }
+
     if(!listPrograms.contains(prg)) {
         debug("Object::RemoveProgram not found")
         return;
@@ -660,11 +634,7 @@ QDataStream & Object::toStream(QDataStream & out) const
         ++i;
     }
 
-    if(currentProgram)
-        out << (quint16)currentProgram->progId;
-    else
-        out << (quint16)EMPTY_PROGRAM;
-
+    out << (quint16)currentProgId;
     return out;
 }
 
@@ -675,6 +645,8 @@ QDataStream & Object::toStream(QDataStream & out) const
   */
 bool Object::fromStream(QDataStream & in)
 {
+//    LoadProgram(TEMP_PROGRAM);
+
     qint16 id;
     in >> id;
     savedIndex=id;
@@ -687,15 +659,15 @@ bool Object::fromStream(QDataStream & in)
         quint16 progId;
         in >> progId;
 
-        ObjectProgram *prog = new ObjectProgram(progId);
+        ObjectProgram *prog = new ObjectProgram();
         in >> *prog;
         if(listPrograms.contains(progId))
             delete listPrograms.take(progId);
         listPrograms.insert(progId,prog);
     }
 
-    quint16 progId;
-    in >> progId;
+    quint16 savedProgId;
+    in >> savedProgId;
 
     if(in.status()!=QDataStream::Ok) {
         debug2(<<"Object::fromStream err"<<in.status())
@@ -703,6 +675,23 @@ bool Object::fromStream(QDataStream & in)
     }
 
     return true;
+}
+
+void Object::ProgramToStream (int progId, QDataStream &out)
+{
+    if(progId == currentProgId) {
+        SaveProgram();
+    }
+    out << *listPrograms.value(progId);
+}
+
+void Object::ProgramFromStream (int progId, QDataStream &in)
+{
+    ObjectProgram *prog = new ObjectProgram();
+    in >> *prog;
+    if(listPrograms.contains(progId))
+        delete listPrograms.take(progId);
+    listPrograms.insert(progId,prog);
 }
 
 /*!

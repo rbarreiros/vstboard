@@ -54,7 +54,7 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
 
     //programs
     myHost->programList->SetMainWindow(this);
-    ui->Programs->SetModel(myHost->programList->GetModel());
+    ui->Programs->SetModel(myHost, myHost->programList->GetModel());
     connect(myHost->programList, SIGNAL(ProgChanged(QModelIndex)),
             ui->Programs,SLOT(OnProgChange(QModelIndex)));
     connect(ui->Programs,SIGNAL(ChangeProg(QModelIndex)),
@@ -71,9 +71,6 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
             myHost->programList, SLOT(SetGroupAutosave(Autosave::Enum)));
     connect(myHost->programList,SIGNAL(GroupAutosaveChanged(Autosave::Enum)),
             ui->Programs,SLOT(OnGroupAutoSaveChanged(Autosave::Enum)));
-
-    connect(ui->Programs, SIGNAL(CurrentDisplayedGroup(QModelIndex)),
-            myHost->programList, SLOT(DisplayedGroupChanged(QModelIndex)));
 
     SetupBrowsersModels( ConfigDialog::defaultVstPath(myHost), ConfigDialog::defaultBankPath(myHost));
 
@@ -94,6 +91,20 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     InitColors();
     connect( viewConfig, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
             this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)));
+
+    QAction *undo = myHost->undoStack.createUndoAction(ui->mainToolBar);
+    undo->setIcon(QIcon(":/img16x16/undo.png"));
+    undo->setShortcut( QKeySequence( Qt::CTRL | Qt::Key_Z) );
+    undo->setShortcutContext(Qt::ApplicationShortcut);
+    ui->mainToolBar->addAction( undo );
+
+    QAction *redo = myHost->undoStack.createRedoAction(ui->mainToolBar);
+    redo->setIcon(QIcon(":/img16x16/redo.png"));
+    redo->setShortcut( QKeySequence( Qt::CTRL | Qt::Key_Y) );
+    redo->setShortcutContext(Qt::ApplicationShortcut);
+    ui->mainToolBar->addAction( redo );
+
+    ui->listUndo->setStack(&myHost->undoStack);
 }
 
 void MainWindow::SetupBrowsersModels(const QString &vstPath, const QString &browserPath)
@@ -417,6 +428,7 @@ void MainWindow::readSettings()
     listDocks << ui->dockVstBrowser;
     listDocks << ui->dockBankBrowser;
     listDocks << ui->dockPrograms;
+    listDocks << ui->dockUndo;
     foreach(QDockWidget *dock, listDocks) {
         ui->menuView->addAction(dock->toggleViewAction());
         ui->mainToolBar->addAction(dock->toggleViewAction());
@@ -514,6 +526,7 @@ void MainWindow::resetSettings()
     listDocksVisible << ui->dockVstBrowser;
     listDocksVisible << ui->dockBankBrowser;
     listDocksVisible << ui->dockPrograms;
+    listDocksVisible << ui->dockUndo;
     foreach(QDockWidget *dock, listDocksVisible) {
         dock->setFloating(false);
         dock->setVisible(true);
@@ -534,6 +547,7 @@ void MainWindow::resetSettings()
     addDockWidget(Qt::LeftDockWidgetArea,  ui->dockBankBrowser);
 
     addDockWidget(Qt::RightDockWidgetArea,  ui->dockPrograms);
+    addDockWidget(Qt::RightDockWidgetArea,  ui->dockUndo);
     addDockWidget(Qt::RightDockWidgetArea,  ui->dockSolver);
     addDockWidget(Qt::RightDockWidgetArea,  ui->dockHostModel);
 

@@ -39,6 +39,7 @@
     #include <QAbstractItemView>
     #include <QtAlgorithms>
     #include <QtGui/QApplication>
+	#include <QClipboard>
     #include <QDialog>
     #include <QDir>
     #include <QDragEnterEvent>
@@ -85,6 +86,7 @@
     #include <QTime>
     #include <QTimer>
     #include <QTreeWidget>
+    #include <QUndoCommand>
     #include <QUrl>
     #include <QWidget>
 

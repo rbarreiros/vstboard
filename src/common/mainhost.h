@@ -22,6 +22,7 @@
 #define MAINHOST_H
 
 //#include "precomp.h"
+#include <QUndoStack>
 #include "connectables/objectfactory.h"
 #include "connectables/object.h"
 #include "connectables/maincontainer.h"
@@ -70,6 +71,20 @@ public:
 
     void SetSetupDirtyFlag() { if(hostContainer) hostContainer->SetDirty(); }
 
+    inline void UpdateSolverNow() {
+        //if we need to update everything now, we have to ask for an update and force a render loop
+        SetSolverUpdateNeeded();
+        Render();
+    }
+
+    inline void SetSolverUpdateNeeded() {
+        solverMutex.lock();
+        solverNeedAnUpdate = true;
+        solverMutex.unlock();
+    }
+
+    inline bool undoProgramChanges() {return undoProgramChangesEnabled;}
+
     QSharedPointer<Connectables::MainContainer> mainContainer;
     QSharedPointer<Connectables::MainContainer> hostContainer;
     QSharedPointer<Connectables::MainContainer> projectContainer;
@@ -105,6 +120,8 @@ public:
 
     QString currentProjectFile;
     QString currentSetupFile;
+
+    QUndoStack undoStack;
 
 protected:
     QTime timeFromStart;
@@ -142,10 +159,11 @@ private:
     QString settingsGroup;
     QSettings settings;
 
+    bool undoProgramChangesEnabled;
+
 signals:
     void SampleRateChanged(float rate);
     void BufferSizeChanged(unsigned long size);
-//    void NewSolver(orderedNodes *renderLines);
     void ObjectRemoved(int contrainerId, int obj);
     void SolverToUpdate();
     void Rendered();
@@ -155,9 +173,7 @@ signals:
     void currentFileChanged();
 
 public slots:
-    void SetSolverUpdateNeeded(bool need=true);
     void SetTempo(int tempo=120, int sign1=4, int sign2=4);
-//    void OnNewRenderingOrder(orderedNodes *renderLines);
     virtual void Render(unsigned long samples=0);
     void LoadFile(const QString &filename);
     void LoadSetupFile(const QString &filename);

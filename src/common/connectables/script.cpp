@@ -140,7 +140,8 @@ render: function(obj) {\n\
 Script::~Script()
 {
     Close();
-    delete currentProgram;
+    if(currentProgId!=EMPTY_PROGRAM)
+        delete currentProgram;
 }
 
 bool Script::Close()
@@ -266,7 +267,7 @@ void Script::EditorDestroyed()
 
 void Script::SaveProgram()
 {
-    if(!currentProgram || !currentProgram->isDirty)
+    if(!currentProgram || !currentProgram->IsDirty())
         return;
 
     Object::SaveProgram();

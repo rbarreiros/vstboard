@@ -27,8 +27,8 @@
 Programs::Programs(MainHost *parent) :
     QObject(parent),
     model(0),
-    nextGroupId(0),
-    nextProgId(0),
+    nextGroupId(1),
+    nextProgId(1),
     myHost(parent),
     progAutosaveState(Autosave::save),
     groupAutosaveState(Autosave::save),
@@ -37,8 +37,6 @@ Programs::Programs(MainHost *parent) :
 {
     setObjectName("Programs");
     model=new ProgramsModel(parent);
-    connect( model, SIGNAL( rowsRemoved( QModelIndex , int, int )),
-            this, SLOT(rowsRemoved( QModelIndex, int, int )));
 
 #ifdef SCRIPTENGINE
     QScriptValue scriptObj = myHost->scriptEngine->newQObject(this);
@@ -60,81 +58,22 @@ void Programs::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, cons
     }
 }
 
-void Programs::DisplayedGroupChanged(const QModelIndex &index)
-{
-    displayedGroup = index;
-}
-
-void Programs::rowsRemoved( const QModelIndex & parent, int start, int end )
-{
-    //a row was removed, after a delete or a move
-    QModelIndex parentIndex;
-
-    if(!parent.isValid()) {
-        //dragging a group
-
-        if(currentGrp.isValid()) {
-            //current group is still valid : send the new midi prog number and leave
-            emit GroupChanged( currentGrp );
-            return;
-
-        } else {
-            //search the current group in the list
-            for(int i=0; i<model->rowCount(); i++) {
-                if (model->hasIndex(i,0)) {
-                    QModelIndex index = model->index(i,0);
-                    if(index.data(UserRoles::type).toInt()==1) {
-                        parentIndex = index.child(0,0);
-                    }
-                }
-            }
-        }
-    } else {
-        //a program is dragged
-
-        if(displayedGroup.isValid() && displayedGroup!=currentGrp) {
-            //dragging a program in another group
-            parentIndex = displayedGroup.child(0,0);
-
-        } else {
-            if(currentPrg.isValid()) {
-                //the current prog is still valid, send the new midi number
-                emit ProgChanged( currentPrg );
-                return;
-            }
-
-            parentIndex = parent;
-        }
-    }
-
-    //now that we have the current group, search the current program
-
-    QStandardItem *parentItem = model->itemFromIndex(parentIndex);
-    for(int i=0; i<parentItem->rowCount(); i++) {
-        if (model->hasIndex(i,0,parentIndex)) {
-            QModelIndex indexPrg = model->index(i,0,parentIndex);
-            if(indexPrg.data(UserRoles::type).toInt()==1) {
-                ChangeProg(indexPrg);
-                return;
-            }
-        }
-    }
-}
-
 void Programs::BuildModel()
 {
     if(model)
         model->clear();
 
+    nextGroupId=1;
+    nextProgId=1;
     groupAutosaveState=Autosave::save;
     progAutosaveState=Autosave::save;
 
     for(unsigned int grp=0; grp<3; grp++) {
+        int groupId = GetNextGroupId();
         QStandardItem *grpItem = new QStandardItem(QString("Grp%1").arg(grp));
-        grpItem->setData(NodeType::programGroup,UserRoles::nodeType);
-        grpItem->setData(nextGroupId,UserRoles::value);
-        nextGroupId++;
-        grpItem->setData(0,UserRoles::type);
+        grpItem->setData(ProgramsModel::GroupNode,ProgramsModel::NodeType);
+        grpItem->setData(groupId,ProgramsModel::ProgramId);
+        grpItem->setData(groupId,Qt::ToolTipRole);
         grpItem->setDragEnabled(true);
         grpItem->setDropEnabled(false);
         grpItem->setEditable(true);
@@ -145,12 +84,11 @@ void Programs::BuildModel()
         prgList->setEditable(false);
 
         for(unsigned int prg=0; prg<5; prg++) {
+            int progId = GetNextProgId();
             QStandardItem *prgItem = new QStandardItem(QString("Prg%1").arg(prg));
-            prgItem->setData(NodeType::program,UserRoles::nodeType);
-            prgItem->setData(nextProgId,UserRoles::value);
-//            prgItem->setData(nextProgId,Qt::ToolTipRole);
-            nextProgId++;
-            prgItem->setData(0,UserRoles::type);
+            prgItem->setData(ProgramsModel::ProgramNode,ProgramsModel::NodeType);
+            prgItem->setData(progId,ProgramsModel::ProgramId);
+            prgItem->setData(progId,Qt::ToolTipRole);
             prgItem->setDragEnabled(true);
             prgItem->setDropEnabled(false);
             prgItem->setEditable(true);
@@ -162,33 +100,19 @@ void Programs::BuildModel()
     }
     currentGrp = model->item(0)->index();
     currentPrg = model->item(0)->child(0)->child(0)->index();
-    model->item(0)->setData(1,UserRoles::type);
-    model->item(0)->child(0)->child(0)->setData(1,UserRoles::type);
     model->item(0)->setBackground(currentProgColor);
     model->item(0)->child(0)->child(0)->setBackground(currentProgColor);
 
 
     emit GroupChanged( currentGrp );
+    emit GroupChanged( currentGrp.data(ProgramsModel::ProgramId).toInt() );
     emit ProgChanged( currentPrg );
+    emit ProgChanged( currentPrg.data(ProgramsModel::ProgramId).toInt() );
 
     emit GroupAutosaveChanged(groupAutosaveState);
     emit ProgAutosaveChanged(progAutosaveState);
 
     projectDirty=false;
-}
-
-int Programs::GetCurrentMidiGroup() const
-{
-    if(!currentGrp.isValid())
-        return 0;
-    return currentGrp.row();
-}
-
-int Programs::GetCurrentMidiProg() const
-{
-    if(!currentPrg.isValid())
-        return 0;
-    return currentPrg.row();
 }
 
 bool Programs::userWantsToUnloadGroup()
@@ -273,50 +197,47 @@ bool Programs::userWantsToUnloadProgram()
     return true;
 }
 
-QStandardItem *Programs::CopyProgram(QStandardItem *progOri)
+/*!
+  move to another program or another group (before deletion)
+  */
+bool Programs::GoAwayFromIndex( const QModelIndex &index)
 {
-    int oriId = progOri->data(UserRoles::value).toInt();
-    emit ProgCopy(oriId,nextProgId);
+    QModelIndex target;
 
-    QStandardItem *prgItem = new QStandardItem(progOri->text());
-    prgItem->setData(NodeType::program,UserRoles::nodeType);
-    prgItem->setData(nextProgId,UserRoles::value);
-    nextProgId++;
-    prgItem->setDragEnabled(true);
-    prgItem->setDropEnabled(false);
-    prgItem->setEditable(true);
+    if(index == currentPrg) {
+        //find another program
+        int i=0;
+        target = currentPrg.sibling(i,0);
+        while( target.isValid() && currentPrg==target) {
+            ++i;
+            target = currentPrg.sibling(i,0);
+        }
 
-    projectDirty=true;
-
-    return prgItem;
-}
-
-QStandardItem *Programs::CopyGroup(QStandardItem *grpOri)
-{
-    int oriId = grpOri->data(UserRoles::value).toInt();
-    emit GroupCopy(oriId,nextGroupId);
-
-    QStandardItem *grpItem = new QStandardItem(grpOri->text());
-    grpItem->setData(NodeType::programGroup,UserRoles::nodeType);
-    grpItem->setData(nextGroupId,UserRoles::value);
-    nextGroupId++;
-    grpItem->setDragEnabled(true);
-    grpItem->setDropEnabled(false);
-    grpItem->setEditable(true);
-
-    QStandardItem *prgList = new QStandardItem();
-    prgList->setDragEnabled(false);
-    prgList->setDropEnabled(true);
-    prgList->setEditable(false);
-    QStandardItem *prgListOri = grpOri->child(0);
-    for(int prg=0; prg<prgListOri->rowCount(); prg++) {
-        prgList->appendRow( CopyProgram( prgListOri->child(prg) ) );
+        if(target.isValid())
+            return ChangeProg( target );
     }
-    grpItem->appendRow(prgList);
 
-    projectDirty=true;
+    //no valid program in this group, find another group
+    int i=0;
+    QModelIndex groupTarget = currentGrp.sibling(i,0);
+    while( groupTarget.isValid() && !target.isValid()) {
+        groupTarget = currentGrp.sibling(i,0);
+        if(currentGrp==groupTarget) {
+            ++i;
+            continue;
+        }
 
-    return grpItem;
+        if(groupTarget.isValid() && groupTarget.child(0,0).isValid())
+            target = groupTarget.child(0,0).child(0,0);
+
+        ++i;
+    }
+
+    if(!target.isValid()) {
+        debug2(<<"Programs::GoAwayFromIndex no good prog found"<<currentGrp.row()<<currentPrg.row())
+        return false;
+    }
+    return ChangeProg( target );
 }
 
 bool Programs::RemoveIndex(const QModelIndex &index)
@@ -324,53 +245,32 @@ bool Programs::RemoveIndex(const QModelIndex &index)
     if(mainWindow->openedPrompt)
         return false;
 
-    if(index.data(UserRoles::nodeType).toInt() == NodeType::program) {
+    //move to another program
+    if( (index == currentPrg || index == currentGrp)
+            && !GoAwayFromIndex(index) )
+        return false;
 
-        //keep one program
-        if(model->rowCount(index.parent()) == 1)
-            return false;
-
-        //move to another program
-        if(index==currentPrg) {
-            if(currentPrg.row()==0) {
-                ChangeProg(1);
-            }  else {
-                ChangeProg(0);
-            }
-        }
+    if(index.data(ProgramsModel::NodeType).toInt() == ProgramsModel::ProgramNode) {
 
         //delete program
-        int prgId = index.data(UserRoles::value).toInt();
+        int prgId = index.data(ProgramsModel::ProgramId).toInt();
         emit ProgDelete(prgId);
 
         projectDirty=true;
         return true;
     } else
-    if(index.data(UserRoles::nodeType).toInt() == NodeType::programGroup) {
-
-        //keep one group
-        if(model->rowCount()==1)
-            return false;
-
-        //move to another group
-        if(index==currentGrp) {
-            if(currentGrp.row()==0) {
-                ChangeGroup(1);
-            }  else {
-                ChangeGroup(0);
-            }
-        }
+    if(index.data(ProgramsModel::NodeType).toInt() == ProgramsModel::GroupNode) {
 
         //delete all programs from group
         QStandardItem *lstPrg = model->itemFromIndex(index.child(0,0));
         for(int i=0; i< lstPrg->rowCount(); i++) {
             QStandardItem *prg = lstPrg->child(i);
-            int prgId = prg->data(UserRoles::value).toInt();
+            int prgId = prg->data(ProgramsModel::ProgramId).toInt();
             emit ProgDelete(prgId);
         }
 
         //delete group
-        int grpId = index.data(UserRoles::value).toInt();
+        int grpId = index.data(ProgramsModel::ProgramId).toInt();
         emit GroupDelete(grpId);
 
         projectDirty=true;
@@ -383,31 +283,32 @@ bool Programs::RemoveIndex(const QModelIndex &index)
     return true;
 }
 
-void Programs::ChangeProg(const QModelIndex &newPrg)
+bool Programs::ChangeProg(const QModelIndex &newPrg)
 {
     if(!newPrg.isValid()) {
         debug("Programs::ChangeProg newprg not valid")
-        return;
+        return false;
     }
 
     if(newPrg==currentPrg)
-        return;
+        return false;
 
     if(!userWantsToUnloadProgram()) {
         emit ProgChanged( currentPrg );
-        return;
+        emit ProgChanged( currentPrg.data(ProgramsModel::ProgramId).toInt() );
+        return false;
     }
 
     QModelIndex newgrp = newPrg.parent().parent();
     if(newgrp!=currentGrp) {
         if(!userWantsToUnloadGroup()) {
             emit ProgChanged( currentPrg );
-            return;
+            emit ProgChanged( currentPrg.data(ProgramsModel::ProgramId).toInt() );
+            return false;
         }
 
         if(currentGrp.isValid()) {
             model->itemFromIndex( currentGrp )->setBackground(Qt::transparent);
-            model->itemFromIndex( currentGrp )->setData(0,UserRoles::type);
         }
 
         currentGrp=newgrp;
@@ -415,51 +316,47 @@ void Programs::ChangeProg(const QModelIndex &newPrg)
         QStandardItem *newGrpItem = model->itemFromIndex(currentGrp);
         if(newGrpItem) {
             newGrpItem->setBackground(currentProgColor);
-            newGrpItem->setData(1,UserRoles::type);
-//            for(int i=0; i<newGrpItem->rowCount(); i++)
-//                newGrpItem->child(i,0)->setBackground(Qt::transparent);
         }
 
         emit GroupChanged( currentGrp );
+        emit GroupChanged( currentGrp.data(ProgramsModel::ProgramId).toInt() );
     }
 
 
     if(currentPrg.isValid()) {
         model->itemFromIndex(currentPrg)->setBackground(Qt::transparent);
-        model->itemFromIndex(currentPrg)->setData(0,UserRoles::type);
     }
 
     model->itemFromIndex(newPrg)->setBackground(currentProgColor);
-    model->itemFromIndex(newPrg)->setData(1,UserRoles::type);
 
     currentPrg = newPrg;
     emit ProgChanged( currentPrg );
+    emit ProgChanged( currentPrg.data(ProgramsModel::ProgramId).toInt() );
 
     projectDirty=true;
+    return true;
 }
 
-//void Programs::ChangeProg(const QModelIndex &prgIndex)
-//{
-//    QStandardItem *newPrg = model->itemFromIndex( prgIndex );
-//    ChangeProg(newPrg);
-//}
+bool Programs::ChangeProg(int midiProgNum) {
+    if(!currentGrp.isValid())
+        return false;
 
-void Programs::ChangeProg(int midiProgNum) {
-    if(!currentPrg.isValid())
-        return;
-    QModelIndex index = currentPrg.parent().child(midiProgNum,0);
-    if(!index.isValid())
-        return;
-    ChangeProg(index);
+    QStandardItem* progList = model->itemFromIndex(currentGrp)->child(0,0);
+
+    if(midiProgNum>=progList->rowCount())
+        midiProgNum=progList->rowCount()-1;
+
+    QModelIndex index = progList->child(midiProgNum,0)->index();
+    return ChangeProg(index);
 }
 
-void Programs::ChangeGroup(const QModelIndex &newGrp)
+bool Programs::ChangeGroup(const QModelIndex &newGrp)
 {
     if(!newGrp.isValid())
-        return;
+        return false;
 
     if(newGrp==currentGrp)
-        return;
+        return false;
 
     QModelIndex newPrg = newGrp.child(0,0).child(0,0);
 
@@ -469,19 +366,53 @@ void Programs::ChangeGroup(const QModelIndex &newGrp)
 
     if(!newPrg.isValid()) {
         debug("Programs::ChangeGroup prog 0 not found")
-        return;
+        return false;
     }
 
-    ChangeProg(newPrg);
+    return ChangeProg(newPrg);
 }
 
-void Programs::ChangeGroup(int grpNum)
+bool Programs::ChangeGroup(int midiGroupNum)
 {
-    if(grpNum>=model->rowCount())
-        return;
+    if(midiGroupNum>=model->rowCount())
+        midiGroupNum=model->rowCount()-1;
 
-    QModelIndex newGrp = model->item(grpNum)->index();
-    ChangeGroup(newGrp);
+    QModelIndex newGrp = model->item(midiGroupNum)->index();
+    return ChangeGroup(newGrp);
+}
+
+bool Programs::GetIndexFromProgNum(int midiGroupNum, int midiProgNum, QModelIndex &index)
+{
+    index = QModelIndex();
+
+    if(midiGroupNum>=model->rowCount() || midiGroupNum<0)
+        return false;
+
+    QStandardItem* progList = model->item(midiGroupNum)->child(0,0);
+    if(midiProgNum>=progList->rowCount() || midiProgNum<0)
+        return false;
+
+    QStandardItem* progItem = progList->child(midiProgNum);
+    if(!progItem)
+        return false;
+
+    index = progItem->index();
+    return true;
+}
+
+bool Programs::ChangeProgNow(int midiGroupNum, int midiProgNum)
+{
+    QModelIndex index;
+    if(!GetIndexFromProgNum(midiGroupNum,midiProgNum,index))
+        return false;
+
+    //if the program has not been changed, just return
+    if( !ChangeProg( index ) )
+        return false;
+
+    //if program changed, force the host to update
+    myHost->UpdateSolverNow();
+    return true;
 }
 
 int Programs::GetNbOfProgs()
@@ -519,7 +450,7 @@ QDataStream & Programs::toStream (QDataStream &out)
     for(int i=0; i<root->rowCount(); i++) {
         QStandardItem *grpItem = root->child(i);
         out << grpItem->text();
-        out << (quint32)grpItem->data(UserRoles::value).toInt();
+        out << (quint32)grpItem->data(ProgramsModel::ProgramId).toInt();
 
         QStandardItem *prgList = grpItem->child(0);
         out << (quint16)prgList->rowCount();
@@ -527,15 +458,12 @@ QDataStream & Programs::toStream (QDataStream &out)
         for(int j=0; j<prgList->rowCount(); j++) {
             QStandardItem *prgItem = prgList->child(j);
             out << prgItem->text();
-            out << (quint32)prgItem->data(UserRoles::value).toInt();
+            out << (quint32)prgItem->data(ProgramsModel::ProgramId).toInt();
         }
     }
 
-    quint16 grp = currentPrg.parent().row();
-    out << grp;
-    quint16 prg = currentPrg.row();
-    out << prg;
-
+    out << (quint16)currentGrp.row();
+    out << (quint16)currentPrg.row();
     out << (quint8)groupAutosaveState;
     out << (quint8)progAutosaveState;
 
@@ -551,16 +479,21 @@ QDataStream & Programs::fromStream (QDataStream &in)
     in >> nbgrp;
     for(unsigned int i=0; i<nbgrp; i++) {
         QStandardItem *grpItem = new QStandardItem();
-        grpItem->setData(NodeType::programGroup,UserRoles::nodeType);
+        grpItem->setData(ProgramsModel::GroupNode,ProgramsModel::NodeType);
         grpItem->setDragEnabled(true);
         grpItem->setDropEnabled(false);
         grpItem->setEditable(true);
         QString str;
         in >> str;
         grpItem->setText(str);
-        quint32 prgId;
-        in >> prgId;
-        grpItem->setData(prgId,UserRoles::value);
+
+        quint32 groupId;
+        in >> groupId;
+        if(groupId>=nextGroupId)
+            nextGroupId=groupId+1;
+
+        grpItem->setData(groupId,ProgramsModel::ProgramId);
+        grpItem->setData(groupId,Qt::ToolTipRole);
 
         QStandardItem *prgList = new QStandardItem();
         prgList->setDragEnabled(false);
@@ -571,19 +504,21 @@ QDataStream & Programs::fromStream (QDataStream &in)
         in >> nbprog;
         for(unsigned int j=0; j<nbprog; j++) {
             QStandardItem *prgItem = new QStandardItem();
-            prgItem->setData(NodeType::program,UserRoles::nodeType);
+            prgItem->setData(ProgramsModel::ProgramNode,ProgramsModel::NodeType);
             prgItem->setDragEnabled(true);
             prgItem->setDropEnabled(false);
             prgItem->setEditable(true);
             QString prgStr;
             in >> prgStr;
             prgItem->setText(prgStr);
+
             quint32 prgId;
             in >> prgId;
-            prgItem->setData(prgId,UserRoles::value);
-
             if(prgId>=nextProgId)
                 nextProgId=prgId+1;
+
+            prgItem->setData(prgId,ProgramsModel::ProgramId);
+            prgItem->setData(prgId,Qt::ToolTipRole);
 
             prgList->appendRow(prgItem);
         }
@@ -611,6 +546,7 @@ QDataStream & Programs::fromStream (QDataStream &in)
     projectDirty=false;
     return in;
 }
+
 
 QDataStream & operator<< (QDataStream& out, Programs& value)
 {

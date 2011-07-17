@@ -40,7 +40,8 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
     solverNeedAnUpdate(false),
     solverUpdateEnabled(true),
     mutexListCables(new QMutex(QMutex::Recursive)),
-    settingsGroup(settingsGroup)
+    settingsGroup(settingsGroup),
+    undoProgramChangesEnabled(false)
 {
     doublePrecision=GetSetting("doublePrecision",false).toBool();
 
@@ -433,10 +434,8 @@ void MainHost::SetupProgramContainer()
         mainContainer->ConnectObjects(groupContainer->bridgeOut, programContainer->bridgeReturn,true);
     }
 
-    connect(programList, SIGNAL(ProgChanged(QModelIndex)),
-            programContainer.data(), SLOT(SetProgram(QModelIndex)));
-    connect(programList, SIGNAL(ProgCopy(int,int)),
-            programContainer.data(), SLOT(CopyProgram(int,int)));
+    connect(programList, SIGNAL(ProgChanged(int)),
+            programContainer.data(), SLOT(SetProgram(int)));
     connect(programList, SIGNAL(ProgDelete(int)),
             programContainer.data(), SLOT(RemoveProgram(int)));
     connect(this,SIGNAL(Rendered()),
@@ -535,10 +534,8 @@ void MainHost::SetupGroupContainer()
         mainContainer->ConnectObjects(hostContainer->bridgeOut, groupContainer->bridgeReturn,true);
     }
 
-    connect(programList, SIGNAL(GroupChanged(QModelIndex)),
-            groupContainer.data(), SLOT(SetProgram(QModelIndex)));
-    connect(programList, SIGNAL(GroupCopy(int,int)),
-            groupContainer.data(), SLOT(CopyProgram(int,int)));
+    connect(programList, SIGNAL(GroupChanged(int)),
+            groupContainer.data(), SLOT(SetProgram(int)));
     connect(programList, SIGNAL(GroupDelete(int)),
             groupContainer.data(), SLOT(RemoveProgram(int)));
     connect(this,SIGNAL(Rendered()),
@@ -563,72 +560,51 @@ bool MainHost::EnableSolverUpdate(bool enable)
     return ret;
 }
 
-//bool MainHost::IsSolverUpdateEnabled()
-//{
-//    QMutexLocker l(&solverMutex);
-//    return solverUpdateEnabled;
-//}
-
-void MainHost::SetSolverUpdateNeeded(bool need)
-{
-    solverMutex.lock();
-    solverNeedAnUpdate = need;
-    solverMutex.unlock();
-}
-
 void MainHost::UpdateSolver(bool forceUpdate)
 {
     solverMutex.lock();
 
-    if(!solverNeedAnUpdate) {
-        solverMutex.unlock();
-        return;
-    }
-
-//    solverNeedAnUpdate=false;
-        //solver needs an update
-//        solverNeedAnUpdate = true;
-
-        bool solverWasEnabled=solverUpdateEnabled;
-
-        //return if solver update was disabled
-        if(!solverUpdateEnabled && !forceUpdate) {
+        //update not forced, not needed or disabled : return
+        if( (!solverUpdateEnabled || !solverNeedAnUpdate) && !forceUpdate) {
             solverMutex.unlock();
             return;
         }
 
         //disable other solver updates
+        bool solverWasEnabled=solverUpdateEnabled;
         solverUpdateEnabled = false;
+
+        //allow others to ask for a new update while we're updating
+        solverNeedAnUpdate = false;
 
     solverMutex.unlock();
 
-    //if forced : wait the end of rendering
-    if(forceUpdate)
+    //if forced : lock rendering
+    if(forceUpdate) {
         mutexRender.lock();
-    else {
+    } else {
         //not forced : do it later if we can't do it now
         if(!mutexRender.tryLock()) {
+            //can't lock, ask for a ne update
+            SetSolverUpdateNeeded();
             EnableSolverUpdate(solverWasEnabled);
             return;
         }
     }
 
+    //update the solver
     mutexListCables->lock();
         solver->Resolve(workingListOfCables, renderer);
     mutexListCables->unlock();
 
-    SetSolverUpdateNeeded(false);
-
-    //allow rendering
     mutexRender.unlock();
-
     EnableSolverUpdate(solverWasEnabled);
 }
 
 void MainHost::ChangeNbThreads(int nbThreads)
 {
     renderer->SetNbThreads(nbThreads);
-    SetSolverUpdateNeeded(true);
+    SetSolverUpdateNeeded();
 
 }
 
@@ -642,7 +618,7 @@ void MainHost::SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum ms
         const ConnectionInfo &destPin = i.value();
         Connectables::Pin *pin = objFactory->GetPin(destPin);
         if(!pin) {
-            debug("MainHost::SendMsg : unknown pin")
+            debug2(<<"MainHost::SendMsg : unknown pin"<<destPin.objId<<"from"<<senderPin.objId)
             return;
         }
 
@@ -783,6 +759,8 @@ void MainHost::LoadSetupFile(const QString &filename)
     if(filename.isEmpty())
         return;
 
+    undoStack.clear();
+
     if(ProjectFile::LoadFromFile(this,filename)) {
         ConfigDialog::AddRecentSetupFile(filename,this);
         currentSetupFile = filename;
@@ -798,6 +776,8 @@ void MainHost::LoadProjectFile(const QString &filename)
     if(filename.isEmpty())
         return;
 
+    undoStack.clear();
+
     if(ProjectFile::LoadFromFile(this,filename)) {
         ConfigDialog::AddRecentProjectFile(filename,this);
         currentProjectFile = filename;
@@ -812,6 +792,9 @@ void MainHost::ReloadProject()
 {
     if(currentProjectFile.isEmpty())
         return;
+
+    undoStack.clear();
+
     ProjectFile::LoadFromFile(this,currentProjectFile);
 }
 
@@ -819,11 +802,16 @@ void MainHost::ReloadSetup()
 {
     if(currentSetupFile.isEmpty())
         return;
+
+    undoStack.clear();
+
     ConfigDialog::AddRecentSetupFile(currentSetupFile,this);
 }
 
 void MainHost::ClearSetup()
 {
+    undoStack.clear();
+
     EnableSolverUpdate(false);
     SetupHostContainer();
     EnableSolverUpdate(true);
@@ -837,6 +825,8 @@ void MainHost::ClearSetup()
 
 void MainHost::ClearProject()
 {
+    undoStack.clear();
+
     EnableSolverUpdate(false);
     SetupProjectContainer();
     SetupProgramContainer();

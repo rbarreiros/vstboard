@@ -78,7 +78,7 @@ bool ProjectFile::ToStream(MainHost *myHost,QDataStream &out, quint32 fileKey )
             QByteArray tmpBa;
             QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
             myHost->hostContainer->SaveProgram();
-            tmpStream << *myHost->hostContainer;
+            myHost->hostContainer->toStream(tmpStream);
             SaveChunk( "HostContainer", tmpBa, out);
         }
 
@@ -107,7 +107,7 @@ bool ProjectFile::ToStream(MainHost *myHost,QDataStream &out, quint32 fileKey )
             QByteArray tmpBa;
             QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
             myHost->projectContainer->SaveProgram();
-            tmpStream << *myHost->projectContainer;
+            myHost->projectContainer->toStream(tmpStream);
             SaveChunk( "ProjectContainer", tmpBa, out);
         }
 
@@ -116,7 +116,7 @@ bool ProjectFile::ToStream(MainHost *myHost,QDataStream &out, quint32 fileKey )
             QByteArray tmpBa;
             QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
             myHost->programContainer->SaveProgram();
-            tmpStream << *myHost->programContainer;
+            myHost->programContainer->toStream(tmpStream);
             SaveChunk( "ProgramContainer", tmpBa, out);
         }
 
@@ -125,7 +125,7 @@ bool ProjectFile::ToStream(MainHost *myHost,QDataStream &out, quint32 fileKey )
             QByteArray tmpBa;
             QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
             myHost->groupContainer->SaveProgram();
-            tmpStream << *myHost->groupContainer;
+            myHost->groupContainer->toStream(tmpStream);
             SaveChunk( "GroupContainer", tmpBa, out);
         }
 
@@ -169,7 +169,7 @@ bool ProjectFile::FromStream(MainHost *myHost,QDataStream &in)
     }
 
     in >> MainHost::currentFileVersion;
-    if(MainHost::currentFileVersion < 15) {
+    if(MainHost::currentFileVersion != PROJECT_AND_SETUP_FILE_VERSION) {
         QMessageBox msgBox(QMessageBox::Critical, "", tr("File format v%1 can't be converted to the current file format v%2").arg(MainHost::currentFileVersion).arg(PROJECT_AND_SETUP_FILE_VERSION) );
         msgBox.exec();
         return false;

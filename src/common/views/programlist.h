@@ -30,6 +30,7 @@ namespace Ui {
     class ProgramList;
 }
 
+class MainHost;
 class ProgramList : public QWidget
 {
     Q_OBJECT
@@ -38,12 +39,13 @@ public:
     explicit ProgramList(QWidget *parent = 0);
     ~ProgramList();
 
-    void SetModel(QAbstractItemModel *model);
+    void SetModel(MainHost *myHost, QAbstractItemModel *model);
     void writeSettings(MainHost *myHost);
     void readSettings(MainHost *myHost);
     void resetSettings();
 
 private:
+    MainHost *myHost;
     Ui::ProgramList *ui;
     QAbstractItemModel *model;
     QPersistentModelIndex currentPrg;
@@ -53,11 +55,11 @@ signals:
     void ChangeGroup(const QModelIndex &index);
     void ProgAutoSave(const Autosave::Enum state);
     void GroupAutoSave(const Autosave::Enum state);
-    void CurrentDisplayedGroup(const QModelIndex &index);
 
 public slots:
     void OnProgChange(const QModelIndex &index);
-    void OnDragOverGroups( QWidget *source, const QModelIndex & index);
+    void OnGroupHovered(const QModelIndex & index);
+    void BackToCurrentGroup();
     void OnProgAutoSaveChanged(const Autosave::Enum state);
     void OnGroupAutoSaveChanged(const Autosave::Enum state);
 
@@ -68,8 +70,10 @@ private slots:
     void on_progAutosaveOff_clicked();
     void on_progAutosaveAsk_clicked();
     void on_progAutosaveOn_clicked();
-    void on_listProgs_clicked(QModelIndex index);
-    void on_listGrps_clicked(QModelIndex index);
+    void on_listProgs_activated(QModelIndex index);
+    void on_listGrps_activated(QModelIndex index);
+    void on_listProgs_clicked(QModelIndex index) {on_listProgs_activated(index);}
+    void on_listGrps_clicked(QModelIndex index) {on_listGrps_activated(index);}
 };
 
 #endif // PROGRAMLIST_H
