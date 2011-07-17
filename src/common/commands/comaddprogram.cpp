@@ -2,19 +2,21 @@
 #include "models/programsmodel.h"
 
 ComAddProgram::ComAddProgram(ProgramsModel *model,
-                             QByteArray *data,
-                             int row,
                              int groupNum,
+                             int row,
+                             QByteArray *data,
                              QUndoCommand *parent) :
     QUndoCommand(parent),
     model(model),
     row(row),
     groupNum(groupNum),
-    data(*data),
     done(false)
 
 {
     setText(QObject::tr("Add program"));
+
+    if(data)
+        this->data=*data;
 
     done=true;
     redo();

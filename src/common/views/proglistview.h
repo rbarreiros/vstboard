@@ -32,10 +32,11 @@ public:
 protected:
     void startDrag(Qt::DropActions supportedActions);
     void dragMoveEvent ( QDragMoveEvent * event );
-//    void dropEvent(QDropEvent *e);
 
-private:
-    QModelIndexList listDragItems;
+    QAction *actDel;
+    QAction *actAddNew;
+    QAction *actCopy;
+    QAction *actPaste;
 
 signals:
     void DragFinished();

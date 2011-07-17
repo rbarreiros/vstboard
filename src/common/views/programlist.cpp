@@ -79,14 +79,10 @@ void ProgramList::OnProgChange(const QModelIndex &index)
 
     if(currentPrg.parent() != index.parent()) {
         ui->listGrps->scrollTo( index.parent().parent() );
-//        ui->listGrps->setCurrentIndex( index.parent().parent() );
-
         ui->listProgs->setRootIndex( index.parent() );
     }
 
     ui->listProgs->scrollTo( index );
-//    ui->listProgs->setCurrentIndex( index );
-
     currentPrg = index;
 }
 

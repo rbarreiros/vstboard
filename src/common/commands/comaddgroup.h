@@ -8,8 +8,8 @@ class ComAddGroup : public QUndoCommand
 {
 public:
     ComAddGroup(ProgramsModel *model,
-                QByteArray *data,
-                int row,
+                int row=-1,
+                QByteArray *data=0,
                 QUndoCommand *parent=0);
     void undo();
     void redo();

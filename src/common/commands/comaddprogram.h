@@ -8,9 +8,9 @@ class ComAddProgram : public QUndoCommand
 {
 public:
     ComAddProgram(ProgramsModel *model,
-                  QByteArray *data,
-                  int row,
                   int groupNum,
+                  int row=0,
+                  QByteArray *data=0,
                   QUndoCommand  *parent=0);
     void undo();
     void redo();

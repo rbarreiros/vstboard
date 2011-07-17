@@ -2,17 +2,19 @@
 #include "models/programsmodel.h"
 
 ComAddGroup::ComAddGroup(ProgramsModel *model,
-                         QByteArray *data,
                          int row,
+                         QByteArray *data,
                          QUndoCommand *parent) :
     QUndoCommand(parent),
     model(model),
     row(row),
-    data(*data),
     done(false)
 
 {
     setText(QObject::tr("Add group"));
+
+    if(data)
+        this->data=*data;
 
     done=true;
     redo();

@@ -397,6 +397,12 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
+   <property name="minimumSize">
+    <size>
+     <width>50</width>
+     <height>50</height>
+    </size>
+   </property>
    <property name="floating">
     <bool>false</bool>
    </property>
@@ -434,6 +440,12 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="dockMidiDevices">
+   <property name="minimumSize">
+    <size>
+     <width>50</width>
+     <height>50</height>
+    </size>
+   </property>
    <property name="acceptDrops">
     <bool>false</bool>
    </property>
@@ -510,6 +522,12 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="dockVstBrowser">
+   <property name="minimumSize">
+    <size>
+     <width>50</width>
+     <height>50</height>
+    </size>
+   </property>
    <property name="windowTitle">
     <string>VST Plugins</string>
    </property>
@@ -538,6 +556,12 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="dockAudioDevices">
+   <property name="minimumSize">
+    <size>
+     <width>50</width>
+     <height>50</height>
+    </size>
+   </property>
    <property name="floating">
     <bool>false</bool>
    </property>
@@ -608,6 +632,12 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
+   <property name="minimumSize">
+    <size>
+     <width>50</width>
+     <height>50</height>
+    </size>
+   </property>
    <property name="windowTitle">
     <string>Solver</string>
    </property>
@@ -654,6 +684,12 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="dockTools">
+   <property name="minimumSize">
+    <size>
+     <width>50</width>
+     <height>50</height>
+    </size>
+   </property>
    <property name="windowTitle">
     <string>Tools</string>
    </property>
@@ -724,6 +760,12 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
+   <property name="minimumSize">
+    <size>
+     <width>50</width>
+     <height>50</height>
+    </size>
+   </property>
    <property name="windowTitle">
     <string>HostModel</string>
    </property>
@@ -782,6 +824,12 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="dockBankBrowser">
+   <property name="minimumSize">
+    <size>
+     <width>50</width>
+     <height>50</height>
+    </size>
+   </property>
    <property name="windowTitle">
     <string>Browser</string>
    </property>
@@ -803,6 +851,12 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="dockUndo">
+   <property name="minimumSize">
+    <size>
+     <width>50</width>
+     <height>50</height>
+    </size>
+   </property>
    <property name="windowTitle">
     <string>Undo history</string>
    </property>

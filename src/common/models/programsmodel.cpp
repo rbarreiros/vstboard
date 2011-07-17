@@ -37,7 +37,40 @@ ProgramsModel::ProgramsModel(MainHost *parent) :
 {
 }
 
-bool ProgramsModel::AddEmptyGroup(QModelIndex &index, int row)
+void ProgramsModel::NewGroup(int row)
+{
+    if(row<0 || row>rowCount())
+        row=rowCount();
+
+    QByteArray tmpBa;
+    QDataStream stream(&tmpBa,QIODevice::WriteOnly);
+    stream << QString(tr("New"));
+
+    QUndoCommand *com = new QUndoCommand( tr("New group") );
+    new ComAddGroup(this,row,&tmpBa,com);
+    new ComAddProgram(this,row,0,&tmpBa,com);
+    myHost->undoStack.push( com );
+}
+
+void ProgramsModel::NewProgram(int groupNum, int row)
+{
+    if(!item(groupNum))
+        return;
+    QStandardItem *progList = item(groupNum)->child(0);
+    if(!progList)
+        return;
+
+    if(row<0 || row>progList->rowCount())
+        row=progList->rowCount();
+
+    QByteArray tmpBa;
+    QDataStream stream(&tmpBa,QIODevice::WriteOnly);
+    stream << QString(tr("New"));
+
+    myHost->undoStack.push( new ComAddProgram(this,groupNum,row,&tmpBa) );
+}
+
+bool ProgramsModel::AddGroup(QModelIndex &index, int row)
 {
     int groupId = myHost->programList->GetNextGroupId();
 
@@ -45,8 +78,9 @@ bool ProgramsModel::AddEmptyGroup(QModelIndex &index, int row)
 
     //create the group
     QStandardItem *groupItem = new QStandardItem( name );
-    groupItem->setData(GroupNode,UserRoles::nodeType);
+    groupItem->setData(GroupNode,NodeType);
     groupItem->setData(groupId,ProgramId);
+    groupItem->setData(groupId,Qt::ToolTipRole);
     groupItem->setDragEnabled(true);
     groupItem->setDropEnabled(false);
     groupItem->setEditable(true);
@@ -63,10 +97,13 @@ bool ProgramsModel::AddEmptyGroup(QModelIndex &index, int row)
     insertRow( row, groupItem );
 
     index = groupItem->index();
+
+    myHost->programList->ChangeGroup(row);
+
     return true;
 }
 
-bool ProgramsModel::AddEmptyProgram(int groupNum, QModelIndex &index, int row)
+bool ProgramsModel::AddProgram(int groupNum, QModelIndex &index, int row)
 {
     QStandardItem *groupItem = item(groupNum);
     QStandardItem *prgList = groupItem->child(0);
@@ -88,6 +125,7 @@ bool ProgramsModel::AddEmptyProgram(int groupNum, QModelIndex &index, int row)
     QStandardItem *prgItem = new QStandardItem( name );
     prgItem->setData(ProgramNode,NodeType);
     prgItem->setData(progId,ProgramId);
+    prgItem->setData(progId,Qt::ToolTipRole);
     prgItem->setDragEnabled(true);
     prgItem->setDropEnabled(false);
     prgItem->setEditable(true);
@@ -97,13 +135,17 @@ bool ProgramsModel::AddEmptyProgram(int groupNum, QModelIndex &index, int row)
     prgList->insertRow(row, prgItem);
 
     index = prgItem->index();
+
+    myHost->programList->ChangeGroup(groupNum);
+    myHost->programList->ChangeProg(row);
+
     return true;
 }
 
 bool ProgramsModel::GroupFromStream( QDataStream &stream, int row)
 {
     QModelIndex grpIndex;
-    if(!AddEmptyGroup(grpIndex, row))
+    if(!AddGroup(grpIndex, row))
         return false;
 
     if(!grpIndex.isValid())
@@ -134,7 +176,7 @@ bool ProgramsModel::GroupFromStream( QDataStream &stream, int row)
 bool ProgramsModel::ProgramFromStream( QDataStream &stream, int row, int groupNum)
 {
     QModelIndex prgIndex;
-    if(!AddEmptyProgram(groupNum,prgIndex,row))
+    if(!AddProgram(groupNum,prgIndex,row))
         return false;
 
     if(!prgIndex.isValid())
@@ -245,16 +287,16 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
             row=rowCount();
     }
 
-    if(data->hasFormat("application/x-groupsdata")) {
-        QDataStream stream( &data->data( "application/x-groupsdata" ), QIODevice::ReadOnly);
+    if(data->hasFormat(MIMETYPE_GROUP)) {
+        QDataStream stream( &data->data(MIMETYPE_GROUP), QIODevice::ReadOnly);
         while(!stream.atEnd()) {
             QByteArray tmpBa;
             stream >> tmpBa;
-            new ComAddGroup( this, &tmpBa, row+countRows, currentCommand );
+            new ComAddGroup( this, row+countRows, &tmpBa, currentCommand );
             ++countRows;
         }
     } else {
-        if(data->hasFormat("application/x-programsdata")) {
+        if(data->hasFormat(MIMETYPE_PROGRAM)) {
             int groupNum;
             if(parent.isValid()) {
                 groupNum = parent.parent().row();
@@ -269,11 +311,11 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
                 row = item(groupNum)->child(0)->rowCount();
             }
 
-            QDataStream stream( &data->data( "application/x-programsdata" ), QIODevice::ReadOnly);
+            QDataStream stream( &data->data(MIMETYPE_PROGRAM), QIODevice::ReadOnly);
             while(!stream.atEnd()) {
                 QByteArray tmpBa;
                 stream >> tmpBa;
-                new ComAddProgram( this, &tmpBa, row+countRows, groupNum , currentCommand );
+                new ComAddProgram( this, groupNum, row+countRows, &tmpBa, currentCommand );
                 ++countRows;
             }
         }
@@ -295,6 +337,8 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
 
 bool ProgramsModel::removeRows ( int row, int count, const QModelIndex & parent )
 {
+    static int removedItems = 0;
+
     if(fromCom) {
         //check if we can remove those rows
         for(int i=0; i<count; i++) {
@@ -302,10 +346,12 @@ bool ProgramsModel::removeRows ( int row, int count, const QModelIndex & parent 
             if( !myHost->programList->RemoveIndex( idx ) )
                 count = i;
         }
+        removedItems += count;
         return QStandardItemModel::removeRows(row,count,parent);
     }
 
     if(currentCommand) {
+
         droppedItemsCount-=count;
 
         while(count>0) {
@@ -320,8 +366,13 @@ bool ProgramsModel::removeRows ( int row, int count, const QModelIndex & parent 
         }
 
         if(droppedItemsCount==0) {
-            myHost->undoStack.push( currentCommand );
+            if(removedItems)
+                myHost->undoStack.push( currentCommand );
+            else
+                delete currentCommand;
+
             currentCommand=0;
+            removedItems=0;
         }
         return true;
     }
@@ -330,16 +381,19 @@ bool ProgramsModel::removeRows ( int row, int count, const QModelIndex & parent 
     return false;
 }
 
-void ProgramsModel::removeRows ( QModelIndexList &listToRemove, const QModelIndex & parent )
+void ProgramsModel::removeRows ( const QModelIndexList &listToRemove, const QModelIndex & parent )
 {
-    currentCommand = new QUndoCommand(tr("Remove programs"));
-    droppedItemsCount = listToRemove.size();
-
-    qSort(listToRemove.begin(),listToRemove.end(),qGreater<QModelIndex>());
-
+    QList<int>rows;
     foreach(QModelIndex index, listToRemove) {
-        removeRow( index.row(), parent);
+        rows << index.row();
     }
+
+    currentCommand = new QUndoCommand(tr("Remove programs"));
+    droppedItemsCount = rows.size();
+
+    qSort(rows.begin(),rows.end(),qGreater<int>());
+    foreach(int r, rows)
+        removeRow( r, parent);
 }
 
 bool ProgramsModel::setData(const QModelIndex &index, const QVariant &value, int role)
@@ -362,8 +416,8 @@ bool ProgramsModel::setData(const QModelIndex &index, const QVariant &value, int
 QStringList ProgramsModel::mimeTypes () const
 {
     QStringList types;
-    types << "application/x-programsdata";
-    types << "application/x-groupsdata";
+    types << MIMETYPE_PROGRAM;
+    types << MIMETYPE_GROUP;
     return types;
 
 }
@@ -376,7 +430,7 @@ QMimeData * ProgramsModel::mimeData ( const QModelIndexList & indexes ) const
     QDataStream streamProg( &programs, QIODevice::WriteOnly);
 
     foreach(QModelIndex index, indexes) {
-        if(index.data(UserRoles::nodeType).toInt() == GroupNode) {
+        if(index.data(NodeType).toInt() == GroupNode) {
             QByteArray tmpBa;
             QDataStream tmpStream(&tmpBa, QIODevice::WriteOnly);
             GroupToStream(tmpStream,index);
@@ -391,9 +445,9 @@ QMimeData * ProgramsModel::mimeData ( const QModelIndexList & indexes ) const
     }
     QMimeData *mime = new QMimeData();
     if(!groups.isEmpty())
-        mime->setData("application/x-groupsdata", groups);
+        mime->setData(MIMETYPE_GROUP, groups);
     if(!programs.isEmpty())
-        mime->setData("application/x-programsdata", programs);
+        mime->setData(MIMETYPE_PROGRAM, programs);
     return mime;
 }
 

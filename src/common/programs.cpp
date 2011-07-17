@@ -27,8 +27,8 @@
 Programs::Programs(MainHost *parent) :
     QObject(parent),
     model(0),
-    nextGroupId(0),
-    nextProgId(0),
+    nextGroupId(1),
+    nextProgId(1),
     myHost(parent),
     progAutosaveState(Autosave::save),
     groupAutosaveState(Autosave::save),
@@ -63,14 +63,17 @@ void Programs::BuildModel()
     if(model)
         model->clear();
 
+    nextGroupId=1;
+    nextProgId=1;
     groupAutosaveState=Autosave::save;
     progAutosaveState=Autosave::save;
 
     for(unsigned int grp=0; grp<3; grp++) {
+        int groupId = GetNextGroupId();
         QStandardItem *grpItem = new QStandardItem(QString("Grp%1").arg(grp));
-        grpItem->setData(ProgramsModel::GroupNode,UserRoles::nodeType);
-        grpItem->setData(nextGroupId,ProgramsModel::ProgramId);
-        nextGroupId++;
+        grpItem->setData(ProgramsModel::GroupNode,ProgramsModel::NodeType);
+        grpItem->setData(groupId,ProgramsModel::ProgramId);
+        grpItem->setData(groupId,Qt::ToolTipRole);
         grpItem->setDragEnabled(true);
         grpItem->setDropEnabled(false);
         grpItem->setEditable(true);
@@ -81,11 +84,11 @@ void Programs::BuildModel()
         prgList->setEditable(false);
 
         for(unsigned int prg=0; prg<5; prg++) {
+            int progId = GetNextProgId();
             QStandardItem *prgItem = new QStandardItem(QString("Prg%1").arg(prg));
             prgItem->setData(ProgramsModel::ProgramNode,ProgramsModel::NodeType);
-            prgItem->setData(nextProgId,ProgramsModel::ProgramId);
-//            prgItem->setData(nextProgId,Qt::ToolTipRole);
-            nextProgId++;
+            prgItem->setData(progId,ProgramsModel::ProgramId);
+            prgItem->setData(progId,Qt::ToolTipRole);
             prgItem->setDragEnabled(true);
             prgItem->setDropEnabled(false);
             prgItem->setEditable(true);
@@ -476,16 +479,21 @@ QDataStream & Programs::fromStream (QDataStream &in)
     in >> nbgrp;
     for(unsigned int i=0; i<nbgrp; i++) {
         QStandardItem *grpItem = new QStandardItem();
-        grpItem->setData(ProgramsModel::GroupNode,UserRoles::nodeType);
+        grpItem->setData(ProgramsModel::GroupNode,ProgramsModel::NodeType);
         grpItem->setDragEnabled(true);
         grpItem->setDropEnabled(false);
         grpItem->setEditable(true);
         QString str;
         in >> str;
         grpItem->setText(str);
-        quint32 prgId;
-        in >> prgId;
-        grpItem->setData(prgId,ProgramsModel::ProgramId);
+
+        quint32 groupId;
+        in >> groupId;
+        if(groupId>=nextGroupId)
+            nextGroupId=groupId+1;
+
+        grpItem->setData(groupId,ProgramsModel::ProgramId);
+        grpItem->setData(groupId,Qt::ToolTipRole);
 
         QStandardItem *prgList = new QStandardItem();
         prgList->setDragEnabled(false);
@@ -503,12 +511,14 @@ QDataStream & Programs::fromStream (QDataStream &in)
             QString prgStr;
             in >> prgStr;
             prgItem->setText(prgStr);
+
             quint32 prgId;
             in >> prgId;
-            prgItem->setData(prgId,ProgramsModel::ProgramId);
-
             if(prgId>=nextProgId)
                 nextProgId=prgId+1;
+
+            prgItem->setData(prgId,ProgramsModel::ProgramId);
+            prgItem->setData(prgId,Qt::ToolTipRole);
 
             prgList->appendRow(prgItem);
         }

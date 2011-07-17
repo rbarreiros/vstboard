@@ -33,6 +33,11 @@ protected:
     void dragMoveEvent ( QDragMoveEvent * event );
     void dropEvent(QDropEvent *event);
 
+    QAction *actDel;
+    QAction *actAddNew;
+    QAction *actCopy;
+    QAction *actPaste;
+
 signals:
     void DragOverItemFromWidget( const QModelIndex &index);
 
