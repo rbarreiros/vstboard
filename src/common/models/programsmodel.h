@@ -23,8 +23,8 @@
 //#include "precomp.h"
 #include "views/viewconfig.h"
 
-#define MIMETYPE_GROUP "application/x-groupsdata"
-#define MIMETYPE_PROGRAM "application/x-programsdata"
+#define MIMETYPE_GROUP QLatin1String("application/x-groupsdata")
+#define MIMETYPE_PROGRAM QLatin1String("application/x-programsdata")
 
 
 class MainHost;

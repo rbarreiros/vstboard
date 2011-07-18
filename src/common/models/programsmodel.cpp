@@ -428,11 +428,7 @@ bool ProgramsModel::setData(const QModelIndex &index, const QVariant &value, int
 
 QStringList ProgramsModel::mimeTypes () const
 {
-    QStringList types;
-    types << MIMETYPE_PROGRAM;
-    types << MIMETYPE_GROUP;
-    return types;
-
+    return QStringList() << MIMETYPE_PROGRAM << MIMETYPE_GROUP;
 }
 
 QMimeData * ProgramsModel::mimeData ( const QModelIndexList & indexes ) const

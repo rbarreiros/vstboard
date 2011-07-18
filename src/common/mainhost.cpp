@@ -882,6 +882,8 @@ void MainHost::SaveSetupFile(bool saveAs)
             filename += ".";
             filename += SETUP_FILE_EXTENSION;
         }
+    } else {
+        filename = currentSetupFile;
     }
 
     if(ProjectFile::SaveToSetupFile(this,filename)) {
@@ -907,6 +909,8 @@ void MainHost::SaveProjectFile(bool saveAs)
             filename += ".";
             filename += PROJECT_FILE_EXTENSION;
         }
+    } else {
+        filename = currentProjectFile;
     }
 
     if(ProjectFile::SaveToProjectFile(this,filename)) {

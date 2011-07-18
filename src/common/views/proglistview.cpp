@@ -70,6 +70,11 @@ void ProgListView::dragMoveEvent ( QDragMoveEvent * event )
         event->accept();
 }
 
+void ProgListView::dropEvent(QDropEvent *event)
+{
+    QListView::dropEvent(event);
+}
+
 void ProgListView::currentChanged (const QModelIndex &current, const QModelIndex &previous)
 {
     Q_UNUSED(previous)

@@ -34,6 +34,7 @@ public:
 protected:
     void dragEnterEvent(QDragEnterEvent *event);
     void dragMoveEvent ( QDragMoveEvent * event );
+    void dropEvent(QDropEvent *event);
     void currentChanged (const QModelIndex &current, const QModelIndex &previous);
 
     QStringList MimeTypes();
