@@ -20,7 +20,7 @@
 
 #ifndef PROGRAMSMODEL_H
 #define PROGRAMSMODEL_H
-//#include "precomp.h"
+#include "precomp.h"
 #include "views/viewconfig.h"
 
 #define MIMETYPE_GROUP QLatin1String("application/x-groupsdata")
@@ -45,14 +45,10 @@ public:
     explicit ProgramsModel(MainHost *parent = 0);
     bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
     bool removeRows ( int row, int count, const QModelIndex & parent = QModelIndex() );
-    void removeRows ( const QModelIndexList &listToRemove, const QModelIndex & parent = QModelIndex() );
     bool setData(const QModelIndex &index, const QVariant &value, int role);
 
     QStringList mimeTypes () const;
     QMimeData * mimeData ( const QModelIndexList & indexes ) const;
-
-    void NewGroup(int row=-1);
-    void NewProgram(int groupNum, int row=-1);
 
     bool userWantsToUnloadGroup();
     bool userWantsToUnloadProgram();
@@ -86,8 +82,14 @@ private:
     bool GroupToStream( QDataStream &stream, int row) const;
     bool ProgramToStream( QDataStream &stream, int row, int groupNum) const;
 
-    bool GoAwayFromIndex( const QModelIndex &index);
-    bool RemoveIndex(const QModelIndex &index);
+    void removeRowsAddToCommandStack ( int row, int count, const QModelIndex & parent = QModelIndex() );
+    void CloseCurrentCommandGroup();
+    bool removeRowsFromCommand ( int row, int count, const QModelIndex & parent = QModelIndex() );
+
+
+    int HowManyItemsCanWeRemoveInThisList(const QModelIndexList &progList);
+    bool FindAValidProgramInGroup( const QModelIndex &group, int progRow, const QModelIndexList &listToAvoid, QModelIndex &target );
+    bool FindAValidProgram( const QModelIndex &prog, const QModelIndexList &listToAvoid, QModelIndex &target = QModelIndex() );
 
     bool ValidateProgChange(const QModelIndex &newPrg);
     bool ChangeProgNow(int midiGroupNum, int midiProgNum);
@@ -121,9 +123,10 @@ private:
     bool dirtyFlag;
     QBrush currentProgColor;
     bool fromCom;
-    QUndoCommand *currentCommand;
-    int countItemsToMove;
+    QUndoCommand *currentCommandGroup;
+    int nbOfCommandsToGroup;
     bool openedPrompt;
+    bool currentCommandHasBeenProcessed;
 
     friend class ComAddProgram;
     friend class ComAddGroup;
@@ -160,6 +163,9 @@ public slots:
     void UserChangeGroup(int grp);
     void UserChangeProgAutosave(const Qt::CheckState state);
     void UserChangeGroupAutosave(const Qt::CheckState state);
+    void UserRemoveRows ( const QModelIndexList &listToRemove, const QModelIndex & parent = QModelIndex() );
+    void UserAddGroup(int row=-1);
+    void UserAddProgram(const QModelIndex &grpIndex, int row=-1);
 
     void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
 };

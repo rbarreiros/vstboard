@@ -41,13 +41,14 @@ ProgramsModel::ProgramsModel(MainHost *parent) :
     dirtyFlag(false),
     currentProgColor(Qt::green),
     fromCom(false),
-    currentCommand(0),
-    countItemsToMove(0),
-    openedPrompt(false)
+    currentCommandGroup(0),
+    nbOfCommandsToGroup(0),
+    openedPrompt(false),
+    currentCommandHasBeenProcessed(false)
 {
 }
 
-void ProgramsModel::NewGroup(int row)
+void ProgramsModel::UserAddGroup(int row)
 {
     if(row<0 || row>rowCount())
         row=rowCount();
@@ -62,23 +63,20 @@ void ProgramsModel::NewGroup(int row)
     myHost->undoStack.push( com );
 }
 
-void ProgramsModel::NewProgram(int groupNum, int row)
+void ProgramsModel::UserAddProgram(const QModelIndex &grpIndex, int row)
 {
-    if(!item(groupNum))
+    if(!grpIndex.isValid())
         return;
 
-    QStandardItem *grpItem = item(groupNum);
-    if(!grpItem)
-        return;
-
-    if( row < 0 || row > grpItem->rowCount() )
-        row=grpItem->rowCount();
+    int m = rowCount(grpIndex)-1;
+    if( row < 0 || row > m )
+        row=m;
 
     QByteArray tmpBa;
     QDataStream stream(&tmpBa,QIODevice::WriteOnly);
     stream << QString(tr("New"));
 
-    myHost->undoStack.push( new ComAddProgram(this,groupNum,row,&tmpBa) );
+    myHost->undoStack.push( new ComAddProgram(this,grpIndex.row(),row,&tmpBa) );
 }
 
 bool ProgramsModel::AddGroup(QModelIndex &index, int row)
@@ -91,6 +89,9 @@ bool ProgramsModel::AddGroup(QModelIndex &index, int row)
     QStandardItem *groupItem = new QStandardItem( name );
     groupItem->setData(GroupNode,NodeType);
     groupItem->setData(groupId,ProgramId);
+#ifndef QT_NODEBUG
+    groupItem->setData(groupId,Qt::ToolTipRole);
+#endif
     groupItem->setDragEnabled(true);
     groupItem->setDropEnabled(false);
     groupItem->setEditable(true);
@@ -116,6 +117,9 @@ bool ProgramsModel::AddProgram(int groupNum, QModelIndex &index, int row)
     QStandardItem *prgItem = new QStandardItem( name );
     prgItem->setData(ProgramNode,NodeType);
     prgItem->setData(progId,ProgramId);
+#ifndef QT_NODEBUG
+    prgItem->setData(progId,Qt::ToolTipRole);
+#endif
     prgItem->setDragEnabled(true);
     prgItem->setDropEnabled(false);
     prgItem->setEditable(true);
@@ -124,15 +128,13 @@ bool ProgramsModel::AddProgram(int groupNum, QModelIndex &index, int row)
         row=groupItem->rowCount();
     groupItem->insertRow(row, prgItem);
 
-    if(!groupItem->isSelectable()) {
-        groupItem->setSelectable(false);
-        groupItem->setBackground(Qt::transparent);
-        groupItem->setToolTip("");
-    }
+    //if the group was disabled re-enable it
+    groupItem->setBackground(Qt::transparent);
+    groupItem->setToolTip("");
 
     index = prgItem->index();
 
-    myHost->programsModel->ValidateProgChange(index);
+//    ValidateProgChange(index);
 
     return true;
 }
@@ -209,14 +211,10 @@ bool ProgramsModel::GroupToStream( QDataStream &stream, const QModelIndex &group
     myHost->mainWindow->mySceneView->viewGroup->ProgramToStream( groupId, stream );
 
     //add programs datas
-    QStandardItem *grpItem = itemFromIndex(groupIndex);
-    if(!grpItem)
-        return false;
-
     QByteArray programs;
     QDataStream streamProgs( &programs, QIODevice::WriteOnly);
-    for(int i=0; i<grpItem->rowCount(); i++) {
-        if(!ProgramToStream( streamProgs, grpItem->child(i)->index() ))
+    for(int i=0; i<rowCount(groupIndex); i++) {
+        if(!ProgramToStream( streamProgs, groupIndex.child(i,0) ))
             return false;
     }
     stream << programs;
@@ -225,7 +223,7 @@ bool ProgramsModel::GroupToStream( QDataStream &stream, const QModelIndex &group
 
 bool ProgramsModel::ProgramToStream( QDataStream &stream, int row, int groupNum) const
 {
-    return ProgramToStream(stream, item(groupNum)->child(row)->index() );
+    return ProgramToStream(stream, index(groupNum,0).child(row,0) );
 }
 
 bool ProgramsModel::ProgramToStream( QDataStream &stream, const QModelIndex &progIndex) const
@@ -248,17 +246,17 @@ bool ProgramsModel::ProgramToStream( QDataStream &stream, const QModelIndex &pro
 
 bool ProgramsModel::RemoveProgram( int row, int groupNum )
 {
-    if(!item(groupNum) ) {
+    if(!index(groupNum,0).isValid() ) {
         debug2(<<"ProgramsModel::RemoveProgram can't remove"<<groupNum<<row)
         return false;
     }
 
-    return removeRow(row, item(groupNum)->index() );
+    return removeRow(row, index(groupNum,0) );
 }
 
 bool ProgramsModel::RemoveGroup( int row )
 {
-    if(!item(row)) {
+    if(!index(row,0).isValid()) {
         debug2(<<"ProgramsModel::RemoveGroup can't remove"<<row)
         return false;
     }
@@ -269,10 +267,10 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
 {
     switch(action) {
     case Qt::CopyAction:
-        currentCommand = new QUndoCommand(tr("Copy programs"));
+        currentCommandGroup = new QUndoCommand(tr("Copy programs"));
         break;
     case Qt::MoveAction:
-        currentCommand = new QUndoCommand(tr("Move programs"));
+        currentCommandGroup = new QUndoCommand(tr("Move programs"));
         break;
     default:
         debug2(<<"ProgramsModel::dropMimeData unsupported action"<<action)
@@ -281,19 +279,15 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
 
     int countRows=0;
 
-    if(row==-1) {
-        if(parent.isValid())
-            row=itemFromIndex(parent)->rowCount();
-        else
-            row=rowCount();
-    }
+    if(row==-1)
+        row=rowCount(parent);
 
     if(data->hasFormat(MIMETYPE_GROUP)) {
         QDataStream stream( &data->data(MIMETYPE_GROUP), QIODevice::ReadOnly);
         while(!stream.atEnd()) {
             QByteArray tmpBa;
             stream >> tmpBa;
-            new ComAddGroup( this, row+countRows, &tmpBa, currentCommand );
+            new ComAddGroup( this, row+countRows, &tmpBa, currentCommandGroup );
             ++countRows;
         }
     } else {
@@ -304,19 +298,19 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
             } else {
                 //drop programs on a group
                 groupNum = row;
-                if(!item(groupNum)) {
-                    delete currentCommand;
-                    currentCommand=0;
+                if( !index(groupNum,0).isValid() ) {
+                    delete currentCommandGroup;
+                    currentCommandGroup=0;
                     return false;
                 }
-                row = item(groupNum)->rowCount();
+                row = rowCount( index(groupNum,0) );
             }
 
             QDataStream stream( &data->data(MIMETYPE_PROGRAM), QIODevice::ReadOnly);
             while(!stream.atEnd()) {
                 QByteArray tmpBa;
                 stream >> tmpBa;
-                new ComAddProgram( this, groupNum, row+countRows, &tmpBa, currentCommand );
+                new ComAddProgram( this, groupNum, row+countRows, &tmpBa, currentCommandGroup );
                 ++countRows;
             }
         }
@@ -324,84 +318,133 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
 
     switch(action) {
     case Qt::CopyAction :
-        myHost->undoStack.push( currentCommand );
-        currentCommand = 0;
-        countItemsToMove = 0;
+        myHost->undoStack.push( currentCommandGroup );
+        currentCommandGroup = 0;
+        nbOfCommandsToGroup = 0;
         break;
     case Qt::MoveAction :
-        countItemsToMove = countRows;
+        nbOfCommandsToGroup = countRows;
         break;
     }
 
     return true;
 }
 
-bool ProgramsModel::removeRows ( int row, int count, const QModelIndex & parent )
+bool ProgramsModel::removeRows( int row, int count, const QModelIndex & parent )
 {
-    static int removedItems = 0;
+    int newCount = 0;
 
-    if(fromCom) {
-        //check if we can remove those rows
+    //don't change prog or delete rows if a dialog is opened
+    if(!openedPrompt) {
+
+        //get the number of rows we're allowed to remove
+        //and switch to a valid program if needed
+        QModelIndexList list;
         for(int i=0; i<count; i++) {
-            QModelIndex idx = index(row,0, parent);
-            if( !myHost->programsModel->RemoveIndex( idx ) )
-                count = i;
+            list << index(row+i,0,parent);
         }
-        removedItems += count;
+        newCount = HowManyItemsCanWeRemoveInThisList(list);
 
-        //removing last programs from a group, it will be disabled
-        if(parent.isValid()) {
-            QStandardItem *parentItem = item(parent.row());
-            if( parentItem->rowCount() == count ) {
-                parentItem->setSelectable(false);
-                parentItem->setBackground(Qt::gray);
-                parentItem->setToolTip( tr("This group has no program and is disabled.\nDrag & drop some programs here to enable it.") );
-            }
+        //issued by a command, do it
+        if(fromCom) {
+            if(newCount==0)
+                return false;
+            return removeRowsFromCommand(row,newCount,parent);
         }
-
-        return QStandardItemModel::removeRows(row,count,parent);
     }
 
-    if(currentCommand) {
+    //command creation in progress, add to the command group
+    if(currentCommandGroup) {
 
-        countItemsToMove-=count;
+        if(!openedPrompt)
+            removeRowsAddToCommandStack(row,newCount,parent);
 
-        while(count>0) {
-            if(parent.isValid()) {
-                if( RemoveIndex( parent.child(row+count-1,0) ) )
-                    new ComRemoveProgram( this, row+count-1, parent.row(), currentCommand);
-            } else {
-                if( RemoveIndex( index(row+count-1,0) ) )
-                    new ComRemoveGroup( this, row+count-1, currentCommand);
-            }
-            --count;
-        }
+        //are we at the end of a command group ?
+        nbOfCommandsToGroup-=count;
+        if(nbOfCommandsToGroup==0)
+            CloseCurrentCommandGroup();
 
-        if(countItemsToMove==0) {
-            if(removedItems)
-                myHost->undoStack.push( currentCommand );
-            else
-                delete currentCommand;
+        if(newCount==0)
+            return false;
 
-            currentCommand=0;
-            removedItems=0;
-        }
         return true;
     }
 
+    //this should never happen
     debug2(<<"ProgramsModel::removeRows remove row with no undoCommand")
     return false;
 }
 
-void ProgramsModel::removeRows ( const QModelIndexList &listToRemove, const QModelIndex & parent )
+/*!
+    issued by a command
+    */
+bool ProgramsModel::removeRowsFromCommand ( int row, int count, const QModelIndex & parent ) {
+
+    //removing last programs from a group, it will be disabled
+    if(parent.isValid()) {
+        QStandardItem *parentItem = item(parent.row());
+        if( parentItem->rowCount() == count ) {
+            parentItem->setBackground(Qt::gray);
+            parentItem->setToolTip( tr("This group has no program.\nDrag & drop some programs here to enable it.") );
+        }
+    }
+
+    SetDirty();
+    currentCommandHasBeenProcessed = true;
+    return QStandardItemModel::removeRows(row,count,parent);
+}
+
+/*!
+  a command creation is in progress, add to the command group
+  */
+void ProgramsModel::removeRowsAddToCommandStack ( int row, int count, const QModelIndex & parent ) {
+
+    for(int i=row; i<row+count; i++) {
+
+        QModelIndex idx = index(i,0,parent);
+
+        if(parent.isValid()) {
+
+            //tell the container to delete the program
+            new ComRemoveProgram( this, i, parent.row(), currentCommandGroup);
+            emit ProgDelete( idx.data(ProgramId).toInt() );
+
+        } else {
+
+            //tell the containers to delete the group and the programs
+            new ComRemoveGroup( this, i, currentCommandGroup);
+            for(int j=0; j< rowCount(idx); j++)
+                emit ProgDelete( idx.child(j,0).data(ProgramId).toInt() );
+            emit GroupDelete( idx.data(ProgramId).toInt() );
+
+        }
+    }
+}
+
+//all the pending items have been moved or the command had been canceled
+void ProgramsModel::CloseCurrentCommandGroup()
+{
+    //don't issue the command if nothing has been deleted
+    if(currentCommandHasBeenProcessed) {
+        myHost->undoStack.push( currentCommandGroup );
+    } else {
+        delete currentCommandGroup;
+    }
+
+    //reset state
+    currentCommandGroup=0;
+    currentCommandHasBeenProcessed=false;
+}
+
+void ProgramsModel::UserRemoveRows ( const QModelIndexList &listToRemove, const QModelIndex & parent )
 {
     QList<int>rows;
     foreach(QModelIndex index, listToRemove) {
         rows << index.row();
     }
 
-    currentCommand = new QUndoCommand(tr("Remove programs"));
-    countItemsToMove = rows.size();
+    currentCommandGroup = new QUndoCommand(tr("Remove programs"));
+    nbOfCommandsToGroup = rows.size();
 
     qSort(rows.begin(),rows.end(),qGreater<int>());
     foreach(int r, rows)
@@ -466,7 +509,7 @@ void ProgramsModel::UserChangeProg(const QModelIndex &newPrg)
         return;
 
     if(!newPrg.isValid() || !newPrg.parent().isValid()) {
-        debug2(<<"ProgramsModel::UserChangeProg invalid prog")
+        debug2(<<"ProgramsModel::UserChangeProg invalid prog"<<newPrg.row()<<newPrg.parent().row())
         return;
     }
 
@@ -755,105 +798,104 @@ bool ProgramsModel::userWantsToUnloadSetup()
     return true;
 }
 
-
-/*!
-  move to another program or another group (before deletion)
-  */
-bool ProgramsModel::GoAwayFromIndex( const QModelIndex &idx)
+int ProgramsModel::HowManyItemsCanWeRemoveInThisList(const QModelIndexList &list)
 {
-    QModelIndex target;
+    //only one program left, just say no
+    if(rowCount()==1 && rowCount( index(0,0) )==1)
+        return 0;
 
-    if(idx == currentPrg) {
-        //next program valid ?
-        target = currentPrg.sibling( currentPrg.row()+1, 0 );
-        if(target.isValid())
-            return ValidateProgChange( target );
+    //current program is not in the list, it's ok
+    if( !list.contains(currentPrg) && !list.contains(currentGrp) )
+        return list.size();
 
-        //previous program ?
-        target = currentPrg.sibling( currentPrg.row()-1, 0 );
-        if(target.isValid())
-            return ValidateProgChange( target );
+    QModelIndex target = QModelIndex();
+
+    if(!FindAValidProgram(currentPrg, list, target)) {
+        //no place to go, remove the last program from the list and go there
+        if(!list.last().parent().isValid()) {
+            //the last item in the list is a group, cancel
+            return 0;
+        } else {
+            ValidateProgChange( list.last() );
+            return list.size()-1;
+        }
     }
 
-    //no valid program in this group
+    //go to that program
+    if(!ValidateProgChange(target))
+        return 0;
 
-    //try next group
-    QModelIndex groupTarget = index( currentGrp.row()+1, 0 );
-    if(groupTarget.isValid()) {
-        target = index( currentPrg.row(), 0, groupTarget );
-        if(target.isValid())
-            return ValidateProgChange( target );
+    return list.size();
+}
 
-        target = index( currentPrg.row()+1, 0, groupTarget );
-        if(target.isValid())
-            return ValidateProgChange( target );
+bool ProgramsModel::FindAValidProgramInGroup( const QModelIndex &group, int progRow, const QModelIndexList &listToAvoid , QModelIndex &target )
+{
+    if(!group.isValid() || rowCount(group)==0)
+        return false;
 
-        target = index( currentPrg.row()-1, 0, groupTarget );
-        if(target.isValid())
-            return ValidateProgChange( target );
+    if(listToAvoid.contains(group))
+        return false;
+
+    //test the program itself
+    target = index( progRow, 0, group );
+    if(!listToAvoid.contains(target))
+        return true;
+
+    //test the next program
+    target = group.child(progRow+1,0);// index( progRow+1, 0, group );
+    if(target.isValid() && !listToAvoid.contains(target))
+        return true;
+
+    //test the previous program
+    target = index( progRow-1, 0, group );
+    if(target.isValid() && !listToAvoid.contains(target))
+        return true;
+
+    //test the other programs in the group
+    for(int i=0; i<rowCount(group); i++) {
+        target = index( i, 0, group );
+        if(target.isValid() && !listToAvoid.contains(target))
+            return true;
     }
 
-    //try previous group
-    groupTarget = index( currentGrp.row()-1, 0 );
-    if(groupTarget.isValid()) {
-        target = index( currentPrg.row(), 0, groupTarget );
-        if(target.isValid())
-            return ValidateProgChange( target );
-
-        target = index( currentPrg.row()+1, 0, groupTarget );
-        if(target.isValid())
-            return ValidateProgChange( target );
-
-        target = index( currentPrg.row()-1, 0, groupTarget );
-        if(target.isValid())
-            return ValidateProgChange( target );
-    }
-
-    debug2(<<"ProgramsModel::GoAwayFromIndex no good prog found"<<currentGrp.row()<<currentPrg.row())
+    //no valid in this group
     return false;
 }
 
-bool ProgramsModel::RemoveIndex(const QModelIndex &idx)
+/*!
+  move to another program (before deletion)
+
+  */
+bool ProgramsModel::FindAValidProgram( const QModelIndex &prog, const QModelIndexList &listToAvoid, QModelIndex &target )
 {
-    if(openedPrompt)
-        return false;
+    int groupRow = prog.parent().row();
+    int progRow = prog.row();
 
-    if(idx.data(NodeType).toInt() == ProgramNode) {
-
-        //move to another program
-        if(idx == currentPrg && !GoAwayFromIndex(idx))
-            return false;
-
-        //delete program
-        int prgId = idx.data(ProgramId).toInt();
-        emit ProgDelete(prgId);
-
-        SetDirty();
+    //test the current group
+    if( FindAValidProgramInGroup( index( groupRow, 0), progRow, listToAvoid, target ) )
         return true;
-    }
-    if(idx.data(NodeType).toInt() == GroupNode) {
 
-        //move to another program
-        if(idx == currentGrp && !GoAwayFromIndex(idx))
-            return false;
-
-        //delete all programs from group
-        QStandardItem *lstPrg = itemFromIndex(idx);
-        for(int i=0; i< lstPrg->rowCount(); i++) {
-            QStandardItem *prg = lstPrg->child(i);
-            int prgId = prg->data(ProgramId).toInt();
-            emit ProgDelete(prgId);
-        }
-
-        //delete group
-        int grpId = idx.data(ProgramId).toInt();
-        emit GroupDelete(grpId);
-
-        SetDirty();
+    //test the next group
+    if( FindAValidProgramInGroup( index( groupRow+1, 0), progRow, listToAvoid, target ) )
         return true;
+
+    //test the previous group
+    if( FindAValidProgramInGroup( index( groupRow-1, 0), progRow, listToAvoid, target ) )
+        return true;
+
+    //test the groups after
+    for(int i=groupRow+2; i<rowCount(); i++) {
+        if( FindAValidProgramInGroup( index(i,0) , progRow, listToAvoid, target ) )
+            return true;
     }
 
-    debug("ProgramsModel::RemoveIndex unknown type")
+    //test the groups before
+    for(int i=0; i<groupRow-1; i++) {
+        if( FindAValidProgramInGroup( index(i,0), progRow, listToAvoid, target ) )
+            return true;
+    }
+
+    //no valid place to go
     return false;
 }
 
@@ -869,8 +911,11 @@ void ProgramsModel::BuildDefaultModel()
     for(unsigned int grp=0; grp<3; grp++) {
         int groupId = GetNextGroupId();
         QStandardItem *grpItem = new QStandardItem(QString("Grp%1").arg(grp));
-        grpItem->setData(ProgramsModel::GroupNode,ProgramsModel::NodeType);
-        grpItem->setData(groupId,ProgramsModel::ProgramId);
+        grpItem->setData(GroupNode,NodeType);
+        grpItem->setData(groupId,ProgramId);
+#ifndef QT_NODEBUG
+        grpItem->setData(groupId,Qt::ToolTipRole);
+#endif
         grpItem->setDragEnabled(true);
         grpItem->setDropEnabled(false);
         grpItem->setEditable(true);
@@ -878,8 +923,11 @@ void ProgramsModel::BuildDefaultModel()
         for(unsigned int prg=0; prg<5; prg++) {
             int progId = GetNextProgId();
             QStandardItem *prgItem = new QStandardItem(QString("Prg%1").arg(prg));
-            prgItem->setData(ProgramsModel::ProgramNode,ProgramsModel::NodeType);
-            prgItem->setData(progId,ProgramsModel::ProgramId);
+            prgItem->setData(ProgramNode,NodeType);
+            prgItem->setData(progId,ProgramId);
+#ifndef QT_NODEBUG
+            prgItem->setData(progId,Qt::ToolTipRole);
+#endif
             prgItem->setDragEnabled(true);
             prgItem->setDropEnabled(false);
             prgItem->setEditable(true);
@@ -910,17 +958,15 @@ QDataStream & ProgramsModel::toStream (QDataStream &out)
 {
     out << (quint16)rowCount();
     for(int i=0; i<rowCount(); i++) {
-        QStandardItem *grpItem = item(i);
-        out << grpItem->text();
-        out << (quint32)grpItem->data(ProgramId).toInt();
+        QModelIndex grpIndex = index(i,0);
+        out << grpIndex.data().toString();
+        out << (quint32)grpIndex.data(ProgramId).toInt();
 
-        QStandardItem *prgList = grpItem;
-
-        out << (quint16)prgList->rowCount();
-        for(int j=0; j<prgList->rowCount(); j++) {
-            QStandardItem *prgItem = prgList->child(j);
-            out << prgItem->text();
-            out << (quint32)prgItem->data(ProgramId).toInt();
+        out << (quint16)rowCount(grpIndex);
+        for(int j=0; j<rowCount(grpIndex); j++) {
+            QModelIndex prgIndex = grpIndex.child(j,0);
+            out << prgIndex.data().toString();
+            out << (quint32)prgIndex.data(ProgramId).toInt();
         }
     }
 
@@ -954,7 +1000,10 @@ QDataStream & ProgramsModel::fromStream (QDataStream &in)
         in >> groupId;
         if(groupId>=nextGroupId)
             nextGroupId=groupId+1;
-        grpItem->setData(groupId,ProgramsModel::ProgramId);
+        grpItem->setData(groupId,ProgramId);
+#ifndef QT_NODEBUG
+        grpItem->setData(groupId,Qt::ToolTipRole);
+#endif
 
         quint16 nbprog;
         in >> nbprog;
@@ -973,7 +1022,10 @@ QDataStream & ProgramsModel::fromStream (QDataStream &in)
             in >> prgId;
             if(prgId>=nextProgId)
                 nextProgId=prgId+1;
-            prgItem->setData(prgId,ProgramsModel::ProgramId);
+            prgItem->setData(prgId,ProgramId);
+#ifndef QT_NODEBUG
+            prgItem->setData(prgId,Qt::ToolTipRole);
+#endif
 
             grpItem->appendRow(prgItem);
         }

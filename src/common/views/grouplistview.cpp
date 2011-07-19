@@ -173,9 +173,9 @@ void GroupListView::DeleteItem()
         return;
 
     if(!selectedIndexes().isEmpty())
-        progModel->removeRows(selectedIndexes(),rootIndex());
+        progModel->UserRemoveRows(selectedIndexes(),rootIndex());
     else if(currentIndex().isValid())
-        progModel->removeRows(QModelIndexList()<<currentIndex(),rootIndex());
+        progModel->UserRemoveRows(QModelIndexList()<<currentIndex(),rootIndex());
 }
 
 void GroupListView::InsertItem()
@@ -188,7 +188,7 @@ void GroupListView::InsertItem()
     if(currentIndex().isValid())
         row=currentIndex().row();
 
-    progModel->NewGroup( row );
+    progModel->UserAddGroup( row );
 }
 
 void GroupListView::Copy()

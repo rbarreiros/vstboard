@@ -96,5 +96,5 @@ void ProgListView::InsertItem()
     if(currentIndex().isValid())
         row=currentIndex().row();
 
-    progModel->NewProgram( rootIndex().row(), row );
+    progModel->UserAddProgram( rootIndex(), row );
 }
