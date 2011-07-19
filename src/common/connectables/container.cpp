@@ -21,6 +21,7 @@
 #include "objectfactory.h"
 #include "mainhost.h"
 #include "projectfile/projectfile.h"
+#include "models/programsmodel.h"
 
 using namespace Connectables;
 
@@ -174,23 +175,13 @@ void Container::Hide()
 
 }
 
-bool Container::IsDirty()
-{
-    return currentContainerProgram->IsDirty();
-}
-
-void Container::SetDirty()
-{
-    currentContainerProgram->SetDirty();
-}
-
 /*!
   Will change program on the next render loop
   \param prg a program model index
   */
-void Container::SetProgram(int prg)
+void Container::SetProgram(const QModelIndex &idx)
 {
-    progToSet=prg;
+    progToSet=idx.data(ProgramsModel::ProgramId).toInt();
 }
 
 void Container::Render()
@@ -325,10 +316,11 @@ void Container::UnloadProgram()
 /*!
   Try to remove the program now, retry later if we try to remove the current program
   */
-void Container::RemoveProgram(int prg)
+void Container::RemoveProgram(const QModelIndex &idx)
 {
     static QList<int> listProgToRemove;
 
+    int prg = idx.data(ProgramsModel::ProgramId).toInt();
      if(prg!=-1)
         listProgToRemove << prg;
 
@@ -817,15 +809,20 @@ bool Container::loadProgramFromStream (QDataStream &in)
 
 void Container::ProgramToStream (int progId, QDataStream &out)
 {
-    if(progId == currentProgId)
-        SaveProgram();
+    ContainerProgram *prog = 0;
 
-    ContainerProgram *prog = listContainerPrograms.value(progId);
+    if(progId == currentProgId)
+        prog = currentContainerProgram;
+    else
+        prog = listContainerPrograms.value(progId,0);
+
     if(!prog) {
         out << (quint8)0;
         return;
     }
     out << (quint8)1;
+
+    out << (quint8)IsDirty();
 
     quint16 nbObj = prog->listObjects.size();
     out << nbObj;
@@ -848,6 +845,9 @@ void Container::ProgramFromStream (int progId, QDataStream &in)
     in >> valid;
     if(valid!=1)
         return;
+
+    quint8 dirty;
+    in >> dirty;
 
     QList<QSharedPointer<Object> >tmpListObj;
 
@@ -879,14 +879,22 @@ void Container::ProgramFromStream (int progId, QDataStream &in)
     ContainerProgram *prog = new ContainerProgram(myHost,this);
     in >> *prog;
 
-    if(listContainerPrograms.contains(progId))
-        delete listContainerPrograms.take(progId);
-    listContainerPrograms.insert(progId,prog);
-
-    myHost->objFactory->ResetSavedId();
-
     if(progId==currentProgId) {
+        if(listContainerPrograms.contains(TEMP_PROGRAM))
+            delete listContainerPrograms.take(TEMP_PROGRAM);
+        listContainerPrograms.insert(TEMP_PROGRAM,prog);
+
         LoadProgram(TEMP_PROGRAM);
-        LoadProgram(progId);
+        currentProgId=progId;
+        if(dirty)
+            currentContainerProgram->SetDirty();
+
+    } else {
+
+        if(listContainerPrograms.contains(progId))
+            delete listContainerPrograms.take(progId);
+        listContainerPrograms.insert(progId,prog);
+
     }
+    myHost->objFactory->ResetSavedId();
 }

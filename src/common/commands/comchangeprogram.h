@@ -23,6 +23,7 @@ private:
     int oldProg;
     int newGroup;
     int newProg;
+    bool done;
 };
 
 #endif // COMCHANGEPROGRAM_H

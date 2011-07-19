@@ -12,7 +12,8 @@ ComChangeProgram::ComChangeProgram(ProgramsModel *model,
     oldGroup(oldGroup),
     oldProg(oldProg),
     newGroup(newGroup),
-    newProg(newProg)
+    newProg(newProg),
+    done(false)
 {
     setText(QObject::tr("Program change"));
 }
@@ -24,5 +25,10 @@ void ComChangeProgram::undo()
 
 void ComChangeProgram::redo()
 {
+    if(!done) {
+        done=true;
+        return;
+    }
+
     model->ChangeProgNow(newGroup,newProg);
 }

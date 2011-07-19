@@ -1,5 +1,5 @@
 /**************************************************************************
-#    Copyright 2010-2011 Raphaël François
+#    Copyright 2010-2011 RaphaÃ«l FranÃ§ois
 #    Contact : ctrlbrk76@gmail.com
 #
 #    This file is part of VstBoard.
@@ -18,29 +18,28 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#ifndef PROGLISTVIEW_H
-#define PROGLISTVIEW_H
+#ifndef COMDISCARDCHANGES_H
+#define COMDISCARDCHANGES_H
 
-#include "grouplistview.h"
+#include <QUndoCommand>
 
 class ProgramsModel;
-class ProgListView : public GroupListView
+class ComDiscardChanges : public QUndoCommand
 {
-    Q_OBJECT
 public:
-    explicit ProgListView(QWidget *parent = 0);
-    void setModel(ProgramsModel *model);
+    ComDiscardChanges(ProgramsModel *model,
+                      int row,
+                      int groupNum,
+                      QUndoCommand  *parent=0);
+     void undo();
+     void redo();
 
-protected:
-    void dragEnterEvent(QDragEnterEvent *event);
-    void dragMoveEvent ( QDragMoveEvent * event );
-    void dropEvent(QDropEvent *event);
-//    void currentChanged (const QModelIndex &current, const QModelIndex &previous);
+ private:
+     ProgramsModel *model;
+     int row;
+     int groupNum;
+     QByteArray data;
+     bool done;
+ };
 
-    QStringList MimeTypes();
-
-public slots:
-    void InsertItem();
-};
-
-#endif // PROGLISTVIEW_H
+#endif // COMDISCARDCHANGES_H

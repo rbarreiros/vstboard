@@ -35,7 +35,7 @@ protected:
     virtual void dragEnterEvent(QDragEnterEvent *event);
     virtual void dragMoveEvent ( QDragMoveEvent * event );
     virtual void dropEvent(QDropEvent *event);
-    virtual void currentChanged (const QModelIndex &current, const QModelIndex &previous);
+//    virtual void currentChanged (const QModelIndex &current, const QModelIndex &previous);
 
     virtual QStringList MimeTypes();
 

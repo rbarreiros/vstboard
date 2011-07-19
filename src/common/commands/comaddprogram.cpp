@@ -25,10 +25,11 @@ ComAddProgram::ComAddProgram(ProgramsModel *model,
 
 void ComAddProgram::undo()
 {
-    model->fromCom=true;
     QDataStream stream(&data, QIODevice::WriteOnly);
-    model->ProgramToStream(stream,row,groupNum);
-    model->RemoveProgram(row,groupNum);
+    model->ProgramToStream(stream, model->index(groupNum,0).child(row,0) );
+
+    model->fromCom=true;
+    model->removeRow(row, model->index(groupNum,0) );
     model->fromCom=false;
 }
 
@@ -39,8 +40,10 @@ void ComAddProgram::redo()
         return;
     }
 
-    model->fromCom=true;
+    QModelIndex prgIndex;
+    if(!model->AddProgram(groupNum,prgIndex,row))
+        return;
+
     QDataStream stream(&data, QIODevice::ReadOnly);
-    model->ProgramFromStream(stream,row,groupNum);
-    model->fromCom=false;
+    model->ProgramFromStream(stream,prgIndex);
 }

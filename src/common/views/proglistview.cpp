@@ -40,6 +40,9 @@ void ProgListView::setModel(ProgramsModel *model)
             this, SLOT(setRootIndex(QModelIndex)));
     connect(model, SIGNAL(ProgChanged(QModelIndex)),
             this, SLOT(SetCurrentNoSelect(QModelIndex)));
+
+    connect(this, SIGNAL(clicked(QModelIndex)),
+            model, SLOT(UserChangeProg(QModelIndex)));
 }
 
 void ProgListView::dragEnterEvent(QDragEnterEvent *event)
@@ -75,16 +78,16 @@ void ProgListView::dropEvent(QDropEvent *event)
     QListView::dropEvent(event);
 }
 
-void ProgListView::currentChanged (const QModelIndex &current, const QModelIndex &previous)
-{
-    Q_UNUSED(previous)
+//void ProgListView::currentChanged (const QModelIndex &current, const QModelIndex &previous)
+//{
+//    Q_UNUSED(previous)
 
-    ProgramsModel *progModel = qobject_cast<ProgramsModel*>(model());
-    if(!progModel)
-        return;
+//    ProgramsModel *progModel = qobject_cast<ProgramsModel*>(model());
+//    if(!progModel)
+//        return;
 
-    progModel->UserChangeProg( current );
-}
+//    progModel->UserChangeProg( current );
+//}
 
 void ProgListView::InsertItem()
 {

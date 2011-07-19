@@ -18,7 +18,6 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-
 #include "hostcontroller.h"
 #include "globals.h"
 #include "mainhost.h"
@@ -79,10 +78,10 @@ HostController::HostController(MainHost *myHost,int index):
             myHost,SLOT(SetTempo(int,int,int)),
             Qt::QueuedConnection);
 
-    connect(myHost->programsModel,SIGNAL(ProgChanged(int)),
-           this,SLOT(OnHostProgChanged(int)));
-    connect(myHost->programsModel,SIGNAL(GroupChanged(int)),
-           this,SLOT(OnHostGroupChanged(int)));
+    connect(myHost->programsModel,SIGNAL(ProgChanged(QModelIndex)),
+           this,SLOT(OnHostProgChanged(QModelIndex)));
+    connect(myHost->programsModel,SIGNAL(GroupChanged(QModelIndex)),
+           this,SLOT(OnHostGroupChanged(QModelIndex)));
     connect(myHost,SIGNAL(TempoChanged(int,int,int)),
             this,SLOT(OnHostTempoChange(int,int,int)));
 }
@@ -152,16 +151,16 @@ void HostController::OnParameterChanged(ConnectionInfo pinInfo, float value)
     }
 }
 
-void HostController::OnHostProgChanged(int prg)
+void HostController::OnHostProgChanged(const QModelIndex &idx)
 {
     if(listParameterPinOut->listPins.contains(Param_Prog))
-        static_cast<ParameterPin*>(listParameterPinOut->listPins.value(Param_Prog))->ChangeValue( prg, true );
+        static_cast<ParameterPin*>(listParameterPinOut->listPins.value(Param_Prog))->ChangeValue( idx.row(), true );
 }
 
-void HostController::OnHostGroupChanged(int grp)
+void HostController::OnHostGroupChanged(const QModelIndex &idx)
 {
     if(listParameterPinOut->listPins.contains(Param_Group))
-        static_cast<ParameterPin*>(listParameterPinOut->listPins.value(Param_Group))->ChangeValue( grp, true );
+        static_cast<ParameterPin*>(listParameterPinOut->listPins.value(Param_Group))->ChangeValue( idx.row(), true );
 }
 
 void HostController::OnHostTempoChange(int tempo, int sign1, int sign2)

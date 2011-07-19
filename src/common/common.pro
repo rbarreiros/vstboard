@@ -121,7 +121,9 @@ SOURCES += \
     commands/comremoveprogram.cpp \
     commands/comremovegroup.cpp \
     commands/comaddgroup.cpp \
-    commands/comchangeprogramitem.cpp
+    commands/comchangeprogramitem.cpp \
+    commands/comdiscardchanges.cpp \
+    commands/comchangeautosave.cpp
 
 HEADERS += \
     globals.h \
@@ -206,7 +208,9 @@ HEADERS += \
     commands/comremoveprogram.h \
     commands/comremovegroup.h \
     commands/comaddgroup.h \
-    commands/comchangeprogramitem.h
+    commands/comchangeprogramitem.h \
+    commands/comdiscardchanges.h \
+    commands/comchangeautosave.h
 
 FORMS += \
     views/configdialog.ui \

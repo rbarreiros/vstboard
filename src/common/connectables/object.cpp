@@ -679,19 +679,48 @@ bool Object::fromStream(QDataStream & in)
 
 void Object::ProgramToStream (int progId, QDataStream &out)
 {
-    if(progId == currentProgId) {
-        SaveProgram();
+    ObjectProgram *prog = 0;
+
+    if(progId == currentProgId)
+        prog = currentProgram;
+    else
+        prog = listPrograms.value(progId,0);
+
+    if(!prog) {
+        out << (quint8)0;
+        return;
     }
-    out << *listPrograms.value(progId);
+    out << (quint8)1;
+
+    out << (quint8)IsDirty();
+
+    out << prog;
 }
 
 void Object::ProgramFromStream (int progId, QDataStream &in)
 {
-    ObjectProgram *prog = new ObjectProgram();
-    in >> *prog;
-    if(listPrograms.contains(progId))
-        delete listPrograms.take(progId);
-    listPrograms.insert(progId,prog);
+    quint8 valid=0;
+    in >> valid;
+    if(valid!=1)
+        return;
+
+    quint8 dirty;
+    in >> dirty;
+
+    if(progId == currentProgId) {
+        UnloadProgram();
+        currentProgram = new ObjectProgram();
+        in >> *currentProgram;
+        if(dirty)
+            currentProgram->SetDirty();
+    } else {
+        ObjectProgram *prog = new ObjectProgram();
+        in >> *prog;
+
+        if(listPrograms.contains(progId))
+            delete listPrograms.take(progId);
+        listPrograms.insert(progId,prog);
+    }
 }
 
 /*!

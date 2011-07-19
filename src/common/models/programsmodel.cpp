@@ -27,6 +27,9 @@
 #include "commands/comremovegroup.h"
 #include "commands/comaddgroup.h"
 #include "commands/comchangeprogram.h"
+#include "commands/comdiscardchanges.h"
+#include "commands/comchangeautosave.h"
+
 #include "mainwindow.h"
 
 ProgramsModel::ProgramsModel(MainHost *parent) :
@@ -68,7 +71,7 @@ void ProgramsModel::UserAddProgram(const QModelIndex &grpIndex, int row)
     if(!grpIndex.isValid())
         return;
 
-    int m = rowCount(grpIndex)-1;
+    int m = rowCount(grpIndex);
     if( row < 0 || row > m )
         row=m;
 
@@ -109,6 +112,12 @@ bool ProgramsModel::AddProgram(int groupNum, QModelIndex &index, int row)
 {
     QStandardItem *groupItem = item(groupNum);
 
+    //if the group was disabled re-enable it
+    if(groupItem->rowCount()==0) {
+        groupItem->setBackground(Qt::transparent);
+        groupItem->setToolTip("");
+    }
+
     int progId = myHost->programsModel->GetNextProgId();
 
     QString name("New prog");
@@ -128,10 +137,6 @@ bool ProgramsModel::AddProgram(int groupNum, QModelIndex &index, int row)
         row=groupItem->rowCount();
     groupItem->insertRow(row, prgItem);
 
-    //if the group was disabled re-enable it
-    groupItem->setBackground(Qt::transparent);
-    groupItem->setToolTip("");
-
     index = prgItem->index();
 
 //    ValidateProgChange(index);
@@ -139,15 +144,8 @@ bool ProgramsModel::AddProgram(int groupNum, QModelIndex &index, int row)
     return true;
 }
 
-bool ProgramsModel::GroupFromStream( QDataStream &stream, int row)
+bool ProgramsModel::GroupFromStream( QDataStream &stream, const QModelIndex &grpIndex)
 {
-    QModelIndex grpIndex;
-    if(!AddGroup(grpIndex, row))
-        return false;
-
-    if(!grpIndex.isValid())
-        return false;
-
     QString name;
     stream >> name;
     itemFromIndex(grpIndex)->setText(name);
@@ -163,22 +161,43 @@ bool ProgramsModel::GroupFromStream( QDataStream &stream, int row)
     QDataStream streamProgs( &programs, QIODevice::ReadOnly);
     int i=0;
     while(!streamProgs.atEnd()) {
-        if(!ProgramFromStream(streamProgs, i, grpIndex.row()))
+
+        QModelIndex prgIndex;
+        if(!AddProgram(grpIndex.row(),prgIndex,i))
+            return false;
+
+        if( !ProgramFromStream(streamProgs, prgIndex) )
             return false;
         ++i;
     }
     return true;
 }
 
-bool ProgramsModel::ProgramFromStream( QDataStream &stream, int row, int groupNum)
+bool ProgramsModel::GroupFromStreamWithPrograms( QDataStream &stream, const QModelIndex &grpIndex)
 {
-    QModelIndex prgIndex;
-    if(!AddProgram(groupNum,prgIndex,row))
+    if(!GroupFromStream(stream,grpIndex))
         return false;
 
-    if(!prgIndex.isValid())
-        return false;
+    //add the programs
+    QByteArray programs;
+    stream >> programs;
+    QDataStream streamProgs( &programs, QIODevice::ReadOnly);
+    int i=0;
+    while(!streamProgs.atEnd()) {
 
+        QModelIndex prgIndex;
+        if(!AddProgram(grpIndex.row(),prgIndex,i))
+            return false;
+
+        if( !ProgramFromStream(streamProgs, prgIndex) )
+            return false;
+        ++i;
+    }
+    return true;
+}
+
+bool ProgramsModel::ProgramFromStream( QDataStream &stream, const QModelIndex &prgIndex)
+{
     QString name;
     stream >> name;
     itemFromIndex(prgIndex)->setText(name);
@@ -190,18 +209,8 @@ bool ProgramsModel::ProgramFromStream( QDataStream &stream, int row, int groupNu
     return true;
 }
 
-bool ProgramsModel::GroupToStream( QDataStream &stream, int row) const
-{
-    return GroupToStream(stream, index(row,0));
-}
-
 bool ProgramsModel::GroupToStream( QDataStream &stream, const QModelIndex &groupIndex) const
 {
-    if(!groupIndex.isValid()) {
-        debug2(<<"ProgramsModel::GroupToStream invalid index")
-        return false;
-    }
-
     //add the group name
     stream << groupIndex.data().toString();
 
@@ -209,6 +218,14 @@ bool ProgramsModel::GroupToStream( QDataStream &stream, const QModelIndex &group
     int groupId = groupIndex.data(ProgramId).toInt();
     myHost->groupContainer->ProgramToStream( groupId, stream );
     myHost->mainWindow->mySceneView->viewGroup->ProgramToStream( groupId, stream );
+
+    return true;
+}
+
+bool ProgramsModel::GroupToStreamWithPrograms( QDataStream &stream, const QModelIndex &groupIndex) const
+{
+    if(!GroupToStream(stream,groupIndex))
+        return false;
 
     //add programs datas
     QByteArray programs;
@@ -221,10 +238,6 @@ bool ProgramsModel::GroupToStream( QDataStream &stream, const QModelIndex &group
     return true;
 }
 
-bool ProgramsModel::ProgramToStream( QDataStream &stream, int row, int groupNum) const
-{
-    return ProgramToStream(stream, index(groupNum,0).child(row,0) );
-}
 
 bool ProgramsModel::ProgramToStream( QDataStream &stream, const QModelIndex &progIndex) const
 {
@@ -242,25 +255,6 @@ bool ProgramsModel::ProgramToStream( QDataStream &stream, const QModelIndex &pro
     myHost->mainWindow->mySceneView->viewProgram->ProgramToStream( progId, stream );
 
     return true;
-}
-
-bool ProgramsModel::RemoveProgram( int row, int groupNum )
-{
-    if(!index(groupNum,0).isValid() ) {
-        debug2(<<"ProgramsModel::RemoveProgram can't remove"<<groupNum<<row)
-        return false;
-    }
-
-    return removeRow(row, index(groupNum,0) );
-}
-
-bool ProgramsModel::RemoveGroup( int row )
-{
-    if(!index(row,0).isValid()) {
-        debug2(<<"ProgramsModel::RemoveGroup can't remove"<<row)
-        return false;
-    }
-    return removeRow(row);
 }
 
 bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent)
@@ -399,7 +393,7 @@ bool ProgramsModel::removeRowsFromCommand ( int row, int count, const QModelInde
   */
 void ProgramsModel::removeRowsAddToCommandStack ( int row, int count, const QModelIndex & parent ) {
 
-    for(int i=row; i<row+count; i++) {
+    for(int i=row+count-1; i>=row; i--) {
 
         QModelIndex idx = index(i,0,parent);
 
@@ -407,15 +401,15 @@ void ProgramsModel::removeRowsAddToCommandStack ( int row, int count, const QMod
 
             //tell the container to delete the program
             new ComRemoveProgram( this, i, parent.row(), currentCommandGroup);
-            emit ProgDelete( idx.data(ProgramId).toInt() );
+            emit ProgDelete( idx );
 
         } else {
 
             //tell the containers to delete the group and the programs
             new ComRemoveGroup( this, i, currentCommandGroup);
             for(int j=0; j< rowCount(idx); j++)
-                emit ProgDelete( idx.child(j,0).data(ProgramId).toInt() );
-            emit GroupDelete( idx.data(ProgramId).toInt() );
+            emit ProgDelete( idx.child(j,0) );
+            emit GroupDelete( idx );
 
         }
     }
@@ -485,7 +479,7 @@ QMimeData * ProgramsModel::mimeData ( const QModelIndexList & indexes ) const
         if(index.data(NodeType).toInt() == GroupNode) {
             QByteArray tmpBa;
             QDataStream tmpStream(&tmpBa, QIODevice::WriteOnly);
-            GroupToStream(tmpStream,index);
+            GroupToStreamWithPrograms(tmpStream,index);
             streamGroup << tmpBa;
         }
         if(index.data(NodeType).toInt() == ProgramNode) {
@@ -513,15 +507,20 @@ void ProgramsModel::UserChangeProg(const QModelIndex &newPrg)
         return;
     }
 
-    if(myHost->undoProgramChanges()) {
-        myHost->undoStack.push( new ComChangeProgram(this,
-                                                     currentGrp.row(),
-                                                     currentPrg.row(),
-                                                     newPrg.parent().row(),
-                                                     newPrg.row()) );
+
+    if(progAutosaveState == Qt::Unchecked && myHost->programContainer->IsDirty()) {
+        QUndoCommand *discardCom = new QUndoCommand("Discard changes");
+        if(newPrg.parent() != currentGrp && groupAutosaveState == Qt::Unchecked && myHost->groupContainer->IsDirty())
+            new ComDiscardChanges(this,currentGrp.row(),-1,discardCom);
+        new ComDiscardChanges(this,currentPrg.row(),currentGrp.row(),discardCom);
+        new ComChangeProgram(this,currentGrp.row(),currentPrg.row(),newPrg.parent().row(), newPrg.row(), discardCom);
+        myHost->undoStack.push( discardCom );
     } else {
-        ValidateProgChange(newPrg);
+        if(myHost->undoProgramChanges())
+            myHost->undoStack.push( new ComChangeProgram(this, currentGrp.row(), currentPrg.row(), newPrg.parent().row(), newPrg.row()) );
     }
+
+    ValidateProgChange(newPrg);
 }
 
 void ProgramsModel::UserChangeGroup(const QModelIndex &newGrp)
@@ -555,15 +554,15 @@ bool ProgramsModel::ValidateProgChange(const QModelIndex &newPrg)
 
     if(!userWantsToUnloadProgram()) {
         emit ProgChanged( currentPrg );
-        emit ProgChanged( currentPrg.data(ProgramId).toInt() );
         return false;
     }
 
     QModelIndex newgrp = newPrg.parent();
     if(newgrp!=currentGrp) {
+
+
         if(!userWantsToUnloadGroup()) {
             emit ProgChanged( currentPrg );
-            emit ProgChanged( currentPrg.data(ProgramId).toInt() );
             return false;
         }
 
@@ -579,7 +578,6 @@ bool ProgramsModel::ValidateProgChange(const QModelIndex &newPrg)
         }
 
         emit GroupChanged( currentGrp );
-        emit GroupChanged( currentGrp.data(ProgramId).toInt() );
     }
 
 
@@ -591,7 +589,6 @@ bool ProgramsModel::ValidateProgChange(const QModelIndex &newPrg)
 
     currentPrg = newPrg;
     emit ProgChanged( currentPrg );
-    emit ProgChanged( currentPrg.data(ProgramId).toInt() );
 
     SetDirty();
     return true;
@@ -616,14 +613,24 @@ bool ProgramsModel::ChangeProgNow(int midiGroupNum, int midiProgNum)
 
 void ProgramsModel::UserChangeProgAutosave(const Qt::CheckState state)
 {
-    progAutosaveState=state;
-    SetDirty();
+    if(fromCom) {
+        progAutosaveState=state;
+        SetDirty();
+        emit ProgAutosaveChanged(progAutosaveState);
+    } else {
+        myHost->undoStack.push( new ComChangeAutosave(this,1,state) );
+    }
 }
 
 void ProgramsModel::UserChangeGroupAutosave(const Qt::CheckState state)
 {
-    groupAutosaveState=state;
-    SetDirty();
+    if(fromCom) {
+        groupAutosaveState=state;
+        SetDirty();
+        emit GroupAutosaveChanged(groupAutosaveState);
+    } else {
+        myHost->undoStack.push( new ComChangeAutosave(this,0,state) );
+    }
 }
 
 bool ProgramsModel::userWantsToUnloadGroup()
@@ -941,14 +948,15 @@ void ProgramsModel::BuildDefaultModel()
     item(0)->child(0)->setBackground(currentProgColor);
 
     emit GroupChanged( currentGrp );
-    emit GroupChanged( currentGrp.data(ProgramsModel::ProgramId).toInt() );
     emit ProgChanged( currentPrg );
-    emit ProgChanged( currentPrg.data(ProgramsModel::ProgramId).toInt() );
 
     groupAutosaveState=Qt::Checked;
     progAutosaveState=Qt::Checked;
+
+    fromCom=true;
     emit GroupAutosaveChanged(groupAutosaveState);
     emit ProgAutosaveChanged(progAutosaveState);
+    fromCom=false;
 
     SetDirty(false);
 }
@@ -1042,11 +1050,13 @@ QDataStream & ProgramsModel::fromStream (QDataStream &in)
 
     ValidateProgChange( index(grp,0).child(prg,0) );
 
+    fromCom=true;
     in >> (quint8&)groupAutosaveState;
     emit GroupAutosaveChanged(groupAutosaveState);
 
     in >> (quint8&)progAutosaveState;
     emit ProgAutosaveChanged(progAutosaveState);
+    fromCom=false;
 
     SetDirty(false);
     return in;

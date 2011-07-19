@@ -87,6 +87,9 @@ void GroupListView::setModel(ProgramsModel *model)
 
     connect(model, SIGNAL(GroupChanged(QModelIndex)),
             this,SLOT(SetCurrentNoSelect(QModelIndex)));
+
+    connect(this, SIGNAL(clicked(QModelIndex)),
+            model, SLOT(UserChangeGroup(QModelIndex)));
 }
 
 void GroupListView::SetCurrentNoSelect(const QModelIndex &index)
@@ -117,7 +120,13 @@ void GroupListView::dragMoveEvent ( QDragMoveEvent * event )
     //accept if we drag a program over a group +switch to the group hovered
     QModelIndex i = indexAt(event->pos());
     if(i.isValid() && event->mimeData()->formats().contains(MIMETYPE_PROGRAM)) {
-        event->accept();
+
+        //show the group content
+        ProgramsModel *progModel = qobject_cast<ProgramsModel*>(model());
+        if(!progModel)
+            return;
+        progModel->UserChangeGroup( i );
+
         setDropIndicatorShown(false);
         selectionModel()->setCurrentIndex(i, QItemSelectionModel::NoUpdate);
         return;
@@ -143,16 +152,16 @@ void GroupListView::dropEvent(QDropEvent *event)
     QListView::dropEvent(event);
 }
 
-void GroupListView::currentChanged (const QModelIndex &current, const QModelIndex &previous)
-{
-    Q_UNUSED(previous)
+//void GroupListView::currentChanged (const QModelIndex &current, const QModelIndex &previous)
+//{
+//    Q_UNUSED(previous)
 
-    ProgramsModel *progModel = qobject_cast<ProgramsModel*>(model());
-    if(!progModel)
-        return;
+//    ProgramsModel *progModel = qobject_cast<ProgramsModel*>(model());
+//    if(!progModel)
+//        return;
 
-    progModel->UserChangeGroup( current );
-}
+//    progModel->UserChangeGroup( current );
+//}
 
 void GroupListView::OnContextMenu(const QPoint & pos)
 {

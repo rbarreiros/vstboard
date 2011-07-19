@@ -18,48 +18,48 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#include "comremoveprogram.h"
+#include "comchangeautosave.h"
 #include "models/programsmodel.h"
 
-ComRemoveProgram::ComRemoveProgram(ProgramsModel *model,
-                                   int row,
-                                   int groupNum,
-                                   QUndoCommand *parent) :
+ComChangeAutosave::ComChangeAutosave(ProgramsModel *model,
+                                     int type,
+                                     Qt::CheckState newState,
+                                     QUndoCommand *parent) :
     QUndoCommand(parent),
     model(model),
-    row(row),
-    groupNum(groupNum),
-    done(false)
-
+    type(type),
+    newState(newState)
 {
-    setText(QObject::tr("Remove program"));
+    setText(QObject::tr("Change Autosave"));
 
-    done=true;
-    redo();
-    done=false;
-}
-
-void ComRemoveProgram::undo()
-{
-    QModelIndex prgIndex;
-    if(!model->AddProgram(groupNum,prgIndex,row))
-        return;
-
-    QDataStream stream(&data, QIODevice::ReadOnly);
-    model->ProgramFromStream(stream,prgIndex);
-}
-
-void ComRemoveProgram::redo()
-{
-    if(!done) {
-        done=true;
-        return;
+    if(type==0) {
+        oldState = model->groupAutosaveState;
     }
+    if(type==1) {
+        oldState = model->progAutosaveState;
+    }
+}
 
-    QDataStream stream(&data, QIODevice::WriteOnly);
-    model->ProgramToStream(stream, model->index(groupNum,0).child(row,0) );
-
+void ComChangeAutosave::undo()
+{
     model->fromCom=true;
-    model->removeRow(row, model->index(groupNum,0) );
+    if(type==0) {
+        model->UserChangeGroupAutosave(oldState);
+    }
+    if(type==1) {
+        model->UserChangeProgAutosave(oldState);
+    }
+    model->fromCom=false;
+}
+
+void ComChangeAutosave::redo()
+{
+    model->fromCom=true;
+    if(type==0) {
+        model->UserChangeGroupAutosave(newState);
+    }
+    if(type==1) {
+        model->UserChangeProgAutosave(newState);
+    }
     model->fromCom=false;
 }

@@ -60,8 +60,8 @@ namespace Connectables {
         void tempoChange(int tempo, int sign1, int sign2);
 
     public slots:
-        void OnHostProgChanged(int prg);
-        void OnHostGroupChanged(int grp);
+        void OnHostProgChanged(const QModelIndex &idx);
+        void OnHostGroupChanged(const QModelIndex &idx);
         void OnHostTempoChange(int tempo, int sign1, int sign2);
         void OnParameterChanged(ConnectionInfo pinInfo, float value);
     };

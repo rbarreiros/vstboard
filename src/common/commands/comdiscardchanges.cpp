@@ -18,13 +18,13 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#include "comremoveprogram.h"
+#include "comdiscardchanges.h"
 #include "models/programsmodel.h"
 
-ComRemoveProgram::ComRemoveProgram(ProgramsModel *model,
-                                   int row,
-                                   int groupNum,
-                                   QUndoCommand *parent) :
+ComDiscardChanges::ComDiscardChanges(ProgramsModel *model,
+                                     int row,
+                                     int groupNum,
+                                     QUndoCommand *parent) :
     QUndoCommand(parent),
     model(model),
     row(row),
@@ -32,34 +32,29 @@ ComRemoveProgram::ComRemoveProgram(ProgramsModel *model,
     done(false)
 
 {
-    setText(QObject::tr("Remove program"));
+    setText(QObject::tr("Discard changes"));
 
-    done=true;
-    redo();
-    done=false;
+
 }
 
-void ComRemoveProgram::undo()
+void ComDiscardChanges::undo()
 {
-    QModelIndex prgIndex;
-    if(!model->AddProgram(groupNum,prgIndex,row))
-        return;
+    QModelIndex idx = model->index(row,0, model->index(groupNum,0) );
 
     QDataStream stream(&data, QIODevice::ReadOnly);
-    model->ProgramFromStream(stream,prgIndex);
+    if(groupNum==-1) {
+        model->GroupFromStream(stream,idx);
+    } else {
+        model->ProgramFromStream(stream,idx);
+    }
 }
 
-void ComRemoveProgram::redo()
+void ComDiscardChanges::redo()
 {
-    if(!done) {
-        done=true;
-        return;
-    }
-
     QDataStream stream(&data, QIODevice::WriteOnly);
-    model->ProgramToStream(stream, model->index(groupNum,0).child(row,0) );
-
-    model->fromCom=true;
-    model->removeRow(row, model->index(groupNum,0) );
-    model->fromCom=false;
+    if(groupNum==-1)
+        model->GroupToStream(stream, model->index(row,0) );
+    else {
+        model->ProgramToStream(stream, model->index(groupNum,0).child(row,0) );
+    }
 }

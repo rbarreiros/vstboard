@@ -18,10 +18,12 @@ ComRemoveGroup::ComRemoveGroup(ProgramsModel *model,
 
 void ComRemoveGroup::undo()
 {
-    model->fromCom=true;
+    QModelIndex grpIndex;
+    if(!model->AddGroup(grpIndex, row))
+        return;
+
     QDataStream stream(&data, QIODevice::ReadOnly);
-    model->GroupFromStream(stream,row);
-    model->fromCom=false;
+    model->GroupFromStreamWithPrograms(stream, grpIndex );
 }
 
 void ComRemoveGroup::redo()
@@ -31,9 +33,10 @@ void ComRemoveGroup::redo()
         return;
     }
 
-    model->fromCom=true;
     QDataStream stream(&data, QIODevice::WriteOnly);
-    model->GroupToStream(stream,row);
-    model->RemoveGroup(row);
+    model->GroupToStreamWithPrograms(stream, model->index(row,0) );
+
+    model->fromCom=true;
+    model->removeRow(row);
     model->fromCom=false;
 }

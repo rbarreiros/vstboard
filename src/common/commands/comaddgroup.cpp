@@ -23,9 +23,10 @@ ComAddGroup::ComAddGroup(ProgramsModel *model,
 
 void ComAddGroup::undo()
 {
-    model->fromCom=true;
     QDataStream stream(&data, QIODevice::WriteOnly);
-    model->GroupToStream(stream,row);
+    model->GroupToStreamWithPrograms(stream, model->index(row,0) );
+
+    model->fromCom=true;
     model->removeRow(row);
     model->fromCom=false;
 }
@@ -37,8 +38,10 @@ void ComAddGroup::redo()
         return;
     }
 
-    model->fromCom=true;
+    QModelIndex grpIndex;
+    if(!model->AddGroup(grpIndex, row))
+        return;
+
     QDataStream stream(&data, QIODevice::ReadOnly);
-    model->GroupFromStream(stream,row);
-    model->fromCom=false;
+    model->GroupFromStreamWithPrograms(stream,grpIndex);
 }

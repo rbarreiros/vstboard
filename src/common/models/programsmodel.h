@@ -72,15 +72,13 @@ public:
 private:
     bool AddGroup(QModelIndex &index=QModelIndex(), int row=-1);
     bool AddProgram(int groupNum, QModelIndex &index=QModelIndex(), int row=-1);
-    bool RemoveProgram( int row, int groupNum );
-    bool RemoveGroup( int row );
 
-    bool GroupFromStream( QDataStream &stream, int row);
-    bool ProgramFromStream( QDataStream &stream, int row, int groupNum);
+    bool GroupFromStream( QDataStream &stream, const QModelIndex &grpIndex);
+    bool GroupFromStreamWithPrograms( QDataStream &stream, const QModelIndex &grpIndex);
+    bool ProgramFromStream( QDataStream &stream, const QModelIndex &prgIndex);
     bool GroupToStream( QDataStream &stream, const QModelIndex &groupIndex) const;
+    bool GroupToStreamWithPrograms( QDataStream &stream, const QModelIndex &groupIndex) const;
     bool ProgramToStream( QDataStream &stream, const QModelIndex &progIndex) const;
-    bool GroupToStream( QDataStream &stream, int row) const;
-    bool ProgramToStream( QDataStream &stream, int row, int groupNum) const;
 
     void removeRowsAddToCommandStack ( int row, int count, const QModelIndex & parent = QModelIndex() );
     void CloseCurrentCommandGroup();
@@ -138,23 +136,22 @@ private:
     friend class ComDisconnectPin;
     friend class ComAddObject;
     friend class ComRemoveObject;
+    friend class ComDiscardChanges;
+    friend class ComChangeAutosave;
 
     friend QDataStream & operator<< (QDataStream&, ProgramsModel&);
     friend QDataStream & operator>> (QDataStream&, ProgramsModel&);
 
 signals:
-    void ProgChanged(int prgId);
     void ProgChanged(const QModelIndex &prgIndex);
-    void GroupChanged(int prgId);
     void GroupChanged(const QModelIndex &grpIndex);
+    void ProgDelete(const QModelIndex &prgIndex);
+    void GroupDelete(const QModelIndex &grpIndex);
 
     void ProgAutosaveChanged(const Qt::CheckState state);
     void GroupAutosaveChanged(const Qt::CheckState state);
 
     void NewProgramAdded(const QModelIndex &prgIndex);
-
-    void ProgDelete(int prg);
-    void GroupDelete(int prg);
 
 public slots:
     void UserChangeProg(const QModelIndex &newPrg);

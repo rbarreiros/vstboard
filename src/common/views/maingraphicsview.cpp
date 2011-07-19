@@ -20,6 +20,7 @@
 
 #include "maingraphicsview.h"
 #include "globals.h"
+#include "models/programsmodel.h"
 
 //using namespace View;
 
@@ -133,6 +134,11 @@ void MainGraphicsView::SaveProgram()
     listPrograms.insert(currentProgId,state);
 }
 
+void MainGraphicsView::SetViewProgram(const QModelIndex &idx)
+{
+    SetViewProgram(idx.data(ProgramsModel::ProgramId).toInt());
+}
+
 void MainGraphicsView::SetViewProgram(int progId)
 {
     if(progId!=currentProgId)
@@ -152,6 +158,11 @@ void MainGraphicsView::SetViewProgram(int progId)
     scale( state.scale, state.scale );
     horizontalScrollBar()->setValue( state.scrollx );
     verticalScrollBar()->setValue( state.scrolly );
+}
+
+void MainGraphicsView::RemoveViewProgram(const QModelIndex &idx)
+{
+    RemoveViewProgram(idx.data(ProgramsModel::ProgramId).toInt());
 }
 
 void MainGraphicsView::RemoveViewProgram(int prg)

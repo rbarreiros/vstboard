@@ -62,8 +62,12 @@ namespace Connectables {
         void MoveOutputCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr);
         void MoveInputCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr);
         void GetListOfConnectedPinsTo(const ConnectionInfo &pin, QList<ConnectionInfo> &list);
-        bool IsDirty();
-        void SetDirty();
+        bool IsDirty() {
+            return currentContainerProgram->IsDirty();
+        }
+        inline void SetDirty() {
+            currentContainerProgram->SetDirty();
+        }
         void SetSleep(bool sleeping);
 
         /// shared pointer to the bridge in object
@@ -94,6 +98,7 @@ namespace Connectables {
     protected:
         void AddChildObject(QSharedPointer<Object> objPtr);
         void ParkChildObject(QSharedPointer<Object> objPtr);
+        bool LoadProgram(ContainerProgram *newProg);
 
         /// true if this container saves the solver status
         bool optimizerFlag;
@@ -149,8 +154,8 @@ namespace Connectables {
         void UnloadProgram();
         void LoadProgram(int prog);
 
-        void SetProgram(int prg);
-        void RemoveProgram(int prg=-1);
+        void SetProgram(const QModelIndex &idx);
+        void RemoveProgram(const QModelIndex &idx);
         void Render();
 
         void SetBufferSize(unsigned long size);

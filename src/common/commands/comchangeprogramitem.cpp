@@ -29,7 +29,6 @@ void ComChangeProgramItem::undo()
     if(groupNum==-1)
         model->item(row)->setData(oldValue,role);
     else
-//        model->item(groupNum)->child(0)->child(row)->setData(oldValue,role);
         model->item(groupNum)->child(row)->setData(oldValue,role);
 
     model->fromCom=false;
@@ -42,7 +41,6 @@ void ComChangeProgramItem::redo()
     if(groupNum==-1)
         model->item(row)->setData(newValue,role);
     else
-//        model->item(groupNum)->child(0)->child(row)->setData(newValue,role);
         model->item(groupNum)->child(row)->setData(newValue,role);
 
     model->fromCom=false;
