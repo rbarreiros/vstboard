@@ -155,7 +155,7 @@ namespace Connectables {
         void LoadProgram(int prog);
 
         void SetProgram(const QModelIndex &idx);
-        void RemoveProgram(const QModelIndex &idx);
+        void RemoveProgram(const QModelIndex &idx = QModelIndex());
         void Render();
 
         void SetBufferSize(unsigned long size);

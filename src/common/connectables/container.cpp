@@ -320,9 +320,8 @@ void Container::RemoveProgram(const QModelIndex &idx)
 {
     static QList<int> listProgToRemove;
 
-    int prg = idx.data(ProgramsModel::ProgramId).toInt();
-     if(prg!=-1)
-        listProgToRemove << prg;
+    if(idx.isValid())
+        listProgToRemove << idx.data(ProgramsModel::ProgramId).toInt();
 
     QList<int>remainingProgs;
 
