@@ -61,7 +61,7 @@ CEffect::~CEffect()
 /* Load : loads the effect module                                            */
 /*****************************************************************************/
 
-bool CEffect::Load(MainHost *myHost, QObject *parent, const QString &name)
+bool CEffect::Load(const QString &name)
 {
     pluginLib = new QLibrary(name);
 

@@ -58,7 +58,7 @@ namespace vst
 
     #endif
 
-        virtual bool Load(MainHost *myHost, QObject *parent, const QString &name);
+        virtual bool Load(const QString &name);
         virtual bool Unload();
 
         virtual bool LoadBank(std::string *name);
