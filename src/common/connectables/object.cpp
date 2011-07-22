@@ -679,12 +679,15 @@ bool Object::fromStream(QDataStream & in)
 
 void Object::ProgramToStream (int progId, QDataStream &out)
 {
+    bool dirty = IsDirty();
     ObjectProgram *prog = 0;
 
-    if(progId == currentProgId)
-        prog = currentProgram;
-    else
+    if(progId == currentProgId) {
+        prog = new ObjectProgram(*currentProgram);
+        prog->Save(listParameterPinIn,listParameterPinOut);
+    } else {
         prog = listPrograms.value(progId,0);
+    }
 
     if(!prog) {
         out << (quint8)0;
@@ -692,9 +695,12 @@ void Object::ProgramToStream (int progId, QDataStream &out)
     }
     out << (quint8)1;
 
-    out << (quint8)IsDirty();
+    out << (quint8)dirty;
 
-    out << prog;
+    out << *prog;
+
+    if(progId == currentProgId)
+        delete prog;
 }
 
 void Object::ProgramFromStream (int progId, QDataStream &in)

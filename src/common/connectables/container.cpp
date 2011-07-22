@@ -263,7 +263,9 @@ void Container::LoadProgram(int prog)
     currentContainerProgram->Load(prog);
     if(optimizerFlag)
         currentContainerProgram->LoadRendererState();
-    UpdateModelNode();
+
+    if(modelIndex.isValid())
+        UpdateModelNode();
 
     if(oldProg) {
         delete oldProg;
