@@ -60,7 +60,10 @@ void ProgListView::dragMoveEvent ( QDragMoveEvent * event )
 {
     //don't allow drop on itself
     QModelIndex idx = indexAt( event->pos() );
-    if(idx.isValid() && selectionModel()->selectedIndexes().contains( idx )) {
+    if(idx.isValid()
+            && selectionModel()
+            && !selectionModel()->selectedIndexes().isEmpty()
+            && selectionModel()->selectedIndexes().contains( idx )) {
         event->ignore();
         return;
     }
