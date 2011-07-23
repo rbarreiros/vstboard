@@ -92,7 +92,7 @@ bool ProgramsModel::AddGroup(QModelIndex &index, int row)
     QStandardItem *groupItem = new QStandardItem( name );
     groupItem->setData(GroupNode,NodeType);
     groupItem->setData(groupId,ProgramId);
-#ifndef QT_NODEBUG
+#ifndef QT_NO_DEBUG
     groupItem->setData(groupId,Qt::ToolTipRole);
 #endif
     groupItem->setDragEnabled(true);
@@ -126,7 +126,7 @@ bool ProgramsModel::AddProgram(int groupNum, QModelIndex &index, int row)
     QStandardItem *prgItem = new QStandardItem( name );
     prgItem->setData(ProgramNode,NodeType);
     prgItem->setData(progId,ProgramId);
-#ifndef QT_NODEBUG
+#ifndef QT_NO_DEBUG
     prgItem->setData(progId,Qt::ToolTipRole);
 #endif
     prgItem->setDragEnabled(true);
@@ -928,7 +928,7 @@ void ProgramsModel::BuildDefaultModel()
         QStandardItem *grpItem = new QStandardItem(QString("Grp%1").arg(grp));
         grpItem->setData(GroupNode,NodeType);
         grpItem->setData(groupId,ProgramId);
-#ifndef QT_NODEBUG
+#ifndef QT_NO_DEBUG
         grpItem->setData(groupId,Qt::ToolTipRole);
 #endif
         grpItem->setDragEnabled(true);
@@ -940,7 +940,7 @@ void ProgramsModel::BuildDefaultModel()
             QStandardItem *prgItem = new QStandardItem(QString("Prg%1").arg(prg));
             prgItem->setData(ProgramNode,NodeType);
             prgItem->setData(progId,ProgramId);
-#ifndef QT_NODEBUG
+#ifndef QT_NO_DEBUG
             prgItem->setData(progId,Qt::ToolTipRole);
 #endif
             prgItem->setDragEnabled(true);
@@ -1017,7 +1017,7 @@ QDataStream & ProgramsModel::fromStream (QDataStream &in)
         if(groupId>=nextGroupId)
             nextGroupId=groupId+1;
         grpItem->setData(groupId,ProgramId);
-#ifndef QT_NODEBUG
+#ifndef QT_NO_DEBUG
         grpItem->setData(groupId,Qt::ToolTipRole);
 #endif
 
@@ -1039,7 +1039,7 @@ QDataStream & ProgramsModel::fromStream (QDataStream &in)
             if(prgId>=nextProgId)
                 nextProgId=prgId+1;
             prgItem->setData(prgId,ProgramId);
-#ifndef QT_NODEBUG
+#ifndef QT_NO_DEBUG
             prgItem->setData(prgId,Qt::ToolTipRole);
 #endif
 
