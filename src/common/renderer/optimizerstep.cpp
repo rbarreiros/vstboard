@@ -133,6 +133,35 @@ void OptimizerStep::OptimizeSpannedNodes()
     if(!nextStep)
         return;
 
+    //expand a spanned node
+    foreach(OptimizeStepThread *th, listOfThreads) {
+        RendererNode *spannedNode = th->spanFor;
+        if(spannedNode && spannedNode->maxRenderOrderOri>step) {
+            OptimizerStep tmpStep(*this);
+            tmpStep.SetNbThreads(nbThreads-1);
+            //tmpStep.listOfNodes.removeAll(spannedNode);
+            tmpStep.Optimize();
+
+            //the resulting cpu usage :
+            long tmpCpuTime=tmpStep.listOfThreads.last()->cpuTime;
+
+            if(tmpCpuTime < spannedNode->cpuTime) {
+                //the spanned node is longer than the other threads, really need to be spanned
+
+                long cpuGainForThisStep = spannedNode->cpuTime - tmpCpuTime;
+
+                //try to span the node
+                if(NextStepCanAcceptSpannedNode(spannedNode, cpuGainForThisStep)) {
+                    spannedNode->maxRenderOrder = step+1;
+                    ClearThreads();
+                    foreach(OptimizeStepThread *th, tmpStep.listOfThreads) {
+                        listOfThreads << new OptimizeStepThread(*th);
+                    }
+                }
+            }
+        }
+    }
+
     foreach(RendererNode *node, listOfNodes) {
         if(node->maxRenderOrderOri > step) {
             //this node can be postpone or spanned
