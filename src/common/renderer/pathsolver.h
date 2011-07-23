@@ -53,9 +53,9 @@ protected:
     QList<SolverNode*> OpenLoop(const QList<SolverNode*>&loop, SolverNode* startingNode);
 
     QList< QSharedPointer<Connectables::Object> >GetListParents(QSharedPointer<Connectables::Object> objPtr);
-    void GetListParentsOfBridgePin(const ConnectionInfo &info, QList< QSharedPointer<Connectables::Object> > &listParents);
+//    void GetListParentsOfBridgePin(const ConnectionInfo &info, QList< QSharedPointer<Connectables::Object> > &listParents);
     QList< QSharedPointer<Connectables::Object> >GetListChildren(QSharedPointer<Connectables::Object> objPtr);
-    void GetListChildrenOfBridgePin(const ConnectionInfo &info, QList< QSharedPointer<Connectables::Object> > &listChildren);
+//    void GetListChildrenOfBridgePin(const ConnectionInfo &info, QList< QSharedPointer<Connectables::Object> > &listChildren);
 
     hashCables listCables;
     MainHost *myHost;

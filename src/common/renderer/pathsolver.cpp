@@ -79,7 +79,8 @@ void PathSolver::CreateNodes()
 
         //don't add parked objects
         if(!objPtr.isNull() && !objPtr->parked) {
-            if(objPtr->info().nodeType!=NodeType::bridge && objPtr->info().nodeType!=NodeType::container) {
+//            if(objPtr->info().nodeType!=NodeType::bridge && objPtr->info().nodeType!=NodeType::container) {
+            if( objPtr->info().nodeType!=NodeType::container) {
                 SolverNode *node = new SolverNode();
                 listNodes << node;
                 node->listOfObj << objPtr;
@@ -319,12 +320,12 @@ QList< QSharedPointer<Connectables::Object> >PathSolver::GetListParents( QShared
         QSharedPointer<Connectables::Object> parentPtr = myHost->objFactory->GetObjectFromId(i.key().objId);
         if(!parentPtr.isNull()) {
             if(i.value().objId == objPtr->GetIndex()) {
-                if(parentPtr->info().nodeType == NodeType::bridge) {
-                    GetListParentsOfBridgePin(i.key(),listParents);
-                } else {
+//                if(parentPtr->info().nodeType == NodeType::bridge) {
+//                    GetListParentsOfBridgePin(i.key(),listParents);
+//                } else {
                     if(!listParents.contains(parentPtr))
                         listParents << parentPtr;
-                }
+//                }
             }
         }
         ++i;
@@ -333,24 +334,24 @@ QList< QSharedPointer<Connectables::Object> >PathSolver::GetListParents( QShared
     return listParents;
 }
 
-void PathSolver::GetListParentsOfBridgePin(const ConnectionInfo &info, QList< QSharedPointer<Connectables::Object> > &listParents)
-{
-    hashCables::iterator i = listCables.begin();
-    while (i != listCables.end()) {
-        QSharedPointer<Connectables::Object> parentPtr = myHost->objFactory->GetObjectFromId(i.key().objId);
-        if(!parentPtr.isNull()) {
-            if(i.value().objId == info.objId && i.value().pinNumber == info.pinNumber && i.value().type == info.type) {
-                if(parentPtr->info().nodeType == NodeType::bridge) {
-                    GetListParentsOfBridgePin(i.key(),listParents);
-                } else {
-                    if(!listParents.contains(parentPtr))
-                        listParents << parentPtr;
-                }
-            }
-        }
-        ++i;
-    }
-}
+//void PathSolver::GetListParentsOfBridgePin(const ConnectionInfo &info, QList< QSharedPointer<Connectables::Object> > &listParents)
+//{
+//    hashCables::iterator i = listCables.begin();
+//    while (i != listCables.end()) {
+//        QSharedPointer<Connectables::Object> parentPtr = myHost->objFactory->GetObjectFromId(i.key().objId);
+//        if(!parentPtr.isNull()) {
+//            if(i.value().objId == info.objId && i.value().pinNumber == info.pinNumber && i.value().type == info.type) {
+//                if(parentPtr->info().nodeType == NodeType::bridge) {
+//                    GetListParentsOfBridgePin(i.key(),listParents);
+//                } else {
+//                    if(!listParents.contains(parentPtr))
+//                        listParents << parentPtr;
+//                }
+//            }
+//        }
+//        ++i;
+//    }
+//}
 
 //get the objects connected to the output pins
 QList< QSharedPointer<Connectables::Object> >PathSolver::GetListChildren( QSharedPointer<Connectables::Object> objPtr)
@@ -362,12 +363,12 @@ QList< QSharedPointer<Connectables::Object> >PathSolver::GetListChildren( QShare
         QSharedPointer<Connectables::Object> childPtr = myHost->objFactory->GetObjectFromId(i.value().objId);
         if(!childPtr.isNull()) {
             if(i.key().objId == objPtr->GetIndex()) {
-                if(childPtr->info().nodeType == NodeType::bridge) {
-                    GetListChildrenOfBridgePin(i.value(),listChildren);
-                } else {
+//                if(childPtr->info().nodeType == NodeType::bridge) {
+//                    GetListChildrenOfBridgePin(i.value(),listChildren);
+//                } else {
                     if(!listChildren.contains(childPtr))
                         listChildren << childPtr;
-                }
+//                }
             }
         }
         ++i;
@@ -376,21 +377,21 @@ QList< QSharedPointer<Connectables::Object> >PathSolver::GetListChildren( QShare
     return listChildren;
 }
 
-void PathSolver::GetListChildrenOfBridgePin(const ConnectionInfo &info, QList< QSharedPointer<Connectables::Object> > &listChildren)
-{
-    hashCables::iterator i = listCables.begin();
-    while (i != listCables.end()) {
-        QSharedPointer<Connectables::Object> childPtr = myHost->objFactory->GetObjectFromId(i.value().objId);
-        if(!childPtr.isNull()) {
-            if(i.key().objId == info.objId && i.key().pinNumber == info.pinNumber && i.key().type == info.type) {
-                if(childPtr->info().nodeType == NodeType::bridge) {
-                    GetListChildrenOfBridgePin(i.value(),listChildren);
-                } else {
-                    if(!listChildren.contains(childPtr))
-                        listChildren << childPtr;
-                }
-            }
-        }
-        ++i;
-    }
-}
+//void PathSolver::GetListChildrenOfBridgePin(const ConnectionInfo &info, QList< QSharedPointer<Connectables::Object> > &listChildren)
+//{
+//    hashCables::iterator i = listCables.begin();
+//    while (i != listCables.end()) {
+//        QSharedPointer<Connectables::Object> childPtr = myHost->objFactory->GetObjectFromId(i.value().objId);
+//        if(!childPtr.isNull()) {
+//            if(i.key().objId == info.objId && i.key().pinNumber == info.pinNumber && i.key().type == info.type) {
+//                if(childPtr->info().nodeType == NodeType::bridge) {
+//                    GetListChildrenOfBridgePin(i.value(),listChildren);
+//                } else {
+//                    if(!listChildren.contains(childPtr))
+//                        listChildren << childPtr;
+//                }
+//            }
+//        }
+//        ++i;
+//    }
+//}

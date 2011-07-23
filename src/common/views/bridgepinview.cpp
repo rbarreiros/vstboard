@@ -122,17 +122,15 @@ void BridgePinView::updateVu()
         case PinType::Audio:
             c = config->GetColor(ColorGroups::AudioPin, Colors::Background);
             break;
-    case PinType::Midi :
-            c= config->GetColor(ColorGroups::MidiPin, Colors::Background);
+        case PinType::Midi :
+            c = config->GetColor(ColorGroups::MidiPin, Colors::Background);
             break;
-    case PinType::Parameter :
-            c= config->GetColor(ColorGroups::ParameterPin, Colors::Background);
+        case PinType::Parameter :
+            c = config->GetColor(ColorGroups::ParameterPin, Colors::Background);
             break;
         default :
-            c=Qt::darkGray;
+            c = Qt::darkGray;
             break;
     }
-//    if(value<0.5)
-//        c.setAlphaF( value/0.5 );
     vuValue->setBrush(c);
 }

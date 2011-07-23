@@ -32,6 +32,7 @@ namespace Connectables {
     public:
         Bridge(MainHost *myHost,int index, const ObjectInfo & info);
         bool Open();
+        void Render();
     };
 }
 

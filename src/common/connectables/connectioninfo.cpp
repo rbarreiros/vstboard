@@ -73,8 +73,8 @@ ConnectionInfo::ConnectionInfo(const ConnectionInfo &c) {
 bool ConnectionInfo::CanConnectTo(const ConnectionInfo &c) const {
 
     //don't connect object to itself
-    if(objId == c.objId)
-        return false;
+//    if(objId == c.objId)
+//        return false;
 
     //must be the same type (audio/midi/automation) or a bridge pin
     if(type!=PinType::Bridge && c.type!=PinType::Bridge && type != c.type)
