@@ -385,7 +385,7 @@ bool ProgramsModel::removeRowsFromCommand ( int row, int count, const QModelInde
             myHost->programContainer->RemoveProgram(parent.child(row+i,0));
     } else {
         for(int i=0; i<count; i++) {
-            for(int j=0; j<rowCount(parent); j++)
+            for(int j=0; j<rowCount(index(row+i,0)); j++)
                 myHost->programContainer->RemoveProgram(index(row+i,0).child(j,0));
             myHost->groupContainer->RemoveProgram(index(row+i,0));
         }
