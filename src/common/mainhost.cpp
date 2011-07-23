@@ -68,7 +68,7 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
     model->setColumnCount(1);
 
     sampleRate = 44100.0;
-    bufferSize = 512;
+    bufferSize = 100;
 
     currentTempo=120;
     currentTimeSig1=4;
@@ -630,7 +630,7 @@ void MainHost::SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum ms
 
 void MainHost::SetBufferSize(unsigned long size)
 {
-    debug("MainHost::SetBufferSize %ld",size)
+    qDebug("MainHost::SetBufferSize %ld",size);
     bufferSize = size;
     emit BufferSizeChanged(bufferSize);
 }

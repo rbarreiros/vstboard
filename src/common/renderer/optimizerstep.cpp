@@ -151,19 +151,19 @@ void OptimizerStep::OptimizeSpannedNodes()
 
                 long cpuGainForThisStep = node->cpuTime - tmpCpuTime;
 
-                //try to span the node (something is wrong, worst than doing nothing)
-//                if(NextStepCanAcceptSpannedNode(node, cpuGainForThisStep)) {
-//                    listOfNodes.removeAll(node);
-//                    nbThreads--;
-//                    OptimizeStepThread *th = new OptimizeStepThread();
-//                    th->listOfNodes << node;
-//                    tmpStep.listOfThreads << th;
-//                    node->maxRenderOrder = step+1;
-//                    ClearThreads();
-//                    foreach(OptimizeStepThread *th, tmpStep.listOfThreads) {
-//                        listOfThreads << new OptimizeStepThread(*th);
-//                    }
-//                } else {
+                //try to span the node
+                if(NextStepCanAcceptSpannedNode(node, cpuGainForThisStep)) {
+                    listOfNodes.removeAll(node);
+                    nbThreads--;
+                    OptimizeStepThread *th = new OptimizeStepThread();
+                    th->listOfNodes << node;
+                    tmpStep.listOfThreads << th;
+                    node->maxRenderOrder = step+1;
+                    ClearThreads();
+                    foreach(OptimizeStepThread *th, tmpStep.listOfThreads) {
+                        listOfThreads << new OptimizeStepThread(*th);
+                    }
+                } else {
                     //does the next step accept this node ?
                     if(NextStepCanAcceptPostponedNode(node, cpuGainForThisStep)) {
                         listOfNodes.removeAll(node);
@@ -171,7 +171,7 @@ void OptimizerStep::OptimizeSpannedNodes()
                         foreach(OptimizeStepThread *th, tmpStep.listOfThreads) {
                             listOfThreads << new OptimizeStepThread(*th);
                         }
-//                    }
+                    }
                 }
             }
         }

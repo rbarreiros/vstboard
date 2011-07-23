@@ -63,9 +63,11 @@ void Renderer::UpdateView()
         optimizer.UpdateView( &model );
     }
 
-//    foreach(RenderThread *th, listOfThreads) {
-//        th->UpdateView( optimizer.GetModel() );
-//    }
+    int i = 0;
+    foreach(RenderThread *th, listOfThreads) {
+        model.setHorizontalHeaderItem(i, new QStandardItem( QString("%1 (cpu:%2)").arg(i).arg(th->currentCpu) ));
+        ++i;
+    }
     mutex.unlock();
 }
 
@@ -98,14 +100,6 @@ void Renderer::SetNbThreads(int nbThreads)
     stop=false;
     mutex.unlock();
 }
-
-//void Renderer::ClearNodes()
-//{
-//    foreach(RendererNode *node, listOfNodes) {
-//        delete node;
-//    }
-//    listOfNodes.clear();
-//}
 
 void Renderer::LoadNodes(const QList<RendererNode*> & listNodes)
 {
@@ -161,7 +155,6 @@ void Renderer::OnNewRenderingOrder(const QList<SolverNode*> & listNodes)
 
 void Renderer::StartRender()
 {
-//    mutex.lockForRead();
     if(!mutex.tryLockForRead(5)) {
         debug2(<<"Renderer::StartRender can't lock")
         return;
@@ -208,7 +201,6 @@ void Renderer::StartRender()
     for(int currentStep=-1; currentStep<numberOfSteps; currentStep++) {
 
         if( sem.tryAcquire(maxNumberOfThreads,5000) ) {
-
             foreach( RenderThread *th, listOfThreads) {
                 th->StartRenderStep( currentStep );
             }
@@ -220,7 +212,6 @@ void Renderer::StartRender()
     }
 
     if( !sem.tryAcquire(maxNumberOfThreads,5000) ) {
-        debug2(<<"Renderer::StartRender timeout last step" << sem.available() << "/" << maxNumberOfThreads )
         sem.acquire( sem.available() );
     }
     mutex.unlock();
@@ -254,10 +245,6 @@ void Renderer::GetStepsFromOptimizer()
     numberOfSteps = -1;
     numberOfThreads = maxNumberOfThreads;
 
-//    foreach(RenderThread *th, listOfThreads) {
-//        th->ResetSteps();
-//    }
-
     for(int th=0; th<maxNumberOfThreads; th++) {
         QMap<int, RendererNode* >lst = optimizer.GetThreadNodes(th);
 
@@ -276,7 +263,7 @@ void Renderer::GetStepsFromOptimizer()
 void Renderer::InitThreads()
 {
     for(int i=0; i<maxNumberOfThreads; i++) {
-        RenderThread *th = new RenderThread(this, QString::number(i));
+        RenderThread *th = new RenderThread(this, i, QString::number(i));
         listOfThreads << th;
         th->start(QThread::TimeCriticalPriority);
     }

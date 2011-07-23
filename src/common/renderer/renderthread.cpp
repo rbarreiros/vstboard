@@ -22,12 +22,13 @@
 #include "renderer.h"
 #include "renderernode.h"
 
-RenderThread::RenderThread(Renderer *renderer, const QString &name)
+RenderThread::RenderThread(Renderer *renderer, int cpu, const QString &name)
     : QThread(renderer),
       renderer(renderer),
       sem(0),
       stop(false),
-      lastStepForRendering(-1)
+      currentCpu(cpu),
+      currentNode(0)
 {
     setObjectName(name);
 }
@@ -41,9 +42,15 @@ RenderThread::~RenderThread()
     }
 }
 
+
 void RenderThread::run()
 {
+    SetThreadIdealProcessor( GetCurrentThread(), currentCpu );
+
     forever {
+
+        currentCpu = GetCurrentProcessorNumber();
+
         sem.acquire();
 
         mutex.lockForRead();
@@ -65,6 +72,7 @@ void RenderThread::Stop()
 
 void RenderThread::RenderStep(int step)
 {
+    //new loop : reset the nodes
     if(step==-1) {
         mutex.lockForRead();
 
@@ -77,41 +85,51 @@ void RenderThread::RenderStep(int step)
             }
             ++i;
         }
-        lastStepForRendering = -1;
         mutex.unlock();
         renderer->sem.release();
         return;
     }
 
+    //a spanned node is rendering
+    if(currentNode && currentNode->maxRenderOrder == step) {
+        //this is the last step, we have to wait for the node to be rendered
+        mutexRender.lock();
+        currentNode=0;
+        mutexRender.unlock();
+        renderer->sem.release();
+        return;
+    }
+
+    //there's a node to render at this step
     RendererNode *n = listOfSteps.value(step,0);
     if(n!=0) {
-        lastStepForRendering = n->maxRenderOrder;
-    } else {
-        //nothing to do
-        if(lastStepForRendering==-1) {
+        currentNode = n;
+
+        if(currentNode->maxRenderOrder == step) {
+            //not a spanned node, we have to render it now
+            currentNode->Render();
+            currentNode=0;
+
+            //release the step when done
             renderer->sem.release();
             return;
-        }
-
-    }
-
-    //we have more time to render, release this step now
-    if(lastStepForRendering > step) {
-        renderer->sem.release();
-    }
-
-    //even if we have more time, we can start rendering now
-    if(n!=0) {
-//        debug2(<< "start" << currentThreadId() << n->listOfObj.first()->objectName())
-        n->Render();
-//        debug2(<< "end  " << currentThreadId() << n->listOfObj.first()->objectName())
-
-        if(lastStepForRendering == step)
+        } else {
+            //this step is spanned, release the step now
             renderer->sem.release();
-        lastStepForRendering=-1;
 
-
+            //and render when we can
+            mutexRender.lock();
+            currentNode->Render();
+            mutexRender.unlock();
+            return;
+        }
     }
+
+
+
+    //nothing to do
+    renderer->sem.release();
+    return;
 }
 
 void RenderThread::ResetSteps()

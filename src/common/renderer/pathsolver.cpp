@@ -132,6 +132,20 @@ bool PathSolver::ChainNodes()
             }
         }
     }
+
+    //remove nodes containing only bridges
+    foreach(SolverNode* node, listNodes) {
+        bool onlyBridges=true;
+        foreach(QWeakPointer<Connectables::Object>objPtr, node->listOfObj ) {
+            if(objPtr.toStrongRef()->info().nodeType!=NodeType::bridge)
+                onlyBridges=false;
+        }
+        if(onlyBridges) {
+            listNodes.removeAll(node);
+            delete node;
+        }
+    }
+
     return false;
 }
 

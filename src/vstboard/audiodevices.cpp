@@ -320,6 +320,9 @@ Connectables::AudioDevice * AudioDevices::AddDevice(ObjectInfo &objInfo, QString
     mutexDevices.unlock();
 
     if(!dev) {
+        //minimize the buffer size to 1, the device will resize it to it's minimum
+        myHost->SetBufferSize(1);
+
         dev = new Connectables::AudioDevice(PAinfo, myHost,objInfo);
         if(!dev->Open()) {
             if(errMsg)
@@ -341,6 +344,14 @@ void AudioDevices::RemoveDevice(PaDeviceIndex devId)
     mutexDevices.unlock();
     if(dev) {
         delete dev;
+    }
+
+    //minimize the buffer size
+    if(listAudioDevices.isEmpty()) {
+        myHost->SetBufferSize(100);
+    } else {
+        //set to 1, the devices will resize it
+        myHost->SetBufferSize(1);
     }
 }
 
