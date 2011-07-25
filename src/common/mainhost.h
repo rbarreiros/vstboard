@@ -25,7 +25,7 @@
 #include <QUndoStack>
 #include "connectables/objectfactory.h"
 #include "connectables/object.h"
-#include "connectables/maincontainer.h"
+#include "connectables/container.h"
 #include "renderer/pathsolver.h"
 #include "renderer/renderer.h"
 #include "globals.h"
@@ -85,11 +85,11 @@ public:
 
     inline bool undoProgramChanges() {return undoProgramChangesEnabled;}
 
-    QSharedPointer<Connectables::MainContainer> mainContainer;
-    QSharedPointer<Connectables::MainContainer> hostContainer;
-    QSharedPointer<Connectables::MainContainer> projectContainer;
-    QSharedPointer<Connectables::MainContainer> programContainer;
-    QSharedPointer<Connectables::MainContainer> groupContainer;
+    QSharedPointer<Connectables::Container> mainContainer;
+    QSharedPointer<Connectables::Container> hostContainer;
+    QSharedPointer<Connectables::Container> projectContainer;
+    QSharedPointer<Connectables::Container> programContainer;
+    QSharedPointer<Connectables::Container> groupContainer;
 
     QTimer *updateViewTimer;
 

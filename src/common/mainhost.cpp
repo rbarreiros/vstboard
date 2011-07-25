@@ -141,11 +141,11 @@ void MainHost::SetupMainContainer()
 {
     ObjectInfo info;
     info.nodeType = NodeType::container;
-    info.objType = ObjType::MainContainer;
+    info.objType = ObjType::Container;
     info.name = "mainContainer";
     info.forcedObjId = FixedObjId::mainContainer;
 
-    mainContainer = objFactory->NewObject(info).staticCast< Connectables::MainContainer >();
+    mainContainer = objFactory->NewObject(info).staticCast< Connectables::Container >();
     if(mainContainer.isNull())
         return;
 
@@ -169,11 +169,11 @@ void MainHost::SetupHostContainer()
 
     ObjectInfo info;
     info.nodeType = NodeType::container;
-    info.objType = ObjType::MainContainer;
+    info.objType = ObjType::Container;
     info.name = "hostContainer";
     info.forcedObjId = FixedObjId::hostContainer;
 
-    hostContainer = objFactory->NewObject(info).staticCast<Connectables::MainContainer>();
+    hostContainer = objFactory->NewObject(info).staticCast<Connectables::Container>();
     if(hostContainer.isNull())
         return;
 
@@ -262,11 +262,11 @@ void MainHost::SetupProjectContainer()
 
     ObjectInfo info;
     info.nodeType = NodeType::container;
-    info.objType = ObjType::MainContainer;
+    info.objType = ObjType::Container;
     info.name = "projectContainer";
     info.forcedObjId = FixedObjId::projectContainer;
 
-    projectContainer = objFactory->NewObject(info).staticCast<Connectables::MainContainer>();
+    projectContainer = objFactory->NewObject(info).staticCast<Connectables::Container>();
     if(projectContainer.isNull())
         return;
 
@@ -360,11 +360,11 @@ void MainHost::SetupProgramContainer()
 
     ObjectInfo info;
     info.nodeType = NodeType::container;
-    info.objType = ObjType::MainContainer;
+    info.objType = ObjType::Container;
     info.name = "programContainer";
     info.forcedObjId = FixedObjId::programContainer;
 
-    programContainer = objFactory->NewObject(info).staticCast<Connectables::MainContainer>();
+    programContainer = objFactory->NewObject(info).staticCast<Connectables::Container>();
     if(programContainer.isNull())
         return;
 
@@ -440,7 +440,7 @@ void MainHost::SetupProgramContainer()
     connect(programsModel, SIGNAL(ProgDelete(QModelIndex)),
             programContainer.data(), SLOT(RemoveProgram(QModelIndex)));
     connect(this,SIGNAL(Rendered()),
-            programContainer.data(), SLOT(Render()));
+            programContainer.data(), SLOT(PostRender()));
 
     emit programParkingModelChanged(&programContainer->parkModel);
 
@@ -462,11 +462,11 @@ void MainHost::SetupGroupContainer()
 
     ObjectInfo info;
     info.nodeType = NodeType::container;
-    info.objType = ObjType::MainContainer;
+    info.objType = ObjType::Container;
     info.name = "groupContainer";
     info.forcedObjId = FixedObjId::groupContainer;
 
-    groupContainer = objFactory->NewObject(info).staticCast<Connectables::MainContainer>();
+    groupContainer = objFactory->NewObject(info).staticCast<Connectables::Container>();
     if(groupContainer.isNull())
         return;
 
@@ -540,7 +540,7 @@ void MainHost::SetupGroupContainer()
     connect(programsModel, SIGNAL(GroupDelete(QModelIndex)),
             groupContainer.data(), SLOT(RemoveProgram(QModelIndex)));
     connect(this,SIGNAL(Rendered()),
-            groupContainer.data(), SLOT(Render()));
+            groupContainer.data(), SLOT(PostRender()));
 
     emit groupParkingModelChanged(&groupContainer->parkModel);
 
@@ -659,11 +659,24 @@ void MainHost::Render(unsigned long samples)
 #endif
 
     mutexRender.lock();
+
+    if(mainContainer)
+        mainContainer->NewRenderLoop();
+    if(hostContainer)
+        hostContainer->NewRenderLoop();
+    if(projectContainer)
+        projectContainer->NewRenderLoop();
+    if(groupContainer)
+        groupContainer->NewRenderLoop();
+    if(programContainer)
+        programContainer->NewRenderLoop();
+
     renderer->StartRender();
     mutexRender.unlock();
 
     if(solverNeedAnUpdate && solverUpdateEnabled)
         emit SolverToUpdate();
+
 
     emit Rendered();
 }

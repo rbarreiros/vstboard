@@ -39,6 +39,8 @@ Container::Container(MainHost *myHost,int index, const ObjectInfo &info) :
     Object(myHost,index, info ),
     bridgeIn(0),
     bridgeOut(0),
+    bridgeSend(0),
+    bridgeReturn(0),
     optimizerFlag(false),
     currentContainerProgram(0),
     cablesNode(QModelIndex()),
@@ -139,6 +141,8 @@ bool Container::Close()
 
     bridgeIn.clear();
     bridgeOut.clear();
+    bridgeSend.clear();
+    bridgeReturn.clear();
 
     return true;
 }
@@ -184,7 +188,16 @@ void Container::SetProgram(const QModelIndex &idx)
     progToSet=idx.data(ProgramsModel::ProgramId).toInt();
 }
 
-void Container::Render()
+void Container::NewRenderLoop()
+{
+    Object::NewRenderLoop();
+
+    foreach(QSharedPointer<Object> obj, listStaticObjects) {
+        obj->NewRenderLoop();
+    }
+}
+
+void Container::PostRender()
 {
     if(progToSet!=-1) {
         if(progToSet != currentProgId) {
@@ -362,12 +375,19 @@ void Container::AddObject(QSharedPointer<Object> objPtr)
     objPtr->UnloadProgram();
 
     //bridges are not stored in program
-    if(objPtr->info().nodeType==NodeType::bridge ) {
+    if(objPtr->info().nodeType == NodeType::bridge) {
         if(objPtr->info().objType==ObjType::BridgeIn) {
             bridgeIn=objPtr;
         }
         if(objPtr->info().objType==ObjType::BridgeOut) {
             bridgeOut=objPtr;
+        }
+
+        if(objPtr->info().objType==ObjType::BridgeSend) {
+            bridgeSend=objPtr;
+        }
+        if(objPtr->info().objType==ObjType::BridgeReturn) {
+            bridgeReturn=objPtr;
         }
 
         objPtr->listenProgramChanges=false;
@@ -478,6 +498,10 @@ void Container::ParkObject(QSharedPointer<Object> objPtr)
         bridgeIn.clear();
     if(objPtr==bridgeOut)
         bridgeOut.clear();
+    if(objPtr==bridgeSend)
+        bridgeSend.clear();
+    if(objPtr==bridgeReturn)
+        bridgeReturn.clear();
 
     listStaticObjects.removeAll(objPtr);
 }

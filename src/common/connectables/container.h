@@ -76,6 +76,9 @@ namespace Connectables {
         /// shared pointer to the bridge out object
         QSharedPointer<Object> bridgeOut;
 
+        QSharedPointer<Object> bridgeSend;
+        QSharedPointer<Object> bridgeReturn;
+
         /// model for the parking storage
         HostModel parkModel;
 
@@ -94,6 +97,8 @@ namespace Connectables {
         int GetProgramToSet() { if(progToSet==-1) return currentProgId; else return progToSet; }
 
         inline ContainerProgram * GetCurrentProgram() {return currentContainerProgram;}
+
+        void NewRenderLoop();
 
     protected:
         void AddChildObject(QSharedPointer<Object> objPtr);
@@ -156,7 +161,7 @@ namespace Connectables {
 
         void SetProgram(const QModelIndex &idx);
         void RemoveProgram(const QModelIndex &idx = QModelIndex());
-        void Render();
+        void PostRender();
 
         void SetBufferSize(unsigned long size);
         void SetSampleRate(float rate=44100.0);

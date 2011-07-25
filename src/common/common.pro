@@ -73,7 +73,6 @@ SOURCES += \
     connectables/objectfactory.cpp \
     connectables/object.cpp \
     connectables/container.cpp \
-    connectables/maincontainer.cpp \
     renderer/pathsolver.cpp \
     renderer/renderer.cpp \
     models/hostmodel.cpp \
@@ -161,7 +160,6 @@ HEADERS += \
     connectables/objectfactory.h \
     connectables/object.h \
     connectables/container.h \
-    connectables/maincontainer.h \
     renderer/pathsolver.h \
     renderer/renderer.h \
     models/hostmodel.h \
@@ -228,3 +226,5 @@ TRANSLATIONS = ../resources/translations/common_fr.ts
 
 RESOURCES += \
     ../resources/resources.qrc
+
+

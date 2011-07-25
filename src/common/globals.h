@@ -90,7 +90,7 @@ namespace ObjType {
         MidiToAutomation,
         MidiSender,
         HostController,
-        MainContainer,
+        Container,
         ParkingContainer,
         BridgeIn,
         BridgeOut,

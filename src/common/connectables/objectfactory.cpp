@@ -24,7 +24,6 @@
 #include "miditoautomation.h"
 #include "hostcontroller.h"
 #include "container.h"
-#include "maincontainer.h"
 #include "bridge.h"
 #include "mainhost.h"
 
@@ -135,7 +134,7 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
         switch(info.nodeType) {
 
             case NodeType::container :
-                obj = new MainContainer(myHost,objId, info);
+                obj = new Container(myHost,objId, info);
                 break;
 
             case NodeType::bridge :
