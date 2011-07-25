@@ -120,7 +120,7 @@ bool CEffect::Unload()
     if(pluginLib) {
         if(pluginLib->isLoaded())
             if(!pluginLib->unload()) {
-                debug2(<<"can't unload plugin"<< sName)
+                debug2(<<"CEffect::Unload can't unload plugin"<< sName)
             }
         delete pluginLib;
         pluginLib=0;
