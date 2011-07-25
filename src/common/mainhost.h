@@ -118,7 +118,7 @@ public:
     QString currentSetupFile;
 
     QUndoStack undoStack;
-
+QMutex mutexRender;
 protected:
     QTime timeFromStart;
     float sampleRate;
@@ -143,7 +143,7 @@ private:
     hashCables workingListOfCables;
     QMutex *mutexListCables;
     Renderer *renderer;
-    QMutex mutexRender;
+
     QMutex solverMutex;
 
     HostModel *model;
