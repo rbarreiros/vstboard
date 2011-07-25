@@ -56,8 +56,6 @@ protected:
 
     void ResetLoopFlags();
 
-
-
     friend class PathSolver;
 };
 

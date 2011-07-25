@@ -105,7 +105,7 @@ namespace Connectables {
         PinsList* GetListMidiPinOut() {return listMidiPinOut;}
 
         bool GetSleep();
-        void NewRenderLoop();
+        virtual void NewRenderLoop();
 
         /// Lock the object mutex
         inline void Lock() { objMutex.lock();}

@@ -64,12 +64,3 @@ bool Bridge::Open()
     Object::Open();
     return true;
 }
-
-void Bridge::Render()
-{
-    foreach(Pin *p, listBridgePinIn->listPins) {
-        BridgePinIn *bp = static_cast<BridgePinIn*>(p);
-        if(bp->msgType!=PinMessage::ND)
-            bp->Render();
-    }
-}

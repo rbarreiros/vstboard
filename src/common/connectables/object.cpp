@@ -335,6 +335,10 @@ void Object::NewRenderLoop()
     foreach(Pin *pin, listAudioPinIn->listPins) {
         pin->NewRenderLoop();
     }
+
+    foreach(Pin *p, listBridgePinIn->listPins) {
+        p->NewRenderLoop();
+    }
 }
 
 /*!
