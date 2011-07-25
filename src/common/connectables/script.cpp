@@ -147,7 +147,7 @@ Script::~Script()
 bool Script::Close()
 {
     if(editorWnd) {
-        editorWnd->close();
+        QTimer::singleShot(0,editorWnd,SLOT(close()));
         editorWnd->deleteLater();
         editorWnd=0;
     }

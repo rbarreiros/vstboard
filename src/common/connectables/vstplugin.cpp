@@ -63,8 +63,8 @@ bool VstPlugin::Close()
         objMutex.lock();
         EffEditClose();
         objMutex.unlock();
-        editorWnd->close();
-        editorWnd->deleteLater();
+        editorWnd->SetPlugin(0);
+        QTimer::singleShot(0,editorWnd,SLOT(close()));
         editorWnd=0;
     }
     mapPlugins.remove(pEffect);
