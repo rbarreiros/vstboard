@@ -24,10 +24,10 @@
 
 using namespace Connectables;
 
-ObjectProgram::ObjectProgram(int progId,PinsList *in, PinsList *out) :
-    progId(progId),
-    isDirty(false)
+ObjectProgram::ObjectProgram(PinsList *in, PinsList *out)
 {
+    ResetDirty();
+
     ObjectParameter param;
     QMap<quint16,Pin*>::const_iterator i = in->listPins.constBegin();
     while(i!=in->listPins.constEnd()) {
@@ -102,7 +102,7 @@ void ObjectProgram::Load(PinsList *in, PinsList *out)
         ++l;
     }
 
-    isDirty=false;
+    ResetDirty();
 }
 
 void ObjectProgram::Save(PinsList *in,PinsList *out)
@@ -121,14 +121,12 @@ void ObjectProgram::Save(PinsList *in,PinsList *out)
         ++j;
     }
 
-    isDirty=false;
+    ResetDirty();
 }
 
 
 QDataStream & ObjectProgram::toStream(QDataStream& out) const
 {
-    out << (quint16)progId;
-
     out << (quint16)listParametersIn.size();
     QMap<ushort,ObjectParameter>::ConstIterator i = listParametersIn.constBegin();
     while(i!=listParametersIn.constEnd()) {
@@ -158,8 +156,6 @@ QDataStream & ObjectProgram::toStream(QDataStream& out) const
 
 QDataStream & ObjectProgram::fromStream(QDataStream& in)
 {
-    in >> (quint16&)progId;
-
     quint16 nbParam;
     in >> nbParam;
     for(int i=0; i<nbParam; i++) {
@@ -188,7 +184,7 @@ QDataStream & ObjectProgram::fromStream(QDataStream& in)
         listOtherValues.insert(id,value);
     }
 
-    isDirty=false;
+    ResetDirty();
     return in;
 }
 

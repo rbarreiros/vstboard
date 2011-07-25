@@ -61,7 +61,7 @@ CEffect::~CEffect()
 /* Load : loads the effect module                                            */
 /*****************************************************************************/
 
-bool CEffect::Load(MainHost *myHost, QObject *parent, const QString &name)
+bool CEffect::Load(const QString &name)
 {
     pluginLib = new QLibrary(name);
 
@@ -120,7 +120,7 @@ bool CEffect::Unload()
     if(pluginLib) {
         if(pluginLib->isLoaded())
             if(!pluginLib->unload()) {
-                debug2(<<"can't unload plugin"<< sName)
+                debug2(<<"CEffect::Unload can't unload plugin"<< sName)
             }
         delete pluginLib;
         pluginLib=0;

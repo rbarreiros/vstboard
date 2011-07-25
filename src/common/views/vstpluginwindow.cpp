@@ -59,6 +59,10 @@ bool VstPluginWindow::SetPlugin(Connectables::VstPlugin *plugin)
 {
     bool windowOk = false;
     this->plugin = plugin;
+
+    if(!plugin)
+        return false;
+
     setWindowFlags(Qt::Tool);
 
     long res;
@@ -127,6 +131,11 @@ void VstPluginWindow::SaveAttribs()
 
 void VstPluginWindow::closeEvent( QCloseEvent * event )
 {
+    if(!plugin) {
+        event->accept();
+        return;
+    }
+
     hide();
     plugin->ToggleEditor(false);
     event->ignore();

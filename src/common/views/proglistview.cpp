@@ -17,57 +17,90 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-//#include "precomp.h"
+#include "precomp.h"
 #include "proglistview.h"
 #include "globals.h"
+#include "models/programsmodel.h"
 
 ProgListView::ProgListView(QWidget *parent) :
-    QListView(parent)
+    GroupListView(parent)
 {
-    connect(this, SIGNAL(customContextMenuRequested(QPoint)),
-            this, SLOT(OnContextMenu(QPoint)));
+}
 
-    QAction *actDel = new QAction(QIcon(":/img16x16/delete.png"),tr("Delete program"),this);
-    actDel->setShortcut(Qt::Key_Delete);
-    actDel->setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    connect(actDel,SIGNAL(triggered()),
-            this,SLOT(DeleteItem()));
-    addAction(actDel);
-    setSelectionMode(ExtendedSelection);
+QStringList ProgListView::MimeTypes()
+{
+    return QStringList() << MIMETYPE_PROGRAM;
+}
+
+void ProgListView::setModel(ProgramsModel *model)
+{
+    QListView::setModel(model);
+
+    connect(model, SIGNAL(GroupChanged(QModelIndex)),
+            this, SLOT(setRootIndex(QModelIndex)));
+    connect(model, SIGNAL(ProgChanged(QModelIndex)),
+            this, SLOT(SetCurrentNoSelect(QModelIndex)));
+
+    connect(this, SIGNAL(clicked(QModelIndex)),
+            model, SLOT(UserChangeProg(QModelIndex)));
+}
+
+void ProgListView::dragEnterEvent(QDragEnterEvent *event)
+{
+    //the root index (a group) is set to 'no-drop'
+    //(otherwise dragging a group on top of another one will move it as a child of the group instead of reordering )
+    //we have to force accept to allow reordering
+    if(event->source() == this)
+        event->accept();
+    else
+        event->ignore();
 }
 
 void ProgListView::dragMoveEvent ( QDragMoveEvent * event )
 {
-    if(event->source() != this) {
-        event->ignore();
-        return;
+    //don't allow drop on itself
+    QModelIndex idx = indexAt( event->pos() );
+
+    if(idx.isValid()) {
+        if( selectionModel()->selectedIndexes().contains( idx )) {
+            event->ignore();
+            return;
+        }
     }
 
-    if (event->keyboardModifiers() & Qt::ControlModifier)
-        event->setDropAction(Qt::CopyAction);
-    else
-        event->setDropAction(Qt::MoveAction);
-
+    //default hover highlight - but no dropindicator :(
     QListView::dragMoveEvent(event);
+
+    //force accept and we'll get the drop
+    if(event->source() == this)
+        event->accept();
 }
 
-void ProgListView::OnContextMenu(const QPoint & pos)
+void ProgListView::dropEvent(QDropEvent *event)
 {
-    NodeType::Enum t = (NodeType::Enum)currentIndex().data(UserRoles::nodeType).toInt();
-    if(t == NodeType::program) {
-        //item context
-        QMenu menu;
-        menu.exec(actions(), mapToGlobal(pos), actions().at(0), this);
-    } else {
-        //widget context
-
-    }
+    QListView::dropEvent(event);
 }
 
-void ProgListView::DeleteItem()
+//void ProgListView::currentChanged (const QModelIndex &current, const QModelIndex &previous)
+//{
+//    Q_UNUSED(previous)
+
+//    ProgramsModel *progModel = qobject_cast<ProgramsModel*>(model());
+//    if(!progModel)
+//        return;
+
+//    progModel->UserChangeProg( current );
+//}
+
+void ProgListView::InsertItem()
 {
-    if(currentIndex().isValid()) {
-        model()->removeRow( currentIndex().row(), currentIndex().parent() );
+    ProgramsModel *progModel = qobject_cast<ProgramsModel*>(model());
+    if(!progModel)
         return;
-    }
+
+    int row=-1;
+    if(currentIndex().isValid())
+        row=currentIndex().row();
+
+    progModel->UserAddProgram( rootIndex(), row );
 }

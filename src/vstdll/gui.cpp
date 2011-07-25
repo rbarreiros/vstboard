@@ -39,6 +39,9 @@ Gui::~Gui()
 
 bool Gui::open(void* ptr)
 {
+    if(!ptr)
+        return false;
+
     AEffEditor::open(ptr);
     widget = new QWinWidget(static_cast<HWND>(ptr));
     widget->setAttribute(Qt::WA_LayoutUsesWidgetRect);
@@ -73,6 +76,9 @@ void Gui::close()
 
 bool Gui::getRect (ERect** rect)
 {
+    if(!widget || !rect)
+        return false;
+
     *rect = &rectangle;
     return true;
 }

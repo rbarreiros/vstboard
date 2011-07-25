@@ -63,8 +63,8 @@ bool VstPlugin::Close()
         objMutex.lock();
         EffEditClose();
         objMutex.unlock();
-        editorWnd->close();
-        editorWnd->deleteLater();
+        editorWnd->SetPlugin(0);
+        QTimer::singleShot(0,editorWnd,SLOT(close()));
         editorWnd=0;
     }
     mapPlugins.remove(pEffect);
@@ -266,7 +266,7 @@ bool VstPlugin::Open()
         QMutexLocker lock(&objMutex);
         VstPlugin::pluginLoading = this;
 
-        if(!Load(myHost, this, objInfo.filename )) {
+        if(!Load(objInfo.filename )) {
             VstPlugin::pluginLoading = 0;
             errorMessage=tr("Error while loading plugin");
             return true;

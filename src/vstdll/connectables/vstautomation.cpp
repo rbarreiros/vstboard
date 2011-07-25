@@ -19,7 +19,7 @@
 **************************************************************************/
 
 #include "vstautomation.h"
-#include "mainhost.h"
+#include "mainhostvst.h"
 #include "vst.h"
 
 using namespace Connectables;

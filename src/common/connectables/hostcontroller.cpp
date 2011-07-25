@@ -18,11 +18,10 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-
 #include "hostcontroller.h"
-#include "../globals.h"
-#include "../mainhost.h"
-#include "../projectfile/projectfile.h"
+#include "globals.h"
+#include "mainhost.h"
+#include "models/programsmodel.h"
 
 using namespace Connectables;
 
@@ -59,29 +58,29 @@ HostController::HostController(MainHost *myHost,int index):
     listParameterPinIn->listPins.insert(Param_Tempo, new ParameterPinIn(this,Param_Tempo,tempo,&listTempo,"bpm"));
     listParameterPinIn->listPins.insert(Param_Sign1, new ParameterPinIn(this,Param_Sign1,sign1,&listSign1,"sign1"));
     listParameterPinIn->listPins.insert(Param_Sign2, new ParameterPinIn(this,Param_Sign2,sign2,&listSign2,"sign2"));
-    listParameterPinIn->listPins.insert(Param_Group, new ParameterPinIn(this,Param_Group, myHost->programList->GetCurrentMidiGroup(),&listGrp,"Group"));
-    listParameterPinIn->listPins.insert(Param_Prog, new ParameterPinIn(this,Param_Prog, myHost->programList->GetCurrentMidiProg(),&listPrg,"Prog"));
+    listParameterPinIn->listPins.insert(Param_Group, new ParameterPinIn(this,Param_Group, myHost->programsModel->GetCurrentMidiGroup(),&listGrp,"Group"));
+    listParameterPinIn->listPins.insert(Param_Prog, new ParameterPinIn(this,Param_Prog, myHost->programsModel->GetCurrentMidiProg(),&listPrg,"Prog"));
 
     listParameterPinOut->listPins.insert(Param_Tempo, new ParameterPinOut(this,Param_Tempo,tempo,&listTempo,"bpm"));
     listParameterPinOut->listPins.insert(Param_Sign1, new ParameterPinOut(this,Param_Sign1,sign1,&listSign1,"sign1"));
     listParameterPinOut->listPins.insert(Param_Sign2, new ParameterPinOut(this,Param_Sign2,sign2,&listSign2,"sign2"));
-    listParameterPinOut->listPins.insert(Param_Group, new ParameterPinOut(this,Param_Group, myHost->programList->GetCurrentMidiGroup(),&listGrp,"Group"));
-    listParameterPinOut->listPins.insert(Param_Prog, new ParameterPinOut(this,Param_Prog, myHost->programList->GetCurrentMidiProg(),&listPrg,"Prog"));
+    listParameterPinOut->listPins.insert(Param_Group, new ParameterPinOut(this,Param_Group, myHost->programsModel->GetCurrentMidiGroup(),&listGrp,"Group"));
+    listParameterPinOut->listPins.insert(Param_Prog, new ParameterPinOut(this,Param_Prog, myHost->programsModel->GetCurrentMidiProg(),&listPrg,"Prog"));
     listParameterPinOut->listPins.insert(Param_Bar, new ParameterPinOut(this,Param_Bar, 0,"Bar"));
 
     connect(this, SIGNAL(progChange(int)),
-            myHost->programList,SLOT(ChangeProg(int)),
+            myHost->programsModel,SLOT(UserChangeProg(int)),
             Qt::QueuedConnection);
     connect(this, SIGNAL(grpChange(int)),
-            myHost->programList,SLOT(ChangeGroup(int)),
+            myHost->programsModel,SLOT(UserChangeGroup(int)),
             Qt::QueuedConnection);
     connect(this, SIGNAL(tempoChange(int,int,int)),
             myHost,SLOT(SetTempo(int,int,int)),
             Qt::QueuedConnection);
 
-    connect(myHost->programList,SIGNAL(ProgChanged(QModelIndex)),
+    connect(myHost->programsModel,SIGNAL(ProgChanged(QModelIndex)),
            this,SLOT(OnHostProgChanged(QModelIndex)));
-    connect(myHost->programList,SIGNAL(GroupChanged(QModelIndex)),
+    connect(myHost->programsModel,SIGNAL(GroupChanged(QModelIndex)),
            this,SLOT(OnHostGroupChanged(QModelIndex)));
     connect(myHost,SIGNAL(TempoChanged(int,int,int)),
             this,SLOT(OnHostTempoChange(int,int,int)));
@@ -152,16 +151,16 @@ void HostController::OnParameterChanged(ConnectionInfo pinInfo, float value)
     }
 }
 
-void HostController::OnHostProgChanged(const QModelIndex &index)
+void HostController::OnHostProgChanged(const QModelIndex &idx)
 {
     if(listParameterPinOut->listPins.contains(Param_Prog))
-        static_cast<ParameterPin*>(listParameterPinOut->listPins.value(Param_Prog))->ChangeValue( index.row(), true );
+        static_cast<ParameterPin*>(listParameterPinOut->listPins.value(Param_Prog))->ChangeValue( idx.row(), true );
 }
 
-void HostController::OnHostGroupChanged(const QModelIndex &index)
+void HostController::OnHostGroupChanged(const QModelIndex &idx)
 {
     if(listParameterPinOut->listPins.contains(Param_Group))
-        static_cast<ParameterPin*>(listParameterPinOut->listPins.value(Param_Group))->ChangeValue( index.row(), true );
+        static_cast<ParameterPin*>(listParameterPinOut->listPins.value(Param_Group))->ChangeValue( idx.row(), true );
 }
 
 void HostController::OnHostTempoChange(int tempo, int sign1, int sign2)
@@ -177,15 +176,15 @@ void HostController::SetContainerId(quint16 id)
         case FixedObjId::programContainer :
             listParameterPinIn->RemovePin(Param_Prog);
             disconnect(this, SIGNAL(progChange(int)),
-                    myHost->programList,SLOT(ChangeProg(int)));
-            disconnect(myHost->programList,SIGNAL(ProgChanged(QModelIndex)),
+                    myHost->programsModel,SLOT(ChangeProg(int)));
+            disconnect(myHost->programsModel,SIGNAL(ProgChanged(QModelIndex)),
                    this,SLOT(OnHostProgChanged(QModelIndex)));
 
         case FixedObjId::groupContainer :
             listParameterPinIn->RemovePin(Param_Group);
             disconnect(this, SIGNAL(grpChange(int)),
-                    myHost->programList,SLOT(ChangeGroup(int)));
-            disconnect(myHost->programList,SIGNAL(GroupChanged(QModelIndex)),
+                    myHost->programsModel,SLOT(ChangeGroup(int)));
+            disconnect(myHost->programsModel,SIGNAL(GroupChanged(QModelIndex)),
                    this,SLOT(OnHostGroupChanged(QModelIndex)));
     }
 

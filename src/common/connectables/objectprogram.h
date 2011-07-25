@@ -32,18 +32,16 @@ namespace Connectables {
     {
 
     public:
-        ObjectProgram(int progId) : progId(progId),isDirty(false) {}
-        ObjectProgram(int progId,PinsList *in, PinsList *out);
+        ObjectProgram() { ResetDirty(); }
+        ObjectProgram(PinsList *in, PinsList *out);
 
         ObjectProgram(const ObjectProgram &c) {
             *this = c;
-            isDirty=false;
+            ResetDirty();
         }
 
         void Load(PinsList *in, PinsList *out);
         void Save(PinsList *in,PinsList *out);
-
-        int progId;
 
         QMap<ushort,ObjectParameter> listParametersIn;
         QMap<ushort,ObjectParameter> listParametersOut;
@@ -53,7 +51,19 @@ namespace Connectables {
         QDataStream & toStream(QDataStream& out) const;
         QDataStream & fromStream(QDataStream& in);
 
-        bool isDirty;
+        inline void SetDirty() {
+            dirty=true;
+        }
+        inline bool IsDirty() {
+            return dirty;
+        }
+
+        inline void ResetDirty() {
+            dirty=false;
+        }
+
+    private:
+        bool dirty;
     };
 
 }

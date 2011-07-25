@@ -31,10 +31,13 @@ namespace Connectables {
         BridgePinIn(Object *parent, int number, bool bridge=false);
         void ReceiveMsg(const PinMessage::Enum msgType,void *data=0);
         float GetValue();
-
+        void NewRenderLoop();
     protected:
         /// type of the last message transmited
         PinType::Enum valueType;
+
+        int loopCounter;
+
     };
 }
 

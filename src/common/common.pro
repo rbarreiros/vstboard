@@ -73,11 +73,9 @@ SOURCES += \
     connectables/objectfactory.cpp \
     connectables/object.cpp \
     connectables/container.cpp \
-    connectables/maincontainer.cpp \
     renderer/pathsolver.cpp \
     renderer/renderer.cpp \
     models/hostmodel.cpp \
-    programs.cpp \
     connectables/connectioninfo.cpp \
     connectables/objectinfo.cpp \
     connectables/pin.cpp \
@@ -112,7 +110,19 @@ SOURCES += \
     views/listaudiodevicesview.cpp \
     views/objectdropzone.cpp \
     views/gradientwidget.cpp \
-    views/gradientwidgethue.cpp
+    views/gradientwidgethue.cpp \
+    commands/comdisconnectpin.cpp \
+    commands/comaddobject.cpp \
+    commands/comaddcable.cpp \
+    commands/comremoveobject.cpp \
+    commands/comchangeprogram.cpp \
+    commands/comaddprogram.cpp \
+    commands/comremoveprogram.cpp \
+    commands/comremovegroup.cpp \
+    commands/comaddgroup.cpp \
+    commands/comchangeprogramitem.cpp \
+    commands/comdiscardchanges.cpp \
+    commands/comchangeautosave.cpp
 
 HEADERS += \
     globals.h \
@@ -150,11 +160,9 @@ HEADERS += \
     connectables/objectfactory.h \
     connectables/object.h \
     connectables/container.h \
-    connectables/maincontainer.h \
     renderer/pathsolver.h \
     renderer/renderer.h \
     models/hostmodel.h \
-    programs.h \
     connectables/connectioninfo.h \
     connectables/objectinfo.h \
     connectables/pin.h \
@@ -187,7 +195,20 @@ HEADERS += \
     views/listaudiodevicesview.h \
     views/objectdropzone.h \
     views/gradientwidget.h \
-    views/gradientwidgethue.h
+    views/gradientwidgethue.h \
+    commands/comdisconnectpin.h \
+    commands/comaddobject.h \
+    commands/comaddcable.h \
+    commands/comremoveobject.h \
+    commands/comchangeprogram.h \
+    projectfile/fileversion.h \
+    commands/comaddprogram.h \
+    commands/comremoveprogram.h \
+    commands/comremovegroup.h \
+    commands/comaddgroup.h \
+    commands/comchangeprogramitem.h \
+    commands/comdiscardchanges.h \
+    commands/comchangeautosave.h
 
 FORMS += \
     views/configdialog.ui \
@@ -205,3 +226,5 @@ TRANSLATIONS = ../resources/translations/common_fr.ts
 
 RESOURCES += \
     ../resources/resources.qrc
+
+

@@ -19,7 +19,9 @@
 **************************************************************************/
 
 #include "programlist.h"
+#include "mainhost.h"
 #include "ui_programlist.h"
+#include "models/programsmodel.h"
 
 ProgramList::ProgramList(QWidget *parent) :
     QWidget(parent),
@@ -27,20 +29,6 @@ ProgramList::ProgramList(QWidget *parent) :
     model(0)
 {
     ui->setupUi(this);
-
-    ui->listGrps->setDragDropMode(QAbstractItemView::DragDrop);
-    ui->listGrps->setDefaultDropAction(Qt::MoveAction);
-    ui->listGrps->setFrameShape(QFrame::NoFrame);
-    ui->listGrps->setContextMenuPolicy(Qt::CustomContextMenu);
-    ui->listGrps->setMinimumWidth(1);
-    connect( ui->listGrps, SIGNAL(DragOverItemFromWidget(QWidget*,QModelIndex)),
-             this, SLOT(OnDragOverGroups(QWidget*,QModelIndex)));
-
-    ui->listProgs->setDragDropMode(QAbstractItemView::DragDrop);
-    ui->listProgs->setDefaultDropAction(Qt::MoveAction);
-    ui->listProgs->setFrameShape(QFrame::NoFrame);
-    ui->listProgs->setContextMenuPolicy(Qt::CustomContextMenu);
-    ui->listProgs->setMinimumWidth(1);
 }
 
 ProgramList::~ProgramList()
@@ -48,55 +36,26 @@ ProgramList::~ProgramList()
     delete ui;
 }
 
-void ProgramList::SetModel(QAbstractItemModel *model)
+void ProgramList::SetModel(ProgramsModel *mod)
 {
-    this->model=model;
+    if(!mod)
+        return;
+
+    model=mod;
     ui->listGrps->setModel(model);
     ui->listProgs->setModel(model);
-}
 
-void ProgramList::OnDragOverGroups( QWidget *source, const QModelIndex & index)
-{
-    if(source == ui->listProgs) {
-        emit CurrentDisplayedGroup(index);
-        ui->listGrps->setCurrentIndex(index);
-        ui->listGrps->scrollTo(index);
-        ui->listProgs->setRootIndex( index.child(0,0) );
-    }
-}
+    //from model
+    connect(model,SIGNAL(ProgAutosaveChanged(Qt::CheckState)),
+            this,SLOT(OnProgAutoSaveChanged(Qt::CheckState)));
+    connect(model,SIGNAL(GroupAutosaveChanged(Qt::CheckState)),
+            this,SLOT(OnGroupAutoSaveChanged(Qt::CheckState)));
 
-void ProgramList::OnProgChange(const QModelIndex &index)
-{
-    if(!index.isValid()) {
-        debug("ProgramList::OnProgChange invalid index")
-        return;
-    }
-
-    //change group if needed
-    QModelIndex parIndex = index.parent().parent();
-    if(!parIndex.isValid()) {
-        debug("ProgramList::OnProgChange invalid group")
-        return;
-    }
-
-    emit CurrentDisplayedGroup(parIndex);
-    currentPrg = index;
-
-    ui->listGrps->scrollTo(parIndex);
-    ui->listProgs->setRootIndex( currentPrg.parent() );
-    ui->listProgs->scrollTo(currentPrg);
-}
-
-void ProgramList::on_listGrps_clicked(QModelIndex index)
-{
-    ui->listProgs->setRootIndex(index.child(0,0));
-    emit CurrentDisplayedGroup(index);
-    emit ChangeGroup(index);
-}
-
-void ProgramList::on_listProgs_clicked(QModelIndex index)
-{
-    emit ChangeProg(index);
+    //to model
+    connect(this,SIGNAL(ProgAutoSave(Qt::CheckState)),
+            model, SLOT(UserChangeProgAutosave(Qt::CheckState)));
+    connect(this,SIGNAL(GroupAutoSave(Qt::CheckState)),
+            model, SLOT(UserChangeGroupAutosave(Qt::CheckState)));
 }
 
 void ProgramList::writeSettings(MainHost *myHost)
@@ -123,62 +82,39 @@ void ProgramList::resetSettings()
     ui->splitter->setSizes(widths);
 }
 
-void ProgramList::on_progAutosaveOn_clicked()
+void ProgramList::OnProgAutoSaveChanged(const Qt::CheckState state)
 {
-    emit ProgAutoSave(Autosave::save);
+    ui->ProgAutosave->setCheckState( state );
 }
 
-void ProgramList::on_progAutosaveAsk_clicked()
+void ProgramList::OnGroupAutoSaveChanged(const Qt::CheckState state)
 {
-    emit ProgAutoSave(Autosave::prompt);
+    ui->GroupAutosave->setCheckState(state);
 }
 
-void ProgramList::on_progAutosaveOff_clicked()
+void ProgramList::on_GroupAutosave_stateChanged(int state)
 {
-    emit ProgAutoSave(Autosave::discard);
+    SetAutosaveToolTip( ui->GroupAutosave );
+    emit GroupAutoSave( (Qt::CheckState)state );
 }
 
-void ProgramList::on_grpAutosaveOn_clicked()
+void ProgramList::on_ProgAutosave_stateChanged(int state)
 {
-    emit GroupAutoSave(Autosave::save);
+    SetAutosaveToolTip( ui->ProgAutosave );
+    emit ProgAutoSave( (Qt::CheckState)state );
 }
 
-void ProgramList::on_grpAutosaveAsk_clicked()
+void ProgramList::SetAutosaveToolTip( QCheckBox *chkBox )
 {
-    emit GroupAutoSave(Autosave::prompt);
-}
-
-void ProgramList::on_grpAutosaveOff_clicked()
-{
-    emit GroupAutoSave(Autosave::discard);
-}
-
-void ProgramList::OnProgAutoSaveChanged(const Autosave::Enum state)
-{
-    switch(state) {
-    case Autosave::save :
-        ui->progAutosaveOn->setChecked(true);
-        break;
-    case Autosave::discard :
-        ui->progAutosaveOff->setChecked(true);
-        break;
-    default :
-        ui->progAutosaveAsk->setChecked(true);
-        break;
-    }
-}
-
-void ProgramList::OnGroupAutoSaveChanged(const Autosave::Enum state)
-{
-    switch(state) {
-    case Autosave::save :
-        ui->grpAutosaveOn->setChecked(true);
-        break;
-    case Autosave::discard :
-        ui->grpAutosaveOff->setChecked(true);
-        break;
-    default :
-        ui->grpAutosaveAsk->setChecked(true);
-        break;
+    switch( chkBox->checkState() ) {
+        case Qt::Checked :
+            chkBox->setToolTip(tr("Always save changes"));
+            break;
+        case Qt::Unchecked :
+            chkBox->setToolTip(tr("Discard unsaved changes"));
+            break;
+        case Qt::PartiallyChecked :
+            chkBox->setToolTip(tr("Prompt for unsaved changes"));
+            break;
     }
 }

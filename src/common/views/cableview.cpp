@@ -23,19 +23,27 @@
 using namespace View;
 
 CableView::CableView(const ConnectionInfo &pinOut, const ConnectionInfo &pinIn, QGraphicsItem *parent, ViewConfig *config)
+#ifndef SIMPLE_CABLES
     : QGraphicsPathItem(parent),
+#else
+    : QGraphicsLineItem(parent),
+#endif
+
     QObject(),
     pinOut(pinOut),
     pinIn(pinIn)
 {
-//    setObjectName("cable");
     setPen( config->GetColor(ColorGroups::Panel,Colors::Lines) );
     connect( config, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
             this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)) );
 }
 
 CableView::CableView(const ConnectionInfo &pinOut, const QPointF &PtIn, QGraphicsItem *parent, ViewConfig *config)
+#ifndef SIMPLE_CABLES
     : QGraphicsPathItem(parent),
+#else
+    : QGraphicsLineItem(parent),
+#endif
     QObject(),
     pinOut(pinOut),
     PtIn(PtIn),
@@ -52,7 +60,7 @@ void CableView::UpdatePosition(const ConnectionInfo &pinInfo, const float angle,
     } else {
         PtIn=mapFromScene(pt);
     }
-
+#ifndef SIMPLE_CABLES
     if(pinInfo == pinOut) {
         CtrlPtOut = PtOut;
         CtrlPtOut.rx()+=50*qCos(angle);
@@ -68,15 +76,24 @@ void CableView::UpdatePosition(const ConnectionInfo &pinInfo, const float angle,
     newPath.cubicTo(CtrlPtOut,CtrlPtIn,PtIn);
 
     setPath(newPath);
+#else
+    Q_UNUSED(angle)
+    setLine(PtOut.x(), PtOut.y(), PtIn.x(), PtIn.y());
+#endif
+
 }
 
 void CableView::UpdatePosition(const QPointF &pt)
 {
     PtIn=mapFromScene(pt);
+#ifndef SIMPLE_CABLES
     QPainterPath newPath;
     newPath.moveTo(PtOut);
     newPath.cubicTo(CtrlPtOut,PtIn,PtIn);
     setPath(newPath);
+#else
+    setLine(PtOut.x(), PtOut.y(), PtIn.x(), PtIn.y());
+#endif
 }
 
 void CableView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)

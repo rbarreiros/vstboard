@@ -19,6 +19,7 @@
 **************************************************************************/
 #include "mainhost.h"
 #include "mainwindow.h"
+#include "models/programsmodel.h"
 #include "connectables/container.h"
 
 #ifdef VSTSDK
@@ -40,7 +41,8 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
     solverNeedAnUpdate(false),
     solverUpdateEnabled(true),
     mutexListCables(new QMutex(QMutex::Recursive)),
-    settingsGroup(settingsGroup)
+    settingsGroup(settingsGroup),
+    undoProgramChangesEnabled(false)
 {
     doublePrecision=GetSetting("doublePrecision",false).toBool();
 
@@ -66,7 +68,7 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
     model->setColumnCount(1);
 
     sampleRate = 44100.0;
-    bufferSize = 512;
+    bufferSize = 100;
 
     currentTempo=120;
     currentTimeSig1=4;
@@ -74,7 +76,7 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
 
     renderer = new Renderer(this);
 
-    programList = new Programs(this);
+    programsModel = new ProgramsModel(this);
 
     //timer
     timeFromStart.start();
@@ -132,18 +134,18 @@ void MainHost::Open()
     SetupGroupContainer();
 
     EnableSolverUpdate(true);
-    programList->BuildModel();
+    programsModel->BuildDefaultModel();
 }
 
 void MainHost::SetupMainContainer()
 {
     ObjectInfo info;
     info.nodeType = NodeType::container;
-    info.objType = ObjType::MainContainer;
+    info.objType = ObjType::Container;
     info.name = "mainContainer";
     info.forcedObjId = FixedObjId::mainContainer;
 
-    mainContainer = objFactory->NewObject(info).staticCast< Connectables::MainContainer >();
+    mainContainer = objFactory->NewObject(info).staticCast< Connectables::Container >();
     if(mainContainer.isNull())
         return;
 
@@ -167,11 +169,11 @@ void MainHost::SetupHostContainer()
 
     ObjectInfo info;
     info.nodeType = NodeType::container;
-    info.objType = ObjType::MainContainer;
+    info.objType = ObjType::Container;
     info.name = "hostContainer";
     info.forcedObjId = FixedObjId::hostContainer;
 
-    hostContainer = objFactory->NewObject(info).staticCast<Connectables::MainContainer>();
+    hostContainer = objFactory->NewObject(info).staticCast<Connectables::Container>();
     if(hostContainer.isNull())
         return;
 
@@ -260,11 +262,11 @@ void MainHost::SetupProjectContainer()
 
     ObjectInfo info;
     info.nodeType = NodeType::container;
-    info.objType = ObjType::MainContainer;
+    info.objType = ObjType::Container;
     info.name = "projectContainer";
     info.forcedObjId = FixedObjId::projectContainer;
 
-    projectContainer = objFactory->NewObject(info).staticCast<Connectables::MainContainer>();
+    projectContainer = objFactory->NewObject(info).staticCast<Connectables::Container>();
     if(projectContainer.isNull())
         return;
 
@@ -358,11 +360,11 @@ void MainHost::SetupProgramContainer()
 
     ObjectInfo info;
     info.nodeType = NodeType::container;
-    info.objType = ObjType::MainContainer;
+    info.objType = ObjType::Container;
     info.name = "programContainer";
     info.forcedObjId = FixedObjId::programContainer;
 
-    programContainer = objFactory->NewObject(info).staticCast<Connectables::MainContainer>();
+    programContainer = objFactory->NewObject(info).staticCast<Connectables::Container>();
     if(programContainer.isNull())
         return;
 
@@ -433,14 +435,12 @@ void MainHost::SetupProgramContainer()
         mainContainer->ConnectObjects(groupContainer->bridgeOut, programContainer->bridgeReturn,true);
     }
 
-    connect(programList, SIGNAL(ProgChanged(QModelIndex)),
+    connect(programsModel, SIGNAL(ProgChanged(QModelIndex)),
             programContainer.data(), SLOT(SetProgram(QModelIndex)));
-    connect(programList, SIGNAL(ProgCopy(int,int)),
-            programContainer.data(), SLOT(CopyProgram(int,int)));
-    connect(programList, SIGNAL(ProgDelete(int)),
-            programContainer.data(), SLOT(RemoveProgram(int)));
+    connect(programsModel, SIGNAL(ProgDelete(QModelIndex)),
+            programContainer.data(), SLOT(RemoveProgram(QModelIndex)));
     connect(this,SIGNAL(Rendered()),
-            programContainer.data(), SLOT(Render()));
+            programContainer.data(), SLOT(PostRender()));
 
     emit programParkingModelChanged(&programContainer->parkModel);
 
@@ -462,11 +462,11 @@ void MainHost::SetupGroupContainer()
 
     ObjectInfo info;
     info.nodeType = NodeType::container;
-    info.objType = ObjType::MainContainer;
+    info.objType = ObjType::Container;
     info.name = "groupContainer";
     info.forcedObjId = FixedObjId::groupContainer;
 
-    groupContainer = objFactory->NewObject(info).staticCast<Connectables::MainContainer>();
+    groupContainer = objFactory->NewObject(info).staticCast<Connectables::Container>();
     if(groupContainer.isNull())
         return;
 
@@ -535,14 +535,12 @@ void MainHost::SetupGroupContainer()
         mainContainer->ConnectObjects(hostContainer->bridgeOut, groupContainer->bridgeReturn,true);
     }
 
-    connect(programList, SIGNAL(GroupChanged(QModelIndex)),
+    connect(programsModel, SIGNAL(GroupChanged(QModelIndex)),
             groupContainer.data(), SLOT(SetProgram(QModelIndex)));
-    connect(programList, SIGNAL(GroupCopy(int,int)),
-            groupContainer.data(), SLOT(CopyProgram(int,int)));
-    connect(programList, SIGNAL(GroupDelete(int)),
-            groupContainer.data(), SLOT(RemoveProgram(int)));
+    connect(programsModel, SIGNAL(GroupDelete(QModelIndex)),
+            groupContainer.data(), SLOT(RemoveProgram(QModelIndex)));
     connect(this,SIGNAL(Rendered()),
-            groupContainer.data(), SLOT(Render()));
+            groupContainer.data(), SLOT(PostRender()));
 
     emit groupParkingModelChanged(&groupContainer->parkModel);
 
@@ -563,72 +561,51 @@ bool MainHost::EnableSolverUpdate(bool enable)
     return ret;
 }
 
-//bool MainHost::IsSolverUpdateEnabled()
-//{
-//    QMutexLocker l(&solverMutex);
-//    return solverUpdateEnabled;
-//}
-
-void MainHost::SetSolverUpdateNeeded(bool need)
-{
-    solverMutex.lock();
-    solverNeedAnUpdate = need;
-    solverMutex.unlock();
-}
-
 void MainHost::UpdateSolver(bool forceUpdate)
 {
     solverMutex.lock();
 
-    if(!solverNeedAnUpdate) {
-        solverMutex.unlock();
-        return;
-    }
-
-//    solverNeedAnUpdate=false;
-        //solver needs an update
-//        solverNeedAnUpdate = true;
-
-        bool solverWasEnabled=solverUpdateEnabled;
-
-        //return if solver update was disabled
-        if(!solverUpdateEnabled && !forceUpdate) {
+        //update not forced, not needed or disabled : return
+        if( (!solverUpdateEnabled || !solverNeedAnUpdate) && !forceUpdate) {
             solverMutex.unlock();
             return;
         }
 
         //disable other solver updates
+        bool solverWasEnabled=solverUpdateEnabled;
         solverUpdateEnabled = false;
+
+        //allow others to ask for a new update while we're updating
+        solverNeedAnUpdate = false;
 
     solverMutex.unlock();
 
-    //if forced : wait the end of rendering
-    if(forceUpdate)
+    //if forced : lock rendering
+    if(forceUpdate) {
         mutexRender.lock();
-    else {
+    } else {
         //not forced : do it later if we can't do it now
         if(!mutexRender.tryLock()) {
+            //can't lock, ask for a ne update
+            SetSolverUpdateNeeded();
             EnableSolverUpdate(solverWasEnabled);
             return;
         }
     }
 
+    //update the solver
     mutexListCables->lock();
         solver->Resolve(workingListOfCables, renderer);
     mutexListCables->unlock();
 
-    SetSolverUpdateNeeded(false);
-
-    //allow rendering
     mutexRender.unlock();
-
     EnableSolverUpdate(solverWasEnabled);
 }
 
 void MainHost::ChangeNbThreads(int nbThreads)
 {
     renderer->SetNbThreads(nbThreads);
-    SetSolverUpdateNeeded(true);
+    SetSolverUpdateNeeded();
 
 }
 
@@ -642,7 +619,7 @@ void MainHost::SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum ms
         const ConnectionInfo &destPin = i.value();
         Connectables::Pin *pin = objFactory->GetPin(destPin);
         if(!pin) {
-            debug("MainHost::SendMsg : unknown pin")
+            debug2(<<"MainHost::SendMsg : unknown pin"<<destPin.objId<<"from"<<senderPin.objId)
             return;
         }
 
@@ -653,7 +630,7 @@ void MainHost::SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum ms
 
 void MainHost::SetBufferSize(unsigned long size)
 {
-    debug("MainHost::SetBufferSize %ld",size)
+    qDebug("MainHost::SetBufferSize %ld",size);
     bufferSize = size;
     emit BufferSizeChanged(bufferSize);
 }
@@ -682,11 +659,24 @@ void MainHost::Render(unsigned long samples)
 #endif
 
     mutexRender.lock();
+
+    if(mainContainer)
+        mainContainer->NewRenderLoop();
+    if(hostContainer)
+        hostContainer->NewRenderLoop();
+    if(projectContainer)
+        projectContainer->NewRenderLoop();
+    if(groupContainer)
+        groupContainer->NewRenderLoop();
+    if(programContainer)
+        programContainer->NewRenderLoop();
+
     renderer->StartRender();
     mutexRender.unlock();
 
     if(solverNeedAnUpdate && solverUpdateEnabled)
         emit SolverToUpdate();
+
 
     emit Rendered();
 }
@@ -780,14 +770,26 @@ void MainHost::LoadFile(const QString &filename)
 
 void MainHost::LoadSetupFile(const QString &filename)
 {
-    if(filename.isEmpty())
+    if(!programsModel->userWantsToUnloadSetup())
         return;
 
-    if(ProjectFile::LoadFromFile(this,filename)) {
-        ConfigDialog::AddRecentSetupFile(filename,this);
-        currentSetupFile = filename;
+    QString name = filename;
+
+    if(name.isEmpty()) {
+        QString lastDir = GetSetting("lastSetupDir").toString();
+        name = QFileDialog::getOpenFileName(mainWindow, tr("Open a Setup file"), lastDir, tr("Setup Files (*.%1)").arg(SETUP_FILE_EXTENSION));
+    }
+
+    if(name.isEmpty())
+        return;
+
+    undoStack.clear();
+
+    if(ProjectFile::LoadFromFile(this,name)) {
+        ConfigDialog::AddRecentSetupFile(name,this);
+        currentSetupFile = name;
     } else {
-        ConfigDialog::RemoveRecentSetupFile(filename,this);
+        ConfigDialog::RemoveRecentSetupFile(name,this);
         ClearSetup();
     }
     emit currentFileChanged();
@@ -795,14 +797,26 @@ void MainHost::LoadSetupFile(const QString &filename)
 
 void MainHost::LoadProjectFile(const QString &filename)
 {
-    if(filename.isEmpty())
+    if(!programsModel->userWantsToUnloadProject())
         return;
 
-    if(ProjectFile::LoadFromFile(this,filename)) {
-        ConfigDialog::AddRecentProjectFile(filename,this);
-        currentProjectFile = filename;
+    QString name = filename;
+
+    if(name.isEmpty()) {
+        QString lastDir = GetSetting("lastProjectDir").toString();
+        name = QFileDialog::getOpenFileName(mainWindow, tr("Open a Project file"), lastDir, tr("Project Files (*.%1)").arg(PROJECT_FILE_EXTENSION));
+    }
+
+    if(name.isEmpty())
+        return;
+
+    undoStack.clear();
+
+    if(ProjectFile::LoadFromFile(this,name)) {
+        ConfigDialog::AddRecentProjectFile(name,this);
+        currentProjectFile = name;
     } else {
-        ConfigDialog::RemoveRecentProjectFile(filename,this);
+        ConfigDialog::RemoveRecentProjectFile(name,this);
         ClearProject();
     }
     emit currentFileChanged();
@@ -812,6 +826,9 @@ void MainHost::ReloadProject()
 {
     if(currentProjectFile.isEmpty())
         return;
+
+    undoStack.clear();
+
     ProjectFile::LoadFromFile(this,currentProjectFile);
 }
 
@@ -819,11 +836,19 @@ void MainHost::ReloadSetup()
 {
     if(currentSetupFile.isEmpty())
         return;
+
+    undoStack.clear();
+
     ConfigDialog::AddRecentSetupFile(currentSetupFile,this);
 }
 
 void MainHost::ClearSetup()
 {
+    if(!programsModel->userWantsToUnloadSetup())
+        return;
+
+    undoStack.clear();
+
     EnableSolverUpdate(false);
     SetupHostContainer();
     EnableSolverUpdate(true);
@@ -837,25 +862,43 @@ void MainHost::ClearSetup()
 
 void MainHost::ClearProject()
 {
+    if(!programsModel->userWantsToUnloadProject())
+        return;
+
+    undoStack.clear();
+
     EnableSolverUpdate(false);
     SetupProjectContainer();
     SetupProgramContainer();
     SetupGroupContainer();
     EnableSolverUpdate(true);
 
-    programList->BuildModel();
+    programsModel->BuildDefaultModel();
 
     ConfigDialog::AddRecentProjectFile("",this);
     currentProjectFile = "";
     emit currentFileChanged();
 }
 
-void MainHost::SaveSetupFile(QString filename)
+void MainHost::SaveSetupFile(bool saveAs)
 {
-    if(filename.isEmpty())
-        filename=currentSetupFile;
-    if(filename.isEmpty())
-        return;
+    QString filename;
+
+    if(currentSetupFile.isEmpty() || saveAs) {
+        QString lastDir = GetSetting("lastSetupDir").toString();
+        filename = QFileDialog::getSaveFileName(mainWindow, tr("Save Setup"), lastDir, tr("Setup Files (*.%1)").arg(SETUP_FILE_EXTENSION));
+
+        if(filename.isEmpty())
+            return;
+
+        if(!filename.endsWith(SETUP_FILE_EXTENSION, Qt::CaseInsensitive)) {
+            filename += ".";
+            filename += SETUP_FILE_EXTENSION;
+        }
+    } else {
+        filename = currentSetupFile;
+    }
+
     if(ProjectFile::SaveToSetupFile(this,filename)) {
         SetSetting("lastSetupDir",QFileInfo(filename).absolutePath());
         ConfigDialog::AddRecentSetupFile(filename,this);
@@ -864,12 +907,25 @@ void MainHost::SaveSetupFile(QString filename)
     }
 }
 
-void MainHost::SaveProjectFile(QString filename)
+void MainHost::SaveProjectFile(bool saveAs)
 {
-    if(filename.isEmpty())
-        filename=currentProjectFile;
-    if(filename.isEmpty())
-        return;
+    QString filename;
+
+    if(currentProjectFile.isEmpty() || saveAs) {
+        QString lastDir = GetSetting("lastProjectDir").toString();
+        filename = QFileDialog::getSaveFileName(mainWindow, tr("Save Project"), lastDir, tr("Project Files (*.%1)").arg(PROJECT_FILE_EXTENSION));
+
+        if(filename.isEmpty())
+            return;
+
+        if(!filename.endsWith(PROJECT_FILE_EXTENSION, Qt::CaseInsensitive)) {
+            filename += ".";
+            filename += PROJECT_FILE_EXTENSION;
+        }
+    } else {
+        filename = currentProjectFile;
+    }
+
     if(ProjectFile::SaveToProjectFile(this,filename)) {
         SetSetting("lastProjectDir",QFileInfo(filename).absolutePath());
         ConfigDialog::AddRecentProjectFile(filename,this);

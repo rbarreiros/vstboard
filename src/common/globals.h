@@ -75,8 +75,6 @@ namespace NodeType {
         listPin,
         pin,
         cable,
-        program,
-        programGroup,
         cursor
     };
 }
@@ -92,7 +90,7 @@ namespace ObjType {
         MidiToAutomation,
         MidiSender,
         HostController,
-        MainContainer,
+        Container,
         ParkingContainer,
         BridgeIn,
         BridgeOut,
@@ -228,12 +226,21 @@ namespace Event {
     const QEvent::Type Shortcut = QEvent::Type(QEvent::User+3);
 }
 
-namespace Autosave {
+namespace InsertionType {
     enum Enum {
-        save,
-        prompt,
-        discard
+        NoInsertion,
+        InsertBefore,
+        InsertAfter,
+        Replace,
+        AddBefore,
+        AddAfter
     };
 }
 
+namespace RemoveType {
+    enum Enum {
+        RemoveWithCables,
+        BridgeCables
+    };
+}
 #endif // GLOBALS_H

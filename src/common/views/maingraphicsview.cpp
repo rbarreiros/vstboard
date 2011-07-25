@@ -19,7 +19,8 @@
 **************************************************************************/
 
 #include "maingraphicsview.h"
-#include "../globals.h"
+#include "globals.h"
+#include "models/programsmodel.h"
 
 //using namespace View;
 
@@ -133,15 +134,15 @@ void MainGraphicsView::SaveProgram()
     listPrograms.insert(currentProgId,state);
 }
 
-
-void MainGraphicsView::SetViewProgram(const QModelIndex &prg)
+void MainGraphicsView::SetViewProgram(const QModelIndex &idx)
 {
-    SetViewProgram(prg.data(UserRoles::value).toInt());
+    SetViewProgram(idx.data(ProgramsModel::ProgramId).toInt());
 }
 
 void MainGraphicsView::SetViewProgram(int progId)
 {
-    SaveProgram();
+    if(progId!=currentProgId)
+        SaveProgram();
 
     currentProgId = progId;
     if(!listPrograms.contains(progId)) {
@@ -159,11 +160,9 @@ void MainGraphicsView::SetViewProgram(int progId)
     verticalScrollBar()->setValue( state.scrolly );
 }
 
-void MainGraphicsView::CopyViewProgram(int ori, int dest)
+void MainGraphicsView::RemoveViewProgram(const QModelIndex &idx)
 {
-    if(!listPrograms.contains(ori))
-        return;
-    listPrograms.insert(dest, listPrograms.value(ori));
+    RemoveViewProgram(idx.data(ProgramsModel::ProgramId).toInt());
 }
 
 void MainGraphicsView::RemoveViewProgram(int prg)
@@ -212,6 +211,41 @@ QDataStream & MainGraphicsView::fromStream (QDataStream& in)
         listPrograms.insert(key,state);
     }
     return in;
+}
+
+void MainGraphicsView::ProgramToStream (int progId, QDataStream &out)
+{
+    if(progId == currentProgId)
+        SaveProgram();
+
+    if(!listPrograms.contains(progId)) {
+        out << (quint8)0;
+        return;
+    }
+
+    out << (quint8)1;
+
+    SceneProg p = listPrograms.value(progId);
+    out << p.scale;
+    out << p.scrollx;
+    out << p.scrolly;
+}
+
+void MainGraphicsView::ProgramFromStream (int progId, QDataStream &in)
+{
+    quint8 valid=0;
+    in >> valid;
+    if(valid==0)
+        return;
+
+    SceneProg p;
+    in >> p.scale;
+    in >> p.scrollx;
+    in >> p.scrolly;
+    listPrograms.insert(progId,p);
+
+    if(progId==currentProgId)
+        SetViewProgram(progId);
 }
 
 QDataStream & operator<< (QDataStream & out, const MainGraphicsView& value)

@@ -64,4 +64,3 @@ bool Bridge::Open()
     Object::Open();
     return true;
 }
-

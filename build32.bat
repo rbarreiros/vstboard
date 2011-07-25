@@ -2,9 +2,9 @@ set NSIS_PATH="c:\Program Files (x86)\NSIS\makensis.exe"
 set BUILD_PATH=..\vstboard.32\buildall-build-desktop
 set JOM_PATH="E:\Qt\qtcreator-2.2.1\bin\jom"
 
-call "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\vcvarsall.bat"
-call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /xp /x86 /Release
 call "C:\Qt\4.7.3-32-2008\bin\qtvars.bat"
+call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /xp /x86 /Release
+call "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\vcvarsall.bat"
 
 mkdir "%BUILD_PATH%/installer"
 copy /y "*.txt" "%BUILD_PATH%/installer"

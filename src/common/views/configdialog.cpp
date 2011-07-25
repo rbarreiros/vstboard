@@ -128,19 +128,19 @@ ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
 
 
 //on unsaved setup
-    ui->onUnsavedSetup->addItem(tr("Always ask"),Autosave::prompt);
-    ui->onUnsavedSetup->addItem(tr("Save changes"),Autosave::save);
-    ui->onUnsavedSetup->addItem(tr("Discard changes"),Autosave::discard);
+    ui->onUnsavedSetup->addItem(tr("Always ask"),Qt::PartiallyChecked);
+    ui->onUnsavedSetup->addItem(tr("Save changes"),Qt::Checked);
+    ui->onUnsavedSetup->addItem(tr("Discard changes"),Qt::Unchecked);
 
-    int unsavedSetup = myHost->GetSetting("onUnsavedSetup",Autosave::prompt).toInt();
+    int unsavedSetup = myHost->GetSetting("onUnsavedSetup",Qt::PartiallyChecked).toInt();
     ui->onUnsavedSetup->setCurrentIndex( ui->onUnsavedSetup->findData(unsavedSetup) );
 
 //on unsaved project
-    ui->onUnsavedProject->addItem(tr("Always ask"),Autosave::prompt);
-    ui->onUnsavedProject->addItem(tr("Save changes"),Autosave::save);
-    ui->onUnsavedProject->addItem(tr("Discard changes"),Autosave::discard);
+    ui->onUnsavedProject->addItem(tr("Always ask"),Qt::PartiallyChecked);
+    ui->onUnsavedProject->addItem(tr("Save changes"),Qt::Checked);
+    ui->onUnsavedProject->addItem(tr("Discard changes"),Qt::Unchecked);
 
-    int unsavedProject = myHost->GetSetting("onUnsavedProject",Autosave::prompt).toInt();
+    int unsavedProject = myHost->GetSetting("onUnsavedProject",Qt::PartiallyChecked).toInt();
     ui->onUnsavedProject->setCurrentIndex( ui->onUnsavedProject->findData(unsavedProject) );
 
 //engine

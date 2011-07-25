@@ -140,13 +140,14 @@ render: function(obj) {\n\
 Script::~Script()
 {
     Close();
-    delete currentProgram;
+    if(currentProgId!=EMPTY_PROGRAM)
+        delete currentProgram;
 }
 
 bool Script::Close()
 {
     if(editorWnd) {
-        editorWnd->close();
+        QTimer::singleShot(0,editorWnd,SLOT(close()));
         editorWnd->deleteLater();
         editorWnd=0;
     }
@@ -266,7 +267,7 @@ void Script::EditorDestroyed()
 
 void Script::SaveProgram()
 {
-    if(!currentProgram || !currentProgram->isDirty)
+    if(!currentProgram || !currentProgram->IsDirty())
         return;
 
     Object::SaveProgram();

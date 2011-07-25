@@ -28,7 +28,8 @@ using namespace Connectables;
 
 BridgePinIn::BridgePinIn(Object *parent, int number, bool bridge) :
     Pin(parent,PinType::Bridge,PinDirection::Input,number,bridge),
-    valueType(PinType::ND)
+    valueType(PinType::ND),
+    loopCounter(0)
 {
     setObjectName(QString("BIn%1").arg(number));
     visible=true;
@@ -37,6 +38,10 @@ BridgePinIn::BridgePinIn(Object *parent, int number, bool bridge) :
 //send message to the corresponding output pin
 void BridgePinIn::ReceiveMsg(const PinMessage::Enum msgType,void *data)
 {
+    if(loopCounter>20)
+        return;
+    ++loopCounter;
+
     ConnectionInfo info = connectInfo;
     info.direction=PinDirection::Output;
     parent->GetPin(info)->SendMsg(msgType,data);
@@ -56,8 +61,12 @@ void BridgePinIn::ReceiveMsg(const PinMessage::Enum msgType,void *data)
         default :
             valueType=PinType::ND;
     }
-
     valueChanged=true;
+}
+
+void BridgePinIn::NewRenderLoop()
+{
+    loopCounter=0;
 }
 
 float BridgePinIn::GetValue()

@@ -21,8 +21,6 @@
 #ifndef PROGRAMLIST_H
 #define PROGRAMLIST_H
 
-//#include <QWidget>
-//#include "precomp.h"
 #include "globals.h"
 #include "mainhost.h"
 
@@ -30,6 +28,7 @@ namespace Ui {
     class ProgramList;
 }
 
+class ProgramsModel;
 class ProgramList : public QWidget
 {
     Q_OBJECT
@@ -38,38 +37,27 @@ public:
     explicit ProgramList(QWidget *parent = 0);
     ~ProgramList();
 
-    void SetModel(QAbstractItemModel *model);
+    void SetModel(ProgramsModel *model);
     void writeSettings(MainHost *myHost);
     void readSettings(MainHost *myHost);
     void resetSettings();
 
 private:
     Ui::ProgramList *ui;
-    QAbstractItemModel *model;
-    QPersistentModelIndex currentPrg;
+    ProgramsModel *model;
+    void SetAutosaveToolTip( QCheckBox *chkBox );
 
 signals:
-    void ChangeProg(const QModelIndex &index);
-    void ChangeGroup(const QModelIndex &index);
-    void ProgAutoSave(const Autosave::Enum state);
-    void GroupAutoSave(const Autosave::Enum state);
-    void CurrentDisplayedGroup(const QModelIndex &index);
+    void ProgAutoSave(const Qt::CheckState state);
+    void GroupAutoSave(const Qt::CheckState state);
 
 public slots:
-    void OnProgChange(const QModelIndex &index);
-    void OnDragOverGroups( QWidget *source, const QModelIndex & index);
-    void OnProgAutoSaveChanged(const Autosave::Enum state);
-    void OnGroupAutoSaveChanged(const Autosave::Enum state);
+    void OnProgAutoSaveChanged(const Qt::CheckState state);
+    void OnGroupAutoSaveChanged(const Qt::CheckState state);
 
 private slots:
-    void on_grpAutosaveOff_clicked();
-    void on_grpAutosaveAsk_clicked();
-    void on_grpAutosaveOn_clicked();
-    void on_progAutosaveOff_clicked();
-    void on_progAutosaveAsk_clicked();
-    void on_progAutosaveOn_clicked();
-    void on_listProgs_clicked(QModelIndex index);
-    void on_listGrps_clicked(QModelIndex index);
+    void on_GroupAutosave_stateChanged(int state);
+    void on_ProgAutosave_stateChanged(int state);
 };
 
 #endif // PROGRAMLIST_H

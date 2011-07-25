@@ -118,41 +118,34 @@ void ConnectablePinView::updateVu()
     if(value<.0f)
         return;
 
-    switch(connectInfo.type) {
-        case PinType::Audio : {
-            value-=.05f;
-            float newVu=.0f;
-            if(value<.0f) {
-                value=-1.0f;
-            } else {
-                newVu = geometry().width() * value;
-            }
-            if(newVu<0.0) {
-                debug2(<<"ConnectablePinView::updateVu <0"<<newVu)
-                newVu=0.0;
-            }
-            rectVu->setRect(0,0, newVu, geometry().height());
-            break;
+    if(connectInfo.type==PinType::Audio) {
+        value-=.05f;
+        float newVu=.0f;
+        if(value<.0f) {
+            value=-1.0f;
+        } else {
+            newVu = geometry().width() * value;
         }
-
-        case PinType::Midi : {
-            value-=.1f;
-            if(value<.0f) {
-                value=-1.0f;
-                rectVu->setBrush(Qt::NoBrush);
-                return;
-            }
-            QColor c = vuColor;
-
-            if(value<0.7)
-                c.setAlphaF( value/0.7 );
-
-            rectVu->setBrush(c);
-            break;
+        if(newVu<0.0) {
+            debug2(<<"ConnectablePinView::updateVu <0"<<newVu)
+            newVu=0.0f;
         }
+        rectVu->setRect(0,0, newVu, geometry().height());
+    }
 
-        default :
-            break;
+    if(connectInfo.type== PinType::Midi) {
+        value-=.1f;
+        if(value<.0f) {
+            value=-1.0f;
+            rectVu->setBrush(Qt::NoBrush);
+            return;
+        }
+        QColor c = vuColor;
+
+        if(value<0.7)
+            c.setAlphaF( value/0.7 );
+
+        rectVu->setBrush(c);
     }
 }
 

@@ -28,7 +28,11 @@
 
 namespace View {
 
+#ifndef SIMPLE_CABLES
     class CableView : public QObject, public QGraphicsPathItem
+#else
+    class CableView : public QObject, public QGraphicsLineItem
+#endif
     {
     Q_OBJECT
     public:

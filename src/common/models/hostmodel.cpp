@@ -22,9 +22,10 @@
 #include "globals.h"
 #include "connectables/objectfactory.h"
 #include "mainhost.h"
-#include "mainwindow.h"
+#include "models/programsmodel.h"
 #include "connectables/objectinfo.h"
 #include "connectables/vstplugin.h"
+#include "commands/comaddobject.h"
 
 HostModel::HostModel(MainHost *parent) :
         QStandardItemModel(parent),
@@ -104,7 +105,8 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
         return false;
     }
 
-    QList< QSharedPointer<Connectables::Object> > listObjToAdd;
+//    QList< QSharedPointer<Connectables::Object> > listObjToAdd;
+    QList<ObjectInfo>listObjInfoToAdd;
 
     //objects from parking
     if(data->hasFormat("application/x-qstandarditemmodeldatalist")) {
@@ -119,7 +121,8 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                     debug("HostModel::dropMimeData x-qstandarditemmodeldatalist object not found")
                     continue;
                 }
-                listObjToAdd << objPtr;
+//                listObjToAdd << objPtr;
+                listObjInfoToAdd << objPtr->info();
             }
         }
     }
@@ -143,21 +146,22 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                     infoVst.filename = fName;
                     infoVst.name = fName;
 
-                    QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(infoVst);
-                    if(objPtr.isNull()) {
-                        if(Connectables::VstPlugin::shellSelectView) {
-                            Connectables::VstPlugin::shellSelectView->cntPtr=targetContainer;
-                        } else {
-                            debug("HostModel::dropMimeData vstplugin object not found")
-                        }
-                        return false;
-                    }
-                    listObjToAdd << objPtr;
+//                    QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(infoVst);
+//                    if(objPtr.isNull()) {
+//                        if(Connectables::VstPlugin::shellSelectView) {
+//                            Connectables::VstPlugin::shellSelectView->cntPtr=targetContainer;
+//                        } else {
+//                            debug("HostModel::dropMimeData vstplugin object not found")
+//                        }
+//                        return false;
+//                    }
+//                    listObjToAdd << objPtr;
+                    listObjInfoToAdd << infoVst;
                 }
 #endif
                 //setup file
                 if ( info.suffix()==SETUP_FILE_EXTENSION ) {
-                    if(myHost->mainWindow->userWantsToUnloadSetup()) {
+                    if(myHost->programsModel->userWantsToUnloadSetup()) {
                         //load on the next loop : we have to get out of the container before loading files
                         LoadFileMapper->setMapping(delayedAction, fName);
                         delayedAction->start(0);
@@ -167,7 +171,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
 
                 //project file
                 if ( info.suffix()==PROJECT_FILE_EXTENSION ) {
-                    if(myHost->mainWindow->userWantsToUnloadProject()) {
+                    if(myHost->programsModel->userWantsToUnloadProject()) {
                         //load on the next loop : we have to get out of the container before loading files
                         LoadFileMapper->setMapping(delayedAction, fName);
                         delayedAction->start(0);
@@ -214,22 +218,24 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
 
             if(info.inputs!=0) {
                 info.objType=ObjType::AudioInterfaceIn;
-                QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
-                if(objPtr.isNull()) {
-                    debug("HostModel::dropMimeData audioin object not found or already used")
-                } else {
-                    listObjToAdd << objPtr;
-                }
+//                QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
+//                if(objPtr.isNull()) {
+//                    debug("HostModel::dropMimeData audioin object not found or already used")
+//                } else {
+//                    listObjToAdd << objPtr;
+//                }
+                listObjInfoToAdd << info;
             }
 
             if(info.outputs!=0) {
                 info.objType=ObjType::AudioInterfaceOut;
-                QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
-                if(objPtr.isNull()) {
-                    debug("HostModel::dropMimeData audioout object not found or already used")
-                } else {
-                    listObjToAdd << objPtr;
-                }
+//                QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
+//                if(objPtr.isNull()) {
+//                    debug("HostModel::dropMimeData audioout object not found or already used")
+//                } else {
+//                    listObjToAdd << objPtr;
+//                }
+                listObjInfoToAdd << info;
             }
         }
     }
@@ -242,12 +248,13 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
         while(!stream.atEnd()) {
             ObjectInfo info;
             stream >> info;
-            QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
-            if(objPtr.isNull()) {
-                debug("HostModel::dropMimeData midi object not found or already used")
-                continue;
-            }
-            listObjToAdd << objPtr;
+//            QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
+//            if(objPtr.isNull()) {
+//                debug("HostModel::dropMimeData midi object not found or already used")
+//                continue;
+//            }
+//            listObjToAdd << objPtr;
+            listObjInfoToAdd << info;
         }
     }
 
@@ -259,47 +266,78 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
         while(!stream.atEnd()) {
             ObjectInfo info;
             stream >> info;
-            QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
-            if(objPtr.isNull()) {
-                debug("HostModel::dropMimeData tool object not found")
-                continue;
-            }
-            listObjToAdd << objPtr;
+//            QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->NewObject(info);
+//            if(objPtr.isNull()) {
+//                debug("HostModel::dropMimeData tool object not found")
+//                continue;
+//            }
+//            listObjToAdd << objPtr;
+            listObjInfoToAdd << info;
         }
     }
 
-    if(listObjToAdd.isEmpty())
-        return false;
 
-    foreach(QSharedPointer<Connectables::Object> objPtr, listObjToAdd) {
-        targetContainer->UserAddObject(objPtr);
+    foreach(ObjectInfo info, listObjInfoToAdd) {
 
-        //auto connect
-        if(column!=0) {
-            QSharedPointer<Connectables::Object> senderObj = myHost->objFactory->GetObj(senderIndex);
+        QSharedPointer<Connectables::Object> senderObj = myHost->objFactory->GetObj(senderIndex);
 
-            //connect left
-            if(column==1) {
-                if(action==Qt::MoveAction) {
-                    targetContainer->MoveInputCablesFromObj(objPtr, senderObj);
-                }
-                targetContainer->ConnectObjects(objPtr, senderObj, false);
-            }
-            //replace object
-            if(column==2) {
-                targetContainer->CopyCablesFromObj(objPtr, senderObj);
-                senderObj->CopyStatusTo(objPtr);
-                targetContainer->ParkObject(senderObj);
-            }
-            //connect right
-            if(column==3) {
-                if(action==Qt::MoveAction) {
-                    targetContainer->MoveOutputCablesFromObj(objPtr, senderObj);
-                }
-                targetContainer->ConnectObjects(senderObj, objPtr, false);
-            }
+        InsertionType::Enum insertType = InsertionType::NoInsertion;
+        switch(column) {
+            case 0:
+                insertType = InsertionType::NoInsertion;
+                break;
+            case 1:
+                if(action==Qt::MoveAction)
+                    insertType = InsertionType::InsertBefore;
+                else
+                    insertType = InsertionType::AddBefore;
+                break;
+            case 2:
+                insertType = InsertionType::Replace;
+                break;
+            case 3:
+                if(action==Qt::MoveAction)
+                    insertType = InsertionType::InsertAfter;
+                else
+                    insertType = InsertionType::AddAfter;
+                break;
         }
+
+        myHost->undoStack.push( new ComAddObject(myHost, info, targetContainer, senderObj, insertType) );
     }
+
+//    if(listObjToAdd.isEmpty())
+//        return false;
+
+//    foreach(QSharedPointer<Connectables::Object> objPtr, listObjToAdd) {
+//        targetContainer->UserAddObject(objPtr);
+
+//        //auto connect
+//        if(column!=0) {
+//            QSharedPointer<Connectables::Object> senderObj = myHost->objFactory->GetObj(senderIndex);
+
+//            //connect left
+//            if(column==1) {
+//                if(action==Qt::MoveAction) {
+//                    targetContainer->MoveInputCablesFromObj(objPtr, senderObj);
+//                }
+//                targetContainer->ConnectObjects(objPtr, senderObj, false);
+//            }
+//            //replace object
+//            if(column==2) {
+//                targetContainer->CopyCablesFromObj(objPtr, senderObj);
+//                senderObj->CopyStatusTo(objPtr);
+//                targetContainer->ParkObject(senderObj);
+//            }
+//            //connect right
+//            if(column==3) {
+//                if(action==Qt::MoveAction) {
+//                    targetContainer->MoveOutputCablesFromObj(objPtr, senderObj);
+//                }
+//                targetContainer->ConnectObjects(senderObj, objPtr, false);
+//            }
+//        }
+//    }
 
     return true;
 }

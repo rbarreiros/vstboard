@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>197</width>
-    <height>148</height>
+    <width>158</width>
+    <height>198</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string notr="true">Form</string>
@@ -29,7 +35,7 @@
       <number>1</number>
      </property>
      <property name="childrenCollapsible">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
      <widget class="QWidget" name="layoutWidget">
       <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -42,7 +48,78 @@
           <number>0</number>
          </property>
          <item>
-          <spacer name="horizontalSpacer_2">
+          <widget class="QToolButton" name="btAddGroup">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Add a group</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../../resources/resources.qrc">
+             <normaloff>:/img16x16/edit_add.png</normaloff>:/img16x16/edit_add.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="btDelGroup">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Remove a group</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../../resources/resources.qrc">
+             <normaloff>:/img16x16/edit_remove.png</normaloff>:/img16x16/edit_remove.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>1</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Groups</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -55,49 +132,47 @@
           </spacer>
          </item>
          <item>
-          <widget class="QRadioButton" name="grpAutosaveOn">
+          <widget class="QCheckBox" name="GroupAutosave">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="toolTip">
-            <string>Autosave changes</string>
+            <string>Autosave groups</string>
            </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="checked">
+           <property name="tristate">
             <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QRadioButton" name="grpAutosaveAsk">
-           <property name="toolTip">
-            <string>Prompt</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QRadioButton" name="grpAutosaveOff">
-           <property name="toolTip">
-            <string>Discard unsaved changes</string>
-           </property>
-           <property name="text">
-            <string/>
            </property>
           </widget>
          </item>
         </layout>
        </item>
        <item>
-        <widget class="GroupListView" name="listGrps" native="true">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+        <widget class="GroupListView" name="listGrps">
+         <property name="minimumSize">
+          <size>
+           <width>1</width>
+           <height>0</height>
+          </size>
          </property>
-         <property name="acceptDrops">
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::DragDrop</enum>
+         </property>
+         <property name="defaultDropAction">
+          <enum>Qt::MoveAction</enum>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
+         <property name="uniformItemSizes">
           <bool>true</bool>
          </property>
         </widget>
@@ -115,7 +190,78 @@
           <number>0</number>
          </property>
          <item>
-          <spacer name="horizontalSpacer">
+          <widget class="QToolButton" name="btAddProgram">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Add a program</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../../resources/resources.qrc">
+             <normaloff>:/img16x16/edit_add.png</normaloff>:/img16x16/edit_add.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="btDelProgram">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Remove a program</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../../resources/resources.qrc">
+             <normaloff>:/img16x16/edit_remove.png</normaloff>:/img16x16/edit_remove.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>1</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Programs</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_2">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -128,47 +274,51 @@
           </spacer>
          </item>
          <item>
-          <widget class="QRadioButton" name="progAutosaveOn">
+          <widget class="QCheckBox" name="ProgAutosave">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="toolTip">
-            <string>Autosave changes</string>
+            <string>Autosave programs</string>
            </property>
            <property name="text">
             <string/>
            </property>
-           <property name="checked">
+           <property name="tristate">
             <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QRadioButton" name="progAutosaveAsk">
-           <property name="toolTip">
-            <string>Prompt</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QRadioButton" name="progAutosaveOff">
-           <property name="toolTip">
-            <string>Discard unsaved changes</string>
-           </property>
-           <property name="text">
-            <string/>
            </property>
           </widget>
          </item>
         </layout>
        </item>
        <item>
-        <widget class="ProgListView" name="listProgs" native="true">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+        <widget class="ProgListView" name="listProgs">
+         <property name="minimumSize">
+          <size>
+           <width>1</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::DragDrop</enum>
+         </property>
+         <property name="defaultDropAction">
+          <enum>Qt::MoveAction</enum>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
+         <property name="uniformItemSizes">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -180,18 +330,93 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>GroupListView</class>
-   <extends>QWidget</extends>
-   <header>views/grouplistview.h</header>
-   <container>1</container>
+   <class>ProgListView</class>
+   <extends>QListView</extends>
+   <header>views/proglistview.h</header>
+   <slots>
+    <slot>InsertItem()</slot>
+    <slot>DeleteItem()</slot>
+   </slots>
   </customwidget>
   <customwidget>
-   <class>ProgListView</class>
-   <extends>QWidget</extends>
-   <header>views/proglistview.h</header>
-   <container>1</container>
+   <class>GroupListView</class>
+   <extends>QListView</extends>
+   <header>views/grouplistview.h</header>
+   <slots>
+    <slot>InsertItem()</slot>
+    <slot>DeleteItem()</slot>
+   </slots>
   </customwidget>
  </customwidgets>
- <resources/>
- <connections/>
+ <resources>
+  <include location="../../resources/resources.qrc"/>
+  <include location="../../resources/resources.qrc"/>
+  <include location="../../resources/resources.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>btAddGroup</sender>
+   <signal>clicked()</signal>
+   <receiver>listGrps</receiver>
+   <slot>InsertItem()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>11</x>
+     <y>10</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>33</x>
+     <y>49</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btDelGroup</sender>
+   <signal>clicked()</signal>
+   <receiver>listGrps</receiver>
+   <slot>DeleteItem()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>32</x>
+     <y>8</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>55</x>
+     <y>45</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btAddProgram</sender>
+   <signal>clicked()</signal>
+   <receiver>listProgs</receiver>
+   <slot>InsertItem()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>110</x>
+     <y>14</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>125</x>
+     <y>58</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btDelProgram</sender>
+   <signal>clicked()</signal>
+   <receiver>listProgs</receiver>
+   <slot>DeleteItem()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>12</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>158</x>
+     <y>52</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

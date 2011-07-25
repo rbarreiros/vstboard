@@ -37,12 +37,14 @@ namespace Connectables {
 
         void Hide();
         void ConnectObjects(QSharedPointer<Object> fromObjOutputs, QSharedPointer<Object> toObjInputs, bool hiddenCables);
-//        void RemoveCable(QModelIndex & index);
         void SetContainerId(quint16 id);
         const QModelIndex &GetCablesIndex();
 
         QDataStream & toStream (QDataStream &) const;
         bool fromStream (QDataStream &);
+
+        void ProgramToStream (int progId, QDataStream &out);
+        void ProgramFromStream (int progId, QDataStream &in);
 
         void OnChildDeleted(Object *obj);
 
@@ -59,8 +61,13 @@ namespace Connectables {
         void CopyCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr);
         void MoveOutputCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr);
         void MoveInputCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr);
-        bool IsDirty();
-        void SetDirty();
+        void GetListOfConnectedPinsTo(const ConnectionInfo &pin, QList<ConnectionInfo> &list);
+        bool IsDirty() {
+            return currentContainerProgram->IsDirty();
+        }
+        inline void SetDirty() {
+            currentContainerProgram->SetDirty();
+        }
         void SetSleep(bool sleeping);
 
         /// shared pointer to the bridge in object
@@ -68,6 +75,9 @@ namespace Connectables {
 
         /// shared pointer to the bridge out object
         QSharedPointer<Object> bridgeOut;
+
+        QSharedPointer<Object> bridgeSend;
+        QSharedPointer<Object> bridgeReturn;
 
         /// model for the parking storage
         HostModel parkModel;
@@ -86,9 +96,14 @@ namespace Connectables {
 
         int GetProgramToSet() { if(progToSet==-1) return currentProgId; else return progToSet; }
 
+        inline ContainerProgram * GetCurrentProgram() {return currentContainerProgram;}
+
+        void NewRenderLoop();
+
     protected:
         void AddChildObject(QSharedPointer<Object> objPtr);
         void ParkChildObject(QSharedPointer<Object> objPtr);
+        bool LoadProgram(ContainerProgram *newProg);
 
         /// true if this container saves the solver status
         bool optimizerFlag;
@@ -114,32 +129,39 @@ namespace Connectables {
         /// id of the progam to change on the next rendering loop
         int progToSet;
 
-        quint32 loadHeaderStream (QDataStream &);
+        bool loadHeaderStream (QDataStream &);
         bool loadObjectFromStream (QDataStream &);
         bool loadProgramFromStream (QDataStream &);
 
         QMutex progLoadMutex;
 
     public slots:
-        void UserAddObject(QSharedPointer<Object> objPtr);
-        void UserParkObject(QSharedPointer<Object> objPtr);
-        void UserParkWithBridge(QSharedPointer<Object> objPtr);
+        void UserAddObject(const QSharedPointer<Object> &objPtr,
+                           InsertionType::Enum insertType = InsertionType::NoInsertion,
+                           QList< QPair<ConnectionInfo,ConnectionInfo> > *listOfAddedCables=0,
+                           QList< QPair<ConnectionInfo,ConnectionInfo> > *listOfRemovedCables=0,
+                           const QSharedPointer<Object> &targetPtr=QSharedPointer<Object>());
+        void UserParkObject(QSharedPointer<Object> objPtr,
+                            RemoveType::Enum removeType = RemoveType::RemoveWithCables,
+                            QList< QPair<ConnectionInfo,ConnectionInfo> > *listOfAddedCables=0,
+                            QList< QPair<ConnectionInfo,ConnectionInfo> > *listOfRemovedCables=0);
         void UserAddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
+        void UserAddCable(const QPair<ConnectionInfo,ConnectionInfo>&pair);
         void UserRemoveCableFromPin(const ConnectionInfo &pin);
+        void UserRemoveCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
+        void UserRemoveCable(const QPair<ConnectionInfo,ConnectionInfo>&pair);
 
         void AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin, bool hidden=false);
-//        void RemoveCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
         void RemoveCableFromPin(const ConnectionInfo &pin);
-//        void RemoveCableFromObj(int objId);
+        void RemoveCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
 
         void SaveProgram();
         void UnloadProgram();
         void LoadProgram(int prog);
 
-        void SetProgram(const QModelIndex &prg);
-        void CopyProgram(int ori, int dest);
-        void RemoveProgram(int prg);
-        void Render();
+        void SetProgram(const QModelIndex &idx);
+        void RemoveProgram(const QModelIndex &idx = QModelIndex());
+        void PostRender();
 
         void SetBufferSize(unsigned long size);
         void SetSampleRate(float rate=44100.0);

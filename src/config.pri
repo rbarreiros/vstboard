@@ -14,6 +14,9 @@ win32|macx {
 CONFIG += scriptengine
 DEFINES += SCRIPTENGINE
 
+#use lines instead of curves
+#DEFINES += SIMPLE_CABLES
+
 CONFIG(debug, debug|release) {
     POST =
     build_postfix=debug

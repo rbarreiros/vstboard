@@ -30,18 +30,21 @@ using namespace Connectables;
 QTime ContainerProgram::unsavedTime;
 
 ContainerProgram::ContainerProgram(MainHost *myHost,Container *container) :
-        container(container),
-        dirty(false),
-        myHost(myHost)
+    container(container),
+    dirty(false),
+    myHost(myHost),
+    collectedListOfAddedCables(0),
+    collectedListOfRemovedCables(0)
 {
 }
 
-ContainerProgram::ContainerProgram(const ContainerProgram& c)
+ContainerProgram::ContainerProgram(const ContainerProgram& c) :
+    container(c.container),
+    dirty(false),
+    myHost(c.myHost),
+    collectedListOfAddedCables(0),
+    collectedListOfRemovedCables(0)
 {
-    myHost = c.myHost;
-    container = c.container;
-    dirty=false;
-
     foreach(QSharedPointer<Object> objPtr, c.listObjects) {
         listObjects << objPtr;
     }
@@ -75,24 +78,6 @@ ContainerProgram::~ContainerProgram()
     foreach(RendererNode *node, listOfRendererNodes) {
         delete node;
     }
-}
-
-ContainerProgram * ContainerProgram::Copy(int fromId, int toId)
-{
-    foreach(QSharedPointer<Object> objPtr, listObjects) {
-        objPtr->CopyProgram(fromId,toId);
-    }
-    return new ContainerProgram(*this);
-}
-
-ContainerProgram * ContainerProgram::CopyTo(int toId)
-{
-    foreach(QSharedPointer<Object> objPtr, listObjects) {
-        objPtr->CopyCurrentProgram(toId);
-    }
-    ContainerProgram *newPrg = new ContainerProgram(*this);
-    newPrg->Save(false);
-    return newPrg;
 }
 
 void ContainerProgram::Remove(int prgId)
@@ -150,7 +135,7 @@ void ContainerProgram::Load(int progId)
         ++i;
     }
 
-    dirty=false;
+    ResetDirty();
 }
 
 void ContainerProgram::Unload()
@@ -214,11 +199,6 @@ bool ContainerProgram::IsDirty()
     return false;
 }
 
-void ContainerProgram::SetDirty()
-{
-    dirty=true;
-}
-
 void ContainerProgram::Save(bool saveChildPrograms)
 {
 
@@ -249,14 +229,14 @@ void ContainerProgram::Save(bool saveChildPrograms)
             mapObjAttribs.insert(obj->GetIndex(),attr);
         }
     }
-    dirty=false;
+    ResetDirty();
 }
 
 void ContainerProgram::AddObject(QSharedPointer<Object> objPtr)
 {
     listObjects << objPtr;
     container->AddChildObject(objPtr);
-    dirty=true;
+    SetDirty();
 }
 
 void ContainerProgram::RemoveObject(QSharedPointer<Object> objPtr)
@@ -264,7 +244,7 @@ void ContainerProgram::RemoveObject(QSharedPointer<Object> objPtr)
     RemoveCableFromObj(objPtr->GetIndex());
     listObjects.removeAll(objPtr);
     container->ParkChildObject(objPtr);
-    dirty=true;
+    SetDirty();
 }
 
 void ContainerProgram::ReplaceObject(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> replacedObjPtr)
@@ -290,21 +270,27 @@ bool ContainerProgram::AddCable(const ConnectionInfo &outputPin, const Connectio
     Cable *cab = new Cable(myHost,outputPin,inputPin);
     listCables << cab;
 
+    if(collectedListOfAddedCables)
+        *collectedListOfAddedCables << QPair<ConnectionInfo,ConnectionInfo>(outputPin,inputPin);
+
     if(!hidden && container)
         cab->AddToParentNode(container->GetCablesIndex());
 
     myHost->OnCableAdded(cab);
-    dirty=true;
+    SetDirty();
     return true;
 }
 
 void ContainerProgram::RemoveCable(Cable *cab)
 {
+    if(collectedListOfRemovedCables)
+        *collectedListOfRemovedCables << QPair<ConnectionInfo,ConnectionInfo>(cab->GetInfoOut(),cab->GetInfoIn());
+
     listCables.removeAll(cab);
     cab->RemoveFromParentNode(container->GetCablesIndex());
     myHost->OnCableRemoved(cab);
     delete cab;
-    dirty=true;
+    SetDirty();
 }
 
 void ContainerProgram::RemoveCable(const QModelIndex & index)
@@ -449,6 +435,19 @@ void ContainerProgram::MoveInputCablesFromObj(int newObjId, int oldObjId)
     }
 }
 
+void ContainerProgram::GetListOfConnectedPinsTo(const ConnectionInfo &pin, QList<ConnectionInfo> &list)
+{
+    int i=listCables.size()-1;
+    while(i>=0) {
+        Cable *cab = listCables.at(i);
+        if(cab->GetInfoIn()==pin)
+            list << cab->GetInfoOut();
+        if(cab->GetInfoOut()==pin)
+            list << cab->GetInfoIn();
+        --i;
+    }
+}
+
 bool ContainerProgram::CableExists(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
 {
     foreach(Cable *c, listCables) {
@@ -460,7 +459,8 @@ bool ContainerProgram::CableExists(const ConnectionInfo &outputPin, const Connec
 
 QDataStream & ContainerProgram::toStream (QDataStream& out) const
 {
-    out << (quint16)listObjects.size();
+    quint16 nbObj = listObjects.size();
+    out << nbObj;
     foreach(QSharedPointer<Object> objPtr, listObjects) {
         out << (qint16)objPtr->GetIndex();
     }
@@ -525,7 +525,7 @@ QDataStream & ContainerProgram::fromStream (QDataStream& in)
         mapObjAttribs.insert(objId,attr);
     }
 
-    dirty=false;
+    ResetDirty();
     return in;
 }
 

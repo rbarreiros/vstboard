@@ -38,6 +38,12 @@
 
         void SaveProgram();
 
+        void ProgramToStream (int progId, QDataStream &out);
+        void ProgramFromStream (int progId, QDataStream &in);
+
+        void SetViewProgram(int progId);
+        void RemoveViewProgram(int prg);
+
     protected:
         void wheelEvent(QWheelEvent * event);
         void mousePressEvent ( QMouseEvent * event );
@@ -62,10 +68,8 @@
         void zoomOut();
         void zoomReset();
         void ForceResize();
-        void SetViewProgram(int progId);
-        void SetViewProgram(const QModelIndex &prg);
-        void CopyViewProgram(int ori, int dest);
-        void RemoveViewProgram(int prg);
+        void SetViewProgram(const QModelIndex &idx);
+        void RemoveViewProgram(const QModelIndex &idx);
         void ClearViewPrograms();
     };
 

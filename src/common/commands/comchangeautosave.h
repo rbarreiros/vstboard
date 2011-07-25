@@ -1,5 +1,5 @@
 /**************************************************************************
-#    Copyright 2010-2011 Raphaël François
+#    Copyright 2010-2011 RaphaÃ«l FranÃ§ois
 #    Contact : ctrlbrk76@gmail.com
 #
 #    This file is part of VstBoard.
@@ -18,28 +18,28 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#ifndef MAINCONTAINER_H
-#define MAINCONTAINER_H
+#ifndef COMCHANGEAUTOSAVE_H
+#define COMCHANGEAUTOSAVE_H
 
-#include "container.h"
+#include <QUndoCommand>
 
-namespace Connectables {
+class ProgramsModel;
+class ComChangeAutosave : public QUndoCommand
+{
+public:
+    ComChangeAutosave(ProgramsModel *model,
+                      int type,
+                      Qt::CheckState newState,
+                      QUndoCommand *parent=0);
 
-    class MainContainer : public Container
-    {
-    public:
-        MainContainer(MainHost *myHost,int index, const ObjectInfo &info);
-        virtual ~MainContainer();
+    void undo();
+    void redo();
 
-        bool Close();
-        void AddObject(QSharedPointer<Object> objPtr);
-        void ParkObject(QSharedPointer<Object> objPtr);
+private:
+    ProgramsModel *model;
+    int type;
+    Qt::CheckState oldState;
+    Qt::CheckState newState;
+};
 
-        QSharedPointer<Object> bridgeSend;
-        QSharedPointer<Object> bridgeReturn;
-
-    protected:
-
-    };
-}
-#endif // MAINCONTAINER_H
+#endif // COMCHANGEAUTOSAVE_H

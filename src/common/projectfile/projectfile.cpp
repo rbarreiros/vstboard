@@ -19,8 +19,9 @@
 **************************************************************************/
 
 #include "projectfile.h"
-#include "../mainhost.h"
-#include "../mainwindow.h"
+#include "mainhost.h"
+#include "mainwindow.h"
+#include "models/programsmodel.h"
 #include "fileversion.h"
 
 bool ProjectFile::SaveToProjectFile(MainHost *myHost,QString filePath)
@@ -78,7 +79,7 @@ bool ProjectFile::ToStream(MainHost *myHost,QDataStream &out, quint32 fileKey )
             QByteArray tmpBa;
             QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
             myHost->hostContainer->SaveProgram();
-            tmpStream << *myHost->hostContainer;
+            myHost->hostContainer->toStream(tmpStream);
             SaveChunk( "HostContainer", tmpBa, out);
         }
 
@@ -107,7 +108,7 @@ bool ProjectFile::ToStream(MainHost *myHost,QDataStream &out, quint32 fileKey )
             QByteArray tmpBa;
             QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
             myHost->projectContainer->SaveProgram();
-            tmpStream << *myHost->projectContainer;
+            myHost->projectContainer->toStream(tmpStream);
             SaveChunk( "ProjectContainer", tmpBa, out);
         }
 
@@ -116,7 +117,7 @@ bool ProjectFile::ToStream(MainHost *myHost,QDataStream &out, quint32 fileKey )
             QByteArray tmpBa;
             QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
             myHost->programContainer->SaveProgram();
-            tmpStream << *myHost->programContainer;
+            myHost->programContainer->toStream(tmpStream);
             SaveChunk( "ProgramContainer", tmpBa, out);
         }
 
@@ -125,7 +126,7 @@ bool ProjectFile::ToStream(MainHost *myHost,QDataStream &out, quint32 fileKey )
             QByteArray tmpBa;
             QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
             myHost->groupContainer->SaveProgram();
-            tmpStream << *myHost->groupContainer;
+            myHost->groupContainer->toStream(tmpStream);
             SaveChunk( "GroupContainer", tmpBa, out);
         }
 
@@ -133,7 +134,7 @@ bool ProjectFile::ToStream(MainHost *myHost,QDataStream &out, quint32 fileKey )
             //save ProgramList
             QByteArray tmpBa;
             QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
-            tmpStream << *myHost->programList;
+            tmpStream << *myHost->programsModel;
             SaveChunk( "ProgramList", tmpBa, out);
         }
 
@@ -169,7 +170,7 @@ bool ProjectFile::FromStream(MainHost *myHost,QDataStream &in)
     }
 
     in >> MainHost::currentFileVersion;
-    if(MainHost::currentFileVersion < 15) {
+    if(MainHost::currentFileVersion != PROJECT_AND_SETUP_FILE_VERSION) {
         QMessageBox msgBox(QMessageBox::Critical, "", tr("File format v%1 can't be converted to the current file format v%2").arg(MainHost::currentFileVersion).arg(PROJECT_AND_SETUP_FILE_VERSION) );
         msgBox.exec();
         return false;
@@ -211,7 +212,7 @@ bool ProjectFile::FromStream(MainHost *myHost,QDataStream &in)
         }
 
         else if(chunkName=="ProgramList") {
-            tmpStream >> *myHost->programList;
+            tmpStream >> *myHost->programsModel;
         }
 
         else if(chunkName=="HostView") {
@@ -243,13 +244,15 @@ bool ProjectFile::FromStream(MainHost *myHost,QDataStream &in)
         }
 
         if(!tmpStream.atEnd()) {
+            in.setStatus(QDataStream::ReadCorruptData);
+#ifndef QT_NO_DEBUG
             debug2(<<"ProjectFile::FromStream stream not at end, drop remaining data")
             while(!tmpStream.atEnd()) {
                 char c[1000];
                 int nb=tmpStream.readRawData(c,1000);
                 debug2(<<nb << QByteArray::fromRawData(c,nb).toHex())
             }
-            in.setStatus(QDataStream::ReadCorruptData);
+#endif
         }
 
         if(tmpStream.status()==QDataStream::ReadCorruptData) {

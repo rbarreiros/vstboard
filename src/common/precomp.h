@@ -36,9 +36,15 @@
     #include <cmath>
     #include <algorithm>
 
+    #include <QtGui/QAction>
     #include <QAbstractItemView>
     #include <QtAlgorithms>
     #include <QtGui/QApplication>
+    #include <QtGui/QButtonGroup>
+    #include <QtGui/QCheckBox>
+    #include <QtGui/QHBoxLayout>
+    #include <QtGui/QHeaderView>
+    #include <QClipboard>
     #include <QDialog>
     #include <QDir>
     #include <QDragEnterEvent>
@@ -59,6 +65,7 @@
     #include <QGraphicsView>
     #include <QGraphicsWidget>
     #include <QHBoxLayout>
+    #include <QtGui/QLabel>
     #include <QLibrary>
     #include <QLineEdit>
     #include <QListWidgetItem>
@@ -78,15 +85,21 @@
     #include <QSharedData>
     #include <QSharedPointer>
     #include <QSignalMapper>
+    #include <QtGui/QSpacerItem>
+    #include <QtGui/QSplitter>
     #include <QStandardItemModel>
     #include <QStringList>
     #include <QStyledItemDelegate>
     #include <QThread>
     #include <QTime>
     #include <QTimer>
+    #include <QtGui/QToolButton>
     #include <QTreeWidget>
+    #include <QUndoCommand>
     #include <QUrl>
-    #include <QWidget>
+    #include <QtCore/QVariant>
+    #include <QtGui/QVBoxLayout>
+    #include <QtGui/QWidget>
 
     #ifdef SCRIPTENGINE
         #include <QtScript>

@@ -10,13 +10,15 @@ class RenderThread : public QThread
     Q_OBJECT
 
 public:
-    RenderThread(Renderer *renderer, const QString &name);
+    RenderThread(Renderer *renderer, int cpu, const QString &name);
     ~RenderThread();
 
     void run();
     void SetListOfSteps( const QMap<int, RendererNode* > &lst );
     void StartRenderStep( int s );
     QList<RendererNode*> GetListOfNodes();
+
+    int currentCpu;
 
 protected:
     void ResetSteps();
@@ -30,9 +32,10 @@ protected:
     QSemaphore sem;
     int step;
     bool stop;
-    int lastStepForRendering;
 
-//friend class Renderer;
+    RendererNode* currentNode;
+
+    QMutex mutexRender;
 };
 
 #endif // RENDERTHREAD_H

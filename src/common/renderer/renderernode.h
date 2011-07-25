@@ -15,7 +15,6 @@ public:
     void NewRenderLoop();
     void Render();
     void AddMergedNode(RendererNode *merged);
-//    void RemoveMergedNode(RendererNode *merged);
     void ClearMergedNodes();
     QList<RendererNode*> GetListOfMergedNodes() const {return listOfMergedNodes;}
     void UpdateModel(QStandardItemModel *model);
@@ -30,7 +29,6 @@ public:
 protected:
     int benchCount;
     QList<RendererNode*>listOfMergedNodes;
-//    QReadWriteLock mutex;
 };
 
 #endif // RENDERERNODE_H
