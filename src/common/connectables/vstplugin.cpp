@@ -24,6 +24,8 @@
 #include "../mainwindow.h"
 #include "../vst/cvsthost.h"
 #include "../views/vstpluginwindow.h"
+#include "commands/comaddpin.h"
+#include "commands/comremovepin.h"
 
 using namespace Connectables;
 
@@ -44,8 +46,6 @@ VstPlugin::VstPlugin(MainHost *myHost,int index, const ObjectInfo & info) :
     for(int i=0;i<128;i++) {
         listValues << i;
     }
-
-
 
     listParameterPinIn->AddPin(FixedPinNumber::vstProgNumber);
 }
@@ -586,29 +586,44 @@ void VstPlugin::UserRemovePin(const ConnectionInfo &info)
     OnProgramDirty();
 }
 
+void VstPlugin::UserAddPin(const ConnectionInfo &info)
+{
+    if(info.type!=PinType::Parameter)
+        return;
+
+    if(info.direction!=PinDirection::Input)
+        return;
+
+    if(listParameterPinIn->listPins.contains(info.pinNumber))
+        static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(info.pinNumber))->SetVisible(true);
+    OnProgramDirty();
+}
+
 VstIntPtr VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr, float opt, long currentReturnCode)
 {
     switch(opcode) {
         case audioMasterAutomate : //0
             //create the parameter pin if needed
-            switch(GetLearningMode()) {
+
+            {
+                ParameterPin *pin = static_cast<ParameterPin*>(listParameterPinIn->listPins.value(index,0));
+                if(!pin)
+                    return 0L;
+
+                switch(GetLearningMode()) {
                 case LearningMode::unlearn :
-                    if(listParameterPinIn->listPins.contains(index))
-                        static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(index))->SetVisible(false);
-//                    if(listParameterPinOut->listPins.contains(index))
-//                        static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(index))->SetVisible(false);
+                    if(pin->GetVisible())
+                        myHost->undoStack.push( new ComRemovePin(myHost, pin->GetConnectionInfo()) );
                     break;
+
                 case LearningMode::learn :
-                    if(listParameterPinIn->listPins.contains(index))
-                        static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(index))->SetVisible(true);
-//                    if(listParameterPinOut->listPins.contains(index))
-//                        static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(index))->SetVisible(true);
+                    if(!pin->GetVisible())
+                        myHost->undoStack.push( new ComAddPin(myHost, pin->GetConnectionInfo()) );
+
                 case LearningMode::off :
-                    if(listParameterPinIn->listPins.contains(index))
-                        static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(index))->ChangeValue(opt);
-//                    if(listParameterPinOut->listPins.contains(index))
-//                        static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(index))->ChangeValue(opt);
-                    break;
+                    pin->ChangeValue(opt);
+
+                }
             }
             break;
 

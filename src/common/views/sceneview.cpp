@@ -35,6 +35,7 @@
 #include <QSplitter>
 #include "commands/comaddcable.h"
 #include "commands/comdisconnectpin.h"
+#include "commands/comremovepin.h"
 #include "models/programsmodel.h"
 
 using namespace View;
@@ -620,9 +621,10 @@ void SceneView::RemoveCablesFromPin(const ConnectionInfo &pin)
 
 void SceneView::RemovePin(const ConnectionInfo &pin)
 {
-    QPersistentModelIndex ix = mapConnectionInfo.value(pin);
-    QSharedPointer<Connectables::Object> objPtr = objFactory->GetObjectFromId(pin.objId);
-    objPtr->UserRemovePin(pin);
+//    QPersistentModelIndex ix = mapConnectionInfo.value(pin);
+//    QSharedPointer<Connectables::Object> objPtr = objFactory->GetObjectFromId(pin.objId);
+//    objPtr->UserRemovePin(pin);
+    myHost->undoStack.push( new ComRemovePin(myHost,pin) );
 }
 
 void SceneView::ToggleHostView(bool show)

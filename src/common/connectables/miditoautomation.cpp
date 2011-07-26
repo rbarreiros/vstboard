@@ -18,11 +18,12 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-
 #include "miditoautomation.h"
 #include "midipinin.h"
 #include "../globals.h"
 #include "mainhost.h"
+#include "commands/comaddpin.h"
+#include "commands/comremovepin.h"
 
 using namespace Connectables;
 
@@ -113,10 +114,17 @@ void MidiToAutomation::ChangeValue(int ctrl, int value) {
     if(ctrl<128 || ctrl>=para_notes) {
         switch(GetLearningMode()) {
             case LearningMode::unlearn :
-                listParameterPinOut->AsyncRemovePin(ctrl);
+                if(listParameterPinOut->listPins.contains(ctrl)) {
+                    myHost->undoStack.push( new ComRemovePin(myHost, listParameterPinOut->listPins.value(ctrl)->GetConnectionInfo()) );
+                }
                 break;
             case LearningMode::learn :
-                listParameterPinOut->AsyncAddPin(ctrl);
+                if(!listParameterPinOut->listPins.contains(ctrl)) {
+                    ConnectionInfo info = listParameterPinOut->connInfo;
+                    info.pinNumber = ctrl;
+                    info.isRemoveable = true;
+                    myHost->undoStack.push( new ComAddPin(myHost,info) );
+                }
             case LearningMode::off :
                 listChanged.insert(ctrl,value);
                 break;

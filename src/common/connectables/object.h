@@ -280,6 +280,7 @@ namespace Connectables {
         virtual void OnHideEditor() {}
 
         virtual void UserRemovePin(const ConnectionInfo &info);
+        virtual void UserAddPin(const ConnectionInfo &info);
 
         void SetErrorMessage(const QString &msg) {errorMessage=msg;}
     };

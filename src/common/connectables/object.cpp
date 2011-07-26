@@ -566,6 +566,23 @@ void Object::UserRemovePin(const ConnectionInfo &info)
     }
 }
 
+void Object::UserAddPin(const ConnectionInfo &info)
+{
+    if(info.type!=PinType::Parameter)
+        return;
+
+    switch(info.direction) {
+        case PinDirection::Input :
+            listParameterPinIn->AsyncAddPin(info.pinNumber);
+            OnProgramDirty();
+            break;
+        case PinDirection::Output :
+            listParameterPinOut->AsyncAddPin(info.pinNumber);
+            OnProgramDirty();
+            break;
+    }
+}
+
 /*!
   Called by PinsList to create a pin
   \param info ConnectionInfo defining the pin to be created

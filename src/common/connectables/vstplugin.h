@@ -107,6 +107,7 @@ namespace Connectables {
         void SaveProgram(const QString &filename);
 //        void TakeScreenshot();
         void UserRemovePin(const ConnectionInfo &info);
+        void UserAddPin(const ConnectionInfo &info);
 
         friend class View::VstPluginWindow;
     };
