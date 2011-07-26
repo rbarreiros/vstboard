@@ -38,6 +38,7 @@
          switch (type) {
 
          case QtWarningMsg:
+             break;
          case QtCriticalMsg:
          case QtFatalMsg:
 //#ifdef _MSC_VER

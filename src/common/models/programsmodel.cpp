@@ -542,11 +542,17 @@ void ProgramsModel::UserChangeGroup(const QModelIndex &newGrp)
 
 void ProgramsModel::UserChangeProg(int prg)
 {
+    int maxPrg=rowCount(currentPrg.parent())-1;
+    if(prg>maxPrg)
+        prg=maxPrg;
     UserChangeProg( currentPrg.sibling(prg,0) );
 }
 
 void ProgramsModel::UserChangeGroup(int grp)
 {
+    int maxGrp=rowCount()-1;
+    if(grp>maxGrp)
+        grp=maxGrp;
     UserChangeGroup( index(grp,0) );
 }
 
