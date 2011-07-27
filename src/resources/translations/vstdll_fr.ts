@@ -4,22 +4,37 @@
 <context>
     <name>Connectables::VstAutomation</name>
     <message>
-        <location filename="../../vstdll/connectables/vstautomation.cpp" line="28"/>
+        <location filename="../../vstdll/connectables/vstautomation.cpp" line="30"/>
         <source>VstAutomation</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../vstdll/connectables/vstautomation.cpp" line="140"/>
+        <location filename="../../vstdll/connectables/vstautomation.cpp" line="84"/>
+        <source>Remove pin</source>
+        <translation>Broche supprimée</translation>
+    </message>
+    <message>
+        <location filename="../../vstdll/connectables/vstautomation.cpp" line="99"/>
+        <source>Add pin</source>
+        <translation>Broche ajoutée</translation>
+    </message>
+    <message>
+        <location filename="../../vstdll/connectables/vstautomation.cpp" line="130"/>
+        <source>Change number of pins</source>
+        <translation>Nb. broches modifié</translation>
+    </message>
+    <message>
+        <location filename="../../vstdll/connectables/vstautomation.cpp" line="197"/>
         <source>Prog</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../vstdll/connectables/vstautomation.cpp" line="149"/>
+        <location filename="../../vstdll/connectables/vstautomation.cpp" line="206"/>
         <source>NbPins</source>
         <translation>NbParam</translation>
     </message>
     <message>
-        <location filename="../../vstdll/connectables/vstautomation.cpp" line="154"/>
+        <location filename="../../vstdll/connectables/vstautomation.cpp" line="211"/>
         <source>Learn</source>
         <translation></translation>
     </message>
@@ -27,27 +42,27 @@
 <context>
     <name>MainWindowVst</name>
     <message>
-        <location filename="../../vstdll/mainwindowvst.cpp" line="53"/>
+        <location filename="../../vstdll/mainwindowvst.cpp" line="54"/>
         <source>Vst audio input</source>
         <translation>Entrée audio VST</translation>
     </message>
     <message>
-        <location filename="../../vstdll/mainwindowvst.cpp" line="62"/>
+        <location filename="../../vstdll/mainwindowvst.cpp" line="63"/>
         <source>Vst audio output</source>
         <translation>Sortie audio VST</translation>
     </message>
     <message>
-        <location filename="../../vstdll/mainwindowvst.cpp" line="74"/>
+        <location filename="../../vstdll/mainwindowvst.cpp" line="75"/>
         <source>Vst midi input</source>
         <translation>Entrée Midi VST</translation>
     </message>
     <message>
-        <location filename="../../vstdll/mainwindowvst.cpp" line="84"/>
+        <location filename="../../vstdll/mainwindowvst.cpp" line="85"/>
         <source>Vst midi output</source>
         <translation>Sortie Midi VST</translation>
     </message>
     <message>
-        <location filename="../../vstdll/mainwindowvst.cpp" line="94"/>
+        <location filename="../../vstdll/mainwindowvst.cpp" line="95"/>
         <source>Vst Automation</source>
         <translation></translation>
     </message>

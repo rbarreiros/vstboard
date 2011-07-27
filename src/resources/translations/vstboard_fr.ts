@@ -6,12 +6,12 @@
     <message>
         <location filename="../../vstboard/connectables/audiodevice.cpp" line="218"/>
         <source>Device not found</source>
-        <translation type="unfinished">Interface non trouvée</translation>
+        <translation>Interface non trouvée</translation>
     </message>
     <message>
         <location filename="../../vstboard/connectables/audiodevice.cpp" line="366"/>
         <source>Stream format not supported</source>
-        <translation type="unfinished">Format stream non supporté</translation>
+        <translation>Format stream non supporté</translation>
     </message>
 </context>
 <context>
@@ -43,17 +43,17 @@
         <translation>Interface non trouvée</translation>
     </message>
     <message>
-        <location filename="../../vstboard/audiodevices.cpp" line="463"/>
+        <location filename="../../vstboard/audiodevices.cpp" line="474"/>
         <source>Error</source>
         <translation>Erreur</translation>
     </message>
     <message>
-        <location filename="../../vstboard/audiodevices.cpp" line="488"/>
+        <location filename="../../vstboard/audiodevices.cpp" line="499"/>
         <source>No config</source>
         <translation>Pas de config</translation>
     </message>
     <message>
-        <location filename="../../vstboard/audiodevices.cpp" line="489"/>
+        <location filename="../../vstboard/audiodevices.cpp" line="500"/>
         <source>No config dialog for this device</source>
         <translation>Pas de config pour cette interface</translation>
     </message>
@@ -61,7 +61,7 @@
 <context>
     <name>MainWindowHost</name>
     <message>
-        <location filename="../../vstboard/mainwindowhost.cpp" line="57"/>
+        <location filename="../../vstboard/mainwindowhost.cpp" line="59"/>
         <source>Refresh list</source>
         <translation>Rafraîchir la liste</translation>
     </message>
