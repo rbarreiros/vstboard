@@ -156,21 +156,32 @@ void PinsList::AsyncRemovePin(int nb)
     emit PinRemoved(nb);
 }
 
-void PinsList::SetNbPins(int nb)
+void PinsList::SetNbPins(int nb, QList<quint16> *listAdded,QList<quint16> *listRemoved)
 {
-   QMap<quint16,Pin*>::iterator i = listPins.end();
-    while(listPins.size()>nb && !listPins.empty()) {
-        if(i.key()<FIXED_PIN_STARTINDEX) {
-            RemovePin(i.key());
-            i=listPins.erase(i);
+    QMap<quint16,Pin*>::iterator i = listPins.begin();
+    while(i!=listPins.end()) {
+        if(i.key()>=nb && i.key()<FIXED_PIN_STARTINDEX) {
+            if(listRemoved) {
+                *listRemoved << i.key();
+                ++i;
+            } else {
+                RemovePin(i.key());
+                i=listPins.erase(i);
+            }
+        } else {
+            ++i;
         }
-        --i;
     }
 
     int cpt=0;
     while(cpt<nb) {
-        if(!listPins.contains(cpt))
-            AddPin(cpt);
+        if(!listPins.contains(cpt)) {
+            if(listAdded) {
+                *listAdded<<cpt;
+            } else {
+                AddPin(cpt);
+            }
+        }
         cpt++;
     }
 }

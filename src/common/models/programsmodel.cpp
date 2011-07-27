@@ -517,7 +517,7 @@ void ProgramsModel::UserChangeProg(const QModelIndex &newPrg)
 
 
     if(progAutosaveState == Qt::Unchecked && myHost->programContainer->IsDirty()) {
-        QUndoCommand *discardCom = new QUndoCommand("Discard changes");
+        QUndoCommand *discardCom = new QUndoCommand( tr("Discard changes") );
         if(newPrg.parent() != currentGrp && groupAutosaveState == Qt::Unchecked && myHost->groupContainer->IsDirty())
             new ComDiscardChanges(this,currentGrp.row(),-1,discardCom);
         new ComDiscardChanges(this,currentPrg.row(),currentGrp.row(),discardCom);
