@@ -20,15 +20,18 @@
 
 #include "scripteditor.h"
 #include "ui_scripteditor.h"
+#include "connectables/script.h"
 
 using namespace View;
 
 ScriptEditor::ScriptEditor(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::ScriptEditor)
+    ui(new Ui::ScriptEditor),
+    object(0)
 {
     ui->setupUi(this);
     setAttribute(Qt::WA_ShowWithoutActivating);
+    setAttribute(Qt::WA_DeleteOnClose);
     setWindowFlags(Qt::Tool);
     setWindowTitle(tr("Script editor"));
 }
@@ -38,8 +41,18 @@ ScriptEditor::~ScriptEditor()
     delete ui;
 }
 
+void ScriptEditor::SetObject(Connectables::Script *script)
+{
+    object=script;
+}
+
 void ScriptEditor::closeEvent( QCloseEvent * event )
 {
+    if(!object) {
+        event->accept();
+        return;
+    }
+
     hide();
     emit Hide();
     event->ignore();

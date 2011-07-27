@@ -60,12 +60,14 @@ VstPlugin::~VstPlugin()
 bool VstPlugin::Close()
 {
     if(editorWnd) {
+        editorWnd->disconnect();
+        editorWnd->SetPlugin(0);
+        disconnect(editorWnd);
+        QTimer::singleShot(0,editorWnd,SLOT(close()));
+        editorWnd=0;
         objMutex.lock();
         EffEditClose();
         objMutex.unlock();
-        editorWnd->SetPlugin(0);
-        QTimer::singleShot(0,editorWnd,SLOT(close()));
-        editorWnd=0;
     }
     mapPlugins.remove(pEffect);
 
@@ -435,11 +437,6 @@ void VstPlugin::CreateEditorWindow()
         return;
 
     editorWnd = new View::VstPluginWindow(myHost->mainWindow);
-
-    connect(this,SIGNAL(CloseEditorWindow()),
-            editorWnd,SLOT(hide()),
-            Qt::QueuedConnection);
-
     editorWnd->setAttribute(Qt::WA_ShowWithoutActivating);
 
     if(!editorWnd->SetPlugin(this)) {
@@ -448,6 +445,16 @@ void VstPlugin::CreateEditorWindow()
         return;
     }
 
+    connect(this,SIGNAL(HideEditorWindow()),
+            editorWnd,SLOT(hide()),
+            Qt::QueuedConnection);
+    connect(editorWnd, SIGNAL(Hide()),
+            this, SLOT(OnEditorClosed()));
+    connect(editorWnd,SIGNAL(destroyed()),
+            this,SLOT(EditorDestroyed()));
+    connect(this,SIGNAL(WindowSizeChange(int,int)),
+            editorWnd,SLOT(SetWindowSize(int,int)));
+
     //no screenshot in db, create one
 //    if(!ImageCollection::Get()->ImageExists(QString::number( pEffect->uniqueID ))) {
 //        OnEditorVisibilityChanged(true);
@@ -455,6 +462,11 @@ void VstPlugin::CreateEditorWindow()
 //                this,SLOT(EditIdle()));
 //        QTimer::singleShot(100,this,SLOT(TakeScreenshot()));
 //    }
+}
+
+void VstPlugin::OnEditorClosed()
+{
+    ToggleEditor(false);
 }
 
 void VstPlugin::OnShowEditor()
@@ -475,7 +487,7 @@ void VstPlugin::OnHideEditor()
 
     disconnect(myHost->updateViewTimer,SIGNAL(timeout()),
             this,SLOT(EditIdle()));
-    emit CloseEditorWindow();
+    emit HideEditorWindow();
 }
 
 void VstPlugin::SetContainerAttribs(const ObjectContainerAttribs &attr)

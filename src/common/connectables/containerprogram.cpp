@@ -242,12 +242,7 @@ void ContainerProgram::AddObject(QSharedPointer<Object> objPtr)
 void ContainerProgram::RemoveObject(QSharedPointer<Object> objPtr)
 {
     RemoveCableFromObj(objPtr->GetIndex());
-
-    //don't remove object while rendering, there's probably a better way to avoid it... but it's late
-    myHost->mutexRender.lock();
     listObjects.removeAll(objPtr);
-    myHost->mutexRender.unlock();
-
     container->ParkChildObject(objPtr);
     SetDirty();
 }

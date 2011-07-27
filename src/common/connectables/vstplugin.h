@@ -101,6 +101,7 @@ namespace Connectables {
         void OnParameterChanged(ConnectionInfo pinInfo, float value);
         void OnShowEditor();
         void OnHideEditor();
+        void OnEditorClosed();
         bool LoadBank(const QString &filename);
         void SaveBank(const QString &filename);
         bool LoadProgram(const QString &filename);

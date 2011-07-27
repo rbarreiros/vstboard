@@ -92,10 +92,6 @@ bool VstPluginWindow::SetPlugin(Connectables::VstPlugin *plugin)
     SetWindowSize(rect->right, rect->bottom);
     setWindowTitle(plugin->objectName());
 
-    connect(this,SIGNAL(destroyed()),
-            plugin,SLOT(EditorDestroyed()));
-    connect(plugin,SIGNAL(WindowSizeChange(int,int)),
-            this,SLOT(SetWindowSize(int,int)));
     return true;
 }
 
@@ -137,7 +133,7 @@ void VstPluginWindow::closeEvent( QCloseEvent * event )
     }
 
     hide();
-    plugin->ToggleEditor(false);
+    emit Hide();
     event->ignore();
 }
 
