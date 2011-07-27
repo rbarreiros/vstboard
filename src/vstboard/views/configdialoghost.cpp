@@ -31,7 +31,7 @@ ConfigDialogHost::ConfigDialogHost(MainHost *myHost, QWidget *parent) :
 
     int index=ui->sampleRate->findData( myHost->GetSampleRate() );
     if(index==-1) {
-        debug("ConfigDialog invalid sample rate")
+        LOG("invalid sample rate"<<index);
         return;
     }
     ui->sampleRate->setCurrentIndex(index);

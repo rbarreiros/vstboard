@@ -106,12 +106,10 @@
     #endif
 
     #ifdef QT_NO_DEBUG
-        #define debug(...)
-        #define debug2(...)
+        #define LOG(...)
     #else
         #include <QDebug>
-        #define debug(...) {qDebug(__VA_ARGS__);}
-        #define debug2(...) {qDebug()__VA_ARGS__;}
+#define LOG(...); {qDebug()<<__VA_ARGS__<<"("<<__FUNCTION__<<":"<< __LINE__<<" )";}
     #endif
 
 #endif

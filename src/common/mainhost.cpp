@@ -619,7 +619,7 @@ void MainHost::SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum ms
         const ConnectionInfo &destPin = i.value();
         Connectables::Pin *pin = objFactory->GetPin(destPin);
         if(!pin) {
-            debug2(<<"MainHost::SendMsg : unknown pin"<<destPin.objId<<"from"<<senderPin.objId)
+            LOG("unknown pin"<<destPin.objId<<"from"<<senderPin.objId);
             return;
         }
 

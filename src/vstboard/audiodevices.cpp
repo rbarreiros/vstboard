@@ -64,7 +64,7 @@ AudioDevices::~AudioDevices()
     if(model) {
         PaError err=Pa_Terminate();
         if(err!=paNoError) {
-            debug("AudioDevices::~AudioDevices Pa_Terminate %s",Pa_GetErrorText( err ))
+            LOG("Pa_Terminate"<<Pa_GetErrorText( err ));
         }
 //        model->deleteLater();
     }
@@ -99,7 +99,7 @@ ListAudioInterfacesModel * AudioDevices::GetModel()
     if(model) {
         PaError err=Pa_Terminate();
         if(err!=paNoError) {
-            debug("AudioDevices::GetModel Pa_Terminate %s",Pa_GetErrorText( err ))
+            LOG("Pa_Terminate"<<Pa_GetErrorText( err ));
         }
         model->invisibleRootItem()->removeRows(0, model->invisibleRootItem()->rowCount());
     }
@@ -261,7 +261,7 @@ void AudioDevices::OnToggleDeviceInUse(PaHostApiIndex apiId, PaDeviceIndex devId
     }
 
     if(!apiItem) {
-        debug2(<< "AudioDevices::OnToggleDeviceInUse API not found ")
+        LOG("API not found"<<apiId);
         return;
     }
 
@@ -277,7 +277,7 @@ void AudioDevices::OnToggleDeviceInUse(PaHostApiIndex apiId, PaDeviceIndex devId
     }
 
     if(!devItem) {
-        debug2(<< "AudioDevices::OnToggleDeviceInUse device not found ")
+        LOG("device not found"<<apiId<<devId);
         return;
     }
 
@@ -432,14 +432,14 @@ bool AudioDevices::FindPortAudioDevice(ObjectInfo &objInfo, PaDeviceInfo *dInfo)
     else if(foundSameName!=-1)
         deviceNumber = foundSameName;
     else {
-        debug("AudioDevice::FindDeviceByName device not found")
+        LOG("device not found"<<objInfo.apiName<<objInfo.name);
         return false;
     }
 
     if(dInfo) {
         const PaDeviceInfo *i = Pa_GetDeviceInfo(deviceNumber);
         if(!i) {
-            debug("AudioDevice::FindDeviceByName error in GetDeviceInfo")
+            LOG("error in GetDeviceInfo");
             return false;
         }
         *dInfo = *i;

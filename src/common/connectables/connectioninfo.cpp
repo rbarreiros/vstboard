@@ -130,7 +130,7 @@ QDataStream & ConnectionInfo::fromStream(QDataStream& in)
     in >> savedContainerId;
     int id = myHost->objFactory->IdFromSavedId(savedContainerId);
     if(id==-1) {
-        debug("ConnectionInfo::fromStream : container not found")
+        LOG("container not found");
         return in;
     }
     container = id;
@@ -139,7 +139,7 @@ QDataStream & ConnectionInfo::fromStream(QDataStream& in)
     in >> savedId;
     id = myHost->objFactory->IdFromSavedId(savedId);
     if(id==-1) {
-        debug("ConnectionInfo::fromStream : obj not found")
+        LOG("obj not found");
         return in;
     }
     objId = id;

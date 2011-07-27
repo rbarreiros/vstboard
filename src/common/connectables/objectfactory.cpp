@@ -87,14 +87,14 @@ int ObjectFactory::IdFromSavedId(int savedId)
         }
         ++i;
     }
-    debug("object factory idfromsavedid: id not found %d",savedId)
+    LOG("id not found"<<savedId);
     return -1;
 }
 
 Pin *ObjectFactory::GetPin(const ConnectionInfo &pinInfo)
 {
     if(!listObjects.contains(pinInfo.objId)) {
-        debug2(<<"objectfactory getpin : obj not found"<<pinInfo.objId)
+        LOG("obj not found"<<pinInfo.objId);
         return 0;
     }
 
@@ -122,7 +122,7 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
     if(info.forcedObjId!=0) {
         objId = info.forcedObjId;
         if(listObjects.contains(objId)) {
-            debug2(<<"ObjectFactory::NewObject forcedId already exists"<<objId)
+            LOG("forcedId already exists"<<objId);
         }
     }
 
@@ -173,14 +173,14 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
                         break;
 
                     default:
-                        debug("ObjectFactory::NewObject : unknown object type")
+                        LOG("unknown object type"<<info.objType);
                         return QSharedPointer<Object>();
                 }
                 break;
 
 
             default :
-                debug("ObjectFactory::NewObject unknown nodeType")
+                LOG("unknown nodeType"<<info.nodeType);
                 return QSharedPointer<Object>();
         }
     }

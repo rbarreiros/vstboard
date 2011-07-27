@@ -92,7 +92,7 @@ AudioDevice::~AudioDevice()
 
     Close();
 
-    debug("%s deleted",objectName().toAscii().constData())
+    LOG(objectName()<<"deleted");
 }
 
 /*!
@@ -136,7 +136,7 @@ bool AudioDevice::SetObjectInput(AudioDeviceIn *obj)
     }
 
     if(devIn && obj) {
-        debug("AudioDevice::SetObjectInput already used")
+        LOG("SetObjectInput already used");
         return false;
     }
 
@@ -176,7 +176,7 @@ bool AudioDevice::SetObjectOutput(AudioDeviceOut *obj)
     devOutClosing=false;
 
     if(devOut && obj) {
-        debug("AudioDevice::SetObjectOutput already used")
+        LOG("SetObjectOutput already used");
         return false;
     }
 
@@ -362,7 +362,7 @@ bool AudioDevice::OpenStream(double sampleRate)
     }
 
     if(Pa_IsFormatSupported( inputParameters, outputParameters, sampleRate ) != paFormatIsSupported) {
-        debug("AudioDevice::OpenStream Pa_IsFormatSupported format not supported")
+        LOG("Pa_IsFormatSupported format not supported");
         errorMessage = tr("Stream format not supported");
         if(inputParameters)
             delete inputParameters;
@@ -383,7 +383,7 @@ bool AudioDevice::OpenStream(double sampleRate)
 
     if( err != paNoError ) {
         Pa_CloseStream(stream);
-        debug("AudioDevice::OpenStream Pa_OpenStream %s",Pa_GetErrorText( err ))
+        LOG("Pa_OpenStream"<<Pa_GetErrorText( err ));
         errorMessage = Pa_GetErrorText( err );
         if(inputParameters)
             delete inputParameters;
@@ -428,7 +428,7 @@ bool AudioDevice::Open()
     mutexOpenClose.lock();
     if(opened) {
         mutexOpenClose.unlock();
-        debug("AudioDevice::Open already opened")
+        LOG("already opened");
         return true;
     }
     isClosing=false;
@@ -456,7 +456,7 @@ bool AudioDevice::Open()
     //failed to open the stream
     if( err != paNoError ) {
 
-        debug("AudioDevice::Open %s",Pa_GetErrorText( err ))
+        LOG("open"<<Pa_GetErrorText( err ));
 
         if(stream)
         {
@@ -508,7 +508,7 @@ bool AudioDevice::Close()
             count++;
         }
         if(count>0) {
-            debug2(<<"AudioDevice::Close"<<objectName()<<"wait:"<<count)
+            LOG("AudioDevice::Close"<<objectName()<<"wait:"<<count);
         }
 
         Pa_CloseStream(stream);

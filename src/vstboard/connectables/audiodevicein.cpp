@@ -138,7 +138,7 @@ Pin* AudioDeviceIn::CreatePin(const ConnectionInfo &info)
             break;
 
         default :
-            debug("AudioDeviceIn::CreatePin PinDirection")
+            LOG("wrong PinDirection");
             return 0;
             break;
     }
@@ -158,7 +158,7 @@ void AudioDeviceIn::SetBufferFromRingBuffer(QList<CircularBuffer*>listCircularBu
             continue;
 
         if(pinBuf->GetSize() < hostBuffSize) {
-            debug2(<<"resize buffer" << objectName() )
+            LOG("resize buffer for" << objectName() );
             pinBuf->SetSize(hostBuffSize);
         }
 

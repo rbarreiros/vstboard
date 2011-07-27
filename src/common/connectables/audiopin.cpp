@@ -92,7 +92,7 @@ bool AudioPin::SetDoublePrecision(bool dblp)
 
 //    if(doublePrecision) {
 //        if(!bufferD) {
-//            debug2(<<"AudioPin::SetDoublePrecision : no double precision buffer : can't convert to single precision")
+//            LOG("no double precision buffer : can't convert to single precision");
 //            return false;
 //        }
 
@@ -106,7 +106,7 @@ bool AudioPin::SetDoublePrecision(bool dblp)
 //        bufferD = 0;
 //    } else {
 //        if(!buffer) {
-//            debug2(<<"AudioPin::SetDoublePrecision : no single precision buffer : can't convert to double precision")
+//            LOG("no single precision buffer : can't convert to double precision");
 //            return false;
 //        }
 

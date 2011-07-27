@@ -242,7 +242,7 @@ bool ProgramsModel::GroupToStreamWithPrograms( QDataStream &stream, const QModel
 bool ProgramsModel::ProgramToStream( QDataStream &stream, const QModelIndex &progIndex) const
 {
     if(!progIndex.isValid()) {
-        debug2(<<"ProgramsModel::ProgramToStream invalid index")
+        LOG("invalid index");
         return false;
     }
 
@@ -267,7 +267,7 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
         currentCommandGroup = new QUndoCommand(tr("Move programs"));
         break;
     default:
-        debug2(<<"ProgramsModel::dropMimeData unsupported action"<<action)
+        LOG("unsupported action"<<action);
         return false;
     }
 
@@ -365,7 +365,7 @@ bool ProgramsModel::removeRows( int row, int count, const QModelIndex & parent )
     }
 
     //this should never happen
-    debug2(<<"ProgramsModel::removeRows remove row with no undoCommand")
+    LOG("remove row with no undoCommand");
     return false;
 }
 
@@ -511,7 +511,7 @@ void ProgramsModel::UserChangeProg(const QModelIndex &newPrg)
         return;
 
     if(!newPrg.isValid() || !newPrg.parent().isValid()) {
-        debug2(<<"ProgramsModel::UserChangeProg invalid prog"<<newPrg.row()<<newPrg.parent().row())
+        LOG("invalid prog"<<newPrg.row()<<newPrg.parent().row());
         return;
     }
 
@@ -559,7 +559,7 @@ void ProgramsModel::UserChangeGroup(int grp)
 bool ProgramsModel::ValidateProgChange(const QModelIndex &newPrg)
 {
     if(!newPrg.isValid()) {
-        debug("ProgramsModel::ValidateProgChange invalid program")
+        LOG("invalid program");
         return false;
     }
 

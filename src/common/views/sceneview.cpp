@@ -119,8 +119,8 @@ void SceneView::dataChanged ( const QModelIndex & topLeft, const QModelIndex & b
             {
                 ObjectView *view = static_cast<ObjectView*>(hashItems.value(tmpIndex,0));
                 if(!view) {
-                    debug("SceneView::dataChanged object not found")
-                            return;
+                    LOG("object not found");
+                    return;
                 }
                 view->UpdateModelIndex();
                 break;
@@ -129,8 +129,8 @@ void SceneView::dataChanged ( const QModelIndex & topLeft, const QModelIndex & b
             {
                 PinView *view = static_cast<PinView*>(hashItems.value(tmpIndex,0));
                 if(!view) {
-                    debug("SceneView::dataChanged pin not found")
-                            return;
+                    LOG("pin not found");
+                    return;
                 }
                 view->UpdateModelIndex(tmpIndex);
                 break;
@@ -159,8 +159,8 @@ void SceneView::dataChanged ( const QModelIndex & topLeft, const QModelIndex & b
             {
                 PinView *view = static_cast<PinView*>(hashItems.value(tmpIndex.parent(),0));
                 if(!view) {
-                    debug("SceneView::dataChanged pin not found")
-                            return;
+                    LOG("pin not found");
+                    return;
                 }
                 static_cast<MinMaxPinView*>(view)->UpdateLimitModelIndex(tmpIndex.parent());
                 break;
@@ -202,8 +202,8 @@ void SceneView::rowsAboutToBeRemoved ( const QModelIndex & parent, int start, in
             {
                 ObjectView *obj = static_cast<ObjectView*>(hashItems.value(index,0));
                 if(!obj) {
-                    debug("SceneView::rowsAboutToBeRemoved obj not found")
-                            continue;
+                    LOG("obj not found");
+                    continue;
                 }
                 obj->hide();
                 obj->scene()->removeItem(obj);
@@ -214,8 +214,8 @@ void SceneView::rowsAboutToBeRemoved ( const QModelIndex & parent, int start, in
             {
                 QGraphicsWidget *obj = static_cast<QGraphicsWidget*>( hashItems.value(index,0) );
                 if(!obj) {
-                    debug("SceneView::rowsAboutToBeRemoved container not found")
-                            continue;
+                    LOG("container not found");
+                    continue;
                 }
                 obj->hide();
                 obj->scene()->removeItem(obj);
@@ -226,8 +226,8 @@ void SceneView::rowsAboutToBeRemoved ( const QModelIndex & parent, int start, in
             {
                 PinView *pin = static_cast<PinView*>(hashItems.value(index,0));
                 if(!pin) {
-                    debug("SceneView::rowsAboutToBeRemoved pin not found")
-                            continue;
+                    LOG("pin not found");
+                    continue;
                 }
 
                 ListPinsView *list = static_cast<ListPinsView*>(hashItems.value(parent,0));
@@ -256,8 +256,8 @@ void SceneView::rowsAboutToBeRemoved ( const QModelIndex & parent, int start, in
 
                 CableView *cable = static_cast<CableView*>(hashItems.value(index,0));
                 if(!cable) {
-                    debug("SceneView::rowsAboutToBeRemoved cable not found")
-                            continue;
+                    LOG("cable not found");
+                    continue;
                 }
 
                 if(pinOut)
@@ -286,7 +286,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
     }
 
     if(!parent.isValid()) {
-        debug("SceneView::rowsInserted parent not valid")
+        LOG("parent not valid");
         return;
     }
 
@@ -353,7 +353,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
 
                 ObjectView *parentView = static_cast<ObjectView*>(hashItems.value(parent,0));
                 if(!parentView) {
-                    debug("SceneView::rowsInserted parent not found")
+                    LOG("parent not found");
                     continue;
                 }
 
@@ -371,7 +371,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                         objView = static_cast<MainContainerView*>(parentView)->bridgeReturn;
                         break;
                     default:
-                        debug("SceneView::rowsInserted unknown listpin")
+                        LOG("unknown listpin");
                         continue;
                 }
 
@@ -387,8 +387,8 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
             {
                 MainContainerView *parentView = static_cast<MainContainerView*>(hashItems.value(parent,0));
                 if(!parentView) {
-                    debug("SceneView::rowsInserted object parent not found")
-                            continue;
+                    LOG("object parent not found");
+                    continue;
                 }
 
                 if(info.objType == ObjType::VstPlugin) {
@@ -415,8 +415,8 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
 //                ObjectInfo infoParent = parent.data(UserRoles::objInfo).value<ObjectInfo>();
                 ObjectView *parentView = static_cast<ObjectView*>(hashItems.value(parent,0));
                 if(!parentView) {
-                    debug("SceneView::rowsInserted listAudioIn parent not found")
-                            continue;
+                    LOG("listAudioIn parent not found");
+                    continue;
                 }
 
                 ListPinsView *v=0;
@@ -445,7 +445,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                         v = parentView->listBridge;
                         break;
                     default:
-                        debug("SceneView::rowsInserted unknown pin type")
+                        LOG("unknown pin type");
                         continue;
                 }
 
@@ -462,14 +462,14 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
             {
                 ListPinsView *parentList = static_cast<ListPinsView*>(hashItems.value(parent,0));
                 if(!parentList) {
-                    debug("SceneView::rowsInserted NodeType::pin list not found")
-                            continue;
+                    LOG("NodeType::pin list not found");
+                    continue;
                 }
                 ConnectionInfo pinInfo = index.data(UserRoles::connectionInfo).value<ConnectionInfo>();
                 Connectables::Pin *pin = objFactory->GetPin(pinInfo);
                 if(!pin) {
-                    debug("SceneView::rowsInserted NodeType::pin pin not found")
-                            continue;
+                    LOG("NodeType::pin pin not found");
+                    continue;
                 }
 
                 PinView *pinView;
@@ -530,7 +530,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
             {
                 MinMaxPinView* pin = static_cast<MinMaxPinView*>(hashItems.value( index.parent(),0 ));
                 if(!pin) {
-                    debug("SceneView::rowsInserted add pinLimit, pin not found")
+                    LOG("add pinLimit, pin not found");
                     continue;
                 }
                 ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
@@ -541,15 +541,15 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
             {
                 MainContainerView *cnt = static_cast<MainContainerView*>(hashItems.value(parent.parent(),0));
                 if(!cnt) {
-                    debug("SceneView::rowsInserted add cable, container not found")
-                            continue;
+                    LOG("add cable, container not found");
+                    continue;
                 }
                 ConnectionInfo infoOut = index.data(UserRoles::value).value<ConnectionInfo>();
                 ConnectionInfo infoIn = index.data(UserRoles::connectionInfo).value<ConnectionInfo>();
 
                 if(!mapConnectionInfo.contains(infoOut) || !mapConnectionInfo.contains(infoIn)) {
-                    debug("SceneView::rowsInserted add cable, connectioninfo not found")
-                            continue;
+                    LOG("add cable, connectioninfo not found");
+                    continue;
                 }
 
                 QPersistentModelIndex ixOut =  mapConnectionInfo.value(infoOut);
@@ -559,8 +559,8 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                 PinView* pinIn = static_cast<PinView*>(hashItems.value( ixIn,0 ));
 
                 if(!pinOut || !pinIn) {
-                    debug("SceneView::rowsInserted addcable : pin not found")
-                            continue;
+                    LOG("addcable : pin not found");
+                    continue;
                 }
                 CableView *cable = new CableView(infoOut,infoIn,cnt,myHost->mainWindow->viewConfig);
                 pinOut->AddCable(cable);
@@ -571,9 +571,10 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                 break;
             }
             default:
-                if(index.data().toString()!="cables")
-                    debug("SceneView::rowsInserted nodetype not found")
-                    break;
+                if(index.data().toString()!="cables") {
+                    LOG("nodetype not found");
+                }
+                break;
 
         }
     }

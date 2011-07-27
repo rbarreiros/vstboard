@@ -193,7 +193,7 @@ void Pin::UpdateModelNode()
 {
     QStandardItem *item = parent->getHost()->GetModel()->itemFromIndex(modelIndex);
     if(!item) {
-        debug("Pin::UpdateModelNode can't find item")
+        LOG("item not found"<<modelIndex);
         return;
     }
     item->setData(objectName(),Qt::DisplayRole);

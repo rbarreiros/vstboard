@@ -240,17 +240,17 @@ bool ProjectFile::FromStream(MainHost *myHost,QDataStream &in)
         //unknown chunk
         else {
             in.setStatus(QDataStream::ReadCorruptData);
-            debug2(<<"ProjectFile::FromStream unknown file section"<<chunkName)
+            LOG("unknown file section"<<chunkName);
         }
 
         if(!tmpStream.atEnd()) {
             in.setStatus(QDataStream::ReadCorruptData);
 #ifndef QT_NO_DEBUG
-            debug2(<<"ProjectFile::FromStream stream not at end, drop remaining data")
+            LOG("stream not at end, drop remaining data");
             while(!tmpStream.atEnd()) {
                 char c[1000];
                 int nb=tmpStream.readRawData(c,1000);
-                debug2(<<nb << QByteArray::fromRawData(c,nb).toHex())
+                LOG(nb << QByteArray::fromRawData(c,nb).toHex());
             }
 #endif
         }
@@ -260,7 +260,7 @@ bool ProjectFile::FromStream(MainHost *myHost,QDataStream &in)
         }
 
         if(tmpStream.status()==QDataStream::ReadPastEnd) {
-            debug2(<<"ProjectFile::FromStream err"<<tmpStream.status())
+            LOG("err"<<tmpStream.status());
             myHost->objFactory->ResetSavedId();
             myHost->renderer->SetEnabled(true);
             myHost->EnableSolverUpdate(true);

@@ -200,7 +200,7 @@ void VstPlugin::Render()
             delete[] tmpBufOut;
 
         } else {
-            debug("VstPlugin::Render DoubleReplacing not supported")
+            LOG("DoubleReplacing not supported");
         }
     } else {
         float **tmpBufOut = new float*[listAudioPinOut->listPins.size()];
@@ -285,7 +285,7 @@ bool VstPlugin::Open()
             }
 
             if(VstPlugin::shellSelectView) {
-                debug("VstPlugin::Open shell selection already opened")
+                LOG("shell selection already opened");
                 return false;
             }
 
@@ -526,7 +526,7 @@ QString VstPlugin::GetParameterName(ConnectionInfo pinInfo)
     if(pEffect && pinInfo.pinNumber < pEffect->numParams)
         return EffGetParamName( pinInfo.pinNumber );
     else
-        debug("VstPlugin::GetParameterName : parameter id out of range")
+        LOG("parameter id out of range"<<pinInfo.pinNumber);
 
     return "";
 }
@@ -565,7 +565,7 @@ void VstPlugin::processEvents(VstEvents* events)
             MidiPinOut *pin = static_cast<MidiPinOut*>(listMidiPinOut->GetPin(0,true));
             pin->SendMsg(PinMessage::MidiMsg, &msg);
         } else {
-            debug("other vst event")
+            LOG("other vst event");
         }
     }
 }
@@ -707,7 +707,7 @@ void VstPlugin::OnParameterChanged(ConnectionInfo pinInfo, float value)
 
         if(pinInfo.pinNumber<200) {
             if(EffCanBeAutomated(pinInfo.pinNumber)!=1) {
-                debug2(<< "vst parameter can't be automated " << pinInfo.pinNumber)
+                LOG("vst parameter can't be automated"<<pinInfo.pinNumber);
                 return;
             }
             EffSetParameter(pinInfo.pinNumber,value);

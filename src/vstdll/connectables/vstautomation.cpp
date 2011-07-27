@@ -129,7 +129,7 @@ Pin* VstAutomation::CreatePin(const ConnectionInfo &info)
         return newPin;
 
     if(info.type!=PinType::Parameter) {
-        debug("VstAutomation::CreatePin PinType")
+        LOG("wrong PinType"<<info.type);
         return 0;
     }
 
@@ -159,7 +159,7 @@ Pin* VstAutomation::CreatePin(const ConnectionInfo &info)
             return new ParameterPinIn(this,info.pinNumber,0,QString("autom%1").arg(info.pinNumber),false,true);
 
         default :
-            debug("VstAutomation::CreatePin PinDirection")
+            LOG("wrong PinDirection"<<info.direction);
             return 0;
 
     }

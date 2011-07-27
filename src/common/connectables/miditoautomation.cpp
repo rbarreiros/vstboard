@@ -107,7 +107,7 @@ void MidiToAutomation::MidiMsgFromInput(long msg)
 void MidiToAutomation::ChangeValue(int ctrl, int value) {
 
     if(value>127 || value<0) {
-        debug("midi ctrl 0>127")
+        LOG("midi ctrl 0>127"<<ctrl<<value);
         return;
     }
 
@@ -141,7 +141,7 @@ Pin* MidiToAutomation::CreatePin(const ConnectionInfo &info)
         return newPin;
 
     if(info.type!=PinType::Parameter) {
-        debug("MidiToAutomation::CreatePin PinType")
+        LOG("wrong PinType"<<info.type);
         return 0;
     }
 

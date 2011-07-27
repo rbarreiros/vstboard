@@ -264,7 +264,7 @@ void ParameterPin::SetLimit(ObjType::Enum type, float newVal)
             limitOutMax = newVal;
             break;
         default:
-            debug("ParameterPin::SetLimit unknown type")
+            LOG("unknown cursor type"<<type)
             return;
     }
 

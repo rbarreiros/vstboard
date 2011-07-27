@@ -102,7 +102,7 @@ bool CircularBuffer::Put(double *buf, unsigned int size)
 bool CircularBuffer::Get(float *buf, unsigned int size)
 {
     if(filledSize<size) {
-        debug("CircularBuffer::Get not enough data")
+        LOG("not enough data");
         return false;
     }
 
@@ -124,7 +124,7 @@ bool CircularBuffer::Get(float *buf, unsigned int size)
 bool CircularBuffer::Get(double *buf, unsigned int size)
 {
     if(filledSize<size) {
-        debug("CircularBuffer::Get not enough data")
+        LOG("not enough data");
         return false;
     }
 
@@ -146,7 +146,7 @@ bool CircularBuffer::Get(double *buf, unsigned int size)
 bool CircularBuffer::Skip(unsigned int size)
 {
     if(filledSize<size) {
-        debug("CircularBuffer::Get can't skip more than filledsize")
+        LOG("can't skip more than filledsize");
         return false;
     }
 
