@@ -74,7 +74,7 @@ namespace Connectables {
         void NbPinChanged(int nb);
 
     public slots:
-        void SetNbPins(int nb);
+        void SetNbPins(int nb, QList<quint16> *listAdded=0,QList<quint16> *listRemoved=0);
         Pin * AddPin(int nb);
         void RemovePin(int nb);
     };

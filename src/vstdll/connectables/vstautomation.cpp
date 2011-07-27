@@ -21,6 +21,8 @@
 #include "vstautomation.h"
 #include "mainhostvst.h"
 #include "vst.h"
+#include "commands/comaddpin.h"
+#include "commands/comremovepin.h"
 
 using namespace Connectables;
 
@@ -40,8 +42,8 @@ VstAutomation::VstAutomation(MainHost *myHost,int index) :
     listParameterPinIn->AddPin(FixedPinNumber::numberOfPins);
     listParameterPinOut->AddPin(FixedPinNumber::vstProgNumber);
 
-    listParameterPinIn->SetNbPins(VST_AUTOMATION_DEFAULT_NB_PINS+2);
-    listParameterPinOut->SetNbPins(VST_AUTOMATION_DEFAULT_NB_PINS+1);
+    listParameterPinIn->SetNbPins(VST_AUTOMATION_DEFAULT_NB_PINS);
+    listParameterPinOut->SetNbPins(VST_AUTOMATION_DEFAULT_NB_PINS);
 
     connect(static_cast<MainHostVst*>(myHost)->myVstPlugin,SIGNAL(HostChangedProg(int)),
             this,SLOT(OnHostChangedProg(int)));
@@ -55,8 +57,6 @@ VstAutomation::~VstAutomation()
 
 void VstAutomation::Render()
 {
-//    QMutexLocker l(&objMutex);
-
     if(!listChanged.isEmpty()) {
         Vst *vst=static_cast<MainHostVst*>(myHost)->myVstPlugin;
         QHash<int,float>::const_iterator i = listChanged.constBegin();
@@ -80,16 +80,43 @@ void VstAutomation::ValueFromHost(int pinNum, float value)
 {
     switch(GetLearningMode()) {
         case LearningMode::unlearn :
-            listParameterPinOut->AsyncRemovePin(pinNum);
-            listParameterPinIn->AsyncRemovePin(pinNum);
+            {
+                QUndoCommand *com = new QUndoCommand(tr("Remove pin"));
+                if(listParameterPinOut->listPins.contains(pinNum)) {
+                    new ComRemovePin(myHost, listParameterPinOut->listPins.value(pinNum)->GetConnectionInfo(),com);
+                }
+                if(listParameterPinIn->listPins.contains(pinNum)) {
+                    new ComRemovePin(myHost, listParameterPinIn->listPins.value(pinNum)->GetConnectionInfo(),com);
+                }
+                if(com->childCount())
+                    myHost->undoStack.push(com);
+                else
+                    delete com;
+            }
             break;
         case LearningMode::learn :
-            listParameterPinOut->AsyncAddPin(pinNum);
-            listParameterPinIn->AsyncAddPin(pinNum);
+            {
+                QUndoCommand *com = new QUndoCommand(tr("Add pin"));
+                if(!listParameterPinOut->listPins.contains(pinNum)) {
+                    ConnectionInfo info = listParameterPinOut->connInfo;
+                    info.pinNumber = pinNum;
+                    info.isRemoveable = true;
+                    new ComAddPin(myHost,info,com);
+                }
+                if(!listParameterPinIn->listPins.contains(pinNum)) {
+                    ConnectionInfo info = listParameterPinIn->connInfo;
+                    info.pinNumber = pinNum;
+                    info.isRemoveable = true;
+                    new ComAddPin(myHost,info,com);
+                }
+                if(com->childCount())
+                    myHost->undoStack.push(com);
+                else
+                    delete com;
+            }
         case LearningMode::off :
             if(listParameterPinOut->listPins.contains(pinNum))
                 static_cast<ParameterPin*>(listParameterPinOut->listPins.value(pinNum))->ChangeValue( value, true );
-//            listChanged.insert(pinNum,value);
             break;
     }
 }
@@ -99,10 +126,40 @@ void VstAutomation::OnParameterChanged(ConnectionInfo pinInfo, float value)
     Object::OnParameterChanged(pinInfo,value);
     if(pinInfo.pinNumber==FixedPinNumber::numberOfPins) {
         int nbPins=static_cast<ParameterPin*>( listParameterPinIn->listPins.value(FixedPinNumber::numberOfPins) )->GetIndex();
-        //count the learn and nbpins pins
-        listParameterPinIn->SetNbPins(nbPins+2);
-        //count the prog pin
-        listParameterPinOut->SetNbPins(nbPins+1);
+
+        QUndoCommand *com = new QUndoCommand(tr("Change number of pins"));
+        QList<quint16>listAdded;
+        QList<quint16>listRemoved;
+
+        listParameterPinOut->SetNbPins(nbPins,&listAdded,&listRemoved);
+        qSort(listRemoved.begin(),listRemoved.end(),qGreater<quint16>());
+        foreach(quint16 i, listRemoved)
+            new ComRemovePin(myHost,listParameterPinOut->listPins.value(i)->GetConnectionInfo(),com);
+        foreach(quint16 i, listAdded) {
+            ConnectionInfo info = listParameterPinOut->connInfo;
+            info.pinNumber = i;
+            info.isRemoveable = true;
+            new ComAddPin(myHost,info,com);
+        }
+
+        listAdded.clear();
+        listRemoved.clear();
+
+        listParameterPinIn->SetNbPins(nbPins,&listAdded,&listRemoved);
+        qSort(listRemoved.begin(),listRemoved.end(),qGreater<quint16>());
+        foreach(quint16 i, listRemoved)
+            new ComRemovePin(myHost,listParameterPinIn->listPins.value(i)->GetConnectionInfo(),com);
+        foreach(quint16 i, listAdded) {
+            ConnectionInfo info = listParameterPinIn->connInfo;
+            info.pinNumber = i;
+            info.isRemoveable = true;
+            new ComAddPin(myHost,info,com);
+        }
+
+        if(com->childCount())
+            myHost->undoStack.push(com);
+        else
+            delete com;
         return;
     }
 
