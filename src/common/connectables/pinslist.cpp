@@ -91,7 +91,7 @@ Pin * PinsList::GetPin(int pinNumber, bool autoCreate)
         if(autoCreate) {
             AddPin(pinNumber);
         } else {
-            debug("PinsList::GetPin pin not in list")
+            LOG("pin not in list"<<pinNumber);
             return 0;
         }
     }
@@ -105,7 +105,7 @@ AudioBuffer *PinsList::GetBuffer(int pinNumber)
         return 0;
 
     if(!listPins.contains(pinNumber)) {
-        debug2(<<"PinsList::GetBuffer"<< pinNumber <<"not found")
+        LOG("pin not found"<<pinNumber);
         return 0;
     }
 
@@ -184,7 +184,7 @@ Pin * PinsList::AddPin(int nb)
     Pin *newPin = parent->CreatePin(connInfo);
 
     if(!newPin) {
-        debug("PinsList::AddPin pin not created")
+        LOG("pin not created"<<nb);
         return 0;
     }
     listPins.insert(nb, newPin);
@@ -239,7 +239,7 @@ QDataStream & PinsList::fromStream(QDataStream & in)
         connInfo.pinNumber=id;
         Pin *newPin = parent->CreatePin(connInfo);
         if(!newPin) {
-            debug("PinsList::fromStream pin not created")
+            LOG("pin not created"<<id);
             return in;
         }
         listPins.insert(id,newPin);

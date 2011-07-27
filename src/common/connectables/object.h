@@ -252,7 +252,7 @@ namespace Connectables {
 
     signals:
         /// Sent to the editor window when we want to close it
-        void CloseEditorWindow();
+        void HideEditorWindow();
 
     public slots:
         void SuspendIfParked() {if(!parked) return; SetSleep(true);}
@@ -280,6 +280,7 @@ namespace Connectables {
         virtual void OnHideEditor() {}
 
         virtual void UserRemovePin(const ConnectionInfo &info);
+        virtual void UserAddPin(const ConnectionInfo &info);
 
         void SetErrorMessage(const QString &msg) {errorMessage=msg;}
     };

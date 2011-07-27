@@ -78,7 +78,7 @@ bool MidiDevice::OpenStream()
 
     queue = Pm_QueueCreate(QUEUE_SIZE, sizeof(PmEvent));
     if(!queue) {
-        debug("MidiDevice::OpenStream can't create queue")
+        LOG("can't create queue");
         return false;
     }
 
@@ -89,10 +89,10 @@ bool MidiDevice::OpenStream()
             if(err==pmHostError) {
                 char msg[255];
                 Pm_GetHostErrorText(msg,255);
-                debug("MidiDevice::OpenStream openInput host %s",msg)
+                LOG("openInput host error"<<msg);
                 msgTxt=msg;
             } else {
-                debug("MidiDevice::OpenStream openInput %s",Pm_GetErrorText(err))
+                LOG("openInput error"<<Pm_GetErrorText(err));
                 msgTxt=Pm_GetErrorText(err);
             }
             errorMessage=tr("Error while opening midi device %1 %2").arg(objInfo.name).arg(msgTxt);
@@ -106,11 +106,11 @@ bool MidiDevice::OpenStream()
                 char msg[20];
                 unsigned int len=20;
                 Pm_GetHostErrorText(msg,len);
-                debug("MidiDevice::OpenStream setFilter host %s",msg)
+                LOG("setFilter host error"<<msg);
                 msgTxt=msg;
             } else {
                 msgTxt=Pm_GetErrorText(err);
-                debug("MidiDevice::OpenStream setFilter %s",Pm_GetErrorText(err))
+                LOG("setFilter error"<<Pm_GetErrorText(err));
             }
             errorMessage=tr("Error while opening midi device %1 %2").arg(objInfo.name).arg(msgTxt);
             return false;
@@ -125,10 +125,10 @@ bool MidiDevice::OpenStream()
                 char msg[20];
                 unsigned int len=20;
                 Pm_GetHostErrorText(msg,len);
-                debug("MidiDevice::Open openInput host %s",msg)
+                LOG("openInput host error"<<msg);
                 msgTxt=msg;
             } else {
-                debug("MidiDevice::Open openInput %s",Pm_GetErrorText(err))
+                LOG("openInput error"<<Pm_GetErrorText(err));
                 msgTxt=Pm_GetErrorText(err);
             }
             errorMessage=tr("Error while opening midi device %1 %2").arg(objInfo.name).arg(msgTxt);
@@ -154,7 +154,7 @@ bool MidiDevice::CloseStream()
     if(stream) {
         err = Pm_Close(stream);
         if(err!=pmNoError) {
-            debug("MidiDevice::Close error closing midi port");
+            LOG("error closing midi port");
         }
         stream=0;
     }
@@ -162,7 +162,7 @@ bool MidiDevice::CloseStream()
     if(queue) {
         err = Pm_QueueDestroy(queue);
         if(err!=pmNoError) {
-            debug("error closing midi queue");
+            LOG("error closing midi queue");
         }
         queue=0;
     }
@@ -218,7 +218,7 @@ bool MidiDevice::FindDeviceByName()
             devInfo = Pm_GetDeviceInfo(deviceNumber);
         } else {
             errorMessage=tr("Error : device was deleted");
-            debug("MidiDevice::FindDeviceByName device not found")
+            LOG("device not found"<<objInfo.apiName<<objInfo.name);
             return false;
         }
     }

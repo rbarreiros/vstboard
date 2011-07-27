@@ -221,7 +221,7 @@ VstIntPtr VSTCALLBACK CVSTHost::AudioMasterCallback(AEffect *effect, VstInt32 op
                 return 1L;
 
             //ignore the rest
-            debug("host can't do '%s'",str)
+            LOG("host can't do"<<str);
             return 0L;
 
         //handled by the object
@@ -242,12 +242,12 @@ VstIntPtr VSTCALLBACK CVSTHost::AudioMasterCallback(AEffect *effect, VstInt32 op
             break;
 
         default:
-            debug(QString("vstcallback %1 not handled").arg(opcode).toAscii())
-            return 0L;
+        LOG("vstcallback not handled"<<opcode);
+        return 0L;
     }
 
     if(!effect) {
-        debug("cvsthost : mastercallback from a null plugin ?")
+        LOG("mastercallback from a null plugin ?");
         return 0L;
     }
 
@@ -258,11 +258,11 @@ VstIntPtr VSTCALLBACK CVSTHost::AudioMasterCallback(AEffect *effect, VstInt32 op
 
     //unknown pointer, it must be the plugin currently loading
     if(Connectables::VstPlugin::pluginLoading) {
-        debug("cvsthost : callback from the loading plugin")
+        LOG("callback from the loading plugin");
         return Connectables::VstPlugin::pluginLoading->OnMasterCallback(opcode,index,value,ptr,opt,retValue);
     }
 
-    debug("cvsthost : plugin not found")
+    LOG("plugin not found");
     return 0L;
 
 }

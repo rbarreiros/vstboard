@@ -47,8 +47,12 @@ Script::Script(MainHost *host, int index, const ObjectInfo &info) :
             Qt::QueuedConnection);
 
     editorWnd = new View::ScriptEditor(myHost->mainWindow);
+    editorWnd->SetObject(this);
     connect(editorWnd, SIGNAL(Execute(QString)),
             this,SLOT(ReplaceScript(QString)));
+    connect(this,SIGNAL(HideEditorWindow()),
+            editorWnd,SLOT(hide()),
+            Qt::QueuedConnection);
     connect(editorWnd, SIGNAL(Hide()),
             this, SLOT(OnEditorClosed()));
     connect(editorWnd, SIGNAL(destroyed()),
@@ -146,9 +150,11 @@ Script::~Script()
 
 bool Script::Close()
 {
-    if(editorWnd) {
+   if(editorWnd) {
+        editorWnd->disconnect();
+        editorWnd->SetObject(0);
+        disconnect(editorWnd);
         QTimer::singleShot(0,editorWnd,SLOT(close()));
-        editorWnd->deleteLater();
         editorWnd=0;
     }
     return true;
@@ -243,7 +249,7 @@ void Script::OnShowEditor()
     if(!editorWnd || editorWnd->isVisible())
         return;
 
-
+    editorWnd->SetScript(scriptText);
     editorWnd->show();
 }
 
@@ -251,7 +257,7 @@ void Script::OnHideEditor()
 {
     if(!editorWnd || !editorWnd->isVisible())
         return;
-    editorWnd->close();
+    emit HideEditorWindow();
 }
 
 void Script::OnEditorClosed()
@@ -282,8 +288,8 @@ void Script::LoadProgram(int prog)
         return;
 
     scriptText = currentProgram->listOtherValues.value(0,"").toString();
-    if(editorWnd)
-        editorWnd->SetScript(scriptText);
+//    if(editorWnd)
+//        editorWnd->SetScript(scriptText);
     Open();
 
     if(editorWnd && editorWnd->isVisible())

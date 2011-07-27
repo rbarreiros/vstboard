@@ -24,6 +24,8 @@
 #include "../mainwindow.h"
 #include "../vst/cvsthost.h"
 #include "../views/vstpluginwindow.h"
+#include "commands/comaddpin.h"
+#include "commands/comremovepin.h"
 
 using namespace Connectables;
 
@@ -45,8 +47,6 @@ VstPlugin::VstPlugin(MainHost *myHost,int index, const ObjectInfo & info) :
         listValues << i;
     }
 
-
-
     listParameterPinIn->AddPin(FixedPinNumber::vstProgNumber);
 }
 
@@ -60,12 +60,14 @@ VstPlugin::~VstPlugin()
 bool VstPlugin::Close()
 {
     if(editorWnd) {
+        editorWnd->disconnect();
+        editorWnd->SetPlugin(0);
+        disconnect(editorWnd);
+        QTimer::singleShot(0,editorWnd,SLOT(close()));
+        editorWnd=0;
         objMutex.lock();
         EffEditClose();
         objMutex.unlock();
-        editorWnd->SetPlugin(0);
-        QTimer::singleShot(0,editorWnd,SLOT(close()));
-        editorWnd=0;
     }
     mapPlugins.remove(pEffect);
 
@@ -200,7 +202,7 @@ void VstPlugin::Render()
             delete[] tmpBufOut;
 
         } else {
-            debug("VstPlugin::Render DoubleReplacing not supported")
+            LOG("DoubleReplacing not supported");
         }
     } else {
         float **tmpBufOut = new float*[listAudioPinOut->listPins.size()];
@@ -285,7 +287,7 @@ bool VstPlugin::Open()
             }
 
             if(VstPlugin::shellSelectView) {
-                debug("VstPlugin::Open shell selection already opened")
+                LOG("shell selection already opened");
                 return false;
             }
 
@@ -435,11 +437,6 @@ void VstPlugin::CreateEditorWindow()
         return;
 
     editorWnd = new View::VstPluginWindow(myHost->mainWindow);
-
-    connect(this,SIGNAL(CloseEditorWindow()),
-            editorWnd,SLOT(hide()),
-            Qt::QueuedConnection);
-
     editorWnd->setAttribute(Qt::WA_ShowWithoutActivating);
 
     if(!editorWnd->SetPlugin(this)) {
@@ -448,6 +445,16 @@ void VstPlugin::CreateEditorWindow()
         return;
     }
 
+    connect(this,SIGNAL(HideEditorWindow()),
+            editorWnd,SLOT(hide()),
+            Qt::QueuedConnection);
+    connect(editorWnd, SIGNAL(Hide()),
+            this, SLOT(OnEditorClosed()));
+    connect(editorWnd,SIGNAL(destroyed()),
+            this,SLOT(EditorDestroyed()));
+    connect(this,SIGNAL(WindowSizeChange(int,int)),
+            editorWnd,SLOT(SetWindowSize(int,int)));
+
     //no screenshot in db, create one
 //    if(!ImageCollection::Get()->ImageExists(QString::number( pEffect->uniqueID ))) {
 //        OnEditorVisibilityChanged(true);
@@ -455,6 +462,11 @@ void VstPlugin::CreateEditorWindow()
 //                this,SLOT(EditIdle()));
 //        QTimer::singleShot(100,this,SLOT(TakeScreenshot()));
 //    }
+}
+
+void VstPlugin::OnEditorClosed()
+{
+    ToggleEditor(false);
 }
 
 void VstPlugin::OnShowEditor()
@@ -475,7 +487,7 @@ void VstPlugin::OnHideEditor()
 
     disconnect(myHost->updateViewTimer,SIGNAL(timeout()),
             this,SLOT(EditIdle()));
-    emit CloseEditorWindow();
+    emit HideEditorWindow();
 }
 
 void VstPlugin::SetContainerAttribs(const ObjectContainerAttribs &attr)
@@ -526,7 +538,7 @@ QString VstPlugin::GetParameterName(ConnectionInfo pinInfo)
     if(pEffect && pinInfo.pinNumber < pEffect->numParams)
         return EffGetParamName( pinInfo.pinNumber );
     else
-        debug("VstPlugin::GetParameterName : parameter id out of range")
+        LOG("parameter id out of range"<<pinInfo.pinNumber);
 
     return "";
 }
@@ -565,7 +577,7 @@ void VstPlugin::processEvents(VstEvents* events)
             MidiPinOut *pin = static_cast<MidiPinOut*>(listMidiPinOut->GetPin(0,true));
             pin->SendMsg(PinMessage::MidiMsg, &msg);
         } else {
-            debug("other vst event")
+            LOG("other vst event");
         }
     }
 }
@@ -586,29 +598,44 @@ void VstPlugin::UserRemovePin(const ConnectionInfo &info)
     OnProgramDirty();
 }
 
+void VstPlugin::UserAddPin(const ConnectionInfo &info)
+{
+    if(info.type!=PinType::Parameter)
+        return;
+
+    if(info.direction!=PinDirection::Input)
+        return;
+
+    if(listParameterPinIn->listPins.contains(info.pinNumber))
+        static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(info.pinNumber))->SetVisible(true);
+    OnProgramDirty();
+}
+
 VstIntPtr VstPlugin::OnMasterCallback(long opcode, long index, long value, void *ptr, float opt, long currentReturnCode)
 {
     switch(opcode) {
         case audioMasterAutomate : //0
             //create the parameter pin if needed
-            switch(GetLearningMode()) {
+
+            {
+                ParameterPin *pin = static_cast<ParameterPin*>(listParameterPinIn->listPins.value(index,0));
+                if(!pin)
+                    return 0L;
+
+                switch(GetLearningMode()) {
                 case LearningMode::unlearn :
-                    if(listParameterPinIn->listPins.contains(index))
-                        static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(index))->SetVisible(false);
-//                    if(listParameterPinOut->listPins.contains(index))
-//                        static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(index))->SetVisible(false);
+                    if(pin->GetVisible())
+                        myHost->undoStack.push( new ComRemovePin(myHost, pin->GetConnectionInfo()) );
                     break;
+
                 case LearningMode::learn :
-                    if(listParameterPinIn->listPins.contains(index))
-                        static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(index))->SetVisible(true);
-//                    if(listParameterPinOut->listPins.contains(index))
-//                        static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(index))->SetVisible(true);
+                    if(!pin->GetVisible())
+                        myHost->undoStack.push( new ComAddPin(myHost, pin->GetConnectionInfo()) );
+
                 case LearningMode::off :
-                    if(listParameterPinIn->listPins.contains(index))
-                        static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(index))->ChangeValue(opt);
-//                    if(listParameterPinOut->listPins.contains(index))
-//                        static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(index))->ChangeValue(opt);
-                    break;
+                    pin->ChangeValue(opt);
+
+                }
             }
             break;
 
@@ -692,7 +719,7 @@ void VstPlugin::OnParameterChanged(ConnectionInfo pinInfo, float value)
 
         if(pinInfo.pinNumber<200) {
             if(EffCanBeAutomated(pinInfo.pinNumber)!=1) {
-                debug2(<< "vst parameter can't be automated " << pinInfo.pinNumber)
+                LOG("vst parameter can't be automated"<<pinInfo.pinNumber);
                 return;
             }
             EffSetParameter(pinInfo.pinNumber,value);

@@ -70,7 +70,7 @@ void Cable::AddToParentNode(const QModelIndex &parentIndex)
 
     QStandardItem *parentItem = myHost->GetModel()->itemFromIndex(parentIndex);
     if(!parentItem) {
-        debug("Cable::AddToParentNode parent item not found")
+        LOG("parent item not found");
         return;
     }
     parentItem->appendRow(item);

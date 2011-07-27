@@ -81,7 +81,7 @@ const QModelIndex &Container::GetCablesIndex()
     //create the cables node
     QStandardItem *item = myHost->GetModel()->itemFromIndex(modelIndex);
     if(!item) {
-        debug("Container::GetCablesIndex modelindex not found")
+        LOG("modelindex not found");
         return cablesNode;
     }
     QStandardItem *cab = new QStandardItem("cables");
@@ -347,14 +347,14 @@ void Container::RemoveProgram(const QModelIndex &idx)
             if(p == currentProgId) {
                 remainingProgs << p;
                 if(progToSet==-1) {
-                    debug2(<<"Container::RemoveProgram removing current program and no scheduled progChange "<<p<<objectName())
+                    LOG("removing current program and no scheduled progChange "<<p<<objectName());
                 }
             } else {
                 delete listContainerPrograms.take(p);
             }
         } /*else {
             //the program does not exist, nothing to do
-            debug2(<<"Container::RemoveProgram unknown prog"<<p<<objectName())
+            LOG("unknown prog"<<p<<objectName());
         }*/
     }
 
@@ -546,7 +546,7 @@ void Container::GetListOfConnectedPinsTo(const ConnectionInfo &pin, QList<Connec
 void Container::AddChildObject(QSharedPointer<Object> objPtr)
 {
     if(!modelIndex.isValid()) {
-        debug2(<<"Container::AddChildObject index not valid")
+        LOG("index not valid");
         return;
     }
 
@@ -743,23 +743,23 @@ bool Container::fromStream (QDataStream& in)
         //unknown chunk
         else {
             in.setStatus(QDataStream::ReadCorruptData);
-            debug2(<<"Container::fromStream unknown section"<<chunkName<<tmpBa.size())
+            LOG("unknown section"<<chunkName<<tmpBa.size());
         }
 
         if(!tmpStream.atEnd()) {
             in.setStatus(QDataStream::ReadCorruptData);
 #ifndef QT_NO_DEBUG
-            debug2(<<"Container::fromStream stream not at end"<<chunkName<<"drop remaining data :")
+            LOG("stream not at end"<<chunkName<<"drop remaining data :");
             while(!tmpStream.atEnd()) {
                 char c[1000];
                 int nb=tmpStream.readRawData(c,1000);
-                debug2(<<nb << QByteArray::fromRawData(c,nb).toHex())
+                LOG(nb << QByteArray::fromRawData(c,nb).toHex());
             }
 #endif
         }
 
         if(tmpStream.status()==QDataStream::ReadPastEnd) {
-            debug2(<<"Container::fromStream ReadPastEnd"<<tmpStream.status())
+            LOG("ReadPastEnd"<<tmpStream.status());
             return false;
         }
     }
@@ -805,7 +805,7 @@ bool Container::loadObjectFromStream (QDataStream &in)
 
     //can't even create a dummy object ?
     if(objPtr.isNull()) {
-        debug("Container::fromStream dummy object not created")
+        LOG("dummy object not created");
     }
 
     if(!objPtr.isNull()) {
@@ -894,7 +894,7 @@ void Container::ProgramFromStream (int progId, QDataStream &in)
             obj->ResetSavedIndex(info.forcedObjId);
         }
         if(!obj) {
-            debug2(<<"Container::ProgramFromStream can't create obj"<<info.id<<info.name)
+            LOG("can't create obj"<<info.id<<info.name);
         }
         if(obj) {
             obj->ProgramFromStream(progId, tmpStream);

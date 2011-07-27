@@ -126,7 +126,6 @@ Object::Object(MainHost *host, int index, const ObjectInfo &info) :
 Object::~Object()
 {
     pinLists.clear();
-//    debug2(<< "delete Object" << objectName() << hex << (long)this)
 
     if(containerId!=FixedObjId::noContainer) {
         QSharedPointer<Object>cntPtr = myHost->objFactory->GetObjectFromId( containerId );
@@ -312,12 +311,12 @@ void Object::LoadProgram(int prog)
 void Object::RemoveProgram(int prg)
 {
     if(prg == currentProgId) {
-        debug2(<<"Object::RemoveProgram removing current program ! "<<prg<<objectName())
+        LOG("removing current program ! "<<prg<<objectName());
         return;
     }
 
     if(!listPrograms.contains(prg)) {
-        debug("Object::RemoveProgram not found")
+        LOG("prog not found"<<prg);
         return;
     }
     delete listPrograms.take(prg);
@@ -422,7 +421,7 @@ QStandardItem * Object::UpdateModelNode()
 
     QStandardItem *modelNode = myHost->GetModel()->itemFromIndex(modelIndex);
     if(!modelNode) {
-        debug("Object::UpdateModelNode node not found")
+        LOG("node not found"<<modelIndex);
         return 0;
     }
 
@@ -566,6 +565,23 @@ void Object::UserRemovePin(const ConnectionInfo &info)
     }
 }
 
+void Object::UserAddPin(const ConnectionInfo &info)
+{
+    if(info.type!=PinType::Parameter)
+        return;
+
+    switch(info.direction) {
+        case PinDirection::Input :
+            listParameterPinIn->AsyncAddPin(info.pinNumber);
+            OnProgramDirty();
+            break;
+        case PinDirection::Output :
+            listParameterPinOut->AsyncAddPin(info.pinNumber);
+            OnProgramDirty();
+            break;
+    }
+}
+
 /*!
   Called by PinsList to create a pin
   \param info ConnectionInfo defining the pin to be created
@@ -674,7 +690,7 @@ bool Object::fromStream(QDataStream & in)
     in >> savedProgId;
 
     if(in.status()!=QDataStream::Ok) {
-        debug2(<<"Object::fromStream err"<<in.status())
+        LOG("err"<<in.status());
         return false;
     }
 

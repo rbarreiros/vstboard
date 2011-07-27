@@ -101,12 +101,14 @@ namespace Connectables {
         void OnParameterChanged(ConnectionInfo pinInfo, float value);
         void OnShowEditor();
         void OnHideEditor();
+        void OnEditorClosed();
         bool LoadBank(const QString &filename);
         void SaveBank(const QString &filename);
         bool LoadProgram(const QString &filename);
         void SaveProgram(const QString &filename);
 //        void TakeScreenshot();
         void UserRemovePin(const ConnectionInfo &info);
+        void UserAddPin(const ConnectionInfo &info);
 
         friend class View::VstPluginWindow;
     };

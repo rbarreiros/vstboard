@@ -191,13 +191,13 @@ void MidiDevices::MidiReceive_poll(PtTimestamp timestamp, void *userData)
                 if (result) {
                     PmError rslt = (PmError)Pm_Read(device->stream, &buffer, 1);
                     if (rslt == pmBufferOverflow) {
-                        debug(QString("midi buffer overflow on device %1 %2").arg(device->GetIndex()).arg(device->objectName()).toAscii())
+                        LOG("midi buffer overflow on"<<device->GetIndex()<<device->objectName());
                         continue;
                     }
                     if(rslt == 1 ) {
                         Pm_Enqueue(device->queue, &buffer);
                     } else {
-                        debug(QString("midi in error on device %1 %2").arg(device->GetIndex()).arg(device->objectName()).toAscii())
+                        LOG("midi in error on %1 %2"<<device->GetIndex()<<device->objectName());
                         continue;
                     }
                 }

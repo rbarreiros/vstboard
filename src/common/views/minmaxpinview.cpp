@@ -72,7 +72,7 @@ void MinMaxPinView::SetLimitModelIndex(ObjType::Enum type, QPersistentModelIndex
             outMax->SetModelIndex(index);
             break;
         default:
-            debug("MinMaxPinView::SetLimitModelIndex unknown type")
+            LOG("unknown type"<<type);
             break;
     }
 }

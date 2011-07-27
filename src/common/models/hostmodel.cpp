@@ -79,13 +79,13 @@ QMimeData * HostModel::mimeData ( const QModelIndexList & indexes ) const
 bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, int row, int column, const QModelIndex & parent )
 {
     if(!parent.isValid()) {
-        debug("HostModel::dropMimeData parent not valid")
+        LOG("parent not valid");
         return false;
     }
 
     QModelIndex senderIndex = parent.sibling(parent.row(),0);
     if(!senderIndex.isValid()) {
-        debug("HostModel::dropMimeData senderIndex not valid")
+        LOG("senderIndex not valid");
         return false;
     }
     ObjectInfo senderInfo = senderIndex.data(UserRoles::objInfo).value<ObjectInfo>();
@@ -101,7 +101,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
     }
 
     if(!targetContainer) {
-        debug(QString("HostModel::dropMimeData container not found").toAscii())
+        LOG("container not found");
         return false;
     }
 
@@ -118,7 +118,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
             if(it->data(UserRoles::value).isValid()) {
                 QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->GetObjectFromId( it->data(UserRoles::value).toInt() );
                 if(objPtr.isNull()) {
-                    debug("HostModel::dropMimeData x-qstandarditemmodeldatalist object not found")
+                    LOG("x-qstandarditemmodeldatalist object not found");
                     continue;
                 }
 //                listObjToAdd << objPtr;
@@ -183,7 +183,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                 if( info.suffix() == VST_BANK_FILE_EXTENSION || info.suffix() == VST_PROGRAM_FILE_EXTENSION) {
                     QSharedPointer<Connectables::VstPlugin> senderObj = myHost->objFactory->GetObj(senderIndex).staticCast<Connectables::VstPlugin>();
                     if(!senderObj) {
-                        debug("HostModel::dropMimeData fxb fxp target not found")
+                        LOG("fxb fxp target not found");
                         return false;
                     }
 
@@ -351,12 +351,12 @@ bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int
         {
             int objId = index.data(UserRoles::value).toInt();
             if(!objId) {
-                debug("HostModel::setData NodeType::object has no object Id")
+                LOG("NodeType::object has no object Id");
                 return false;
             }
             QSharedPointer<Connectables::Object> objPtr = myHost->objFactory->GetObjectFromId(objId);
             if(objPtr.isNull()) {
-                debug(QString("HostModel::setData NodeType::object the object %1 is deleted").arg(objId).toAscii())
+                LOG("NodeType::object the object deleted"<<objId);
                 return false;
             }
 
@@ -391,7 +391,7 @@ bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int
                     bool ok=true;
                     float newVal = value.toFloat(&ok);// item->data(Qt::DisplayRole).toFloat(&ok);
                     if(!ok) {
-                        debug("HostModel::setData pin can't convert value to float")
+                        LOG("pin can't convert value to float");
                         return false;
                     }
 

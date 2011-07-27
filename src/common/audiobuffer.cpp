@@ -143,7 +143,7 @@ void AudioBuffer::AddToStack(AudioBuffer * buff)
         if(stackSize==0) {
             SetSize(buff->GetSize());
         } else {
-            debug("AudioBuffer::AddToStack : not the same size, abort %ld != %ld",buff->GetSize(),bufferSize)
+            LOG("not the same size, abort"<<buff->GetSize()<<bufferSize);
             return;
         }
     }
@@ -353,7 +353,7 @@ void AudioBuffer::SetBufferContent(float *buff, int count)
     debugbuf("setcontent float");
 
     if(count!=bufferSize) {
-        debug2(<<"AudioBuffer::SetBufferContent resize"<<bufferSize<<count)
+        LOG("resize buffer"<<bufferSize<<count);
         SetSize(count);
     }
 
@@ -375,7 +375,7 @@ void AudioBuffer::SetBufferContent(double *buff, int count)
     debugbuf("setcontent double");
 
     if(count!=bufferSize) {
-        debug2(<<"AudioBuffer::SetBufferContent resize"<<bufferSize<<count)
+        LOG("resize buffer"<<bufferSize<<count);
         SetSize(count);
     }
 
@@ -397,7 +397,7 @@ void AudioBuffer::DumpToBuffer(float *buff, unsigned long count)
     debugbuf("dump float");
 
     if(count>bufferSize) {
-        debug("AudioBuffer::DumpToBuffer buffer too small")
+        LOG("buffer too small");
         count=bufferSize;
     }
 
@@ -418,7 +418,7 @@ void AudioBuffer::DumpToBuffer(double *buff, unsigned long count)
     debugbuf("dump double");
 
     if(count>bufferSize) {
-        debug("AudioBuffer::DumpToBuffer buffer too small")
+        LOG("buffer too small");
         count=bufferSize;
     }
 

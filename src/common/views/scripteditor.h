@@ -6,7 +6,9 @@
 namespace Ui {
     class ScriptEditor;
 }
-
+namespace Connectables {
+    class Script;
+}
 namespace View {
 
     class ScriptEditor : public QWidget
@@ -17,6 +19,7 @@ namespace View {
         explicit ScriptEditor(QWidget *parent = 0);
         ~ScriptEditor();
         void SetScript(const QString &script);
+        void SetObject(Connectables::Script *script);
 
     protected:
         void closeEvent ( QCloseEvent * event );
@@ -30,6 +33,7 @@ namespace View {
 
     private:
         Ui::ScriptEditor *ui;
+        Connectables::Script *object;
     };
 }
 #endif // SCRIPTEDITOR_H

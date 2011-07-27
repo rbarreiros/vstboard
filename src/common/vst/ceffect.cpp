@@ -120,7 +120,7 @@ bool CEffect::Unload()
     if(pluginLib) {
         if(pluginLib->isLoaded())
             if(!pluginLib->unload()) {
-                debug2(<<"CEffect::Unload can't unload plugin"<< sName)
+                LOG("can't unload plugin"<< sName);
             }
         delete pluginLib;
         pluginLib=0;
@@ -143,7 +143,7 @@ bool CEffect::LoadBank(std::string *name)
             throw (int)1;
 
         if (pEffect->uniqueID != bank.GetFxID()) {
-            debug2(<<"CEffect::LoadBank ID doesn't match");
+            LOG("LoadBank ID doesn't match");
             QMessageBox msgBox;
             msgBox.setText( QObject::tr("Wrong plugin ID.") );
             msgBox.setInformativeText( QObject::tr("Bank file not designed for that plugin") );
@@ -156,7 +156,7 @@ bool CEffect::LoadBank(std::string *name)
 
         if(bank.IsChunk()) {
             if(!(pEffect->flags & effFlagsProgramChunks)) {
-                debug2(<< "CEffect::LoadBank chunk not handled")
+                LOG("LoadBank chunk not handled");
                 throw (int)1;
             }
             EffSetChunk(bank.GetChunk(),bank.GetChunkSize(),0);
@@ -237,7 +237,7 @@ bool CEffect::LoadProgram(std::string *name)
             throw (int)1;
 
         if (pEffect->uniqueID != progFile.GetFxID()) {
-            debug2(<<"CEffect::LoadPreset ID doesn't match");
+            LOG("LoadPreset ID doesn't match");
             QMessageBox msgBox;
             msgBox.setText( QObject::tr("Wrong plugin ID.") );
             msgBox.setInformativeText( QObject::tr("Program file not designed for that plugin") );
@@ -248,7 +248,7 @@ bool CEffect::LoadProgram(std::string *name)
 
         if(progFile.IsChunk()) {
             if(!(pEffect->flags & effFlagsProgramChunks)) {
-                debug2(<< "CEffect::LoadPreset chunk not handled")
+                LOG("LoadPreset chunk not handled");
                 throw (int)1;
             }
             EffSetChunk(progFile.GetChunk(),progFile.GetChunkSize(),0);

@@ -78,12 +78,12 @@ void View::VstShellSelect::on_buttonOk_clicked()
 
     QSharedPointer<Connectables::Object> objPtr = objFactory->NewObject(info);
     if(objPtr.isNull()) {
-        debug("View::VstShellSelect::on_buttonOk_clicked object not loaded")
+        LOG("on_buttonOk_clicked object not loaded");
         close();
         return;
     }
     if(!cntPtr) {
-        debug("View::VstShellSelect::on_buttonOk_clicked container not set")
+        LOG("on_buttonOk_clicked container not set");
         close();
         return;
     }

@@ -405,7 +405,7 @@ VstInt32 Vst::processEvents(VstEvents* events)
                 dev->midiQueue << msg;
             }
         } else {
-            debug("other vst event")
+            LOG("other vst event");
         }
     }
 

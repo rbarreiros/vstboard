@@ -138,6 +138,8 @@ private:
     friend class ComRemoveObject;
     friend class ComDiscardChanges;
     friend class ComChangeAutosave;
+    friend class ComAddPin;
+    friend class ComRemovePin;
 
     friend QDataStream & operator<< (QDataStream&, ProgramsModel&);
     friend QDataStream & operator>> (QDataStream&, ProgramsModel&);

@@ -156,7 +156,7 @@ void Renderer::OnNewRenderingOrder(const QList<SolverNode*> & listNodes)
 void Renderer::StartRender()
 {
     if(!mutex.tryLockForRead(5)) {
-        debug2(<<"Renderer::StartRender can't lock")
+        LOG("can't lock renderer");
         return;
     }
 
@@ -206,7 +206,7 @@ void Renderer::StartRender()
             }
 
         } else {
-            debug2(<<"Renderer::StartRender timeout, step:"<< currentStep << sem.available() << "/" << maxNumberOfThreads )
+            LOG("StartRender timeout, step:"<< currentStep << sem.available() << "/" << maxNumberOfThreads );
         }
 
     }

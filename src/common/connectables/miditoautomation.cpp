@@ -18,11 +18,12 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-
 #include "miditoautomation.h"
 #include "midipinin.h"
 #include "../globals.h"
 #include "mainhost.h"
+#include "commands/comaddpin.h"
+#include "commands/comremovepin.h"
 
 using namespace Connectables;
 
@@ -106,17 +107,24 @@ void MidiToAutomation::MidiMsgFromInput(long msg)
 void MidiToAutomation::ChangeValue(int ctrl, int value) {
 
     if(value>127 || value<0) {
-        debug("midi ctrl 0>127")
+        LOG("midi ctrl 0>127"<<ctrl<<value);
         return;
     }
 
     if(ctrl<128 || ctrl>=para_notes) {
         switch(GetLearningMode()) {
             case LearningMode::unlearn :
-                listParameterPinOut->AsyncRemovePin(ctrl);
+                if(listParameterPinOut->listPins.contains(ctrl)) {
+                    myHost->undoStack.push( new ComRemovePin(myHost, listParameterPinOut->listPins.value(ctrl)->GetConnectionInfo()) );
+                }
                 break;
             case LearningMode::learn :
-                listParameterPinOut->AsyncAddPin(ctrl);
+                if(!listParameterPinOut->listPins.contains(ctrl)) {
+                    ConnectionInfo info = listParameterPinOut->connInfo;
+                    info.pinNumber = ctrl;
+                    info.isRemoveable = true;
+                    myHost->undoStack.push( new ComAddPin(myHost,info) );
+                }
             case LearningMode::off :
                 listChanged.insert(ctrl,value);
                 break;
@@ -133,7 +141,7 @@ Pin* MidiToAutomation::CreatePin(const ConnectionInfo &info)
         return newPin;
 
     if(info.type!=PinType::Parameter) {
-        debug("MidiToAutomation::CreatePin PinType")
+        LOG("wrong PinType"<<info.type);
         return 0;
     }
 

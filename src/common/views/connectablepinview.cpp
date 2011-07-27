@@ -127,7 +127,7 @@ void ConnectablePinView::updateVu()
             newVu = geometry().width() * value;
         }
         if(newVu<0.0) {
-            debug2(<<"ConnectablePinView::updateVu <0"<<newVu)
+            LOG("updateVu <0"<<newVu);
             newVu=0.0f;
         }
         rectVu->setRect(0,0, newVu, geometry().height());

@@ -121,7 +121,7 @@ ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
     ui->samplePrecision->addItem("64 bits",true);
     index=ui->samplePrecision->findData( defaultDoublePrecision(myHost) );
     if(index==-1) {
-        debug("ConfigDialog invalid sample precision")
+        LOG("invalid sample precision"<<index)
         index=0;
     }
     ui->samplePrecision->setCurrentIndex(index);

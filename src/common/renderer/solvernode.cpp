@@ -206,13 +206,13 @@ void SolverNode::ReconnectParentsTo(SolverNode *newChild)
 bool SolverNode::MergeWithParentNode()
 {
     if(listParents.count()!=1) {
-        debug2(<< "SolverNode::MergeWithParentNode need only one parent")
+        LOG("MergeWithParentNode need only one parent");
         return false;
     }
 
     SolverNode *parent = listParents.first();
     if(parent->listChilds.count()!=1) {
-        debug2(<< "SolverNode::MergeWithParentNode parent must have one child only")
+        LOG("MergeWithParentNode parent must have one child only");
         return false;
     }
 

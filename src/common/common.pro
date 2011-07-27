@@ -122,7 +122,9 @@ SOURCES += \
     commands/comaddgroup.cpp \
     commands/comchangeprogramitem.cpp \
     commands/comdiscardchanges.cpp \
-    commands/comchangeautosave.cpp
+    commands/comchangeautosave.cpp \
+    commands/comremovepin.cpp \
+    commands/comaddpin.cpp
 
 HEADERS += \
     globals.h \
@@ -208,7 +210,9 @@ HEADERS += \
     commands/comaddgroup.h \
     commands/comchangeprogramitem.h \
     commands/comdiscardchanges.h \
-    commands/comchangeautosave.h
+    commands/comchangeautosave.h \
+    commands/comremovepin.h \
+    commands/comaddpin.h
 
 FORMS += \
     views/configdialog.ui \
@@ -226,5 +230,9 @@ TRANSLATIONS = ../resources/translations/common_fr.ts
 
 RESOURCES += \
     ../resources/resources.qrc
+
+
+
+
 
 
