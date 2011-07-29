@@ -26,12 +26,15 @@ private:
 
     QWeakPointer<Connectables::Container>ContainerPtr;
     InsertionType::Enum insertType;
-    ObjectContainerAttribs attr;
 
     QList< QPair<ConnectionInfo,ConnectionInfo> >listAddedCables;
     QList< QPair<ConnectionInfo,ConnectionInfo> >listRemovedCables;
 
+    ObjectContainerAttribs attr;
     QByteArray objState;
+
+    ObjectContainerAttribs targetAttr;
+    QByteArray targetState;
 
     int currentGroup;
     int currentProg;
