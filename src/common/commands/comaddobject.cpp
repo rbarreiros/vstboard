@@ -58,7 +58,16 @@ void ComAddObject::undo ()
             target = myHost->objFactory->NewObject( targetInfo );
         }
         if(target) {
+            if(targetState.size()!=0) {
+                QDataStream stream(&targetState, QIODevice::ReadWrite);
+                target->fromStream( stream );
+                targetState.resize(0);
+            }
+
             container->UserAddObject(target);
+            if(targetAttr.position!=QPointF(0.0f,0.0f)) {
+                target->SetContainerAttribs(targetAttr);
+            }
         }
     }
 
@@ -99,8 +108,13 @@ void ComAddObject::redo ()
 
     //get the target
     QSharedPointer<Connectables::Object> target = myHost->objFactory->GetObjectFromId( targetInfo.forcedObjId );
-    if(target)
+    if(target) {
         targetInfo = target->info();
+        QDataStream stream(&targetState, QIODevice::ReadWrite);
+        target->SaveProgram();
+        target->toStream( stream );
+        target->GetContainerAttribs(targetAttr);
+    }
 
     if(objState.size()!=0) {
         QDataStream stream(&objState, QIODevice::ReadWrite);

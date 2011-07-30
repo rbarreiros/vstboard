@@ -46,6 +46,7 @@ protected:
     bool ChainNodes();
     void UnwrapLoops();
     void SetMinAndMaxStep();
+    void RemoveUnusedNodes();
 
     QList<SolverNode*> ListOfGoodStarts(const QList<SolverNode*>&loop);
     QList<SolverNode*> BestStartsInAList(const QList<SolverNode*>&loop, const QList<SolverNode*>&possibleStarts);

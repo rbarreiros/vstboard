@@ -61,6 +61,7 @@ void PathSolver::Resolve(hashCables cables, Renderer *renderer)
     CreateNodes();
     PutParentsInNodes();
     while(ChainNodes()) {}
+    RemoveUnusedNodes();
     UnwrapLoops();
     SetMinAndMaxStep();
     renderer->OnNewRenderingOrder(listNodes);
@@ -135,20 +136,32 @@ bool PathSolver::ChainNodes()
         }
     }
 
-    //remove nodes containing only bridges
-//    foreach(SolverNode* node, listNodes) {
-//        bool onlyBridges=true;
-//        foreach(QWeakPointer<Connectables::Object>objPtr, node->listOfObj ) {
-//            if(objPtr.toStrongRef()->info().nodeType!=NodeType::bridge)
-//                onlyBridges=false;
-//        }
-//        if(onlyBridges) {
-//            listNodes.removeAll(node);
-//            delete node;
-//        }
-//    }
-
     return false;
+}
+
+void PathSolver::RemoveUnusedNodes()
+{
+    foreach(SolverNode *node, listNodes) {
+        bool onlyBridges=true;
+        foreach(QSharedPointer<Connectables::Object>objPtr,node->listOfObj) {
+            if(objPtr->info().nodeType!=NodeType::bridge) {
+                onlyBridges=false;
+                break;
+            }
+        }
+        if(onlyBridges) {
+            foreach(SolverNode *child, node->listChilds) {
+                child->listParents.removeAll(node);
+                child->listParents << node->listParents;
+            }
+            foreach(SolverNode *parent, node->listParents) {
+                parent->listChilds.removeAll(node);
+                parent->listChilds << node->listChilds;
+            }
+            listNodes.removeAll(node);
+            delete node;
+        }
+    }
 }
 
 void PathSolver::UnwrapLoops()
