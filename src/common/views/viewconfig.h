@@ -41,6 +41,10 @@ namespace Colors {
     };
 }
 
+#define viewConfigPreset QMap<ColorGroups::Enum, QMap<Colors::Enum, QColor> >
+#define viewConfigPresetList QMap<QString, QMap<ColorGroups::Enum, QMap<Colors::Enum, QColor> > >
+
+
 namespace View {
 
 //    class ColorGroup
@@ -65,7 +69,7 @@ namespace View {
         QString GetColorName(Colors::Enum colorId);
         QPalette::ColorRole GetPaletteRoleFromColor(Colors::Enum colorId);
         QPalette GetPaletteFromColorGroup(ColorGroups::Enum groupId, const QPalette &oriPalette);
-        void SetListGroups(QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> > newList);
+        void SetListGroups(viewConfigPreset newList);
 
         void SaveToFile( QDataStream & out );
         void LoadFromFile( QDataStream & in );
@@ -76,12 +80,12 @@ namespace View {
         void LoadPreset(const QString &presetName);
         inline const QString & GetPresetName() const {return currentPresetName;}
 
-        inline QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> > * ViewConfig::GetCurrentPreset()
+        inline viewConfigPreset * ViewConfig::GetCurrentPreset()
         {
             return &(*GetListOfPresets())[currentPresetName];
         }
 
-        inline QMap<QString, QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> > > * ViewConfig::GetListOfPresets()
+        inline viewConfigPresetList * ViewConfig::GetListOfPresets()
         {
             if(savedInSetupFile)
                 return &listPresetsInSetup;
@@ -94,8 +98,8 @@ namespace View {
 
         void AddPreset(QString &presetName);
         void RemovePreset(const QString &presetName);
-        void RenamePreset(const QString &oldName, const QString &newName);
-        void CopyPreset(QString &presetName);
+        void RenamePreset(const QString &oldName, QString &newName);
+        void CopyPreset(const QString &presetName, QString &newName=QString(""));
 
         QDataStream & toStream (QDataStream &) const;
         QDataStream & fromStream (QDataStream &);
@@ -104,10 +108,10 @@ namespace View {
 
     protected:
         ///list of presets in registry
-        QMap<QString, QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> > >listPresets;
+        viewConfigPresetList listPresets;
 
         ///list of presets saved in setup file
-        QMap<QString, QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> > >listPresetsInSetup;
+        viewConfigPresetList listPresetsInSetup;
 
         bool savedInSetupFile;
         void InitPresets();
