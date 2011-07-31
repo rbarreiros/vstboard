@@ -142,7 +142,7 @@ void ViewConfig::LoadPreset(const QString &presetName)
   Update all colors with a new list, used by the dialog when changes are discarded
   \param newList list of groups
   */
-void ViewConfig::SetListGroups(QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> > newList)
+void ViewConfig::SetListGroups(viewConfigPreset newList)
 {
     *GetCurrentPreset() = newList;
     UpdateAllWidgets();
@@ -153,7 +153,7 @@ void ViewConfig::SetListGroups(QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor>
   */
 void ViewConfig::UpdateAllWidgets()
 {
-    QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> >::iterator i = GetCurrentPreset()->begin();
+    viewConfigPreset::iterator i = GetCurrentPreset()->begin();
     while( i!=GetCurrentPreset()->end() ) {
         QMap<Colors::Enum,QColor> grp = i.value();
         QMap<Colors::Enum,QColor>::iterator j = grp.begin();
@@ -299,20 +299,29 @@ void ViewConfig::AddPreset(QString &presetName)
     presetName=newName;
 }
 
-void ViewConfig::CopyPreset(QString &presetName)
+void ViewConfig::CopyPreset(const QString &presetName, QString &newName)
 {
     int count=2;
-    QString newName=presetName;
-    while(GetListOfPresets()->contains( newName )) {
-        newName=presetName+" ("+QString::number(count)+")";
+
+    if(newName.isEmpty())
+        newName=presetName;
+
+    QString tmpNewName = newName;
+
+    while(GetListOfPresets()->contains( tmpNewName )) {
+        tmpNewName=newName+" ("+QString::number(count)+")";
         count++;
     }
 
-    if(!GetListOfPresets()->contains(presetName))
-        presetName="Default";
+    viewConfigPreset oldPreset;
 
-    GetListOfPresets()->insert( newName, (*GetListOfPresets())[presetName] );
-    presetName=newName;
+    if(GetListOfPresets()->contains(presetName))
+        oldPreset = (*GetListOfPresets())[presetName];
+    else
+        oldPreset = (*GetListOfPresets())["Default"];
+
+    GetListOfPresets()->insert( tmpNewName, oldPreset );
+    newName=tmpNewName;
 }
 
 void ViewConfig::RemovePreset(const QString &presetName)
@@ -322,9 +331,9 @@ void ViewConfig::RemovePreset(const QString &presetName)
     GetListOfPresets()->remove(presetName);
 }
 
-void ViewConfig::RenamePreset(const QString &oldName, const QString &newName)
+void ViewConfig::RenamePreset( const QString &oldName, QString &newName)
 {
-    (*GetListOfPresets())[newName] = (*GetListOfPresets())[oldName];
+    CopyPreset(oldName,newName);
     GetListOfPresets()->remove(oldName);
 }
 
@@ -393,20 +402,20 @@ void ViewConfig::LoadFromRegistry()
   */
 QDataStream & ViewConfig::toStream(QDataStream & out) const
 {
-    QMap<QString, QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> > >tmpPresets;
+    viewConfigPresetList tmpPresets;
     if(savedInSetupFile)
         tmpPresets=listPresetsInSetup;
     else
         tmpPresets=listPresets;
 
     out << (quint16)tmpPresets.count();
-    QMap<QString, QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> > >::const_iterator ip = tmpPresets.constBegin();
+    viewConfigPresetList::const_iterator ip = tmpPresets.constBegin();
 
     while(ip!=tmpPresets.constEnd()) {
         out << ip.key();
         out << (quint16)ip.value().count();
 
-        QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> >::const_iterator i = ip.value().constBegin();
+        viewConfigPreset::const_iterator i = ip.value().constBegin();
         while(i!=ip.value().constEnd()) {
             out << (quint8)i.key();
             out << (quint8)i.value().count();

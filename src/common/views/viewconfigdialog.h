@@ -52,7 +52,7 @@ namespace View {
         Colors::Enum currentCol;
 
         /// a copy of the original colors, restored if dialog is canceled
-        QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> >backupColors;
+        viewConfigPreset backupColors;
 
         /// save in setup file, oriinal state
         bool backupSaveInSetup;

@@ -76,7 +76,7 @@ void ViewConfigDialog::InitLists()
     ui->listPresets->clear();
     ui->listPresets->addItem( "Default" );
 
-    QMap<QString, QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> > >::const_iterator ip = conf->GetListOfPresets()->constBegin();
+    viewConfigPresetList::const_iterator ip = conf->GetListOfPresets()->constBegin();
     while(ip!=conf->GetListOfPresets()->constEnd()) {
         if( ip.key()!="Default") {
             QListWidgetItem *item = new QListWidgetItem( ip.key() );
@@ -155,7 +155,7 @@ void ViewConfigDialog::LoadPreset(const QString &presetName)
     backupSaveInSetup = conf->IsSavedInSetup();
 
     ui->listPalettes->clear();
-    QMap<ColorGroups::Enum, QMap<Colors::Enum,QColor> >::iterator i = conf->GetCurrentPreset()->begin();
+    viewConfigPreset::iterator i = conf->GetCurrentPreset()->begin();
     while(i!=conf->GetCurrentPreset()->end()) {
         QListWidgetItem *item = new QListWidgetItem( conf->GetColorGroupName(i.key()) );
         item->setData(Qt::UserRole+1,i.key());
@@ -381,7 +381,7 @@ void View::ViewConfigDialog::on_addPreset_clicked()
     QListWidgetItem * item = ui->listPresets->currentItem();
     if(item) {
         name=item->text();
-        conf->CopyPreset(name);
+        conf->CopyPreset(name,name);
     } else {
         conf->AddPreset( name );
     }
@@ -411,8 +411,11 @@ void View::ViewConfigDialog::on_delPreset_clicked()
 void View::ViewConfigDialog::on_listPresets_itemChanged(QListWidgetItem *item)
 {
     QString oldName = item->data(Qt::UserRole+1).toString();
-    conf->RenamePreset( oldName, item->text() );
-    item->setData( Qt::UserRole+1, item->text() );
+    QString newName = item->text();
+    conf->RenamePreset( oldName, newName );
+
+    InitLists();
+    LoadPreset(newName);
 
     if(ui->checkSavedInSetupFile->isChecked())
         myHost->SetSetupDirtyFlag();
