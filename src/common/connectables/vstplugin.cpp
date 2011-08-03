@@ -390,10 +390,11 @@ bool VstPlugin::Open()
     }
 
     //create all parameters pins
-    int nbParam = pEffect->numParams;
-    for(int i=0;i<nbParam;i++) {
-        listParameterPinIn->AddPin(i);
-    }
+    //no, only touched parameters are recorded
+//    int nbParam = pEffect->numParams;
+//    for(int i=0;i<nbParam;i++) {
+//        listParameterPinIn->AddPin(i);
+//    }
 
     //editor pin
     listEditorVisible << "hide";
@@ -692,9 +693,24 @@ VstIntPtr VstPlugin::OnMasterCallback(long opcode, long index, long value, void 
         case audioMasterGetSampleRate : //16
             return sampleRate;
 
-//        case audioMasterUpdateDisplay : //42
-//            break;
+        case audioMasterUpdateDisplay : //42
+        {
+            if(!pEffect)
+                return 1L;
+            QMap<quint16,Pin*>::iterator i = listParameterPinIn->listPins.begin();
+            while(i!=listParameterPinIn->listPins.end()) {
+                if(i.key()<pEffect->numParams) {
+                    ParameterPin *pin = static_cast<ParameterPin*>(i.value());
+                    pin->ChangeValue( EffGetParameter(i.key()), true );
+                    pin->setObjectName( EffGetParamName(i.key()) );
+                }
+                ++i;
+            }
+            return 1L;
+        }
+            break;
         case audioMasterBeginEdit : //43
+            listParameterPinIn->AddPin(index);
         case audioMasterEndEdit : //44
             return 1L;
     }
@@ -717,15 +733,12 @@ void VstPlugin::OnParameterChanged(ConnectionInfo pinInfo, float value)
             return;
         }
 
-        if(pinInfo.pinNumber<200) {
+        if(pinInfo.pinNumber<pEffect->numParams) {
             if(EffCanBeAutomated(pinInfo.pinNumber)!=1) {
                 LOG("vst parameter can't be automated"<<pinInfo.pinNumber);
                 return;
             }
             EffSetParameter(pinInfo.pinNumber,value);
-
-//            if(listParameterPinOut->listPins.contains(pinInfo.pinNumber))
-//                static_cast<ParameterPinOut*>(listParameterPinOut->listPins.value(pinInfo.pinNumber))->ChangeValue(value);
         }
     }
 }
