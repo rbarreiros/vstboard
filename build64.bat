@@ -32,15 +32,6 @@ copy /y "%QTDIR%\bin\QtScript4.dll" ".\installer"
 copy /y "%QTDIR%\bin\QtSolutions_MFCMigrationFramework-head.dll" ".\installer"
 rem copy /y "%WindowsSDKDir%\Redist\VC\vcredist_x64.exe" ".\installer"
 
-rem set MPRESS_PATH="../../vstboard/tools/mpress/mpress.exe"
-rem %MPRESS_PATH% -q ".\installer\VstBoard.exe"
-rem %MPRESS_PATH% -q ".\installer\VstBoardPlugin.dll"
-rem %MPRESS_PATH% -q ".\installer\VstBoard.dll"
-rem %MPRESS_PATH% -q ".\installer\QtGui4.dll"
-rem %MPRESS_PATH% -q ".\installer\QtCore4.dll"
-rem %MPRESS_PATH% -q ".\installer\QtScript4.dll"
-rem %MPRESS_PATH% -q ".\installer\QtSolutions_MFCMigrationFramework-head.dll"
-
 cd "installer"
 %NSIS_PATH% /DARCH=x64 /DOutFile="vstboard_win64_setup.exe" nsis.nsi
 
