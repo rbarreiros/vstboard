@@ -49,7 +49,8 @@ void RenderThread::run()
 
     forever {
 
-        currentCpu = GetCurrentProcessorNumber();
+//not available on XP
+//        currentCpu = GetCurrentProcessorNumber();
 
         sem.acquire();
 
