@@ -324,6 +324,7 @@ void *AudioBuffer::ConsumeStack()
 
         //if we're off-limits : here is a limiter
         if(_maxVal > 1.0f) {
+#ifdef BUFFER_ZERODB_CLIPPING
             buf = (float*)pBuffer;
             for(unsigned long i=0;i<bufferSize;i++) {
                 if(*buf > 1.0f)
@@ -332,6 +333,7 @@ void *AudioBuffer::ConsumeStack()
                     *buf = -.8f;
                ++buf;
             }
+#endif
             _maxVal = 1.0f;
         }
     }
