@@ -390,11 +390,10 @@ bool VstPlugin::Open()
     }
 
     //create all parameters pins
-    //no, only touched parameters are recorded
-//    int nbParam = pEffect->numParams;
-//    for(int i=0;i<nbParam;i++) {
-//        listParameterPinIn->AddPin(i);
-//    }
+    int nbParam = pEffect->numParams;
+    for(int i=0;i<nbParam;i++) {
+        listParameterPinIn->AddPin(i);
+    }
 
     //editor pin
     listEditorVisible << "hide";
