@@ -24,7 +24,8 @@ qmake -r C:\Users\CtrlBrk\Documents\VstBoard\src\buildall.pro
 
 pause
 
-copy /y ".\dllLoader\release\vstboard.dll" ".\installer"
+copy /y ".\dllLoader\release\VstBoardEffect.dll" ".\installer"
+copy /y ".\dllLoaderInst\release\VstBoardInstrument.dll" ".\installer"
 copy /y ".\vstboard\release\vstboard.exe" ".\installer"
 copy /y ".\vstdll\release\VstBoardPlugin.dll" ".\installer"
 copy /y "%QTDIR%\bin\QtCore4.dll" ".\installer"
