@@ -21,7 +21,8 @@
 #ifndef VST_H
 #define VST_H
 
-#define kUniqueID CCONST('V','b','P','l')
+#define uniqueIDEffect CCONST('V','b','P','l')
+#define uniqueIDInstrument CCONST('V','b','I','s')
 #define VST_EVENT_BUFFER_SIZE 1000
 #define DEFAULT_INPUTS 1
 #define DEFAULT_OUTPUTS 1
@@ -37,7 +38,7 @@
 #include "connectables/vstmididevice.h"
 #include "connectables/vstautomation.h"
 
-AudioEffect* createEffectInstance (audioMasterCallback audioMaster);
+AudioEffect* createEffectInstance (audioMasterCallback audioMaster, bool asInstrument);
 
 //-------------------------------------------------------------------------------------------------------
 class Vst : public QObject, public AudioEffectX
@@ -45,7 +46,7 @@ class Vst : public QObject, public AudioEffectX
     Q_OBJECT
 public:
 
-        Vst (audioMasterCallback audioMaster);
+        Vst (audioMasterCallback audioMaster, bool asInstrument=false);
         ~Vst ();
 
         VstInt32 canDo(char* text);

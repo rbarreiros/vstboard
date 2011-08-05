@@ -19,7 +19,7 @@
 **************************************************************************/
 #include "vst.h"
 
-extern AudioEffect* createEffectInstance (audioMasterCallback audioMaster);
+extern AudioEffect* createEffectInstance (audioMasterCallback audioMaster, bool asInstrument);
 
 extern "C" {
 
@@ -39,7 +39,7 @@ extern "C" {
             return 0;  // old version
 
         // Create the AudioEffect
-        AudioEffect* effect = createEffectInstance (audioMaster);
+        AudioEffect* effect = createEffectInstance (audioMaster,false);
         if (!effect)
             return 0;
 
@@ -47,14 +47,20 @@ extern "C" {
         return effect->getAeffect ();
     }
 
-    // support for old hosts not looking for VSTPluginMain
-#if (TARGET_API_MAC_CARBON && __ppc__)
-    VST_EXPORT AEffect* main_macho (audioMasterCallback audioMaster) { return VSTPluginMain (audioMaster); }
-#elif WIN32
-    VST_EXPORT AEffect* MAIN (audioMasterCallback audioMaster) { return VSTPluginMain (audioMaster); }
-#elif BEOS
-    VST_EXPORT AEffect* main_plugin (audioMasterCallback audioMaster) { return VSTPluginMain (audioMaster); }
-#endif
+    VST_EXPORT AEffect* VSTInstrumentMain (audioMasterCallback audioMaster)
+    {
+        // Get VST Version of the Host
+        if (!audioMaster (0, audioMasterVersion, 0, 0, 0, 0))
+            return 0;  // old version
+
+        // Create the AudioEffect
+        AudioEffect* effect = createEffectInstance (audioMaster,true);
+        if (!effect)
+            return 0;
+
+        // Return the VST AEffect structur
+        return effect->getAeffect ();
+    }
 
 } // extern "C"
 

@@ -24,12 +24,12 @@
 #include "projectfile/projectfile.h"
 #include "views/configdialog.h"
 
-AudioEffect* createEffectInstance (audioMasterCallback audioMaster)
+AudioEffect* createEffectInstance (audioMasterCallback audioMaster, bool asInstrument)
 {
-    return new Vst (audioMaster);
+    return new Vst (audioMaster, asInstrument);
 }
 
-Vst::Vst (audioMasterCallback audioMaster) :
+Vst::Vst (audioMasterCallback audioMaster, bool asInstrument) :
     AudioEffectX (audioMaster, 128, 128),
     myApp(0),
     myHost(0),
@@ -50,7 +50,13 @@ Vst::Vst (audioMasterCallback audioMaster) :
 {
     setNumInputs (DEFAULT_INPUTS*2);
     setNumOutputs (DEFAULT_OUTPUTS*2);
-    setUniqueID (kUniqueID);
+
+    if(asInstrument)
+        setUniqueID (uniqueIDInstrument);
+    else
+        setUniqueID (uniqueIDEffect);
+
+    isSynth(asInstrument);
     canProcessReplacing(true);
     programsAreChunks(true);
     vst_strncpy (programName, "Default", kVstMaxProgNameLen);	// default program name
@@ -99,12 +105,12 @@ void Vst::open()
 
      hostSendVstEvents = (bool)canHostDo("sendVstEvents");
      hostSendVstMidiEvent = (bool)canHostDo("sendVstMidiEvent");
-     hostSendVstTimeInfo = (bool)canHostDo((char *)"sendVstTimeInfo");
+     hostSendVstTimeInfo = (bool)canHostDo("sendVstTimeInfo");
      hostReceiveVstEvents = (bool)canHostDo("receiveVstEvents");
      hostReceiveVstMidiEvents = (bool)canHostDo("receiveVstMidiEvents");
      hostReceiveVstTimeInfo = (bool)canHostDo("receiveVstTimeInfo");
      hostReportConnectionChanges = (bool)canHostDo("reportConnectionChanges");
-     hostAcceptIOChanges = (bool)canHostDo((char *)"acceptIOChanges");
+     hostAcceptIOChanges = (bool)canHostDo("acceptIOChanges");
 
 //     long hostSizeWindow = canHostDo("sizeWindow");
 //     long hostAsyncProcessing = canHostDo("asyncProcessing");
@@ -575,7 +581,7 @@ void Vst::deleteChunkData()
 
 VstInt32 Vst::setChunk ( void* data, VstInt32 byteSize, bool isPreset)
 {
-    if(!data || byteSize<=0)
+    if(!data || byteSize<=0 || isPreset)
         return 0;
     QByteArray tmpStream;
     tmpStream.setRawData((const char*)data,byteSize);
@@ -589,7 +595,7 @@ VstInt32 Vst::setChunk ( void* data, VstInt32 byteSize, bool isPreset)
 
 VstInt32 Vst::getChunk (void** data, bool isPreset)
 {
-    if(!data)
+    if(!data || isPreset)
         return 0;
     QByteArray tmpStream;
     QDataStream tmp( &tmpStream , QIODevice::WriteOnly);

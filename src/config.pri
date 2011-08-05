@@ -14,6 +14,9 @@ win32|macx {
 CONFIG += scriptengine
 DEFINES += SCRIPTENGINE
 
+#limit buffers range from -1.0 to 1.0
+#DEFINES += BUFFER_ZERODB_CLIPPING
+
 #use lines instead of curves
 #DEFINES += SIMPLE_CABLES
 

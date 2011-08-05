@@ -54,6 +54,6 @@ protected:
     MainWindow *myWindow;
 };
 
-void clientResize(HWND h_parent, int width, int height);
+//void clientResize(HWND h_parent, int width, int height);
 
 #endif // GUI_H

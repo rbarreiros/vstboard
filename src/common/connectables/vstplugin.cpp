@@ -390,11 +390,10 @@ bool VstPlugin::Open()
     }
 
     //create all parameters pins
-    //no, only touched parameters are recorded
-//    int nbParam = pEffect->numParams;
-//    for(int i=0;i<nbParam;i++) {
-//        listParameterPinIn->AddPin(i);
-//    }
+    int nbParam = pEffect->numParams;
+    for(int i=0;i<nbParam;i++) {
+        listParameterPinIn->AddPin(i);
+    }
 
     //editor pin
     listEditorVisible << "hide";
@@ -617,7 +616,6 @@ VstIntPtr VstPlugin::OnMasterCallback(long opcode, long index, long value, void 
     switch(opcode) {
         case audioMasterAutomate : //0
             //create the parameter pin if needed
-
             {
                 ParameterPin *pin = static_cast<ParameterPin*>(listParameterPinIn->listPins.value(index,0));
                 if(!pin)
@@ -710,7 +708,6 @@ VstIntPtr VstPlugin::OnMasterCallback(long opcode, long index, long value, void 
         }
             break;
         case audioMasterBeginEdit : //43
-            listParameterPinIn->AddPin(index);
         case audioMasterEndEdit : //44
             return 1L;
     }
