@@ -70,8 +70,8 @@ Section "VstBoard (required)"
 	SetOutPath $InstFolder
 	File "QtCore4.dll"
 	File "QtGui4.dll"
-        File "QtScript4.dll"
-        File "QtSolutions_MFCMigrationFramework-head.dll"
+	File "QtScript4.dll"
+	File "QtSolutions_MFCMigrationFramework-head.dll"
 	File "VstBoard.exe"
 	File "VstBoardPlugin.dll"
 	File "license.txt"
@@ -80,9 +80,9 @@ Section "VstBoard (required)"
 
 	WriteRegStr HKCU "${REG_UNINSTALL}" "DisplayName" "VstBoard"
 	WriteRegStr HKCU "${REG_UNINSTALL}" "DisplayIcon" "$\"$InstFolder\VstBoard.exe$\""
-	WriteRegStr HKCU "${REG_UNINSTALL}" "Publisher" "Raphaël François"
+	WriteRegStr HKCU "${REG_UNINSTALL}" "Publisher" "CtrlBrk"
 	WriteRegStr HKCU "${REG_UNINSTALL}" "DisplayVersion" "a0.0.0.1"
-	WriteRegDWord HKCU "${REG_UNINSTALL}" "EstimatedSize" 4500 ;KB
+	WriteRegDWord HKCU "${REG_UNINSTALL}" "EstimatedSize" 15000 ;KB
 	WriteRegStr HKCU "${REG_UNINSTALL}" "HelpLink" "${WEBSITE_LINK}"
 	WriteRegStr HKCU "${REG_UNINSTALL}" "URLInfoAbout" "${WEBSITE_LINK}"
 	WriteRegStr HKCU "${REG_UNINSTALL}" "InstallLocation" "$\"$InstFolder$\""
@@ -96,7 +96,8 @@ Section "VstBoard (required)"
 
 	SetOutPath $VstDir
 	WriteRegStr HKCU "${REG_SETTINGS}" "pluginInstallDir" $VstDir
-	File "VstBoard.dll"
+	File "VstBoardEffect.dll"
+	File "VstBoardInstrument.dll"
 	
 SectionEnd
 
@@ -120,14 +121,15 @@ Section "Uninstall"
         SetShellVarContext current
 	
 	ReadRegStr $VstDir HKCU "${REG_SETTINGS}" "pluginInstallDir"
-	Delete "$VstDir\VstBoard.dll"
+	Delete "$VstDir\VstBoardEffect.dll"
+	Delete "$VstDir\VstBoardInstrument.dll"
 	
 	DeleteRegKey HKCU "${REG_UNINSTALL}"
 	DeleteRegKey HKCU "${REG_SETTINGS}"
 	Delete "$INSTDIR\QtCore4.dll"
 	Delete "$INSTDIR\QtGui4.dll"
-        Delete "$INSTDIR\QtScript4.dll"
-        Delete "$INSTDIR\QtSolutions_MFCMigrationFramework-head.dll"
+	Delete "$INSTDIR\QtScript4.dll"
+	Delete "$INSTDIR\QtSolutions_MFCMigrationFramework-head.dll"
 	Delete "$INSTDIR\VstBoard.exe"
 	Delete "$INSTDIR\VstBoardPlugin.dll"
 	Delete "$INSTDIR\license.txt"

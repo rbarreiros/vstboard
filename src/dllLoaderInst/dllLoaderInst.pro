@@ -6,8 +6,8 @@
 
 include(../config.pri)
 
-DEFINES -= AS_INSTRUMENT
-TARGET = VstBoardEffect
+DEFINES += AS_INSTRUMENT
+TARGET = VstBoardInstrument
 TEMPLATE = lib
 
 QT       -= core gui
@@ -15,12 +15,12 @@ LIBS += -ladvapi32
 LIBS += -luser32
 
 SOURCES += \
-    main.cpp
+    ../dllLoader/main.cpp
 
 HEADERS +=
 
 win32-msvc* {
-    RC_FILE = dllLoader.rc
+    RC_FILE = ../dllLoader/dllLoader.rc
 }
 
 

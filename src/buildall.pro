@@ -5,5 +5,7 @@ SUBDIRS     = \
     common \
     vstdll \
     vstboard \
-    dllLoader
+    dllLoader \
+    dllLoaderInst
+
 CONFIG += ordered

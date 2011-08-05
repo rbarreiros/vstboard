@@ -98,8 +98,11 @@ extern "C" {
             MessageBox(NULL,(L"Error while loading "+instDir+L"\\VstBoardPlugin.dll").c_str(),L"VstBoard", MB_OK | MB_ICONERROR);
             return 0;
         }
-
+#ifdef AS_INSTRUMENT
+        vstPluginFuncPtr entryPoint = (vstPluginFuncPtr)GetProcAddress(Hplugin, "VSTInstrumentMain");
+#else
         vstPluginFuncPtr entryPoint = (vstPluginFuncPtr)GetProcAddress(Hplugin, "VSTPluginMain");
+#endif
         if(!entryPoint) {
             FreeLibrary(Hplugin);
             FreeLibrary(HwinMigrate);

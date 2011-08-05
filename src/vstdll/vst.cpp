@@ -24,12 +24,12 @@
 #include "projectfile/projectfile.h"
 #include "views/configdialog.h"
 
-AudioEffect* createEffectInstance (audioMasterCallback audioMaster)
+AudioEffect* createEffectInstance (audioMasterCallback audioMaster, bool asInstrument)
 {
-    return new Vst (audioMaster);
+    return new Vst (audioMaster, asInstrument);
 }
 
-Vst::Vst (audioMasterCallback audioMaster) :
+Vst::Vst (audioMasterCallback audioMaster, bool asInstrument) :
     AudioEffectX (audioMaster, 128, 128),
     myApp(0),
     myHost(0),
@@ -50,7 +50,13 @@ Vst::Vst (audioMasterCallback audioMaster) :
 {
     setNumInputs (DEFAULT_INPUTS*2);
     setNumOutputs (DEFAULT_OUTPUTS*2);
-    setUniqueID (kUniqueID);
+
+    if(asInstrument)
+        setUniqueID (uniqueIDInstrument);
+    else
+        setUniqueID (uniqueIDEffect);
+
+    isSynth(asInstrument);
     canProcessReplacing(true);
     programsAreChunks(true);
     vst_strncpy (programName, "Default", kVstMaxProgNameLen);	// default program name
