@@ -58,7 +58,7 @@ bool Gui::open(void* ptr)
 
     widget->show();
     myWindow->readSettings();
-    clientResize(static_cast<HWND>(ptr), widget->width(), widget->height());
+//    clientResize(static_cast<HWND>(ptr), widget->width(), widget->height());
     return true;
 }
 
@@ -83,13 +83,13 @@ bool Gui::getRect (ERect** rect)
     return true;
 }
 
-void clientResize(HWND h_parent, int width, int height)
-{
-    RECT rcClient, rcWindow;
-    POINT ptDiff;
-    GetClientRect(h_parent, &rcClient);
-    GetWindowRect(h_parent, &rcWindow);
-    ptDiff.x = (rcWindow.right - rcWindow.left) - rcClient.right;
-    ptDiff.y = (rcWindow.bottom - rcWindow.top) - rcClient.bottom;
-    MoveWindow(h_parent, rcWindow.left, rcWindow.top, width + ptDiff.x, height + ptDiff.y, TRUE);
-}
+//void clientResize(HWND h_parent, int width, int height)
+//{
+//    RECT rcClient, rcWindow;
+//    POINT ptDiff;
+//    GetClientRect(h_parent, &rcClient);
+//    GetWindowRect(h_parent, &rcWindow);
+//    ptDiff.x = (rcWindow.right - rcWindow.left) - rcClient.right;
+//    ptDiff.y = (rcWindow.bottom - rcWindow.top) - rcClient.bottom;
+//    MoveWindow(h_parent, rcWindow.left, rcWindow.top, width + ptDiff.x, height + ptDiff.y, TRUE);
+//}

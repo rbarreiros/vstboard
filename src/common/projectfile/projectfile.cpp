@@ -163,7 +163,7 @@ bool ProjectFile::FromStream(MainHost *myHost,QDataStream &in)
 
     quint32 magic;
     in >> magic;
-    if(magic != PROJECT_FILE_KEY && magic != SETUP_FILE_KEY) {
+    if(magic != PROJECT_FILE_KEY && magic != SETUP_FILE_KEY && magic != SETUPANDPROJECT_FILE_KEY) {
         QMessageBox msgBox(QMessageBox::Critical, "", tr("Unknown file format. This file can't be loaded"));
         msgBox.exec();
         return false;

@@ -70,7 +70,15 @@ extern "C" {
           MessageBox(NULL,(instDir+L"\\VstBoardPlugin.dll : file not found").c_str(),L"VstBoard", MB_OK | MB_ICONERROR);
           return 0;
         }
-
+#ifndef QT_NO_DEBUG
+        HMODULE Hcore = LoadLibrary((instDir+L"\\QtCored4.dll").c_str());
+        HMODULE Hgui = LoadLibrary((instDir+L"\\QtGuid4.dll").c_str());
+#ifdef SCRIPTENGINE
+        HMODULE Hscript = LoadLibrary((instDir+L"\\QtScriptd4.dll").c_str());
+#endif
+        HMODULE HwinMigrate = LoadLibrary((instDir+L"\\QtSolutions_MFCMigrationFramework-headd.dll").c_str());
+        HMODULE Hplugin = LoadLibrary((instDir+L"\\VstBoardPlugin.dll").c_str());
+#else
         HMODULE Hcore = LoadLibrary((instDir+L"\\QtCore4.dll").c_str());
         HMODULE Hgui = LoadLibrary((instDir+L"\\QtGui4.dll").c_str());
 #ifdef SCRIPTENGINE
@@ -78,7 +86,7 @@ extern "C" {
 #endif
         HMODULE HwinMigrate = LoadLibrary((instDir+L"\\QtSolutions_MFCMigrationFramework-head.dll").c_str());
         HMODULE Hplugin = LoadLibrary((instDir+L"\\VstBoardPlugin.dll").c_str());
-
+#endif
         if(!Hplugin) {
             FreeLibrary(Hplugin);
             FreeLibrary(HwinMigrate);

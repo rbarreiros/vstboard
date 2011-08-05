@@ -99,12 +99,12 @@ void Vst::open()
 
      hostSendVstEvents = (bool)canHostDo("sendVstEvents");
      hostSendVstMidiEvent = (bool)canHostDo("sendVstMidiEvent");
-     hostSendVstTimeInfo = (bool)canHostDo((char *)"sendVstTimeInfo");
+     hostSendVstTimeInfo = (bool)canHostDo("sendVstTimeInfo");
      hostReceiveVstEvents = (bool)canHostDo("receiveVstEvents");
      hostReceiveVstMidiEvents = (bool)canHostDo("receiveVstMidiEvents");
      hostReceiveVstTimeInfo = (bool)canHostDo("receiveVstTimeInfo");
      hostReportConnectionChanges = (bool)canHostDo("reportConnectionChanges");
-     hostAcceptIOChanges = (bool)canHostDo((char *)"acceptIOChanges");
+     hostAcceptIOChanges = (bool)canHostDo("acceptIOChanges");
 
 //     long hostSizeWindow = canHostDo("sizeWindow");
 //     long hostAsyncProcessing = canHostDo("asyncProcessing");
@@ -575,7 +575,7 @@ void Vst::deleteChunkData()
 
 VstInt32 Vst::setChunk ( void* data, VstInt32 byteSize, bool isPreset)
 {
-    if(!data || byteSize<=0)
+    if(!data || byteSize<=0 || isPreset)
         return 0;
     QByteArray tmpStream;
     tmpStream.setRawData((const char*)data,byteSize);
@@ -589,7 +589,7 @@ VstInt32 Vst::setChunk ( void* data, VstInt32 byteSize, bool isPreset)
 
 VstInt32 Vst::getChunk (void** data, bool isPreset)
 {
-    if(!data)
+    if(!data || isPreset)
         return 0;
     QByteArray tmpStream;
     QDataStream tmp( &tmpStream , QIODevice::WriteOnly);
