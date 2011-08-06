@@ -10,9 +10,6 @@
     <height>570</height>
    </rect>
   </property>
-  <property name="contextMenuPolicy">
-   <enum>Qt::DefaultContextMenu</enum>
-  </property>
   <property name="windowTitle">
    <string>VstBoard</string>
   </property>
@@ -312,7 +309,6 @@
     <addaction name="actionGroup_panel"/>
     <addaction name="separator"/>
     <addaction name="actionRestore_default_layout"/>
-    <addaction name="actionStatus_bar"/>
     <addaction name="actionTool_bar"/>
     <addaction name="actionAppearance"/>
     <addaction name="separator"/>
@@ -385,11 +381,7 @@
    <addaction name="actionAppearance"/>
    <addaction name="separator"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="dockPrograms">
    <property name="sizePolicy">
     <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
@@ -399,7 +391,7 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>50</width>
+     <width>80</width>
      <height>50</height>
     </size>
    </property>
@@ -442,8 +434,8 @@
   <widget class="QDockWidget" name="dockMidiDevices">
    <property name="minimumSize">
     <size>
-     <width>50</width>
-     <height>50</height>
+     <width>80</width>
+     <height>91</height>
     </size>
    </property>
    <property name="acceptDrops">
@@ -524,7 +516,7 @@
   <widget class="QDockWidget" name="dockVstBrowser">
    <property name="minimumSize">
     <size>
-     <width>50</width>
+     <width>80</width>
      <height>50</height>
     </size>
    </property>
@@ -558,8 +550,8 @@
   <widget class="QDockWidget" name="dockAudioDevices">
    <property name="minimumSize">
     <size>
-     <width>50</width>
-     <height>50</height>
+     <width>80</width>
+     <height>91</height>
     </size>
    </property>
    <property name="floating">
@@ -634,8 +626,8 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>50</width>
-     <height>50</height>
+     <width>80</width>
+     <height>91</height>
     </size>
    </property>
    <property name="windowTitle">
@@ -686,8 +678,8 @@
   <widget class="QDockWidget" name="dockTools">
    <property name="minimumSize">
     <size>
-     <width>50</width>
-     <height>50</height>
+     <width>80</width>
+     <height>91</height>
     </size>
    </property>
    <property name="windowTitle">
@@ -762,8 +754,8 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>50</width>
-     <height>50</height>
+     <width>80</width>
+     <height>91</height>
     </size>
    </property>
    <property name="windowTitle">
@@ -826,7 +818,7 @@
   <widget class="QDockWidget" name="dockBankBrowser">
    <property name="minimumSize">
     <size>
-     <width>50</width>
+     <width>80</width>
      <height>50</height>
     </size>
    </property>
@@ -853,8 +845,8 @@
   <widget class="QDockWidget" name="dockUndo">
    <property name="minimumSize">
     <size>
-     <width>50</width>
-     <height>50</height>
+     <width>80</width>
+     <height>91</height>
     </size>
    </property>
    <property name="windowTitle">
@@ -1120,14 +1112,6 @@
     <string>Restore default layout</string>
    </property>
   </action>
-  <action name="actionStatus_bar">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Status bar</string>
-   </property>
-  </action>
   <action name="actionTool_bar">
    <property name="checkable">
     <bool>true</bool>
@@ -1268,22 +1252,6 @@
     <hint type="destinationlabel">
      <x>422</x>
      <y>449</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionStatus_bar</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>statusBar</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>422</x>
-     <y>559</y>
     </hint>
    </hints>
   </connection>

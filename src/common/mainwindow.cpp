@@ -48,6 +48,7 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
             this,SLOT(currentFileChanged()));
 
     ui->setupUi(this);
+    ui->statusBar->hide();
 
     connect(ui->mainToolBar, SIGNAL(visibilityChanged(bool)),
             ui->actionTool_bar, SLOT(setChecked(bool)));
@@ -251,7 +252,7 @@ void MainWindow::writeSettings()
 {
     myHost->SetSetting("MainWindow/geometry", saveGeometry());
     myHost->SetSetting("MainWindow/state", saveState());
-    myHost->SetSetting("MainWindow/statusBar", ui->statusBar->isVisible());
+//    myHost->SetSetting("MainWindow/statusBar", ui->statusBar->isVisible());
     myHost->SetSetting("MainWindow/splitPan", ui->splitterPanels->saveState());
     myHost->SetSetting("MainWindow/splitProg", ui->splitterProg->saveState());
     myHost->SetSetting("MainWindow/splitGroup", ui->splitterGroup->saveState());
@@ -316,9 +317,9 @@ void MainWindow::readSettings()
     if(myHost->SettingDefined("MainWindow/geometry")) {
         restoreGeometry(myHost->GetSetting("MainWindow/geometry").toByteArray());
         restoreState(myHost->GetSetting("MainWindow/state").toByteArray());
-        bool statusb = myHost->GetSetting("MainWindow/statusBar",false).toBool();
-        ui->actionStatus_bar->setChecked( statusb );
-        ui->statusBar->setVisible(statusb);
+//        bool statusb = myHost->GetSetting("MainWindow/statusBar",false).toBool();
+//        ui->actionStatus_bar->setChecked( statusb );
+//        ui->statusBar->setVisible(statusb);
     } else {
         resetSettings();
     }
@@ -411,7 +412,7 @@ void MainWindow::resetSettings()
     ui->actionGroup_panel->setChecked(true);
 
     ui->actionTool_bar->setChecked(true);
-    ui->actionStatus_bar->setChecked(false);
+//    ui->actionStatus_bar->setChecked(false);
     ui->statusBar->setVisible(false);
 
     int h = ui->splitterPanels->height()/4;
