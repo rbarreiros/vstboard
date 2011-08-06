@@ -20,9 +20,23 @@
 #include "gui.h"
 #include <QtGui/QHBoxLayout>
 
-Gui::Gui(AudioEffectX* effect) : widget(0), effect(effect)
+Gui::Gui(AudioEffectX* effect) :
+    widget(0),
+    myWindow(0),
+    effect(effect),
+    resizeH(0)
 {
+    rectangle.top = 0;
+    rectangle.left = 0;
+    rectangle.bottom = 600;
+    rectangle.right = 800;
 
+    //reaper needs an offset.. can't find a good solution
+    char str[64];
+    effect->getHostProductString(str);
+    if(!strcmp(str,"REAPER")) {
+        widgetOffset.setY(27);
+    }
 }
 
 Gui::~Gui()
@@ -37,29 +51,79 @@ Gui::~Gui()
     }
 }
 
+void Gui::UpdateColor(ColorGroups::Enum groupId, Colors::Enum /*colorId*/, const QColor & /*color*/)
+{
+    if(groupId!=ColorGroups::Window)
+        return;
+
+    if(widget)
+        widget->setPalette( myWindow->palette() );
+}
+
+void Gui::SetMainWindow(MainWindowVst *win)
+{
+    if(win==myWindow)
+        return;
+
+    myWindow = win;
+    if(!myWindow)
+        return;
+
+    connect( myWindow->viewConfig, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
+             this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)),
+             Qt::UniqueConnection);
+}
+
 bool Gui::open(void* ptr)
 {
-    if(!ptr)
+    if(!ptr || !myWindow)
         return false;
 
     AEffEditor::open(ptr);
     widget = new QWinWidget(static_cast<HWND>(ptr));
-    widget->setAttribute(Qt::WA_LayoutUsesWidgetRect);
-    QHBoxLayout layout(widget);
-    layout.setContentsMargins(0,0,0,0);
-    layout.addWidget(myWindow);
+    widget->setAutoFillBackground(false);
+    widget->setObjectName("QWinWidget");
+
+    myWindow->setParent(widget);
+    myWindow->readSettings();
+    myWindow->move(0,0);
+
+    rectangle.bottom = myWindow->height();
+    rectangle.right = myWindow->width();
 
     widget->move( 0, 0 );
-    widget->adjustSize();
-    rectangle.top = 0;
-    rectangle.left = 0;
-    rectangle.bottom = widget->height();
-    rectangle.right = widget->width();
+    widget->resize( rectangle.right, rectangle.bottom );
+    widget->setPalette( myWindow->palette() );
+
+    resizeH = new ResizeHandle(widget);
+    QPoint pos( widget->geometry().bottomRight() );
+    pos.rx()-=resizeH->width();
+    pos.ry()-=resizeH->height();
+    resizeH->move(pos);
+    resizeH->show();
+
+    connect(resizeH, SIGNAL(Moved(QPoint)),
+            this, SLOT(OnResizeHandleMove(QPoint)));
 
     widget->show();
-    myWindow->readSettings();
-//    clientResize(static_cast<HWND>(ptr), widget->width(), widget->height());
     return true;
+}
+
+
+
+void Gui::OnResizeHandleMove(const QPoint &pt)
+{
+    widget->resize( pt.x(), pt.y() );
+    widget->move(widgetOffset);
+
+    if(myWindow)
+        myWindow->resize(pt.x(), pt.y());
+
+    if(effect)
+        effect->sizeWindow(pt.x(), pt.y());
+
+    rectangle.right = pt.x();
+    rectangle.bottom = pt.y();
 }
 
 void Gui::close()
@@ -82,14 +146,3 @@ bool Gui::getRect (ERect** rect)
     *rect = &rectangle;
     return true;
 }
-
-//void clientResize(HWND h_parent, int width, int height)
-//{
-//    RECT rcClient, rcWindow;
-//    POINT ptDiff;
-//    GetClientRect(h_parent, &rcClient);
-//    GetWindowRect(h_parent, &rcWindow);
-//    ptDiff.x = (rcWindow.right - rcWindow.left) - rcClient.right;
-//    ptDiff.y = (rcWindow.bottom - rcWindow.top) - rcClient.bottom;
-//    MoveWindow(h_parent, rcWindow.left, rcWindow.top, width + ptDiff.x, height + ptDiff.y, TRUE);
-//}

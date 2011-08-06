@@ -1,5 +1,5 @@
 /**************************************************************************
-#    Copyright 2010-2011 Raphaël François
+#    Copyright 2010-2011 RaphaÃ«l FranÃ§ois
 #    Contact : ctrlbrk76@gmail.com
 #
 #    This file is part of VstBoard.
@@ -18,45 +18,31 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#ifndef GUI_H
-#define GUI_H
+#ifndef RESIZEHANDLE_H
+#define RESIZEHANDLE_H
 
+#include "precomp.h"
 
-#include <QObject>
-
-#include "aeffeditor.h"
-#include "mainwindowvst.h"
-#include "resizehandle.h"
-#include <qwinwidget.h>
-
-class Gui : public QObject, public AEffEditor
+class ResizeHandle : public QWidget
 {
     Q_OBJECT
-    QWinWidget *widget;
-    AudioEffectX* effect;
-
 public:
-    Gui(AudioEffectX* effect);
-    ~Gui();
-
-    virtual bool open(void* ptr);
-    virtual bool getRect (ERect** rect);
-    virtual void close();
-    void SetMainWindow(MainWindowVst *win);
+    explicit ResizeHandle(QWidget *parent = 0);
+//    QSize sizeHint() const;
 
 protected:
-    ERect rectangle;
-    MainWindowVst *myWindow;
-    ResizeHandle *resizeH;
-    QPoint widgetOffset;
+    void paintEvent(QPaintEvent *);
+    void mousePressEvent ( QMouseEvent * event );
+    void mouseMoveEvent ( QMouseEvent * event );
+    void mouseReleaseEvent (  QMouseEvent * event );
+
+    QPoint offset;
 
 signals:
-    void update(float value);
+    void Moved(const QPoint &pt);
 
 public slots:
-    void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
-    void OnResizeHandleMove(const QPoint &pt);
 
 };
 
-#endif // GUI_H
+#endif // RESIZEHANDLE_H

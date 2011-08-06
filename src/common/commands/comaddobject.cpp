@@ -128,7 +128,10 @@ void ComAddObject::redo ()
     if(attr.position!=QPointF(0.0f,0.0f)) {
         obj->SetContainerAttribs(attr);
     }
+}
 
-
-
+void ComAddObject::ReloadObject(const ObjectInfo &info)
+{
+    objectInfo = info;
+    redo();
 }

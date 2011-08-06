@@ -21,36 +21,33 @@
 #ifndef VSTSHELLSELECT_H
 #define VSTSHELLSELECT_H
 
-#include "../precomp.h"
-#include "../connectables/container.h"
+#include "precomp.h"
+#include "connectables/objectinfo.h"
 
 namespace Ui {
     class VstShellSelect;
 }
 namespace Connectables {
-    class ObjectFactory;
+    class VstPlugin;
 }
+class ComAddObject;
+class MainHost;
 namespace View {
     class VstShellSelect : public QWidget {
         Q_OBJECT
     public:
-        VstShellSelect(Connectables::ObjectFactory *objFactory);
+        VstShellSelect(MainHost *myHost, Connectables::VstPlugin *plugin);
         ~VstShellSelect();
+        static ComAddObject* command;
 
-        void SetListPlugins(QString file, QMap<ulong,QString> &listPlugins);
-        QSharedPointer<Connectables::Container> cntPtr;
-
-    protected:
-        void changeEvent(QEvent *e);
-        QString vstDll;
-        int containerId;
-        Connectables::ObjectFactory *objFactory;
     private:
+        ObjectInfo info;
         Ui::VstShellSelect *ui;
+        MainHost *myHost;
 
-private slots:
-    void on_buttonCancel_clicked();
-    void on_buttonOk_clicked();
-};
+    private slots:
+        void on_buttonCancel_clicked();
+        void on_buttonOk_clicked();
+    };
 }
 #endif // VSTSHELLSELECT_H

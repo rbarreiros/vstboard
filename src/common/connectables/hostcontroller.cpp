@@ -176,14 +176,14 @@ void HostController::SetContainerId(quint16 id)
         case FixedObjId::programContainer :
             listParameterPinIn->RemovePin(Param_Prog);
             disconnect(this, SIGNAL(progChange(int)),
-                    myHost->programsModel,SLOT(ChangeProg(int)));
+                    myHost->programsModel,SLOT(UserChangeProg(int)));
             disconnect(myHost->programsModel,SIGNAL(ProgChanged(QModelIndex)),
                    this,SLOT(OnHostProgChanged(QModelIndex)));
 
         case FixedObjId::groupContainer :
             listParameterPinIn->RemovePin(Param_Group);
             disconnect(this, SIGNAL(grpChange(int)),
-                    myHost->programsModel,SLOT(ChangeGroup(int)));
+                    myHost->programsModel,SLOT(UserChangeGroup(int)));
             disconnect(myHost->programsModel,SIGNAL(GroupChanged(QModelIndex)),
                    this,SLOT(OnHostGroupChanged(QModelIndex)));
     }

@@ -140,6 +140,7 @@ void VstPluginWindow::closeEvent( QCloseEvent * event )
 void VstPluginWindow::SetWindowSize(int newWidth, int newHeight)
 {
     ui->scrollAreaWidgetContents->setFixedSize(newWidth,newHeight);
+    setMaximumSize(newWidth,newHeight);
     resize(newWidth,newHeight);
 }
 

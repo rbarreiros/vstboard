@@ -45,7 +45,8 @@ SOURCES += \
     mainwindowvst.cpp \
     mainhostvst.cpp \
     connectables/objectfactoryvst.cpp \
-    views/configdialogvst.cpp
+    views/configdialogvst.cpp \
+    resizehandle.cpp
 
 
 HEADERS  += \
@@ -58,7 +59,8 @@ HEADERS  += \
     mainwindowvst.h \
     mainhostvst.h \
     connectables/objectfactoryvst.h \
-    views/configdialogvst.h
+    views/configdialogvst.h \
+    resizehandle.h
 
 
 PRECOMPILED_HEADER = ../common/precomp.h
@@ -77,3 +79,5 @@ DEPENDPATH += $$PWD/../common
 win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../common/release/common.lib
 else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../common/debug/common.lib
 else:unix:!symbian: PRE_TARGETDEPS += $$OUT_PWD/../common/libcommon.a
+
+

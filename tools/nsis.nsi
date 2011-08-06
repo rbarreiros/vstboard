@@ -1,7 +1,7 @@
 Name "VstBoard"
 RequestExecutionLevel admin
 
-OutFile "${OutFile}"
+OutFile "VstBoard_${VERSION}_${ARCH}.exe"
 SetDateSave on
 SetDatablockOptimize on
 CRCCheck on
@@ -81,7 +81,7 @@ Section "VstBoard (required)"
 	WriteRegStr HKCU "${REG_UNINSTALL}" "DisplayName" "VstBoard"
 	WriteRegStr HKCU "${REG_UNINSTALL}" "DisplayIcon" "$\"$InstFolder\VstBoard.exe$\""
 	WriteRegStr HKCU "${REG_UNINSTALL}" "Publisher" "CtrlBrk"
-	WriteRegStr HKCU "${REG_UNINSTALL}" "DisplayVersion" "0.4.8"
+	WriteRegStr HKCU "${REG_UNINSTALL}" "DisplayVersion" "${VERSION}"
 	WriteRegDWord HKCU "${REG_UNINSTALL}" "EstimatedSize" 15000 ;KB
 	WriteRegStr HKCU "${REG_UNINSTALL}" "HelpLink" "${WEBSITE_LINK}"
 	WriteRegStr HKCU "${REG_UNINSTALL}" "URLInfoAbout" "${WEBSITE_LINK}"

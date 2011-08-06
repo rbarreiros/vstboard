@@ -20,20 +20,33 @@
 
 #include "vstshellselect.h"
 #include "ui_vstshellselect.h"
-//#include "../mainhost.h"
-#include "../connectables/objectfactory.h"
-#include "../connectables/container.h"
-#include "../connectables/vstplugin.h"
-
+#include "mainhost.h"
+#include "connectables/vstplugin.h"
+#include "commands/comaddobject.h"
 using namespace View;
 
-VstShellSelect::VstShellSelect(Connectables::ObjectFactory *objFactory) :
-    cntPtr(0),
-    objFactory(objFactory),
+ComAddObject* VstShellSelect::command=0;
+
+VstShellSelect::VstShellSelect(MainHost *myHost, Connectables::VstPlugin *plugin) :
+    myHost(myHost),
     ui(new Ui::VstShellSelect)
 {
     ui->setupUi(this);
     setAttribute( Qt::WA_DeleteOnClose );
+
+    QList<ulong> listPlugins;
+    char szName[64];
+    ulong id;
+    while ((id = plugin->EffGetNextShellPlugin(szName))) {
+        if(listPlugins.contains(id))
+            continue;
+        listPlugins << id;
+        QListWidgetItem *item = new QListWidgetItem(szName,ui->listPlugins);
+        item->setData(Qt::UserRole,(int)id);
+    }
+
+    info = plugin->info();
+    info.forcedObjId = 0;
 }
 
 VstShellSelect::~VstShellSelect()
@@ -42,58 +55,16 @@ VstShellSelect::~VstShellSelect()
     delete ui;
 }
 
-void VstShellSelect::changeEvent(QEvent *e)
-{
-    QWidget::changeEvent(e);
-    switch (e->type()) {
-    case QEvent::LanguageChange:
-        ui->retranslateUi(this);
-        break;
-    default:
-        break;
-    }
-}
-
-void VstShellSelect::SetListPlugins(QString file, QMap<ulong,QString> &listPlugins)
-{
-    vstDll = file;
-    QMap<ulong,QString>::iterator i = listPlugins.begin();
-    while(i!=listPlugins.end()) {
-        QListWidgetItem *item = new QListWidgetItem(i.value(),ui->listPlugins);
-        item->setData(Qt::UserRole,(int)i.key());
-        ++i;
-    }
-}
-
 void View::VstShellSelect::on_buttonOk_clicked()
 {
-    QModelIndex index = ui->listPlugins->currentIndex();
-    int id = index.data(Qt::UserRole).toInt();
-
-    ObjectInfo info;
-    info.nodeType = NodeType::object;
-    info.objType = ObjType::VstPlugin;
-    info.filename = vstDll;
-    info.id = id;
-
-    QSharedPointer<Connectables::Object> objPtr = objFactory->NewObject(info);
-    if(objPtr.isNull()) {
-        LOG("on_buttonOk_clicked object not loaded");
-        close();
-        return;
-    }
-    if(!cntPtr) {
-        LOG("on_buttonOk_clicked container not set");
-        close();
-        return;
-    }
-
-    cntPtr->UserAddObject(objPtr);
+    info.id = ui->listPlugins->currentIndex().data(Qt::UserRole).toInt();
+    command->ReloadObject(info);
     close();
 }
 
 void View::VstShellSelect::on_buttonCancel_clicked()
 {
+    myHost->undoStack.undo();
     close();
 }
 
