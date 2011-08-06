@@ -70,6 +70,8 @@ namespace Connectables {
         bool fromStream (QDataStream &);
 
     protected:
+        void SetId(int id) {objInfo.id = id;}
+        bool initPlugin();
         void processEvents(VstEvents* events);
         void onVstProgramChanged();
         float sampleRate;
@@ -111,6 +113,7 @@ namespace Connectables {
         void UserAddPin(const ConnectionInfo &info);
 
         friend class View::VstPluginWindow;
+        friend class View::VstShellSelect;
     };
 
 }

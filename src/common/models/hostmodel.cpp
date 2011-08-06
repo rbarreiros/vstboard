@@ -303,7 +303,10 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                 break;
         }
 
-        myHost->undoStack.push( new ComAddObject(myHost, info, targetContainer, senderObj, insertType) );
+        ComAddObject *com = new ComAddObject(myHost, info, targetContainer, senderObj, insertType);
+//        Connectables::VstPlugin::shellSelectView->SetTargetContainer( targetContainer->GetIndex() );
+        Connectables::VstPlugin::shellSelectView->command=com;
+        myHost->undoStack.push( com );
     }
 
 //    if(listObjToAdd.isEmpty())

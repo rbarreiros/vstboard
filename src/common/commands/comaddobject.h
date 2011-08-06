@@ -18,6 +18,8 @@ public:
     void undo ();
     void redo ();
 
+    void ReloadObject(const ObjectInfo &info);
+
 private:
     MainHost *myHost;
 

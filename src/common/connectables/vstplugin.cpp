@@ -264,6 +264,7 @@ void VstPlugin::Render()
 
 bool VstPlugin::Open()
 {
+
     {
         QMutexLocker lock(&objMutex);
         VstPlugin::pluginLoading = this;
@@ -271,6 +272,7 @@ bool VstPlugin::Open()
         if(!Load(objInfo.filename )) {
             VstPlugin::pluginLoading = 0;
             errorMessage=tr("Error while loading plugin");
+            //return true to create a dummy object
             return true;
         }
 
@@ -279,25 +281,27 @@ bool VstPlugin::Open()
         VstPlugin::pluginLoading = 0;
 
         if(EffGetPlugCategory() == kPlugCategShell && objInfo.id==0) {
-            QMap<ulong,QString> listPlugins;
-            char szName[1024];
-            ulong id;
-            while ((id = EffGetNextShellPlugin(szName))) {
-                listPlugins.insert(id,szName);
-            }
 
             if(VstPlugin::shellSelectView) {
+                VstPlugin::shellSelectView->raise();
                 LOG("shell selection already opened");
                 return false;
             }
 
-            VstPlugin::shellSelectView = new View::VstShellSelect(myHost->objFactory);
-            VstPlugin::shellSelectView->SetListPlugins(objInfo.name, listPlugins);
+            VstPlugin::shellSelectView = new View::VstShellSelect(myHost, this);
             VstPlugin::shellSelectView->show();
 
             //this is a shell, return false to delete this object
             return false;
         }
+    }
+    return initPlugin();
+}
+
+bool VstPlugin::initPlugin()
+{
+    {
+        QMutexLocker lock(&objMutex);
 
         long ver = EffGetVstVersion();
 
