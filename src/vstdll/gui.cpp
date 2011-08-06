@@ -37,6 +37,15 @@ Gui::~Gui()
     }
 }
 
+void Gui::UpdateColor(ColorGroups::Enum groupId, Colors::Enum /*colorId*/, const QColor & /*color*/)
+{
+    if(groupId!=ColorGroups::Window)
+        return;
+
+    widget->setPalette( myWindow->palette() );
+}
+
+
 bool Gui::open(void* ptr)
 {
     if(!ptr)
@@ -55,6 +64,10 @@ bool Gui::open(void* ptr)
     rectangle.left = 0;
     rectangle.bottom = widget->height();
     rectangle.right = widget->width();
+
+    widget->setPalette( myWindow->palette() );
+    connect( myWindow->viewConfig, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
+             this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)));
 
     widget->show();
     myWindow->readSettings();

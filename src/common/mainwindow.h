@@ -94,7 +94,6 @@ private slots:
     virtual void on_actionConfig_triggered();
     virtual void on_actionRefresh_Midi_devices_triggered() {}
     virtual void on_actionRefresh_Audio_devices_triggered() {}
-    void InitColors();
     void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
 
     void on_solverView_clicked(const QModelIndex &index);

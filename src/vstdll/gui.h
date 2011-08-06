@@ -49,6 +49,9 @@ public:
 signals:
     void update(float value);
 
+public slots:
+    void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
+
 protected:
     ERect rectangle;
     MainWindow *myWindow;

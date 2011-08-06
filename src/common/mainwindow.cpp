@@ -69,9 +69,9 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
 
     ui->treeHostModel->setModel(myHost->GetModel());
 
+    setPalette( viewConfig->GetPaletteFromColorGroup( ColorGroups::Window, palette() ));
     connect( viewConfig, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
              myHost->programsModel, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)) );
-    InitColors();
     connect( viewConfig, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
              this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)));
 
@@ -124,11 +124,6 @@ MainWindow::~MainWindow()
 {
     if(ui)
         delete ui;
-}
-
-void MainWindow::InitColors()
-{
-    setPalette( viewConfig->GetPaletteFromColorGroup( ColorGroups::Window, palette() ));
 }
 
 void MainWindow::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
