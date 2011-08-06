@@ -34,6 +34,6 @@ copy /y "%QTDIR%\bin\QtSolutions_MFCMigrationFramework-head.dll" ".\installer"
 rem copy /y "%WindowsSDKDir%\Redist\VC\vcredist_x86.exe" ".\installer"
 
 cd "installer"
-%NSIS_PATH% /DARCH=x86 /DOutFile="vstboard_win32_setup.exe" nsis.nsi
+%NSIS_PATH% /DARCH=x86 /DVERSION="0.4.8" nsis.nsi
 
 pause
