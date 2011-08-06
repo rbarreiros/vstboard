@@ -46,6 +46,9 @@
         <height>90</height>
        </rect>
       </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
      </widget>
     </widget>
    </item>

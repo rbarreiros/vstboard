@@ -30,6 +30,13 @@ Gui::Gui(AudioEffectX* effect) :
     rectangle.left = 0;
     rectangle.bottom = 600;
     rectangle.right = 800;
+
+    //reaper needs an offset.. can't find a good solution
+    char str[64];
+    effect->getHostProductString(str);
+    if(!strcmp(str,"REAPER")) {
+        widgetOffset.setY(27);
+    }
 }
 
 Gui::~Gui()
@@ -74,12 +81,12 @@ bool Gui::open(void* ptr)
 
     AEffEditor::open(ptr);
     widget = new QWinWidget(static_cast<HWND>(ptr));
+    widget->setAutoFillBackground(false);
     widget->setObjectName("QWinWidget");
-    widget->setAttribute(Qt::WA_LayoutUsesWidgetRect);
-    QHBoxLayout layout(widget);
-    layout.setContentsMargins(0,0,0,0);
-    layout.addWidget(myWindow);
+
+    myWindow->setParent(widget);
     myWindow->readSettings();
+    myWindow->move(0,0);
 
     rectangle.bottom = myWindow->height();
     rectangle.right = myWindow->width();
@@ -102,15 +109,21 @@ bool Gui::open(void* ptr)
     return true;
 }
 
+
+
 void Gui::OnResizeHandleMove(const QPoint &pt)
 {
-    QPoint dest( pt );
-    if(widget)
-        widget->resize(dest.x(), dest.y());
+    widget->resize( pt.x(), pt.y() );
+    widget->move(widgetOffset);
+
     if(myWindow)
-        myWindow->resize(dest.x(), dest.y());
+        myWindow->resize(pt.x(), pt.y());
+
     if(effect)
-        effect->sizeWindow(dest.x(), dest.y());
+        effect->sizeWindow(pt.x(), pt.y());
+
+    rectangle.right = pt.x();
+    rectangle.bottom = pt.y();
 }
 
 void Gui::close()

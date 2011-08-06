@@ -59,7 +59,11 @@ void ResizeHandle::mousePressEvent ( QMouseEvent * event )
 
 void ResizeHandle::mouseMoveEvent ( QMouseEvent * event )
 {
-    move( mapToParent(event->pos()) - offset );
+    QPoint dest( mapToParent(event->pos()) - offset );
+    if(dest.x()<100) dest.setX(100);
+    if(dest.y()<50) dest.setY(50);
+
+    move( dest );
     emit Moved( geometry().bottomRight() );
 }
 

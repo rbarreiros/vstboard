@@ -48,6 +48,7 @@ protected:
     ERect rectangle;
     MainWindowVst *myWindow;
     ResizeHandle *resizeH;
+    QPoint widgetOffset;
 
 signals:
     void update(float value);
