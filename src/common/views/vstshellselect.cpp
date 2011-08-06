@@ -34,16 +34,19 @@ VstShellSelect::VstShellSelect(MainHost *myHost, Connectables::VstPlugin *plugin
     ui->setupUi(this);
     setAttribute( Qt::WA_DeleteOnClose );
 
-    QMap<ulong,QString> listPlugins;
+    QList<ulong> listPlugins;
     char szName[64];
     ulong id;
     while ((id = plugin->EffGetNextShellPlugin(szName))) {
+        if(listPlugins.contains(id))
+            continue;
+        listPlugins << id;
         QListWidgetItem *item = new QListWidgetItem(szName,ui->listPlugins);
         item->setData(Qt::UserRole,(int)id);
     }
 
     info = plugin->info();
-    info.forcedObjId = plugin->GetIndex();
+    info.forcedObjId = 0;
 }
 
 VstShellSelect::~VstShellSelect()
