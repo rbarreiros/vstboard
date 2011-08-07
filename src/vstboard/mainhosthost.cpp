@@ -29,8 +29,6 @@ MainHostHost::MainHostHost(QObject *parent, QString settingsGroup) :
     objFactory = new Connectables::ObjectFactoryHost(this);
     midiDevices = new MidiDevices(this);
     audioDevices = new AudioDevices(this);
-    connect(&audioDevices->fakeRenderTimer,SIGNAL(timeout()),
-            this, SLOT(Render()));
 }
 
 MainHostHost::~MainHostHost()

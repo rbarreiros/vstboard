@@ -628,9 +628,15 @@ void MainHost::SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum ms
     }
 }
 
+void MainHost::SetBufferSizeMs(unsigned int ms)
+{
+    ulong size = ms*sampleRate/1000;
+    SetBufferSize(size);
+}
+
 void MainHost::SetBufferSize(unsigned long size)
 {
-    qDebug("MainHost::SetBufferSize %ld",size);
+    qDebug()<<"MainHost::SetBufferSize"<<size;
     bufferSize = size;
     emit BufferSizeChanged(bufferSize);
 }

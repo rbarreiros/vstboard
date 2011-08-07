@@ -21,7 +21,7 @@
 #ifndef AUDIODEVICES_H
 #define AUDIODEVICES_H
 
-#define FAKE_RENDER_TIMER_MS 10
+#define FAKE_RENDER_TIMER_MS 5
 
 //#include "precomp.h"
 #include "portaudio.h"
@@ -30,6 +30,20 @@
 #include "connectables/audiodevice.h"
 
 class MainHostHost;
+
+class FakeTimer : public QThread
+{
+public:
+    FakeTimer(MainHostHost *myHost);
+    ~FakeTimer();
+    void run();
+
+private:
+    MainHostHost *myHost;
+    bool stop;
+};
+
+
 class AudioDevices : public QObject
 {
     Q_OBJECT
@@ -43,7 +57,7 @@ public:
     void PutPinsBuffersInRingBuffers();
 
     /// timer to launch the rendering loop when no audio devices are opened
-    QTimer fakeRenderTimer;
+    FakeTimer *fakeRenderTimer;
 
     /// model index of the asio devices, used by the view to expand this branch only
     QPersistentModelIndex AsioIndex;
