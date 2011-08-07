@@ -337,8 +337,6 @@ void Container::UnloadProgram()
   */
 void Container::RemoveProgram(const QModelIndex &idx)
 {
-    static QList<int> listProgToRemove;
-
     if(idx.isValid())
         listProgToRemove << idx.data(ProgramsModel::ProgramId).toInt();
 
@@ -358,7 +356,7 @@ void Container::RemoveProgram(const QModelIndex &idx)
             }
         } /*else {
             //the program does not exist, nothing to do
-            LOG("unknown prog"<<p<<objectName());
+            LOG("unknown prog"<<p<<objectName()<<listContainerPrograms.keys());
         }*/
     }
 
@@ -884,6 +882,11 @@ void Container::ProgramFromStream (int progId, QDataStream &in)
     in >> valid;
     if(valid!=1)
         return;
+
+    if(listProgToRemove.contains(progId)) {
+        LOG("cancel deletion"<<progId<<objectName());
+        listProgToRemove.removeAll(progId);
+    }
 
     quint8 dirty;
     in >> dirty;

@@ -150,6 +150,8 @@ namespace Connectables {
 
         QMutex progLoadMutex;
 
+        QList<int> listProgToRemove;
+
     public slots:
         void UserAddObject(const QSharedPointer<Object> &objPtr,
                            InsertionType::Enum insertType = InsertionType::NoInsertion,
