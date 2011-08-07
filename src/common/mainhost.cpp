@@ -149,12 +149,18 @@ void MainHost::SetupMainContainer()
     if(mainContainer.isNull())
         return;
 
+    mainContainer->SetLoadingMode(true);
+
     mainContainer->LoadProgram(0);
     QStandardItem *item = mainContainer->GetFullItem();
     model->invisibleRootItem()->appendRow(item);
     mainContainer->modelIndex=item->index();
     mainContainer->parked=false;
     mainContainer->listenProgramChanges=false;
+
+    mainContainer->SetLoadingMode(false);
+    mainContainer->UpdateModificationTime();
+    SetSolverUpdateNeeded();
 }
 
 void MainHost::SetupHostContainer()
@@ -176,6 +182,8 @@ void MainHost::SetupHostContainer()
     hostContainer = objFactory->NewObject(info).staticCast<Connectables::Container>();
     if(hostContainer.isNull())
         return;
+
+    hostContainer->SetLoadingMode(true);
 
     hostContainer->LoadProgram(0);
     mainContainer->AddObject(hostContainer);
@@ -246,6 +254,10 @@ void MainHost::SetupHostContainer()
 
     if(projectContainer)
         hostContainer->childContainer=projectContainer;
+
+    hostContainer->SetLoadingMode(false);
+    hostContainer->UpdateModificationTime();
+    SetSolverUpdateNeeded();
 }
 
 void MainHost::SetupProjectContainer()
@@ -269,6 +281,8 @@ void MainHost::SetupProjectContainer()
     projectContainer = objFactory->NewObject(info).staticCast<Connectables::Container>();
     if(projectContainer.isNull())
         return;
+
+    projectContainer->SetLoadingMode(true);
 
     projectContainer->LoadProgram(0);
     mainContainer->AddObject(projectContainer);
@@ -346,6 +360,10 @@ void MainHost::SetupProjectContainer()
         hostContainer->childContainer=projectContainer;
     if(groupContainer)
         projectContainer->childContainer=groupContainer;
+
+    projectContainer->SetLoadingMode(false);
+    projectContainer->UpdateModificationTime();
+    SetSolverUpdateNeeded();
 }
 
 void MainHost::SetupProgramContainer()
@@ -367,6 +385,8 @@ void MainHost::SetupProgramContainer()
     programContainer = objFactory->NewObject(info).staticCast<Connectables::Container>();
     if(programContainer.isNull())
         return;
+
+    programContainer->SetLoadingMode(true);
 
     programContainer->SetOptimizerFlag(true);
     programContainer->LoadProgram(0);
@@ -448,6 +468,10 @@ void MainHost::SetupProgramContainer()
         groupContainer->childContainer=programContainer;
         programContainer->parentContainer=groupContainer;
     }
+
+    programContainer->SetLoadingMode(false);
+    programContainer->UpdateModificationTime();
+    SetSolverUpdateNeeded();
 }
 
 void MainHost::SetupGroupContainer()
@@ -469,6 +493,8 @@ void MainHost::SetupGroupContainer()
     groupContainer = objFactory->NewObject(info).staticCast<Connectables::Container>();
     if(groupContainer.isNull())
         return;
+
+    groupContainer->SetLoadingMode(true);
 
     groupContainer->LoadProgram(0);
     mainContainer->AddObject(groupContainer);
@@ -550,6 +576,10 @@ void MainHost::SetupGroupContainer()
         groupContainer->childContainer=programContainer;
         programContainer->parentContainer=groupContainer;
     }
+
+    groupContainer->SetLoadingMode(false);
+    groupContainer->UpdateModificationTime();
+    SetSolverUpdateNeeded();
 }
 
 bool MainHost::EnableSolverUpdate(bool enable)

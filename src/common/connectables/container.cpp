@@ -44,7 +44,8 @@ Container::Container(MainHost *myHost,int index, const ObjectInfo &info) :
     optimizerFlag(false),
     currentContainerProgram(0),
     cablesNode(QModelIndex()),
-    progToSet(-1)
+    progToSet(-1),
+    loadingMode(false)
 {
     parkModel.setObjectName("parkModel"%objectName());
     LoadProgram(TEMP_PROGRAM);
@@ -231,6 +232,8 @@ void Container::LoadProgram(int prog)
         return;
     }
 
+    SetLoadingMode(true);
+
     if(!listContainerPrograms.contains(prog))
         listContainerPrograms.insert(prog,new ContainerProgram(myHost,this));
 
@@ -274,6 +277,9 @@ void Container::LoadProgram(int prog)
     }
 
     currentContainerProgram->Load(prog);
+
+    SetLoadingMode(false);
+
     if(optimizerFlag)
         currentContainerProgram->LoadRendererState();
 
@@ -283,19 +289,17 @@ void Container::LoadProgram(int prog)
     if(oldProg) {
         delete oldProg;
     }
-
-    //Updated();
 }
 
-const QTime Container::GetLastUpdate() {
+const QTime Container::GetLastModificationTime() {
     QTime parentTime;
     QTime myTime;
 
     if(parentContainer)
-        parentTime = parentContainer.toStrongRef()->GetLastUpdate();
+        parentTime = parentContainer.toStrongRef()->GetLastModificationTime();
 
     if(currentContainerProgram)
-        myTime = currentContainerProgram->timeSavedRendererNodes;
+        myTime = currentContainerProgram->lastModificationTime;
 
     if(myTime>parentTime)
         return myTime;
@@ -452,9 +456,10 @@ void Container::UserAddObject(const QSharedPointer<Object> &objPtr,
         }
         currentContainerProgram->CollectCableUpdates();
     }
-
-    myHost->SetSolverUpdateNeeded();
-    Updated();
+    if(!loadingMode) {
+        myHost->SetSolverUpdateNeeded();
+        UpdateModificationTime();
+    }
 }
 
 
@@ -472,8 +477,10 @@ void Container::UserParkObject(QSharedPointer<Object> objPtr,
 
     currentContainerProgram->CollectCableUpdates();
 
-    myHost->SetSolverUpdateNeeded();
-    Updated();
+    if(!loadingMode) {
+        myHost->SetSolverUpdateNeeded();
+        UpdateModificationTime();
+    }
 }
 
 /*!
@@ -605,9 +612,11 @@ void Container::OnChildDeleted(Object *obj)
 void Container::UserAddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
 {
     AddCable(outputPin,inputPin,false);
-    myHost->SetSolverUpdateNeeded();
 
-    Updated();
+    if(!loadingMode) {
+        myHost->SetSolverUpdateNeeded();
+        UpdateModificationTime();
+    }
 }
 
 void Container::UserAddCable(const QPair<ConnectionInfo,ConnectionInfo>&pair)
@@ -618,16 +627,21 @@ void Container::UserAddCable(const QPair<ConnectionInfo,ConnectionInfo>&pair)
 void Container::UserRemoveCableFromPin(const ConnectionInfo &pin)
 {
     RemoveCableFromPin(pin);
-    myHost->SetSolverUpdateNeeded();
 
-    Updated();
+    if(!loadingMode) {
+        myHost->SetSolverUpdateNeeded();
+        UpdateModificationTime();
+    }
 }
 
 void  Container::UserRemoveCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
 {
     RemoveCable(outputPin,inputPin);
-    myHost->SetSolverUpdateNeeded();
-    Updated();
+
+    if(!loadingMode) {
+        myHost->SetSolverUpdateNeeded();
+        UpdateModificationTime();
+    }
 }
 
 void Container::UserRemoveCable(const QPair<ConnectionInfo,ConnectionInfo>&pair)
