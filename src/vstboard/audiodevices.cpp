@@ -75,9 +75,6 @@ AudioDevices::AudioDevices(MainHostHost *myHost) :
   */
 AudioDevices::~AudioDevices()
 {
-    if(fakeRenderTimer)
-        delete fakeRenderTimer;
-
     mutexClosing.lock();
     closing=true;
     mutexClosing.unlock();
@@ -101,6 +98,9 @@ AudioDevices::~AudioDevices()
         delete dev; //dev->DeleteIfUnused();
     listAudioDevices.clear();
     mutexDevices.unlock();
+
+    if(fakeRenderTimer)
+        delete fakeRenderTimer;
 }
 
 /*!
@@ -342,7 +342,7 @@ void AudioDevices::OnToggleDeviceInUse(PaHostApiIndex apiId, PaDeviceIndex devId
     }
     if(countActiveDevices==0) {
         myHost->SetBufferSizeMs(FAKE_RENDER_TIMER_MS);
-        if(!fakeRenderTimer)
+        if(!fakeRenderTimer && !closing)
             fakeRenderTimer = new FakeTimer(myHost);
     }
 }

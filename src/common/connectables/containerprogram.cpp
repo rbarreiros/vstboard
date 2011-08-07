@@ -159,9 +159,7 @@ void ContainerProgram::SaveRendererState()
         lastModificationTime = savedTime;
         qDeleteAll(listOfRendererNodes);
         listOfRendererNodes.clear();
-
         listOfRendererNodes = myHost->GetRenderer()->SaveNodes();
-        LOG("save state");
     }
 }
 
@@ -170,10 +168,8 @@ void ContainerProgram::LoadRendererState()
     const QTime t = container->GetLastModificationTime();
     if(t > lastModificationTime) {
         //my renderer map is outdated
-        LOG("outdated state"<<t<<lastModificationTime);
         myHost->SetSolverUpdateNeeded();
     } else {
-        LOG("load state");
         myHost->GetRenderer()->LoadNodes( listOfRendererNodes );
     }
 }
