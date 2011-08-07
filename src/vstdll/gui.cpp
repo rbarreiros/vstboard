@@ -123,7 +123,7 @@ void Gui::OnResizeHandleMove(const QPoint &pt)
     if(myWindow)
         myWindow->resize(pt.x(), pt.y());
 
-    if(effect && hostCanSizeWindow)
+    if(effect)
         effect->sizeWindow(pt.x(), pt.y());
 
     rectangle.right = pt.x();
