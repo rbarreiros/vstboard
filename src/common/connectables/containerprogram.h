@@ -78,7 +78,8 @@ namespace Connectables {
         QDataStream & fromStream (QDataStream &);
 
         QList<RendererNode*>listOfRendererNodes;
-        QTime timeSavedRendererNodes;
+        QTime lastModificationTime;
+        QTime savedTime;
         static QTime unsavedTime;
 
     protected:

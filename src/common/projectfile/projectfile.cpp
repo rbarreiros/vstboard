@@ -190,7 +190,6 @@ bool ProjectFile::FromStream(MainHost *myHost,QDataStream &in)
             myHost->SetupHostContainer();
             if(!myHost->hostContainer->fromStream( tmpStream ))
                 myHost->SetupHostContainer();
-            myHost->hostContainer->Updated();
         }
 
         else if(chunkName=="ProjectContainer") {

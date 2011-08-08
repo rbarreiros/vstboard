@@ -71,7 +71,7 @@ PinView::PinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, 
     addAction(actUnplug);
 
 
-    setFocusPolicy(Qt::StrongFocus);
+    setFocusPolicy(Qt::WheelFocus);
 }
 
 /*!

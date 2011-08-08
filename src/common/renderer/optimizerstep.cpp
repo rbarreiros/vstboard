@@ -182,7 +182,6 @@ void OptimizerStep::OptimizeSpannedNodes()
 
                 //try to span the node
                 if(NextStepCanAcceptSpannedNode(node, cpuGainForThisStep)) {
-                    listOfNodes.removeAll(node);
                     nbThreads--;
                     OptimizeStepThread *th = new OptimizeStepThread();
                     th->listOfNodes << node;

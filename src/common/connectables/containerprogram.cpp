@@ -62,7 +62,7 @@ ContainerProgram::ContainerProgram(const ContainerProgram& c) :
     foreach(RendererNode *node, c.listOfRendererNodes) {
         listOfRendererNodes << new RendererNode(*node);
     }
-    timeSavedRendererNodes = c.timeSavedRendererNodes;
+    lastModificationTime = c.lastModificationTime;
 }
 
 ContainerProgram::~ContainerProgram()
@@ -153,25 +153,26 @@ void ContainerProgram::Unload()
 
 void ContainerProgram::SaveRendererState()
 {
-    timeSavedRendererNodes = QTime::currentTime();
-    foreach(RendererNode *node, listOfRendererNodes)
-        delete node;
-    listOfRendererNodes = myHost->GetRenderer()->SaveNodes();
+    const QTime t = container->GetLastModificationTime();
+    if(!savedTime.isValid() || t > savedTime) {
+        savedTime = QTime::currentTime();
+        lastModificationTime = savedTime;
+        qDeleteAll(listOfRendererNodes);
+        listOfRendererNodes.clear();
+        listOfRendererNodes = myHost->GetRenderer()->SaveNodes();
+    }
 }
 
 void ContainerProgram::LoadRendererState()
 {
-    //if(container->parentContainer) {
-        const QTime t = container->GetLastUpdate();
-        if(t > timeSavedRendererNodes) {
-            //my renderer map is outdated
-            myHost->SetSolverUpdateNeeded();
-        } else {
-            myHost->GetRenderer()->LoadNodes( listOfRendererNodes );
-        }
-    //}
+    const QTime t = container->GetLastModificationTime();
+    if(t > lastModificationTime) {
+        //my renderer map is outdated
+        myHost->SetSolverUpdateNeeded();
+    } else {
+        myHost->GetRenderer()->LoadNodes( listOfRendererNodes );
+    }
 }
-
 
 void ContainerProgram::ParkAllObj()
 {

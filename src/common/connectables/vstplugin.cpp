@@ -399,16 +399,18 @@ bool VstPlugin::initPlugin()
         listParameterPinIn->AddPin(i);
     }
 
-    //editor pin
-    listEditorVisible << "hide";
-    listEditorVisible << "show";
-    listParameterPinIn->AddPin(FixedPinNumber::editorVisible);
+    if(pEffect->flags & effFlagsHasEditor) {
+        //editor pin
+        listEditorVisible << "hide";
+        listEditorVisible << "show";
+        listParameterPinIn->AddPin(FixedPinNumber::editorVisible);
 
-    //learning pin
-    listIsLearning << "off";
-    listIsLearning << "learn";
-    listIsLearning << "unlearn";
-    listParameterPinIn->AddPin(FixedPinNumber::learningMode);
+        //learning pin
+        listIsLearning << "off";
+        listIsLearning << "learn";
+        listIsLearning << "unlearn";
+        listParameterPinIn->AddPin(FixedPinNumber::learningMode);
+    }
 
     Object::Open();
     CreateEditorWindow();

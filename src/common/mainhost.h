@@ -48,6 +48,7 @@ public:
 
     void SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum msgType,void *data);
 
+    void SetBufferSizeMs(unsigned int ms);
     void SetBufferSize(unsigned long size);
     void SetSampleRate(float rate=44100.0);
     unsigned long GetBufferSize() {return bufferSize;}

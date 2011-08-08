@@ -112,9 +112,6 @@ void Vst::open()
      hostReportConnectionChanges = (bool)canHostDo("reportConnectionChanges");
      hostAcceptIOChanges = (bool)canHostDo("acceptIOChanges");
 
-     long hostSizeWindow = canHostDo("sizeWindow");
-     if(!hostSizeWindow)
-         qDebug()<<"host can't resize window";
 //     long hostAsyncProcessing = canHostDo("asyncProcessing");
 //     long hostOffline = canHostDo("offline");
 //     long hostSupplyIdle = canHostDo("supplyIdle");

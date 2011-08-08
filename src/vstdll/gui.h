@@ -45,6 +45,7 @@ public:
     void SetMainWindow(MainWindowVst *win);
 
 protected:
+    bool hostCanSizeWindow;
     ERect rectangle;
     MainWindowVst *myWindow;
     ResizeHandle *resizeH;

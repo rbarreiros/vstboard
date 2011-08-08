@@ -516,9 +516,6 @@ bool AudioDevice::Close()
     }
 
     DeleteCircualBuffers();
-
-    if(myHost)
-        myHost->SetBufferSize(1);
     return true;
 }
 
@@ -568,11 +565,6 @@ float AudioDevice::GetCpuUsage()
 
 bool AudioDevice::DeviceToRingBuffers( const void *inputBuffer, unsigned long framesPerBuffer)
 {
-    unsigned long hostBuffSize = myHost->GetBufferSize();
-    if(framesPerBuffer > hostBuffSize) {
-       myHost->SetBufferSize(framesPerBuffer);
-       hostBuffSize = framesPerBuffer;
-    }
 
     mutexOpenClose.lock();
     if(isClosing) {
@@ -580,6 +572,12 @@ bool AudioDevice::DeviceToRingBuffers( const void *inputBuffer, unsigned long fr
         return false;
     }
     mutexOpenClose.unlock();
+
+    unsigned long hostBuffSize = myHost->GetBufferSize();
+    if(framesPerBuffer > hostBuffSize) {
+       myHost->SetBufferSize(framesPerBuffer);
+       hostBuffSize = framesPerBuffer;
+    }
 
     mutexDevicesInOut.lock();
     if(!devIn) {

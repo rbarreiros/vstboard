@@ -37,6 +37,10 @@ Gui::Gui(AudioEffectX* effect) :
     if(!strcmp(str,"REAPER")) {
         widgetOffset.setY(27);
     }
+
+    hostCanSizeWindow = (bool)effect->canHostDo("sizeWindow");
+    if(!hostCanSizeWindow)
+        qDebug()<<"host can't resize window";
 }
 
 Gui::~Gui()

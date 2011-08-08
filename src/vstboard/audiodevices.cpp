@@ -28,6 +28,29 @@
 #include "connectables/audiodevicein.h"
 #include "connectables/audiodeviceout.h"
 
+FakeTimer::FakeTimer(MainHostHost *myHost) :
+    QThread(myHost),
+    myHost(myHost),
+    stop(false)
+{
+    start(QThread::TimeCriticalPriority);
+}
+
+FakeTimer::~FakeTimer()
+{
+    stop=true;
+    wait(1000);
+}
+
+void FakeTimer::run()
+{
+    while(!stop) {
+        msleep(FAKE_RENDER_TIMER_MS);
+        myHost->Render();
+    }
+    stop=false;
+}
+
 /*!
   \class AudioDevices
   \brief manage the list of audio devices provided by PortAudio
@@ -41,9 +64,10 @@ AudioDevices::AudioDevices(MainHostHost *myHost) :
     closing(false),
     model(0),
     countActiveDevices(0),
-    myHost(myHost)
+    myHost(myHost),
+    fakeRenderTimer(0)
 {
-    fakeRenderTimer.start(FAKE_RENDER_TIMER_MS);
+    fakeRenderTimer = new FakeTimer(myHost);
 }
 
 /*!
@@ -74,6 +98,9 @@ AudioDevices::~AudioDevices()
         delete dev; //dev->DeleteIfUnused();
     listAudioDevices.clear();
     mutexDevices.unlock();
+
+    if(fakeRenderTimer)
+        delete fakeRenderTimer;
 }
 
 /*!
@@ -282,27 +309,41 @@ void AudioDevices::OnToggleDeviceInUse(PaHostApiIndex apiId, PaDeviceIndex devId
     }
 
     //change status
+    QStandardItem *chk = apiItem->child( devItem->row(), 3);
+
     if(inUse) {
-        apiItem->child( devItem->row(), 3)->setCheckState(Qt::Checked);
+        if(chk->checkState()!=Qt::Checked) {
+            apiItem->child( devItem->row(), 3)->setCheckState(Qt::Checked);
+            countActiveDevices++;
+        }
 
         int inL = ceil(inLatency*1000);
         int outL = ceil(outLatency*1000);
         devItem->setToolTip( QString("Input latency %1ms\nOutput latency %2ms\nSample rate %3Hz")
                              .arg(inL).arg(outL).arg(sampleRate) );
-        countActiveDevices++;
     } else {
-        apiItem->child( devItem->row(), 3)->setCheckState(Qt::Unchecked);
+        if(chk->checkState()==Qt::Checked) {
+            chk->setCheckState(Qt::Unchecked);
+            countActiveDevices--;
+        }
         devItem->setToolTip("");
-        countActiveDevices--;
     }
+
+    qDebug()<<"countActiveDevices"<<countActiveDevices<<fakeRenderTimer;
 
     //the renderer is normally launched when all the audio devices are ready,
     //if there is no audio device we have to run a timer
-    if(countActiveDevices==1) {
-        fakeRenderTimer.stop();
+    if(countActiveDevices>0) {
+        myHost->SetBufferSize(1);
+        if(fakeRenderTimer) {
+            delete fakeRenderTimer;
+            fakeRenderTimer=0;
+        }
     }
     if(countActiveDevices==0) {
-        fakeRenderTimer.start(FAKE_RENDER_TIMER_MS);
+        myHost->SetBufferSizeMs(FAKE_RENDER_TIMER_MS);
+        if(!fakeRenderTimer && !closing)
+            fakeRenderTimer = new FakeTimer(myHost);
     }
 }
 
@@ -320,9 +361,6 @@ Connectables::AudioDevice * AudioDevices::AddDevice(ObjectInfo &objInfo, QString
     mutexDevices.unlock();
 
     if(!dev) {
-        //minimize the buffer size to 1, the device will resize it to it's minimum
-        myHost->SetBufferSize(1);
-
         dev = new Connectables::AudioDevice(PAinfo, myHost,objInfo);
         if(!dev->Open()) {
             if(errMsg)
@@ -346,13 +384,7 @@ void AudioDevices::RemoveDevice(PaDeviceIndex devId)
         delete dev;
     }
 
-    //minimize the buffer size
-    if(listAudioDevices.isEmpty()) {
-        myHost->SetBufferSize(100);
-    } else {
-        //set to 1, the devices will resize it
-        myHost->SetBufferSize(1);
-    }
+
 }
 
 void AudioDevices::PutPinsBuffersInRingBuffers()

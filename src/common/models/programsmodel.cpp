@@ -370,24 +370,30 @@ bool ProgramsModel::removeRows( int row, int count, const QModelIndex & parent )
 }
 
 /*!
-    issued by a command
+    issued by a command, tell the containers and views to delete the programs
     */
 bool ProgramsModel::removeRowsFromCommand ( int row, int count, const QModelIndex & parent ) {
 
-    //removing last programs from a group, it will be disabled
     if(parent.isValid()) {
         QStandardItem *parentItem = item(parent.row());
+
+        //removing all the programs from a group
         if( parentItem->rowCount() == count ) {
             parentItem->setBackground(Qt::gray);
             parentItem->setToolTip( tr("This group has no program.\nDrag & drop some programs here to enable it.") );
         }
+
         for(int i=0; i<count; i++)
-            myHost->programContainer->RemoveProgram(parent.child(row+i,0));
+            emit ProgDelete(parent.child(row+i,0));
+
     } else {
         for(int i=0; i<count; i++) {
-            for(int j=0; j<rowCount(index(row+i,0)); j++)
-                myHost->programContainer->RemoveProgram(index(row+i,0).child(j,0));
-            myHost->groupContainer->RemoveProgram(index(row+i,0));
+            QModelIndex groupIndex = index(row+i,0);
+            int nbProg = rowCount(groupIndex);
+            for(int j=0; j<nbProg; j++) {
+                emit ProgDelete(groupIndex.child(j,0));
+            }
+            emit GroupDelete(groupIndex);
         }
     }
 
@@ -400,25 +406,11 @@ bool ProgramsModel::removeRowsFromCommand ( int row, int count, const QModelInde
   a command creation is in progress, add to the command group
   */
 void ProgramsModel::removeRowsAddToCommandStack ( int row, int count, const QModelIndex & parent ) {
-
     for(int i=row+count-1; i>=row; i--) {
-
-        QModelIndex idx = index(i,0,parent);
-
         if(parent.isValid()) {
-
-            //tell the container to delete the program
             new ComRemoveProgram( this, i, parent.row(), currentCommandGroup);
-            emit ProgDelete( idx );
-
         } else {
-
-            //tell the containers to delete the group and the programs
             new ComRemoveGroup( this, i, currentCommandGroup);
-            for(int j=0; j< rowCount(idx); j++)
-            emit ProgDelete( idx.child(j,0) );
-            emit GroupDelete( idx );
-
         }
     }
 }
@@ -558,6 +550,8 @@ void ProgramsModel::UserChangeGroup(int grp)
 
 bool ProgramsModel::ValidateProgChange(const QModelIndex &newPrg)
 {
+//    LOG(newPrg.parent().row()<<newPrg.row()<<newPrg.data(ProgramId));
+
     if(!newPrg.isValid()) {
         LOG("invalid program");
         return false;

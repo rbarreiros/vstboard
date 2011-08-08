@@ -85,14 +85,27 @@ namespace Connectables {
         QWeakPointer<Container>childContainer;
         QWeakPointer<Container>parentContainer;
 
-        void Updated() {
-            if(currentContainerProgram)
-                currentContainerProgram->timeSavedRendererNodes = QTime::currentTime();
-            if(childContainer)
-                childContainer.toStrongRef()->Updated();
+        void SetLoadingMode(bool active=true) {
+            loadingMode = active;
+
+            //end of loading mode, update renderer map if needed
+            if(!active) {
+
+            }
         }
 
-        const QTime GetLastUpdate();
+        void UpdateModificationTime() {
+            if(loadingMode)
+                return;
+
+            if(currentContainerProgram)
+                currentContainerProgram->lastModificationTime = QTime::currentTime();
+            if(childContainer)
+                childContainer.toStrongRef()->UpdateModificationTime();
+
+        }
+
+        const QTime GetLastModificationTime();
 
         int GetProgramToSet() { if(progToSet==-1) return currentProgId; else return progToSet; }
 
@@ -129,11 +142,15 @@ namespace Connectables {
         /// id of the progam to change on the next rendering loop
         int progToSet;
 
+        bool loadingMode;
+
         bool loadHeaderStream (QDataStream &);
         bool loadObjectFromStream (QDataStream &);
         bool loadProgramFromStream (QDataStream &);
 
         QMutex progLoadMutex;
+
+        QList<int> listProgToRemove;
 
     public slots:
         void UserAddObject(const QSharedPointer<Object> &objPtr,
