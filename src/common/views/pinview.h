@@ -70,7 +70,7 @@ namespace View {
     protected:
         virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
         QVariant itemChange ( GraphicsItemChange change, const QVariant & value );
-        void mousePressEvent ( QGraphicsSceneMouseEvent * event );
+        virtual void mousePressEvent ( QGraphicsSceneMouseEvent * event );
         void mouseMoveEvent ( QGraphicsSceneMouseEvent  * event );
         void mouseReleaseEvent ( QGraphicsSceneMouseEvent  * event );
         void mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * event );

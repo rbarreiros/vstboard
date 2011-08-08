@@ -37,6 +37,7 @@ namespace View {
         void keyPressEvent ( QKeyEvent * event );
         void ValueChanged(float newVal);
         void wheelEvent ( QGraphicsSceneWheelEvent * event );
+        void mousePressEvent ( QGraphicsSceneMouseEvent * event );
         QGraphicsSimpleTextItem *textItem;
         QGraphicsRectItem *rectVu;
         QString text;
@@ -44,10 +45,12 @@ namespace View {
         bool isParameter;
         ColorGroups::Enum colorGroupId;
         QColor vuColor;
+        int overload;
 
     public slots:
         void updateVu();
         void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
+        void ResetOveload();
     };
 
 }

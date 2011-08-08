@@ -26,7 +26,8 @@ using namespace View;
 ConnectablePinView::ConnectablePinView(float angle, QAbstractItemModel *model, QGraphicsItem * parent, const ConnectionInfo &pinInfo, ViewConfig *config) :
        PinView(angle,model,parent,pinInfo,config),
        value(0),
-       isParameter(false)
+       isParameter(false),
+        overload(0)
 {
     setGeometry(0,0,50,15);
     setMinimumSize(50,15);
@@ -39,12 +40,10 @@ ConnectablePinView::ConnectablePinView(float angle, QAbstractItemModel *model, Q
     rectVu = new QGraphicsRectItem(this);
     outline->setBrush(Qt::NoBrush);
 
-//    textItem = new OutlinedText("", this, Qt::black, QColor(255,255,255,150));
     textItem = new QGraphicsSimpleTextItem(this);
     textItem->moveBy(2,1);
     textItem->setZValue(1);
 
-//    QColor c;
     switch(connectInfo.type) {
     case PinType::Audio :
         colorGroupId=ColorGroups::AudioPin;
@@ -92,6 +91,12 @@ void ConnectablePinView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum col
     }
 }
 
+void ConnectablePinView::mousePressEvent ( QGraphicsSceneMouseEvent * event )
+{
+    ResetOveload();
+    PinView::mousePressEvent(event);
+}
+
 void ConnectablePinView::UpdateModelIndex(const QModelIndex &index)
 {
     QString newName = index.data(Qt::DisplayRole).toString();
@@ -113,6 +118,12 @@ void ConnectablePinView::UpdateModelIndex(const QModelIndex &index)
 
 }
 
+void ConnectablePinView::ResetOveload()
+{
+    overload=0;
+    rectVu->setBrush(vuColor);
+}
+
 void ConnectablePinView::updateVu()
 {
     if(value<.0f)
@@ -120,6 +131,22 @@ void ConnectablePinView::updateVu()
 
     if(connectInfo.type==PinType::Audio) {
         value-=.05f;
+
+        if(value>1.0f) {
+            if(overload==0) {
+                rectVu->setBrush(Qt::red);
+                overload=500;
+            }
+            value=1.0f;
+        }
+
+        if(overload>0) {
+            overload--;
+            if(overload==0) {
+                ResetOveload();
+            }
+        }
+
         float newVu=.0f;
         if(value<.0f) {
             value=-1.0f;
@@ -130,6 +157,7 @@ void ConnectablePinView::updateVu()
             LOG("updateVu <0"<<newVu);
             newVu=0.0f;
         }
+
         rectVu->setRect(0,0, newVu, geometry().height());
     }
 
