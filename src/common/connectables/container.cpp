@@ -187,6 +187,17 @@ void Container::Hide()
 void Container::SetProgram(const QModelIndex &idx)
 {
     progToSet=idx.data(ProgramsModel::ProgramId).toInt();
+    if(progToSet == currentProgId) {
+        progToSet=-1;
+        return;
+    }
+
+    if(!myHost->mutexRender.tryLock())
+        return;
+    LoadProgram(progToSet);
+    progToSet=-1;
+    myHost->mutexRender.unlock();
+
 }
 
 void Container::NewRenderLoop()
@@ -201,10 +212,10 @@ void Container::NewRenderLoop()
 void Container::PostRender()
 {
     if(progToSet!=-1) {
-        if(progToSet != currentProgId) {
-            LoadProgram(progToSet);
-        }
+        myHost->mutexRender.lock();
+        LoadProgram(progToSet);
         progToSet=-1;
+        myHost->mutexRender.unlock();
     }
 }
 

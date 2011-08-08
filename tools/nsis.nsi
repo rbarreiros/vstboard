@@ -97,6 +97,7 @@ Section "VstBoard (required)"
 	SetOutPath $VstDir
 	WriteRegStr HKCU "${REG_SETTINGS}" "pluginInstallDir" $VstDir
 	WriteRegStr HKCU "${REG_SETTINGS}" "lastVstPath" $VstDir
+	WriteRegStr HKCU "${REG_SETTINGS}\plugin" "lastVstPath" $VstDir
 	File "VstBoardEffect.dll"
 	File "VstBoardInstrument.dll"
 	
