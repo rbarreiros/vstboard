@@ -36,7 +36,8 @@ ViewConfig::ViewConfig(MainHost *myHost, QObject *parent) :
     QObject(parent),
     savedInSetupFile(false),
     currentPresetName("Default"),
-    myHost(myHost)
+    myHost(myHost),
+    currentEditMode(EditMode::Cable)
 {
     colorGroupNames.insert( ColorGroups::ND, tr("-undefined-") );
     colorGroupNames.insert( ColorGroups::Window, tr("Window") );

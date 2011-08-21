@@ -17,14 +17,16 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-
+#include "precomp.h"
 #include "minmaxpinview.h"
 
 using namespace View;
 
 MinMaxPinView::MinMaxPinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo, ViewConfig *config) :
-        ConnectablePinView(angle,model,parent,pinInfo,config),
-        cursorCreated(false)
+    ConnectablePinView(angle,model,parent,pinInfo,config),
+    cursorCreated(false),
+    changingValue(false),
+    startDragValue(.0f)
 {
 
 }
@@ -115,4 +117,53 @@ void MinMaxPinView::UpdateScaleView()
     QPolygonF pol;
     pol << QPointF(limitVal,0) << QPointF(inMin->GetValue(),0)  << QPointF(outMin->GetValue(),rect().height()) << QPointF(outVal,rect().height());
     scaledView->setPolygon(pol);
+}
+
+void MinMaxPinView::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    if(config->EditMode()!=EditMode::Value) {
+        ConnectablePinView::mousePressEvent(event);
+        return;
+    }
+
+    LOG((long)this<<"press");
+    changingValue=true;
+    startDragPos=event->screenPos();
+    startDragValue=pinIndex.data(UserRoles::value).toFloat();
+    grabMouse();
+}
+
+void MinMaxPinView::mouseMoveEvent ( QGraphicsSceneMouseEvent  * event )
+{
+    if(changingValue) {
+        float mouseSensibility = 1.0f/size().width();
+        if(event->modifiers() & Qt::ControlModifier)
+            mouseSensibility /= 10;
+        if(event->modifiers() & Qt::ShiftModifier)
+            mouseSensibility /= 10;
+        if(event->modifiers() & Qt::AltModifier)
+            mouseSensibility /= 10;
+
+        int x=event->buttonDownScreenPos(Qt::LeftButton).x();
+        int increm = event->screenPos().x() - startDragPos.x();
+        LOG((long)this<<"move"<<x<<increm);
+
+        float newVal = startDragValue + mouseSensibility*increm;
+
+        startDragPos=event->screenPos();
+        startDragValue=newVal;
+
+        ValueChanged( newVal );
+    } else {
+        ConnectablePinView::mouseMoveEvent(event);
+    }
+}
+
+void MinMaxPinView::mouseReleaseEvent ( QGraphicsSceneMouseEvent  * event )
+{
+    if(changingValue) {
+        ungrabMouse();
+        changingValue=false;
+    }
+    ConnectablePinView::mouseReleaseEvent(event);
 }

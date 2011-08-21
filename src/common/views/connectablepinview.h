@@ -37,7 +37,7 @@ namespace View {
         void keyPressEvent ( QKeyEvent * event );
         void ValueChanged(float newVal);
         void wheelEvent ( QGraphicsSceneWheelEvent * event );
-        void mousePressEvent ( QGraphicsSceneMouseEvent * event );
+        virtual void mousePressEvent ( QGraphicsSceneMouseEvent * event );
         QGraphicsSimpleTextItem *textItem;
         QGraphicsRectItem *rectVu;
         QString text;

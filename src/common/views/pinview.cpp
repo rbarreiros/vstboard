@@ -122,7 +122,6 @@ void PinView::mousePressEvent ( QGraphicsSceneMouseEvent * event )
         event->ignore();
         return;
     }
-
     setCursor(Qt::ClosedHandCursor);
 }
 

@@ -41,6 +41,13 @@ namespace Colors {
     };
 }
 
+namespace EditMode {
+    enum Enum {
+        Cable,
+        Value
+    };
+}
+
 #define viewConfigPreset QMap<ColorGroups::Enum, QMap<Colors::Enum, QColor> >
 #define viewConfigPresetList QMap<QString, QMap<ColorGroups::Enum, QMap<Colors::Enum, QColor> > >
 
@@ -106,6 +113,9 @@ namespace View {
 
         static float KeyboardNumber(int key);
 
+        void SetEditMode(const EditMode::Enum mode) {currentEditMode=mode;}
+        EditMode::Enum EditMode() {return currentEditMode;}
+
     protected:
         ///list of presets in registry
         viewConfigPresetList listPresets;
@@ -127,6 +137,9 @@ namespace View {
         QString currentPresetName;
 
         MainHost *myHost;
+
+        EditMode::Enum currentEditMode;
+
     signals:
         /*!
             emited when a color changed

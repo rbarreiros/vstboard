@@ -71,8 +71,8 @@ namespace View {
         virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
         QVariant itemChange ( GraphicsItemChange change, const QVariant & value );
         virtual void mousePressEvent ( QGraphicsSceneMouseEvent * event );
-        void mouseMoveEvent ( QGraphicsSceneMouseEvent  * event );
-        void mouseReleaseEvent ( QGraphicsSceneMouseEvent  * event );
+        virtual void mouseMoveEvent ( QGraphicsSceneMouseEvent  * event );
+        virtual void mouseReleaseEvent ( QGraphicsSceneMouseEvent  * event );
         void mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * event );
         void dragLeaveEvent( QGraphicsSceneDragDropEvent  * event );
         void dragEnterEvent ( QGraphicsSceneDragDropEvent * event );
