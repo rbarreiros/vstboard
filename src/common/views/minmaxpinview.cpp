@@ -91,6 +91,16 @@ void MinMaxPinView::UpdateLimitModelIndex(const QModelIndex &index)
 void MinMaxPinView::UpdateModelIndex(const QModelIndex &index)
 {
     ConnectablePinView::UpdateModelIndex(index);
+
+    //avoid "jumps"
+    if(changingValue)
+        value = startDragValue;
+    else
+        value = index.data(UserRoles::value).toFloat();
+
+    float newVu = geometry().width() * value;
+    rectVu->setRect(0,0, newVu, geometry().height());
+
     if(cursorCreated)
         UpdateScaleView();
 }
@@ -148,12 +158,12 @@ void MinMaxPinView::mouseMoveEvent ( QGraphicsSceneMouseEvent  * event )
         int increm = event->screenPos().x() - startDragPos.x();
         LOG((long)this<<"move"<<x<<increm);
 
-        float newVal = startDragValue + mouseSensibility*increm;
+        startDragValue += mouseSensibility*increm;
+        startDragValue = std::max(.0f,startDragValue);
+        startDragValue = std::min(1.0f,startDragValue);
 
         startDragPos=event->screenPos();
-        startDragValue=newVal;
-
-        ValueChanged( newVal );
+        ValueChanged( startDragValue );
     } else {
         ConnectablePinView::mouseMoveEvent(event);
     }

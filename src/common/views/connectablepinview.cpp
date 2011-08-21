@@ -103,11 +103,7 @@ void ConnectablePinView::UpdateModelIndex(const QModelIndex &index)
     if(newName!=textItem->text())
         textItem->setText(newName);
 
-    if(connectInfo.type == PinType::Parameter) {
-        value = index.data(UserRoles::value).toFloat();
-        float newVu = geometry().width() * value;
-        rectVu->setRect(0,0, newVu, geometry().height());
-    } else {
+    if(connectInfo.type != PinType::Parameter) {
         float newVal = index.data(UserRoles::value).toFloat();
         value = std::max(value,newVal);
     }
