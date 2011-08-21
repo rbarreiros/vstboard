@@ -17,14 +17,17 @@
 #    You should have received a copy of the under the terms of the GNU Lesser General Public License
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-
+#include "precomp.h"
 #include "minmaxpinview.h"
+#include "objectview.h"
 
 using namespace View;
 
 MinMaxPinView::MinMaxPinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo, ViewConfig *config) :
-        ConnectablePinView(angle,model,parent,pinInfo,config),
-        cursorCreated(false)
+    ConnectablePinView(angle,model,parent,pinInfo,config),
+    cursorCreated(false),
+    changingValue(false),
+    startDragValue(.0f)
 {
 
 }
@@ -89,8 +92,28 @@ void MinMaxPinView::UpdateLimitModelIndex(const QModelIndex &index)
 void MinMaxPinView::UpdateModelIndex(const QModelIndex &index)
 {
     ConnectablePinView::UpdateModelIndex(index);
+
+    //avoid "jumps"
+    if(changingValue)
+        value = startDragValue;
+    else
+        value = index.data(UserRoles::value).toFloat();
+
+    float newVu = geometry().width() * value;
+    rectVu->setRect(0,0, newVu, geometry().height());
+
     if(cursorCreated)
         UpdateScaleView();
+
+    ObjectView *parentObj = static_cast<ObjectView*>(parentWidget()->parentWidget());
+    if(parentObj) {
+        if(connectInfo.pinNumber == FixedPinNumber::editorVisible) {
+            parentObj->SetEditorPin(this, value);
+        }
+        if(connectInfo.pinNumber == FixedPinNumber::learningMode) {
+            parentObj->SetLearnPin(this, value);
+        }
+    }
 }
 
 void MinMaxPinView::UpdateScaleView()
@@ -115,4 +138,49 @@ void MinMaxPinView::UpdateScaleView()
     QPolygonF pol;
     pol << QPointF(limitVal,0) << QPointF(inMin->GetValue(),0)  << QPointF(outMin->GetValue(),rect().height()) << QPointF(outVal,rect().height());
     scaledView->setPolygon(pol);
+}
+
+void MinMaxPinView::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    if(config->EditMode()!=EditMode::Value) {
+        ConnectablePinView::mousePressEvent(event);
+        return;
+    }
+
+    changingValue=true;
+    startDragPos=event->screenPos();
+    startDragValue=pinIndex.data(UserRoles::value).toFloat();
+    grabMouse();
+}
+
+void MinMaxPinView::mouseMoveEvent ( QGraphicsSceneMouseEvent  * event )
+{
+    if(changingValue) {
+        float mouseSensibility = 1.0f/size().width();
+        if(event->modifiers() & Qt::ControlModifier)
+            mouseSensibility /= 10;
+        if(event->modifiers() & Qt::ShiftModifier)
+            mouseSensibility /= 10;
+        if(event->modifiers() & Qt::AltModifier)
+            mouseSensibility /= 10;
+
+        int increm = event->screenPos().x() - startDragPos.x();
+        startDragValue += mouseSensibility*increm;
+        startDragValue = std::max(.0f,startDragValue);
+        startDragValue = std::min(1.0f,startDragValue);
+
+        startDragPos=event->screenPos();
+        ValueChanged( startDragValue );
+    } else {
+        ConnectablePinView::mouseMoveEvent(event);
+    }
+}
+
+void MinMaxPinView::mouseReleaseEvent ( QGraphicsSceneMouseEvent  * event )
+{
+    if(changingValue) {
+        ungrabMouse();
+        changingValue=false;
+    }
+    ConnectablePinView::mouseReleaseEvent(event);
 }

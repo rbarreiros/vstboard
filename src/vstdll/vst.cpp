@@ -112,6 +112,13 @@ void Vst::open()
      hostReportConnectionChanges = (bool)canHostDo("reportConnectionChanges");
      hostAcceptIOChanges = (bool)canHostDo("acceptIOChanges");
 
+     //reaper returns false :-/
+     char str[64];
+     getHostProductString(str);
+     if(!strcmp(str,"REAPER")) {
+        hostAcceptIOChanges = true;
+     }
+
 //     long hostAsyncProcessing = canHostDo("asyncProcessing");
 //     long hostOffline = canHostDo("offline");
 //     long hostSupplyIdle = canHostDo("supplyIdle");

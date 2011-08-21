@@ -320,9 +320,17 @@
     <property name="title">
      <string>Edit</string>
     </property>
+    <widget class="QMenu" name="menuTool">
+     <property name="title">
+      <string>Tool</string>
+     </property>
+     <addaction name="actionCable"/>
+     <addaction name="actionValue"/>
+    </widget>
     <addaction name="actionConfig"/>
     <addaction name="actionRefresh_Audio_devices"/>
     <addaction name="actionRefresh_Midi_devices"/>
+    <addaction name="menuTool"/>
    </widget>
    <widget class="QMenu" name="menuFile">
     <property name="title">
@@ -382,6 +390,9 @@
    <addaction name="separator"/>
    <addaction name="actionConfig"/>
    <addaction name="actionAppearance"/>
+   <addaction name="separator"/>
+   <addaction name="actionCable"/>
+   <addaction name="actionValue"/>
    <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -1166,6 +1177,31 @@
    </property>
    <property name="text">
     <string>Appearance</string>
+   </property>
+  </action>
+  <action name="actionCable">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Cable</string>
+   </property>
+   <property name="shortcut">
+    <string>C</string>
+   </property>
+  </action>
+  <action name="actionValue">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Value</string>
+   </property>
+   <property name="shortcut">
+    <string>V</string>
    </property>
   </action>
  </widget>

@@ -528,3 +528,17 @@ void MainWindow::OnViewConfigClosed()
     viewConfigDlg=0;
     ui->actionAppearance->setChecked(false);
 }
+
+void MainWindow::on_actionCable_toggled(bool arg1)
+{
+    ui->actionValue->setChecked(!arg1);
+    if(arg1)
+        viewConfig->SetEditMode(EditMode::Cable);
+}
+
+void MainWindow::on_actionValue_toggled(bool arg1)
+{
+    ui->actionCable->setChecked(!arg1);
+    if(arg1)
+        viewConfig->SetEditMode(EditMode::Value);
+}

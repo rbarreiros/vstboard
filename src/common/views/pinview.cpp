@@ -22,6 +22,7 @@
 #include "cableview.h"
 #include "../connectables/pin.h"
 #include "../connectables/objectfactory.h"
+#include "objectview.h"
 
 using namespace View;
 
@@ -122,7 +123,6 @@ void PinView::mousePressEvent ( QGraphicsSceneMouseEvent * event )
         event->ignore();
         return;
     }
-
     setCursor(Qt::ClosedHandCursor);
 }
 
@@ -158,7 +158,7 @@ void PinView::mouseMoveEvent ( QGraphicsSceneMouseEvent  * event )
         delete currentLine;
         currentLine = 0;
     }
-    setCursor(Qt::OpenHandCursor);
+    setCursor(Qt::PointingHandCursor);
 }
 
 /*!
@@ -167,16 +167,7 @@ void PinView::mouseMoveEvent ( QGraphicsSceneMouseEvent  * event )
   */
 void PinView::mouseReleaseEvent ( QGraphicsSceneMouseEvent  * /*event*/ )
 {
-    setCursor(Qt::OpenHandCursor);
-}
-
-/*!
-  Reimplements QGraphicsWidget::mouseDoubleClickEvent \n
-  remove all connected cables
-  */
-void PinView::mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * /*event*/ )
-{
-    Unplug();
+    setCursor(Qt::PointingHandCursor);
 }
 
 void PinView::Unplug()
