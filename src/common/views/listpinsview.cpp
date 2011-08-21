@@ -50,4 +50,3 @@ int ListPinsView::GetPinPosition(int newPinNumber)
     }
     return layout->count();
 }
-

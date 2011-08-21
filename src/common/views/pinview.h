@@ -73,7 +73,6 @@ namespace View {
         virtual void mousePressEvent ( QGraphicsSceneMouseEvent * event );
         virtual void mouseMoveEvent ( QGraphicsSceneMouseEvent  * event );
         virtual void mouseReleaseEvent ( QGraphicsSceneMouseEvent  * event );
-        void mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * event );
         void dragLeaveEvent( QGraphicsSceneDragDropEvent  * event );
         void dragEnterEvent ( QGraphicsSceneDragDropEvent * event );
         void dragMoveEvent ( QGraphicsSceneDragDropEvent * event );

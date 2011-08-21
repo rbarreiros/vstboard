@@ -22,6 +22,7 @@
 #include "pinview.h"
 #include "../globals.h"
 #include "commands/comremoveobject.h"
+#include "connectablepinview.h"
 
 using namespace View;
 
@@ -53,10 +54,15 @@ ObjectView::ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsIte
     layout(0),
     model(model),
     actRemove(0),
+    actRemoveBridge(0),
+    actShowEditor(0),
+    actLearnSwitch(0),
     shrinkAsked(false),
     myHost(myHost),
     highlighted(false),
-    config(myHost->mainWindow->viewConfig)
+    config(myHost->mainWindow->viewConfig),
+    editorPin(0),
+    learnPin(0)
 {
     setObjectName("objView");
 
@@ -143,6 +149,24 @@ void ObjectView::SetModelIndex(QPersistentModelIndex index)
         connect(actRemove,SIGNAL(triggered()),
                 this,SLOT(close()));
         addAction(actRemove);
+
+        actShowEditor = new QAction(tr("Show Editor"),this);
+        actShowEditor->setShortcut( Qt::Key_E );
+        actShowEditor->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+        actShowEditor->setEnabled(false);
+        actShowEditor->setCheckable(true);
+        connect(actShowEditor,SIGNAL(toggled(bool)),
+                this,SLOT(SwitchEditor(bool)));
+        addAction(actShowEditor);
+
+        actLearnSwitch = new QAction(tr("Learn Mode"),this);
+        actLearnSwitch->setShortcut( Qt::Key_L );
+        actLearnSwitch->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+        actLearnSwitch->setEnabled(false);
+        actLearnSwitch->setCheckable(true);
+        connect(actLearnSwitch,SIGNAL(toggled(bool)),
+                this,SLOT(SwitchLearnMode(bool)));
+        addAction(actLearnSwitch);
     }
 
     objIndex = index;
@@ -295,4 +319,53 @@ void ObjectView::ShrinkNow()
 {
     shrinkAsked=false;
     resize(0,0);
+}
+
+void ObjectView::SetEditorPin(ConnectablePinView *pin, float value)
+{
+    editorPin = pin;
+    actShowEditor->setEnabled(editorPin);
+    actShowEditor->setChecked(value>.5f);
+}
+
+void ObjectView::SetLearnPin(ConnectablePinView *pin, float value)
+{
+    learnPin = pin;
+    actLearnSwitch->setEnabled(learnPin);
+    actLearnSwitch->setChecked(value>.33f);
+}
+
+void ObjectView::SwitchLearnMode(bool on)
+{
+    if(!learnPin)
+        return;
+
+    if(learnPin->GetValue() > .33f && !on)
+        learnPin->ValueChanged(.0f);
+    if(learnPin->GetValue() < .33f && on)
+        learnPin->ValueChanged(.34f);
+}
+
+void ObjectView::SwitchEditor(bool show)
+{
+    if(!editorPin)
+        return;
+
+    if(editorPin->GetValue() > .5f && !show)
+        editorPin->ValueChanged(.0f);
+    if(editorPin->GetValue() < .5f && show)
+        editorPin->ValueChanged(1.0f);
+}
+
+void ObjectView::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+{
+    ToggleEditor();
+}
+
+void ObjectView::ToggleEditor()
+{
+    if(!actShowEditor || !actShowEditor->isEnabled())
+        return;
+
+    actShowEditor->toggle();
 }

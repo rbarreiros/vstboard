@@ -32,10 +32,11 @@ namespace View {
     public:
         ConnectablePinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo, ViewConfig *config);
         virtual void UpdateModelIndex(const QModelIndex &index);
+        void ValueChanged(float newVal);
+        float GetValue() {return value;}
 
     protected:
         void keyPressEvent ( QKeyEvent * event );
-        void ValueChanged(float newVal);
         void wheelEvent ( QGraphicsSceneWheelEvent * event );
         virtual void mousePressEvent ( QGraphicsSceneMouseEvent * event );
         QGraphicsSimpleTextItem *textItem;
@@ -51,6 +52,7 @@ namespace View {
         void updateVu();
         void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
         void ResetOveload();
+
     };
 
 }

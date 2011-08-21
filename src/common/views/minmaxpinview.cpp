@@ -19,6 +19,7 @@
 **************************************************************************/
 #include "precomp.h"
 #include "minmaxpinview.h"
+#include "objectview.h"
 
 using namespace View;
 
@@ -103,6 +104,16 @@ void MinMaxPinView::UpdateModelIndex(const QModelIndex &index)
 
     if(cursorCreated)
         UpdateScaleView();
+
+    ObjectView *parentObj = static_cast<ObjectView*>(parentWidget()->parentWidget());
+    if(parentObj) {
+        if(connectInfo.pinNumber == FixedPinNumber::editorVisible) {
+            parentObj->SetEditorPin(this, value);
+        }
+        if(connectInfo.pinNumber == FixedPinNumber::learningMode) {
+            parentObj->SetLearnPin(this, value);
+        }
+    }
 }
 
 void MinMaxPinView::UpdateScaleView()
@@ -136,7 +147,6 @@ void MinMaxPinView::mousePressEvent(QGraphicsSceneMouseEvent *event)
         return;
     }
 
-    LOG((long)this<<"press");
     changingValue=true;
     startDragPos=event->screenPos();
     startDragValue=pinIndex.data(UserRoles::value).toFloat();
@@ -154,10 +164,7 @@ void MinMaxPinView::mouseMoveEvent ( QGraphicsSceneMouseEvent  * event )
         if(event->modifiers() & Qt::AltModifier)
             mouseSensibility /= 10;
 
-        int x=event->buttonDownScreenPos(Qt::LeftButton).x();
         int increm = event->screenPos().x() - startDragPos.x();
-        LOG((long)this<<"move"<<x<<increm);
-
         startDragValue += mouseSensibility*increm;
         startDragValue = std::max(.0f,startDragValue);
         startDragValue = std::min(1.0f,startDragValue);
