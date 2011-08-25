@@ -24,7 +24,7 @@
 class CircularBuffer
 {
 public:
-    CircularBuffer();
+    CircularBuffer(unsigned int buffSize=0);
     ~CircularBuffer();
     void Clear();
     void SetSize(unsigned int size);

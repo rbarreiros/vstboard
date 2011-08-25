@@ -1,5 +1,5 @@
 /**************************************************************************
-#    Copyright 2010-2011 Raphaël François
+#    Copyright 2010-2011 RaphaÃ«l FranÃ§ois
 #    Contact : ctrlbrk76@gmail.com
 #
 #    This file is part of VstBoard.
@@ -18,24 +18,30 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#include "node.h"
+#ifndef BUFFER_H
+#define BUFFER_H
 
-Node::Node() :
-    minRenderOrder(0),
-    maxRenderOrder(9999),
-    internalDelay(0L),
-    totalDelayAtOutput(0L)
-{
-}
+#include "object.h"
+#include "circularbuffer.h"
 
-Node::Node(const Node &c) :
-    minRenderOrder(c.minRenderOrder),
-    maxRenderOrder(c.maxRenderOrder),
-    listOfObj(c.listOfObj),
-    internalDelay(c.internalDelay),
-    totalDelayAtOutput(c.totalDelayAtOutput)
+namespace Connectables
 {
 
+    class Buffer : public Object
+    {
+        Q_OBJECT
+    public:
+        Buffer(MainHost *host, int index, const ObjectInfo &info);
+        void Render();
+        void SetDelay(long d);
+
+    private:
+        CircularBuffer buffer;
+        bool delayChanged;
+
+    public slots:
+        void OnParameterChanged(ConnectionInfo pinInfo, float value);
+    };
+
 }
-
-
+#endif // BUFFER_H

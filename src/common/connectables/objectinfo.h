@@ -44,6 +44,7 @@ public:
     quint8 api;
     QString apiName;
     quint16 forcedObjId;
+    long initDelay;
 };
 
 Q_DECLARE_METATYPE(ObjectInfo);

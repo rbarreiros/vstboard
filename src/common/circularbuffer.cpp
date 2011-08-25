@@ -20,25 +20,51 @@
 #include "circularbuffer.h"
 //#include "precomp.h"
 
-CircularBuffer::CircularBuffer() :
-        buffSize(4096)
+CircularBuffer::CircularBuffer(unsigned int buffSize) :
+    buffSize(buffSize),
+    buffer(0)
 {
-    buffer = new float[buffSize];
-    ZeroMemory(buffer,sizeof(float)*buffSize);
-    bufStart = &buffer[0];
-    bufEnd = &buffer[buffSize-1];
-    filledStart = bufStart;
-    filledEnd = bufStart;
+    if(buffSize!=0) {
+        buffer = new float[buffSize];
+        ZeroMemory(buffer,sizeof(float)*buffSize);
+        bufStart = &buffer[0];
+        bufEnd = &buffer[buffSize-1];
+        filledStart = bufStart;
+        filledEnd = bufStart;
+    }
+
     filledSize=0;
 }
 
 CircularBuffer::~CircularBuffer()
 {
-    delete[] buffer;
+    if(buffSize!=0)
+        delete[] buffer;
+}
+
+void CircularBuffer::SetSize(unsigned int size)
+{
+    if(buffSize!=0)
+        delete[] buffer;
+
+    buffSize = size;
+
+    if(buffSize!=0) {
+        buffer = new float[buffSize];
+        ZeroMemory(buffer,sizeof(float)*buffSize);
+        bufStart = &buffer[0];
+        bufEnd = &buffer[buffSize-1];
+        filledStart = bufStart;
+        filledEnd = bufStart;
+    }
+    filledSize=0;
 }
 
 void CircularBuffer::Clear()
 {
+    if(buffSize==0)
+        return;
+
     filledStart = bufStart;
     filledEnd = bufStart;
     filledSize=0;
@@ -47,6 +73,9 @@ void CircularBuffer::Clear()
 
 bool CircularBuffer::Put(float *buf, unsigned int size)
 {
+    if(buffSize==0)
+        return false;
+
     if((buffSize-filledSize)<size) {
        //debug("CircularBuffer::Put not enough free space")
        unsigned int overlapping = size-(buffSize-filledSize);
@@ -74,6 +103,9 @@ bool CircularBuffer::Put(float *buf, unsigned int size)
 
 bool CircularBuffer::Put(double *buf, unsigned int size)
 {
+    if(buffSize==0)
+        return false;
+
     if((buffSize-filledSize)<size) {
        //debug("CircularBuffer::Put not enough free space")
        unsigned int overlapping = size-(buffSize-filledSize);
@@ -101,6 +133,9 @@ bool CircularBuffer::Put(double *buf, unsigned int size)
 
 bool CircularBuffer::Get(float *buf, unsigned int size)
 {
+    if(buffSize==0)
+        return false;
+
     if(filledSize<size) {
         LOG("not enough data");
         return false;
@@ -123,6 +158,9 @@ bool CircularBuffer::Get(float *buf, unsigned int size)
 
 bool CircularBuffer::Get(double *buf, unsigned int size)
 {
+    if(buffSize==0)
+        return false;
+
     if(filledSize<size) {
         LOG("not enough data");
         return false;
@@ -145,6 +183,9 @@ bool CircularBuffer::Get(double *buf, unsigned int size)
 
 bool CircularBuffer::Skip(unsigned int size)
 {
+    if(buffSize==0)
+        return false;
+
     if(filledSize<size) {
         LOG("can't skip more than filledsize");
         return false;

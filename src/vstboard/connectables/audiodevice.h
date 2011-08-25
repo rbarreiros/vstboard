@@ -30,7 +30,7 @@
 #include "pa_win_wmme.h"
 #include "pa_win_ds.h"
 #include "pa_win_wasapi.h"
-#include "../circularbuffer.h"
+#include "circularbuffer.h"
 
 class MainHostHost;
 namespace Connectables {

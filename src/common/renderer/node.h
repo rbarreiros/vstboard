@@ -11,6 +11,8 @@ public:
     Node(const Node &c);
     int minRenderOrder;
     int maxRenderOrder;
+    long internalDelay;
+    long totalDelayAtOutput;
     QList< QWeakPointer<Connectables::Object> >listOfObj;
 };
 

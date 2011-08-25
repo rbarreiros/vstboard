@@ -391,6 +391,8 @@ bool VstPlugin::initPlugin()
             listMidiPinIn->AddPin(0);
             listMidiPinOut->AddPin(0);
         }
+
+        initialDelay = pEffect->initialDelay;
     }
 
     //create all parameters pins
@@ -681,6 +683,7 @@ VstIntPtr VstPlugin::OnMasterCallback(long opcode, long index, long value, void 
         case audioMasterIOChanged : //13
             if(!pEffect)
                 return 0L;
+            initialDelay = pEffect->initialDelay;
             listAudioPinIn->ChangeNumberOfPins(pEffect->numInputs);
             listAudioPinOut->ChangeNumberOfPins(pEffect->numOutputs);
             UpdateModelNode();
@@ -697,6 +700,11 @@ VstIntPtr VstPlugin::OnMasterCallback(long opcode, long index, long value, void 
         case audioMasterGetSampleRate : //16
             return sampleRate;
 
+        case audioMasterGetInputLatency : //18
+            LOG("input latency");
+        case audioMasterGetOutputLatency : //19
+            LOG("output latency");
+            return 0L;
         case audioMasterUpdateDisplay : //42
         {
             if(!pEffect)

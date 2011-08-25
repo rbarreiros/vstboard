@@ -469,9 +469,9 @@ bool AudioDevice::Open()
     }
 
     for(int i=0; i<devInfo.maxInputChannels; i++ )
-        listCircularBuffersIn << new CircularBuffer();
+        listCircularBuffersIn << new CircularBuffer(4096);
     for(int i=0; i<devInfo.maxOutputChannels; i++ )
-        listCircularBuffersOut << new CircularBuffer();
+        listCircularBuffersOut << new CircularBuffer(4096);
 
     mutexOpenClose.lock();
     opened=true;

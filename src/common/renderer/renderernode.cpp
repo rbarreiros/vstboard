@@ -134,12 +134,14 @@ void RendererNode::UpdateModel(QStandardItemModel *model)
 
     modelNeedUpdate=false;
 
-    QString str = QString("[%1:%2][%3:%4](%5)")
-                    .arg(minRenderOrder)
-                    .arg(maxRenderOrder)
-                    .arg(minRenderOrderOri)
-                    .arg(maxRenderOrderOri)
-                    .arg(cpuTime);
+    QString str = QString("[%1:%2][%3:%4](%5) nodeDelay(%6):addedDelay(%7)")
+            .arg(minRenderOrder)
+            .arg(maxRenderOrder)
+            .arg(minRenderOrderOri)
+            .arg(maxRenderOrderOri)
+            .arg(cpuTime)
+            .arg(internalDelay)
+            .arg(totalDelayAtOutput);
 
     foreach( QSharedPointer<Connectables::Object> objPtr, listOfObj) {
         if(!objPtr.isNull() && !objPtr->GetSleep()) {

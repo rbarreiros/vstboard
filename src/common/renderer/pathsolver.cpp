@@ -23,6 +23,7 @@
 #include "globals.h"
 #include "projectfile/projectfile.h"
 #include "connectables/objectfactory.h"
+#include "connectables/buffer.h"
 
 PathSolver::PathSolver(MainHost *parent) :
     QObject(parent),
@@ -63,10 +64,94 @@ void PathSolver::Resolve(hashCables cables, Renderer *renderer)
     while(ChainNodes()) {}
     RemoveUnusedNodes();
     UnwrapLoops();
+    while(AddDelays()) {}
     SetMinAndMaxStep();
+
     renderer->OnNewRenderingOrder(listNodes);
     mutex.unlock();
 }
+
+bool PathSolver::AddDelays()
+{
+    foreach(SolverNode *node, listNodes) {
+        if(!node->IsRoot())
+            continue;
+        node->UpdateInitialDelay();
+    }
+
+    bool modified=false;
+
+    foreach(SolverNode *node, listNodes) {
+
+        long delay = node->GetParentMaxDelay();
+        if(delay!=0) {
+
+            foreach(SolverNode *parent, node->listParents) {
+                if(parent->totalDelayAtOutput < delay) {
+                    //add delay on this node
+                    QSharedPointer<Connectables::Object>obj = parent->listOfObj.last();
+                    if(obj->info().objType==ObjType::Buffer) {
+                        //it's a delay, adjust it
+                        obj.staticCast<Connectables::Buffer>()->SetDelay( obj->initialDelay + delay - parent->totalDelayAtOutput);
+
+                    } else {
+                        //we need a new delay
+                        CreateCablesForDelayNode(parent, node, delay-parent->totalDelayAtOutput);
+                    }
+                    parent->totalDelayAtOutput=delay;
+                    modified=true;
+                }
+            }
+        }
+    }
+    return modified;
+}
+
+void PathSolver::CreateCablesForDelayNode(SolverNode *node, SolverNode *childNode, long delay)
+{
+    QSharedPointer<Connectables::Object>outObj = node->listOfObj.last();
+    QSharedPointer<Connectables::Object>inObj = childNode->listOfObj.first();
+    QSharedPointer<Connectables::Container>container = myHost->objFactory->GetObjectFromId(outObj->GetContainerId()).staticCast<Connectables::Container>();
+
+    ObjectInfo info;
+    info.nodeType = NodeType::object;
+    info.objType = ObjType::Buffer;
+    info.initDelay = delay;
+    QSharedPointer<Connectables::Buffer>delayObj = myHost->objFactory->NewObject(info).staticCast<Connectables::Buffer>();
+    node->listOfObj << delayObj;
+    container->UserAddObject(delayObj);
+    delayObj->SetSolverNode(node);
+//    delayObj->SetDelay(delay);
+
+
+    //find the affected cables
+
+    foreach(Connectables::Pin* outPin, outObj->GetListAudioPinOut()->listPins) {
+        ConnectionInfo outInfo = outPin->GetConnectionInfo();
+        QList<ConnectionInfo>lstIn;
+        GetListPinsConnectedTo(outInfo, lstIn);
+        foreach(ConnectionInfo inInfo, lstIn) {
+            if(inObj->GetIndex() == inInfo.objId) {
+                //found a cable !
+                LOG(outObj->objectName()<<inObj->objectName());
+
+                container->UserAddCable(outInfo, delayObj->GetListAudioPinIn()->GetPin(0)->GetConnectionInfo());
+                container->UserAddCable(delayObj->GetListAudioPinOut()->GetPin(0)->GetConnectionInfo(), inInfo);
+                container->UserRemoveCable(outInfo, inInfo);
+            }
+        }
+    }
+}
+
+void PathSolver::GetListPinsConnectedTo(ConnectionInfo out, QList<ConnectionInfo> &list)
+{
+    hashCables::const_iterator i = listCables.constFind(out);
+    while (i != listCables.constEnd()  && i.key() == out) {
+        list << i.value();
+        ++i;
+    }
+}
+
 
 /*!
   Create nodes for each objects

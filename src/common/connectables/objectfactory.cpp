@@ -26,6 +26,7 @@
 #include "container.h"
 #include "bridge.h"
 #include "mainhost.h"
+#include "buffer.h"
 
 #ifdef SCRIPTENGINE
     #include "script.h"
@@ -170,6 +171,10 @@ QSharedPointer<Object> ObjectFactory::NewObject(const ObjectInfo &info)
                     case ObjType::dummy :
                         obj = new Object(myHost, objId, info);
                         obj->SetErrorMessage("Dummy object");
+                        break;
+
+                    case ObjType::Buffer :
+                        obj = new Buffer(myHost, objId, info);
                         break;
 
                     default:

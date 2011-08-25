@@ -46,7 +46,11 @@ protected:
     bool ChainNodes();
     void UnwrapLoops();
     void SetMinAndMaxStep();
+    bool AddDelays();
     void RemoveUnusedNodes();
+    void GetInitialDelay();
+    void CreateCablesForDelayNode(SolverNode *node, SolverNode *childNode, long delay);
+    void GetListPinsConnectedTo(ConnectionInfo out, QList<ConnectionInfo> &list);
 
     QList<SolverNode*> ListOfGoodStarts(const QList<SolverNode*>&loop);
     QList<SolverNode*> BestStartsInAList(const QList<SolverNode*>&loop, const QList<SolverNode*>&possibleStarts);
@@ -63,7 +67,6 @@ protected:
 
     QList<SolverNode*>listNodes;
     QMutex mutex;
-
 };
 
 #endif // PATHSOLVER_H
