@@ -126,9 +126,9 @@ void AudioBuffer::Clear()
     //debugbuf("clear");
 
     if(doublePrecision)
-        ZeroMemory( pBuffer, sizeof(double)*bufferSize );
+        memset( pBuffer, 0, sizeof(double)*bufferSize );
     else
-        ZeroMemory( pBuffer, sizeof(float)*bufferSize );
+        memset( pBuffer, 0, sizeof(float)*bufferSize );
 }
 
 /*!
@@ -162,7 +162,7 @@ void AudioBuffer::AddToStack(AudioBuffer * buff)
         if(!doublePrecision && buff->GetDoublePrecision()) {
             float *dest=(float*)pBuffer;
             double *ori=(double*)buff->GetPointer();
-            for(uint i=0; i<bufferSize; ++i) {
+            for(unsigned long i=0; i<bufferSize; ++i) {
                 *dest=(float)*ori;
                 ++dest;
                 ++ori;
@@ -173,7 +173,7 @@ void AudioBuffer::AddToStack(AudioBuffer * buff)
         if(doublePrecision && !buff->GetDoublePrecision()) {
             double *dest=(double*)pBuffer;
             float *ori=(float*)buff->GetPointer();
-            for(uint i=0; i<bufferSize; ++i) {
+            for(unsigned long i=0; i<bufferSize; ++i) {
                 *dest=(double)*ori;
                 ++dest;
                 ++ori;
@@ -282,7 +282,7 @@ void *AudioBuffer::ConsumeStack()
         }
 
         if( std::max(ma,-mi) > _maxVal)
-            _maxVal = std::max(ma,-mi);
+            _maxVal = (float)std::max(ma,-mi);
 
         //if we're off-limits : here is a limiter
         if(_maxVal > 1.0) {

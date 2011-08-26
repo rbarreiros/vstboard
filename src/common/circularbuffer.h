@@ -38,8 +38,8 @@ public:
     unsigned int filledSize;
 private:
 
-    float *filledStart;
-    float *filledEnd;
+    float *readPos;
+    float *writePos;
     float *bufStart;
     float *bufEnd;
     float *buffer;
