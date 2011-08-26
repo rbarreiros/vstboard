@@ -145,6 +145,7 @@ protected:
         void HostChangedProg(int prog);
     public slots:
         void OnMainHostTempoChange();
+        void DelayChanged(long samples);
 };
 
 

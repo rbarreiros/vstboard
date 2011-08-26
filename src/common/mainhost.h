@@ -119,7 +119,8 @@ public:
     QString currentSetupFile;
 
     QUndoStack undoStack;
-QMutex mutexRender;
+    QMutex mutexRender;
+
 protected:
     QTime timeFromStart;
     float sampleRate;
@@ -170,6 +171,7 @@ signals:
     void groupParkingModelChanged(QStandardItemModel *model);
     void TempoChanged(int tempo=120, int sign1=4, int sign2=4);
     void currentFileChanged();
+    void DelayChanged(long samples);
 
 public slots:
     void SetTempo(int tempo=120, int sign1=4, int sign2=4);

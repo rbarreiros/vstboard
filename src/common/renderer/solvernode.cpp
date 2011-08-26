@@ -19,6 +19,7 @@
 **************************************************************************/
 
 #include "solvernode.h"
+#include "connectables/buffer.h"
 
 SolverNode::SolverNode() :
     Node(),

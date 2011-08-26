@@ -24,9 +24,10 @@
 using namespace Connectables;
 
 Buffer::Buffer(MainHost *host, int index, const ObjectInfo &info) :
-    Object(host,index,info),
+    Object(host,index,ObjectInfo(NodeType::object, ObjType::Buffer, tr("Delay"))),
     delayChanged(false)
 {
+
     initialDelay = info.initDelay;
     buffer.SetSize(myHost->GetBufferSize()*2 + initialDelay);
     listAudioPinIn->SetNbPins(1);
@@ -37,6 +38,7 @@ Buffer::Buffer(MainHost *host, int index, const ObjectInfo &info) :
 void Buffer::SetDelay(long d)
 {
     initialDelay=d;
+    static_cast<ParameterPin*>(listParameterPinIn->GetPin(0))->ChangeValue((float)d/50000, true);
     delayChanged=true;
 }
 
