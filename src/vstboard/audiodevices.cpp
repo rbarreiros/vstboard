@@ -33,17 +33,21 @@ FakeTimer::FakeTimer(MainHostHost *myHost) :
     myHost(myHost),
     stop(false)
 {
+    setObjectName("FakeTimer");
     start(QThread::TimeCriticalPriority);
 }
 
 FakeTimer::~FakeTimer()
 {
+    LOG("stop thread"<<objectName()<<(int)currentThreadId());
     stop=true;
     wait(1000);
 }
 
 void FakeTimer::run()
 {
+
+    LOG("start thread"<<objectName()<<(int)currentThreadId());
     while(!stop) {
         msleep(FAKE_RENDER_TIMER_MS);
         myHost->Render();
@@ -383,10 +387,9 @@ void AudioDevices::RemoveDevice(PaDeviceIndex devId)
     if(dev) {
         delete dev;
     }
-
-
 }
 
+#ifdef CIRCULAR_BUFFER
 void AudioDevices::PutPinsBuffersInRingBuffers()
 {
     mutexClosing.lock();
@@ -403,7 +406,7 @@ void AudioDevices::PutPinsBuffersInRingBuffers()
 
     mutexClosing.unlock();
 }
-
+#endif
 /*!
   Try to find a device in the list returned by PortAudio
   \param[in] objInfo the ObjectInfo we're looking for

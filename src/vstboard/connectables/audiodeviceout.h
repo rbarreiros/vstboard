@@ -24,7 +24,9 @@
 //#include "precomp.h"
 #include "connectables/object.h"
 #include "connectables/objectinfo.h"
-#include "circularbuffer.h"
+#ifdef CIRCULAR_BUFFER
+    #include "circularbuffer.h"
+#endif
 
 class AudioBuffer;
 
@@ -40,7 +42,9 @@ namespace Connectables {
         bool Open();
         bool Close();
         void SetParentDevice( AudioDevice *device );
+#ifdef CIRCULAR_BUFFER
         void SetRingBufferFromPins(QList<CircularBuffer*>listCircularBuffers);
+#endif
         QStandardItem *GetFullItem();
 
     protected:

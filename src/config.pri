@@ -14,6 +14,9 @@ win32|macx {
 CONFIG += scriptengine
 DEFINES += SCRIPTENGINE
 
+#use ring buffers to sync multiple audio inputs
+#DEFINES += CIRCULAR_BUFFER
+
 #limit buffers range from -1.0 to 1.0
 #DEFINES += BUFFER_ZERODB_CLIPPING
 
