@@ -133,11 +133,13 @@ namespace Connectables {
         /// windows wasapi stream options
         PaWasapiStreamInfo wasapiStreamInfo;
 
+#ifdef CIRCULAR_BUFFER
         /// list of input ring buffers
         QList<CircularBuffer*>listCircularBuffersIn;
 
         /// list of output ring buffers
         QList<CircularBuffer*>listCircularBuffersOut;
+#endif
 
         /// pointer to the MainHost
         MainHostHost *myHost;

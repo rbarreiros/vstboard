@@ -701,9 +701,9 @@ VstIntPtr VstPlugin::OnMasterCallback(long opcode, long index, long value, void 
             return sampleRate;
 
         case audioMasterGetInputLatency : //18
-            LOG("input latency");
+//            LOG("input latency");
         case audioMasterGetOutputLatency : //19
-            LOG("output latency");
+//            LOG("output latency");
             return 0L;
         case audioMasterUpdateDisplay : //42
         {
