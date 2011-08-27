@@ -602,6 +602,9 @@ bool AudioDevice::DeviceToRingBuffers( const void *inputBuffer, unsigned long fr
     //fill circular buffer with device audio
     int cpt=0;
     foreach(CircularBuffer *buf, listCircularBuffersIn) {
+        if(buf->buffSize<myHost->GetBufferSize()*2)
+            buf->SetSize(myHost->GetBufferSize()*2);
+
         buf->Put( ((float **) inputBuffer)[cpt], framesPerBuffer );
         if(buf->filledSize < hostBuffSize )
             readyToRender=false;
@@ -742,6 +745,7 @@ bool AudioDevice::PinBuffersToDevice( void *outputBuffer, unsigned long framesPe
     return true;
 }
 #endif
+
 /*!
   PortAudio callback
   put the audio provided by PortAudio in ring buffers

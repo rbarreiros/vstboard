@@ -105,6 +105,9 @@ bool AudioDeviceOut::Open()
 void AudioDeviceOut::SetRingBufferFromPins(QList<CircularBuffer*>listCircularBuffers) {
     int cpt=0;
     foreach(CircularBuffer *buf, listCircularBuffers) {
+        if(buf->buffSize<myHost->GetBufferSize()*2)
+            buf->SetSize(myHost->GetBufferSize()*2);
+
         AudioBuffer *pinBuf = listAudioPinIn->GetBuffer(cpt);
         cpt++;
         if(!pinBuf)

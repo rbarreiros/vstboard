@@ -165,9 +165,9 @@ void AudioDeviceIn::SetBufferFromRingBuffer(QList<CircularBuffer*>listCircularBu
 
         if(buf->filledSize >= hostBuffSize) {
             if(pinBuf->GetDoublePrecision())
-                buf->Get( (double*)pinBuf->GetPointer(true), hostBuffSize );
+                buf->Get( (double*)pinBuf->GetPointerWillBeFilled(), hostBuffSize );
             else
-                buf->Get( (float*)pinBuf->GetPointer(true), hostBuffSize );
+                buf->Get( (float*)pinBuf->GetPointerWillBeFilled(), hostBuffSize );
         }
     }
 }
