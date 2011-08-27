@@ -708,9 +708,6 @@ bool AudioDevice::DeviceToPinBuffers( const void *inputBuffer, unsigned long fra
 
     for(int cpt=0; cpt<lst->nbPins(); cpt++) {
         AudioBuffer *pinBuf = lst->GetBuffer(cpt);
-        if(pinBuf->GetSize() < hostBuffSize) {
-            pinBuf->SetSize(hostBuffSize);
-        }
         pinBuf->SetBufferContent( ((float **) inputBuffer)[cpt], framesPerBuffer);
     }
 

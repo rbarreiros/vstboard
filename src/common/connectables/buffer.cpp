@@ -27,12 +27,11 @@ Buffer::Buffer(MainHost *host, int index, const ObjectInfo &info) :
     Object(host,index,ObjectInfo(NodeType::object, ObjType::Buffer, tr("Delay"))),
     delayChanged(false)
 {
-
     initialDelay = info.initDelay;
     buffer.SetSize(myHost->GetBufferSize()*2 + initialDelay);
     listAudioPinIn->SetNbPins(1);
     listAudioPinOut->SetNbPins(1);
-    listParameterPinIn->listPins.insert(0, new ParameterPinIn(this,0,(float)initialDelay/50000,"Delay"));
+    listParameterPinIn->listPins.insert(0, new ParameterPinIn(this,0,(float)initialDelay/50000,"Delay",true));
 }
 
 void Buffer::SetDelay(long d)
@@ -62,9 +61,9 @@ void Buffer::Render()
     if(buffer.filledSize>=initialDelay+pinOutBuf->GetSize()) {
         //set buffer to output
         if(pinOutBuf->GetDoublePrecision())
-            buffer.Get( (double*)pinOutBuf->GetPointer(true), pinOutBuf->GetSize() );
+            buffer.Get( (double*)pinOutBuf->GetPointerWillBeFilled(), pinOutBuf->GetSize() );
         else
-            buffer.Get( (float*)pinOutBuf->GetPointer(true), pinOutBuf->GetSize() );
+            buffer.Get( (float*)pinOutBuf->GetPointerWillBeFilled(), pinOutBuf->GetSize() );
 
         pinOutBuf->ConsumeStack();
         static_cast<AudioPin*>(listAudioPinOut->listPins.value(0))->SendAudioBuffer();

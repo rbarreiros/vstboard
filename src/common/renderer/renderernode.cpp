@@ -134,7 +134,7 @@ void RendererNode::UpdateModel(QStandardItemModel *model)
 
     modelNeedUpdate=false;
 
-    QString str = QString("[%1:%2][%3:%4](%5) nodeDelay(%6):addedDelay(%7)")
+    QString str = QString("[%1:%2][%3:%4](%5)\ndelay(%6:%7)")
             .arg(minRenderOrder)
             .arg(maxRenderOrder)
             .arg(minRenderOrderOri)

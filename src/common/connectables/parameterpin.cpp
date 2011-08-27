@@ -77,7 +77,8 @@ ParameterPin::ParameterPin(Object *parent, PinDirection::Enum direction, int num
     stepSize=1.0f/(listValues->size()-1);
     stepIndex=listValues->indexOf(defaultVariantValue);
     defaultIndex=stepIndex;
-    OnValueChanged( .0f);//stepIndex*stepSize );
+    OnValueChanged( .0f);
+    UpdateView();
     loading=false;
 }
 
@@ -116,13 +117,14 @@ void ParameterPin::ChangeValue(float val, bool fromObj)
     val = std::min(val,1.0f);
     val = std::max(val,.0f);
 
-    if(!loading && std::abs(val-value)<0.001f)
+    if(!loading && std::abs(val-value)<0.00001f)
         return;
 
     OnValueChanged(val);
 
     if(!fromObj)
         parent->OnParameterChanged(connectInfo,outValue);
+    UpdateView();
 }
 
 //from int
@@ -141,6 +143,7 @@ void ParameterPin::ChangeValue(int index, bool fromObj)
 
     if(!fromObj)
         parent->OnParameterChanged(connectInfo,outValue);
+    UpdateView();
 }
 
 //from variant
@@ -221,7 +224,10 @@ void ParameterPin::OnValueChanged(float val)
         dirty=true;
         parent->OnProgramDirty();
     }
+}
 
+void ParameterPin::UpdateView()
+{
     if(visible) {
         if(nameCanChange)
             setObjectName(parent->GetParameterName(connectInfo));

@@ -174,7 +174,7 @@ void VstPlugin::Render()
             int cpt=0;
             foreach(Pin* pin,listAudioPinOut->listPins) {
                 AudioPin *audioPin = static_cast<AudioPin*>(pin);
-                tmpBufOut[cpt] = (double*)audioPin->GetBuffer()->GetPointer(true);
+                tmpBufOut[cpt] = (double*)audioPin->GetBuffer()->GetPointerWillBeFilled();
                 cpt++;
             }
 
@@ -210,7 +210,7 @@ void VstPlugin::Render()
         int cpt=0;
         foreach(Pin* pin,listAudioPinOut->listPins) {
             AudioPin *audioPin = static_cast<AudioPin*>(pin);
-            tmpBufOut[cpt] = (float*)audioPin->GetBuffer()->GetPointer(true);
+            tmpBufOut[cpt] = (float*)audioPin->GetBuffer()->GetPointerWillBeFilled();
             cpt++;
         }
 

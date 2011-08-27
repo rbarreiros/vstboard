@@ -34,6 +34,7 @@ namespace Connectables
         Buffer(MainHost *host, int index, const ObjectInfo &info);
         void Render();
         void SetDelay(long d);
+        QString GetParameterName(ConnectionInfo /*pinInfo*/) {return QString::number(initialDelay);}
 
     private:
         CircularBuffer buffer;
