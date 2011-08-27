@@ -358,6 +358,8 @@ void PathSolver::CreateDelayNode(SolverNode *node, SolverNode *childNode, long d
     childNode->totalDelayAtOutput+=delay;
 //    LOG("add obj"<<delayObj->objectName());
 
+    qreal objPosY=.0f;
+
     //find affected cables
     foreach(Connectables::Pin* outPin, outObj->GetListAudioPinOut()->listPins) {
         ConnectionInfo outInfo = outPin->GetConnectionInfo();
@@ -382,6 +384,13 @@ void PathSolver::CreateDelayNode(SolverNode *node, SolverNode *childNode, long d
                 container->UserAddCable(outInfo, delayObj->GetListAudioPinIn()->GetPin(0)->GetConnectionInfo());
                 container->UserAddCable(delayObj->GetListAudioPinOut()->GetPin(0)->GetConnectionInfo(), inInfo);
                 container->UserRemoveCable(outInfo, inInfo);
+
+                ObjectContainerAttribs attr;
+                inObj->GetContainerAttribs(attr);
+                attr.position.rx()-=130;
+                attr.position.ry()+=objPosY;
+                objPosY+=50;
+                delayObj->SetContainerAttribs(attr);
             }
         }
     }
@@ -410,6 +419,13 @@ void PathSolver::CreateDelayNode(SolverNode *node, SolverNode *childNode, long d
                 container->UserAddCable(outInfo, delayObj->GetListAudioPinIn()->GetPin(0)->GetConnectionInfo());
                 container->UserAddCable(delayObj->GetListAudioPinOut()->GetPin(0)->GetConnectionInfo(), inInfo);
                 container->UserRemoveCable(outInfo, inInfo);
+
+                ObjectContainerAttribs attr;
+                inObj->GetContainerAttribs(attr);
+                attr.position.rx()-=130;
+                attr.position.ry()+=objPosY;
+                objPosY+=50;
+                delayObj->SetContainerAttribs(attr);
             }
         }
     }
