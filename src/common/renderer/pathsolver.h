@@ -50,6 +50,8 @@ protected:
 
     void ResetDelays();
     bool AddDelays();
+    bool SynchronizeParentNodes(SolverNode *node, long targetDelay);
+    bool SynchronizeAudioOutputs();
     void CreateDelayNode(SolverNode *node, SolverNode *childNode, long delay);
     void GetListPinsConnectedTo(ConnectionInfo out, QList<ConnectionInfo> &list);
 
