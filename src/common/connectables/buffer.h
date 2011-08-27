@@ -1,5 +1,5 @@
 /**************************************************************************
-#    Copyright 2010-2011 Raphaël François
+#    Copyright 2010-2011 RaphaÃ«l FranÃ§ois
 #    Contact : ctrlbrk76@gmail.com
 #
 #    This file is part of VstBoard.
@@ -18,32 +18,31 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#ifndef CIRCULARBUFFER_H
-#define CIRCULARBUFFER_H
+#ifndef BUFFER_H
+#define BUFFER_H
 
-class CircularBuffer
+#include "object.h"
+#include "circularbuffer.h"
+
+namespace Connectables
 {
-public:
-    CircularBuffer();
-    ~CircularBuffer();
-    void Clear();
-    void SetSize(unsigned int size);
-    bool Put(float *buf, unsigned int size);
-    bool Put(double *buf, unsigned int size);
-    bool Get(float *buf, unsigned int size);
-    bool Get(double *buf, unsigned int size);
-    bool Skip(unsigned int size);
-//    bool Keep(unsigned int size);
-    unsigned int buffSize;
-    unsigned int filledSize;
-private:
 
-    float *filledStart;
-    float *filledEnd;
-    float *bufStart;
-    float *bufEnd;
-    float *buffer;
+    class Buffer : public Object
+    {
+        Q_OBJECT
+    public:
+        Buffer(MainHost *host, int index, const ObjectInfo &info);
+        void Render();
+        void SetDelay(long d);
+        QString GetParameterName(ConnectionInfo /*pinInfo*/) {return QString::number(initialDelay);}
 
-};
+    private:
+        CircularBuffer buffer;
+        bool delayChanged;
 
-#endif // CIRCULARBUFFER_H
+    public slots:
+        void OnParameterChanged(ConnectionInfo pinInfo, float value);
+    };
+
+}
+#endif // BUFFER_H

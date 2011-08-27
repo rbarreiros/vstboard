@@ -110,7 +110,8 @@ namespace ObjType {
         limitInMax,
         limitOutMin,
         limitOutMax,
-        Script
+        Script,
+        Buffer
     };
 }
 

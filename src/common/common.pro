@@ -124,7 +124,9 @@ SOURCES += \
     commands/comdiscardchanges.cpp \
     commands/comchangeautosave.cpp \
     commands/comremovepin.cpp \
-    commands/comaddpin.cpp
+    commands/comaddpin.cpp \
+    connectables/buffer.cpp \
+    circularbuffer.cpp
 
 HEADERS += \
     globals.h \
@@ -212,7 +214,9 @@ HEADERS += \
     commands/comdiscardchanges.h \
     commands/comchangeautosave.h \
     commands/comremovepin.h \
-    commands/comaddpin.h
+    commands/comaddpin.h \
+    connectables/buffer.h \
+    circularbuffer.h
 
 FORMS += \
     views/configdialog.ui \
@@ -230,6 +234,8 @@ TRANSLATIONS = ../resources/translations/common_fr.ts
 
 RESOURCES += \
     ../resources/resources.qrc
+
+
 
 
 

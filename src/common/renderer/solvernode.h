@@ -45,6 +45,8 @@ protected:
     void RemoveParent(SolverNode *parent);
     int SetMinRenderOrder(int order);
     void SetMaxRenderOrder(int order);
+    long GetParentMaxDelay();
+    void UpdateInitialDelay();
 
     bool MergeWithParentNode();
 

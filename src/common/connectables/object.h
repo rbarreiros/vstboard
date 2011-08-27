@@ -180,6 +180,8 @@ namespace Connectables {
         virtual void ProgramToStream (int progId, QDataStream &out);
         virtual void ProgramFromStream (int progId, QDataStream &in);
 
+        long initialDelay;
+
     protected:
         /// pointer to the MainHost
         MainHost *myHost;

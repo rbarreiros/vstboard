@@ -192,11 +192,11 @@ void Container::SetProgram(const QModelIndex &idx)
         return;
     }
 
-    if(!myHost->mutexRender.tryLock())
-        return;
-    LoadProgram(progToSet);
-    progToSet=-1;
-    myHost->mutexRender.unlock();
+//    if(!myHost->mutexRender.tryLock())
+//        return;
+//    LoadProgram(progToSet);
+//    progToSet=-1;
+//    myHost->mutexRender.unlock();
 
 }
 

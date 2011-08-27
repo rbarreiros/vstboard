@@ -44,7 +44,6 @@ SOURCES += \
     connectables/mididevice.cpp \
     audiodevices.cpp \
     mididevices.cpp \
-    circularbuffer.cpp \
     views/configdialoghost.cpp \
     views/mmeconfigdialog.cpp \
     views/wasapiconfigdialog.cpp
@@ -61,7 +60,6 @@ HEADERS += \
     connectables/mididevice.h \
     audiodevices.h \
     mididevices.h \
-    circularbuffer.h \
     views/configdialoghost.h \
     views/mmeconfigdialog.h \
     views/wasapiconfigdialog.h

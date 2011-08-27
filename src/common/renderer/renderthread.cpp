@@ -45,7 +45,7 @@ RenderThread::~RenderThread()
 
 void RenderThread::run()
 {
-    SetThreadIdealProcessor( GetCurrentThread(), currentCpu );
+//    SetThreadIdealProcessor( GetCurrentThread(), currentCpu );
 
     forever {
 

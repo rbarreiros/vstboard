@@ -19,6 +19,7 @@
 **************************************************************************/
 
 #include "solvernode.h"
+#include "connectables/buffer.h"
 
 SolverNode::SolverNode() :
     Node(),
@@ -149,6 +150,30 @@ bool SolverNode::DetectLoopback(QList<SolverNode*>&listLoop)
         }
     }
     return false;
+}
+
+long SolverNode::GetParentMaxDelay()
+{
+    //get the internal delay from parents
+    long parentMaxDelay=0L;
+    foreach(SolverNode *parent,listParents) {
+        parentMaxDelay = std::max(parentMaxDelay,parent->totalDelayAtOutput);
+    }
+    return parentMaxDelay;
+}
+
+void SolverNode::UpdateInitialDelay()
+{
+    internalDelay=0L;
+    foreach(QSharedPointer<Connectables::Object>obj, listOfObj) {
+        internalDelay+=obj->initialDelay;
+    }
+
+    totalDelayAtOutput = internalDelay+GetParentMaxDelay();
+
+    foreach(SolverNode *child, listChilds) {
+        child->UpdateInitialDelay();
+    }
 }
 
 int SolverNode::SetMinRenderOrder(int order)

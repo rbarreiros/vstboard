@@ -83,6 +83,8 @@ Vst::Vst (audioMasterCallback audioMaster, bool asInstrument) :
     myHost = new MainHostVst(this,0,"plugin/");
     if(myHost->doublePrecision)
         canDoubleReplacing(true);
+    connect(myHost, SIGNAL(DelayChanged(long)),
+            this, SLOT(DelayChanged(long)));
 
     myWindow = new MainWindowVst(myHost);
     qEditor = new Gui(this);
@@ -611,4 +613,10 @@ VstInt32 Vst::getChunk (void** data, bool isPreset)
     memcpy(chunkData, tmpStream.data(), tmpStream.size());
     *data=chunkData;
     return tmpStream.size();
+}
+
+void Vst::DelayChanged(long samples)
+{
+    setInitialDelay( static_cast<VstInt32>(samples) );
+    ioChanged();
 }

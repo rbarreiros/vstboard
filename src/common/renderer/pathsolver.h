@@ -48,6 +48,13 @@ protected:
     void SetMinAndMaxStep();
     void RemoveUnusedNodes();
 
+    void ResetDelays();
+    bool AddDelays();
+    bool SynchronizeParentNodes(SolverNode *node, long targetDelay);
+    bool SynchronizeAudioOutputs();
+    void CreateDelayNode(SolverNode *node, SolverNode *childNode, long delay);
+    void GetListPinsConnectedTo(ConnectionInfo out, QList<ConnectionInfo> &list);
+
     QList<SolverNode*> ListOfGoodStarts(const QList<SolverNode*>&loop);
     QList<SolverNode*> BestStartsInAList(const QList<SolverNode*>&loop, const QList<SolverNode*>&possibleStarts);
     QList<SolverNode*> CopyNodesChain(const QList<SolverNode*>&chain);
@@ -63,7 +70,9 @@ protected:
 
     QList<SolverNode*>listNodes;
     QMutex mutex;
-
+    long globalDelay;
+signals:
+    void GlobalDelayChanged(long samples);
 };
 
 #endif // PATHSOLVER_H

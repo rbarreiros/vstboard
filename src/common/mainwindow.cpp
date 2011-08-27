@@ -194,6 +194,14 @@ void MainWindow::BuildListTools()
     item->setData(QVariant::fromValue(info),UserRoles::objInfo);
     parentItem->appendRow(item);
 
+    //delay buffer
+    item = new QStandardItem(tr("Delay Buffer"));
+    info.nodeType = NodeType::object;
+    info.objType = ObjType::Buffer;
+    info.inputs = myHost->GetBufferSize()*2;
+    item->setData(QVariant::fromValue(info),UserRoles::objInfo);
+    parentItem->appendRow(item);
+
     ui->treeTools->setModel(listToolsModel);
     ui->treeTools->header()->setResizeMode(0,QHeaderView::Stretch);
 }

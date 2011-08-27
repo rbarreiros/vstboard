@@ -74,9 +74,9 @@ bool VstPluginWindow::SetPlugin(Connectables::VstPlugin *plugin)
         windowOk=true;
 
     //try to open the window
-    plugin->objMutex.lock();
+//    plugin->objMutex.lock();
     res = plugin->EffEditOpen(ui->scrollAreaWidgetContents->winId());
-    plugin->objMutex.unlock();
+//    plugin->objMutex.unlock();
 
     if(res == 1L)
         windowOk=true;

@@ -37,6 +37,7 @@ public:
     FakeTimer(MainHostHost *myHost);
     ~FakeTimer();
     void run();
+    void CleanupBuffers();
 
 private:
     MainHostHost *myHost;
@@ -54,7 +55,9 @@ public:
     Connectables::AudioDevice * AddDevice(ObjectInfo &objInfo, QString *errMsg=0);
     void RemoveDevice(PaDeviceIndex devId);
 
+#ifdef CIRCULAR_BUFFER
     void PutPinsBuffersInRingBuffers();
+#endif
 
     /// timer to launch the rendering loop when no audio devices are opened
     FakeTimer *fakeRenderTimer;

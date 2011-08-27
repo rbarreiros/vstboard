@@ -49,6 +49,7 @@
     #include <QDir>
     #include <QDragEnterEvent>
     #include <QDropEvent>
+    #include <QEvent>
     #include <QFileDialog>
     #include <QFileSystemModel>
     #include <QFocusEvent>
@@ -67,7 +68,9 @@
     #include <QHBoxLayout>
     #include <QtGui/QLabel>
     #include <QLibrary>
+    #include <QLibraryInfo>
     #include <QLineEdit>
+    #include <QListView>
     #include <QListWidgetItem>
     #include <QMainWindow>
     #include <QMap>
@@ -77,7 +80,10 @@
     #include <QMimeData>
     #include <QMultiHash>
     #include <QMutex>
+    #include <QtGui/QMouseEvent>
     #include <QObject>
+    #include <QtGui/QPainter>
+    #include <QtGui/QPen>
     #include <QReadWriteLock>
     #include <QScrollBar>
     #include <QSemaphore>
@@ -94,11 +100,14 @@
     #include <QTime>
     #include <QTimer>
     #include <QtGui/QToolButton>
+    #include <QTranslator>
     #include <QTreeWidget>
     #include <QUndoCommand>
+    #include <QUndoStack>
     #include <QUrl>
     #include <QtCore/QVariant>
     #include <QtGui/QVBoxLayout>
+    #include <QWaitCondition>
     #include <QtGui/QWidget>
 
     #ifdef SCRIPTENGINE

@@ -97,7 +97,12 @@ bool AudioBuffer::SetSize(unsigned long newSize, bool forceRealloc)
     }
 
     bufferSize = allocatedSize = newSize;
-    if(!externAlloc) Clear();
+    if(!externAlloc) {
+        if(!doublePrecision)
+            memset( pBuffer, 0, sizeof(float)*bufferSize );
+        else
+            memset( pBuffer, 0, sizeof(double)*bufferSize );
+    }
     return true;
 }
 
@@ -119,23 +124,10 @@ void AudioBuffer::SetDoublePrecision(bool dbl)
 }
 
 /*!
-  Erase the buffer by copying a blank buffer
-  */
-void AudioBuffer::Clear()
-{
-    //debugbuf("clear");
-
-    if(doublePrecision)
-        ZeroMemory( pBuffer, sizeof(double)*bufferSize );
-    else
-        ZeroMemory( pBuffer, sizeof(float)*bufferSize );
-}
-
-/*!
   Add a buffer to the stack. Can resize the buffer if needed if the current stack is empty
   \param buff buffer to be added to the mix
   */
-void AudioBuffer::AddToStack(AudioBuffer * buff)
+void AudioBuffer::AddToStack(const AudioBuffer * buff)
 {
     debugbuf("addtostak other:"<<buff->GetDoublePrecision());
 
@@ -148,86 +140,90 @@ void AudioBuffer::AddToStack(AudioBuffer * buff)
         }
     }
 
-
     if(stackSize==0) {
         debugbuf("1st stack");
         //1st in the stack, copying is enough
 
-        if(doublePrecision && buff->GetDoublePrecision())
-            memcpy(pBuffer,buff->GetPointer(),sizeof(double)*bufferSize);
-        if(!doublePrecision && !buff->GetDoublePrecision())
-            memcpy(pBuffer,buff->GetPointer(),sizeof(float)*bufferSize);
-
-        //convert from double to float
-        if(!doublePrecision && buff->GetDoublePrecision()) {
-            float *dest=(float*)pBuffer;
-            double *ori=(double*)buff->GetPointer();
-            for(uint i=0; i<bufferSize; ++i) {
-                *dest=(float)*ori;
-                ++dest;
-                ++ori;
+        if(!doublePrecision) {
+            if(!buff->GetDoublePrecision()) {
+                memcpy(pBuffer,buff->GetPointer(),sizeof(float)*bufferSize);
+            } else {
+                //convert from double to float
+                float *dest=(float*)pBuffer;
+                double *ori=(double*)buff->GetPointer();
+                unsigned long i=bufferSize;
+                while(i>0) {
+                    *dest=(float)*ori;
+                    ++dest;
+                    ++ori;
+                    --i;
+                }
+            }
+        } else {
+            if(buff->GetDoublePrecision()) {
+                memcpy(pBuffer,buff->GetPointer(),sizeof(double)*bufferSize);
+            } else {
+                //convert from float to double
+                double *dest=(double*)pBuffer;
+                float *ori=(float*)buff->GetPointer();
+                unsigned long i=bufferSize;
+                while(i>0) {
+                    *dest=(double)*ori;
+                    ++dest;
+                    ++ori;
+                    --i;
+                }
             }
         }
-
-        //convert from float to double
-        if(doublePrecision && !buff->GetDoublePrecision()) {
-            double *dest=(double*)pBuffer;
-            float *ori=(float*)buff->GetPointer();
-            for(uint i=0; i<bufferSize; ++i) {
-                *dest=(double)*ori;
-                ++dest;
-                ++ori;
-            }
-        }
-
-
     } else {
         debugbuf("add to stack");
         //add the next buffers to the stack
 
-        if(doublePrecision && buff->GetDoublePrecision()) {
-            double *buffToAdd = (double*)buff->GetPointer();
-            double *myBuff = (double*)pBuffer;
-
-            for(unsigned long i=0;i<bufferSize;i++) {
-                *myBuff += *buffToAdd;
-                ++myBuff;
-                ++buffToAdd;
+        if(!doublePrecision) {
+            if(!buff->GetDoublePrecision()) {
+                float *buffToAdd = (float*)buff->GetPointer();
+                float *myBuff = (float*)pBuffer;
+                unsigned long i=bufferSize;
+                while(i>0) {
+                    *myBuff += *buffToAdd;
+                    ++myBuff;
+                    ++buffToAdd;
+                    --i;
+                }
+            } else  {
+                //convert from double to float
+                double *buffToAdd = (double*)buff->GetPointer();
+                float *myBuff = (float*)pBuffer;
+                unsigned long i=bufferSize;
+                while(i>0) {
+                    *myBuff += (float)*buffToAdd;
+                    ++myBuff;
+                    ++buffToAdd;
+                    --i;
+                }
             }
-        }
-
-        if(!doublePrecision && !buff->GetDoublePrecision()) {
-            float *buffToAdd = (float*)buff->GetPointer();
-            float *myBuff = (float*)pBuffer;
-
-            for(unsigned long i=0;i<bufferSize;i++) {
-                *myBuff += *buffToAdd;
-                ++myBuff;
-                ++buffToAdd;
-            }
-        }
-
-        //convert from double to float
-        if(!doublePrecision && buff->GetDoublePrecision()) {
-            double *buffToAdd = (double*)buff->GetPointer();
-            float *myBuff = (float*)pBuffer;
-
-            for(unsigned long i=0;i<bufferSize;i++) {
-                *myBuff += (float)*buffToAdd;
-                ++myBuff;
-                ++buffToAdd;
-            }
-        }
-
-        //convert from float to double
-        if(doublePrecision && !buff->GetDoublePrecision()) {
-            float *buffToAdd = (float*)buff->GetPointer();
-            double *myBuff = (double*)pBuffer;
-
-            for(unsigned long i=0;i<bufferSize;++i) {
-                *myBuff += (double)*buffToAdd;
-                ++myBuff;
-                ++buffToAdd;
+        } else {
+            if(buff->GetDoublePrecision()) {
+                double *buffToAdd = (double*)buff->GetPointer();
+                double *myBuff = (double*)pBuffer;
+                unsigned long i=bufferSize;
+                while(i>0) {
+                    *myBuff += *buffToAdd;
+                    ++myBuff;
+                    ++buffToAdd;
+                    --i;
+                }
+            } else {
+                //convert from float to double
+                float *buffToAdd = (float*)buff->GetPointer();
+                double *myBuff = (double*)pBuffer;
+                unsigned long i=bufferSize;
+                while(i>0) {
+                    *myBuff += (double)*buffToAdd;
+                    ++myBuff;
+                    ++buffToAdd;
+                    --i;
+                }
             }
         }
     }
@@ -238,13 +234,9 @@ void AudioBuffer::AddToStack(AudioBuffer * buff)
   Get the pointer of the audio buffer
   \param willBeFilled true if we get this pointer to replace the content of the buffer with a new sound
   */
-void * AudioBuffer::GetPointer(bool willBeFilled)
+void * AudioBuffer::GetPointerWillBeFilled()
 {
-    //debugbuf("getpointer");
-
-    if(willBeFilled)
-        stackSize=1;
-
+    stackSize=1;
     return pBuffer;
 }
 
@@ -258,85 +250,96 @@ void *AudioBuffer::ConsumeStack()
 {
     //debugbuf("consume");
 
-    if(doublePrecision) {
-        double ma = .0;
-        double mi = .0;
-        double *buf;
-
-        if(stackSize==0) {
-            //empty stack : return a blank buffer
-            Clear();
-            _maxVal = 0.0f;
-            return pBuffer;
-        } else {
-            //find max value
-            buf = (double*)pBuffer;
-            for(unsigned long i=0;i<bufferSize;i++) {
-                if(*buf > ma)
-                    ma = *buf;
-                if(*buf < mi)
-                    mi = *buf;
-
-                ++buf;
-            }
-        }
-
-        if( std::max(ma,-mi) > _maxVal)
-            _maxVal = std::max(ma,-mi);
-
-        //if we're off-limits : here is a limiter
-        if(_maxVal > 1.0) {
-            buf = (double*)pBuffer;
-            for(unsigned long i=0;i<bufferSize;i++) {
-                if(*buf > 1.0)
-                    *buf = .8;
-                if(*buf < -1.0)
-                    *buf = -.8;
-               ++buf;
-            }
-            _maxVal = 1.0;
-        }
-    } else {
+    if(!doublePrecision) {
         float ma = .0f;
         float mi = .0f;
         float *buf;
 
         if(stackSize==0) {
             //empty stack : return a blank buffer
-            Clear();
+            memset( pBuffer, 0, sizeof(float)*bufferSize );
             _maxVal = 0.0f;
             return pBuffer;
         } else {
             //find max value
             buf = (float*)pBuffer;
-            for(unsigned long i=0;i<bufferSize;i++) {
+            unsigned long i=bufferSize;
+            while(i>0) {
                 if(*buf > ma)
                     ma = *buf;
-                if(*buf < mi)
+                if(mi > *buf)
                     mi = *buf;
-
                 ++buf;
+                --i;
             }
         }
 
-        if( std::max(ma,-mi) > _maxVal)
-            _maxVal = std::max(ma,-mi);
+        float m = std::max(std::abs(ma),std::abs(mi));
+        if( m > _maxVal)
+            _maxVal = m;
 
 #ifdef BUFFER_ZERODB_CLIPPING
         //if we're off-limits : here is a limiter
         if(_maxVal > 1.0f) {
             buf = (float*)pBuffer;
-            for(unsigned long i=0;i<bufferSize;i++) {
+            unsigned long i=bufferSize;
+            while(i>0) {
                 if(*buf > 1.0f)
                     *buf = .8f;
                 if(*buf < -1.0f)
                     *buf = -.8f;
                ++buf;
+               --i;
             }
             _maxVal = 1.0f;
         }
 #endif
+    } else {
+        double ma = .0;
+        double mi = .0;
+        double *buf;
+
+        if(stackSize==0) {
+            //empty stack : return a blank buffer
+            memset( pBuffer, 0, sizeof(double)*bufferSize );
+            _maxVal = 0.0f;
+            return pBuffer;
+        } else {
+            //find max value
+            buf = (double*)pBuffer;
+            unsigned long i=bufferSize;
+            while(i>0) {
+                if(mi > *buf)
+                    mi = *buf;
+                if(*buf > ma)
+                    ma = *buf;
+                ++buf;
+                --i;
+            }
+        }
+
+        float m = (float)std::max(std::abs(ma),std::abs(mi));
+        if( m > _maxVal)
+            _maxVal = m;
+
+#ifdef BUFFER_ZERODB_CLIPPING
+        //if we're off-limits : here is a limiter
+        if(_maxVal > 1.0) {
+            buf = (double*)pBuffer;
+            unsigned long i=bufferSize;
+            while(i>0) {
+                if(*buf > 1.0)
+                    *buf = .8;
+                if(*buf < -1.0)
+                    *buf = -.8;
+               ++buf;
+               --i;
+            }
+            _maxVal = 1.0;
+        }
+#endif
     }
+
     return pBuffer;
 }
 
@@ -361,10 +364,12 @@ void AudioBuffer::SetBufferContent(float *buff, int count)
 
     if(doublePrecision) {
         double *dest = (double*)pBuffer;
-        for(int i=0;i<count;i++) {
+        unsigned long i = count;
+        while(i>0) {
             *dest=(double)*buff;
-            dest++;
-            buff++;
+            ++dest;
+            ++buff;
+            --i;
         }
     } else {
         memcpy(pBuffer,buff,count*sizeof(float));
@@ -385,10 +390,12 @@ void AudioBuffer::SetBufferContent(double *buff, int count)
         memcpy(pBuffer,buff,count*sizeof(double));
     } else {
         float *dest = (float*)pBuffer;
-        for(int i=0;i<count;i++) {
+        unsigned long i = count;
+        while(i>0) {
             *dest=(float)*buff;
-            dest++;
-            buff++;
+            ++dest;
+            ++buff;
+            --i;
         }
     }
     stackSize=1;
@@ -399,16 +406,18 @@ void AudioBuffer::DumpToBuffer(float *buff, unsigned long count)
     debugbuf("dump float");
 
     if(count>bufferSize) {
-        LOG("buffer too small");
+//        LOG("buffer too small");
         count=bufferSize;
     }
 
     if(doublePrecision) {
         double *ori = (double*)pBuffer;
-        for(unsigned long i=0;i<count;i++) {
+        unsigned long i = count;
+        while(i>0) {
             *buff=(float)*ori;
-            ori++;
-            buff++;
+            ++ori;
+            ++buff;
+            --i;
         }
     } else {
         memcpy(buff,pBuffer,count*sizeof(float));
@@ -420,7 +429,7 @@ void AudioBuffer::DumpToBuffer(double *buff, unsigned long count)
     debugbuf("dump double");
 
     if(count>bufferSize) {
-        LOG("buffer too small");
+//        LOG("buffer too small");
         count=bufferSize;
     }
 
@@ -428,10 +437,12 @@ void AudioBuffer::DumpToBuffer(double *buff, unsigned long count)
         memcpy(buff,pBuffer,count*sizeof(double));
     } else {
         float *ori = (float*)pBuffer;
-        for(unsigned long i=0;i<count;i++) {
+        unsigned long i = count;
+        while(i>0) {
             *buff=(double)*ori;
-            ori++;
-            buff++;
+            ++ori;
+            ++buff;
+            --i;
         }
     }
 }

@@ -18,24 +18,32 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#include "node.h"
+#ifndef CIRCULARBUFFER_H
+#define CIRCULARBUFFER_H
 
-Node::Node() :
-    minRenderOrder(0),
-    maxRenderOrder(9999),
-    internalDelay(0L),
-    totalDelayAtOutput(0L)
+class CircularBuffer
 {
-}
+public:
+    CircularBuffer(unsigned int buffSize=0);
+    ~CircularBuffer();
+    void Clear();
+    void SetSize(unsigned int size);
+    bool Put(float *buf, unsigned int size);
+    bool Put(double *buf, unsigned int size);
+    bool Get(float *buf, unsigned int size);
+    bool Get(double *buf, unsigned int size);
+    bool Skip(unsigned int size);
+//    bool Keep(unsigned int size);
+    unsigned int buffSize;
+    unsigned int filledSize;
+private:
 
-Node::Node(const Node &c) :
-    minRenderOrder(c.minRenderOrder),
-    maxRenderOrder(c.maxRenderOrder),
-    listOfObj(c.listOfObj),
-    internalDelay(c.internalDelay),
-    totalDelayAtOutput(c.totalDelayAtOutput)
-{
+    float *readPos;
+    float *writePos;
+    float *bufStart;
+    float *bufEnd;
+    float *buffer;
 
-}
+};
 
-
+#endif // CIRCULARBUFFER_H
