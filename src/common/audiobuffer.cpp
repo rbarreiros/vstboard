@@ -69,7 +69,7 @@ AudioBuffer::~AudioBuffer()
   Don't allocate anything if it's externally allocated
   \param size the new size
   */
-bool AudioBuffer::SetSize(unsigned long newSize, bool forceRealloc)
+bool AudioBuffer::SetSize(long newSize, bool forceRealloc)
 {
     debugbuf("setsize old:"<<bufferSize<<"new"<<newSize);
 
@@ -151,7 +151,7 @@ void AudioBuffer::AddToStack(const AudioBuffer * buff)
                 //convert from double to float
                 float *dest=(float*)pBuffer;
                 double *ori=(double*)buff->GetPointer();
-                unsigned long i=bufferSize;
+                long i=bufferSize;
                 while(i>0) {
                     *dest=(float)*ori;
                     ++dest;
@@ -166,7 +166,7 @@ void AudioBuffer::AddToStack(const AudioBuffer * buff)
                 //convert from float to double
                 double *dest=(double*)pBuffer;
                 float *ori=(float*)buff->GetPointer();
-                unsigned long i=bufferSize;
+                long i=bufferSize;
                 while(i>0) {
                     *dest=(double)*ori;
                     ++dest;
@@ -183,7 +183,7 @@ void AudioBuffer::AddToStack(const AudioBuffer * buff)
             if(!buff->GetDoublePrecision()) {
                 float *buffToAdd = (float*)buff->GetPointer();
                 float *myBuff = (float*)pBuffer;
-                unsigned long i=bufferSize;
+                long i=bufferSize;
                 while(i>0) {
                     *myBuff += *buffToAdd;
                     ++myBuff;
@@ -194,7 +194,7 @@ void AudioBuffer::AddToStack(const AudioBuffer * buff)
                 //convert from double to float
                 double *buffToAdd = (double*)buff->GetPointer();
                 float *myBuff = (float*)pBuffer;
-                unsigned long i=bufferSize;
+                long i=bufferSize;
                 while(i>0) {
                     *myBuff += (float)*buffToAdd;
                     ++myBuff;
@@ -206,7 +206,7 @@ void AudioBuffer::AddToStack(const AudioBuffer * buff)
             if(buff->GetDoublePrecision()) {
                 double *buffToAdd = (double*)buff->GetPointer();
                 double *myBuff = (double*)pBuffer;
-                unsigned long i=bufferSize;
+                long i=bufferSize;
                 while(i>0) {
                     *myBuff += *buffToAdd;
                     ++myBuff;
@@ -217,7 +217,7 @@ void AudioBuffer::AddToStack(const AudioBuffer * buff)
                 //convert from float to double
                 float *buffToAdd = (float*)buff->GetPointer();
                 double *myBuff = (double*)pBuffer;
-                unsigned long i=bufferSize;
+                long i=bufferSize;
                 while(i>0) {
                     *myBuff += (double)*buffToAdd;
                     ++myBuff;
@@ -263,7 +263,7 @@ void *AudioBuffer::ConsumeStack()
         } else {
             //find max value
             buf = (float*)pBuffer;
-            unsigned long i=bufferSize;
+            long i=bufferSize;
             while(i>0) {
                 if(*buf > ma)
                     ma = *buf;
@@ -282,7 +282,7 @@ void *AudioBuffer::ConsumeStack()
         //if we're off-limits : here is a limiter
         if(_maxVal > 1.0f) {
             buf = (float*)pBuffer;
-            unsigned long i=bufferSize;
+            long i=bufferSize;
             while(i>0) {
                 if(*buf > 1.0f)
                     *buf = .8f;
@@ -307,7 +307,7 @@ void *AudioBuffer::ConsumeStack()
         } else {
             //find max value
             buf = (double*)pBuffer;
-            unsigned long i=bufferSize;
+            long i=bufferSize;
             while(i>0) {
                 if(mi > *buf)
                     mi = *buf;
@@ -326,7 +326,7 @@ void *AudioBuffer::ConsumeStack()
         //if we're off-limits : here is a limiter
         if(_maxVal > 1.0) {
             buf = (double*)pBuffer;
-            unsigned long i=bufferSize;
+            long i=bufferSize;
             while(i>0) {
                 if(*buf > 1.0)
                     *buf = .8;
@@ -364,7 +364,7 @@ void AudioBuffer::SetBufferContent(float *buff, int count)
 
     if(doublePrecision) {
         double *dest = (double*)pBuffer;
-        unsigned long i = count;
+        long i = count;
         while(i>0) {
             *dest=(double)*buff;
             ++dest;
@@ -390,7 +390,7 @@ void AudioBuffer::SetBufferContent(double *buff, int count)
         memcpy(pBuffer,buff,count*sizeof(double));
     } else {
         float *dest = (float*)pBuffer;
-        unsigned long i = count;
+        long i = count;
         while(i>0) {
             *dest=(float)*buff;
             ++dest;
@@ -401,7 +401,7 @@ void AudioBuffer::SetBufferContent(double *buff, int count)
     stackSize=1;
 }
 
-void AudioBuffer::DumpToBuffer(float *buff, unsigned long count)
+void AudioBuffer::DumpToBuffer(float *buff, long count)
 {
     debugbuf("dump float");
 
@@ -412,7 +412,7 @@ void AudioBuffer::DumpToBuffer(float *buff, unsigned long count)
 
     if(doublePrecision) {
         double *ori = (double*)pBuffer;
-        unsigned long i = count;
+        long i = count;
         while(i>0) {
             *buff=(float)*ori;
             ++ori;
@@ -424,7 +424,7 @@ void AudioBuffer::DumpToBuffer(float *buff, unsigned long count)
     }
 }
 
-void AudioBuffer::DumpToBuffer(double *buff, unsigned long count)
+void AudioBuffer::DumpToBuffer(double *buff, long count)
 {
     debugbuf("dump double");
 
@@ -437,7 +437,7 @@ void AudioBuffer::DumpToBuffer(double *buff, unsigned long count)
         memcpy(buff,pBuffer,count*sizeof(double));
     } else {
         float *ori = (float*)pBuffer;
-        unsigned long i = count;
+        long i = count;
         while(i>0) {
             *buff=(double)*ori;
             ++ori;

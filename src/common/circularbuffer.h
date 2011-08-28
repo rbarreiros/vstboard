@@ -24,20 +24,24 @@
 class CircularBuffer
 {
 public:
-    CircularBuffer(unsigned int buffSize=0);
+    CircularBuffer(long size=0);
     ~CircularBuffer();
     void Clear();
-    void SetSize(unsigned int size);
-    bool Put(float *buf, unsigned int size);
-    bool Put(double *buf, unsigned int size);
-    bool Get(float *buf, unsigned int size);
-    bool Get(double *buf, unsigned int size);
-    bool Skip(unsigned int size);
+    void SetSize(long size);
+    bool Put(float *buf, long size);
+//    long PutAtZero(float *buf, long size);
+    bool Put(double *buf, long size);
+    bool Get(float *buf, long size);
+    bool Get(double *buf, long size);
+    bool Skip(long size);
+//    void Stretch(unsigned int neededSize);
 //    bool Keep(unsigned int size);
-    unsigned int buffSize;
-    unsigned int filledSize;
-private:
+    long buffSize;
+    long filledSize;
 
+    bool SetWritePosToLastZeroCrossing();
+
+private:
     float *readPos;
     float *writePos;
     float *bufStart;

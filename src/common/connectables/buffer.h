@@ -32,14 +32,18 @@ namespace Connectables
         Q_OBJECT
     public:
         Buffer(MainHost *host, int index, const ObjectInfo &info);
+        ~Buffer();
         void Render();
         void SetDelay(long d);
         QString GetParameterName(ConnectionInfo /*pinInfo*/) {return QString::number(initialDelay);}
 
     private:
+        bool CutBufferAtZeroCrossing(float *buffer, long size);
         CircularBuffer buffer;
         bool delayChanged;
-
+        long addedSize;
+        long offset;
+        float *adjustDelay;
     public slots:
         void OnParameterChanged(ConnectionInfo pinInfo, float value);
     };
