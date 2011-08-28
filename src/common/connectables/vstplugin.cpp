@@ -320,9 +320,9 @@ bool VstPlugin::initPlugin()
         EffSetSampleRate(sampleRate);
         EffSetBlockSize(bufferSize);
 
-        //long canSndMidiEvnt = pEffect->EffCanDo("sendVstMidiEvent");
+        //long canSndMidiEvnt = EffCanDo(PlugCanDos::canDoSendVstMidiEvent);
         bWantMidi = (EffCanDo("receiveVstMidiEvent") == 1);
-
+LOG("sendtime"<<EffCanDo("sendVstTimeInfo"));
 
      //   long midiPrgNames = EffCanDo("midiProgramNames");
         VstPinProperties pinProp;

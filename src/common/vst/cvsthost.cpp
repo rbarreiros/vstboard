@@ -181,7 +181,7 @@ VstIntPtr VSTCALLBACK CVSTHost::AudioMasterCallback(AEffect *effect, VstInt32 op
 
         case audioMasterSetTime : //9
             pHost->SetTimeInfo((VstTimeInfo*)ptr);
-            return 0L;
+            return 1L;
 
         case audioMasterTempoAt : //10
             return 1000L*pHost->vstTimeInfo.tempo;
