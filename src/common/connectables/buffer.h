@@ -44,6 +44,7 @@ namespace Connectables
         long addedSize;
         long offset;
         float *adjustDelay;
+        int countWait;
     public slots:
         void OnParameterChanged(ConnectionInfo pinInfo, float value);
     };

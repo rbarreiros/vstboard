@@ -272,23 +272,21 @@ bool CircularBuffer::SetWritePosToLastZeroCrossing()
         --pos;
 
     long cpt=0;
-    while(*pos<0) {
+    bool sign=(*pos>0);
+    while((*pos>0)==sign) {
         --pos;
+        if(pos<bufStart)
+            pos=bufEnd;
+
         if(pos==writePos || pos==readPos) {
-            LOG("zero point not found");
-            return false;
-        }
-        ++cpt;
-    }
-    while(*pos>0) {
-        --pos;
-        if(pos==writePos || pos==readPos) {
-            LOG("zero point not found");
+//            LOG("zero point not found");
             return false;
         }
         ++cpt;
     }
     ++pos;
+    ++pos;
+    --cpt;
     writePos=pos;
     filledSize-=cpt;
     return true;

@@ -28,7 +28,8 @@ Buffer::Buffer(MainHost *host, int index, const ObjectInfo &info) :
     delayChanged(false),
     addedSize(0),
     offset(0),
-    adjustDelay(0)
+    adjustDelay(0),
+    countWait(0)
 {
     initialDelay = info.initDelay;
     buffer.SetSize(myHost->GetBufferSize()*2 + initialDelay);
@@ -54,11 +55,21 @@ void Buffer::SetDelay(long d)
 void Buffer::Render()
 {
     if(delayChanged) {
-        if(addedSize<0)
-            addedSize=0;
+        if(addedSize<500 && countWait<10) {
+            //wait for more
+            ++countWait;
+        } else {
+            countWait=0;
+            delayChanged=false;
+            buffer.SetSize(myHost->GetBufferSize()*2 + initialDelay);
+        }
 
-        delayChanged=false;
-        buffer.SetSize(myHost->GetBufferSize()*2 + initialDelay);
+        if(addedSize<0) {
+            addedSize=0;
+            offset=0;
+        }
+
+
     }
 
     //get buffer from input
@@ -68,38 +79,43 @@ void Buffer::Render()
     else {
         float *buf = (float*)pinInBuf->ConsumeStack();
         buffer.Put( buf, pinInBuf->GetSize() );
-        if(addedSize>0) {
+
+        if(addedSize>0 && countWait==0) {
             if(!adjustDelay)
-                adjustDelay = new float[5000];
+                adjustDelay = new float[4000];
 
             memcpy( adjustDelay+offset, buf, pinInBuf->GetSize()*sizeof(float) );
             offset+=pinInBuf->GetSize();
 
+            float *start=0;
+            long size=0;
             if(offset>=addedSize) {
-                float *start=adjustDelay;
-                long size=addedSize;
+                start=adjustDelay;
+                size=addedSize;
+            } else if(offset>=buffer.buffSize) {
+                start=adjustDelay;
+                size=buffer.buffSize;
+            } else if(offset>=1500) {
+                start=adjustDelay;
+                size=offset;
+            }
+            if(size>0) {
                 CutBufferAtZeroCrossing(start,size);
                 buffer.SetWritePosToLastZeroCrossing();
                 buffer.Put(start, size);
-                offset=0;
-                addedSize=0;
-                delete[] adjustDelay;
-                adjustDelay=0;
-            } else if(offset>=1500) {
-                float *start=adjustDelay;
-                long size=offset;
-                CutBufferAtZeroCrossing(start,size);
-                buffer.SetWritePosToLastZeroCrossing();
-                buffer.Put(start,size);
                 addedSize-=size;
                 offset=0;
+                if(addedSize<=0 && adjustDelay) {
+                    delete[] adjustDelay;
+                    adjustDelay=0;
+                }
             }
         }
     }
     pinInBuf->ResetStackCounter();
 
     AudioBuffer *pinOutBuf = listAudioPinOut->GetBuffer(0);
-    if(buffer.filledSize>=initialDelay+pinOutBuf->GetSize() || (addedSize>0 && buffer.filledSize>=pinOutBuf->GetSize()) ) {
+    if(buffer.filledSize>=initialDelay+pinOutBuf->GetSize() || addedSize>0 ) {
         //set buffer to output
         if(pinOutBuf->GetDoublePrecision())
             buffer.Get( (double*)pinOutBuf->GetPointerWillBeFilled(), pinOutBuf->GetSize() );
@@ -124,39 +140,39 @@ void Buffer::OnParameterChanged(ConnectionInfo pinInfo, float value)
 
 bool Buffer::CutBufferAtZeroCrossing(float *buffer, long size)
 {
+    if(size<10)
+        return false;
+
+    if(size<200) {
+        for(int i=10;i>=0;--i) {
+            buffer[i]*=(float)i/10;
+            buffer[size-1-i]*=(float)i/10;
+        }
+        return true;
+    }
+
     float *start=buffer;
     float *end=buffer+size-1;
 
-    while(*start>0) {
+    bool sign=(*start>0);
+    while((*start>0)==sign) {
         ++start;
         if(start==end) {
-            LOG("zero not found");
+//            LOG("zero not found");
             return false;
         }
     }
+    --start;
 
-    while(*start<0) {
-        ++start;
-        if(start==end) {
-            LOG("zero not found");
-            return false;
-        }
-    }
-
-    while(*end<0) {
+    sign=(*end>0);
+    while((*end<0)==sign) {
         --end;
         if(start==end) {
-            LOG("zero not found");
+//            LOG("zero not found");
             return false;
         }
     }
-    while(*end>0) {
-        --end;
-        if(start==end) {
-            LOG("zero not found");
-            return false;
-        }
-    }
+    ++end;
 
     buffer=start;
     size=end-start+1;
