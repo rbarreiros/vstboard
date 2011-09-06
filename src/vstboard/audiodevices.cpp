@@ -34,6 +34,7 @@ FakeTimer::FakeTimer(MainHostHost *myHost) :
     stop(false)
 {
     setObjectName("FakeTimer");
+    myHost->SetBufferSize((myHost->GetSampleRate()*FAKE_RENDER_TIMER_MS)/1000);
     start(QThread::TimeCriticalPriority);
 }
 

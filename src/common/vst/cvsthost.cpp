@@ -87,7 +87,7 @@ void CVSTHost::SetTimeInfo(const VstTimeInfo *info) {
     if (!info)
         return;
 
-    //todo : recalculate values depending of the given info
+    //todo : recalculate values depending on the given info
 
     if(info->flags & kVstNanosValid)
         vstTimeInfo.nanoSeconds = info->nanoSeconds;

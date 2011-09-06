@@ -38,7 +38,7 @@ public:
     MidiDevices *midiDevices;
 
 public slots:
-    void Render(unsigned long samples=0);
+    void Render();
 };
 
 #endif // MAINHOSTHOST_H

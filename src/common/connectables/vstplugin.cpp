@@ -322,7 +322,7 @@ bool VstPlugin::initPlugin()
 
         //long canSndMidiEvnt = EffCanDo(PlugCanDos::canDoSendVstMidiEvent);
         bWantMidi = (EffCanDo("receiveVstMidiEvent") == 1);
-LOG("sendtime"<<EffCanDo("sendVstTimeInfo"));
+//LOG("sendtime"<<EffCanDo("sendVstTimeInfo"));
 
      //   long midiPrgNames = EffCanDo("midiProgramNames");
         VstPinProperties pinProp;
