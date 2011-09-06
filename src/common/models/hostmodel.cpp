@@ -136,9 +136,10 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
             info.setFile( fName );
 
             if ( info.isFile() && info.isReadable() ) {
+                QString fileType(info.suffix().toLower());
 #ifdef VSTSDK
                 //vst plugin
-                if ( info.suffix()=="dll" ) {
+                if ( fileType=="dll" ) {
 
                     ObjectInfo infoVst;
                     infoVst.nodeType = NodeType::object;
@@ -160,7 +161,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                 }
 #endif
                 //setup file
-                if ( info.suffix()==SETUP_FILE_EXTENSION ) {
+                if ( fileType==SETUP_FILE_EXTENSION ) {
                     if(myHost->programsModel->userWantsToUnloadSetup()) {
                         //load on the next loop : we have to get out of the container before loading files
                         LoadFileMapper->setMapping(delayedAction, fName);
@@ -170,7 +171,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                 }
 
                 //project file
-                if ( info.suffix()==PROJECT_FILE_EXTENSION ) {
+                if ( fileType==PROJECT_FILE_EXTENSION ) {
                     if(myHost->programsModel->userWantsToUnloadProject()) {
                         //load on the next loop : we have to get out of the container before loading files
                         LoadFileMapper->setMapping(delayedAction, fName);
@@ -180,14 +181,14 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                 }
 
                 //fxb file
-                if( info.suffix() == VST_BANK_FILE_EXTENSION || info.suffix() == VST_PROGRAM_FILE_EXTENSION) {
+                if( fileType == VST_BANK_FILE_EXTENSION || fileType == VST_PROGRAM_FILE_EXTENSION) {
                     QSharedPointer<Connectables::VstPlugin> senderObj = myHost->objFactory->GetObj(senderIndex).staticCast<Connectables::VstPlugin>();
                     if(!senderObj) {
                         LOG("fxb fxp target not found");
                         return false;
                     }
 
-                    if( info.suffix() == VST_BANK_FILE_EXTENSION && senderObj->LoadBank(fName) ) {
+                    if( fileType == VST_BANK_FILE_EXTENSION && senderObj->LoadBank(fName) ) {
                         QStandardItem *item = itemFromIndex(senderIndex);
                         if(item)
                             item->setData(fName,UserRoles::bankFile);
@@ -195,7 +196,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                     }
 
 
-                    if( info.suffix() == VST_PROGRAM_FILE_EXTENSION && senderObj->LoadProgram(fName) ) {
+                    if( fileType == VST_PROGRAM_FILE_EXTENSION && senderObj->LoadProgram(fName) ) {
                         QStandardItem *item = itemFromIndex(senderIndex);
                         if(item)
                             item->setData(fName,UserRoles::programFile);

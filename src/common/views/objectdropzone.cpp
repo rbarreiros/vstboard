@@ -48,9 +48,10 @@ void ObjectDropZone::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
             info.setFile( fName );
 
             if ( info.isFile() && info.isReadable() ) {
+                QString fileType(info.suffix().toLower());
 #ifdef VSTSDK
                 //accept DLL files
-                if( info.suffix()=="dll" ) {
+                if( fileType=="dll" ) {
                     event->setDropAction(Qt::CopyAction);
                     event->accept();
                     HighlightStart();
@@ -59,7 +60,7 @@ void ObjectDropZone::dragEnterEvent( QGraphicsSceneDragDropEvent *event)
 #endif
 
                 //accept setup and projects files
-                if ( info.suffix()==SETUP_FILE_EXTENSION || info.suffix()==PROJECT_FILE_EXTENSION ) {
+                if ( fileType==SETUP_FILE_EXTENSION || fileType==PROJECT_FILE_EXTENSION ) {
                     event->setDropAction(Qt::CopyAction);
                     event->accept();
                     HighlightStart();
