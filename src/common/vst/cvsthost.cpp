@@ -116,8 +116,10 @@ void CVSTHost::SetTimeInfo(const VstTimeInfo *info) {
 void CVSTHost::SetTempo(int tempo, int sign1, int sign2)
 {
     vstTimeInfo.tempo = tempo;
-    vstTimeInfo.timeSigNumerator = sign1;
-    vstTimeInfo.timeSigDenominator = sign2;
+    if(sign1!=0)
+        vstTimeInfo.timeSigNumerator = sign1;
+    if(sign2!=0)
+        vstTimeInfo.timeSigDenominator = sign2;
 
     vstTimeInfo.flags |= kVstTempoValid;
     vstTimeInfo.flags |= kVstTimeSigValid;

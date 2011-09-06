@@ -34,7 +34,8 @@ namespace Connectables {
             Param_Sign2,
             Param_Group,
             Param_Prog,
-            Param_Bar
+            Param_Bar,
+            Param_TapTempo
         };
 
     Q_OBJECT
@@ -53,17 +54,23 @@ namespace Connectables {
         bool tempoChanged;
         bool progChanged;
         bool grpChanged;
+        bool tapTempoChanged;
+
+        QTime tapTempoTimer;
+        QList<int>taps;
+        bool tapTrigger;
 
     signals:
         void progChange(int prog);
         void grpChange(int grp);
-        void tempoChange(int tempo, int sign1, int sign2);
+        void tempoChange(int tempo, int sign1=0, int sign2=0);
 
     public slots:
         void OnHostProgChanged(const QModelIndex &idx);
         void OnHostGroupChanged(const QModelIndex &idx);
         void OnHostTempoChange(int tempo, int sign1, int sign2);
         void OnParameterChanged(ConnectionInfo pinInfo, float value);
+        void TapTempo();
     };
 
 }

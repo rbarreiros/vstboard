@@ -29,7 +29,8 @@ HostController::HostController(MainHost *myHost,int index):
     Object(myHost,index, ObjectInfo(NodeType::object, ObjType::HostController, tr("HostController") ) ),
     tempoChanged(false),
     progChanged(false),
-    grpChanged(false)
+    grpChanged(false),
+    tapTrigger(false)
 {
 
         for(int i=1;i<300;i++) {
@@ -60,6 +61,7 @@ HostController::HostController(MainHost *myHost,int index):
     listParameterPinIn->listPins.insert(Param_Sign2, new ParameterPinIn(this,Param_Sign2,sign2,&listSign2,"sign2"));
     listParameterPinIn->listPins.insert(Param_Group, new ParameterPinIn(this,Param_Group, myHost->programsModel->GetCurrentMidiGroup(),&listGrp,"Group"));
     listParameterPinIn->listPins.insert(Param_Prog, new ParameterPinIn(this,Param_Prog, myHost->programsModel->GetCurrentMidiProg(),&listPrg,"Prog"));
+    listParameterPinIn->listPins.insert(Param_TapTempo, new ParameterPinIn(this,Param_TapTempo,.0f,"tapTempo"));
 
     listParameterPinOut->listPins.insert(Param_Tempo, new ParameterPinOut(this,Param_Tempo,tempo,&listTempo,"bpm"));
     listParameterPinOut->listPins.insert(Param_Sign1, new ParameterPinOut(this,Param_Sign1,sign1,&listSign1,"sign1"));
@@ -122,8 +124,8 @@ void HostController::Render()
             emit grpChange( pin->GetVariantValue().toInt() );
     }
 
-    pin=static_cast<ParameterPin*>(listParameterPinOut->listPins.value(Param_Bar));
 #ifdef VSTSDK
+    pin=static_cast<ParameterPin*>(listParameterPinOut->listPins.value(Param_Bar));
     if(pin)
         pin->ChangeValue( myHost->vstHost->GetCurrentBarTic() );
 #endif
@@ -147,6 +149,14 @@ void HostController::OnParameterChanged(ConnectionInfo pinInfo, float value)
             break;
         case Param_Prog :
             progChanged=true;
+            break;
+        case Param_TapTempo :
+            if(value>=0.5f && !tapTrigger) {
+                tapTrigger=true;
+                TapTempo();
+            }
+            if(value<0.5f)
+                tapTrigger=false;
             break;
     }
 }
@@ -190,3 +200,48 @@ void HostController::SetContainerId(quint16 id)
 
     Object::SetContainerId(id);
 }
+
+void HostController::TapTempo()
+{
+    if(taps.size()>8)
+        taps.removeFirst();
+
+    float tapMoy=.0f;
+    if(taps.size()>2) {
+        for(int i=1; i<taps.size(); ++i) {
+            tapMoy+=taps.at(i);
+        }
+        tapMoy/=(taps.size()-1);
+    }
+
+    if(tapMoy>1.0f && (tapTempoTimer.elapsed()>tapMoy*1.5 || tapTempoTimer.elapsed()<tapMoy*0.5)) {
+        taps.clear();
+    } else {
+        taps<<tapTempoTimer.elapsed();
+    }
+    tapTempoTimer.restart();
+
+    double intPart;
+    double fractPart = modf (myHost->vstHost->vstTimeInfo.ppqPos, &intPart);
+    LOG(fractPart);
+    myHost->vstHost->vstTimeInfo.ppqPos = (int)myHost->vstHost->vstTimeInfo.ppqPos;
+
+    if(taps.size()>2) {
+        float tempo=.0f;
+        for(int i=1; i<taps.size(); ++i) {
+            tempo+=taps.at(i);
+        }
+        tempo/=(taps.size()-1);
+        if(tempo<=0)
+            return;
+        tempo=(1000*60)/tempo;
+        if(tempo<1 || tempo>300)
+            return;
+
+        ParameterPin *pin=static_cast<ParameterPin*>(listParameterPinIn->listPins.value(Param_Tempo));
+        if(!pin)
+            return;
+        pin->SetVariantValue((int)tempo);
+    }
+}
+
