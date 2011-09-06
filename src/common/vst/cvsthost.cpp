@@ -87,14 +87,39 @@ void CVSTHost::SetTimeInfo(const VstTimeInfo *info) {
     if (!info)
         return;
 
-    vstTimeInfo = *info;
+    //todo : recalculate values depending on the given info
+
+    if(info->flags & kVstNanosValid)
+        vstTimeInfo.nanoSeconds = info->nanoSeconds;
+    if(info->flags & kVstPpqPosValid)
+        vstTimeInfo.ppqPos = info->ppqPos;
+    if(info->flags & kVstTempoValid)
+        vstTimeInfo.tempo = info->tempo;
+    if(info->flags & kVstBarsValid)
+        vstTimeInfo.barStartPos = info->barStartPos;
+    if(info->flags & kVstCyclePosValid) {
+        vstTimeInfo.cycleStartPos = info->cycleStartPos;
+        vstTimeInfo.cycleEndPos = info->cycleEndPos;
+    }
+    if(info->flags & kVstTimeSigValid) {
+        vstTimeInfo.timeSigNumerator = info->timeSigNumerator;
+        vstTimeInfo.timeSigDenominator = info->timeSigDenominator;
+    }
+    if(info->flags & kVstSmpteValid) {
+        vstTimeInfo.smpteOffset = info->smpteOffset;
+        vstTimeInfo.smpteFrameRate = info->smpteFrameRate;
+    }
+    if(info->flags & kVstClockValid)
+        vstTimeInfo.samplesToNextClock = info->samplesToNextClock;
 }
 
 void CVSTHost::SetTempo(int tempo, int sign1, int sign2)
 {
     vstTimeInfo.tempo = tempo;
-    vstTimeInfo.timeSigNumerator = sign1;
-    vstTimeInfo.timeSigDenominator = sign2;
+    if(sign1!=0)
+        vstTimeInfo.timeSigNumerator = sign1;
+    if(sign2!=0)
+        vstTimeInfo.timeSigDenominator = sign2;
 
     vstTimeInfo.flags |= kVstTempoValid;
     vstTimeInfo.flags |= kVstTimeSigValid;

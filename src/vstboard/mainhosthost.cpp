@@ -40,14 +40,11 @@ MainHostHost::~MainHostHost()
     midiDevices=0;
 }
 
-void MainHostHost::Render(unsigned long samples)
+void MainHostHost::Render()
 {
-    if(samples==0)
-        samples=bufferSize;
-
     #ifdef VSTSDK
-        vstHost->UpdateTimeInfo(timeFromStart.elapsed(), samples, sampleRate);
+        vstHost->UpdateTimeInfo(timeFromStart.elapsed(), bufferSize, sampleRate);
     #endif
 
-    MainHost::Render(samples);
+    MainHost::Render();
 }

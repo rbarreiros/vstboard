@@ -685,10 +685,8 @@ void MainHost::SetSampleRate(float rate)
 //    emit NewSolver(renderLines);
 //}
 
-void MainHost::Render(unsigned long samples)
+void MainHost::Render()
 {
-    if(samples==0)
-        samples=bufferSize;
 
 #ifdef VSTSDK
     CheckTempo();

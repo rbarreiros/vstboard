@@ -174,8 +174,8 @@ signals:
     void DelayChanged(long samples);
 
 public slots:
-    void SetTempo(int tempo=120, int sign1=4, int sign2=4);
-    virtual void Render(unsigned long samples=0);
+    void SetTempo(int tempo=120, int sign1=0, int sign2=0);
+    virtual void Render();
     void LoadFile(const QString &filename);
     void LoadSetupFile(const QString &filename = QString());
     void LoadProjectFile(const QString &filename = QString());
