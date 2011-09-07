@@ -148,6 +148,9 @@ ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
     if(th<1 && th>32)
         th=0;
     ui->nbThreads->setValue( th );
+
+    connect(ui->nbThreads, SIGNAL(valueChanged(int)),
+        myHost, SLOT(ChangeNbThreads(int)));
 }
 
 ConfigDialog::~ConfigDialog()
@@ -446,6 +449,13 @@ void ConfigDialog::accept()
     myHost->SetSetting("onUnsavedSetup", ui->onUnsavedSetup->itemData( ui->onUnsavedSetup->currentIndex() ).toInt() );
     myHost->SetSetting("onUnsavedProject", ui->onUnsavedProject->itemData( ui->onUnsavedProject->currentIndex() ).toInt() );
 
+//engine
+    int oldNbThreads = myHost->GetSetting("NbThreads",0).toInt();
+    int newNbThreads = ui->nbThreads->value();
+    if( newNbThreads != oldNbThreads ) {
+        myHost->SetSetting("NbThreads", newNbThreads);
+    }
+
     QDialog::accept();
 
     if(needRestart) {
@@ -453,14 +463,6 @@ void ConfigDialog::accept()
         msg.setText(tr("You must restart VstBoard for the changes to take effect"));
         msg.setIcon(QMessageBox::Information);
         msg.exec();
-    }
-
-//engine
-    int oldNbThreads = myHost->GetSetting("NbThreads",0).toInt();
-    int newNbThreads = ui->nbThreads->value();
-    if( newNbThreads != oldNbThreads ) {
-        myHost->SetSetting("NbThreads", newNbThreads);
-        myHost->ChangeNbThreads(newNbThreads);
     }
 }
 

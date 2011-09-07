@@ -60,8 +60,6 @@ public:
     void GetTempo(int &tempo, int &sign1, int &sign2);
     void SetTimeInfo(const VstTimeInfo *info);
 
-    void ChangeNbThreads(int nbThreads);
-
     QStandardItemModel *GetRendererModel() { return renderer->GetModel(); }
 
     void OptimizeRenderer() { if(renderer) renderer->Optimize(); }
@@ -185,6 +183,7 @@ public slots:
     void ClearProject();
     void SaveSetupFile(bool saveAs=false);
     void SaveProjectFile(bool saveAs=false);
+    void ChangeNbThreads(int nbThreads);
 
 private slots:
     void UpdateSolver(bool forceUpdate=false);

@@ -82,22 +82,20 @@ void Renderer::Clear()
     stop=true;
     numberOfThreads=0;
     numberOfSteps=0;
-    foreach(RenderThread *th, listOfThreads) {
-        delete th;
-    }
+    qDeleteAll(listOfThreads);
     listOfThreads.clear();
     mutex.unlock();
 }
 
 void Renderer::SetNbThreads(int nbThreads)
 {
-    Clear();
+    if(nbThreads<=0) nbThreads = 2;
 
     mutex.lockForWrite();
+    qDeleteAll(listOfThreads);
+    listOfThreads.clear();
     maxNumberOfThreads = nbThreads;
-    if(maxNumberOfThreads<=0) maxNumberOfThreads = 2;
     InitThreads();
-    stop=false;
     mutex.unlock();
 }
 
@@ -192,21 +190,33 @@ void Renderer::StartRender()
         mutexOptimize.unlock();
     }
 
-    if(numberOfThreads==0) {
+    if(numberOfThreads<=0) {
         mutex.unlock();
         return;
+    }
+
+
+    if(sem.available()!=0) {
+        LOG("semaphore available before rendering !"<<sem.available());
+        sem.acquire(sem.available());
     }
 
     sem.release(maxNumberOfThreads);
     for(int currentStep=-1; currentStep<numberOfSteps; currentStep++) {
 
-        if( sem.tryAcquire(maxNumberOfThreads,5000) ) {
+        if(sem.tryAcquire(maxNumberOfThreads,2)) {
             foreach( RenderThread *th, listOfThreads) {
                 th->StartRenderStep( currentStep );
             }
-
         } else {
-            LOG("StartRender timeout, step:"<< currentStep << sem.available() << "/" << maxNumberOfThreads );
+            LOG("renderer too slow");
+            if( sem.tryAcquire(maxNumberOfThreads,5000) ) {
+                foreach( RenderThread *th, listOfThreads) {
+                    th->StartRenderStep( currentStep );
+                }
+            } else {
+                LOG("StartRender timeout, step:"<< currentStep << sem.available() << "/" << maxNumberOfThreads );
+            }
         }
 
     }
@@ -214,6 +224,12 @@ void Renderer::StartRender()
     if( !sem.tryAcquire(maxNumberOfThreads,5000) ) {
         sem.acquire( sem.available() );
     }
+
+    if(sem.available()!=0) {
+        LOG("semaphore available after rendering !"<<sem.available());
+        sem.acquire(sem.available());
+    }
+
     mutex.unlock();
 }
 

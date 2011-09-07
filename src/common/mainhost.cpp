@@ -634,8 +634,23 @@ void MainHost::UpdateSolver(bool forceUpdate)
 
 void MainHost::ChangeNbThreads(int nbThreads)
 {
-    renderer->SetNbThreads(nbThreads);
-    SetSolverUpdateNeeded();
+    if(!renderer)
+            return;
+
+        if(nbThreads<=0) {
+    #ifdef _WIN32
+            SYSTEM_INFO info;
+            GetSystemInfo(&info);
+            nbThreads = info.dwNumberOfProcessors;
+    #else
+            nbThreads = 1;
+    #endif
+        }
+
+        mutexRender.lock();
+        renderer->SetNbThreads(nbThreads);
+        mutexRender.unlock();
+        SetSolverUpdateNeeded();
 
 }
 
