@@ -38,7 +38,9 @@ namespace View {
 
 
     protected:
-        QAbstractGraphicsShapeItem *vuValue;
+        QGraphicsPolygonItem *bridgeOutline;
+        QGraphicsPolygonItem *bridgeVuValue;
+        QGraphicsPolygonItem *bridgeHighlight;
         float value;
         PinType::Enum valueType;
 

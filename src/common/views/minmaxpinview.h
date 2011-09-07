@@ -35,6 +35,7 @@ Q_OBJECT
         void UpdateModelIndex(const QModelIndex &index);
 
     protected:
+        void resizeEvent ( QGraphicsSceneResizeEvent * event );
         void mousePressEvent(QGraphicsSceneMouseEvent *event);
         void mouseMoveEvent ( QGraphicsSceneMouseEvent  * event );
         void mouseReleaseEvent ( QGraphicsSceneMouseEvent  * event );

@@ -36,6 +36,7 @@ namespace View {
         float GetValue() {return value;}
 
     protected:
+        void resizeEvent ( QGraphicsSceneResizeEvent * event );
         void keyPressEvent ( QKeyEvent * event );
         void wheelEvent ( QGraphicsSceneWheelEvent * event );
         virtual void mousePressEvent ( QGraphicsSceneMouseEvent * event );
