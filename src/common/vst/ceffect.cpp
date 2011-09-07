@@ -378,7 +378,7 @@ VstIntPtr CEffect::OnMasterCallback(long opcode, long index, long value, void *p
 
 QString CEffect::EffGetParamName(long index)
 {
-    char txt[32] ={0};
+    char txt[256] ={0};
     EffDispatch(effGetParamName, index, 0, txt);
     return QString(txt);
 

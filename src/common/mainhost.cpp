@@ -634,8 +634,23 @@ void MainHost::UpdateSolver(bool forceUpdate)
 
 void MainHost::ChangeNbThreads(int nbThreads)
 {
-    renderer->SetNbThreads(nbThreads);
-    SetSolverUpdateNeeded();
+    if(!renderer)
+            return;
+
+        if(nbThreads<=0) {
+    #ifdef _WIN32
+            SYSTEM_INFO info;
+            GetSystemInfo(&info);
+            nbThreads = info.dwNumberOfProcessors;
+    #else
+            nbThreads = 1;
+    #endif
+        }
+
+        mutexRender.lock();
+        renderer->SetNbThreads(nbThreads);
+        mutexRender.unlock();
+        SetSolverUpdateNeeded();
 
 }
 
@@ -685,10 +700,8 @@ void MainHost::SetSampleRate(float rate)
 //    emit NewSolver(renderLines);
 //}
 
-void MainHost::Render(unsigned long samples)
+void MainHost::Render()
 {
-    if(samples==0)
-        samples=bufferSize;
 
 #ifdef VSTSDK
     CheckTempo();

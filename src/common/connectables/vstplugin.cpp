@@ -174,7 +174,7 @@ void VstPlugin::Render()
             int cpt=0;
             foreach(Pin* pin,listAudioPinOut->listPins) {
                 AudioPin *audioPin = static_cast<AudioPin*>(pin);
-                tmpBufOut[cpt] = (double*)audioPin->GetBuffer()->GetPointer(true);
+                tmpBufOut[cpt] = (double*)audioPin->GetBuffer()->GetPointerWillBeFilled();
                 cpt++;
             }
 
@@ -210,7 +210,7 @@ void VstPlugin::Render()
         int cpt=0;
         foreach(Pin* pin,listAudioPinOut->listPins) {
             AudioPin *audioPin = static_cast<AudioPin*>(pin);
-            tmpBufOut[cpt] = (float*)audioPin->GetBuffer()->GetPointer(true);
+            tmpBufOut[cpt] = (float*)audioPin->GetBuffer()->GetPointerWillBeFilled();
             cpt++;
         }
 
@@ -320,9 +320,9 @@ bool VstPlugin::initPlugin()
         EffSetSampleRate(sampleRate);
         EffSetBlockSize(bufferSize);
 
-        //long canSndMidiEvnt = pEffect->EffCanDo("sendVstMidiEvent");
+        //long canSndMidiEvnt = EffCanDo(PlugCanDos::canDoSendVstMidiEvent);
         bWantMidi = (EffCanDo("receiveVstMidiEvent") == 1);
-
+//LOG("sendtime"<<EffCanDo("sendVstTimeInfo"));
 
      //   long midiPrgNames = EffCanDo("midiProgramNames");
         VstPinProperties pinProp;
@@ -391,6 +391,8 @@ bool VstPlugin::initPlugin()
             listMidiPinIn->AddPin(0);
             listMidiPinOut->AddPin(0);
         }
+
+        initialDelay = pEffect->initialDelay;
     }
 
     //create all parameters pins
@@ -401,6 +403,7 @@ bool VstPlugin::initPlugin()
 
     if(pEffect->flags & effFlagsHasEditor) {
         //editor pin
+//        listEditorVisible << "close";
         listEditorVisible << "hide";
         listEditorVisible << "show";
         listParameterPinIn->AddPin(FixedPinNumber::editorVisible);
@@ -413,7 +416,7 @@ bool VstPlugin::initPlugin()
     }
 
     Object::Open();
-    CreateEditorWindow();
+//    CreateEditorWindow();
     return true;
 }
 
@@ -468,6 +471,8 @@ void VstPlugin::CreateEditorWindow()
 //                this,SLOT(EditIdle()));
 //        QTimer::singleShot(100,this,SLOT(TakeScreenshot()));
 //    }
+
+
 }
 
 void VstPlugin::OnEditorClosed()
@@ -477,23 +482,46 @@ void VstPlugin::OnEditorClosed()
 
 void VstPlugin::OnShowEditor()
 {
-    if(!editorWnd || editorWnd->isVisible())
+    if(!editorWnd)
+        CreateEditorWindow();
+
+    if(editorWnd->isVisible())
         return;
 
     editorWnd->show();
 //    editorWnd->raise();
     connect(myHost->updateViewTimer,SIGNAL(timeout()),
             this,SLOT(EditIdle()));
+    editorWnd->LoadAttribs();
 }
 
 void VstPlugin::OnHideEditor()
 {
-    if(!editorWnd || !editorWnd->isVisible())
+    if(!editorWnd)
         return;
 
-    disconnect(myHost->updateViewTimer,SIGNAL(timeout()),
-            this,SLOT(EditIdle()));
-    emit HideEditorWindow();
+    editorWnd->SaveAttribs();
+
+    editorWnd->disconnect();
+    editorWnd->SetPlugin(0);
+    disconnect(editorWnd);
+    QTimer::singleShot(0,editorWnd,SLOT(close()));
+    editorWnd=0;
+    objMutex.lock();
+    EffEditClose();
+    objMutex.unlock();
+
+//    if(!editorWnd)
+//        CreateEditorWindow();
+
+//    if(!editorWnd->isVisible())
+//        return;
+
+//    editorWnd->SaveAttribs();
+
+//    disconnect(myHost->updateViewTimer,SIGNAL(timeout()),
+//            this,SLOT(EditIdle()));
+//    emit HideEditorWindow();
 }
 
 void VstPlugin::SetContainerAttribs(const ObjectContainerAttribs &attr)
@@ -541,11 +569,15 @@ QString VstPlugin::GetParameterName(ConnectionInfo pinInfo)
     if(closed)
         return "";
 
-    if(pEffect && pinInfo.pinNumber < pEffect->numParams)
-        return EffGetParamName( pinInfo.pinNumber );
-    else
-        LOG("parameter id out of range"<<pinInfo.pinNumber);
-
+    if(pEffect && pinInfo.pinNumber < pEffect->numParams){
+        QString s(EffGetParamName(pinInfo.pinNumber));
+        char str[20]={0};
+        EffGetParamDisplay(pinInfo.pinNumber,str);
+        s.append(":");
+        s.append(str);
+        return s;
+    }
+    LOG("parameter id out of range"<<pinInfo.pinNumber);
     return "";
 }
 
@@ -681,6 +713,7 @@ VstIntPtr VstPlugin::OnMasterCallback(long opcode, long index, long value, void 
         case audioMasterIOChanged : //13
             if(!pEffect)
                 return 0L;
+            initialDelay = pEffect->initialDelay;
             listAudioPinIn->ChangeNumberOfPins(pEffect->numInputs);
             listAudioPinOut->ChangeNumberOfPins(pEffect->numOutputs);
             UpdateModelNode();
@@ -697,6 +730,11 @@ VstIntPtr VstPlugin::OnMasterCallback(long opcode, long index, long value, void 
         case audioMasterGetSampleRate : //16
             return sampleRate;
 
+        case audioMasterGetInputLatency : //18
+//            LOG("input latency");
+        case audioMasterGetOutputLatency : //19
+//            LOG("output latency");
+            return 0L;
         case audioMasterUpdateDisplay : //42
         {
             if(!pEffect)
@@ -729,6 +767,23 @@ void VstPlugin::OnParameterChanged(ConnectionInfo pinInfo, float value)
         return;
 
     if(pinInfo.direction == PinDirection::Input) {
+//        //editor pin
+//        if(pinInfo.pinNumber==FixedPinNumber::editorVisible) {
+//            int val = static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::editorVisible))->GetIndex();
+//            LOG("editor"<<val);
+//            switch(val) {
+//                case 0:
+//                    QTimer::singleShot(0, this, SLOT(OnCloseEditor()));
+//                    return;
+//                case 1:
+//                    QTimer::singleShot(0, this, SLOT(OnHideEditor()));
+//                    return;
+//                case 2:
+//                    QTimer::singleShot(0, this, SLOT(OnShowEditor()));
+//                    return;
+//            }
+//        }
+
         if(pinInfo.pinNumber==FixedPinNumber::vstProgNumber) {
             //program pin
             EffSetProgram( static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(FixedPinNumber::vstProgNumber))->GetIndex() );

@@ -24,17 +24,17 @@
 using namespace View;
 
 ConnectablePinView::ConnectablePinView(float angle, QAbstractItemModel *model, QGraphicsItem * parent, const ConnectionInfo &pinInfo, ViewConfig *config) :
-       PinView(angle,model,parent,pinInfo,config),
-       value(0),
-       isParameter(false),
-        overload(0)
+    PinView(angle,model,parent,pinInfo,config),
+    value(0),
+    isParameter(false),
+    overload(0),
+    textItem(0),
+    rectVu(0),
+    colorGroupId(ColorGroups::ND),
+    vuColor(Qt::gray)
 {
-    setGeometry(0,0,50,15);
-    setMinimumSize(50,15);
-    setMaximumSize(50,15);
-
-    outline = new QGraphicsRectItem(geometry(), this);
-    highlight = new QGraphicsRectItem(geometry(), this);
+    outline = new QGraphicsRectItem(rect(), this);
+    highlight = new QGraphicsRectItem(rect(), this);
     highlight->setVisible(false);
 
     rectVu = new QGraphicsRectItem(this);
@@ -53,6 +53,8 @@ ConnectablePinView::ConnectablePinView(float angle, QAbstractItemModel *model, Q
         rectVu->setRect(rect());
         break;
     case PinType::Parameter :
+        defaultCursor = Qt::PointingHandCursor;
+        setCursor(defaultCursor);
         colorGroupId=ColorGroups::ParameterPin;
         break;
     default :
@@ -65,6 +67,10 @@ ConnectablePinView::ConnectablePinView(float angle, QAbstractItemModel *model, Q
     rectVu->setBrush( vuColor );
     highlight->setBrush( config->GetColor(ColorGroups::Object, Colors::HighlightBackground) );
     textItem->setBrush(  config->GetColor(ColorGroups::Object, Colors::Text) );
+
+    setGeometry(0,0,50,15);
+    setMinimumSize(50,15);
+    setMaximumSize(80,15);
 }
 
 void ConnectablePinView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
@@ -91,6 +97,35 @@ void ConnectablePinView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum col
     }
 }
 
+void ConnectablePinView::resizeEvent ( QGraphicsSceneResizeEvent * event )
+{
+    PinView::resizeEvent(event);
+
+    if(outline) {
+        QRectF r = outline->rect();
+        r.setSize(event->newSize());
+        outline->setRect(r);
+    }
+    if(highlight){
+        QRectF r = highlight->rect();
+        r.setSize(event->newSize());
+        highlight->setRect(r);
+    }
+    if(rectVu) {
+        QRectF r = rectVu->rect();
+        if(connectInfo.type == PinType::Midi) {
+            r.setSize(event->newSize());
+            rectVu->setRect(r);
+        } else if(value>.0f) {
+            r.setWidth(value*event->newSize().width());
+            r.setHeight(event->newSize().height());
+            rectVu->setRect(r);
+        }
+    }
+
+    UpdateCablesPosition();
+}
+
 void ConnectablePinView::mousePressEvent ( QGraphicsSceneMouseEvent * event )
 {
     ResetOveload();
@@ -100,16 +135,24 @@ void ConnectablePinView::mousePressEvent ( QGraphicsSceneMouseEvent * event )
 void ConnectablePinView::UpdateModelIndex(const QModelIndex &index)
 {
     QString newName = index.data(Qt::DisplayRole).toString();
-    if(newName!=textItem->text())
+    if(newName!=textItem->text()) {
         textItem->setText(newName);
 
-    if(connectInfo.type != PinType::Parameter) {
+        if(textItem->boundingRect().width()>size().width())
+            setMinimumWidth( textItem->boundingRect().width()+10 );
+    }
+
+    if(connectInfo.type == PinType::Parameter) {
+        value = index.data(UserRoles::value).toFloat();
+        float newVu = size().width() * value;
+        rectVu->setRect(0,0, newVu, size().height());
+    } else {
         float newVal = index.data(UserRoles::value).toFloat();
         value = std::max(value,newVal);
     }
 
-    ConnectionInfo pinInfo = index.data(UserRoles::connectionInfo).value<ConnectionInfo>();
-    if(pinInfo.type == PinType::Parameter)
+    connectInfo = index.data(UserRoles::connectionInfo).value<ConnectionInfo>();
+    if(connectInfo.type == PinType::Parameter)
         isParameter=true;
 
 }
@@ -147,14 +190,14 @@ void ConnectablePinView::updateVu()
         if(value<.0f) {
             value=-1.0f;
         } else {
-            newVu = geometry().width() * value;
+            newVu = size().width() * value;
         }
-        if(newVu<0.0) {
+        if(newVu<0.0f) {
             LOG("updateVu <0"<<newVu);
             newVu=0.0f;
         }
 
-        rectVu->setRect(0,0, newVu, geometry().height());
+        rectVu->setRect(0,0, newVu, size().height());
     }
 
     if(connectInfo.type== PinType::Midi) {
@@ -166,8 +209,8 @@ void ConnectablePinView::updateVu()
         }
         QColor c = vuColor;
 
-        if(value<0.7)
-            c.setAlphaF( value/0.7 );
+        if(value<0.7f)
+            c.setAlphaF( value/0.7f );
 
         rectVu->setBrush(c);
     }

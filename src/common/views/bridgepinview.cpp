@@ -35,9 +35,12 @@ using namespace View;
   \param pinInfo description of the pin
   */
 BridgePinView::BridgePinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo, ViewConfig *config) :
-        PinView(angle, model,parent, pinInfo,config),
-        value(.0f),
-        valueType(PinType::ND)
+    PinView(angle, model,parent, pinInfo,config),
+    value(.0f),
+    valueType(PinType::ND),
+    bridgeOutline(0),
+    bridgeVuValue(0),
+    bridgeHighlight(0)
 {
     setGeometry(0,0,PINSIZE,PINSIZE);
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -54,16 +57,16 @@ BridgePinView::BridgePinView(float angle, QAbstractItemModel *model,QGraphicsIte
         pol << QPointF(PINSIZE/2,0) << QPointF(0,PINSIZE) << QPointF(PINSIZE,PINSIZE);
     }
 
-    vuValue = new QGraphicsPolygonItem(pol,this);
-    vuValue->setPen(Qt::NoPen);
+    bridgeVuValue = new QGraphicsPolygonItem(pol,this);
+    bridgeVuValue->setPen(Qt::NoPen);
 
-    outline = new QGraphicsPolygonItem(pol,this);
-    outline->setBrush(Qt::NoBrush);
-    outline->setPen( config->GetColor(ColorGroups::Bridge,Colors::Lines) );
+    bridgeOutline = new QGraphicsPolygonItem(pol,this);
+    bridgeOutline->setBrush(Qt::NoBrush);
+    bridgeOutline->setPen( config->GetColor(ColorGroups::Bridge,Colors::Lines) );
 
-    highlight = new QGraphicsPolygonItem(pol,this);
-    highlight->setVisible(false);
-    highlight->setBrush( config->GetColor(ColorGroups::Object, Colors::HighlightBackground) );
+    bridgeHighlight = new QGraphicsPolygonItem(pol,this);
+    bridgeHighlight->setVisible(false);
+    bridgeHighlight ->setBrush( config->GetColor(ColorGroups::Object, Colors::HighlightBackground) );
 
     QPalette pal(palette());
     pal.setColor(QPalette::Window, config->GetColor(ColorGroups::Bridge,Colors::Background) );
@@ -73,7 +76,7 @@ BridgePinView::BridgePinView(float angle, QAbstractItemModel *model,QGraphicsIte
 void BridgePinView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color)
 {
     if(groupId==ColorGroups::Bridge && colorId==Colors::Lines) {
-        outline->setPen( color );
+        bridgeOutline->setPen( color );
         return;
     }
 
@@ -85,7 +88,7 @@ void BridgePinView::UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId,
     }
 
     if(groupId==ColorGroups::Object && colorId==Colors::HighlightBackground) {
-        highlight->setBrush( color );
+        bridgeHighlight->setBrush( color );
     }
 }
 
@@ -113,7 +116,7 @@ void BridgePinView::updateVu()
     value-=.3f;
     if(value<.0f) {
         value=-1.0f;
-        vuValue->setBrush(Qt::NoBrush);
+        bridgeVuValue->setBrush(Qt::NoBrush);
         return;
     }
 
@@ -132,5 +135,5 @@ void BridgePinView::updateVu()
             c = Qt::darkGray;
             break;
     }
-    vuValue->setBrush(c);
+    bridgeVuValue->setBrush(c);
 }

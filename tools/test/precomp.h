@@ -1,5 +1,5 @@
 /**************************************************************************
-#    Copyright 2010-2011 Raphaël François
+#    Copyright 2010-2011 RaphaÃ«l FranÃ§ois
 #    Contact : ctrlbrk76@gmail.com
 #
 #    This file is part of VstBoard.
@@ -18,24 +18,16 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#include "node.h"
+#ifndef PRECOMP_H
+#define PRECOMP_H
 
-Node::Node() :
-    minRenderOrder(0),
-    maxRenderOrder(9999),
-    internalDelay(0L),
-    totalDelayAtOutput(0L)
-{
-}
+#if defined __cplusplus
 
-Node::Node(const Node &c) :
-    minRenderOrder(c.minRenderOrder),
-    maxRenderOrder(c.maxRenderOrder),
-    listOfObj(c.listOfObj),
-    internalDelay(c.internalDelay),
-    totalDelayAtOutput(c.totalDelayAtOutput)
-{
+#include <cmath>
+#include <algorithm>
 
-}
+#include <QDebug>
+#define LOG(...); {qDebug()<<__VA_ARGS__<<"("<<__FUNCTION__<<":"<< __LINE__<<" )";}
 
-
+#endif
+#endif // PRECOMP_H

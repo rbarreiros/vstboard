@@ -30,21 +30,22 @@ class AudioBuffer
 public:
         AudioBuffer(bool doublePrecision, bool externAlloc);
         ~AudioBuffer();
-        bool SetSize(unsigned long size, bool forceRealloc=false);
-        void AddToStack(AudioBuffer * buff);
+        bool SetSize(long size, bool forceRealloc=false);
+        void AddToStack(const AudioBuffer * buff);
         void SetBufferContent(float *buff, int count);
         void SetBufferContent(double *buff, int count);
-        void DumpToBuffer(float *buff, unsigned long count);
-        void DumpToBuffer(double *buff, unsigned long count);
+        void DumpToBuffer(float *buff, long count);
+        void DumpToBuffer(double *buff, long count);
 
-        void *GetPointer(bool willBeFilled=false);
+        void *GetPointer() const {return pBuffer;}
+        void *GetPointerWillBeFilled();
         void *ConsumeStack();
         void SetDoublePrecision(bool dbl);
-        inline bool GetDoublePrecision() {return doublePrecision;}
+        inline bool GetDoublePrecision() const {return doublePrecision;}
         float GetVu();
 
         /// \return the current buffer size
-        inline unsigned long GetSize() {return bufferSize;}
+        inline long GetSize() const {return bufferSize;}
 
         /*!
          Get the last vu-meter value. Don't reset the peak value (used by bridges)
@@ -61,8 +62,6 @@ public:
         static float const blankBuffer[BLANK_BUFFER_SIZE];
 
 protected:
-        void Clear();
-
         /// the stack size
         unsigned int stackSize;
 
@@ -70,10 +69,10 @@ protected:
         void * pBuffer;
 
         /// buffer size
-        unsigned long bufferSize;
+        long bufferSize;
 
         /// allocated buffer size, can be bigger than the useable buffer size
-        unsigned long allocatedSize;
+        long allocatedSize;
 
         /// vu-meter peak
         float _maxVal;

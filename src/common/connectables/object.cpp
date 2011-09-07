@@ -59,7 +59,8 @@ Object::Object(MainHost *host, int index, const ObjectInfo &info) :
     currentProgId(TEMP_PROGRAM),
     closed(true),
     objInfo(info),
-    containerId(FixedObjId::noContainer)
+    containerId(FixedObjId::noContainer),
+    initialDelay(0L)
 {
     objInfo.forcedObjId = index;
 

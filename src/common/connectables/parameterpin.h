@@ -63,6 +63,8 @@ namespace Connectables {
         void SetLimitsEnabled(bool enable) {limitsEnabled=enable;}
 
     protected:
+        void UpdateView();
+
         QList<QVariant> *listValues;
         int stepIndex;
         bool defaultVisible;

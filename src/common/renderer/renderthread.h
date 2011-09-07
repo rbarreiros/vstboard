@@ -22,7 +22,6 @@ public:
 
 protected:
     void ResetSteps();
-    void Stop();
     void RenderStep(int step);
 
     QMap<int, RendererNode* > listOfSteps;

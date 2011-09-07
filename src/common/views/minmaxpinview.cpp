@@ -27,9 +27,27 @@ MinMaxPinView::MinMaxPinView(float angle, QAbstractItemModel *model,QGraphicsIte
     ConnectablePinView(angle,model,parent,pinInfo,config),
     cursorCreated(false),
     changingValue(false),
-    startDragValue(.0f)
+    startDragValue(.0f),
+    inMin(0),
+    inMax(0),
+    outMin(0),
+    outMax(0),
+    scaledView(0)
 {
 
+}
+
+void MinMaxPinView::resizeEvent ( QGraphicsSceneResizeEvent * event )
+{
+    ConnectablePinView::resizeEvent(event);
+
+    if(cursorCreated) {
+        inMin->setPos( inMin->GetValue()*event->newSize().width(), 0 );
+        inMax->setPos( inMax->GetValue()*event->newSize().width(), 0 );
+        outMin->setPos( outMin->GetValue()*event->newSize().width(), 0 );
+        outMax->setPos( outMax->GetValue()*event->newSize().width(), 0 );
+        UpdateScaleView();
+    }
 }
 
 void MinMaxPinView::CreateCursors()

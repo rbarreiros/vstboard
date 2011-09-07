@@ -60,8 +60,6 @@ public:
     void GetTempo(int &tempo, int &sign1, int &sign2);
     void SetTimeInfo(const VstTimeInfo *info);
 
-    void ChangeNbThreads(int nbThreads);
-
     QStandardItemModel *GetRendererModel() { return renderer->GetModel(); }
 
     void OptimizeRenderer() { if(renderer) renderer->Optimize(); }
@@ -119,7 +117,8 @@ public:
     QString currentSetupFile;
 
     QUndoStack undoStack;
-QMutex mutexRender;
+    QMutex mutexRender;
+
 protected:
     QTime timeFromStart;
     float sampleRate;
@@ -170,10 +169,11 @@ signals:
     void groupParkingModelChanged(QStandardItemModel *model);
     void TempoChanged(int tempo=120, int sign1=4, int sign2=4);
     void currentFileChanged();
+    void DelayChanged(long samples);
 
 public slots:
-    void SetTempo(int tempo=120, int sign1=4, int sign2=4);
-    virtual void Render(unsigned long samples=0);
+    void SetTempo(int tempo=120, int sign1=0, int sign2=0);
+    virtual void Render();
     void LoadFile(const QString &filename);
     void LoadSetupFile(const QString &filename = QString());
     void LoadProjectFile(const QString &filename = QString());
@@ -183,6 +183,7 @@ public slots:
     void ClearProject();
     void SaveSetupFile(bool saveAs=false);
     void SaveProjectFile(bool saveAs=false);
+    void ChangeNbThreads(int nbThreads);
 
 private slots:
     void UpdateSolver(bool forceUpdate=false);

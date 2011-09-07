@@ -36,8 +36,6 @@ ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel
     dropAttachLeft(0),
     dropAttachRight(0)
 {
-    setGeometry(QRectF(0,0,105,15));
-
     titleText = new QGraphicsSimpleTextItem(QString("Title"),this);
     titleText->moveBy(2,1);
     titleText->setBrush( config->GetColor(ColorGroups::Object,Colors::Text) );
@@ -66,7 +64,6 @@ ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel
     layout->addItem(listParametersOut,2,1,Qt::AlignRight | Qt::AlignTop);
 
     dropReplace = new ObjectDropZone(this,parent->GetParking());
-    dropReplace->setGeometry(10,0,85, size().height());
     connect(parent,SIGNAL(ParkingChanged(QWidget*)),
             dropReplace,SLOT(SetParking(QWidget*)));
     connect(dropReplace, SIGNAL(ObjectDropped(QGraphicsSceneDragDropEvent*)),
@@ -75,7 +72,6 @@ ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel
             dropReplace, SLOT(UpdateHeight()));
 
     dropAttachLeft = new ObjectDropZone(this,parent->GetParking());
-    dropAttachLeft->setGeometry(-10,0,20, size().height());
     connect(parent,SIGNAL(ParkingChanged(QWidget*)),
             dropAttachLeft,SLOT(SetParking(QWidget*)));
     connect(dropAttachLeft, SIGNAL(ObjectDropped(QGraphicsSceneDragDropEvent*)),
@@ -84,7 +80,6 @@ ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel
             dropAttachLeft, SLOT(UpdateHeight()));
 
     dropAttachRight = new ObjectDropZone(this,parent->GetParking());
-    dropAttachRight->setGeometry(95,0,20, size().height());
     connect(parent,SIGNAL(ParkingChanged(QWidget*)),
             dropAttachLeft,SLOT(SetParking(QWidget*)));
     connect(dropAttachRight, SIGNAL(ObjectDropped(QGraphicsSceneDragDropEvent*)),
@@ -97,6 +92,20 @@ ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel
     dropReplace->setPalette( pal );
     dropAttachLeft->setPalette( pal );
     dropAttachRight->setPalette( pal );
+
+    setGeometry(QRectF(0,0,105,15));
+}
+
+void ConnectableObjectView::resizeEvent ( QGraphicsSceneResizeEvent * event )
+{
+    ObjectView::resizeEvent(event);
+
+    if(dropReplace)
+        dropReplace->setGeometry( 20,0,size().width()-40, event->newSize().height());
+    if(dropAttachLeft)
+        dropAttachLeft->setGeometry(-10,0,30, event->newSize().height());
+    if(dropAttachRight)
+        dropAttachRight->setGeometry(event->newSize().width()-20,0,30, event->newSize().height());
 }
 
 void ConnectableObjectView::ObjectDropped(QGraphicsSceneDragDropEvent *event)

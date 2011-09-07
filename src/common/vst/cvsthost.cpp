@@ -87,14 +87,39 @@ void CVSTHost::SetTimeInfo(const VstTimeInfo *info) {
     if (!info)
         return;
 
-    vstTimeInfo = *info;
+    //todo : recalculate values depending on the given info
+
+    if(info->flags & kVstNanosValid)
+        vstTimeInfo.nanoSeconds = info->nanoSeconds;
+    if(info->flags & kVstPpqPosValid)
+        vstTimeInfo.ppqPos = info->ppqPos;
+    if(info->flags & kVstTempoValid)
+        vstTimeInfo.tempo = info->tempo;
+    if(info->flags & kVstBarsValid)
+        vstTimeInfo.barStartPos = info->barStartPos;
+    if(info->flags & kVstCyclePosValid) {
+        vstTimeInfo.cycleStartPos = info->cycleStartPos;
+        vstTimeInfo.cycleEndPos = info->cycleEndPos;
+    }
+    if(info->flags & kVstTimeSigValid) {
+        vstTimeInfo.timeSigNumerator = info->timeSigNumerator;
+        vstTimeInfo.timeSigDenominator = info->timeSigDenominator;
+    }
+    if(info->flags & kVstSmpteValid) {
+        vstTimeInfo.smpteOffset = info->smpteOffset;
+        vstTimeInfo.smpteFrameRate = info->smpteFrameRate;
+    }
+    if(info->flags & kVstClockValid)
+        vstTimeInfo.samplesToNextClock = info->samplesToNextClock;
 }
 
 void CVSTHost::SetTempo(int tempo, int sign1, int sign2)
 {
     vstTimeInfo.tempo = tempo;
-    vstTimeInfo.timeSigNumerator = sign1;
-    vstTimeInfo.timeSigDenominator = sign2;
+    if(sign1!=0)
+        vstTimeInfo.timeSigNumerator = sign1;
+    if(sign2!=0)
+        vstTimeInfo.timeSigDenominator = sign2;
 
     vstTimeInfo.flags |= kVstTempoValid;
     vstTimeInfo.flags |= kVstTimeSigValid;
@@ -181,7 +206,7 @@ VstIntPtr VSTCALLBACK CVSTHost::AudioMasterCallback(AEffect *effect, VstInt32 op
 
         case audioMasterSetTime : //9
             pHost->SetTimeInfo((VstTimeInfo*)ptr);
-            return 0L;
+            return 1L;
 
         case audioMasterTempoAt : //10
             return 1000L*pHost->vstTimeInfo.tempo;
@@ -236,6 +261,8 @@ VstIntPtr VSTCALLBACK CVSTHost::AudioMasterCallback(AEffect *effect, VstInt32 op
         case audioMasterNeedIdle : //14
         case audioMasterSizeWindow : //15
         case audioMasterGetSampleRate : //16
+        case audioMasterGetInputLatency : //18
+        case audioMasterGetOutputLatency : //19
         case audioMasterUpdateDisplay : //42
         case audioMasterBeginEdit : //43
         case audioMasterEndEdit : //44

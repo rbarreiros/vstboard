@@ -23,30 +23,32 @@
 #include "mainhost.h"
 
 ObjectInfo::ObjectInfo() :
-        nodeType(NodeType::ND),
-        objType(ObjType::ND),
-        id(0),
-        name(""),
-        filename(""),
-        inputs(0),
-        outputs(0),
-        duplicateNamesCounter(0),
-        api(0),
-        forcedObjId(0)
+    nodeType(NodeType::ND),
+    objType(ObjType::ND),
+    id(0),
+    name(""),
+    filename(""),
+    inputs(0),
+    outputs(0),
+    duplicateNamesCounter(0),
+    api(0),
+    forcedObjId(0),
+    initDelay(0)
 {
 
 }
 
 ObjectInfo::ObjectInfo(NodeType::Enum nodeType, ObjType::Enum objType, QString name) :
-        nodeType(nodeType),
-        objType(objType),
-        name(name),
-        filename(""),
-        inputs(0),
-        outputs(0),
-        duplicateNamesCounter(0),
-        api(0),
-        forcedObjId(0)
+    nodeType(nodeType),
+    objType(objType),
+    name(name),
+    filename(""),
+    inputs(0),
+    outputs(0),
+    duplicateNamesCounter(0),
+    api(0),
+    forcedObjId(0),
+    initDelay(0)
 {
 
 }

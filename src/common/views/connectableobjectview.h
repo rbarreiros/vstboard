@@ -36,7 +36,7 @@ namespace View {
         ConnectableObjectView(MainHost *myHost,QAbstractItemModel *model,MainContainerView * parent = 0, Qt::WindowFlags wFlags = 0);
 
     protected:
-//        WId backOri;
+        void resizeEvent ( QGraphicsSceneResizeEvent * event );
         QList<CableView*>listCables;
         ObjectDropZone *dropReplace;
         ObjectDropZone *dropAttachLeft;

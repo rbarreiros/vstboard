@@ -100,13 +100,13 @@ bool AudioDeviceIn::Open()
     }
 
     //if no input channels
-    if(parentDevice->devInfo.maxInputChannels==0) {
+    if(parentDevice->GetNbInputs()==0) {
         parentDevice=0;
         //should be deleted : return false
         return false;
     }
 
-    listAudioPinOut->ChangeNumberOfPins( parentDevice->devInfo.maxInputChannels );
+    listAudioPinOut->ChangeNumberOfPins( parentDevice->GetNbInputs() );
 
     //device already has a child
     if(!parentDevice->SetObjectInput(this)) {
@@ -146,6 +146,7 @@ Pin* AudioDeviceIn::CreatePin(const ConnectionInfo &info)
     return 0;
 }
 
+#ifdef CIRCULAR_BUFFER
 void AudioDeviceIn::SetBufferFromRingBuffer(QList<CircularBuffer*>listCircularBuffers)
 {
     unsigned long hostBuffSize = myHost->GetBufferSize();
@@ -164,12 +165,13 @@ void AudioDeviceIn::SetBufferFromRingBuffer(QList<CircularBuffer*>listCircularBu
 
         if(buf->filledSize >= hostBuffSize) {
             if(pinBuf->GetDoublePrecision())
-                buf->Get( (double*)pinBuf->GetPointer(true), hostBuffSize );
+                buf->Get( (double*)pinBuf->GetPointerWillBeFilled(), hostBuffSize );
             else
-                buf->Get( (float*)pinBuf->GetPointer(true), hostBuffSize );
+                buf->Get( (float*)pinBuf->GetPointerWillBeFilled(), hostBuffSize );
         }
     }
 }
+#endif
 
 QStandardItem *AudioDeviceIn::GetFullItem()
 {
