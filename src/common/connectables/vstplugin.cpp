@@ -569,11 +569,15 @@ QString VstPlugin::GetParameterName(ConnectionInfo pinInfo)
     if(closed)
         return "";
 
-    if(pEffect && pinInfo.pinNumber < pEffect->numParams)
-        return EffGetParamName( pinInfo.pinNumber );
-    else
-        LOG("parameter id out of range"<<pinInfo.pinNumber);
-
+    if(pEffect && pinInfo.pinNumber < pEffect->numParams){
+        QString s(EffGetParamName(pinInfo.pinNumber));
+        char str[20]={0};
+        EffGetParamDisplay(pinInfo.pinNumber,str);
+        s.append(":");
+        s.append(str);
+        return s;
+    }
+    LOG("parameter id out of range"<<pinInfo.pinNumber);
     return "";
 }
 
