@@ -23,11 +23,6 @@
 #include "../connectables/objectfactory.h"
 #include "../connectables/container.h"
 
-#ifdef VSTSDK
-    #include "../connectables/vstplugin.h"
-    #include "vstpluginwindow.h"
-#endif
-
 using namespace View;
 
 ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel *model,MainContainerView * parent, Qt::WindowFlags wFlags ) :

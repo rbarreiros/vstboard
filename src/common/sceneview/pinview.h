@@ -24,7 +24,7 @@
 //#include "precomp.h"
 #include "globals.h"
 #include "connectables/connectioninfo.h"
-#include "viewconfig.h"
+#include "views/viewconfig.h"
 
 #ifdef _MSC_VER
 #pragma warning( push )

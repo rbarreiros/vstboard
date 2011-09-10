@@ -22,7 +22,7 @@
 #define CURSORVIEW_H
 
 //#include "precomp.h"
-#include "viewconfig.h"
+#include "views/viewconfig.h"
 
 namespace View {
 

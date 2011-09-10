@@ -20,7 +20,7 @@
 
 #include "cursorview.h"
 #include "globals.h"
-#include "viewconfig.h"
+#include "views/viewconfig.h"
 
 using namespace View;
 

@@ -24,7 +24,7 @@
 //#include "precomp.h"
 #include "mainhost.h"
 #include "models/listtoolsmodel.h"
-#include "views/sceneview.h"
+#include "sceneview/sceneview.h"
 #include "views/viewconfig.h"
 
 namespace Ui {

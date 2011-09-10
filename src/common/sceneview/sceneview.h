@@ -28,7 +28,7 @@
 
 //#include "precomp.h"
 #include "connectables/connectioninfo.h"
-#include "maingraphicsview.h"
+#include "views/maingraphicsview.h"
 
 namespace Connectables {
     class ObjectFactory;

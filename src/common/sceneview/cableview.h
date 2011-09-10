@@ -24,7 +24,7 @@
 #include "../precomp.h"
 #include "../globals.h"
 #include "pinview.h"
-#include "viewconfig.h"
+#include "views/viewconfig.h"
 
 namespace View {
 

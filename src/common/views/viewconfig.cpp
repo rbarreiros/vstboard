@@ -19,7 +19,6 @@
 **************************************************************************/
 //#include "precomp.h"
 #include "viewconfig.h"
-#include "objectview.h"
 #include "mainhost.h"
 
 using namespace View;
