@@ -22,7 +22,7 @@
 #include "pinview.h"
 #include "../globals.h"
 #include "commands/comremoveobject.h"
-#include "connectablepinview.h"
+#include "minmaxpinview.h"
 
 using namespace View;
 
@@ -291,16 +291,6 @@ void ObjectView::resizeEvent ( QGraphicsSceneResizeEvent * event )
 }
 
 /*!
-  Reimplements QGraphicsWidget::mouseReleaseEvent \n
-  update the model with the new position
-  */
-void ObjectView::mouseReleaseEvent ( QGraphicsSceneMouseEvent * event )
-{
-    QGraphicsWidget::mouseReleaseEvent(event);
-    model->setData(objIndex,pos(),UserRoles::position);
-}
-
-/*!
   Shrink the object to its minimal size after a 100ms delay
   */
 void ObjectView::Shrink()
@@ -321,14 +311,14 @@ void ObjectView::ShrinkNow()
     resize(0,0);
 }
 
-void ObjectView::SetEditorPin(ConnectablePinView *pin, float value)
+void ObjectView::SetEditorPin(MinMaxPinView *pin, float value)
 {
     editorPin = pin;
     actShowEditor->setEnabled(editorPin);
     actShowEditor->setChecked(value>.5f);
 }
 
-void ObjectView::SetLearnPin(ConnectablePinView *pin, float value)
+void ObjectView::SetLearnPin(MinMaxPinView *pin, float value)
 {
     learnPin = pin;
     actLearnSwitch->setEnabled(learnPin);

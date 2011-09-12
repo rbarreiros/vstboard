@@ -33,12 +33,15 @@ Q_OBJECT
         void SetLimitModelIndex(ObjType::Enum type, QPersistentModelIndex index);
         void UpdateLimitModelIndex(const QModelIndex &index);
         void UpdateModelIndex(const QModelIndex &index);
+        void ValueChanged(float newVal);
 
     protected:
         void resizeEvent ( QGraphicsSceneResizeEvent * event );
         void mousePressEvent(QGraphicsSceneMouseEvent *event);
         void mouseMoveEvent ( QGraphicsSceneMouseEvent  * event );
         void mouseReleaseEvent ( QGraphicsSceneMouseEvent  * event );
+        void keyPressEvent ( QKeyEvent * event );
+        void wheelEvent ( QGraphicsSceneWheelEvent * event );
         void CreateCursors();
         void UpdateScaleView();
         CursorView *inMin;
@@ -49,7 +52,7 @@ Q_OBJECT
         bool cursorCreated;
         bool changingValue;
         float startDragValue;
-        QPoint startDragPos;
+        QPointF startDragPos;
     };
 }
 #endif // MINMAXPINVIEW_H

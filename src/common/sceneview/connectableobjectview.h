@@ -36,11 +36,17 @@ namespace View {
         ConnectableObjectView(MainHost *myHost,QAbstractItemModel *model,MainContainerView * parent = 0, Qt::WindowFlags wFlags = 0);
 
     protected:
+        void mousePressEvent(QGraphicsSceneMouseEvent *event);
+        void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
+        void mouseReleaseEvent ( QGraphicsSceneMouseEvent * event );
         void resizeEvent ( QGraphicsSceneResizeEvent * event );
         QList<CableView*>listCables;
         ObjectDropZone *dropReplace;
         ObjectDropZone *dropAttachLeft;
         ObjectDropZone *dropAttachRight;
+
+        bool moving;
+        QPointF moveOffset;
 
     signals:
         void CommandStep(ConnectionInfo pinInfo, int delta);

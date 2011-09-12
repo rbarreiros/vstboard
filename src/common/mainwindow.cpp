@@ -78,17 +78,35 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
 
     QAction *undo = myHost->undoStack.createUndoAction(ui->mainToolBar);
     undo->setIcon(QIcon(":/img16x16/undo.png"));
-    undo->setShortcut( QKeySequence::Undo );
+    undo->setShortcut( viewConfig->keyBinding.GetMainShortcut(MainShortcuts::undo) );
     undo->setShortcutContext(Qt::ApplicationShortcut);
     ui->mainToolBar->addAction( undo );
 
     QAction *redo = myHost->undoStack.createRedoAction(ui->mainToolBar);
     redo->setIcon(QIcon(":/img16x16/redo.png"));
-    redo->setShortcut( QKeySequence::Redo );
+    redo->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::redo));
     redo->setShortcutContext(Qt::ApplicationShortcut);
     ui->mainToolBar->addAction( redo );
 
     ui->listUndo->setStack(&myHost->undoStack);
+
+    ui->actionLoad->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::openProject));
+    ui->actionSave->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::saveProject));
+    ui->actionSave_Project_As->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::saveProjectAs));
+    ui->actionNew->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::newProject));
+    ui->actionLoad_Setup->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::openSetup));
+    ui->actionSave_Setup->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::saveSetup));
+    ui->actionSave_Setup_As->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::saveSetupAs));
+    ui->actionNew_Setup->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::newSetup));
+    ui->actionHost_panel->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::hostPanel));
+    ui->actionProject_panel->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::projectPanel));
+    ui->actionProgram_panel->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::programPanel));
+    ui->actionGroup_panel->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::groupPanel));
+    ui->actionRestore_default_layout->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::defaultLayout));
+    ui->actionTool_bar->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::toolBar));
+    ui->actionConfig->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::configuration));
+    ui->actionAppearance->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::appearence));
+
 }
 
 void MainWindow::SetupBrowsersModels(const QString &vstPath, const QString &browserPath)
@@ -278,23 +296,33 @@ void MainWindow::writeSettings()
 
 void MainWindow::readSettings()
 {
-    QList<QDockWidget*>listDocks;
-    listDocks << ui->dockTools;
-    listDocks << ui->dockVstBrowser;
-    listDocks << ui->dockBankBrowser;
-    listDocks << ui->dockPrograms;
-    listDocks << ui->dockUndo;
-    foreach(QDockWidget *dock, listDocks) {
-        ui->menuView->addAction(dock->toggleViewAction());
-        ui->mainToolBar->addAction(dock->toggleViewAction());
-    }
+    ui->menuView->addAction(ui->dockTools->toggleViewAction());
+    ui->mainToolBar->addAction(ui->dockTools->toggleViewAction());
+    ui->dockTools->toggleViewAction()->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::tools));
 
-    QList<QDockWidget*>listDocksNoToolbar;
-    listDocksNoToolbar << ui->dockSolver;
-    listDocksNoToolbar << ui->dockHostModel;
-    foreach(QDockWidget *dock, listDocksNoToolbar) {
-        ui->menuView->addAction(dock->toggleViewAction());
-    }
+    ui->menuView->addAction(ui->dockVstBrowser->toggleViewAction());
+    ui->mainToolBar->addAction(ui->dockVstBrowser->toggleViewAction());
+    ui->dockVstBrowser->toggleViewAction()->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::vstPlugins));
+
+    ui->menuView->addAction(ui->dockBankBrowser->toggleViewAction());
+    ui->mainToolBar->addAction(ui->dockBankBrowser->toggleViewAction());
+    ui->dockBankBrowser->toggleViewAction()->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::browser));
+
+    ui->menuView->addAction(ui->dockPrograms->toggleViewAction());
+    ui->mainToolBar->addAction(ui->dockPrograms->toggleViewAction());
+    ui->dockPrograms->toggleViewAction()->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::programs));
+
+    ui->menuView->addAction(ui->dockUndo->toggleViewAction());
+    ui->mainToolBar->addAction(ui->dockUndo->toggleViewAction());
+    ui->dockUndo->toggleViewAction()->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::undoHistory));
+
+    ui->menuView->addAction(ui->dockSolver->toggleViewAction());
+    ui->dockSolver->toggleViewAction()->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::solverModel));
+
+    ui->menuView->addAction(ui->dockHostModel->toggleViewAction());
+    ui->dockHostModel->toggleViewAction()->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::hostModel));
+
+
 
     //recent setups
     for(int i=0; i<NB_RECENT_FILES; i++) {

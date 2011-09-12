@@ -158,17 +158,36 @@ void MinMaxPinView::UpdateScaleView()
     scaledView->setPolygon(pol);
 }
 
+void MinMaxPinView::ValueChanged(float newVal)
+{
+    if(value==newVal)
+        return;
+    if(newVal>1.0f) newVal=1.0f;
+    if(newVal<0.0f) newVal=0.0f;
+
+    model->setData(pinIndex,newVal,UserRoles::value);
+}
+
 void MinMaxPinView::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    if(config->EditMode()!=EditMode::Value) {
-        ConnectablePinView::mousePressEvent(event);
+    const MoveBind b = config->keyBinding.GetMoveSortcuts(MovesBindings::changeValue);
+    if(b.input == MoveInputs::mouse && b.buttons == event->button() && b.modifier == event->modifiers()) {
+        changingValue=true;
+        startDragPos=event->pos();
+        startDragValue=pinIndex.data(UserRoles::value).toFloat();
+        grabMouse();
         return;
     }
 
-    changingValue=true;
-    startDragPos=event->screenPos();
-    startDragValue=pinIndex.data(UserRoles::value).toFloat();
-    grabMouse();
+//    if(config->EditMode()!=EditMode::Value) {
+        ConnectablePinView::mousePressEvent(event);
+        return;
+//    }
+
+//    changingValue=true;
+//    startDragPos=event->screenPos();
+//    startDragValue=pinIndex.data(UserRoles::value).toFloat();
+//    grabMouse();
 }
 
 void MinMaxPinView::mouseMoveEvent ( QGraphicsSceneMouseEvent  * event )
@@ -182,12 +201,12 @@ void MinMaxPinView::mouseMoveEvent ( QGraphicsSceneMouseEvent  * event )
         if(event->modifiers() & Qt::AltModifier)
             mouseSensibility /= 10;
 
-        int increm = event->screenPos().x() - startDragPos.x();
+        qreal increm = event->pos().x() - startDragPos.x();
         startDragValue += mouseSensibility*increm;
         startDragValue = std::max(.0f,startDragValue);
         startDragValue = std::min(1.0f,startDragValue);
 
-        startDragPos=event->screenPos();
+        startDragPos=event->pos();
         ValueChanged( startDragValue );
     } else {
         ConnectablePinView::mouseMoveEvent(event);
@@ -201,4 +220,42 @@ void MinMaxPinView::mouseReleaseEvent ( QGraphicsSceneMouseEvent  * event )
         changingValue=false;
     }
     ConnectablePinView::mouseReleaseEvent(event);
+}
+
+void MinMaxPinView::wheelEvent ( QGraphicsSceneWheelEvent * event )
+{
+    const MoveBind b = config->keyBinding.GetMoveSortcuts(MovesBindings::changeValue);
+    if(b.input == MoveInputs::mouseWheel && b.modifier == event->modifiers()) {
+        event->accept();
+
+        int increm=1;
+        if(event->delta()<0)
+            increm=-1;
+
+        ValueChanged( pinIndex.data(UserRoles::value).toFloat()
+                      + pinIndex.data(UserRoles::stepSize).toFloat()*increm);
+    }
+}
+
+void MinMaxPinView::keyPressEvent ( QKeyEvent * event )
+{
+    int k = event->key();
+
+    if(connectInfo.type == PinType::Parameter) {
+        if(event->modifiers() & Qt::ControlModifier) {
+            if(k==Qt::Key_Left) { ValueChanged(value-0.01); return; }
+            if(k==Qt::Key_Right) { ValueChanged(value+0.01); return; }
+        } else {
+            if(k==Qt::Key_Left) { ValueChanged(value-0.1); return; }
+            if(k==Qt::Key_Right) { ValueChanged(value+0.1); return; }
+        }
+
+        float val = ViewConfig::KeyboardNumber(k);
+        if(val>=0) {
+            ValueChanged(val);
+            return;
+        }
+    }
+
+    QGraphicsWidget::keyPressEvent(event);
 }

@@ -36,7 +36,7 @@ namespace Connectables {
 class MainHost;
 namespace View {
     class MainContainerView;
-
+    class ViewConfig;
     class SceneView : public QAbstractItemView
     {
         Q_OBJECT

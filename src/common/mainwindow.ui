@@ -88,9 +88,6 @@
           <property name="renderHints">
            <set>QPainter::Antialiasing|QPainter::TextAntialiasing</set>
           </property>
-          <property name="dragMode">
-           <enum>QGraphicsView::ScrollHandDrag</enum>
-          </property>
           <property name="transformationAnchor">
            <enum>QGraphicsView::AnchorUnderMouse</enum>
           </property>
@@ -131,9 +128,6 @@
           </property>
           <property name="renderHints">
            <set>QPainter::Antialiasing|QPainter::TextAntialiasing</set>
-          </property>
-          <property name="dragMode">
-           <enum>QGraphicsView::ScrollHandDrag</enum>
           </property>
           <property name="transformationAnchor">
            <enum>QGraphicsView::AnchorUnderMouse</enum>
@@ -182,9 +176,6 @@
            </property>
            <property name="renderHints">
             <set>QPainter::Antialiasing|QPainter::TextAntialiasing</set>
-           </property>
-           <property name="dragMode">
-            <enum>QGraphicsView::ScrollHandDrag</enum>
            </property>
            <property name="transformationAnchor">
             <enum>QGraphicsView::AnchorUnderMouse</enum>
@@ -254,9 +245,6 @@
            </property>
            <property name="renderHints">
             <set>QPainter::Antialiasing|QPainter::TextAntialiasing</set>
-           </property>
-           <property name="dragMode">
-            <enum>QGraphicsView::ScrollHandDrag</enum>
            </property>
            <property name="transformationAnchor">
             <enum>QGraphicsView::AnchorUnderMouse</enum>

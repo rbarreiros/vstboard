@@ -26,6 +26,7 @@
 #include "models/listtoolsmodel.h"
 #include "sceneview/sceneview.h"
 #include "views/viewconfig.h"
+#include "views/keybind.h"
 
 namespace Ui {
     class MainWindow;
@@ -47,8 +48,6 @@ public:
 
     View::SceneView *mySceneView;
     View::ViewConfig *viewConfig;
-
-
 
 protected:
     void changeEvent(QEvent *e);

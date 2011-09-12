@@ -2,6 +2,7 @@
 #define VIEWCONFIG_H
 
 //#include "precomp.h"
+#include "keybind.h"
 
 class MainHost;
 
@@ -115,6 +116,8 @@ namespace View {
 
         void SetEditMode(const EditMode::Enum mode) {currentEditMode=mode;}
         EditMode::Enum EditMode() {return currentEditMode;}
+
+        KeyBind keyBinding;
 
     protected:
         ///list of presets in registry

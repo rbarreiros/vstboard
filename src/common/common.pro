@@ -101,7 +101,7 @@ SOURCES += \
     commands/comchangeautosave.cpp \
     commands/comremovepin.cpp \
     commands/comaddpin.cpp
-	
+
 SOURCES += \
     views/programlist.cpp \
     views/filebrowser.cpp \
@@ -115,7 +115,8 @@ SOURCES += \
     views/viewconfig.cpp \
     views/listaudiodevicesview.cpp \
     views/gradientwidget.cpp \
-    views/gradientwidgethue.cpp
+    views/gradientwidgethue.cpp \
+    views/keybind.cpp
 	
 SOURCES += \
     sceneview/connectablepinview.cpp \
@@ -193,7 +194,7 @@ HEADERS += \
     commands/comchangeautosave.h \
     commands/comremovepin.h \
     commands/comaddpin.h
-   
+
 HEADERS += \
     views/configdialog.h \
     views/programlist.h \
@@ -207,7 +208,8 @@ HEADERS += \
     views/viewconfig.h \
     views/listaudiodevicesview.h \
     views/gradientwidget.h \
-    views/gradientwidgethue.h
+    views/gradientwidgethue.h \
+    views/keybind.h
 	
 HEADERS += \
     sceneview/objectview.h \
@@ -242,6 +244,8 @@ TRANSLATIONS = ../resources/translations/common_fr.ts
 
 RESOURCES += \
     ../resources/resources.qrc
+
+
 
 
 

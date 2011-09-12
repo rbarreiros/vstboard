@@ -40,9 +40,11 @@ namespace View {
     protected:
         void keyPressEvent ( QKeyEvent * event );
         void ValueChanged(float newVal);
-        QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+//        QVariant itemChange(GraphicsItemChange change, const QVariant &value);
         void mousePressEvent ( QGraphicsSceneMouseEvent * event );
+        void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
         void mouseReleaseEvent ( QGraphicsSceneMouseEvent * event );
+        void wheelEvent(QGraphicsSceneWheelEvent *event);
         void focusInEvent ( QFocusEvent * event );
         void focusOutEvent ( QFocusEvent * event );
 
@@ -55,6 +57,9 @@ namespace View {
         QPersistentModelIndex modelIndex;
         QPointF offset;
         ViewConfig *config;
+
+        float startDragValue;
+        QPointF startDragPos;
 
     public slots:
         void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
