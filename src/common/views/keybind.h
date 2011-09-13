@@ -23,9 +23,16 @@
 
 #include "precomp.h"
 
-namespace MainShortcuts {
-    enum Enum {
-        ND,
+class KeyBind : public QObject
+{
+    Q_OBJECT
+    Q_ENUMS(MainShortcuts)
+    Q_ENUMS(MoveInputs)
+    Q_ENUMS(MovesBindings)
+
+public:
+
+    enum MainShortcuts {
         openProject,
         saveProject,
         saveProjectAs,
@@ -67,11 +74,14 @@ namespace MainShortcuts {
 
         */
     };
-}
 
-namespace MovesBindings {
-    enum Enum {
-        ND,
+    enum MoveInputs {
+        none,
+        mouse,
+        mouseWheel
+    };
+
+    enum MovesBindings {
         zoom,
         zoomReset,
         moveView,
@@ -80,33 +90,24 @@ namespace MovesBindings {
         changeValue,
         changeCursorValue
     };
-}
 
-namespace MoveInputs {
-    enum Enum {
-        ND,
-        mouse,
-        mouseWheel
+    struct MoveBind {
+        KeyBind::MoveInputs input;
+        Qt::MouseButtons buttons;
+        Qt::KeyboardModifier modifier;
     };
-}
 
-struct MoveBind {
-    MoveInputs::Enum input;
-    Qt::MouseButtons buttons;
-    Qt::KeyboardModifier modifier;
-};
-
-class KeyBind : public QObject
-{
-    Q_OBJECT
-public:
     KeyBind(QObject *parent=0);
-    QString GetMainShortcut(MainShortcuts::Enum id);
-    const MoveBind GetMoveSortcuts(const MovesBindings::Enum id) const;
-
+    const QString GetMainShortcut(const MainShortcuts id) const;
+    const MoveBind GetMoveSortcuts(const MovesBindings id) const;
+    QStandardItemModel * GetMainBindingModel();
+    QStandardItemModel * GetModesModel();
 private:
-    QMap<MainShortcuts::Enum, QString>mapMainShortcuts;
-    QMap<MovesBindings::Enum, MoveBind>mapMoveShortcuts;
+    QMap<MainShortcuts, QString>mapMainShortcuts;
+    QMap<QString, QMap<MovesBindings, MoveBind> >mapModes;
+    QStandardItemModel mainModel;
+    QStandardItemModel modesModel;
+    QString currentMode;
 };
 
 #endif // KEYBIND_H

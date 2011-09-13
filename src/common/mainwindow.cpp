@@ -27,6 +27,7 @@
 #include "connectables/objectinfo.h"
 #include "views/viewconfigdialog.h"
 #include "models/programsmodel.h"
+#include "views/keybindingdialog.h"
 
 MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     QMainWindow(parent),
@@ -78,34 +79,34 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
 
     QAction *undo = myHost->undoStack.createUndoAction(ui->mainToolBar);
     undo->setIcon(QIcon(":/img16x16/undo.png"));
-    undo->setShortcut( viewConfig->keyBinding.GetMainShortcut(MainShortcuts::undo) );
+    undo->setShortcut( viewConfig->keyBinding.GetMainShortcut(KeyBind::undo) );
     undo->setShortcutContext(Qt::ApplicationShortcut);
     ui->mainToolBar->addAction( undo );
 
     QAction *redo = myHost->undoStack.createRedoAction(ui->mainToolBar);
     redo->setIcon(QIcon(":/img16x16/redo.png"));
-    redo->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::redo));
+    redo->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::redo));
     redo->setShortcutContext(Qt::ApplicationShortcut);
     ui->mainToolBar->addAction( redo );
 
     ui->listUndo->setStack(&myHost->undoStack);
 
-    ui->actionLoad->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::openProject));
-    ui->actionSave->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::saveProject));
-    ui->actionSave_Project_As->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::saveProjectAs));
-    ui->actionNew->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::newProject));
-    ui->actionLoad_Setup->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::openSetup));
-    ui->actionSave_Setup->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::saveSetup));
-    ui->actionSave_Setup_As->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::saveSetupAs));
-    ui->actionNew_Setup->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::newSetup));
-    ui->actionHost_panel->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::hostPanel));
-    ui->actionProject_panel->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::projectPanel));
-    ui->actionProgram_panel->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::programPanel));
-    ui->actionGroup_panel->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::groupPanel));
-    ui->actionRestore_default_layout->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::defaultLayout));
-    ui->actionTool_bar->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::toolBar));
-    ui->actionConfig->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::configuration));
-    ui->actionAppearance->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::appearence));
+    ui->actionLoad->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::openProject));
+    ui->actionSave->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::saveProject));
+    ui->actionSave_Project_As->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::saveProjectAs));
+    ui->actionNew->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::newProject));
+    ui->actionLoad_Setup->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::openSetup));
+    ui->actionSave_Setup->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::saveSetup));
+    ui->actionSave_Setup_As->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::saveSetupAs));
+    ui->actionNew_Setup->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::newSetup));
+    ui->actionHost_panel->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::hostPanel));
+    ui->actionProject_panel->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::projectPanel));
+    ui->actionProgram_panel->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::programPanel));
+    ui->actionGroup_panel->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::groupPanel));
+    ui->actionRestore_default_layout->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::defaultLayout));
+    ui->actionTool_bar->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::toolBar));
+    ui->actionConfig->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::configuration));
+    ui->actionAppearance->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::appearence));
 
 }
 
@@ -298,31 +299,29 @@ void MainWindow::readSettings()
 {
     ui->menuView->addAction(ui->dockTools->toggleViewAction());
     ui->mainToolBar->addAction(ui->dockTools->toggleViewAction());
-    ui->dockTools->toggleViewAction()->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::tools));
+    ui->dockTools->toggleViewAction()->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::tools));
 
     ui->menuView->addAction(ui->dockVstBrowser->toggleViewAction());
     ui->mainToolBar->addAction(ui->dockVstBrowser->toggleViewAction());
-    ui->dockVstBrowser->toggleViewAction()->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::vstPlugins));
+    ui->dockVstBrowser->toggleViewAction()->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::vstPlugins));
 
     ui->menuView->addAction(ui->dockBankBrowser->toggleViewAction());
     ui->mainToolBar->addAction(ui->dockBankBrowser->toggleViewAction());
-    ui->dockBankBrowser->toggleViewAction()->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::browser));
+    ui->dockBankBrowser->toggleViewAction()->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::browser));
 
     ui->menuView->addAction(ui->dockPrograms->toggleViewAction());
     ui->mainToolBar->addAction(ui->dockPrograms->toggleViewAction());
-    ui->dockPrograms->toggleViewAction()->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::programs));
+    ui->dockPrograms->toggleViewAction()->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::programs));
 
     ui->menuView->addAction(ui->dockUndo->toggleViewAction());
     ui->mainToolBar->addAction(ui->dockUndo->toggleViewAction());
-    ui->dockUndo->toggleViewAction()->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::undoHistory));
+    ui->dockUndo->toggleViewAction()->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::undoHistory));
 
     ui->menuView->addAction(ui->dockSolver->toggleViewAction());
-    ui->dockSolver->toggleViewAction()->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::solverModel));
+    ui->dockSolver->toggleViewAction()->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::solverModel));
 
     ui->menuView->addAction(ui->dockHostModel->toggleViewAction());
-    ui->dockHostModel->toggleViewAction()->setShortcut(viewConfig->keyBinding.GetMainShortcut(MainShortcuts::hostModel));
-
-
+    ui->dockHostModel->toggleViewAction()->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::hostModel));
 
     //recent setups
     for(int i=0; i<NB_RECENT_FILES; i++) {
@@ -577,4 +576,10 @@ void MainWindow::on_actionValue_toggled(bool arg1)
     ui->actionCable->setChecked(!arg1);
     if(arg1)
         viewConfig->SetEditMode(EditMode::Value);
+}
+
+void MainWindow::on_actionKeyBinding_triggered()
+{
+    KeyBindingDialog bind(&viewConfig->keyBinding,this);
+    bind.exec();
 }

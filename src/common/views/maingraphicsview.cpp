@@ -55,8 +55,8 @@ void MainGraphicsView::wheelEvent(QWheelEvent * event)
     if(event->isAccepted())
         return;
 
-    const MoveBind b = config->keyBinding.GetMoveSortcuts(MovesBindings::zoom);
-    if(b.input == MoveInputs::mouseWheel && b.modifier == event->modifiers()) {
+    const KeyBind::MoveBind b = config->keyBinding.GetMoveSortcuts(KeyBind::zoom);
+    if(b.input == KeyBind::mouseWheel && b.modifier == event->modifiers()) {
         event->accept();
         if(event->delta()>0)
             zoomIn();
@@ -74,8 +74,8 @@ void MainGraphicsView::mousePressEvent ( QMouseEvent * event )
         return;
 
     {
-        const MoveBind b = config->keyBinding.GetMoveSortcuts(MovesBindings::zoomReset);
-        if(b.input == MoveInputs::ND && b.buttons == event->buttons() && b.modifier == event->modifiers()) {
+        const KeyBind::MoveBind b = config->keyBinding.GetMoveSortcuts(KeyBind::zoomReset);
+        if(b.input == KeyBind::none && b.buttons == event->buttons() && b.modifier == event->modifiers()) {
             event->accept();
             zoomReset();
             return;
@@ -83,8 +83,8 @@ void MainGraphicsView::mousePressEvent ( QMouseEvent * event )
     }
 
     {
-        const MoveBind b = config->keyBinding.GetMoveSortcuts(MovesBindings::moveView);
-        if(b.input == MoveInputs::mouse && b.buttons == event->buttons() && b.modifier == event->modifiers()) {
+        const KeyBind::MoveBind b = config->keyBinding.GetMoveSortcuts(KeyBind::moveView);
+        if(b.input == KeyBind::mouse && b.buttons == event->buttons() && b.modifier == event->modifiers()) {
             event->accept();
             moving=true;
             startMovePos=event->pos();

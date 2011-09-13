@@ -100,7 +100,10 @@ SOURCES += \
     commands/comdiscardchanges.cpp \
     commands/comchangeautosave.cpp \
     commands/comremovepin.cpp \
-    commands/comaddpin.cpp
+    commands/comaddpin.cpp \
+    views/keybindingdialog.cpp \
+    views/buttonswidget.cpp \
+    views/modifierswidget.cpp
 
 SOURCES += \
     views/programlist.cpp \
@@ -193,7 +196,10 @@ HEADERS += \
     commands/comdiscardchanges.h \
     commands/comchangeautosave.h \
     commands/comremovepin.h \
-    commands/comaddpin.h
+    commands/comaddpin.h \
+    views/keybindingdialog.h \
+    views/buttonswidget.h \
+    views/modifierswidget.h
 
 HEADERS += \
     views/configdialog.h \
@@ -236,6 +242,9 @@ FORMS += \
     views/aboutdialog.ui \
     views/splash.ui \
     views/viewconfigdialog.ui \
+    views/keybindingdialog.ui \
+    views/buttonswidget.ui \
+    views/modifierswidget.ui
 
 
 PRECOMPILED_HEADER = precomp.h
@@ -244,6 +253,15 @@ TRANSLATIONS = ../resources/translations/common_fr.ts
 
 RESOURCES += \
     ../resources/resources.qrc
+
+
+
+
+
+
+
+
+
 
 
 

@@ -99,6 +99,7 @@ private slots:
     void on_actionAppearance_toggled(bool arg1);
     void on_actionCable_toggled(bool arg1);
     void on_actionValue_toggled(bool arg1);
+    void on_actionKeyBinding_triggered();
 };
 
 #endif // MAINWINDOW_H

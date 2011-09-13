@@ -45,6 +45,7 @@
     #include <QtGui/QHBoxLayout>
     #include <QtGui/QHeaderView>
     #include <QClipboard>
+    #include <QComboBox>
     #include <QDialog>
     #include <QDir>
     #include <QDragEnterEvent>

@@ -120,8 +120,8 @@ QVariant PinView::itemChange ( GraphicsItemChange change, const QVariant & value
   */
 void PinView::mousePressEvent ( QGraphicsSceneMouseEvent * event )
 {
-    const MoveBind b = config->keyBinding.GetMoveSortcuts(MovesBindings::createCable);
-    if(b.input == MoveInputs::mouse && b.buttons == event->button() && b.modifier == event->modifiers()) {
+    const KeyBind::MoveBind b = config->keyBinding.GetMoveSortcuts(KeyBind::createCable);
+    if(b.input == KeyBind::mouse && b.buttons == event->button() && b.modifier == event->modifiers()) {
         setCursor(defaultCursor);
         return;
     }

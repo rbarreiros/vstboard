@@ -106,8 +106,8 @@ void ConnectableObjectView::resizeEvent ( QGraphicsSceneResizeEvent * event )
 
 void ConnectableObjectView::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    const MoveBind b = config->keyBinding.GetMoveSortcuts(MovesBindings::moveObject);
-    if(b.input == MoveInputs::mouse && b.modifier == event->modifiers() && b.buttons == event->buttons()) {
+    const KeyBind::MoveBind b = config->keyBinding.GetMoveSortcuts(KeyBind::moveObject);
+    if(b.input == KeyBind::mouse && b.modifier == event->modifiers() && b.buttons == event->buttons()) {
         event->accept();
         moving=true;
         moveOffset=pos()-mapToParent(mapFromScene(event->scenePos()));

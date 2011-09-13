@@ -19,86 +19,243 @@
 **************************************************************************/
 
 #include "keybind.h"
+#include "precomp.h"
 
 KeyBind::KeyBind(QObject *parent) :
-    QObject(parent)
+    QObject(parent),
+    currentMode("Cable")
 {
-    mapMainShortcuts.insert(MainShortcuts::openProject,         "Ctrl+O");
-    mapMainShortcuts.insert(MainShortcuts::saveProject,         "Ctrl+S");
-    mapMainShortcuts.insert(MainShortcuts::saveProjectAs,       "Ctrl+Shift+S");
-    mapMainShortcuts.insert(MainShortcuts::newProject,          "Ctrl+N");
-    mapMainShortcuts.insert(MainShortcuts::openSetup,           "Alt+O");
-    mapMainShortcuts.insert(MainShortcuts::saveSetup,           "Alt+S");
-    mapMainShortcuts.insert(MainShortcuts::saveSetupAs,         "Alt+Shift+S");
-    mapMainShortcuts.insert(MainShortcuts::newSetup,            "Alt+N");
-    mapMainShortcuts.insert(MainShortcuts::hostPanel,           "Ctrl+H");
-    mapMainShortcuts.insert(MainShortcuts::projectPanel,        "Ctrl+R");
-    mapMainShortcuts.insert(MainShortcuts::programPanel,        "Ctrl+P");
-    mapMainShortcuts.insert(MainShortcuts::groupPanel,          "Ctrl+G");
-    mapMainShortcuts.insert(MainShortcuts::defaultLayout,       "");
-    mapMainShortcuts.insert(MainShortcuts::toolBar,             "Ctrl+Alt+O");
-    mapMainShortcuts.insert(MainShortcuts::tools,               "Ctrl+Alt+T");
-    mapMainShortcuts.insert(MainShortcuts::vstPlugins,          "Ctrl+Alt+V");
-    mapMainShortcuts.insert(MainShortcuts::browser,             "Ctrl+Alt+B");
-    mapMainShortcuts.insert(MainShortcuts::programs,            "Ctrl+Alt+P");
-    mapMainShortcuts.insert(MainShortcuts::midiDevices,         "Ctrl+Alt+M");
-    mapMainShortcuts.insert(MainShortcuts::audioDevices,        "Ctrl+Alt+A");
-    mapMainShortcuts.insert(MainShortcuts::solverModel,         "Ctrl+Alt+S");
-    mapMainShortcuts.insert(MainShortcuts::hostModel,           "Ctrl+Alt+H");
-    mapMainShortcuts.insert(MainShortcuts::undoHistory,         "Ctrl+Alt+U");
-    mapMainShortcuts.insert(MainShortcuts::configuration,       "Ctrl+Alt+C");
-    mapMainShortcuts.insert(MainShortcuts::appearence,          "Ctrl+Alt+E");
-    mapMainShortcuts.insert(MainShortcuts::undo,                "Ctrl+Z");
-    mapMainShortcuts.insert(MainShortcuts::redo,                "Ctrl+Y");
-    mapMainShortcuts.insert(MainShortcuts::refreashAudioDevices,"Ctrl+F5");
-    mapMainShortcuts.insert(MainShortcuts::refreashMidiDevices, "Alt+F5");
+    mapMainShortcuts.insert(openProject,         "Ctrl+O");
+    mapMainShortcuts.insert(saveProject,         "Ctrl+S");
+    mapMainShortcuts.insert(saveProjectAs,       "Ctrl+Shift+S");
+    mapMainShortcuts.insert(newProject,          "Ctrl+N");
+    mapMainShortcuts.insert(openSetup,           "Alt+O");
+    mapMainShortcuts.insert(saveSetup,           "Alt+S");
+    mapMainShortcuts.insert(saveSetupAs,         "Alt+Shift+S");
+    mapMainShortcuts.insert(newSetup,            "Alt+N");
+    mapMainShortcuts.insert(hostPanel,           "Ctrl+H");
+    mapMainShortcuts.insert(projectPanel,        "Ctrl+R");
+    mapMainShortcuts.insert(programPanel,        "Ctrl+P");
+    mapMainShortcuts.insert(groupPanel,          "Ctrl+G");
+    mapMainShortcuts.insert(defaultLayout,       "");
+    mapMainShortcuts.insert(toolBar,             "Ctrl+Alt+O");
+    mapMainShortcuts.insert(tools,               "Ctrl+Alt+T");
+    mapMainShortcuts.insert(vstPlugins,          "Ctrl+Alt+V");
+    mapMainShortcuts.insert(browser,             "Ctrl+Alt+B");
+    mapMainShortcuts.insert(programs,            "Ctrl+Alt+P");
+    mapMainShortcuts.insert(midiDevices,         "Ctrl+Alt+M");
+    mapMainShortcuts.insert(audioDevices,        "Ctrl+Alt+A");
+    mapMainShortcuts.insert(solverModel,         "Ctrl+Alt+S");
+    mapMainShortcuts.insert(hostModel,           "Ctrl+Alt+H");
+    mapMainShortcuts.insert(undoHistory,         "Ctrl+Alt+U");
+    mapMainShortcuts.insert(configuration,       "Ctrl+Alt+C");
+    mapMainShortcuts.insert(appearence,          "Ctrl+Alt+E");
+    mapMainShortcuts.insert(undo,                "Ctrl+Z");
+    mapMainShortcuts.insert(redo,                "Ctrl+Y");
+    mapMainShortcuts.insert(refreashAudioDevices,"Ctrl+F5");
+    mapMainShortcuts.insert(refreashMidiDevices, "Alt+F5");
 
     {
-        MoveBind b={MoveInputs::mouseWheel, Qt::NoButton, Qt::NoModifier};
-        mapMoveShortcuts.insert( MovesBindings::zoom, b );
+        QMap<MovesBindings, MoveBind>mapMv;
+        {
+            MoveBind b={mouseWheel, Qt::NoButton, Qt::NoModifier};
+            mapMv.insert( zoom, b );
+        }
+
+        {
+            MoveBind b={none, Qt::MiddleButton, Qt::NoModifier};
+            mapMv.insert( zoomReset, b );
+        }
+
+        {
+            MoveBind b={mouse, Qt::LeftButton, Qt::NoModifier};
+            mapMv.insert( moveView, b );
+        }
+
+        {
+            MoveBind b={mouse, Qt::LeftButton, Qt::NoModifier};
+            mapMv.insert( moveObject, b );
+        }
+
+        {
+            MoveBind b={mouse, Qt::LeftButton, Qt::NoModifier};
+            mapMv.insert( createCable, b );
+        }
+
+        {
+            MoveBind b={mouse, Qt::LeftButton, Qt::ControlModifier};
+            mapMv.insert( changeValue, b );
+        }
+
+        {
+            MoveBind b={mouse, Qt::LeftButton, Qt::NoModifier};
+            mapMv.insert( changeCursorValue, b );
+        }
+        mapModes.insert("Cable",mapMv);
     }
 
     {
-        MoveBind b={MoveInputs::ND, Qt::MiddleButton, Qt::NoModifier};
-        mapMoveShortcuts.insert( MovesBindings::zoomReset, b );
-    }
+        QMap<MovesBindings, MoveBind>mapMv;
+        {
+            MoveBind b={mouseWheel, Qt::NoButton, Qt::NoModifier};
+            mapMv.insert( zoom, b );
+        }
 
-    {
-        MoveBind b={MoveInputs::mouse, Qt::LeftButton, Qt::NoModifier};
-        mapMoveShortcuts.insert( MovesBindings::moveView, b );
-    }
+        {
+            MoveBind b={none, Qt::MiddleButton, Qt::NoModifier};
+            mapMv.insert( zoomReset, b );
+        }
 
-    {
-        MoveBind b={MoveInputs::mouse, Qt::LeftButton, Qt::NoModifier};
-        mapMoveShortcuts.insert( MovesBindings::moveObject, b );
-    }
+        {
+            MoveBind b={mouse, Qt::LeftButton, Qt::NoModifier};
+            mapMv.insert( moveView, b );
+        }
 
-    {
-        MoveBind b={MoveInputs::mouse, Qt::LeftButton, Qt::NoModifier};
-        mapMoveShortcuts.insert( MovesBindings::createCable, b );
-    }
+        {
+            MoveBind b={mouse, Qt::LeftButton, Qt::NoModifier};
+            mapMv.insert( moveObject, b );
+        }
 
-    {
-        MoveBind b={MoveInputs::mouse, Qt::LeftButton, Qt::ControlModifier};
-        mapMoveShortcuts.insert( MovesBindings::changeValue, b );
-    }
+        {
+            MoveBind b={mouse, Qt::LeftButton, Qt::NoModifier};
+            mapMv.insert( createCable, b );
+        }
 
-    {
-        MoveBind b={MoveInputs::mouse, Qt::LeftButton, Qt::NoModifier};
-        mapMoveShortcuts.insert( MovesBindings::changeCursorValue, b );
+        {
+            MoveBind b={mouse, Qt::LeftButton, Qt::ControlModifier};
+            mapMv.insert( changeValue, b );
+        }
+
+        {
+            MoveBind b={mouse, Qt::LeftButton, Qt::NoModifier};
+            mapMv.insert( changeCursorValue, b );
+        }
+        mapModes.insert("Value",mapMv);
     }
 }
 
-QString KeyBind::GetMainShortcut(MainShortcuts::Enum id)
+QStandardItemModel * KeyBind::GetMainBindingModel()
+{
+    mainModel.clear();
+    mainModel.setColumnCount(2);
+    QMetaEnum n = metaObject()->enumerator( metaObject()->indexOfEnumerator("MainShortcuts") );
+    for(int i=0; i<n.keyCount(); ++i) {
+        QList<QStandardItem*>listItems;
+        QStandardItem *kName = new QStandardItem( QString(n.key(i)) );
+        kName->setEditable(false);
+        listItems << kName;
+        listItems << new QStandardItem( mapMainShortcuts.value( (MainShortcuts)n.value(i),"") );
+        mainModel.invisibleRootItem()->appendRow(listItems);
+    }
+    return &mainModel;
+}
+
+QStandardItemModel * KeyBind::GetModesModel()
+{
+    modesModel.clear();
+    QStringList titles;
+    titles << tr("Function")
+           << tr("Controller")
+           << tr("Buttons")
+           << tr("Modifiers");
+    modesModel.setHorizontalHeaderLabels(titles);
+
+    QMetaEnum n = metaObject()->enumerator( metaObject()->indexOfEnumerator("MovesBindings") );
+    QMetaEnum moveInput =  metaObject()->enumerator( metaObject()->indexOfEnumerator("MoveInputs") );
+
+    QMap<QString, QMap<MovesBindings, MoveBind> >::const_iterator i = mapModes.constBegin();
+    while(i!=mapModes.constEnd()) {
+        QStandardItem *mode = new QStandardItem(i.key());
+
+        for(int j=0; j<n.keyCount(); ++j) {
+            MoveBind mb = i.value().value((MovesBindings)n.value(j));
+            QList<QStandardItem*>listItems;
+            QStandardItem *kName = new QStandardItem( QString(n.key(j)) );
+            kName->setEditable(false);
+            listItems << kName;
+            listItems << new QStandardItem( moveInput.valueToKey(mb.input) );
+            QStandardItem *m = new QStandardItem();
+            m->setData(static_cast<int>(mb.buttons),Qt::EditRole);
+            listItems << m;
+
+            QStandardItem *mod = new QStandardItem();
+            mod->setData(static_cast<int>(mb.modifier),Qt::EditRole);
+            listItems << mod;
+
+
+//            QStandardItem *lmb = new QStandardItem();
+//            lmb->setData(QVariant(),Qt::DisplayRole);
+//            lmb->setCheckable(true);
+//            if(mb.buttons & Qt::LeftButton)
+//                lmb->setCheckState(Qt::Checked);
+//            listItems << lmb;
+
+//            QStandardItem *mmb = new QStandardItem();
+//            mmb->setData(QVariant(),Qt::DisplayRole);
+//            mmb->setCheckable(true);
+//            if(mb.buttons & Qt::MiddleButton)
+//                mmb->setCheckState(Qt::Checked);
+//            listItems << mmb;
+
+//            QStandardItem *rmb = new QStandardItem();
+//            rmb->setCheckable(true);
+//            if(mb.buttons & Qt::RightButton)
+//                rmb->setCheckState(Qt::Checked);
+//            listItems << rmb;
+
+//            QStandardItem *mb4 = new QStandardItem();
+//            mb4->setCheckable(true);
+//            if(mb.buttons & Qt::XButton1)
+//                mb4->setCheckState(Qt::Checked);
+//            listItems << mb4;
+
+//            QStandardItem *mb5 = new QStandardItem();
+//            mb5->setCheckable(true);
+//            if(mb.buttons & Qt::XButton2)
+//                mb5->setCheckState(Qt::Checked);
+//            listItems << mb5;
+
+//            QStandardItem *shift = new QStandardItem();
+//            shift->setCheckable(true);
+//            if(mb.modifier & Qt::ShiftModifier)
+//                shift->setCheckState(Qt::Checked);
+//            listItems << shift;
+
+//            QStandardItem *ctrl = new QStandardItem();
+//            ctrl->setCheckable(true);
+//            if(mb.modifier & Qt::ControlModifier)
+//                ctrl->setCheckState(Qt::Checked);
+//            listItems << ctrl;
+
+//            QStandardItem *alt = new QStandardItem();
+//            alt->setCheckable(true);
+//            if(mb.modifier & Qt::AltModifier)
+//                alt->setCheckState(Qt::Checked);
+//            listItems << alt;
+            mode->appendRow(listItems);
+        }
+        modesModel.appendRow(mode);
+        ++i;
+    }
+
+
+    return &modesModel;
+}
+
+const QString KeyBind::GetMainShortcut(const MainShortcuts id) const
 {
     return mapMainShortcuts.value(id,"");
 }
 
-const MoveBind KeyBind::GetMoveSortcuts(const MovesBindings::Enum id) const
+const KeyBind::MoveBind KeyBind::GetMoveSortcuts(const MovesBindings id) const
 {
-    if(!mapMoveShortcuts.contains(id)) {
+    if(!mapModes.contains(currentMode)) {
+        LOG("current mode not found");
+        return MoveBind();
+    }
+    if(!mapModes.value(currentMode).contains(id)) {
         LOG("move id not found");
         return MoveBind();
     }
-    return mapMoveShortcuts.value(id);
+    return mapModes.value(currentMode).value(id);
 }
