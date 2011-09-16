@@ -72,6 +72,11 @@ SceneView::SceneView(MainHost *myHost,Connectables::ObjectFactory *objFactory, M
     sceneProgram = new QGraphicsScene(this);
     sceneGroup = new QGraphicsScene(this);
 
+    viewHost->SetViewConfig(myHost->mainWindow->viewConfig);
+    viewProject->SetViewConfig(myHost->mainWindow->viewConfig);
+    viewProgram->SetViewConfig(myHost->mainWindow->viewConfig);
+    viewGroup->SetViewConfig(myHost->mainWindow->viewConfig);
+
     //we need a root object to avoid a bug when the scene is empty
     rootObjHost = new QGraphicsRectItem(0, sceneHost);
     rootObjProject = new QGraphicsRectItem(0, sceneProject);

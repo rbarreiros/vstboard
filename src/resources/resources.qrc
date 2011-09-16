@@ -37,5 +37,7 @@
         <file>img16x16/editcopy.png</file>
         <file>img16x16/editpaste.png</file>
         <file>img16x16/cell_edit.png</file>
+        <file>img16x16/key_bindings.png</file>
+        <file>img16x16/move.png</file>
     </qresource>
 </RCC>

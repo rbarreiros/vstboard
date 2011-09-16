@@ -32,7 +32,7 @@
 class MainHost;
 namespace View {
 
-    class ConnectablePinView;
+    class MinMaxPinView;
     class PinView;
     class ObjectView : public QGraphicsWidget
     {
@@ -68,8 +68,8 @@ namespace View {
 
         ViewConfig *config;
 
-        void SetEditorPin(ConnectablePinView *pin, float value);
-        void SetLearnPin(ConnectablePinView *pin, float value);
+        void SetEditorPin(MinMaxPinView *pin, float value);
+        void SetLearnPin(MinMaxPinView *pin, float value);
 
     protected:
         virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
@@ -77,7 +77,6 @@ namespace View {
         virtual void closeEvent ( QCloseEvent * event );
         virtual void focusInEvent ( QFocusEvent * event );
         virtual void focusOutEvent ( QFocusEvent * event );
-        void mouseReleaseEvent ( QGraphicsSceneMouseEvent * event );
         void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
 
         void SetErrorMessage(const QString & msg);
@@ -121,8 +120,8 @@ namespace View {
 
         bool highlighted;
 
-        ConnectablePinView *editorPin;
-        ConnectablePinView *learnPin;
+        MinMaxPinView *editorPin;
+        MinMaxPinView *learnPin;
 
     private slots:
         void SwitchEditor(bool show);

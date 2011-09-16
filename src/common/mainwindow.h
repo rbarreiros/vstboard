@@ -26,6 +26,7 @@
 #include "models/listtoolsmodel.h"
 #include "sceneview/sceneview.h"
 #include "views/viewconfig.h"
+#include "views/keybind.h"
 
 namespace Ui {
     class MainWindow;
@@ -48,8 +49,6 @@ public:
     View::SceneView *mySceneView;
     View::ViewConfig *viewConfig;
 
-
-
 protected:
     void changeEvent(QEvent *e);
     void SetupBrowsersModels(const QString &vstPath, const QString &browserPath);
@@ -68,6 +67,9 @@ protected:
 
     Ui::MainWindow *ui;
     MainHost *myHost;
+
+    QAction *actUndo;
+    QAction *actRedo;
 
     View::ViewConfigDialog *viewConfigDlg;
 
@@ -95,11 +97,13 @@ private slots:
     virtual void on_actionRefresh_Midi_devices_triggered() {}
     virtual void on_actionRefresh_Audio_devices_triggered() {}
     void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
+    void UpdateKeyBinding();
 
     void on_solverView_clicked(const QModelIndex &index);
     void on_actionAppearance_toggled(bool arg1);
     void on_actionCable_toggled(bool arg1);
     void on_actionValue_toggled(bool arg1);
+    void on_actionKeyBinding_triggered();
 };
 
 #endif // MAINWINDOW_H

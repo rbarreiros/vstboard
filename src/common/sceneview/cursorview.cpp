@@ -62,7 +62,7 @@ CursorView::CursorView(QAbstractItemModel *model,bool isMaxi,bool upsideDown,QGr
     connect( config, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
             this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)) );
 
-    setFlag(QGraphicsItem::ItemIsMovable, true);
+//    setFlag(QGraphicsItem::ItemIsMovable, true);
     setFocusPolicy(Qt::StrongFocus);
     setCursor(Qt::SplitHCursor);
     resize(cursor->boundingRect().size());
@@ -97,14 +97,59 @@ void CursorView::setPos ( qreal x, qreal y )
 
 void CursorView::mousePressEvent ( QGraphicsSceneMouseEvent * event )
 {
-    drag=true;
+    const KeyBind::MoveBind b = config->keyBinding->GetMoveSortcuts(KeyBind::changeCursorValue);
+    if(b.input == KeyBind::mouse && b.buttons == event->button() && b.modifier == event->modifiers()) {
+        event->accept();
+        drag=true;
+        startDragValue=value;
+        startDragPos=mapToParent(event->pos());
+        return;
+    }
     QGraphicsWidget::mousePressEvent(event);
+}
+
+void CursorView::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+    if(drag) {
+        float mouseSensibility = 1.0f/parentWidget()->size().width();
+        if(event->modifiers() & Qt::ControlModifier)
+            mouseSensibility /= 10;
+        if(event->modifiers() & Qt::ShiftModifier)
+            mouseSensibility /= 10;
+        if(event->modifiers() & Qt::AltModifier)
+            mouseSensibility /= 10;
+
+        qreal increm = mapToParent(event->pos()).x() - startDragPos.x();
+        startDragValue += mouseSensibility*increm;
+        startDragValue = std::max(.0f,startDragValue);
+        startDragValue = std::min(1.0f,startDragValue);
+
+        event->accept();
+        startDragPos=mapToParent(event->pos());
+        ValueChanged( startDragValue );
+        return;
+    }
+    QGraphicsWidget::mouseMoveEvent(event);
 }
 
 void CursorView::mouseReleaseEvent ( QGraphicsSceneMouseEvent * event )
 {
     drag=false;
     QGraphicsWidget::mouseReleaseEvent(event);
+}
+
+void CursorView::wheelEvent ( QGraphicsSceneWheelEvent * event )
+{
+    const KeyBind::MoveBind b = config->keyBinding->GetMoveSortcuts(KeyBind::changeCursorValue);
+    if(b.input == KeyBind::mouseWheel && b.modifier == event->modifiers()) {
+        event->accept();
+
+        int increm=1;
+        if(event->delta()<0)
+            increm=-1;
+
+        ValueChanged( value + 0.1f*increm);
+    }
 }
 
 void CursorView::SetValue(float newVal)
@@ -137,26 +182,26 @@ void CursorView::ValueChanged(float newVal)
     model->setData(modelIndex,newVal,UserRoles::value);
 }
 
-QVariant CursorView::itemChange(GraphicsItemChange change, const QVariant &value)
-{
-    if (change == ItemPositionChange && scene() && drag) {
-        QPointF newPos = value.toPointF();
+//QVariant CursorView::itemChange(GraphicsItemChange change, const QVariant &value)
+//{
+//    if (change == ItemPositionChange && scene() && drag) {
+//        QPointF newPos = value.toPointF();
 
-        if(newPos.x()<-offset.x())
-            newPos.setX(-offset.x());
-        if(newPos.x()>parentWidget()->rect().width()-offset.x())
-            newPos.setX(parentWidget()->rect().width()-offset.x());
-        if(upsideDown) {
-            newPos.setY(parentWidget()->rect().height()-offset.y());
-        } else {
-            newPos.setY(-offset.y());
-        }
-        if(parentWidget()->rect().width()!=0)
-            ValueChanged((newPos.x()+offset.x())/parentWidget()->rect().width());
-        return newPos;
-    }
-    return QGraphicsWidget::itemChange(change, value);
-}
+//        if(newPos.x()<-offset.x())
+//            newPos.setX(-offset.x());
+//        if(newPos.x()>parentWidget()->rect().width()-offset.x())
+//            newPos.setX(parentWidget()->rect().width()-offset.x());
+//        if(upsideDown) {
+//            newPos.setY(parentWidget()->rect().height()-offset.y());
+//        } else {
+//            newPos.setY(-offset.y());
+//        }
+//        if(parentWidget()->rect().width()!=0)
+//            ValueChanged((newPos.x()+offset.x())/parentWidget()->rect().width());
+//        return newPos;
+//    }
+//    return QGraphicsWidget::itemChange(change, value);
+//}
 
 void CursorView::keyPressEvent ( QKeyEvent * event )
 {

@@ -29,7 +29,8 @@ ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel
     ObjectView(myHost,model,parent,wFlags),
     dropReplace(0),
     dropAttachLeft(0),
-    dropAttachRight(0)
+    dropAttachRight(0),
+    moving(false)
 {
     titleText = new QGraphicsSimpleTextItem(QString("Title"),this);
     titleText->moveBy(2,1);
@@ -41,7 +42,7 @@ ConnectableObjectView::ConnectableObjectView(MainHost *myHost,QAbstractItemModel
     layout->setContentsMargins(0,15,0,0);
     setLayout(layout);
 
-    setFlag(QGraphicsItem::ItemIsMovable, true);
+//    setFlag(QGraphicsItem::ItemIsMovable, true);
     setFocusPolicy(Qt::StrongFocus);
 
     listAudioIn = new ListPinsView(this);
@@ -101,6 +102,58 @@ void ConnectableObjectView::resizeEvent ( QGraphicsSceneResizeEvent * event )
         dropAttachLeft->setGeometry(-10,0,30, event->newSize().height());
     if(dropAttachRight)
         dropAttachRight->setGeometry(event->newSize().width()-20,0,30, event->newSize().height());
+}
+
+void ConnectableObjectView::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    event->setAccepted(false);
+    QGraphicsWidget::mousePressEvent(event);
+    if(!event->isAccepted()) {
+
+        const KeyBind::MoveBind b = config->keyBinding->GetMoveSortcuts(KeyBind::moveObject);
+        if(b.input == KeyBind::mouse && b.modifier == event->modifiers() && b.buttons == event->buttons()) {
+            event->accept();
+            moveOffset=pos()-mapToParent(mapFromScene(event->scenePos()));
+            startDragMousePos = event->screenPos();
+            moving=true;
+            return;
+        }
+    }
+
+    if(moving) {
+        moving=false;
+        model->setData(objIndex,pos(),UserRoles::position);
+        return;
+    }
+}
+
+void ConnectableObjectView::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+    event->setAccepted(false);
+    QGraphicsWidget::mouseMoveEvent(event);
+    if(event->isAccepted())
+        return;
+
+    if(moving && QLineF(event->screenPos(), startDragMousePos).length() > QApplication::startDragDistance()) {
+        event->accept();
+        setPos(mapToParent(mapFromScene(event->scenePos()))+moveOffset);
+    }
+}
+
+/*!
+  Reimplements QGraphicsWidget::mouseReleaseEvent \n
+  update the model with the new position
+  */
+void ConnectableObjectView::mouseReleaseEvent ( QGraphicsSceneMouseEvent * event )
+{
+    if(moving) {
+        moving=false;
+        model->setData(objIndex,pos(),UserRoles::position);
+        event->accept();
+        return;
+    }
+    QGraphicsWidget::mouseReleaseEvent(event);
+
 }
 
 void ConnectableObjectView::ObjectDropped(QGraphicsSceneDragDropEvent *event)

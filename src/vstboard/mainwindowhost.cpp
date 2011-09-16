@@ -95,13 +95,13 @@ void MainWindowHost::readSettings()
         spl->show();
     }
 
-    QList<QDockWidget*>listDocks;
-    listDocks << ui->dockMidiDevices;
-    listDocks << ui->dockAudioDevices;
-    foreach(QDockWidget *dock, listDocks) {
-        ui->menuView->addAction(dock->toggleViewAction());
-        ui->mainToolBar->addAction(dock->toggleViewAction());
-    }
+    ui->menuView->addAction(ui->dockMidiDevices->toggleViewAction());
+    ui->mainToolBar->addAction(ui->dockMidiDevices->toggleViewAction());
+    ui->dockMidiDevices->toggleViewAction()->setShortcut(viewConfig->keyBinding->GetMainShortcut(KeyBind::midiDevices));
+
+    ui->menuView->addAction(ui->dockAudioDevices->toggleViewAction());
+    ui->mainToolBar->addAction(ui->dockAudioDevices->toggleViewAction());
+    ui->dockAudioDevices->toggleViewAction()->setShortcut(viewConfig->keyBinding->GetMainShortcut(KeyBind::audioDevices));
 }
 
 void MainWindowHost::resetSettings()

@@ -21,22 +21,15 @@
 #include "maingraphicsview.h"
 #include "globals.h"
 #include "models/programsmodel.h"
+#include "viewconfig.h"
 
 //using namespace View;
 
 MainGraphicsView::MainGraphicsView(QWidget * parent) :
     QGraphicsView(parent),
-    currentProgId(0)
+    currentProgId(0),
+    moving(false)
 {
-//    MainConfig::Get()->ListenToAction("sceneZoomIn",this);
-//    MainConfig::Get()->ListenToAction("sceneZoomOut",this);
-//    MainConfig::Get()->ListenToAction("sceneDrag",this);
-}
-
-MainGraphicsView::MainGraphicsView(QGraphicsScene * scene, QWidget * parent) :
-    QGraphicsView(scene, parent)
-{
-
 }
 
 void MainGraphicsView::ForceResize()
@@ -46,7 +39,24 @@ void MainGraphicsView::ForceResize()
 
 void MainGraphicsView::wheelEvent(QWheelEvent * event)
 {
-    if(event->modifiers() == Qt::ControlModifier) {
+    event->ignore();
+
+    QGraphicsSceneWheelEvent wheelEvent(QEvent::GraphicsSceneWheel);
+    wheelEvent.setWidget(viewport());
+    wheelEvent.setScenePos(mapToScene(event->pos()));
+    wheelEvent.setScreenPos(event->globalPos());
+    wheelEvent.setButtons(event->buttons());
+    wheelEvent.setModifiers(event->modifiers());
+    wheelEvent.setDelta(event->delta());
+    wheelEvent.setOrientation(event->orientation());
+    wheelEvent.setAccepted(false);
+    QApplication::sendEvent(scene(), &wheelEvent);
+    event->setAccepted(wheelEvent.isAccepted());
+    if(event->isAccepted())
+        return;
+
+    const KeyBind::MoveBind b = config->keyBinding->GetMoveSortcuts(KeyBind::zoom);
+    if(b.input == KeyBind::mouseWheel && b.modifier == event->modifiers()) {
         event->accept();
         if(event->delta()>0)
             zoomIn();
@@ -54,18 +64,66 @@ void MainGraphicsView::wheelEvent(QWheelEvent * event)
             zoomOut();
         return;
     }
-    QGraphicsView::wheelEvent(event);
+
 }
 
 void MainGraphicsView::mousePressEvent ( QMouseEvent * event )
 {
-    if(event->modifiers() == Qt::ControlModifier
-       && event->button() == Qt::MidButton) {
+    event->setAccepted(false);
+    QGraphicsView::mousePressEvent(event);
+
+    if(!event->isAccepted()) {
+        {
+            const KeyBind::MoveBind b = config->keyBinding->GetMoveSortcuts(KeyBind::zoomReset);
+            if(b.input == KeyBind::none && b.buttons == event->buttons() && b.modifier == event->modifiers()) {
+                event->accept();
+                zoomReset();
+                return;
+            }
+        }
+
+        {
+            const KeyBind::MoveBind b = config->keyBinding->GetMoveSortcuts(KeyBind::moveView);
+            if(b.input == KeyBind::mouse && b.buttons == event->buttons() && b.modifier == event->modifiers()) {
+                event->accept();
+                startMovePos=event->pos();
+                startDragMousePos=event->pos();
+                moving=true;
+                return;
+            }
+        }
+    }
+
+    if(moving)
+        moving=false;
+}
+
+void MainGraphicsView::mouseMoveEvent(QMouseEvent *event)
+{
+    event->setAccepted(false);
+    QGraphicsView::mouseMoveEvent(event);
+    if(event->isAccepted())
+        return;
+
+    if(moving && QLineF(event->pos(), startDragMousePos).length() > QApplication::startDragDistance()) {
         event->accept();
-        zoomReset();
+        QScrollBar *hBar = horizontalScrollBar();
+        QScrollBar *vBar = verticalScrollBar();
+        QPoint delta = event->pos() - startMovePos;
+        hBar->setValue(hBar->value() + (isRightToLeft() ? delta.x() : -delta.x()));
+        vBar->setValue(vBar->value() - delta.y());
+        startMovePos=event->pos();
+    }
+}
+
+void MainGraphicsView::mouseReleaseEvent(QMouseEvent *event)
+{
+    if(moving) {
+        event->accept();
+        moving=false;
         return;
     }
-    QGraphicsView::mousePressEvent(event);
+    QGraphicsView::mouseReleaseEvent(event);
 }
 
 //bool MainGraphicsView::event(QEvent *event)
