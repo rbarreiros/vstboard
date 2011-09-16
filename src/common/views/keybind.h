@@ -94,20 +94,27 @@ public:
     struct MoveBind {
         KeyBind::MoveInputs input;
         Qt::MouseButtons buttons;
-        Qt::KeyboardModifier modifier;
+        Qt::KeyboardModifiers modifier;
     };
 
     KeyBind(QObject *parent=0);
     const QString GetMainShortcut(const MainShortcuts id) const;
     const MoveBind GetMoveSortcuts(const MovesBindings id) const;
     QStandardItemModel * GetMainBindingModel();
+    void SetMainBindingModel(QStandardItemModel *model);
     QStandardItemModel * GetModesModel();
+    void SetModesModel(QStandardItemModel *model);
+
 private:
     QMap<MainShortcuts, QString>mapMainShortcuts;
     QMap<QString, QMap<MovesBindings, MoveBind> >mapModes;
     QStandardItemModel mainModel;
     QStandardItemModel modesModel;
     QString currentMode;
+
+signals:
+    void BindingChanged();
+    void ModeChanged();
 };
 
 #endif // KEYBIND_H

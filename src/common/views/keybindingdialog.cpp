@@ -36,7 +36,7 @@ QWidget *MoveTypeDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     QComboBox *editor = new QComboBox(parent);
     QMetaEnum moveInput =  KeyBind::staticMetaObject.enumerator( KeyBind::staticMetaObject.indexOfEnumerator("MoveInputs") );
     for(int i=0; i<moveInput.keyCount(); ++i) {
-        editor->addItem(moveInput.key(i));
+        editor->addItem(moveInput.key(i),moveInput.value(i));
     }
 
     return editor;
@@ -50,6 +50,7 @@ void MoveTypeDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, 
 {
     QComboBox *combo = static_cast<QComboBox*>(editor);
     model->setData(index, combo->currentText(), Qt::EditRole);
+    model->setData(index, combo->itemData(combo->currentIndex()), Qt::UserRole+1);
 }
 void MoveTypeDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &/* index */) const
 {
@@ -79,7 +80,7 @@ void MouseButtonsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
     painter->drawText(option.rect,str);
 }
 
-QSize MouseButtonsDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+QSize MouseButtonsDelegate::sizeHint(const QStyleOptionViewItem & /*option*/, const QModelIndex & /*index*/) const
 {
     return QSize(200,200);
 //    return QStyledItemDelegate::sizeHint(option, index);
@@ -124,13 +125,13 @@ void ModifierDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
     painter->drawText(option.rect,str);
 }
 
-QSize ModifierDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+QSize ModifierDelegate::sizeHint(const QStyleOptionViewItem & /*option*/, const QModelIndex & /*index*/) const
 {
     return QSize(200,200);
 //    return QStyledItemDelegate::sizeHint(option, index);
 }
 
-QWidget *ModifierDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &/* option */, const QModelIndex &index) const
+QWidget *ModifierDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem & /*option*/, const QModelIndex & /*index*/) const
 {
     ModifiersWidget *editor = new ModifiersWidget(parent);
     return editor;
@@ -175,6 +176,13 @@ KeyBindingDialog::KeyBindingDialog(KeyBind *bind, QWidget *parent) :
 KeyBindingDialog::~KeyBindingDialog()
 {
     delete ui;
+}
+
+void KeyBindingDialog::accept()
+{
+    bind->SetMainBindingModel(modelMain);
+    bind->SetModesModel(modelModes);
+    QDialog::accept();
 }
 
 void KeyBindingDialog::on_listModes_clicked(const QModelIndex &index)

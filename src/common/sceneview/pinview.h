@@ -109,6 +109,8 @@ namespace View {
 
         Qt::CursorShape defaultCursor;
 
+        QPoint startDragMousePos;
+
     signals:
         /*!
           emitted when a pin is drag&droped over another one

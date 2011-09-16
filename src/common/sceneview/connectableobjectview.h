@@ -47,6 +47,7 @@ namespace View {
 
         bool moving;
         QPointF moveOffset;
+        QPoint startDragMousePos;
 
     signals:
         void CommandStep(ConnectionInfo pinInfo, int delta);

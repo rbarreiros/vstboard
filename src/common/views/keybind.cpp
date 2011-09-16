@@ -142,12 +142,22 @@ QStandardItemModel * KeyBind::GetMainBindingModel()
     for(int i=0; i<n.keyCount(); ++i) {
         QList<QStandardItem*>listItems;
         QStandardItem *kName = new QStandardItem( QString(n.key(i)) );
+        kName->setData(n.value(i));
         kName->setEditable(false);
         listItems << kName;
         listItems << new QStandardItem( mapMainShortcuts.value( (MainShortcuts)n.value(i),"") );
         mainModel.invisibleRootItem()->appendRow(listItems);
     }
     return &mainModel;
+}
+
+void KeyBind::SetMainBindingModel(QStandardItemModel *model)
+{
+    mapMainShortcuts.clear();
+    for(int i=0; i<model->rowCount(); ++i) {
+        mapMainShortcuts.insert( (MainShortcuts)model->item(i,0)->data().toInt(), QKeySequence( model->item(i,1)->text() ).toString() );
+    }
+    emit BindingChanged();
 }
 
 QStandardItemModel * KeyBind::GetModesModel()
@@ -170,76 +180,65 @@ QStandardItemModel * KeyBind::GetModesModel()
         for(int j=0; j<n.keyCount(); ++j) {
             MoveBind mb = i.value().value((MovesBindings)n.value(j));
             QList<QStandardItem*>listItems;
-            QStandardItem *kName = new QStandardItem( QString(n.key(j)) );
-            kName->setEditable(false);
-            listItems << kName;
-            listItems << new QStandardItem( moveInput.valueToKey(mb.input) );
-            QStandardItem *m = new QStandardItem();
-            m->setData(static_cast<int>(mb.buttons),Qt::EditRole);
-            listItems << m;
 
-            QStandardItem *mod = new QStandardItem();
-            mod->setData(static_cast<int>(mb.modifier),Qt::EditRole);
-            listItems << mod;
+            QStandardItem *keyItem = new QStandardItem( QString(n.key(j)) );
+            keyItem->setData(static_cast<int>(n.value(j)));
+            keyItem->setEditable(false);
+            listItems << keyItem;
 
+            QStandardItem *moveItem = new QStandardItem( moveInput.valueToKey(mb.input) );
+            moveItem->setData(static_cast<int>(mb.input));
+            listItems << moveItem;
 
-//            QStandardItem *lmb = new QStandardItem();
-//            lmb->setData(QVariant(),Qt::DisplayRole);
-//            lmb->setCheckable(true);
-//            if(mb.buttons & Qt::LeftButton)
-//                lmb->setCheckState(Qt::Checked);
-//            listItems << lmb;
+            QStandardItem *buttonsItem = new QStandardItem();
+            buttonsItem->setData(static_cast<int>(mb.buttons),Qt::EditRole);
+            listItems << buttonsItem;
 
-//            QStandardItem *mmb = new QStandardItem();
-//            mmb->setData(QVariant(),Qt::DisplayRole);
-//            mmb->setCheckable(true);
-//            if(mb.buttons & Qt::MiddleButton)
-//                mmb->setCheckState(Qt::Checked);
-//            listItems << mmb;
+            QStandardItem *modifiersItem = new QStandardItem();
+            modifiersItem->setData(static_cast<int>(mb.modifier),Qt::EditRole);
+            listItems << modifiersItem;
 
-//            QStandardItem *rmb = new QStandardItem();
-//            rmb->setCheckable(true);
-//            if(mb.buttons & Qt::RightButton)
-//                rmb->setCheckState(Qt::Checked);
-//            listItems << rmb;
-
-//            QStandardItem *mb4 = new QStandardItem();
-//            mb4->setCheckable(true);
-//            if(mb.buttons & Qt::XButton1)
-//                mb4->setCheckState(Qt::Checked);
-//            listItems << mb4;
-
-//            QStandardItem *mb5 = new QStandardItem();
-//            mb5->setCheckable(true);
-//            if(mb.buttons & Qt::XButton2)
-//                mb5->setCheckState(Qt::Checked);
-//            listItems << mb5;
-
-//            QStandardItem *shift = new QStandardItem();
-//            shift->setCheckable(true);
-//            if(mb.modifier & Qt::ShiftModifier)
-//                shift->setCheckState(Qt::Checked);
-//            listItems << shift;
-
-//            QStandardItem *ctrl = new QStandardItem();
-//            ctrl->setCheckable(true);
-//            if(mb.modifier & Qt::ControlModifier)
-//                ctrl->setCheckState(Qt::Checked);
-//            listItems << ctrl;
-
-//            QStandardItem *alt = new QStandardItem();
-//            alt->setCheckable(true);
-//            if(mb.modifier & Qt::AltModifier)
-//                alt->setCheckState(Qt::Checked);
-//            listItems << alt;
             mode->appendRow(listItems);
         }
         modesModel.appendRow(mode);
         ++i;
     }
-
-
     return &modesModel;
+}
+
+void KeyBind::SetModesModel(QStandardItemModel *model)
+{
+    mapModes.clear();
+    for(int mode=0; mode<model->rowCount(); ++mode) {
+        QStandardItem *modeItem = model->item(mode);
+        QMap<MovesBindings, MoveBind>mapMove;
+        for(int move=0; move<modeItem->rowCount(); ++move) {
+            MoveBind bind;
+
+            int mv = modeItem->child(move,0)->data().toInt();
+
+            int in = modeItem->child(move,1)->data().toInt();
+            bind.input = static_cast<MoveInputs>(in);
+
+            bind.buttons=0;
+            int bt = modeItem->child(move,2)->data(Qt::EditRole).toInt();
+            if(bt & Qt::LeftButton) bind.buttons |= Qt::LeftButton;
+            if(bt & Qt::MiddleButton) bind.buttons |= Qt::MiddleButton;
+            if(bt & Qt::RightButton) bind.buttons |= Qt::RightButton;
+            if(bt & Qt::XButton1) bind.buttons |= Qt::XButton1;
+            if(bt & Qt::XButton2) bind.buttons |= Qt::XButton2;
+
+            bind.modifier=0;
+            int mod = modeItem->child(move,3)->data(Qt::EditRole).toInt();
+            if(mod & Qt::ShiftModifier) bind.modifier |= Qt::ShiftModifier;
+            if(mod & Qt::ControlModifier) bind.modifier |= Qt::ControlModifier;
+            if(mod & Qt::AltModifier) bind.modifier |= Qt::AltModifier;
+
+            mapMove.insert( static_cast<MovesBindings>(mv), bind );
+        }
+        mapModes.insert(modeItem->text(),mapMove);
+    }
+    emit ModeChanged();
 }
 
 const QString KeyBind::GetMainShortcut(const MainShortcuts id) const

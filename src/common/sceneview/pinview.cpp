@@ -121,8 +121,10 @@ QVariant PinView::itemChange ( GraphicsItemChange change, const QVariant & value
 void PinView::mousePressEvent ( QGraphicsSceneMouseEvent * event )
 {
     const KeyBind::MoveBind b = config->keyBinding.GetMoveSortcuts(KeyBind::createCable);
-    if(b.input == KeyBind::mouse && b.buttons == event->button() && b.modifier == event->modifiers()) {
+    if(b.input == KeyBind::mouse && b.buttons == event->buttons() && b.modifier == event->modifiers()) {
+        startDragMousePos = event->screenPos();
         setCursor(defaultCursor);
+        event->accept();
         return;
     }
 
@@ -135,8 +137,7 @@ void PinView::mousePressEvent ( QGraphicsSceneMouseEvent * event )
   */
 void PinView::mouseMoveEvent ( QGraphicsSceneMouseEvent  * event )
 {
-
-    if (QLineF(event->screenPos(), event->buttonDownScreenPos(Qt::LeftButton)).length() < QApplication::startDragDistance()) {
+    if (QLineF(event->screenPos(), startDragMousePos).length() < QApplication::startDragDistance()) {
         return;
     }
 

@@ -68,6 +68,9 @@ protected:
     Ui::MainWindow *ui;
     MainHost *myHost;
 
+    QAction *actUndo;
+    QAction *actRedo;
+
     View::ViewConfigDialog *viewConfigDlg;
 
 public slots:
@@ -94,6 +97,7 @@ private slots:
     virtual void on_actionRefresh_Midi_devices_triggered() {}
     virtual void on_actionRefresh_Audio_devices_triggered() {}
     void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
+    void UpdateKeyBinding();
 
     void on_solverView_clicked(const QModelIndex &index);
     void on_actionAppearance_toggled(bool arg1);

@@ -69,48 +69,57 @@ void MainGraphicsView::wheelEvent(QWheelEvent * event)
 
 void MainGraphicsView::mousePressEvent ( QMouseEvent * event )
 {
+    event->setAccepted(false);
     QGraphicsView::mousePressEvent(event);
-    if(event->isAccepted())
-        return;
 
-    {
-        const KeyBind::MoveBind b = config->keyBinding.GetMoveSortcuts(KeyBind::zoomReset);
-        if(b.input == KeyBind::none && b.buttons == event->buttons() && b.modifier == event->modifiers()) {
-            event->accept();
-            zoomReset();
-            return;
+    if(!event->isAccepted()) {
+        {
+            const KeyBind::MoveBind b = config->keyBinding.GetMoveSortcuts(KeyBind::zoomReset);
+            if(b.input == KeyBind::none && b.buttons == event->buttons() && b.modifier == event->modifiers()) {
+                event->accept();
+                zoomReset();
+                return;
+            }
+        }
+
+        {
+            const KeyBind::MoveBind b = config->keyBinding.GetMoveSortcuts(KeyBind::moveView);
+            if(b.input == KeyBind::mouse && b.buttons == event->buttons() && b.modifier == event->modifiers()) {
+                event->accept();
+                startMovePos=event->pos();
+                startDragMousePos=event->pos();
+                moving=true;
+                return;
+            }
         }
     }
 
-    {
-        const KeyBind::MoveBind b = config->keyBinding.GetMoveSortcuts(KeyBind::moveView);
-        if(b.input == KeyBind::mouse && b.buttons == event->buttons() && b.modifier == event->modifiers()) {
-            event->accept();
-            moving=true;
-            startMovePos=event->pos();
-            return;
-        }
-    }
-
+    if(moving)
+        moving=false;
 }
 
 void MainGraphicsView::mouseMoveEvent(QMouseEvent *event)
 {
-    if(moving) {
+    event->setAccepted(false);
+    QGraphicsView::mouseMoveEvent(event);
+    if(event->isAccepted())
+        return;
+
+    if(moving && QLineF(event->pos(), startDragMousePos).length() > QApplication::startDragDistance()) {
+        event->accept();
         QScrollBar *hBar = horizontalScrollBar();
         QScrollBar *vBar = verticalScrollBar();
         QPoint delta = event->pos() - startMovePos;
         hBar->setValue(hBar->value() + (isRightToLeft() ? delta.x() : -delta.x()));
         vBar->setValue(vBar->value() - delta.y());
         startMovePos=event->pos();
-        return;
     }
-    QGraphicsView::mouseMoveEvent(event);
 }
 
 void MainGraphicsView::mouseReleaseEvent(QMouseEvent *event)
 {
     if(moving) {
+        event->accept();
         moving=false;
         return;
     }

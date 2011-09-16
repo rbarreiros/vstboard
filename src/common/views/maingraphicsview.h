@@ -68,6 +68,7 @@ namespace View {
         View::ViewConfig *config;
         bool moving;
         QPoint startMovePos;
+        QPoint startDragMousePos;
 
     signals:
         void viewResized(QRectF trans);

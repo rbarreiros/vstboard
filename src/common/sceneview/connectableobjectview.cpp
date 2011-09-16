@@ -106,24 +106,38 @@ void ConnectableObjectView::resizeEvent ( QGraphicsSceneResizeEvent * event )
 
 void ConnectableObjectView::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    const KeyBind::MoveBind b = config->keyBinding.GetMoveSortcuts(KeyBind::moveObject);
-    if(b.input == KeyBind::mouse && b.modifier == event->modifiers() && b.buttons == event->buttons()) {
-        event->accept();
-        moving=true;
-        moveOffset=pos()-mapToParent(mapFromScene(event->scenePos()));
+    event->setAccepted(false);
+    QGraphicsWidget::mousePressEvent(event);
+    if(!event->isAccepted()) {
+
+        const KeyBind::MoveBind b = config->keyBinding.GetMoveSortcuts(KeyBind::moveObject);
+        if(b.input == KeyBind::mouse && b.modifier == event->modifiers() && b.buttons == event->buttons()) {
+            event->accept();
+            moveOffset=pos()-mapToParent(mapFromScene(event->scenePos()));
+            startDragMousePos = event->screenPos();
+            moving=true;
+            return;
+        }
+    }
+
+    if(moving) {
+        moving=false;
+        model->setData(objIndex,pos(),UserRoles::position);
         return;
     }
-    QGraphicsWidget::mousePressEvent(event);
 }
 
 void ConnectableObjectView::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    if(moving) {
+    event->setAccepted(false);
+    QGraphicsWidget::mouseMoveEvent(event);
+    if(event->isAccepted())
+        return;
+
+    if(moving && QLineF(event->screenPos(), startDragMousePos).length() > QApplication::startDragDistance()) {
         event->accept();
         setPos(mapToParent(mapFromScene(event->scenePos()))+moveOffset);
-        return;
     }
-    QGraphicsWidget::mouseMoveEvent(event);
 }
 
 /*!
@@ -135,6 +149,7 @@ void ConnectableObjectView::mouseReleaseEvent ( QGraphicsSceneMouseEvent * event
     if(moving) {
         moving=false;
         model->setData(objIndex,pos(),UserRoles::position);
+        event->accept();
         return;
     }
     QGraphicsWidget::mouseReleaseEvent(event);

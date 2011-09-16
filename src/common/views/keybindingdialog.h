@@ -87,6 +87,9 @@ private:
     MoveTypeDelegate moveDelegate;
     MouseButtonsDelegate buttonsDelegate;
     ModifierDelegate modDelegate;
+
+public slots:
+    void accept();
 };
 
 #endif // KEYBINDINGDIALOG_H
