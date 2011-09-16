@@ -256,12 +256,12 @@ void KeyBind::SetDefaults()
     {
         QMap<MovesBindings, MoveBind>mapMv;
         {
-            MoveBind b={mouseWheel, Qt::NoButton, Qt::NoModifier};
+            MoveBind b={mouseWheel, Qt::NoButton, Qt::ControlModifier};
             mapMv.insert( zoom, b );
         }
 
         {
-            MoveBind b={none, Qt::MiddleButton, Qt::NoModifier};
+            MoveBind b={none, Qt::MiddleButton, Qt::ControlModifier};
             mapMv.insert( zoomReset, b );
         }
 
@@ -295,12 +295,12 @@ void KeyBind::SetDefaults()
     {
         QMap<MovesBindings, MoveBind>mapMv;
         {
-            MoveBind b={mouseWheel, Qt::NoButton, Qt::NoModifier};
+            MoveBind b={mouseWheel, Qt::NoButton, Qt::ControlModifier};
             mapMv.insert( zoom, b );
         }
 
         {
-            MoveBind b={none, Qt::MiddleButton, Qt::NoModifier};
+            MoveBind b={none, Qt::MiddleButton, Qt::ControlModifier};
             mapMv.insert( zoomReset, b );
         }
 

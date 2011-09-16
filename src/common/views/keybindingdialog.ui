@@ -23,7 +23,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="keys_tab">
       <attribute name="icon">
@@ -95,9 +95,6 @@
          </property>
          <property name="contextMenuPolicy">
           <enum>Qt::NoContextMenu</enum>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
          </property>
          <property name="selectionBehavior">
           <enum>QAbstractItemView::SelectRows</enum>

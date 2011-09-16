@@ -1200,7 +1200,7 @@
     <string>Keyboard mapping</string>
    </property>
    <property name="toolTip">
-    <string>Keyboard mapping</string>
+    <string>Keyboard and Mouse mapping</string>
    </property>
   </action>
  </widget>
