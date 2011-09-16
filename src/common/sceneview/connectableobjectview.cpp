@@ -110,7 +110,7 @@ void ConnectableObjectView::mousePressEvent(QGraphicsSceneMouseEvent *event)
     QGraphicsWidget::mousePressEvent(event);
     if(!event->isAccepted()) {
 
-        const KeyBind::MoveBind b = config->keyBinding.GetMoveSortcuts(KeyBind::moveObject);
+        const KeyBind::MoveBind b = config->keyBinding->GetMoveSortcuts(KeyBind::moveObject);
         if(b.input == KeyBind::mouse && b.modifier == event->modifiers() && b.buttons == event->buttons()) {
             event->accept();
             moveOffset=pos()-mapToParent(mapFromScene(event->scenePos()));

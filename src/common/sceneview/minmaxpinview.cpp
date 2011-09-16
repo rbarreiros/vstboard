@@ -170,7 +170,7 @@ void MinMaxPinView::ValueChanged(float newVal)
 
 void MinMaxPinView::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    const KeyBind::MoveBind b = config->keyBinding.GetMoveSortcuts(KeyBind::changeValue);
+    const KeyBind::MoveBind b = config->keyBinding->GetMoveSortcuts(KeyBind::changeValue);
     if(b.input == KeyBind::mouse && b.buttons == event->buttons() && b.modifier == event->modifiers()) {
         changingValue=true;
         startDragPos=event->pos();
@@ -225,7 +225,7 @@ void MinMaxPinView::mouseReleaseEvent ( QGraphicsSceneMouseEvent  * event )
 
 void MinMaxPinView::wheelEvent ( QGraphicsSceneWheelEvent * event )
 {
-    const KeyBind::MoveBind b = config->keyBinding.GetMoveSortcuts(KeyBind::changeValue);
+    const KeyBind::MoveBind b = config->keyBinding->GetMoveSortcuts(KeyBind::changeValue);
     if(b.input == KeyBind::mouseWheel && b.modifier == event->modifiers()) {
         event->accept();
 

@@ -97,11 +97,11 @@ void MainWindowHost::readSettings()
 
     ui->menuView->addAction(ui->dockMidiDevices->toggleViewAction());
     ui->mainToolBar->addAction(ui->dockMidiDevices->toggleViewAction());
-    ui->dockMidiDevices->toggleViewAction()->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::midiDevices));
+    ui->dockMidiDevices->toggleViewAction()->setShortcut(viewConfig->keyBinding->GetMainShortcut(KeyBind::midiDevices));
 
     ui->menuView->addAction(ui->dockAudioDevices->toggleViewAction());
     ui->mainToolBar->addAction(ui->dockAudioDevices->toggleViewAction());
-    ui->dockAudioDevices->toggleViewAction()->setShortcut(viewConfig->keyBinding.GetMainShortcut(KeyBind::audioDevices));
+    ui->dockAudioDevices->toggleViewAction()->setShortcut(viewConfig->keyBinding->GetMainShortcut(KeyBind::audioDevices));
 }
 
 void MainWindowHost::resetSettings()

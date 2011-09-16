@@ -97,7 +97,7 @@ void CursorView::setPos ( qreal x, qreal y )
 
 void CursorView::mousePressEvent ( QGraphicsSceneMouseEvent * event )
 {
-    const KeyBind::MoveBind b = config->keyBinding.GetMoveSortcuts(KeyBind::changeCursorValue);
+    const KeyBind::MoveBind b = config->keyBinding->GetMoveSortcuts(KeyBind::changeCursorValue);
     if(b.input == KeyBind::mouse && b.buttons == event->button() && b.modifier == event->modifiers()) {
         event->accept();
         drag=true;
@@ -140,7 +140,7 @@ void CursorView::mouseReleaseEvent ( QGraphicsSceneMouseEvent * event )
 
 void CursorView::wheelEvent ( QGraphicsSceneWheelEvent * event )
 {
-    const KeyBind::MoveBind b = config->keyBinding.GetMoveSortcuts(KeyBind::changeCursorValue);
+    const KeyBind::MoveBind b = config->keyBinding->GetMoveSortcuts(KeyBind::changeCursorValue);
     if(b.input == KeyBind::mouseWheel && b.modifier == event->modifiers()) {
         event->accept();
 

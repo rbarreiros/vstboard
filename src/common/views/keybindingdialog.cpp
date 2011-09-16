@@ -182,6 +182,7 @@ void KeyBindingDialog::accept()
 {
     bind->SetMainBindingModel(modelMain);
     bind->SetModesModel(modelModes);
+    bind->SaveInRegistry();
     QDialog::accept();
 }
 
