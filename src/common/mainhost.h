@@ -139,7 +139,6 @@ private:
     QMap<int,Connectables::Object*>listContainers;
     QMap<ConnectionInfo,Connectables::Pin*>listPins;
 
-
     hashCables workingListOfCables;
     QMutex *mutexListCables;
     Renderer *renderer;

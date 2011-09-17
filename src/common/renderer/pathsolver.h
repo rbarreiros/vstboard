@@ -23,6 +23,7 @@
 
 //#include "precomp.h"
 #include "connectables/object.h"
+#include "connectables/cable.h"
 #include "solvernode.h"
 #include "globals.h"
 #include "renderer.h"
@@ -38,6 +39,7 @@ public:
     explicit PathSolver(MainHost *parent);
     ~PathSolver();
     void Resolve(hashCables cables, Renderer *renderer);
+    void UpdateDelays();
 
 protected:
     void Clear();
@@ -53,6 +55,7 @@ protected:
     bool SynchronizeParentNodes(SolverNode *node, long targetDelay);
     bool SynchronizeAudioOutputs();
     void CreateDelayNode(SolverNode *node, SolverNode *childNode, long delay);
+    void GetListCablesConnectedTo(quint16 objId, QList<Connectables::Cable*> &list);
     void GetListPinsConnectedTo(ConnectionInfo out, QList<ConnectionInfo> &list);
 
     QList<SolverNode*> ListOfGoodStarts(const QList<SolverNode*>&loop);

@@ -24,13 +24,17 @@
 #include "connectioninfo.h"
 
 class MainHost;
+class CircularBuffer;
+class AudioBuffer;
 namespace Connectables {
 
+    class Pin;
     class Cable
     {
     public:
         Cable(MainHost *myHost,const ConnectionInfo &pinOut, const ConnectionInfo &pinIn);
         Cable(const Cable & c);
+        ~Cable();
         void AddToParentNode(const QModelIndex &parentIndex);
         void RemoveFromParentNode(const QModelIndex &parentIndex);
 
@@ -46,6 +50,11 @@ namespace Connectables {
           */
         inline const ConnectionInfo & GetInfoIn() const {return pinIn;}
 
+
+        bool SetDelay(unsigned long d);
+        unsigned long GetDelay() { return delay; }
+        void Render(const PinMessage::Enum msgType,void *data);
+
     protected:
         /// the output pin (from the sender object)
         const ConnectionInfo pinOut;
@@ -58,7 +67,13 @@ namespace Connectables {
 
         /// pointer to the MainHost
         MainHost *myHost;
+
+        CircularBuffer *buffer;
+        unsigned long delay;
+        AudioBuffer *tmpBuf;
     };
 }
+
+typedef QMultiMap<ConnectionInfo, Connectables::Cable*> hashCables;
 
 #endif // CABLE_H

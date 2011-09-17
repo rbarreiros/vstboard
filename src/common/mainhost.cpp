@@ -661,14 +661,14 @@ void MainHost::SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum ms
 
     hashCables::const_iterator i = workingListOfCables.constFind(senderPin);
     while (i != workingListOfCables.constEnd()  && i.key() == senderPin) {
-        const ConnectionInfo &destPin = i.value();
-        Connectables::Pin *pin = objFactory->GetPin(destPin);
-        if(!pin) {
-            LOG("unknown pin"<<destPin.objId<<"from"<<senderPin.objId);
-            return;
-        }
-
-        pin->ReceiveMsg(msgType,data);
+//        const ConnectionInfo &destPin = i.value();
+//        Connectables::Pin *pin = objFactory->GetPin(destPin);
+//        if(!pin) {
+//            LOG("unknown pin"<<destPin.objId<<"from"<<senderPin.objId);
+//            return;
+//        }
+//        pin->ReceiveMsg(msgType,data);
+        i.value()->Render(msgType,data);
         ++i;
     }
 }
@@ -733,14 +733,24 @@ void MainHost::Render()
 void MainHost::OnCableAdded(Connectables::Cable *cab)
 {
     mutexListCables->lock();
-    workingListOfCables.insert(cab->GetInfoOut(),cab->GetInfoIn());
+    workingListOfCables.insert(cab->GetInfoOut(),cab);
     mutexListCables->unlock();
 }
 
 void MainHost::OnCableRemoved(Connectables::Cable *cab)
 {
     mutexListCables->lock();
-    workingListOfCables.remove(cab->GetInfoOut(),cab->GetInfoIn());
+    hashCables::iterator i = workingListOfCables.find(cab->GetInfoOut());
+    while(i!=workingListOfCables.end() && i.key()==cab->GetInfoOut()) {
+        if(i.value()->GetInfoIn()==cab->GetInfoIn()) {
+            i=workingListOfCables.erase(i);
+            mutexListCables->unlock();
+            return;
+        } else {
+            ++i;
+        }
+    }
+//    workingListOfCables.remove(cab->GetInfoOut(),cab);
     mutexListCables->unlock();
 }
 
