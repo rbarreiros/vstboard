@@ -45,7 +45,11 @@ namespace View {
         void SetViewProgram(int progId);
         void RemoveViewProgram(int prg);
 
-        void SetViewConfig(View::ViewConfig *conf) {config = conf;}
+        void SetViewConfig(View::ViewConfig *conf);
+
+        QAction *actZoomIn;
+        QAction *actZoomOut;
+        QAction *actZoomReset;
 
     protected:
         void wheelEvent(QWheelEvent * event);
@@ -81,6 +85,7 @@ namespace View {
         void SetViewProgram(const QModelIndex &idx);
         void RemoveViewProgram(const QModelIndex &idx);
         void ClearViewPrograms();
+        void UpdateKeyBinding();
     };
 
 //}

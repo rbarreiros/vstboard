@@ -70,6 +70,7 @@ namespace View {
 
         void SetEditorPin(MinMaxPinView *pin, float value);
         void SetLearnPin(MinMaxPinView *pin, float value);
+        void SetBypassPin(MinMaxPinView *pin, float value);
 
     protected:
         virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
@@ -112,6 +113,9 @@ namespace View {
         //switch learn mode
         QAction *actLearnSwitch;
 
+        QAction *actToggleBypass;
+
+
         /// true if a shrink is already in progress
         bool shrinkAsked;
 
@@ -122,10 +126,12 @@ namespace View {
 
         MinMaxPinView *editorPin;
         MinMaxPinView *learnPin;
+        MinMaxPinView *bypassPin;
 
     private slots:
         void SwitchEditor(bool show);
         void SwitchLearnMode(bool on);
+        void ToggleBypass(bool b);
 
     public slots:
         void ShrinkNow();
@@ -134,6 +140,7 @@ namespace View {
         virtual void HighlightStop() {}
         void RemoveWithBridge();
         void ToggleEditor();
+        virtual void UpdateKeyBinding();
 
     friend class PinView;
     };

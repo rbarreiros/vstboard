@@ -252,6 +252,22 @@ void KeyBind::SetDefaults()
     mapMainShortcuts.insert(redo,                "Ctrl+Y");
     mapMainShortcuts.insert(refreashAudioDevices,"Ctrl+F5");
     mapMainShortcuts.insert(refreashMidiDevices, "Alt+F5");
+    mapMainShortcuts.insert(zoomIn,              "PgUp");
+    mapMainShortcuts.insert(zoomOut,             "PgDown");
+    mapMainShortcuts.insert(zoomReset,           "Home");
+
+    mapMainShortcuts.insert(deleteObject,       "Delete");
+    mapMainShortcuts.insert(deleteObjectWithCables, "Ctrl+Delete");
+    mapMainShortcuts.insert(toggleEditor,       "E");
+    mapMainShortcuts.insert(toggleLearnMode,    "L");
+    mapMainShortcuts.insert(toggleBypass,       "B");
+    mapMainShortcuts.insert(saveBank,           "Ctrl+B");
+    mapMainShortcuts.insert(saveBankAs,         "Ctrl+Shift+B");
+    mapMainShortcuts.insert(saveProgram,        "Ctrl+P");
+    mapMainShortcuts.insert(saveProgramAs,      "Ctrl+Shift+P");
+
+    mapMainShortcuts.insert(unplugPin,          "Backspace");
+    mapMainShortcuts.insert(deletePin,          "Delete");
 
     {
         QMap<MovesBindings, MoveBind>mapMv;
@@ -262,7 +278,7 @@ void KeyBind::SetDefaults()
 
         {
             MoveBind b={none, Qt::MiddleButton, Qt::ControlModifier};
-            mapMv.insert( zoomReset, b );
+            mapMv.insert( zoomResetMouse, b );
         }
 
         {
@@ -301,7 +317,7 @@ void KeyBind::SetDefaults()
 
         {
             MoveBind b={none, Qt::MiddleButton, Qt::ControlModifier};
-            mapMv.insert( zoomReset, b );
+            mapMv.insert( zoomResetMouse, b );
         }
 
         {

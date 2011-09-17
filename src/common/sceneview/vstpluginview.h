@@ -29,6 +29,7 @@ namespace View {
         void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
         void HighlightStart();
         void HighlightStop();
+        void UpdateKeyBinding();
     };
 }
 

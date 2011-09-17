@@ -56,7 +56,6 @@ PinView::PinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, 
             this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)) );
 
     actDel = new QAction(QIcon(":/img16x16/delete.png"),tr("Remove"),this);
-    actDel->setShortcut( Qt::Key_Delete );
     actDel->setShortcutContext(Qt::WidgetShortcut);
     connect(actDel,SIGNAL(triggered()),
             this,SLOT(RemovePin()));
@@ -65,15 +64,22 @@ PinView::PinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, 
         addAction(actDel);
 
     actUnplug = new QAction(QIcon(":/img16x16/editcut.png"),tr("Unplug"),this);
-    actUnplug->setShortcut( Qt::Key_Backspace );
     actUnplug->setShortcutContext(Qt::WidgetShortcut);
     actUnplug->setEnabled(false);
     connect(actUnplug,SIGNAL(triggered()),
             this,SLOT(Unplug()));
     addAction(actUnplug);
 
-
+    UpdateKeyBinding();
+    connect(config->keyBinding, SIGNAL(BindingChanged()),
+            this, SLOT(UpdateKeyBinding()));
     setFocusPolicy(Qt::WheelFocus);
+}
+
+void PinView::UpdateKeyBinding()
+{
+    if(actDel) actDel->setShortcut( config->keyBinding->GetMainShortcut(KeyBind::deletePin) );
+    if(actUnplug) actUnplug->setShortcut( config->keyBinding->GetMainShortcut(KeyBind::unplugPin) );
 }
 
 /*!

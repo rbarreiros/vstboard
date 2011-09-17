@@ -131,6 +131,9 @@ void MinMaxPinView::UpdateModelIndex(const QModelIndex &index)
         if(connectInfo.pinNumber == FixedPinNumber::learningMode) {
             parentObj->SetLearnPin(this, value);
         }
+        if(connectInfo.pinNumber == FixedPinNumber::bypass) {
+            parentObj->SetBypassPin(this, value);
+        }
     }
 }
 

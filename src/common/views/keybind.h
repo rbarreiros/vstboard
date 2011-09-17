@@ -62,14 +62,22 @@ public:
         undo,
         redo,
         refreashAudioDevices,
-        refreashMidiDevices
-        /*
-        zoomIn,
-        zoomOut,
-        zoomDefault,
+        refreashMidiDevices,
         deleteObject,
         deleteObjectWithCables,
+        toggleEditor,
+        toggleLearnMode,
+        toggleBypass,
         unplugPin,
+        deletePin,
+        saveBank,
+        saveBankAs,
+        saveProgram,
+        saveProgramAs,
+        zoomIn,
+        zoomOut,
+        zoomReset
+        /*
         increaseValue,
         decreaseValue
 
@@ -84,7 +92,7 @@ public:
 
     enum MovesBindings {
         zoom,
-        zoomReset,
+        zoomResetMouse,
         moveView,
         moveObject,
         createCable,

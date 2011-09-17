@@ -132,6 +132,7 @@ namespace View {
         virtual void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color) {}
         void RemovePin();
         void Unplug();
+        void UpdateKeyBinding();
 
     friend class Cable;
     };

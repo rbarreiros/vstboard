@@ -37,6 +37,7 @@
     #include <algorithm>
 
     #include <QtGui/QAction>
+    #include <QAbstractButton>
     #include <QAbstractItemView>
     #include <QtAlgorithms>
     #include <QtGui/QApplication>
@@ -85,6 +86,7 @@
     #include <QObject>
     #include <QtGui/QPainter>
     #include <QtGui/QPen>
+    #include <QPushButton>
     #include <QReadWriteLock>
     #include <QScrollBar>
     #include <QSemaphore>

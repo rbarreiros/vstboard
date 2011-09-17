@@ -75,9 +75,13 @@ class KeyBindingDialog : public QDialog
 public:
     explicit KeyBindingDialog(KeyBind *bind, QWidget *parent = 0);
     ~KeyBindingDialog();
+private:
+    void Init();
 
 private slots:
     void on_listModes_clicked(const QModelIndex &index);
+
+    void on_buttonBox_clicked(QAbstractButton *button);
 
 private:
     Ui::KeyBindingDialog *ui;

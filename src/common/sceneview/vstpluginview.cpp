@@ -23,7 +23,11 @@
 using namespace View;
 
 VstPluginView::VstPluginView(MainHost *myHost,QAbstractItemModel *model,MainContainerView * parent, Qt::WindowFlags wFlags) :
-    ConnectableObjectView(myHost,model,parent,wFlags)
+    ConnectableObjectView(myHost,model,parent,wFlags),
+    actSaveBank(0),
+    actSaveBankAs(0),
+    actSaveProgram(0),
+    actSaveProgramAs(0)
 {
     setObjectName("vstPluginView");
 
@@ -62,14 +66,12 @@ void VstPluginView::SetModelIndex(QPersistentModelIndex index)
     ConnectableObjectView::SetModelIndex(index);
 
     actSaveBank = new QAction(QIcon(":/img16x16/filesave.png"),tr("Save Bank"),this);
-    actSaveBank->setShortcut( Qt::CTRL + Qt::Key_B );
     actSaveBank->setShortcutContext(Qt::WidgetShortcut);
     connect(actSaveBank,SIGNAL(triggered()),
             this,SLOT(SaveBank()));
     addAction(actSaveBank);
 
     actSaveBankAs = new QAction(QIcon(":/img16x16/filesaveas.png"),tr("Save Bank As..."),this);
-    actSaveBankAs->setShortcut( Qt::CTRL + Qt::SHIFT + Qt::Key_B );
     actSaveBankAs->setShortcutContext(Qt::WidgetShortcut);
     connect(actSaveBankAs,SIGNAL(triggered()),
             this,SLOT(SaveBankAs()));
@@ -77,19 +79,28 @@ void VstPluginView::SetModelIndex(QPersistentModelIndex index)
     addAction(actSaveBankAs);
 
     actSaveProgram = new QAction(QIcon(":/img16x16/filesave.png"),tr("Save Program"),this);
-    actSaveProgram->setShortcut( Qt::CTRL + Qt::Key_P );
     actSaveProgram->setShortcutContext(Qt::WidgetShortcut);
     connect(actSaveProgram,SIGNAL(triggered()),
             this,SLOT(SaveProgram()));
     addAction(actSaveProgram);
 
     actSaveProgramAs = new QAction(QIcon(":/img16x16/filesaveas.png"),tr("Save Program As..."),this);
-    actSaveProgramAs->setShortcut( Qt::CTRL + Qt::SHIFT + Qt::Key_P );
     actSaveProgramAs->setShortcutContext(Qt::WidgetShortcut);
     connect(actSaveProgramAs,SIGNAL(triggered()),
             this,SLOT(SaveProgramAs()));
     actSaveProgramAs->setEnabled(false);
     addAction(actSaveProgramAs);
+
+    UpdateKeyBinding();
+}
+
+void VstPluginView::UpdateKeyBinding()
+{
+    ObjectView::UpdateKeyBinding();
+    if(actSaveBank) actSaveBank->setShortcut( config->keyBinding->GetMainShortcut(KeyBind::saveBank) );
+    if(actSaveBankAs) actSaveBankAs->setShortcut( config->keyBinding->GetMainShortcut(KeyBind::saveBankAs) );
+    if(actSaveProgram) actSaveProgram->setShortcut( config->keyBinding->GetMainShortcut(KeyBind::saveProgram) );
+    if(actSaveProgramAs) actSaveProgramAs->setShortcut( config->keyBinding->GetMainShortcut(KeyBind::saveProgramAs) );
 }
 
 void VstPluginView::UpdateModelIndex()

@@ -28,8 +28,43 @@
 MainGraphicsView::MainGraphicsView(QWidget * parent) :
     QGraphicsView(parent),
     currentProgId(0),
-    moving(false)
+    moving(false),
+    actZoomIn(0),
+    actZoomOut(0),
+    actZoomReset(0)
 {
+    actZoomIn = new QAction(tr("Zoom in"), this);
+    actZoomIn->setShortcutContext(Qt::WidgetShortcut);
+    connect(actZoomIn,SIGNAL(triggered()),
+            this, SLOT(zoomIn()));
+    addAction(actZoomIn);
+
+    actZoomOut = new QAction(tr("Zoom out"), this);
+    actZoomOut->setShortcutContext(Qt::WidgetShortcut);
+    connect(actZoomOut,SIGNAL(triggered()),
+            this, SLOT(zoomOut()));
+    addAction(actZoomOut);
+
+    actZoomReset = new QAction(tr("Zoom reset"), this);
+    actZoomReset->setShortcutContext(Qt::WidgetShortcut);
+    connect(actZoomReset,SIGNAL(triggered()),
+            this,SLOT(zoomReset()));
+    addAction(actZoomReset);
+}
+
+void MainGraphicsView::SetViewConfig(View::ViewConfig *conf)
+{
+    config = conf;
+    connect(config->keyBinding,SIGNAL(BindingChanged()),
+            this,SLOT(UpdateKeyBinding()));
+    UpdateKeyBinding();
+}
+
+void MainGraphicsView::UpdateKeyBinding()
+{
+    if(actZoomIn) actZoomIn->setShortcut( config->keyBinding->GetMainShortcut(KeyBind::zoomIn) );
+    if(actZoomOut) actZoomOut->setShortcut( config->keyBinding->GetMainShortcut(KeyBind::zoomOut) );
+    if(actZoomReset) actZoomReset->setShortcut( config->keyBinding->GetMainShortcut(KeyBind::zoomReset) );
 }
 
 void MainGraphicsView::ForceResize()
@@ -74,7 +109,7 @@ void MainGraphicsView::mousePressEvent ( QMouseEvent * event )
 
     if(!event->isAccepted()) {
         {
-            const KeyBind::MoveBind b = config->keyBinding->GetMoveSortcuts(KeyBind::zoomReset);
+            const KeyBind::MoveBind b = config->keyBinding->GetMoveSortcuts(KeyBind::zoomResetMouse);
             if(b.input == KeyBind::none && b.buttons == event->buttons() && b.modifier == event->modifiers()) {
                 event->accept();
                 zoomReset();

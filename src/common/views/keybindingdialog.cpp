@@ -80,10 +80,9 @@ void MouseButtonsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
     painter->drawText(option.rect,str);
 }
 
-QSize MouseButtonsDelegate::sizeHint(const QStyleOptionViewItem & /*option*/, const QModelIndex & /*index*/) const
+QSize MouseButtonsDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index) const
 {
-    return QSize(200,200);
-//    return QStyledItemDelegate::sizeHint(option, index);
+    return QStyledItemDelegate::sizeHint(option, index);
 }
 
 QWidget *MouseButtonsDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &/* option */, const QModelIndex &/* index */) const
@@ -125,10 +124,9 @@ void ModifierDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
     painter->drawText(option.rect,str);
 }
 
-QSize ModifierDelegate::sizeHint(const QStyleOptionViewItem & /*option*/, const QModelIndex & /*index*/) const
+QSize ModifierDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index) const
 {
-    return QSize(200,200);
-//    return QStyledItemDelegate::sizeHint(option, index);
+    return QStyledItemDelegate::sizeHint(option, index);
 }
 
 QWidget *ModifierDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem & /*option*/, const QModelIndex & /*index*/) const
@@ -160,8 +158,14 @@ KeyBindingDialog::KeyBindingDialog(KeyBind *bind, QWidget *parent) :
     modelModes(0)
 {
     ui->setupUi(this);
+    Init();
+}
+
+void KeyBindingDialog::Init()
+{
     modelMain = bind->GetMainBindingModel();
     ui->tableMain->setModel(modelMain);
+    ui->tableMain->resizeColumnsToContents();
 
     modelModes = bind->GetModesModel();
     ui->listModes->setModel(modelModes);
@@ -171,6 +175,7 @@ KeyBindingDialog::KeyBindingDialog(KeyBind *bind, QWidget *parent) :
     ui->tableMode->setItemDelegateForColumn(1,&moveDelegate);
     ui->tableMode->setItemDelegateForColumn(2,&buttonsDelegate);
     ui->tableMode->setItemDelegateForColumn(3,&modDelegate);
+    ui->tableMode->resizeColumnsToContents();
 }
 
 KeyBindingDialog::~KeyBindingDialog()
@@ -192,3 +197,16 @@ void KeyBindingDialog::on_listModes_clicked(const QModelIndex &index)
     ui->tableMode->setRootIndex(index);
 }
 
+
+void KeyBindingDialog::on_buttonBox_clicked(QAbstractButton *button)
+{
+    if(button == ui->buttonBox->button( QDialogButtonBox::RestoreDefaults)) {
+        QMessageBox msg(QMessageBox::Warning,tr("Restore default"),tr("Restore default mapping ?"),QMessageBox::Ok|QMessageBox::Cancel);
+        msg.exec();
+        if(msg.result()!=QMessageBox::Ok)
+            return;
+
+        bind->SetDefaults();
+        Init();
+    }
+}
