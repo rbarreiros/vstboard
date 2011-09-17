@@ -82,6 +82,11 @@ public:
         solverMutex.unlock();
     }
 
+    void UpdateGlobalDelay(long samples)
+    {
+        emit DelayChanged(samples);
+    }
+
     inline bool undoProgramChanges() {return undoProgramChangesEnabled;}
 
     QSharedPointer<Connectables::Container> mainContainer;
