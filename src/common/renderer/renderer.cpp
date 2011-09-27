@@ -195,6 +195,8 @@ void Renderer::StartRender()
         return;
     }
 
+    int maxRenderingTime = myHost->GetSampleRate()/myHost->GetBufferSize();
+    int renderTimeout = 2000;
 
     if(sem.available()!=0) {
         LOG("semaphore available before rendering !"<<sem.available());
@@ -204,32 +206,33 @@ void Renderer::StartRender()
     sem.release(maxNumberOfThreads);
     for(int currentStep=-1; currentStep<numberOfSteps; currentStep++) {
 
-        if(sem.tryAcquire(maxNumberOfThreads,2)) {
+        if(sem.tryAcquire(maxNumberOfThreads,maxRenderingTime)) {
+            foreach( RenderThread *th, listOfThreads) {
+                th->StartRenderStep( currentStep );
+            }
+        } else if( sem.tryAcquire(maxNumberOfThreads,renderTimeout) ) {
+            LOG("renderer step"<<currentStep-1<<" took more than the total available time ("<<maxRenderingTime<<"ms) , finished threads:"<< sem.available() << "/" << maxNumberOfThreads);
             foreach( RenderThread *th, listOfThreads) {
                 th->StartRenderStep( currentStep );
             }
         } else {
-            LOG("renderer too slow");
-            if( sem.tryAcquire(maxNumberOfThreads,5000) ) {
-                foreach( RenderThread *th, listOfThreads) {
-                    th->StartRenderStep( currentStep );
-                }
-            } else {
-                LOG("StartRender timeout, step:"<< currentStep << sem.available() << "/" << maxNumberOfThreads );
-            }
+            LOG("renderer step"<<currentStep-1<<"timeout, finished threads:"<< sem.available() << "/" << maxNumberOfThreads);
+            sem.acquire(sem.available());
+            mutex.unlock();
+            return;
         }
-
     }
 
-    if( !sem.tryAcquire(maxNumberOfThreads,5000) ) {
-        sem.acquire( sem.available() );
-    }
-
-    if(sem.available()!=0) {
-        LOG("semaphore available after rendering !"<<sem.available());
+    //wait for the last step to finish
+    if(sem.tryAcquire(maxNumberOfThreads,maxRenderingTime)) {
+        mutex.unlock();
+        return;
+    } else if(sem.tryAcquire(maxNumberOfThreads,renderTimeout) ) {
+        LOG("renderer last step took more than the total available time ("<<maxRenderingTime<<"ms) , finished threads:"<< sem.available() << "/" << maxNumberOfThreads);
+    } else {
+        LOG("renderer last step timeout, finished threads:"<< sem.available() << "/" << maxNumberOfThreads);
         sem.acquire(sem.available());
     }
-
     mutex.unlock();
 }
 

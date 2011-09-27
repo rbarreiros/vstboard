@@ -41,6 +41,7 @@ namespace View {
 
         void UpdatePosition(const ConnectionInfo &pinInfo, const float angle, const QPointF &pt);
         void UpdatePosition(const QPointF &pt);
+        void UpdateModelIndex(const QModelIndex &index);
 
         const ConnectionInfo pinOut;
         const ConnectionInfo pinIn;

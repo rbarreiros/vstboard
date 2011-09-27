@@ -112,7 +112,4 @@ inline bool operator<(const ConnectionInfo &c1, const ConnectionInfo &c2)
 QDataStream & operator<< (QDataStream& out, const ConnectionInfo& connInfo);
 QDataStream & operator>> (QDataStream& in, ConnectionInfo& connInfo);
 
-typedef QMultiMap < ConnectionInfo, ConnectionInfo > hashCables;
-
-
 #endif // CONNECTIONINFO_H

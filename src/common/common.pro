@@ -103,7 +103,8 @@ SOURCES += \
     commands/comaddpin.cpp \
     views/keybindingdialog.cpp \
     views/buttonswidget.cpp \
-    views/modifierswidget.cpp
+    views/modifierswidget.cpp \
+    renderer/updatedelays.cpp
 
 SOURCES += \
     views/programlist.cpp \
@@ -199,7 +200,8 @@ HEADERS += \
     commands/comaddpin.h \
     views/keybindingdialog.h \
     views/buttonswidget.h \
-    views/modifierswidget.h
+    views/modifierswidget.h \
+    renderer/updatedelays.h
 
 HEADERS += \
     views/configdialog.h \
@@ -253,6 +255,8 @@ TRANSLATIONS = ../resources/translations/common_fr.ts
 
 RESOURCES += \
     ../resources/resources.qrc
+
+
 
 
 

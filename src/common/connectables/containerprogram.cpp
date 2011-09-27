@@ -165,13 +165,15 @@ void ContainerProgram::SaveRendererState()
 
 void ContainerProgram::LoadRendererState()
 {
-    const QTime t = container->GetLastModificationTime();
-    if(t > lastModificationTime) {
+    //todo : we have to rebuild the map to adjust delays in other containers
+
+//    const QTime t = container->GetLastModificationTime();
+//    if(t > lastModificationTime) {
         //my renderer map is outdated
         myHost->SetSolverUpdateNeeded();
-    } else {
-        myHost->GetRenderer()->LoadNodes( listOfRendererNodes );
-    }
+//    } else {
+//        myHost->GetRenderer()->LoadNodes( listOfRendererNodes );
+//    }
 }
 
 void ContainerProgram::ParkAllObj()
