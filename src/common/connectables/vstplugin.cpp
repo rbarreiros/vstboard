@@ -438,7 +438,7 @@ bool VstPlugin::initPlugin()
         listIsLearning << "unlearn";
         listParameterPinIn->AddPin(FixedPinNumber::learningMode);
     }
-
+    EffSetProgram(0);
     Object::Open();
 //    CreateEditorWindow();
     return true;
@@ -924,7 +924,7 @@ Pin* VstPlugin::CreatePin(const ConnectionInfo &info)
             case FixedPinNumber::editorVisible :
                 if(!hasEditor)
                     return 0;
-                return new ParameterPinIn(this,info.pinNumber,"hide",&listEditorVisible,tr("Editor"));
+                return new ParameterPinIn(this,info.pinNumber,"show",&listEditorVisible,tr("Editor"));
             case FixedPinNumber::learningMode :
                 if(!hasEditor)
                     return 0;

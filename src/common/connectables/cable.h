@@ -50,9 +50,8 @@ namespace Connectables {
           */
         inline const ConnectionInfo & GetInfoIn() const {return pinIn;}
 
-
-        bool SetDelay(unsigned long d);
-        unsigned long GetDelay() { return delay; }
+        bool SetDelay(long d);
+        long GetDelay() { return delay; }
         void Render(const PinMessage::Enum msgType,void *data);
 
     protected:
@@ -69,7 +68,7 @@ namespace Connectables {
         MainHost *myHost;
 
         CircularBuffer *buffer;
-        unsigned long delay;
+        long delay;
         AudioBuffer *tmpBuf;
     };
 }

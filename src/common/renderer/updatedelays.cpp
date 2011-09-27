@@ -70,7 +70,7 @@ bool UpdateDelays::SynchronizeParentNodes(SolverNode *node, long targetDelay)
         long delayToAdd = targetDelay - parent->totalDelayAtOutput;
 
         if(delayToAdd>0) {
-            LOG("add delay"<<delayToAdd<<parent->listOfObj.first().toStrongRef()->objectName()<<node->listOfObj.first().toStrongRef()->objectName());
+//            LOG("add delay"<<delayToAdd<<parent->listOfObj.first().toStrongRef()->objectName()<<node->listOfObj.first().toStrongRef()->objectName());
             QSharedPointer<Connectables::Object>obj = parent->listOfObj.last().toStrongRef();
 
             QList<Connectables::Cable*>lstCables;

@@ -750,6 +750,7 @@ void MainHost::OnCableRemoved(Connectables::Cable *cab)
             ++i;
         }
     }
+    LOG("cable not found");
 //    workingListOfCables.remove(cab->GetInfoOut(),cab);
     mutexListCables->unlock();
 }

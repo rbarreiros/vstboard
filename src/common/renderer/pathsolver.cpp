@@ -64,12 +64,13 @@ void PathSolver::Resolve(hashCables cables, Renderer *renderer)
     CreateNodes();
     PutParentsInNodes();
     UnwrapLoops();
+    UpdateDelays(myHost,cables,listNodes);
     int cpt=0;
     while(ChainNodes() && cpt<100) { ++cpt; }
     RemoveUnusedNodes();
     SetMinAndMaxStep();
 
-    UpdateDelays(myHost,cables,listNodes);
+
 
     renderer->OnNewRenderingOrder(listNodes);
     mutex.unlock();

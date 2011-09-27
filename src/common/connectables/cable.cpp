@@ -61,7 +61,7 @@ Cable::Cable(const Cable & c) :
     delay(c.delay),
     tmpBuf(0)
 {
-    SetDelay(delay);
+
 }
 
 Cable::~Cable()
@@ -77,10 +77,13 @@ Cable::~Cable()
   */
 void Cable::AddToParentNode(const QModelIndex &parentIndex)
 {
+    SetDelay(delay);
+
     QStandardItem *item = new QStandardItem(QString("cable %1:%2 %3").arg(pinOut.objId).arg(pinIn.objId).arg(delay));
     item->setData(QVariant::fromValue(ObjectInfo(NodeType::cable)),UserRoles::objInfo);
     item->setData(QVariant::fromValue(pinOut),UserRoles::value);
     item->setData(QVariant::fromValue(pinIn),UserRoles::connectionInfo);
+    item->setData(delay,UserRoles::position);
 
     QStandardItem *parentItem = myHost->GetModel()->itemFromIndex(parentIndex);
     if(!parentItem) {
@@ -97,17 +100,25 @@ void Cable::AddToParentNode(const QModelIndex &parentIndex)
   */
 void Cable::RemoveFromParentNode(const QModelIndex &parentIndex)
 {
+    delete buffer;
+    buffer=0;
+    delete tmpBuf;
+    tmpBuf=0;
+
     if(modelIndex.isValid() && parentIndex.isValid())
         myHost->GetModel()->removeRow(modelIndex.row(), parentIndex);
 
     modelIndex=QModelIndex();
 }
 
-bool Cable::SetDelay(unsigned long d)
+bool Cable::SetDelay(long d)
 {
     delay=d;
-    if(modelIndex.isValid())
-        myHost->GetModel()->itemFromIndex(modelIndex)->setText( QString("cable %1:%2 %3").arg(pinOut.objId).arg(pinIn.objId).arg(delay) );
+    if(modelIndex.isValid()) {
+        QStandardItem *item = myHost->GetModel()->itemFromIndex(modelIndex);
+        item->setText( QString("cable %1:%2 %3").arg(pinOut.objId).arg(pinIn.objId).arg(delay) );
+        item->setData(d,UserRoles::position);
+    }
 
     if(delay==0) {
         if(buffer) {
@@ -137,7 +148,7 @@ void Cable::Render(const PinMessage::Enum msgType,void *data)
     if(!pin)
         return;
 
-    if(delay==0) {
+    if(buffer==0) {
         pin->ReceiveMsg(msgType,data);
         return;
     }

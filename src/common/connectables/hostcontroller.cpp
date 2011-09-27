@@ -223,7 +223,7 @@ void HostController::TapTempo()
 
     double intPart;
     double fractPart = modf (myHost->vstHost->vstTimeInfo.ppqPos, &intPart);
-    LOG(fractPart);
+//    LOG(fractPart);
     myHost->vstHost->vstTimeInfo.ppqPos = (int)myHost->vstHost->vstTimeInfo.ppqPos;
 
     if(taps.size()>2) {

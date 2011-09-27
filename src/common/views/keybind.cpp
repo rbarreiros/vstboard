@@ -302,7 +302,7 @@ void KeyBind::SetDefaults()
         }
 
         {
-            MoveBind b={mouse, Qt::LeftButton, Qt::NoModifier};
+            MoveBind b={mouseWheel, Qt::NoButton, Qt::NoModifier};
             mapMv.insert( changeCursorValue, b );
         }
         mapModes.insert("Cable",mapMv);

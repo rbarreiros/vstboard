@@ -487,8 +487,7 @@ void MainWindow::updateRecentFileActions()
         int numRecentFiles = qMin(files.size(), (int)NB_RECENT_FILES);
 
         for (int i = 0; i < numRecentFiles; ++i) {
-            QString text = tr("&%1 %2").arg(i + 1).arg( QFileInfo(files[i]).fileName() );
-            listRecentSetups[i]->setText(text);
+            listRecentSetups[i]->setText(QFileInfo(files[i]).fileName());
             listRecentSetups[i]->setData(files[i]);
             listRecentSetups[i]->setVisible(true);
         }
@@ -502,8 +501,7 @@ void MainWindow::updateRecentFileActions()
         int numRecentFiles = qMin(files.size(), (int)NB_RECENT_FILES);
 
         for (int i = 0; i < numRecentFiles; ++i) {
-            QString text = tr("&%1 %2").arg(i + 1).arg( QFileInfo(files[i]).fileName() );
-            listRecentProjects[i]->setText(text);
+            listRecentProjects[i]->setText(QFileInfo(files[i]).fileName());
             listRecentProjects[i]->setData(files[i]);
             listRecentProjects[i]->setVisible(true);
         }
