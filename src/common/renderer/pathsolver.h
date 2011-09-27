@@ -23,6 +23,7 @@
 
 //#include "precomp.h"
 #include "connectables/object.h"
+#include "connectables/cable.h"
 #include "solvernode.h"
 #include "globals.h"
 #include "renderer.h"
@@ -48,11 +49,6 @@ protected:
     void SetMinAndMaxStep();
     void RemoveUnusedNodes();
 
-    void ResetDelays();
-    bool AddDelays();
-    bool SynchronizeParentNodes(SolverNode *node, long targetDelay);
-    bool SynchronizeAudioOutputs();
-    void CreateDelayNode(SolverNode *node, SolverNode *childNode, long delay);
     void GetListPinsConnectedTo(ConnectionInfo out, QList<ConnectionInfo> &list);
 
     QList<SolverNode*> ListOfGoodStarts(const QList<SolverNode*>&loop);
@@ -70,9 +66,7 @@ protected:
 
     QList<SolverNode*>listNodes;
     QMutex mutex;
-    long globalDelay;
-signals:
-    void GlobalDelayChanged(long samples);
+
 };
 
 #endif // PATHSOLVER_H

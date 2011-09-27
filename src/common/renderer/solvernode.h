@@ -59,6 +59,7 @@ protected:
     void ResetLoopFlags();
 
     friend class PathSolver;
+    friend class UpdateDelays;
 };
 
 #endif // SOLVERNODE_H

@@ -139,8 +139,6 @@ void ParameterPin::ChangeValue(int index, bool fromObj)
     stepIndex=index;
     OnValueChanged(stepSize*index);
 
-    outStepIndex=(int)( 0.5f + outValue/stepSize );
-
     if(!fromObj)
         parent->OnParameterChanged(connectInfo,outValue);
     UpdateView();
@@ -219,6 +217,7 @@ void ParameterPin::OnValueChanged(float val)
     val*=(limitOutMax-limitOutMin);
     val+=limitOutMin;
     outValue=val;
+    outStepIndex=(int)( 0.5f + outValue/stepSize );
 
     if(!loading && !dirty && connectInfo.direction==PinDirection::Input) {
         dirty=true;
@@ -233,7 +232,7 @@ void ParameterPin::UpdateView()
             setObjectName(parent->GetParameterName(connectInfo));
 
         if(listValues) {
-            displayedText = QString("%1:%2").arg(objectName()).arg(listValues->at(stepIndex).toString());
+            displayedText = QString("%1:%2").arg(objectName()).arg(listValues->at(outStepIndex).toString());
         }
     }
 }
@@ -275,6 +274,8 @@ void ParameterPin::SetLimit(ObjType::Enum type, float newVal)
     }
 
     OnValueChanged(value);
+    parent->OnParameterChanged(connectInfo,outValue);
+    UpdateView();
     if(!dirty) {
         dirty=true;
         parent->OnProgramDirty();

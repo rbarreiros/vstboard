@@ -23,15 +23,16 @@
 
 #include "../precomp.h"
 
-//namespace View {
+
+namespace View {
+    class ViewConfig;
+}
 
     class MainGraphicsView : public QGraphicsView
     {
     Q_OBJECT
     public:
         MainGraphicsView(QWidget * parent = 0);
-        MainGraphicsView(QGraphicsScene * scene, QWidget * parent = 0);
-//        bool event(QEvent *event);
 
         QDataStream & toStream (QDataStream &) const;
         QDataStream & fromStream (QDataStream &);
@@ -44,9 +45,17 @@
         void SetViewProgram(int progId);
         void RemoveViewProgram(int prg);
 
+        void SetViewConfig(View::ViewConfig *conf);
+
+        QAction *actZoomIn;
+        QAction *actZoomOut;
+        QAction *actZoomReset;
+
     protected:
         void wheelEvent(QWheelEvent * event);
         void mousePressEvent ( QMouseEvent * event );
+        void mouseMoveEvent(QMouseEvent *event);
+        void mouseReleaseEvent(QMouseEvent *event);
         void resizeEvent ( QResizeEvent * event );
         void scrollContentsBy ( int dx, int dy );
         void paintEvent ( QPaintEvent * event );
@@ -60,6 +69,11 @@
 
         qint16 currentProgId;
 
+        View::ViewConfig *config;
+        bool moving;
+        QPoint startMovePos;
+        QPoint startDragMousePos;
+
     signals:
         void viewResized(QRectF trans);
 
@@ -71,6 +85,7 @@
         void SetViewProgram(const QModelIndex &idx);
         void RemoveViewProgram(const QModelIndex &idx);
         void ClearViewPrograms();
+        void UpdateKeyBinding();
     };
 
 //}

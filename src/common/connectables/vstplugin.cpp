@@ -41,13 +41,16 @@ VstPlugin::VstPlugin(MainHost *myHost,int index, const ObjectInfo & info) :
     bufferSize(1024),
     listEvnts(0),
     savedChunk(0),
-    savedChunkSize(0)
+    savedChunkSize(0),
+    bypass(false)
 {
     for(int i=0;i<128;i++) {
         listValues << i;
     }
+    listBypass << "On" << "Bypass" << "Mute";
 
     listParameterPinIn->AddPin(FixedPinNumber::vstProgNumber);
+    listParameterPinIn->AddPin(FixedPinNumber::bypass);
 }
 
 VstPlugin::~VstPlugin()
@@ -136,7 +139,28 @@ void VstPlugin::SetSampleRate(float rate)
 
 void VstPlugin::Render()
 {
-    if(closed)
+    if(bypass) {
+        foreach(Pin *in, listAudioPinIn->listPins ) {
+            AudioPin *audioIn = static_cast<AudioPin*>(in);
+            AudioPin *audioOut = 0;
+            if(listAudioPinOut->listPins.size() > in->GetConnectionInfo().pinNumber) {
+                audioOut = static_cast<AudioPin*>(listAudioPinOut->GetPin( in->GetConnectionInfo().pinNumber ));
+            }
+
+            if(audioIn) {
+                if(audioOut) {
+                    audioOut->GetBuffer()->AddToStack( audioIn->GetBuffer() );
+                    audioOut->GetBuffer()->ConsumeStack();
+                    audioOut->SendAudioBuffer();
+                    audioOut->GetBuffer()->ResetStackCounter();
+                }
+                audioIn->GetBuffer()->ConsumeStack();
+            }
+        }
+        return;
+    }
+
+    if(closed || sleep)
         return;
 
     QMutexLocker lock(&objMutex);
@@ -414,7 +438,7 @@ bool VstPlugin::initPlugin()
         listIsLearning << "unlearn";
         listParameterPinIn->AddPin(FixedPinNumber::learningMode);
     }
-
+    EffSetProgram(0);
     Object::Open();
 //    CreateEditorWindow();
     return true;
@@ -798,6 +822,22 @@ void VstPlugin::OnParameterChanged(ConnectionInfo pinInfo, float value)
             }
             EffSetParameter(pinInfo.pinNumber,value);
         }
+
+        if(pinInfo.pinNumber==FixedPinNumber::bypass) {
+            QString val = static_cast<ParameterPinIn*>(listParameterPinIn->listPins.value(pinInfo.pinNumber))->GetVariantValue().toString();
+            if(val=="On") {
+                SetSleep(false);
+                bypass=false;
+            }
+            if(val=="Bypass") {
+                SetSleep(false);
+                bypass=true;
+            }
+            if(val=="Mute") {
+                SetSleep(true);
+                bypass=false;
+            }
+        }
     }
 }
 
@@ -879,25 +919,18 @@ Pin* VstPlugin::CreatePin(const ConnectionInfo &info)
         bool hasEditor = (!pEffect || (pEffect->flags & effFlagsHasEditor) == 0)?false:true;
 
         switch(info.pinNumber) {
-            case FixedPinNumber::vstProgNumber : {
-                ParameterPinIn *newPin = new ParameterPinIn(this,info.pinNumber,0,&listValues,"prog");
-                newPin->SetLimitsEnabled(false);
-                return newPin;
-            }
-            case FixedPinNumber::editorVisible : {
+            case FixedPinNumber::vstProgNumber :
+                return new ParameterPinIn(this,info.pinNumber,0,&listValues,"prog");
+            case FixedPinNumber::editorVisible :
                 if(!hasEditor)
                     return 0;
-                ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::editorVisible,"hide",&listEditorVisible,tr("Editor"));
-                newPin->SetLimitsEnabled(false);
-                return newPin;
-            }
-            case FixedPinNumber::learningMode : {
+                return new ParameterPinIn(this,info.pinNumber,"show",&listEditorVisible,tr("Editor"));
+            case FixedPinNumber::learningMode :
                 if(!hasEditor)
                     return 0;
-                ParameterPin *newPin = new ParameterPinIn(this,FixedPinNumber::learningMode,"off",&listIsLearning,tr("Learn"));
-                newPin->SetLimitsEnabled(false);
-                return newPin;
-            }
+                return new ParameterPinIn(this,info.pinNumber,"off",&listIsLearning,tr("Learn"));
+            case FixedPinNumber::bypass :
+                return new ParameterPinIn(this,info.pinNumber,"On",&listBypass);
             default : {
                 ParameterPin *pin=0;
                 if(closed) {

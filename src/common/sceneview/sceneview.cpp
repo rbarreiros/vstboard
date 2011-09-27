@@ -72,6 +72,11 @@ SceneView::SceneView(MainHost *myHost,Connectables::ObjectFactory *objFactory, M
     sceneProgram = new QGraphicsScene(this);
     sceneGroup = new QGraphicsScene(this);
 
+    viewHost->SetViewConfig(myHost->mainWindow->viewConfig);
+    viewProject->SetViewConfig(myHost->mainWindow->viewConfig);
+    viewProgram->SetViewConfig(myHost->mainWindow->viewConfig);
+    viewGroup->SetViewConfig(myHost->mainWindow->viewConfig);
+
     //we need a root object to avoid a bug when the scene is empty
     rootObjHost = new QGraphicsRectItem(0, sceneHost);
     rootObjProject = new QGraphicsRectItem(0, sceneProject);
@@ -163,6 +168,16 @@ void SceneView::dataChanged ( const QModelIndex & topLeft, const QModelIndex & b
                     return;
                 }
                 static_cast<MinMaxPinView*>(view)->UpdateLimitModelIndex(tmpIndex.parent());
+                break;
+            }
+        case NodeType::cable :
+            {
+                CableView *cable = static_cast<CableView*>(hashItems.value(tmpIndex,0));
+                if(!cable) {
+                    LOG("cable not found");
+                    continue;
+                }
+                cable->UpdateModelIndex(tmpIndex);
                 break;
             }
         default:
@@ -563,6 +578,7 @@ void SceneView::rowsInserted ( const QModelIndex & parent, int start, int end  )
                     continue;
                 }
                 CableView *cable = new CableView(infoOut,infoIn,cnt,myHost->mainWindow->viewConfig);
+                cable->UpdateModelIndex(index);
                 pinOut->AddCable(cable);
                 pinIn->AddCable(cable);
                 hashItems.insert(index, cable);

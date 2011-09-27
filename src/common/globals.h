@@ -176,7 +176,8 @@ namespace FixedPinNumber {
         editorVisible = FIXED_PIN_STARTINDEX,
         learningMode,
         vstProgNumber,
-        numberOfPins
+        numberOfPins,
+        bypass
     };
 }
 

@@ -82,6 +82,11 @@ public:
         solverMutex.unlock();
     }
 
+    void UpdateGlobalDelay(long samples)
+    {
+        emit DelayChanged(samples);
+    }
+
     inline bool undoProgramChanges() {return undoProgramChangesEnabled;}
 
     QSharedPointer<Connectables::Container> mainContainer;
@@ -138,7 +143,6 @@ private:
 
     QMap<int,Connectables::Object*>listContainers;
     QMap<ConnectionInfo,Connectables::Pin*>listPins;
-
 
     hashCables workingListOfCables;
     QMutex *mutexListCables;

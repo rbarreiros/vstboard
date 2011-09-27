@@ -18,46 +18,40 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#ifndef CURSORVIEW_H
-#define CURSORVIEW_H
+#ifndef CONNECTABLEPINVIEW_H
+#define CONNECTABLEPINVIEW_H
 
-//#include "precomp.h"
-#include "viewconfig.h"
+#include "pinview.h"
+//#include "outlinedtext.h"
 
 namespace View {
 
-    class CursorView : public QGraphicsWidget
+    class ConnectablePinView : public PinView
     {
-        Q_OBJECT
+    Q_OBJECT
     public:
-        explicit CursorView(QAbstractItemModel *model,bool isMaxi,bool upsideDown,QGraphicsItem *parent, ViewConfig *config);
-        void SetValue(float newVal);
-        void SetModelIndex(QPersistentModelIndex index);
-        inline float GetValue() const {return value;}
-        void setPos ( const QPointF & pos );
-        void setPos ( qreal x, qreal y );
+        ConnectablePinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo, ViewConfig *config);
+        virtual void UpdateModelIndex(const QModelIndex &index);
+        float GetValue() {return value;}
 
     protected:
-        void keyPressEvent ( QKeyEvent * event );
-        void ValueChanged(float newVal);
-        QVariant itemChange(GraphicsItemChange change, const QVariant &value);
-        void mousePressEvent ( QGraphicsSceneMouseEvent * event );
-        void mouseReleaseEvent ( QGraphicsSceneMouseEvent * event );
-        void focusInEvent ( QFocusEvent * event );
-        void focusOutEvent ( QFocusEvent * event );
-
-        QGraphicsPolygonItem *cursor;
-        bool isMaxi;
-        bool upsideDown;
-        bool drag;
+        void resizeEvent ( QGraphicsSceneResizeEvent * event );
+        virtual void mousePressEvent ( QGraphicsSceneMouseEvent * event );
+        QGraphicsSimpleTextItem *textItem;
+        QGraphicsRectItem *rectVu;
+        QString text;
         float value;
-        QAbstractItemModel *model;
-        QPersistentModelIndex modelIndex;
-        QPointF offset;
-        ViewConfig *config;
+        bool isParameter;
+        ColorGroups::Enum colorGroupId;
+        QColor vuColor;
+        int overload;
 
     public slots:
+        void updateVu();
         void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
+        void ResetOveload();
+
     };
+
 }
-#endif // CURSORVIEW_H
+#endif // CONNECTABLEPINVIEW_H

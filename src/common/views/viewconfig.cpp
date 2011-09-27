@@ -19,7 +19,6 @@
 **************************************************************************/
 //#include "precomp.h"
 #include "viewconfig.h"
-#include "objectview.h"
 #include "mainhost.h"
 
 using namespace View;
@@ -37,7 +36,7 @@ ViewConfig::ViewConfig(MainHost *myHost, QObject *parent) :
     savedInSetupFile(false),
     currentPresetName("Default"),
     myHost(myHost),
-    currentEditMode(EditMode::Cable)
+    keyBinding(new KeyBind(myHost))
 {
     colorGroupNames.insert( ColorGroups::ND, tr("-undefined-") );
     colorGroupNames.insert( ColorGroups::Window, tr("Window") );

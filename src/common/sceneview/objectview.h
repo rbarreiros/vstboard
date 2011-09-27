@@ -32,7 +32,7 @@
 class MainHost;
 namespace View {
 
-    class ConnectablePinView;
+    class MinMaxPinView;
     class PinView;
     class ObjectView : public QGraphicsWidget
     {
@@ -68,8 +68,9 @@ namespace View {
 
         ViewConfig *config;
 
-        void SetEditorPin(ConnectablePinView *pin, float value);
-        void SetLearnPin(ConnectablePinView *pin, float value);
+        void SetEditorPin(MinMaxPinView *pin, float value);
+        void SetLearnPin(MinMaxPinView *pin, float value);
+        void SetBypassPin(MinMaxPinView *pin, float value);
 
     protected:
         virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
@@ -77,7 +78,6 @@ namespace View {
         virtual void closeEvent ( QCloseEvent * event );
         virtual void focusInEvent ( QFocusEvent * event );
         virtual void focusOutEvent ( QFocusEvent * event );
-        void mouseReleaseEvent ( QGraphicsSceneMouseEvent * event );
         void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
 
         void SetErrorMessage(const QString & msg);
@@ -113,6 +113,9 @@ namespace View {
         //switch learn mode
         QAction *actLearnSwitch;
 
+        QAction *actToggleBypass;
+
+
         /// true if a shrink is already in progress
         bool shrinkAsked;
 
@@ -121,12 +124,14 @@ namespace View {
 
         bool highlighted;
 
-        ConnectablePinView *editorPin;
-        ConnectablePinView *learnPin;
+        MinMaxPinView *editorPin;
+        MinMaxPinView *learnPin;
+        MinMaxPinView *bypassPin;
 
     private slots:
         void SwitchEditor(bool show);
         void SwitchLearnMode(bool on);
+        void ToggleBypass(bool b);
 
     public slots:
         void ShrinkNow();
@@ -135,6 +140,7 @@ namespace View {
         virtual void HighlightStop() {}
         void RemoveWithBridge();
         void ToggleEditor();
+        virtual void UpdateKeyBinding();
 
     friend class PinView;
     };

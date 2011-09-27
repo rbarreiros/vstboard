@@ -2,6 +2,7 @@
 #define VIEWCONFIG_H
 
 //#include "precomp.h"
+#include "keybind.h"
 
 class MainHost;
 
@@ -38,13 +39,6 @@ namespace Colors {
 //            ToolTipBase,
 //            ToolTipText,
 //            BrightText,
-    };
-}
-
-namespace EditMode {
-    enum Enum {
-        Cable,
-        Value
     };
 }
 
@@ -113,8 +107,7 @@ namespace View {
 
         static float KeyboardNumber(int key);
 
-        void SetEditMode(const EditMode::Enum mode) {currentEditMode=mode;}
-        EditMode::Enum EditMode() {return currentEditMode;}
+        KeyBind *keyBinding;
 
     protected:
         ///list of presets in registry
@@ -137,8 +130,6 @@ namespace View {
         QString currentPresetName;
 
         MainHost *myHost;
-
-        EditMode::Enum currentEditMode;
 
     signals:
         /*!

@@ -20,7 +20,9 @@
 
 
 #include "cable.h"
-#include "../mainhost.h"
+#include "mainhost.h"
+#include "circularbuffer.h"
+#include "pin.h"
 
 using namespace Connectables;
 
@@ -35,10 +37,13 @@ using namespace Connectables;
   \param pinIn the input pin (the receiver)
   */
 Cable::Cable(MainHost *myHost, const ConnectionInfo &pinOut, const ConnectionInfo &pinIn) :
-        pinOut(pinOut),
-        pinIn(pinIn),
-        modelIndex(QModelIndex()),
-        myHost(myHost)
+    pinOut(pinOut),
+    pinIn(pinIn),
+    modelIndex(QModelIndex()),
+    myHost(myHost),
+    buffer(0),
+    delay(0),
+    tmpBuf(0)
 {
 
 }
@@ -48,12 +53,21 @@ Cable::Cable(MainHost *myHost, const ConnectionInfo &pinOut, const ConnectionInf
   \param c the model
   */
 Cable::Cable(const Cable & c) :
-        pinOut(c.pinOut),
-        pinIn(c.pinIn),
-        modelIndex(c.modelIndex),
-        myHost(c.myHost)
+    pinOut(c.pinOut),
+    pinIn(c.pinIn),
+    modelIndex(c.modelIndex),
+    myHost(c.myHost),
+    buffer(0),
+    delay(c.delay),
+    tmpBuf(0)
 {
 
+}
+
+Cable::~Cable()
+{
+    if(buffer)
+        delete buffer;
 }
 
 /*!
@@ -63,10 +77,13 @@ Cable::Cable(const Cable & c) :
   */
 void Cable::AddToParentNode(const QModelIndex &parentIndex)
 {
-    QStandardItem *item = new QStandardItem(QString("cable %1:%2").arg(pinOut.objId).arg(pinIn.objId));
+    SetDelay(delay);
+
+    QStandardItem *item = new QStandardItem(QString("cable %1:%2 %3").arg(pinOut.objId).arg(pinIn.objId).arg(delay));
     item->setData(QVariant::fromValue(ObjectInfo(NodeType::cable)),UserRoles::objInfo);
     item->setData(QVariant::fromValue(pinOut),UserRoles::value);
     item->setData(QVariant::fromValue(pinIn),UserRoles::connectionInfo);
+    item->setData(delay,UserRoles::position);
 
     QStandardItem *parentItem = myHost->GetModel()->itemFromIndex(parentIndex);
     if(!parentItem) {
@@ -83,8 +100,71 @@ void Cable::AddToParentNode(const QModelIndex &parentIndex)
   */
 void Cable::RemoveFromParentNode(const QModelIndex &parentIndex)
 {
+    delete buffer;
+    buffer=0;
+    delete tmpBuf;
+    tmpBuf=0;
+
     if(modelIndex.isValid() && parentIndex.isValid())
         myHost->GetModel()->removeRow(modelIndex.row(), parentIndex);
 
     modelIndex=QModelIndex();
+}
+
+bool Cable::SetDelay(long d)
+{
+    delay=d;
+    if(modelIndex.isValid()) {
+        QStandardItem *item = myHost->GetModel()->itemFromIndex(modelIndex);
+        item->setText( QString("cable %1:%2 %3").arg(pinOut.objId).arg(pinIn.objId).arg(delay) );
+        item->setData(d,UserRoles::position);
+    }
+
+    if(delay==0) {
+        if(buffer) {
+            delete buffer;
+            buffer=0;
+            delete tmpBuf;
+            tmpBuf=0;
+        }
+        return true;
+    }
+
+    if(!buffer)
+        buffer = new CircularBuffer(myHost->GetBufferSize()*2 + delay);
+    else
+        buffer->SetSize(myHost->GetBufferSize()*2 + delay);
+
+    if(!tmpBuf)
+        tmpBuf = new AudioBuffer(false,false);
+
+    tmpBuf->SetSize(myHost->GetBufferSize());
+    return true;
+}
+
+void Cable::Render(const PinMessage::Enum msgType,void *data)
+{
+    Pin *pin = myHost->objFactory->GetPin(pinIn);
+    if(!pin)
+        return;
+
+    if(buffer==0) {
+        pin->ReceiveMsg(msgType,data);
+        return;
+    }
+
+    //fill buffer
+    if(msgType==PinMessage::AudioBuffer) {
+        AudioBuffer *buf = static_cast<AudioBuffer*>(data);
+        buffer->Put( (float*)buf->GetPointer(), buf->GetSize());
+    }
+
+    //buffer is full, send data
+    if(buffer->filledSize >= delay+myHost->GetBufferSize()) {
+        buffer->Get( (float*)tmpBuf->GetPointerWillBeFilled(),tmpBuf->GetSize() );
+        tmpBuf->ConsumeStack();
+        pin->ReceiveMsg(msgType,(void*)tmpBuf);
+//        static_cast<AudioPin*>(pin)->GetBuffer()->AddToStack(tmpBuf);
+    }
+
 }

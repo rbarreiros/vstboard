@@ -73,9 +73,6 @@
         </property>
         <item>
          <widget class="MainGraphicsView" name="hostView">
-          <property name="whatsThis">
-           <string>The Host panel is where you normally put your audio and midi interfaces.</string>
-          </property>
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
           </property>
@@ -87,9 +84,6 @@
           </property>
           <property name="renderHints">
            <set>QPainter::Antialiasing|QPainter::TextAntialiasing</set>
-          </property>
-          <property name="dragMode">
-           <enum>QGraphicsView::ScrollHandDrag</enum>
           </property>
           <property name="transformationAnchor">
            <enum>QGraphicsView::AnchorUnderMouse</enum>
@@ -131,9 +125,6 @@
           </property>
           <property name="renderHints">
            <set>QPainter::Antialiasing|QPainter::TextAntialiasing</set>
-          </property>
-          <property name="dragMode">
-           <enum>QGraphicsView::ScrollHandDrag</enum>
           </property>
           <property name="transformationAnchor">
            <enum>QGraphicsView::AnchorUnderMouse</enum>
@@ -182,9 +173,6 @@
            </property>
            <property name="renderHints">
             <set>QPainter::Antialiasing|QPainter::TextAntialiasing</set>
-           </property>
-           <property name="dragMode">
-            <enum>QGraphicsView::ScrollHandDrag</enum>
            </property>
            <property name="transformationAnchor">
             <enum>QGraphicsView::AnchorUnderMouse</enum>
@@ -254,9 +242,6 @@
            </property>
            <property name="renderHints">
             <set>QPainter::Antialiasing|QPainter::TextAntialiasing</set>
-           </property>
-           <property name="dragMode">
-            <enum>QGraphicsView::ScrollHandDrag</enum>
            </property>
            <property name="transformationAnchor">
             <enum>QGraphicsView::AnchorUnderMouse</enum>
@@ -328,6 +313,7 @@
      <addaction name="actionValue"/>
     </widget>
     <addaction name="actionConfig"/>
+    <addaction name="actionKeyBinding"/>
     <addaction name="actionRefresh_Audio_devices"/>
     <addaction name="actionRefresh_Midi_devices"/>
     <addaction name="menuTool"/>
@@ -390,6 +376,7 @@
    <addaction name="separator"/>
    <addaction name="actionConfig"/>
    <addaction name="actionAppearance"/>
+   <addaction name="actionKeyBinding"/>
    <addaction name="separator"/>
    <addaction name="actionCable"/>
    <addaction name="actionValue"/>
@@ -1202,6 +1189,18 @@
    </property>
    <property name="shortcut">
     <string>V</string>
+   </property>
+  </action>
+  <action name="actionKeyBinding">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/img16x16/key_bindings.png</normaloff>:/img16x16/key_bindings.png</iconset>
+   </property>
+   <property name="text">
+    <string>Keyboard mapping</string>
+   </property>
+   <property name="toolTip">
+    <string>Keyboard and Mouse mapping</string>
    </property>
   </action>
  </widget>

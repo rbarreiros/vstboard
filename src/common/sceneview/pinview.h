@@ -24,7 +24,7 @@
 //#include "precomp.h"
 #include "globals.h"
 #include "connectables/connectioninfo.h"
-#include "viewconfig.h"
+#include "views/viewconfig.h"
 
 #ifdef _MSC_VER
 #pragma warning( push )
@@ -109,6 +109,8 @@ namespace View {
 
         Qt::CursorShape defaultCursor;
 
+        QPoint startDragMousePos;
+
     signals:
         /*!
           emitted when a pin is drag&droped over another one
@@ -130,6 +132,7 @@ namespace View {
         virtual void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color) {}
         void RemovePin();
         void Unplug();
+        void UpdateKeyBinding();
 
     friend class Cable;
     };

@@ -87,9 +87,12 @@ namespace Connectables {
         QMutex midiEventsMutex;
         QList<VstMidiEvent*>listVstMidiEvents;
         QList<QVariant>listValues;
+        QList<QVariant>listBypass;
 
         char *savedChunk;
         quint32 savedChunkSize;
+
+        bool bypass;
 
     signals:
         void WindowSizeChange(int newWidth, int newHeight);

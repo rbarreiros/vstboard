@@ -22,7 +22,7 @@
 #include "pinview.h"
 #include "../globals.h"
 #include "commands/comremoveobject.h"
-#include "connectablepinview.h"
+#include "minmaxpinview.h"
 
 using namespace View;
 
@@ -57,12 +57,14 @@ ObjectView::ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsIte
     actRemoveBridge(0),
     actShowEditor(0),
     actLearnSwitch(0),
+    actToggleBypass(0),
     shrinkAsked(false),
     myHost(myHost),
     highlighted(false),
     config(myHost->mainWindow->viewConfig),
     editorPin(0),
-    learnPin(0)
+    learnPin(0),
+    bypassPin(0)
 {
     setObjectName("objView");
 
@@ -75,6 +77,8 @@ ObjectView::ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsIte
 
     connect( config, SIGNAL(ColorChanged(ColorGroups::Enum,Colors::Enum,QColor)),
             this, SLOT(UpdateColor(ColorGroups::Enum,Colors::Enum,QColor)) );
+    connect( config->keyBinding, SIGNAL(BindingChanged()),
+            this, SLOT(UpdateKeyBinding()));
 }
 
 /*!
@@ -137,21 +141,18 @@ void ObjectView::SetModelIndex(QPersistentModelIndex index)
 
     if(info.nodeType != NodeType::bridge) {
         actRemoveBridge = new QAction(QIcon(":/img16x16/delete.png"),tr("Remove"),this);
-        actRemoveBridge->setShortcut( Qt::Key_Delete );
         actRemoveBridge->setShortcutContext(Qt::WidgetShortcut);
         connect(actRemoveBridge,SIGNAL(triggered()),
                 this,SLOT(RemoveWithBridge()));
         addAction(actRemoveBridge);
 
         actRemove = new QAction(QIcon(":/img16x16/delete.png"),tr("Remove with cables"),this);
-        actRemove->setShortcut( Qt::CTRL + Qt::Key_Delete );
         actRemove->setShortcutContext(Qt::WidgetShortcut);
         connect(actRemove,SIGNAL(triggered()),
                 this,SLOT(close()));
         addAction(actRemove);
 
         actShowEditor = new QAction(tr("Show Editor"),this);
-        actShowEditor->setShortcut( Qt::Key_E );
         actShowEditor->setShortcutContext(Qt::WidgetWithChildrenShortcut);
         actShowEditor->setEnabled(false);
         actShowEditor->setCheckable(true);
@@ -160,17 +161,35 @@ void ObjectView::SetModelIndex(QPersistentModelIndex index)
         addAction(actShowEditor);
 
         actLearnSwitch = new QAction(tr("Learn Mode"),this);
-        actLearnSwitch->setShortcut( Qt::Key_L );
         actLearnSwitch->setShortcutContext(Qt::WidgetWithChildrenShortcut);
         actLearnSwitch->setEnabled(false);
         actLearnSwitch->setCheckable(true);
         connect(actLearnSwitch,SIGNAL(toggled(bool)),
                 this,SLOT(SwitchLearnMode(bool)));
         addAction(actLearnSwitch);
+
+        actToggleBypass = new QAction("Bypass",this);
+        actToggleBypass->setShortcutContext(Qt::WidgetShortcut);
+        actToggleBypass->setEnabled(false);
+        actToggleBypass->setCheckable(true);
+        connect(actToggleBypass,SIGNAL(toggled(bool)),
+                this,SLOT(ToggleBypass(bool)));
+        addAction(actToggleBypass);
     }
+
+    UpdateKeyBinding();
 
     objIndex = index;
     UpdateTitle();
+}
+
+void ObjectView::UpdateKeyBinding()
+{
+    if(actRemoveBridge) actRemoveBridge->setShortcut( config->keyBinding->GetMainShortcut(KeyBind::deleteObject) );
+    if(actRemove) actRemove->setShortcut( config->keyBinding->GetMainShortcut(KeyBind::deleteObjectWithCables) );
+    if(actShowEditor) actShowEditor->setShortcut( config->keyBinding->GetMainShortcut(KeyBind::toggleEditor) );
+    if(actLearnSwitch) actLearnSwitch->setShortcut( config->keyBinding->GetMainShortcut(KeyBind::toggleLearnMode) );
+    if(actToggleBypass) actToggleBypass->setShortcut( config->keyBinding->GetMainShortcut(KeyBind::toggleBypass) );
 }
 
 void ObjectView::UpdateTitle()
@@ -291,16 +310,6 @@ void ObjectView::resizeEvent ( QGraphicsSceneResizeEvent * event )
 }
 
 /*!
-  Reimplements QGraphicsWidget::mouseReleaseEvent \n
-  update the model with the new position
-  */
-void ObjectView::mouseReleaseEvent ( QGraphicsSceneMouseEvent * event )
-{
-    QGraphicsWidget::mouseReleaseEvent(event);
-    model->setData(objIndex,pos(),UserRoles::position);
-}
-
-/*!
   Shrink the object to its minimal size after a 100ms delay
   */
 void ObjectView::Shrink()
@@ -321,18 +330,25 @@ void ObjectView::ShrinkNow()
     resize(0,0);
 }
 
-void ObjectView::SetEditorPin(ConnectablePinView *pin, float value)
+void ObjectView::SetEditorPin(MinMaxPinView *pin, float value)
 {
     editorPin = pin;
     actShowEditor->setEnabled(editorPin);
     actShowEditor->setChecked(value>.5f);
 }
 
-void ObjectView::SetLearnPin(ConnectablePinView *pin, float value)
+void ObjectView::SetLearnPin(MinMaxPinView *pin, float value)
 {
     learnPin = pin;
     actLearnSwitch->setEnabled(learnPin);
     actLearnSwitch->setChecked(value>.33f);
+}
+
+void ObjectView::SetBypassPin(MinMaxPinView *pin, float value)
+{
+    bypassPin = pin;
+    actToggleBypass->setEnabled(bypassPin);
+    actToggleBypass->setChecked(value>.33f);
 }
 
 void ObjectView::SwitchLearnMode(bool on)
@@ -355,6 +371,17 @@ void ObjectView::SwitchEditor(bool show)
         editorPin->ValueChanged(.0f);
     if(editorPin->GetValue() < .5f && show)
         editorPin->ValueChanged(1.0f);
+}
+
+void ObjectView::ToggleBypass(bool b)
+{
+    if(!bypassPin)
+        return;
+
+    if(bypassPin->GetValue() > .33f && !b)
+        bypassPin->ValueChanged(.0f);
+    if(bypassPin->GetValue() < .33f && b)
+        bypassPin->ValueChanged(0.34f);
 }
 
 void ObjectView::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)

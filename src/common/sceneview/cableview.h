@@ -18,43 +18,44 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-#ifndef CONNECTABLEPINVIEW_H
-#define CONNECTABLEPINVIEW_H
+#ifndef CABLEVIEW_H
+#define CABLEVIEW_H
 
+#include "../precomp.h"
+#include "../globals.h"
 #include "pinview.h"
-//#include "outlinedtext.h"
+#include "views/viewconfig.h"
 
 namespace View {
 
-    class ConnectablePinView : public PinView
+#ifndef SIMPLE_CABLES
+    class CableView : public QObject, public QGraphicsPathItem
+#else
+    class CableView : public QObject, public QGraphicsLineItem
+#endif
     {
     Q_OBJECT
     public:
-        ConnectablePinView(float angle, QAbstractItemModel *model,QGraphicsItem * parent, const ConnectionInfo &pinInfo, ViewConfig *config);
-        virtual void UpdateModelIndex(const QModelIndex &index);
-        void ValueChanged(float newVal);
-        float GetValue() {return value;}
+        CableView(const ConnectionInfo &pinOut, const ConnectionInfo &pinIn, QGraphicsItem *parent, ViewConfig *config);
+        CableView(const ConnectionInfo &pinOut, const QPointF &PtIn, QGraphicsItem *parent, ViewConfig *config);
+
+        void UpdatePosition(const ConnectionInfo &pinInfo, const float angle, const QPointF &pt);
+        void UpdatePosition(const QPointF &pt);
+        void UpdateModelIndex(const QModelIndex &index);
+
+        const ConnectionInfo pinOut;
+        const ConnectionInfo pinIn;
 
     protected:
-        void resizeEvent ( QGraphicsSceneResizeEvent * event );
-        void keyPressEvent ( QKeyEvent * event );
-        void wheelEvent ( QGraphicsSceneWheelEvent * event );
-        virtual void mousePressEvent ( QGraphicsSceneMouseEvent * event );
-        QGraphicsSimpleTextItem *textItem;
-        QGraphicsRectItem *rectVu;
-        QString text;
-        float value;
-        bool isParameter;
-        ColorGroups::Enum colorGroupId;
-        QColor vuColor;
-        int overload;
+        QPointF PtOut;
+        QPointF PtIn;
+        QPointF CtrlPtOut;
+        QPointF CtrlPtIn;
+        ViewConfig *config;
 
     public slots:
-        void updateVu();
         void UpdateColor(ColorGroups::Enum groupId, Colors::Enum colorId, const QColor &color);
-        void ResetOveload();
-
     };
-
 }
-#endif // CONNECTABLEPINVIEW_H
+
+#endif // CABLEVIEW_H

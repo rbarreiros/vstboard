@@ -28,7 +28,7 @@
 
 //#include "precomp.h"
 #include "connectables/connectioninfo.h"
-#include "maingraphicsview.h"
+#include "views/maingraphicsview.h"
 
 namespace Connectables {
     class ObjectFactory;
@@ -36,7 +36,7 @@ namespace Connectables {
 class MainHost;
 namespace View {
     class MainContainerView;
-
+    class ViewConfig;
     class SceneView : public QAbstractItemView
     {
         Q_OBJECT
