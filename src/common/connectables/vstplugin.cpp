@@ -595,7 +595,7 @@ QString VstPlugin::GetParameterName(ConnectionInfo pinInfo)
 
     if(pEffect && pinInfo.pinNumber < pEffect->numParams){
         QString s(EffGetParamName(pinInfo.pinNumber));
-        char str[20]={0};
+        char str[256]={0};
         EffGetParamDisplay(pinInfo.pinNumber,str);
         s.append(":");
         s.append(str);
