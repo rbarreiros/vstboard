@@ -28,7 +28,7 @@
      <property name="childrenCollapsible">
       <bool>false</bool>
      </property>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="2" column="0" colspan="5">
         <widget class="QCheckBox" name="checkSavedInSetupFile">
@@ -93,7 +93,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <layout class="QGridLayout" name="gridLayout_3">
        <item row="0" column="0">
         <widget class="QLabel" name="label_6">
@@ -314,13 +314,13 @@
   <customwidget>
    <class>View::GradientWidget</class>
    <extends>QWidget</extends>
-   <header>gradientwidget.h</header>
+   <header>views/gradientwidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>View::GradientWidgetHue</class>
    <extends>QWidget</extends>
-   <header>gradientwidgethue.h</header>
+   <header>views/gradientwidgethue.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

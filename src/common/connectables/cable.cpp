@@ -109,7 +109,7 @@ void Cable::RemoveFromParentNode(const QModelIndex &parentIndex)
     modelIndex=QModelIndex();
 }
 
-bool Cable::SetDelay(long d)
+bool Cable::SetDelay(quint32 d)
 {
     delay=d;
     if(modelIndex.isValid()) {

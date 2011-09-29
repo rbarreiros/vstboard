@@ -41,12 +41,7 @@
              break;
          case QtCriticalMsg:
          case QtFatalMsg:
-//#ifdef _MSC_VER
-               // __asm int 3
-            __debugbreak();
-//#else
-//                __asm("int3");
-//#endif
+
              abort();
              break;
 
@@ -55,27 +50,6 @@
          }
      }
 #endif
-/*
-class MyApp : public QApplication {
-public:
-    MyApp(int &c, char **v): QApplication(c, v) {}
-
-    bool notify(QObject *rec, QEvent *ev) {
-           try {
-               return QApplication::notify(rec, ev);
-           }
-           catch (...) {
-               debug("Unknown exception!")
-#ifdef _MSC_VER
-                __asm int 3
-#else
-                __asm("int3");
-#endif
-               abort();
-           }
-       }
-};
-*/
 
 int main(int argc, char *argv[])
 {
@@ -94,7 +68,6 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("CtrlBrk");
     QCoreApplication::setApplicationName("VstBoard");
 
-    //MyApp app(argc, argv);
     QApplication app(argc, argv);
 
 #ifdef QT_NO_DEBUG

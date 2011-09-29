@@ -70,8 +70,8 @@ public:
     void BuildDefaultModel();
 
 private:
-    bool AddGroup(QModelIndex &index=QModelIndex(), int row=-1);
-    bool AddProgram(int groupNum, QModelIndex &index=QModelIndex(), int row=-1);
+    bool AddGroup(QModelIndex &index, int row=-1);
+    bool AddProgram(int groupNum, QModelIndex &index, int row=-1);
 
     bool GroupFromStream( QDataStream &stream, const QModelIndex &grpIndex);
     bool GroupFromStreamWithPrograms( QDataStream &stream, const QModelIndex &grpIndex);
@@ -87,7 +87,7 @@ private:
 
     int HowManyItemsCanWeRemoveInThisList(const QModelIndexList &progList);
     bool FindAValidProgramInGroup( const QModelIndex &group, int progRow, const QModelIndexList &listToAvoid, QModelIndex &target );
-    bool FindAValidProgram( const QModelIndex &prog, const QModelIndexList &listToAvoid, QModelIndex &target = QModelIndex() );
+    bool FindAValidProgram( const QModelIndex &prog, const QModelIndexList &listToAvoid, QModelIndex &target );
 
     bool ValidateProgChange(const QModelIndex &newPrg);
     bool ChangeProgNow(int midiGroupNum, int midiProgNum);
