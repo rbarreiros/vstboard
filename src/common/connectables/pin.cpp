@@ -18,8 +18,8 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-
 #include "pin.h"
+#include "cable.h"
 #include "../mainhost.h"
 
 using namespace Connectables;
@@ -80,7 +80,22 @@ void Pin::setObjectName(const QString &name)
   */
 void Pin::SendMsg(const PinMessage::Enum msgType,void *data)
 {
-    parent->getHost()->SendMsg(connectInfo,(PinMessage::Enum)msgType,data);
+    foreach(QSharedPointer<Cable>c, listCables) {
+        if(c)
+            c->Render(msgType,data);
+        else
+            listCables.removeAll(c);
+    }
+//    int cntId = connectInfo.container;
+//    if(connectInfo.bridge)
+//        cntId = parent->getHost()->objFactory->GetObjectFromId( cntId )->GetContainerId();
+
+//    QSharedPointer<Container>cnt=parent->getHost()->objFactory->GetObjectFromId( cntId ).staticCast<Container>();
+//    if(!cnt)
+//        return;
+//    cnt->SendMsg(connectInfo,(PinMessage::Enum)msgType,data);
+
+//    parent->getHost()->SendMsg(connectInfo,(PinMessage::Enum)msgType,data);
 }
 
 /*!

@@ -212,10 +212,10 @@ void Container::NewRenderLoop()
 void Container::PostRender()
 {
     if(progToSet!=-1) {
-        myHost->mutexRender.lock();
+//        myHost->mutexRender.lock();
         LoadProgram(progToSet);
         progToSet=-1;
-        myHost->mutexRender.unlock();
+//        myHost->mutexRender.unlock();
     }
 }
 
@@ -522,6 +522,12 @@ void Container::ParkObject(QSharedPointer<Object> objPtr)
     listStaticObjects.removeAll(objPtr);
 }
 
+//void Container::SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum msgType,void *data)
+//{
+//    if(currentContainerProgram)
+//        currentContainerProgram->SendMsg(senderPin,msgType,data);
+//}
+
 /*!
   Copy cables from an object
   \param newObjPtr the new object
@@ -575,6 +581,11 @@ void Container::AddChildObject(QSharedPointer<Object> objPtr)
     objPtr->modelIndex=item->index();
     objPtr->parked=false;
 
+    if(objPtr->GetInitDelay()>0)
+        myHost->objFactory->listDelayObj << objPtr->GetIndex();
+    else
+        myHost->objFactory->listDelayObj.removeAll(objPtr->GetIndex());
+
 //    myHost->SetSolverUpdateNeeded();
 }
 
@@ -586,6 +597,8 @@ void Container::ParkChildObject(QSharedPointer<Object> objPtr)
 {
     if(objPtr.isNull())
         return;
+
+    myHost->objFactory->listDelayObj.removeAll(objPtr->GetIndex());
 
     if(objPtr->modelIndex.isValid() && objPtr->modelIndex.model()==myHost->GetModel())
         myHost->GetModel()->removeRow(objPtr->modelIndex.row(), objPtr->modelIndex.parent());

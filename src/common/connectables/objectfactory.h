@@ -64,6 +64,8 @@ namespace Connectables {
 
         const hashObjects &GetListObjects() {return listObjects;}
 
+        QList<int>listDelayObj;
+
     protected:
         virtual Object *CreateOtherObjects(const ObjectInfo &info)=0;
 

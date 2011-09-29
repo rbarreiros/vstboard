@@ -35,12 +35,13 @@ namespace Connectables
         ~Buffer();
         void Render();
         void SetDelay(long d);
-        QString GetParameterName(ConnectionInfo /*pinInfo*/) {return QString::number(initialDelay);}
+        QString GetParameterName(ConnectionInfo /*pinInfo*/) {return QString::number(delaySize);}
 
     private:
         bool CutBufferAtZeroCrossing(float *buffer, long size);
         CircularBuffer buffer;
         bool delayChanged;
+        long delaySize;
         long addedSize;
         long offset;
         float *adjustDelay;

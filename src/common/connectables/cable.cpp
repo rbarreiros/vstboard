@@ -45,7 +45,6 @@ Cable::Cable(MainHost *myHost, const ConnectionInfo &pinOut, const ConnectionInf
     delay(0),
     tmpBuf(0)
 {
-
 }
 
 /*!
@@ -61,7 +60,6 @@ Cable::Cable(const Cable & c) :
     delay(c.delay),
     tmpBuf(0)
 {
-
 }
 
 Cable::~Cable()

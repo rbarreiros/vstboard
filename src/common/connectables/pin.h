@@ -33,6 +33,7 @@
 namespace Connectables {
 
     class Object;
+    class Cable;
     class Pin : public QObject
     {
     Q_OBJECT
@@ -78,6 +79,8 @@ namespace Connectables {
           Called one time at the beginning of the loop
            */
         virtual void NewRenderLoop() {}
+
+        QList<QWeakPointer<Cable> >listCables;
 
     protected:
         /// ConnectionInfo og the pin

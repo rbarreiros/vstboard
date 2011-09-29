@@ -170,7 +170,7 @@ bool ProjectFile::FromStream(MainHost *myHost,QDataStream &in)
     }
 
     in >> MainHost::currentFileVersion;
-    if(MainHost::currentFileVersion != PROJECT_AND_SETUP_FILE_VERSION) {
+    if(MainHost::currentFileVersion < 16) {
         QMessageBox msgBox(QMessageBox::Critical, "", tr("File format v%1 can't be converted to the current file format v%2").arg(MainHost::currentFileVersion).arg(PROJECT_AND_SETUP_FILE_VERSION) );
         msgBox.exec();
         return false;

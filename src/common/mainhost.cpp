@@ -40,7 +40,7 @@ MainHost::MainHost(QObject *parent, QString settingsGroup) :
     mainWindow(0),
     solverNeedAnUpdate(false),
     solverUpdateEnabled(true),
-    mutexListCables(new QMutex(QMutex::Recursive)),
+//    mutexListCables(new QMutex(QMutex::Recursive)),
     settingsGroup(settingsGroup),
     undoProgramChangesEnabled(false)
 {
@@ -99,11 +99,13 @@ MainHost::~MainHost()
     delete updateViewTimer;
     updateViewTimer=0;
 
-    mutexListCables->lock();
-    workingListOfCables.clear();
-    mutexListCables->unlock();
+//    mutexListCables->lock();
+//    workingListOfCables.clear();
+//    mutexListCables->unlock();
 
-    solver->Resolve(workingListOfCables, renderer);
+    hashCables lstCables;
+    solver->Resolve(lstCables, renderer);
+//    solver->Resolve(workingListOfCables, renderer);
     delete renderer;
 
     mainContainer.clear();
@@ -120,7 +122,7 @@ MainHost::~MainHost()
         delete vstHost;
 #endif
 
-    delete mutexListCables;
+//    delete mutexListCables;
 }
 
 void MainHost::Open()
@@ -591,6 +593,20 @@ bool MainHost::EnableSolverUpdate(bool enable)
     return ret;
 }
 
+void MainHost::ResetDelays()
+{
+    if(mainContainer && mainContainer->GetCurrentProgram())
+        mainContainer->GetCurrentProgram()->ResetDelays();
+    if(hostContainer && hostContainer->GetCurrentProgram())
+        hostContainer->GetCurrentProgram()->ResetDelays();
+    if(projectContainer && projectContainer->GetCurrentProgram())
+        projectContainer->GetCurrentProgram()->ResetDelays();
+    if(groupContainer && groupContainer->GetCurrentProgram())
+        groupContainer->GetCurrentProgram()->ResetDelays();
+    if(programContainer && programContainer->GetCurrentProgram())
+        programContainer->GetCurrentProgram()->ResetDelays();
+}
+
 void MainHost::UpdateSolver(bool forceUpdate)
 {
     solverMutex.lock();
@@ -624,9 +640,21 @@ void MainHost::UpdateSolver(bool forceUpdate)
     }
 
     //update the solver
-    mutexListCables->lock();
-        solver->Resolve(workingListOfCables, renderer);
-    mutexListCables->unlock();
+    hashCables lstCables;
+    if(mainContainer && mainContainer->GetCurrentProgram())
+        mainContainer->GetCurrentProgram()->AddToCableList(&lstCables);
+    if(hostContainer && hostContainer->GetCurrentProgram())
+        hostContainer->GetCurrentProgram()->AddToCableList(&lstCables);
+    if(projectContainer && projectContainer->GetCurrentProgram())
+        projectContainer->GetCurrentProgram()->AddToCableList(&lstCables);
+    if(groupContainer && groupContainer->GetCurrentProgram())
+        groupContainer->GetCurrentProgram()->AddToCableList(&lstCables);
+    if(programContainer && programContainer->GetCurrentProgram())
+        programContainer->GetCurrentProgram()->AddToCableList(&lstCables);
+    solver->Resolve(lstCables, renderer);
+//    mutexListCables->lock();
+//        solver->Resolve(workingListOfCables, renderer);
+//    mutexListCables->unlock();
 
     mutexRender.unlock();
     EnableSolverUpdate(solverWasEnabled);
@@ -654,24 +682,24 @@ void MainHost::ChangeNbThreads(int nbThreads)
 
 }
 
-void MainHost::SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum msgType,void *data)
-{
-    QMutexLocker lock(mutexListCables);
+//void MainHost::SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum msgType,void *data)
+//{
+//    QMutexLocker lock(mutexListCables);
 
 
-    hashCables::const_iterator i = workingListOfCables.constFind(senderPin);
-    while (i != workingListOfCables.constEnd()  && i.key() == senderPin) {
-//        const ConnectionInfo &destPin = i.value();
-//        Connectables::Pin *pin = objFactory->GetPin(destPin);
-//        if(!pin) {
-//            LOG("unknown pin"<<destPin.objId<<"from"<<senderPin.objId);
-//            return;
-//        }
-//        pin->ReceiveMsg(msgType,data);
-        i.value()->Render(msgType,data);
-        ++i;
-    }
-}
+//    hashCables::const_iterator i = workingListOfCables.constFind(senderPin);
+//    while (i != workingListOfCables.constEnd()  && i.key() == senderPin) {
+////        const ConnectionInfo &destPin = i.value();
+////        Connectables::Pin *pin = objFactory->GetPin(destPin);
+////        if(!pin) {
+////            LOG("unknown pin"<<destPin.objId<<"from"<<senderPin.objId);
+////            return;
+////        }
+////        pin->ReceiveMsg(msgType,data);
+//        i.value()->Render(msgType,data);
+//        ++i;
+//    }
+//}
 
 void MainHost::SetBufferSizeMs(unsigned int ms)
 {
@@ -726,33 +754,7 @@ void MainHost::Render()
     if(solverNeedAnUpdate && solverUpdateEnabled)
         emit SolverToUpdate();
 
-
     emit Rendered();
-}
-
-void MainHost::OnCableAdded(Connectables::Cable *cab)
-{
-    mutexListCables->lock();
-    workingListOfCables.insert(cab->GetInfoOut(),cab);
-    mutexListCables->unlock();
-}
-
-void MainHost::OnCableRemoved(Connectables::Cable *cab)
-{
-    mutexListCables->lock();
-    hashCables::iterator i = workingListOfCables.find(cab->GetInfoOut());
-    while(i!=workingListOfCables.end() && i.key()==cab->GetInfoOut()) {
-        if(i.value()->GetInfoIn()==cab->GetInfoIn()) {
-            i=workingListOfCables.erase(i);
-            mutexListCables->unlock();
-            return;
-        } else {
-            ++i;
-        }
-    }
-    LOG("cable not found");
-//    workingListOfCables.remove(cab->GetInfoOut(),cab);
-    mutexListCables->unlock();
 }
 
 void MainHost::SetTimeInfo(const VstTimeInfo *info)

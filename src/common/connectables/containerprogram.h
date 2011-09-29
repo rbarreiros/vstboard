@@ -21,7 +21,7 @@
 #ifndef CONTAINERPROGRAM_H
 #define CONTAINERPROGRAM_H
 
-//#include "precomp.h"
+#include "precomp.h"
 #include "cable.h"
 #include "objectinfo.h"
 
@@ -38,6 +38,7 @@ namespace Connectables {
         ContainerProgram(MainHost *myHost, Container *container);
         ContainerProgram(const ContainerProgram & c);
         ~ContainerProgram();
+        void AddToCableList(hashCables *lst);
         void Load(int progId);
         void Unload();
         void Save(bool saveChildPrograms=true);
@@ -49,7 +50,7 @@ namespace Connectables {
         void ReplaceObject(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> replacedObjPtr);
 
         bool AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin, bool hidden=false);
-        void RemoveCable(Cable *cab);
+        void RemoveCable(QSharedPointer<Cable>cab);
         void RemoveCable(const QModelIndex & index);
         void RemoveCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin);
         void RemoveCableFromPin(const ConnectionInfo &pin);
@@ -60,6 +61,8 @@ namespace Connectables {
         void MoveInputCablesFromObj(int newObjId, int oldObjId);
         void GetListOfConnectedPinsTo(const ConnectionInfo &pin, QList<ConnectionInfo> &list);
 
+//        void SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum msgType,void *data);
+
         bool IsDirty();
         inline void SetDirty() {
             dirty=true;
@@ -67,6 +70,7 @@ namespace Connectables {
 
         void SaveRendererState();
         void LoadRendererState();
+        void ResetDelays();
 
         void CollectCableUpdates(QList< QPair<ConnectionInfo,ConnectionInfo> > *addedCables=0,
                                 QList< QPair<ConnectionInfo,ConnectionInfo> > *removedCables=0) {
@@ -95,7 +99,7 @@ namespace Connectables {
         MainHost *myHost;
 
         QList< QSharedPointer<Object> >listObjects;
-        QList<Cable*>listCables;
+        QList<QSharedPointer<Cable> >listCables;
 
         QMap<int,ObjectContainerAttribs>mapObjAttribs;
 

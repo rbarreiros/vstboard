@@ -62,6 +62,7 @@ namespace Connectables {
         void MoveOutputCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr);
         void MoveInputCablesFromObj(QSharedPointer<Object> newObjPtr, QSharedPointer<Object> ObjPtr);
         void GetListOfConnectedPinsTo(const ConnectionInfo &pin, QList<ConnectionInfo> &list);
+//        void SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum msgType,void *data);
         bool IsDirty() {
             return currentContainerProgram->IsDirty();
         }

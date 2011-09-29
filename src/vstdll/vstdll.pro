@@ -5,8 +5,10 @@ QT += core gui
 TARGET = "VstBoardPlugin"
 TEMPLATE = lib
 
-LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/" -lvld
-INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include/"
+#CONFIG(debug, debug|release) {
+#    LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/" -lvld
+#    INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include/"
+#}
 
 CONFIG += qtwinmigrate-uselib
 include($${_PRO_FILE_PWD_}/../../libs/qtwinmigrate/src/qtwinmigrate.pri)

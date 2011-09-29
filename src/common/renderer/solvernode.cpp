@@ -166,7 +166,7 @@ void SolverNode::UpdateInitialDelay()
 {
     internalDelay=0L;
     foreach(QSharedPointer<Connectables::Object>obj, listOfObj) {
-        internalDelay+=obj->initialDelay;
+        internalDelay+=obj->GetInitDelay();
     }
 
     totalDelayAtOutput = internalDelay+GetParentMaxDelay();

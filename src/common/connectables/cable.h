@@ -21,6 +21,7 @@
 #ifndef CABLE_H
 #define CABLE_H
 
+#include "precomp.h"
 #include "connectioninfo.h"
 
 class MainHost;
@@ -73,6 +74,6 @@ namespace Connectables {
     };
 }
 
-typedef QMultiMap<ConnectionInfo, Connectables::Cable*> hashCables;
+typedef QMultiMap<ConnectionInfo, QSharedPointer<Connectables::Cable> > hashCables;
 
 #endif // CABLE_H
