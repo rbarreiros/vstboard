@@ -41,7 +41,7 @@ MainContainerView::~MainContainerView()
 {
     foreach(CableView *c, listCables) {
         c->scene()->removeItem(c);
-        delete c;
+        c->deleteLater();
     }
 }
 

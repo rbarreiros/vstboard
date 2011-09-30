@@ -124,7 +124,7 @@ void ContainerProgram::Load(int progId)
            PinExistAndVisible(cab->GetInfoIn())) {
             Connectables::Pin *pin = myHost->objFactory->GetPin(cab->GetInfoOut());
             if(pin)
-                pin->listCables << cab;
+                pin->AddCable(cab);
 
             cab->AddToParentNode(container->GetCablesIndex());
         } else {
@@ -153,10 +153,9 @@ void ContainerProgram::Unload()
     foreach(QSharedPointer<Cable>cab, listCables) {
         Connectables::Pin *pin = myHost->objFactory->GetPin(cab->GetInfoOut());
         if(pin)
-            pin->listCables.removeAll(cab);
+            pin->RemoveCable(cab);
         cab->RemoveFromParentNode(container->GetCablesIndex());
     }
-
     foreach(QSharedPointer<Object> obj, listObjects) {
         if(!obj.isNull())
             obj->UnloadProgram();
@@ -316,7 +315,7 @@ bool ContainerProgram::AddCable(const ConnectionInfo &outputPin, const Connectio
 
     Connectables::Pin *pin = myHost->objFactory->GetPin(outputPin);
     if(pin)
-        pin->listCables << cab;
+        pin->AddCable(cab);
 
     SetDirty();
     return true;
@@ -326,7 +325,7 @@ void ContainerProgram::RemoveCable(QSharedPointer<Cable>cab)
 {
     Connectables::Pin *pin = myHost->objFactory->GetPin(cab->GetInfoOut());
     if(pin)
-        pin->listCables.removeAll(cab);
+        pin->RemoveCable(cab);
 
     if(collectedListOfRemovedCables)
         *collectedListOfRemovedCables << QPair<ConnectionInfo,ConnectionInfo>(cab->GetInfoOut(),cab->GetInfoIn());

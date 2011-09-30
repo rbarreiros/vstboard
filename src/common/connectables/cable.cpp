@@ -112,11 +112,11 @@ void Cable::RemoveFromParentNode(const QModelIndex &parentIndex)
 bool Cable::SetDelay(quint32 d)
 {
     delay=d;
-    if(modelIndex.isValid()) {
-        QStandardItem *item = myHost->GetModel()->itemFromIndex(modelIndex);
-        item->setText( QString("cable %1:%2 %3").arg(pinOut.objId).arg(pinIn.objId).arg(delay) );
-        item->setData(d,UserRoles::position);
-    }
+//    if(modelIndex.isValid()) {
+//        QStandardItem *item = myHost->GetModel()->itemFromIndex(modelIndex);
+//        item->setText( QString("cable %1:%2 %3").arg(pinOut.objId).arg(pinIn.objId).arg(delay) );
+//        item->setData(d,UserRoles::position);
+//    }
 
     if(delay==0) {
         if(buffer) {

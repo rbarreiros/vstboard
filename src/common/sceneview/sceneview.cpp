@@ -234,7 +234,7 @@ void SceneView::rowsAboutToBeRemoved ( const QModelIndex & parent, int start, in
                 }
                 obj->hide();
                 obj->scene()->removeItem(obj);
-                delete obj;
+                obj->deleteLater();
                 break;
             }
         case NodeType::pin :
@@ -282,7 +282,7 @@ void SceneView::rowsAboutToBeRemoved ( const QModelIndex & parent, int start, in
 
                 cable->hide();
                 cable->scene()->removeItem(cable);
-                delete cable;
+                cable->deleteLater();
                 break;
             }
         default:

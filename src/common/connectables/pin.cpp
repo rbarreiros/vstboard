@@ -62,40 +62,23 @@ Pin::~Pin()
 }
 
 /*!
-  Set the pin name
-  \param name
-  */
-void Pin::setObjectName(const QString &name)
-{
-    if(modelIndex.isValid())
-        parent->getHost()->GetModel()->setData(modelIndex,name,Qt::DisplayRole);
-
-    QObject::setObjectName(name);
-}
-
-/*!
   Send a message to all the connected pins
   \param msgType PinMessage
   \param data data to send
   */
 void Pin::SendMsg(const PinMessage::Enum msgType,void *data)
 {
+    if(!cablesMutex.tryLock()) {
+        LOG("pin not locked")
+        return;
+    }
     foreach(QSharedPointer<Cable>c, listCables) {
         if(c)
             c->Render(msgType,data);
         else
             listCables.removeAll(c);
     }
-//    int cntId = connectInfo.container;
-//    if(connectInfo.bridge)
-//        cntId = parent->getHost()->objFactory->GetObjectFromId( cntId )->GetContainerId();
-
-//    QSharedPointer<Container>cnt=parent->getHost()->objFactory->GetObjectFromId( cntId ).staticCast<Container>();
-//    if(!cnt)
-//        return;
-//    cnt->SendMsg(connectInfo,(PinMessage::Enum)msgType,data);
-
-//    parent->getHost()->SendMsg(connectInfo,(PinMessage::Enum)msgType,data);
+    cablesMutex.unlock();
 }
 
 /*!
@@ -182,6 +165,11 @@ void Pin::SetVisible(bool vis)
     }
 
     if(!visible && modelIndex.isValid()) {
+        //        if(connectInfo.type!=PinType::Bridge) {
+                    disconnect(parent->getHost()->updateViewTimer,SIGNAL(timeout()),
+                            this,SLOT(updateView()));
+        //        }
+
         //remove cables from pin
         QSharedPointer<Object> cnt = parent->getHost()->objFactory->GetObjectFromId(connectInfo.container);
         if(!cnt.isNull()) {
@@ -189,11 +177,6 @@ void Pin::SetVisible(bool vis)
         }
 
         //remove pin
-        if(connectInfo.type!=PinType::Bridge) {
-            disconnect(parent->getHost()->updateViewTimer,SIGNAL(timeout()),
-                    this,SLOT(updateView()));
-        }
-
         if(modelIndex.isValid())
             parent->getHost()->GetModel()->removeRow(modelIndex.row(), modelIndex.parent());
         modelIndex=QModelIndex();

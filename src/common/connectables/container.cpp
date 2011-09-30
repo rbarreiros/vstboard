@@ -212,9 +212,12 @@ void Container::NewRenderLoop()
 void Container::PostRender()
 {
     if(progToSet!=-1) {
-//        myHost->mutexRender.lock();
-        LoadProgram(progToSet);
+        int p =progToSet;
         progToSet=-1;
+
+//        myHost->mutexRender.lock();
+        LoadProgram(p);
+
 //        myHost->mutexRender.unlock();
     }
 }
@@ -235,7 +238,7 @@ void Container::SetSampleRate(float rate)
 
 void Container::LoadProgram(int prog)
 {
-    QMutexLocker ml(&progLoadMutex);
+//    QMutexLocker ml(&progLoadMutex);
 
     //if prog is already loaded, update model
     if(prog==currentProgId && currentContainerProgram) {

@@ -56,8 +56,6 @@ namespace Connectables {
           */
         virtual float GetValue() {return value;}
 
-        void setObjectName(const QString &name);
-
         /*!
           get the pin infos
           \return ConnectionInfo
@@ -80,9 +78,13 @@ namespace Connectables {
            */
         virtual void NewRenderLoop() {}
 
-        QList<QWeakPointer<Cable> >listCables;
+        void AddCable(const QWeakPointer<Cable>&c) {cablesMutex.lock(); listCables << c; cablesMutex.unlock();}
+        void RemoveCable(const QWeakPointer<Cable>&c) {cablesMutex.lock(); listCables.removeAll(c); cablesMutex.unlock();}
 
     protected:
+        QMutex cablesMutex;
+        QList<QWeakPointer<Cable> >listCables;
+
         /// ConnectionInfo og the pin
         ConnectionInfo connectInfo;
 
