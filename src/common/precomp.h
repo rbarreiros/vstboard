@@ -28,6 +28,7 @@
     #define VST_FORCE_DEPRECATED 0
 
     #ifdef WIN32
+        #undef NOMINMAX
         #define NOMINMAX
         #include "Windows.h"
     #endif

@@ -46,7 +46,7 @@ public:
 
     void Open();
 
-    void SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum msgType,void *data);
+//    void SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum msgType,void *data);
 
     void SetBufferSizeMs(unsigned int ms);
     void SetBufferSize(unsigned long size);
@@ -64,9 +64,6 @@ public:
 
     void OptimizeRenderer() { if(renderer) renderer->Optimize(); }
     Renderer * GetRenderer() { return renderer; }
-
-    void OnCableAdded(Connectables::Cable *cab);
-    void OnCableRemoved(Connectables::Cable *cab);
 
     void SetSetupDirtyFlag() { if(hostContainer) hostContainer->SetDirty(); }
 
@@ -144,8 +141,8 @@ private:
     QMap<int,Connectables::Object*>listContainers;
     QMap<ConnectionInfo,Connectables::Pin*>listPins;
 
-    hashCables workingListOfCables;
-    QMutex *mutexListCables;
+//    hashCables workingListOfCables;
+//    QMutex *mutexListCables;
     Renderer *renderer;
 
     QMutex solverMutex;
@@ -188,6 +185,7 @@ public slots:
     void SaveSetupFile(bool saveAs=false);
     void SaveProjectFile(bool saveAs=false);
     void ChangeNbThreads(int nbThreads);
+    void ResetDelays();
 
 private slots:
     void UpdateSolver(bool forceUpdate=false);

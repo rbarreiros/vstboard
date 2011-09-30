@@ -81,12 +81,12 @@ namespace View {
         void LoadPreset(const QString &presetName);
         inline const QString & GetPresetName() const {return currentPresetName;}
 
-        inline viewConfigPreset * ViewConfig::GetCurrentPreset()
+        inline viewConfigPreset * GetCurrentPreset()
         {
             return &(*GetListOfPresets())[currentPresetName];
         }
 
-        inline viewConfigPresetList * ViewConfig::GetListOfPresets()
+        inline viewConfigPresetList * GetListOfPresets()
         {
             if(savedInSetupFile)
                 return &listPresetsInSetup;
@@ -100,7 +100,7 @@ namespace View {
         void AddPreset(QString &presetName);
         void RemovePreset(const QString &presetName);
         void RenamePreset(const QString &oldName, QString &newName);
-        void CopyPreset(const QString &presetName, QString &newName=QString(""));
+        void CopyPreset(const QString &presetName, QString &newName);
 
         QDataStream & toStream (QDataStream &) const;
         QDataStream & fromStream (QDataStream &);

@@ -416,7 +416,7 @@ bool VstPlugin::initPlugin()
             listMidiPinOut->AddPin(0);
         }
 
-        initialDelay = pEffect->initialDelay;
+        SetInitDelay(pEffect->initialDelay);
     }
 
     //create all parameters pins
@@ -737,7 +737,7 @@ VstIntPtr VstPlugin::OnMasterCallback(long opcode, long index, long value, void 
         case audioMasterIOChanged : //13
             if(!pEffect)
                 return 0L;
-            initialDelay = pEffect->initialDelay;
+            SetInitDelay(pEffect->initialDelay);
             listAudioPinIn->ChangeNumberOfPins(pEffect->numInputs);
             listAudioPinOut->ChangeNumberOfPins(pEffect->numOutputs);
             UpdateModelNode();

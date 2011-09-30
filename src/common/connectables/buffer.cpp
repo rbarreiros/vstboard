@@ -31,11 +31,11 @@ Buffer::Buffer(MainHost *host, int index, const ObjectInfo &info) :
     adjustDelay(0),
     countWait(0)
 {
-    initialDelay = info.initDelay;
-    buffer.SetSize(myHost->GetBufferSize()*2 + initialDelay);
+    delaySize = info.initDelay;
+    buffer.SetSize(myHost->GetBufferSize()*2 + delaySize);
     listAudioPinIn->SetNbPins(1);
     listAudioPinOut->SetNbPins(1);
-    listParameterPinIn->listPins.insert(0, new ParameterPinIn(this,0,(float)initialDelay/50000,"Delay",true));
+    listParameterPinIn->listPins.insert(0, new ParameterPinIn(this,0,(float)delaySize/50000,"Delay",true));
 }
 
 Buffer::~Buffer()
@@ -46,8 +46,8 @@ Buffer::~Buffer()
 
 void Buffer::SetDelay(long d)
 {
-    addedSize+=(d-initialDelay);
-    initialDelay=d;
+    addedSize+=(d-delaySize);
+    delaySize=d;
     delayChanged=true;
     static_cast<ParameterPin*>(listParameterPinIn->GetPin(0))->ChangeValue((float)d/50000, true);
 }
@@ -61,7 +61,7 @@ void Buffer::Render()
         } else {
             countWait=0;
             delayChanged=false;
-            buffer.SetSize(myHost->GetBufferSize()*2 + initialDelay);
+            buffer.SetSize(myHost->GetBufferSize()*2 + delaySize);
         }
 
         if(addedSize<0) {
@@ -115,7 +115,7 @@ void Buffer::Render()
     pinInBuf->ResetStackCounter();
 
     AudioBuffer *pinOutBuf = listAudioPinOut->GetBuffer(0);
-    if(buffer.filledSize>=initialDelay+pinOutBuf->GetSize() || addedSize>0 ) {
+    if(buffer.filledSize>=delaySize+pinOutBuf->GetSize() || addedSize>0 ) {
         //set buffer to output
         if(pinOutBuf->GetDoublePrecision())
             buffer.Get( (double*)pinOutBuf->GetPointerWillBeFilled(), pinOutBuf->GetSize() );
@@ -131,9 +131,9 @@ void Buffer::OnParameterChanged(ConnectionInfo pinInfo, float value)
 {
     Object::OnParameterChanged(pinInfo,value);
     long d = listParameterPinIn->listPins.value(0)->GetValue()*50000;
-    if(abs(d-initialDelay)>1) {
-        addedSize+=(d-initialDelay);
-        initialDelay=d;
+    if(abs(d-delaySize)>1) {
+        addedSize+=(d-delaySize);
+        delaySize=d;
         delayChanged=true;
     }
 }

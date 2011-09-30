@@ -180,9 +180,12 @@ namespace Connectables {
         virtual void ProgramToStream (int progId, QDataStream &out);
         virtual void ProgramFromStream (int progId, QDataStream &in);
 
-        long initialDelay;
+        long GetInitDelay() {return initialDelay;}
 
     protected:
+
+        void SetInitDelay(long d) {initialDelay=d;}
+
         /// pointer to the MainHost
         MainHost *myHost;
 
@@ -251,6 +254,8 @@ namespace Connectables {
     private:
         /// the current container id if not parked
         quint16 containerId;
+
+        long initialDelay;
 
     signals:
         /// Sent to the editor window when we want to close it

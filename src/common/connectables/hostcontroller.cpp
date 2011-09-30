@@ -221,8 +221,8 @@ void HostController::TapTempo()
     }
     tapTempoTimer.restart();
 
-    double intPart;
-    double fractPart = modf (myHost->vstHost->vstTimeInfo.ppqPos, &intPart);
+//    double intPart;
+//    double fractPart = modf (myHost->vstHost->vstTimeInfo.ppqPos, &intPart);
 //    LOG(fractPart);
     myHost->vstHost->vstTimeInfo.ppqPos = (int)myHost->vstHost->vstTimeInfo.ppqPos;
 

@@ -28,7 +28,7 @@ class MainHost;
 class UpdateDelays
 {
 public:
-    UpdateDelays(MainHost *myHost, hashCables &listCables, const QList<SolverNode*> &listNodes);
+    UpdateDelays(MainHost *myHost, hashCables *listCables, const QList<SolverNode*> *listNodes);
 
 private:
     void ResetDelays();
@@ -37,10 +37,10 @@ private:
     bool SynchronizeAudioOutputs();
 //    void CreateDelayNode(SolverNode *node, SolverNode *childNode, long delay);
 
-    void GetListCablesConnectedTo(quint16 objId, QList<Connectables::Cable*> &list);
+    void GetListCablesConnectedTo(quint16 objId, QList<QSharedPointer<Connectables::Cable> > &list);
 
-    hashCables listCables;
-    const QList<SolverNode*> listNodes;
+    hashCables *listCables;
+    const QList<SolverNode*> *listNodes;
     long globalDelay;
     MainHost *myHost;
 };

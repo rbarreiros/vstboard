@@ -5,11 +5,10 @@ QT += core gui
 TARGET = "VstBoardPlugin"
 TEMPLATE = lib
 
-LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/" -lvld
-INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include/"
-
-CONFIG += qtwinmigrate-uselib
-include($${_PRO_FILE_PWD_}/../../libs/qtwinmigrate/src/qtwinmigrate.pri)
+#CONFIG(debug, debug|release) {
+#    LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/" -lvld
+#    INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include/"
+#}
 
 win32 {
     LIBS += -lwinmm
@@ -18,8 +17,6 @@ win32 {
 }
 
 win32-g++ {
-    DEFINES += WINVER=0x0501
-    DEFINES += _WIN32_WINNT=0x0501
     QMAKE_LFLAGS += -static-libgcc
 }
 
@@ -29,6 +26,9 @@ win32-msvc* {
 }
 
 INCLUDEPATH += ../common
+
+CONFIG += qtwinmigrate-uselib
+include($${_PRO_FILE_PWD_}/../../libs/qtwinmigrate/src/qtwinmigrate.pri)
 
 scriptengine {
     QT += script
@@ -76,7 +76,9 @@ else:unix:!symbian: LIBS += -L$$OUT_PWD/../common/ -lcommon
 INCLUDEPATH += $$PWD/../common
 DEPENDPATH += $$PWD/../common
 
-win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../common/release/common.lib
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../common/release/libcommon.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../common/debug/libcommon.a
+else:win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../common/release/common.lib
 else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../common/debug/common.lib
 else:unix:!symbian: PRE_TARGETDEPS += $$OUT_PWD/../common/libcommon.a
 

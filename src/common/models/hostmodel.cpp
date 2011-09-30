@@ -421,6 +421,9 @@ bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int
             if(pinInfo.type==PinType::Parameter) {
                 if(role==UserRoles::value) {
                     Connectables::ParameterPin* pin = static_cast<Connectables::ParameterPin*>(myHost->objFactory->GetPin(pinInfo));
+                    if(!pin) {
+                        return false;
+                    }
                     ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
                     pin->SetLimit(info.objType,value.toFloat());
 

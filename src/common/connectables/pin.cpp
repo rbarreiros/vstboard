@@ -18,8 +18,8 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
-
 #include "pin.h"
+#include "cable.h"
 #include "../mainhost.h"
 
 using namespace Connectables;
@@ -62,25 +62,23 @@ Pin::~Pin()
 }
 
 /*!
-  Set the pin name
-  \param name
-  */
-void Pin::setObjectName(const QString &name)
-{
-    if(modelIndex.isValid())
-        parent->getHost()->GetModel()->setData(modelIndex,name,Qt::DisplayRole);
-
-    QObject::setObjectName(name);
-}
-
-/*!
   Send a message to all the connected pins
   \param msgType PinMessage
   \param data data to send
   */
 void Pin::SendMsg(const PinMessage::Enum msgType,void *data)
 {
-    parent->getHost()->SendMsg(connectInfo,(PinMessage::Enum)msgType,data);
+    if(!cablesMutex.tryLock()) {
+        LOG("pin not locked")
+        return;
+    }
+    foreach(QSharedPointer<Cable>c, listCables) {
+        if(c)
+            c->Render(msgType,data);
+        else
+            listCables.removeAll(c);
+    }
+    cablesMutex.unlock();
 }
 
 /*!
@@ -167,6 +165,11 @@ void Pin::SetVisible(bool vis)
     }
 
     if(!visible && modelIndex.isValid()) {
+        //        if(connectInfo.type!=PinType::Bridge) {
+                    disconnect(parent->getHost()->updateViewTimer,SIGNAL(timeout()),
+                            this,SLOT(updateView()));
+        //        }
+
         //remove cables from pin
         QSharedPointer<Object> cnt = parent->getHost()->objFactory->GetObjectFromId(connectInfo.container);
         if(!cnt.isNull()) {
@@ -174,11 +177,6 @@ void Pin::SetVisible(bool vis)
         }
 
         //remove pin
-        if(connectInfo.type!=PinType::Bridge) {
-            disconnect(parent->getHost()->updateViewTimer,SIGNAL(timeout()),
-                    this,SLOT(updateView()));
-        }
-
         if(modelIndex.isValid())
             parent->getHost()->GetModel()->removeRow(modelIndex.row(), modelIndex.parent());
         modelIndex=QModelIndex();

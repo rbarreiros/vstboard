@@ -45,7 +45,6 @@ Cable::Cable(MainHost *myHost, const ConnectionInfo &pinOut, const ConnectionInf
     delay(0),
     tmpBuf(0)
 {
-
 }
 
 /*!
@@ -61,7 +60,6 @@ Cable::Cable(const Cable & c) :
     delay(c.delay),
     tmpBuf(0)
 {
-
 }
 
 Cable::~Cable()
@@ -111,14 +109,14 @@ void Cable::RemoveFromParentNode(const QModelIndex &parentIndex)
     modelIndex=QModelIndex();
 }
 
-bool Cable::SetDelay(long d)
+bool Cable::SetDelay(quint32 d)
 {
     delay=d;
-    if(modelIndex.isValid()) {
-        QStandardItem *item = myHost->GetModel()->itemFromIndex(modelIndex);
-        item->setText( QString("cable %1:%2 %3").arg(pinOut.objId).arg(pinIn.objId).arg(delay) );
-        item->setData(d,UserRoles::position);
-    }
+//    if(modelIndex.isValid()) {
+//        QStandardItem *item = myHost->GetModel()->itemFromIndex(modelIndex);
+//        item->setText( QString("cable %1:%2 %3").arg(pinOut.objId).arg(pinIn.objId).arg(delay) );
+//        item->setData(d,UserRoles::position);
+//    }
 
     if(delay==0) {
         if(buffer) {

@@ -21,7 +21,7 @@
 #include "updatedelays.h"
 #include "mainhost.h"
 
-UpdateDelays::UpdateDelays(MainHost *myHost, hashCables &listCables, const QList<SolverNode*> &listNodes) :
+UpdateDelays::UpdateDelays(MainHost *myHost, hashCables *listCables, const QList<SolverNode*> *listNodes) :
     listCables(listCables),
     listNodes(listNodes),
     myHost(myHost)
@@ -38,13 +38,13 @@ UpdateDelays::UpdateDelays(MainHost *myHost, hashCables &listCables, const QList
   */
 void UpdateDelays::ResetDelays()
 {
-    hashCables::iterator i = listCables.begin();
-    while (i != listCables.end()) {
+    hashCables::iterator i = listCables->begin();
+    while (i != listCables->end()) {
         i.value()->SetDelay(0);
         ++i;
     }
 
-    foreach(SolverNode *node, listNodes) {
+    foreach(SolverNode *node, *listNodes) {
         if(!node->IsRoot())
             continue;
         node->UpdateInitialDelay();
@@ -56,7 +56,7 @@ void UpdateDelays::ResetDelays()
   */
 bool UpdateDelays::AddDelays()
 {
-    foreach(SolverNode *node, listNodes) {
+    foreach(SolverNode *node, *listNodes) {
         long delay = node->GetParentMaxDelay();
         if(SynchronizeParentNodes(node,delay))
             return true;
@@ -73,10 +73,10 @@ bool UpdateDelays::SynchronizeParentNodes(SolverNode *node, long targetDelay)
 //            LOG("add delay"<<delayToAdd<<parent->listOfObj.first().toStrongRef()->objectName()<<node->listOfObj.first().toStrongRef()->objectName());
             QSharedPointer<Connectables::Object>obj = parent->listOfObj.last().toStrongRef();
 
-            QList<Connectables::Cable*>lstCables;
+            QList<QSharedPointer<Connectables::Cable> >lstCables;
             GetListCablesConnectedTo(obj->GetIndex(), lstCables);
             bool mod=false;
-            foreach(Connectables::Cable *cab, lstCables) {
+            foreach(QSharedPointer<Connectables::Cable>cab, lstCables) {
                 QSharedPointer<Connectables::Object>destObj = myHost->objFactory->GetObjectFromId(cab->GetInfoIn().objId);
                 if(node->listOfObj.contains(destObj)) {
                     if(cab->SetDelay(delayToAdd))
@@ -96,7 +96,7 @@ bool UpdateDelays::SynchronizeAudioOutputs()
 {
     //get the maximum delay at audio out
     long newDelay=0L;
-    foreach(SolverNode *node, listNodes) {
+    foreach(SolverNode *node, *listNodes) {
         if(node->totalDelayAtOutput>newDelay) {
             //only for nodes containing audio output
             foreach(QSharedPointer<Connectables::Object>obj, node->listOfObj) {
@@ -107,7 +107,7 @@ bool UpdateDelays::SynchronizeAudioOutputs()
     }
 
     //set an equal delay on all outputs
-    foreach(SolverNode *node, listNodes) {
+    foreach(SolverNode *node, *listNodes) {
         bool isOutput=false;
         foreach(QSharedPointer<Connectables::Object>obj, node->listOfObj) {
             if(obj->info().objType==ObjType::AudioInterfaceOut) {
@@ -130,10 +130,10 @@ bool UpdateDelays::SynchronizeAudioOutputs()
     return false;
 }
 
-void UpdateDelays::GetListCablesConnectedTo(quint16 objId, QList<Connectables::Cable*> &list)
+void UpdateDelays::GetListCablesConnectedTo(quint16 objId, QList<QSharedPointer<Connectables::Cable> > &list)
 {
-    hashCables::const_iterator i = listCables.constBegin();
-    while (i != listCables.constEnd()) {
+    hashCables::const_iterator i = listCables->constBegin();
+    while (i != listCables->constEnd()) {
         if(i.key().objId == objId)
             list << i.value();
         ++i;

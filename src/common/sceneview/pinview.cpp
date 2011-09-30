@@ -165,7 +165,7 @@ void PinView::mouseMoveEvent ( QGraphicsSceneMouseEvent  * event )
 
     if(currentLine) {
         RemoveCable(currentLine);
-        delete currentLine;
+        currentLine->deleteLater();
         currentLine = 0;
     }
     setCursor(defaultCursor);

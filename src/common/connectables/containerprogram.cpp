@@ -49,8 +49,8 @@ ContainerProgram::ContainerProgram(const ContainerProgram& c) :
         listObjects << objPtr;
     }
 
-    foreach(Cable* cab, c.listCables) {
-        listCables << new Cable(*cab);
+    foreach(QSharedPointer<Cable>cab, c.listCables) {
+        listCables << cab;
     }
 
     QMap<int,ObjectContainerAttribs>::ConstIterator i = c.mapObjAttribs.constBegin();
@@ -67,9 +67,9 @@ ContainerProgram::ContainerProgram(const ContainerProgram& c) :
 
 ContainerProgram::~ContainerProgram()
 {
-    foreach(Cable *c, listCables) {
-        delete c;
-    }
+//    foreach(QSharedPointer<Cable>c, listCables) {
+//        delete c;
+//    }
     listCables.clear();
 
     listObjects.clear();
@@ -100,6 +100,13 @@ bool ContainerProgram::PinExistAndVisible(const ConnectionInfo &info)
     return true;
 }
 
+void ContainerProgram::AddToCableList(hashCables *l)
+{
+    foreach(QSharedPointer<Cable>c, listCables) {
+        l->insert(c->GetInfoOut(), c);
+    }
+}
+
 void ContainerProgram::Load(int progId)
 {
     foreach(QSharedPointer<Object> objPtr, listObjects) {
@@ -109,14 +116,17 @@ void ContainerProgram::Load(int progId)
         }
     }
 
-    foreach(Cable *cab, listCables) {
+    foreach(QSharedPointer<Cable>cab, listCables) {
 
         //check if the pin exists,
         //if the object is in error mode, dummy pins will be created
         if(PinExistAndVisible(cab->GetInfoOut()) &&
            PinExistAndVisible(cab->GetInfoIn())) {
+            Connectables::Pin *pin = myHost->objFactory->GetPin(cab->GetInfoOut());
+            if(pin)
+                pin->AddCable(cab);
+
             cab->AddToParentNode(container->GetCablesIndex());
-            myHost->OnCableAdded(cab);
         } else {
             //delete cable from program if pins are not found and can't be created
             listCables.removeAll(cab);
@@ -140,11 +150,12 @@ void ContainerProgram::Load(int progId)
 
 void ContainerProgram::Unload()
 {
-    foreach(Cable *cab, listCables) {
-        myHost->OnCableRemoved(cab);
+    foreach(QSharedPointer<Cable>cab, listCables) {
+        Connectables::Pin *pin = myHost->objFactory->GetPin(cab->GetInfoOut());
+        if(pin)
+            pin->RemoveCable(cab);
         cab->RemoveFromParentNode(container->GetCablesIndex());
     }
-
     foreach(QSharedPointer<Object> obj, listObjects) {
         if(!obj.isNull())
             obj->UnloadProgram();
@@ -165,15 +176,28 @@ void ContainerProgram::SaveRendererState()
 
 void ContainerProgram::LoadRendererState()
 {
-    //todo : we have to rebuild the map to adjust delays in other containers
-
-//    const QTime t = container->GetLastModificationTime();
-//    if(t > lastModificationTime) {
-        //my renderer map is outdated
+    //if an object contains an initialDelay we need to update everything
+    if(myHost->objFactory->listDelayObj.isEmpty()) {
+        myHost->ResetDelays();
+        const QTime t = container->GetLastModificationTime();
+        if(t > lastModificationTime) {
+            //my renderer map is outdated
+            myHost->SetSolverUpdateNeeded();
+        } else {
+            myHost->GetRenderer()->LoadNodes( listOfRendererNodes );
+        }
+    } else {
+        LOG("update everything for delays");
         myHost->SetSolverUpdateNeeded();
-//    } else {
-//        myHost->GetRenderer()->LoadNodes( listOfRendererNodes );
-//    }
+    }
+}
+
+void ContainerProgram::ResetDelays()
+{
+    foreach(QSharedPointer<Cable>c, listCables) {
+        if(c)
+            c->SetDelay(0);
+    }
 }
 
 void ContainerProgram::ParkAllObj()
@@ -257,6 +281,16 @@ void ContainerProgram::ReplaceObject(QSharedPointer<Object> newObjPtr, QSharedPo
     //RemoveObject(replacedObjPtr);
 }
 
+//void ContainerProgram::SendMsg(const ConnectionInfo &senderPin,const PinMessage::Enum msgType,void *data)
+//{
+////    QMutexLocker lock(mutexListCables);
+
+//    foreach(Cable *c, listCables) {
+//        if(c->GetInfoOut()==senderPin)
+//            c->Render(msgType,data);
+//    }
+//}
+
 bool ContainerProgram::AddCable(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin, bool hidden)
 {
     if(CableExists(outputPin,inputPin))
@@ -270,7 +304,7 @@ bool ContainerProgram::AddCable(const ConnectionInfo &outputPin, const Connectio
     if(!PinExistAndVisible(inputPin) || !PinExistAndVisible(outputPin))
         return false;
 
-    Cable *cab = new Cable(myHost,outputPin,inputPin);
+    QSharedPointer<Cable>cab(new Cable(myHost,outputPin,inputPin));
     listCables << cab;
 
     if(collectedListOfAddedCables)
@@ -279,21 +313,27 @@ bool ContainerProgram::AddCable(const ConnectionInfo &outputPin, const Connectio
     if(!hidden && container)
         cab->AddToParentNode(container->GetCablesIndex());
 
-    myHost->OnCableAdded(cab);
+    Connectables::Pin *pin = myHost->objFactory->GetPin(outputPin);
+    if(pin)
+        pin->AddCable(cab);
+
     SetDirty();
     return true;
 }
 
-void ContainerProgram::RemoveCable(Cable *cab)
+void ContainerProgram::RemoveCable(QSharedPointer<Cable>cab)
 {
+    Connectables::Pin *pin = myHost->objFactory->GetPin(cab->GetInfoOut());
+    if(pin)
+        pin->RemoveCable(cab);
+
     if(collectedListOfRemovedCables)
         *collectedListOfRemovedCables << QPair<ConnectionInfo,ConnectionInfo>(cab->GetInfoOut(),cab->GetInfoIn());
 
-    listCables.removeAll(cab);
     cab->RemoveFromParentNode(container->GetCablesIndex());
-    myHost->OnCableRemoved(cab);
-    delete cab;
     SetDirty();
+    listCables.removeAll(cab);
+    //    delete cab;
 }
 
 void ContainerProgram::RemoveCable(const QModelIndex & index)
@@ -307,7 +347,7 @@ void ContainerProgram::RemoveCable(const ConnectionInfo &outputPin, const Connec
 {
     int i=listCables.size()-1;
     while(i>=0) {
-        Cable *cab = listCables.at(i);
+        QSharedPointer<Cable>cab = listCables.at(i);
         if(cab->GetInfoOut()==outputPin && cab->GetInfoIn()==inputPin) {
             RemoveCable(cab);
             return;
@@ -320,7 +360,7 @@ void ContainerProgram::RemoveCableFromPin(const ConnectionInfo &pin)
 {
     int i=listCables.size()-1;
     while(i>=0) {
-        Cable *cab = listCables.at(i);
+        QSharedPointer<Cable>cab = listCables.at(i);
         if(cab->GetInfoOut()==pin || cab->GetInfoIn()==pin) {
             RemoveCable(cab);
         }
@@ -332,7 +372,7 @@ void ContainerProgram::RemoveCableFromObj(int objId)
 {
     int i=listCables.size()-1;
     while(i>=0) {
-        Cable *cab = listCables.at(i);
+        QSharedPointer<Cable>cab = listCables.at(i);
         if(cab->GetInfoOut().objId==objId || cab->GetInfoIn().objId==objId ||
            cab->GetInfoOut().container==objId || cab->GetInfoIn().container==objId) {
             RemoveCable(cab);
@@ -345,7 +385,7 @@ void ContainerProgram::CreateBridgeOverObj(int objId)
 {
     int i=listCables.size()-1;
     while(i>=0) {
-        Cable *cab = listCables.at(i);
+        QSharedPointer<Cable>cab = listCables.at(i);
         if(cab->GetInfoOut().objId==objId || cab->GetInfoIn().objId==objId ||
            cab->GetInfoOut().container==objId || cab->GetInfoIn().container==objId) {
 
@@ -353,7 +393,7 @@ void ContainerProgram::CreateBridgeOverObj(int objId)
             if(cab->GetInfoOut().objId==objId && cab->GetInfoOut().type!=PinType::Parameter ) {
                 int j=listCables.size()-1;
                 while(j>=0) {
-                    Cable *otherCab = listCables.at(j);
+                    QSharedPointer<Cable>otherCab = listCables.at(j);
                     ConnectionInfo otherPin( cab->GetInfoOut() );
                     otherPin.direction=PinDirection::Input;
 
@@ -370,7 +410,7 @@ void ContainerProgram::CreateBridgeOverObj(int objId)
             if(cab->GetInfoIn().objId==objId && cab->GetInfoIn().type!=PinType::Parameter ) {
                 int j=listCables.size()-1;
                 while(j>=0) {
-                    Cable *otherCab = listCables.at(j);
+                    QSharedPointer<Cable>otherCab = listCables.at(j);
                     ConnectionInfo otherPin( cab->GetInfoOut() );
                     otherPin.direction=PinDirection::Output;
 
@@ -391,7 +431,7 @@ void ContainerProgram::CopyCablesFromObj(int newObjId, int oldObjId)
 {
     int i=listCables.size()-1;
     while(i>=0) {
-        Cable *cab = listCables.at(i);
+        QSharedPointer<Cable>cab = listCables.at(i);
         if(cab->GetInfoOut().objId==oldObjId) {
             ConnectionInfo newConnect = cab->GetInfoOut();
             newConnect.objId = newObjId;
@@ -410,7 +450,7 @@ void ContainerProgram::MoveOutputCablesFromObj(int newObjId, int oldObjId)
 {
     int i=listCables.size()-1;
     while(i>=0) {
-        Cable *cab = listCables.at(i);
+        QSharedPointer<Cable>cab = listCables.at(i);
         if(cab->GetInfoOut().objId==oldObjId && cab->GetInfoOut().type!=PinType::Parameter) {
             ConnectionInfo newConnect = cab->GetInfoOut();
             newConnect.objId = newObjId;
@@ -426,7 +466,7 @@ void ContainerProgram::MoveInputCablesFromObj(int newObjId, int oldObjId)
 {
     int i=listCables.size()-1;
     while(i>=0) {
-        Cable *cab = listCables.at(i);
+        QSharedPointer<Cable>cab = listCables.at(i);
         if(cab->GetInfoIn().objId==oldObjId && cab->GetInfoIn().type!=PinType::Parameter) {
             ConnectionInfo newConnect = cab->GetInfoIn();
             newConnect.objId = newObjId;
@@ -442,7 +482,7 @@ void ContainerProgram::GetListOfConnectedPinsTo(const ConnectionInfo &pin, QList
 {
     int i=listCables.size()-1;
     while(i>=0) {
-        Cable *cab = listCables.at(i);
+        QSharedPointer<Cable>cab = listCables.at(i);
         if(cab->GetInfoIn()==pin)
             list << cab->GetInfoOut();
         if(cab->GetInfoOut()==pin)
@@ -453,7 +493,7 @@ void ContainerProgram::GetListOfConnectedPinsTo(const ConnectionInfo &pin, QList
 
 bool ContainerProgram::CableExists(const ConnectionInfo &outputPin, const ConnectionInfo &inputPin)
 {
-    foreach(Cable *c, listCables) {
+    foreach(QSharedPointer<Cable>c, listCables) {
         if(c->GetInfoOut()==outputPin && c->GetInfoIn()==inputPin)
             return true;
     }
@@ -469,9 +509,10 @@ QDataStream & ContainerProgram::toStream (QDataStream& out) const
     }
 
     out << (quint16)listCables.size();
-    foreach(Cable *cab, listCables) {
+    foreach(QSharedPointer<Cable>cab, listCables) {
         out << cab->GetInfoOut();
         out << cab->GetInfoIn();
+        out << (quint32)cab->GetDelay();
     }
 
     out << (quint16)mapObjAttribs.size();
@@ -513,8 +554,13 @@ QDataStream & ContainerProgram::fromStream (QDataStream& in)
         //myHost->objFactory->GetPin(infoOut);
         //myHost->objFactory->GetPin(infoIn);
 
+        quint32 d=0;
+        if(myHost->currentFileVersion>=17)
+            in >> d;
+
         Cable *cab = new Cable(myHost,infoOut,infoIn);
-        listCables << cab;
+        cab->SetDelay(d);
+        listCables << QSharedPointer<Cable>(cab);
     }
 
     quint16 nbPos;
