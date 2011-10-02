@@ -440,7 +440,11 @@ bool VstPlugin::initPlugin()
     }
     EffSetProgram(0);
     Object::Open();
-//    CreateEditorWindow();
+
+    if(myHost->GetSetting("fastEditorsOpenClose",true).toBool()) {
+        CreateEditorWindow();
+    }
+
     return true;
 }
 
@@ -526,15 +530,20 @@ void VstPlugin::OnHideEditor()
 
     editorWnd->SaveAttribs();
 
-    editorWnd->disconnect();
-    editorWnd->SetPlugin(0);
-    disconnect(editorWnd);
-    QTimer::singleShot(0,editorWnd,SLOT(close()));
-    editorWnd=0;
-    objMutex.lock();
-    EffEditClose();
-    objMutex.unlock();
-
+    if(myHost->GetSetting("fastEditorsOpenClose",true).toBool()) {
+        disconnect(myHost->updateViewTimer,SIGNAL(timeout()),
+            this,SLOT(EditIdle()));
+        emit HideEditorWindow();
+    } else {
+        editorWnd->disconnect();
+        editorWnd->SetPlugin(0);
+        disconnect(editorWnd);
+        QTimer::singleShot(0,editorWnd,SLOT(close()));
+        editorWnd=0;
+        objMutex.lock();
+        EffEditClose();
+        objMutex.unlock();
+    }
 //    if(!editorWnd)
 //        CreateEditorWindow();
 

@@ -151,6 +151,9 @@ ConfigDialog::ConfigDialog(MainHost *myHost, QWidget *parent) :
 
     connect(ui->nbThreads, SIGNAL(valueChanged(int)),
         myHost, SLOT(ChangeNbThreads(int)));
+
+//hide/close editors
+    ui->fastEditorOpenClose->setChecked( myHost->GetSetting("fastEditorsOpenClose",true).toBool() );
 }
 
 ConfigDialog::~ConfigDialog()
@@ -455,6 +458,8 @@ void ConfigDialog::accept()
     if( newNbThreads != oldNbThreads ) {
         myHost->SetSetting("NbThreads", newNbThreads);
     }
+//hide/close editors
+    myHost->SetSetting("fastEditorsOpenClose", ui->fastEditorOpenClose->isChecked());
 
     QDialog::accept();
 
