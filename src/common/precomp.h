@@ -56,6 +56,8 @@
     #include <QFileDialog>
     #include <QFileSystemModel>
     #include <QFocusEvent>
+    #include <QFont>
+    #include <QFontDatabase>
     #include <QFrame>
     #include <QGraphicsBlurEffect>
     #include <QGraphicsGridLayout>

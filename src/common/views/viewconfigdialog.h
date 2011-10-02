@@ -34,6 +34,8 @@ namespace View {
         void SaveChanges();
         void DiscardChanges();
 
+        void UpdateProgramsFont();
+
         QColor currentColor;
 
         /// pointer to the dialog ui;
@@ -83,6 +85,11 @@ namespace View {
         void on_addPreset_clicked();
         void on_delPreset_clicked();
         void on_listPresets_itemChanged(QListWidgetItem *item);
+        void on_fontProgItalic_clicked(bool checked);
+        void on_fontProgStretch_valueChanged(double arg1);
+        void on_fontProgSize_valueChanged(double arg1);
+        void on_fontProgFamily_currentIndexChanged(const QString &arg1);
+        void on_fontProgBold_clicked(bool checked);
     };
 }
 #endif // VIEWCONFIGDIALOG_H

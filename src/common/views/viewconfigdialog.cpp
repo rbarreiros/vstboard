@@ -69,6 +69,19 @@ void ViewConfigDialog::InitDialog()
     ui->checkSavedInSetupFile->setChecked( conf->IsSavedInSetup() );
     InitLists();
     LoadPreset( conf->GetPresetName() );
+
+    ui->fontProgFamily->addItem("Default");
+    QFontDatabase database;
+    foreach (const QString &family, database.families()) {
+        ui->fontProgFamily->addItem(family);
+    }
+    ui->fontProgFamily->setCurrentIndex( ui->fontProgFamily->findText(myHost->GetSetting("fontProgFamily","Default").toString()) );
+
+    ui->fontProgSize->setValue( myHost->GetSetting("fontProgSize",0).toInt() );
+    ui->fontProgBold->setChecked( myHost->GetSetting("fontProgbold",false).toBool() );
+    ui->fontProgItalic->setChecked( myHost->GetSetting("fontProgItalic",false).toBool() );
+    ui->fontProgStretch->setValue( myHost->GetSetting("fontProgStretch",100).toInt() );
+    UpdateProgramsFont();
 }
 
 void ViewConfigDialog::InitLists()
@@ -130,6 +143,12 @@ bool ViewConfigDialog::UserWantsToUnloadPreset()
 
 void ViewConfigDialog::SaveChanges()
 {
+    myHost->SetSetting("fontProgFamily", ui->fontProgFamily->itemText(ui->fontProgFamily->currentIndex()) );
+    myHost->SetSetting("fontProgSize", static_cast<int>(ui->fontProgSize->value()));
+    myHost->SetSetting("fontProgBold", static_cast<int>(ui->fontProgBold->isChecked()));
+    myHost->SetSetting("fontProgItalic", static_cast<int>(ui->fontProgItalic->isChecked()));
+    myHost->SetSetting("fontProgStretch", static_cast<int>(ui->fontProgStretch->value()));
+
     if(!modified)
         return;
 
@@ -143,6 +162,7 @@ void ViewConfigDialog::SaveChanges()
 
 void ViewConfigDialog::DiscardChanges()
 {
+    myHost->mainWindow->LoadProgramsFont();
     conf->SetListGroups( backupColors );
     conf->SetSavedInSetup( backupSaveInSetup );
     modified=false;
@@ -419,4 +439,46 @@ void View::ViewConfigDialog::on_listPresets_itemChanged(QListWidgetItem *item)
 
     if(ui->checkSavedInSetupFile->isChecked())
         myHost->SetSetupDirtyFlag();
+}
+
+void ViewConfigDialog::UpdateProgramsFont()
+{
+    int b = QFont::Normal;
+    if(ui->fontProgBold->isChecked())
+        b = QFont::Bold;
+
+    QFont f(
+        ui->fontProgFamily->itemText(ui->fontProgFamily->currentIndex()),
+        ui->fontProgSize->value(),
+        b,
+        ui->fontProgItalic->isChecked()
+            );
+    f.setPointSize(ui->fontProgSize->value());
+    f.setStretch(ui->fontProgStretch->value());
+    myHost->mainWindow->SetProgramsFont(f);
+}
+
+void View::ViewConfigDialog::on_fontProgItalic_clicked(bool checked)
+{
+    UpdateProgramsFont();
+}
+
+void View::ViewConfigDialog::on_fontProgStretch_valueChanged(double arg1)
+{
+    UpdateProgramsFont();
+}
+
+void View::ViewConfigDialog::on_fontProgSize_valueChanged(double arg1)
+{
+    UpdateProgramsFont();
+}
+
+void View::ViewConfigDialog::on_fontProgFamily_currentIndexChanged(const QString &arg1)
+{
+    UpdateProgramsFont();
+}
+
+void View::ViewConfigDialog::on_fontProgBold_clicked(bool checked)
+{
+    UpdateProgramsFont();
 }

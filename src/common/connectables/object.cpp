@@ -462,7 +462,7 @@ bool Object::ToggleEditor(bool visible)
     ParameterPin *pin = static_cast<ParameterPin*>(listParameterPinIn->listPins.value(FixedPinNumber::editorVisible));
     if(!pin)
         return false;
-    if(pin->GetIndex()==visible)
+    if(static_cast<bool>(pin->GetIndex())==visible)
         return false;
     pin->ChangeValue(visible);
     return true;

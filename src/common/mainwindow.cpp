@@ -388,7 +388,7 @@ void MainWindow::readSettings()
 
     viewConfig->LoadFromRegistry();
 
-
+    LoadProgramsFont();
 }
 
 void MainWindow::LoadDefaultFiles()
@@ -570,6 +570,35 @@ void MainWindow::OnViewConfigClosed()
 {
     viewConfigDlg=0;
     ui->actionAppearance->setChecked(false);
+
+
+}
+
+void MainWindow::SetProgramsFont(const QFont &f)
+{
+    ui->Programs->setFont(f);
+}
+
+void MainWindow::LoadProgramsFont()
+{
+    QFont f(ui->Programs->font());
+
+    QString fam( myHost->GetSetting("fontProgFamily","Default").toString() );
+    if(fam!="Default")
+        f.setFamily( fam );
+    else
+        f.setFamily( ui->dockPrograms->font().family() );
+
+    int s = myHost->GetSetting("fontProgSize",0).toInt();
+    if(s>0)
+        f.setPointSize( s );
+    else
+        f.setPointSize( ui->dockPrograms->font().pointSize() );
+
+    f.setStretch( myHost->GetSetting("fontProgStretch",100).toInt() );
+    f.setBold( myHost->GetSetting("fontProgBold",false).toBool() );
+    f.setItalic( myHost->GetSetting("fontProgItalic",false).toBool() );
+    ui->Programs->setFont(f);
 }
 
 void MainWindow::on_actionCable_toggled(bool arg1)

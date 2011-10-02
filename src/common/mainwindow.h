@@ -81,6 +81,8 @@ public slots:
     void currentFileChanged();
     void OnViewConfigClosed();
     void LoadDefaultFiles();
+    void SetProgramsFont(const QFont &f);
+    void LoadProgramsFont();
 
 private slots:
     void on_actionLoad_Setup_triggered();
