@@ -278,7 +278,7 @@ namespace Connectables {
 
         virtual void OnParameterChanged(ConnectionInfo pinInfo, float value);
 
-        void ToggleEditor(bool visible);
+        bool ToggleEditor(bool visible);
 
         /// to show the editor window from another thread
         virtual void OnShowEditor() {}

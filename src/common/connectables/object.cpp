@@ -457,12 +457,15 @@ void Object::OnParameterChanged(ConnectionInfo pinInfo, float value)
   Toggle the editor (if the object has one) by changing the editor pin value
   \param visible true to show, false to hide
   */
-void Object::ToggleEditor(bool visible)
+bool Object::ToggleEditor(bool visible)
 {
     ParameterPin *pin = static_cast<ParameterPin*>(listParameterPinIn->listPins.value(FixedPinNumber::editorVisible));
     if(!pin)
-        return;
+        return false;
+    if(pin->GetIndex()==visible)
+        return false;
     pin->ChangeValue(visible);
+    return true;
 }
 
 /*!

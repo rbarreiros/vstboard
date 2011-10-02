@@ -299,6 +299,7 @@
     <addaction name="actionRestore_default_layout"/>
     <addaction name="actionTool_bar"/>
     <addaction name="actionAppearance"/>
+    <addaction name="actionHide_all_editors"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
@@ -381,6 +382,7 @@
    <addaction name="actionCable"/>
    <addaction name="actionValue"/>
    <addaction name="separator"/>
+   <addaction name="actionHide_all_editors"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="dockPrograms">
@@ -1201,6 +1203,21 @@
    </property>
    <property name="toolTip">
     <string>Keyboard and Mouse mapping</string>
+   </property>
+  </action>
+  <action name="actionHide_all_editors">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/img16x16/window_nofullscreen.png</normaloff>:/img16x16/window_nofullscreen.png</iconset>
+   </property>
+   <property name="text">
+    <string>Hide all editors</string>
+   </property>
+   <property name="shortcut">
+    <string>H</string>
    </property>
   </action>
  </widget>

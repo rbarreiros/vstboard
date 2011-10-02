@@ -73,6 +73,8 @@ protected:
 
     View::ViewConfigDialog *viewConfigDlg;
 
+    QList<QWeakPointer<Connectables::Object> >listClosedEditors;
+
 public slots:
     void programParkingModelChanges(QStandardItemModel *model);
     void groupParkingModelChanges(QStandardItemModel *model);
@@ -104,6 +106,7 @@ private slots:
     void on_actionCable_toggled(bool arg1);
     void on_actionValue_toggled(bool arg1);
     void on_actionKeyBinding_triggered();
+    void on_actionHide_all_editors_triggered(bool checked);
 };
 
 #endif // MAINWINDOW_H

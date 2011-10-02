@@ -289,6 +289,7 @@ void MainWindow::UpdateKeyBinding()
     ui->dockUndo->toggleViewAction()->setShortcut(viewConfig->keyBinding->GetMainShortcut(KeyBind::undoHistory));
     ui->dockSolver->toggleViewAction()->setShortcut(viewConfig->keyBinding->GetMainShortcut(KeyBind::solverModel));
     ui->dockHostModel->toggleViewAction()->setShortcut(viewConfig->keyBinding->GetMainShortcut(KeyBind::hostModel));
+    ui->actionHide_all_editors->setShortcut(viewConfig->keyBinding->GetMainShortcut(KeyBind::hideAllEditors));
 }
 
 void MainWindow::writeSettings()
@@ -589,4 +590,23 @@ void MainWindow::on_actionKeyBinding_triggered()
 {
     KeyBindingDialog bind(viewConfig->keyBinding,this);
     bind.exec();
+}
+
+void MainWindow::on_actionHide_all_editors_triggered(bool checked)
+{
+    if(checked) {
+        listClosedEditors.clear();
+        foreach(QSharedPointer<Connectables::Object>obj, myHost->objFactory->GetListObjects()) {
+            if(obj->ToggleEditor(false))
+                listClosedEditors << obj;
+        }
+    } else {
+        foreach(QSharedPointer<Connectables::Object>obj, listClosedEditors) {
+            if(!obj || obj->parked)
+                listClosedEditors.removeAll(obj);
+            else
+                obj->ToggleEditor(true);
+        }
+        listClosedEditors.clear();
+    }
 }
