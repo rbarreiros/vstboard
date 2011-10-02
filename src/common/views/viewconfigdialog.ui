@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>VstBoard Appearance</string>
   </property>
+  <property name="locale">
+   <locale language="English" country="UnitedStates"/>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <property name="margin">
     <number>5</number>
@@ -527,6 +530,28 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>buttonBox</tabstop>
+  <tabstop>listPresets</tabstop>
+  <tabstop>checkSavedInSetupFile</tabstop>
+  <tabstop>addPreset</tabstop>
+  <tabstop>delPreset</tabstop>
+  <tabstop>listPalettes</tabstop>
+  <tabstop>listRoles</tabstop>
+  <tabstop>RedSlider</tabstop>
+  <tabstop>RedSpinBox</tabstop>
+  <tabstop>GreenSlider</tabstop>
+  <tabstop>GreenSpinBox</tabstop>
+  <tabstop>BlueSlider</tabstop>
+  <tabstop>BlueSpinBox</tabstop>
+  <tabstop>AlphaSlider</tabstop>
+  <tabstop>AlphaSpinBox</tabstop>
+  <tabstop>fontProgFamily</tabstop>
+  <tabstop>fontProgSize</tabstop>
+  <tabstop>fontProgBold</tabstop>
+  <tabstop>fontProgItalic</tabstop>
+  <tabstop>fontProgStretch</tabstop>
+ </tabstops>
  <resources>
   <include location="../../resources/resources.qrc"/>
   <include location="../../resources/resources.qrc"/>

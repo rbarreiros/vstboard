@@ -33,27 +33,27 @@
 <context>
     <name>AudioDevices</name>
     <message>
-        <location filename="../../vstboard/audiodevices.cpp" line="111"/>
+        <location filename="../../vstboard/audiodevices.cpp" line="143"/>
         <source>Unable to initialize audio engine : %1</source>
         <translation>Impossible d&apos;initialiser le moteur audio : %1</translation>
     </message>
     <message>
-        <location filename="../../vstboard/audiodevices.cpp" line="314"/>
+        <location filename="../../vstboard/audiodevices.cpp" line="360"/>
         <source>Device not found</source>
         <translation>Interface non trouvée</translation>
     </message>
     <message>
-        <location filename="../../vstboard/audiodevices.cpp" line="474"/>
+        <location filename="../../vstboard/audiodevices.cpp" line="510"/>
         <source>Error</source>
         <translation>Erreur</translation>
     </message>
     <message>
-        <location filename="../../vstboard/audiodevices.cpp" line="499"/>
+        <location filename="../../vstboard/audiodevices.cpp" line="535"/>
         <source>No config</source>
         <translation>Pas de config</translation>
     </message>
     <message>
-        <location filename="../../vstboard/audiodevices.cpp" line="500"/>
+        <location filename="../../vstboard/audiodevices.cpp" line="536"/>
         <source>No config dialog for this device</source>
         <translation>Pas de config pour cette interface</translation>
     </message>
