@@ -825,10 +825,11 @@ void VstPlugin::OnParameterChanged(ConnectionInfo pinInfo, float value)
         }
 
         if(pinInfo.pinNumber<pEffect->numParams) {
-            if(EffCanBeAutomated(pinInfo.pinNumber)!=1) {
-                LOG("vst parameter can't be automated"<<pinInfo.pinNumber);
-                return;
-            }
+            //plugins just don't respect anything...
+//            if(EffCanBeAutomated(pinInfo.pinNumber)!=1) {
+//                LOG("vst parameter can't be automated"<<pinInfo.pinNumber);
+//                return;
+//            }
             EffSetParameter(pinInfo.pinNumber,value);
         }
 
