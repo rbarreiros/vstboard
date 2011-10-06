@@ -289,6 +289,7 @@ void MainWindow::UpdateKeyBinding()
     ui->dockUndo->toggleViewAction()->setShortcut(viewConfig->keyBinding->GetMainShortcut(KeyBind::undoHistory));
     ui->dockSolver->toggleViewAction()->setShortcut(viewConfig->keyBinding->GetMainShortcut(KeyBind::solverModel));
     ui->dockHostModel->toggleViewAction()->setShortcut(viewConfig->keyBinding->GetMainShortcut(KeyBind::hostModel));
+    ui->actionHide_all_editors->setShortcut(viewConfig->keyBinding->GetMainShortcut(KeyBind::hideAllEditors));
 }
 
 void MainWindow::writeSettings()
@@ -387,7 +388,7 @@ void MainWindow::readSettings()
 
     viewConfig->LoadFromRegistry();
 
-
+    LoadProgramsFont();
 }
 
 void MainWindow::LoadDefaultFiles()
@@ -569,6 +570,35 @@ void MainWindow::OnViewConfigClosed()
 {
     viewConfigDlg=0;
     ui->actionAppearance->setChecked(false);
+
+
+}
+
+void MainWindow::SetProgramsFont(const QFont &f)
+{
+    ui->Programs->setFont(f);
+}
+
+void MainWindow::LoadProgramsFont()
+{
+    QFont f(ui->Programs->font());
+
+    QString fam( myHost->GetSetting("fontProgFamily","Default").toString() );
+    if(fam!="Default")
+        f.setFamily( fam );
+    else
+        f.setFamily( ui->dockPrograms->font().family() );
+
+    int s = myHost->GetSetting("fontProgSize",0).toInt();
+    if(s>0)
+        f.setPointSize( s );
+    else
+        f.setPointSize( ui->dockPrograms->font().pointSize() );
+
+    f.setStretch( myHost->GetSetting("fontProgStretch",100).toInt() );
+    f.setBold( myHost->GetSetting("fontProgBold",false).toBool() );
+    f.setItalic( myHost->GetSetting("fontProgItalic",false).toBool() );
+    ui->Programs->setFont(f);
 }
 
 void MainWindow::on_actionCable_toggled(bool arg1)
@@ -589,4 +619,23 @@ void MainWindow::on_actionKeyBinding_triggered()
 {
     KeyBindingDialog bind(viewConfig->keyBinding,this);
     bind.exec();
+}
+
+void MainWindow::on_actionHide_all_editors_triggered(bool checked)
+{
+    if(checked) {
+        listClosedEditors.clear();
+        foreach(QSharedPointer<Connectables::Object>obj, myHost->objFactory->GetListObjects()) {
+            if(obj->ToggleEditor(false))
+                listClosedEditors << obj;
+        }
+    } else {
+        foreach(QSharedPointer<Connectables::Object>obj, listClosedEditors) {
+            if(!obj || obj->parked)
+                listClosedEditors.removeAll(obj);
+            else
+                obj->ToggleEditor(true);
+        }
+        listClosedEditors.clear();
+    }
 }

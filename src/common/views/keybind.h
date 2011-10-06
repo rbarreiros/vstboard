@@ -76,7 +76,8 @@ public:
         saveProgramAs,
         zoomIn,
         zoomOut,
-        zoomReset
+        zoomReset,
+        hideAllEditors
         /*
         increaseValue,
         decreaseValue

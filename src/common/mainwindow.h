@@ -73,12 +73,16 @@ protected:
 
     View::ViewConfigDialog *viewConfigDlg;
 
+    QList<QWeakPointer<Connectables::Object> >listClosedEditors;
+
 public slots:
     void programParkingModelChanges(QStandardItemModel *model);
     void groupParkingModelChanges(QStandardItemModel *model);
     void currentFileChanged();
     void OnViewConfigClosed();
     void LoadDefaultFiles();
+    void SetProgramsFont(const QFont &f);
+    void LoadProgramsFont();
 
 private slots:
     void on_actionLoad_Setup_triggered();
@@ -104,6 +108,7 @@ private slots:
     void on_actionCable_toggled(bool arg1);
     void on_actionValue_toggled(bool arg1);
     void on_actionKeyBinding_triggered();
+    void on_actionHide_all_editors_triggered(bool checked);
 };
 
 #endif // MAINWINDOW_H

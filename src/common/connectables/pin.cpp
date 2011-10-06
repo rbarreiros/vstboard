@@ -68,10 +68,7 @@ Pin::~Pin()
   */
 void Pin::SendMsg(const PinMessage::Enum msgType,void *data)
 {
-    if(!cablesMutex.tryLock()) {
-        LOG("pin not locked")
-        return;
-    }
+    cablesMutex.lock();
     foreach(QSharedPointer<Cable>c, listCables) {
         if(c)
             c->Render(msgType,data);
