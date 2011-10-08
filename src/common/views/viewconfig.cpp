@@ -36,7 +36,8 @@ ViewConfig::ViewConfig(MainHost *myHost, QObject *parent) :
     savedInSetupFile(false),
     currentPresetName("Default"),
     myHost(myHost),
-    keyBinding(new KeyBind(myHost))
+    keyBinding(new KeyBind(myHost)),
+    AutoOpenGui(false)
 {
     colorGroupNames.insert( ColorGroups::ND, tr("-undefined-") );
     colorGroupNames.insert( ColorGroups::Window, tr("Window") );

@@ -64,7 +64,8 @@ ObjectView::ObjectView(MainHost *myHost, QAbstractItemModel *model, QGraphicsIte
     config(myHost->mainWindow->viewConfig),
     editorPin(0),
     learnPin(0),
-    bypassPin(0)
+    bypassPin(0),
+    editorAutoOpened(false)
 {
     setObjectName("objView");
 
@@ -280,6 +281,14 @@ void ObjectView::RemoveWithBridge()
   */
 void ObjectView::focusInEvent ( QFocusEvent * event )
 {
+    if(event->reason()==Qt::MouseFocusReason &&
+            config->AutoOpenGui &&
+            editorPin &&
+            editorPin->GetValue() < .5f) {
+        editorAutoOpened=true;
+        editorPin->ValueChanged(1.0f);
+    }
+
     if(selectBorder)
         delete selectBorder;
     selectBorder=new QGraphicsRectItem( -2,-2, size().width()+4, size().height()+4 , this );
@@ -292,6 +301,13 @@ void ObjectView::focusInEvent ( QFocusEvent * event )
   */
 void ObjectView::focusOutEvent ( QFocusEvent * event )
 {
+    if(event->reason()==Qt::MouseFocusReason &&
+            config->AutoOpenGui &&
+            editorAutoOpened) {
+        editorAutoOpened=false;
+        editorPin->ValueChanged(0.0f);
+    }
+
     if(selectBorder) {
         delete selectBorder;
         selectBorder =0;
@@ -332,6 +348,8 @@ void ObjectView::ShrinkNow()
 
 void ObjectView::SetEditorPin(MinMaxPinView *pin, float value)
 {
+    if(editorPin==pin)
+        return;
     editorPin = pin;
     actShowEditor->setEnabled(editorPin);
     actShowEditor->setChecked(value>.5f);
@@ -366,6 +384,9 @@ void ObjectView::SwitchEditor(bool show)
 {
     if(!editorPin)
         return;
+
+    if(editorAutoOpened)
+        editorAutoOpened=false;
 
     if(editorPin->GetValue() > .5f && !show)
         editorPin->ValueChanged(.0f);

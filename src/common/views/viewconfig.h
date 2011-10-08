@@ -108,6 +108,7 @@ namespace View {
         static float KeyboardNumber(int key);
 
         KeyBind *keyBinding;
+        bool AutoOpenGui;
 
     protected:
         ///list of presets in registry
