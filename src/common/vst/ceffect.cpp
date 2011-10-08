@@ -303,6 +303,11 @@ bool CEffect::SaveProgram(std::string *name)
     return false;
 }
 
+VstInt32 CEffect::PluginIdFromBankFile(std::string *name)
+{
+    return CFxBank::PluginIdFromBank(name);
+}
+
 /*****************************************************************************/
 /* EffDispatch : calls an effect's dispatcher                                */
 /*****************************************************************************/

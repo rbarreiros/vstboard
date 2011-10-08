@@ -69,11 +69,17 @@ namespace Connectables {
         QDataStream & toStream (QDataStream &) const;
         bool fromStream (QDataStream &);
 
+        void AddPluginToDatabase();
+
     protected:
         void SetId(int id) {objInfo.id = id;}
         bool initPlugin();
         void processEvents(VstEvents* events);
         void onVstProgramChanged();
+        bool FilenameFromDatabase(VstInt32 id, QString &filename);
+        VstInt32 IdFromFxb(const QString &fxbFile);
+
+        QString bankToLoad;
         float sampleRate;
         unsigned long bufferSize;
         VstEvents *listEvnts;
@@ -107,6 +113,7 @@ namespace Connectables {
         void OnShowEditor();
         void OnHideEditor();
         void OnEditorClosed();
+        void LoadBank();
         bool LoadBank(const QString &filename);
         void SaveBank(const QString &filename);
         bool LoadProgram(const QString &filename);

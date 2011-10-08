@@ -43,6 +43,7 @@ namespace vst
     public:
         bool SetSize(int nPrograms, int nParams);
         bool SetSize(int nChunkSize);
+        static VstInt32 PluginIdFromBank(std::string *pszFile);
         bool LoadBank(std::string *pszFile);
         bool SaveBank(std::string *pszFile);
         void Unload();

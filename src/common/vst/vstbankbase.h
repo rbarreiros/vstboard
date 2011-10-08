@@ -7,7 +7,7 @@
 namespace vst
 {
 
-    const int MyVersion = 1;                /* highest known VST FX version      */
+    const int MyVersion = 2;                /* highest known VST FX version      */
 
     /*===========================================================================*/
     /* structures for .fxb / .fxp files                                          */
