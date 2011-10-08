@@ -878,6 +878,7 @@ void VstPlugin::OnParameterChanged(ConnectionInfo pinInfo, float value)
                 bypass=false;
             }
             if(val=="Bypass") {
+                SetSleep(true);
                 SetSleep(false);
                 bypass=true;
             }
