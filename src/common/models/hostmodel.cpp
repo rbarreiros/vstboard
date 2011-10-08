@@ -182,25 +182,34 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
 
                 //fxb file
                 if( fileType == VST_BANK_FILE_EXTENSION || fileType == VST_PROGRAM_FILE_EXTENSION) {
-                    QSharedPointer<Connectables::VstPlugin> senderObj = myHost->objFactory->GetObj(senderIndex).staticCast<Connectables::VstPlugin>();
-                    if(!senderObj) {
-                        LOG("fxb fxp target not found");
-                        return false;
-                    }
+                    switch(senderInfo.nodeType) {
+                        case NodeType::container : {
+                            if(!fName.isEmpty()) {
+                                ObjectInfo infoVst;
+                                infoVst.nodeType = NodeType::object;
+                                infoVst.objType = ObjType::VstPlugin;
+                                infoVst.filename = fName;
+                                infoVst.name = fName;
+                                listObjInfoToAdd << infoVst;
+                            }
+                            break;
+                        }
+                        case NodeType::object: {
+                            QSharedPointer<Connectables::VstPlugin> senderObj = myHost->objFactory->GetObj(senderIndex).staticCast<Connectables::VstPlugin>();
+                            if(!senderObj) {
+                                LOG("fxb fxp target not found");
+                                return false;
+                            }
 
-                    if( fileType == VST_BANK_FILE_EXTENSION && senderObj->LoadBank(fName) ) {
-                        QStandardItem *item = itemFromIndex(senderIndex);
-                        if(item)
-                            item->setData(fName,UserRoles::bankFile);
-                        return true;
-                    }
+                            if( fileType == VST_BANK_FILE_EXTENSION && senderObj->LoadBank(fName) ) {
+                                return true;
+                            }
 
 
-                    if( fileType == VST_PROGRAM_FILE_EXTENSION && senderObj->LoadProgram(fName) ) {
-                        QStandardItem *item = itemFromIndex(senderIndex);
-                        if(item)
-                            item->setData(fName,UserRoles::programFile);
-                        return true;
+                            if( fileType == VST_PROGRAM_FILE_EXTENSION && senderObj->LoadProgram(fName) ) {
+                                return true;
+                            }
+                        }
                     }
                 }
             }

@@ -208,6 +208,51 @@ bool CFxBank::SetSize(int nChunkSize)
     return true;
 }
 
+VstInt32 CFxBank::PluginIdFromBank(std::string *pszFile)
+{
+    FILE *fp = fopen(pszFile->c_str(), "rb");        /* try to open the file              */
+    if (!fp)                                /* upon error                        */
+        return false;                         /* return an error                   */
+    unsigned char *nBank = NULL;
+    VstInt32 pluginId=0;
+    try
+    {
+        fseek(fp, 0, SEEK_END);               /* get file size                     */
+        size_t tLen = (size_t)ftell(fp);
+        rewind(fp);
+
+        nBank = new unsigned char[tLen];      /* allocate storage                  */
+        if (!nBank)
+            throw (int)1;
+        /* read chunk set to determine cnt.  */
+        if (fread(nBank, 1, tLen, fp) != tLen)
+            throw (int)1;
+        /* position on bank                  */
+        SFxBankBase *pBank = (SFxBankBase *)nBank;
+        if (NeedsBSwap)                       /* eventually swap necessary bytes   */
+        {
+            SwapBytes(pBank->chunkMagic);
+            SwapBytes(pBank->byteSize);
+            SwapBytes(pBank->fxMagic);
+            SwapBytes(pBank->version);
+            SwapBytes(pBank->fxID);
+            SwapBytes(pBank->fxVersion);
+            SwapBytes(pBank->numPrograms);
+        }
+        if ((pBank->chunkMagic != cMagic) ||  /* if erroneous data in there        */
+            (pBank->version > MyVersion))
+            throw (int)1;                       /* get out                           */
+        pluginId = pBank->fxID;
+    }
+    catch(...)
+    {
+        if (nBank)
+            delete[] nBank;
+    }
+    fclose(fp);
+    return pluginId;
+}
+
 /*****************************************************************************/
 /* LoadBank : loads a bank file                                              */
 /*****************************************************************************/

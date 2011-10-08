@@ -288,10 +288,23 @@ void VstPlugin::Render()
 
 bool VstPlugin::Open()
 {
-
     {
         QMutexLocker lock(&objMutex);
         VstPlugin::pluginLoading = this;
+
+        if(objInfo.filename.endsWith(VST_BANK_FILE_EXTENSION,Qt::CaseInsensitive) || objInfo.filename.endsWith(VST_PROGRAM_FILE_EXTENSION,Qt::CaseInsensitive)) {
+            bankToLoad=objInfo.filename;
+            VstInt32 i = IdFromFxb(bankToLoad);
+            if(i==0) {
+                LOG("plugin id not found");
+                return false;
+            }
+            if(!FilenameFromDatabase(i,objInfo.filename)) {
+                QMessageBox msg(QMessageBox::Critical,"Unkown Id",tr("Id %1 not in database, load the corresponding plugin first").arg(i));
+                msg.exec();
+                return false;
+            }
+        }
 
         if(!Load(objInfo.filename )) {
             VstPlugin::pluginLoading = 0;
@@ -319,6 +332,7 @@ bool VstPlugin::Open()
             return false;
         }
     }
+
     return initPlugin();
 }
 
@@ -444,8 +458,32 @@ bool VstPlugin::initPlugin()
     if(myHost->GetSetting("fastEditorsOpenClose",true).toBool()) {
         CreateEditorWindow();
     }
+    AddPluginToDatabase();
+
+    if(!bankToLoad.isEmpty()) {
+        QTimer::singleShot(0,this,SLOT(LoadBank()));
+    }
+    return true;
+}
+
+void VstPlugin::AddPluginToDatabase()
+{
+   myHost->SetSetting(QString("pluginsDb/%1").arg(pEffect->uniqueID),objInfo.filename);
+}
+
+bool VstPlugin::FilenameFromDatabase(VstInt32 id, QString &filename)
+{
+    filename=myHost->GetSetting(QString("pluginsDb/%1").arg(id),"").toString();
+    if(filename.isEmpty())
+        return false;
 
     return true;
+}
+
+VstInt32 VstPlugin::IdFromFxb(const QString &fxbFile)
+{
+    std::string str = fxbFile.toStdString();
+    return CEffect::PluginIdFromBankFile(&str);
 }
 
 void VstPlugin::RaiseEditor()
@@ -851,6 +889,15 @@ void VstPlugin::OnParameterChanged(ConnectionInfo pinInfo, float value)
     }
 }
 
+void VstPlugin::LoadBank()
+{
+    if(bankToLoad.endsWith(VST_BANK_FILE_EXTENSION,Qt::CaseInsensitive))
+        LoadBank(bankToLoad);
+    if(bankToLoad.endsWith(VST_PROGRAM_FILE_EXTENSION,Qt::CaseInsensitive))
+        LoadProgram(bankToLoad);
+    bankToLoad.clear();
+}
+
 /**
   Load FXB file
   \param filename the file name
@@ -862,6 +909,7 @@ bool VstPlugin::LoadBank(const QString &filename)
     if(!CEffect::LoadBank(&str))
         return false;
     onVstProgramChanged();
+    myHost->GetModel()->setData( modelIndex, filename, UserRoles::bankFile);
     return true;
 }
 
@@ -889,6 +937,7 @@ bool VstPlugin::LoadProgram(const QString &filename)
     if(!CEffect::LoadProgram(&str))
         return false;
     onVstProgramChanged();
+    myHost->GetModel()->setData( modelIndex, filename, UserRoles::programFile);
     return true;
 }
 
