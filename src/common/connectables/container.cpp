@@ -95,8 +95,9 @@ void Container::SetContainerId(quint16 id)
 {
     Object::SetContainerId(id);
 
-    foreach(Object* obj, listLoadedObjects) {
-        obj->SetContainerId(index);
+    foreach(QSharedPointer<Object>obj, listLoadedObjects) {
+        if(obj)
+            obj->SetContainerId(index);
     }
 }
 
@@ -224,15 +225,17 @@ void Container::PostRender()
 
 void Container::SetBufferSize(unsigned long size)
 {
-    foreach(Object *obj, listLoadedObjects) {
-        obj->SetBufferSize(size);
+    foreach(QSharedPointer<Object>obj, listLoadedObjects) {
+        if(obj)
+            obj->SetBufferSize(size);
     }
 }
 
 void Container::SetSampleRate(float rate)
 {
-    foreach(Object *obj, listLoadedObjects) {
-        obj->SetSampleRate(rate);
+    foreach(QSharedPointer<Object>obj, listLoadedObjects) {
+        if(obj)
+            obj->SetSampleRate(rate);
     }
 }
 
@@ -413,8 +416,8 @@ void Container::AddObject(QSharedPointer<Object> objPtr)
         return;
     }
 
-    if(!listLoadedObjects.contains(objPtr.data()))
-        listLoadedObjects << objPtr.data();
+    if(!listLoadedObjects.contains(objPtr))
+        listLoadedObjects << objPtr;
     currentContainerProgram->AddObject(objPtr);
     objPtr->LoadProgram(currentProgId);
 }
@@ -428,7 +431,7 @@ void Container::AddParkedObject(QSharedPointer<Object> objPtr)
     objPtr->SetContainerId(index);
     objPtr->UnloadProgram();
 
-    listLoadedObjects << objPtr.data();
+    listLoadedObjects << objPtr;
     ParkChildObject(objPtr);
 }
 
@@ -618,7 +621,7 @@ void Container::ParkChildObject(QSharedPointer<Object> objPtr)
   Called by the Object destructor, remove the object
   \param obj pointer to the object
   */
-void Container::OnChildDeleted(Object *obj)
+void Container::OnChildDeleted(QSharedPointer<Object>obj)
 {
     listLoadedObjects.removeAll(obj);
 
@@ -728,12 +731,14 @@ QDataStream & Container::toStream (QDataStream& out) const
     }
 
     //save all loaded objects
-    foreach(Object* obj, listLoadedObjects) {
-        QByteArray tmpBa;
-        QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
-        tmpStream << obj->info();
-        obj->toStream( tmpStream );
-        ProjectFile::SaveChunk( "CntObj", tmpBa, out);
+    foreach(QSharedPointer<Object>obj, listLoadedObjects) {
+        if(obj) {
+            QByteArray tmpBa;
+            QDataStream tmpStream( &tmpBa, QIODevice::ReadWrite);
+            tmpStream << obj->info();
+            obj->toStream( tmpStream );
+            ProjectFile::SaveChunk( "CntObj", tmpBa, out);
+        }
     }
 
     //save all programs
