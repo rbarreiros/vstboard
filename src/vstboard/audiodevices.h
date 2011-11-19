@@ -67,6 +67,8 @@ public:
 
     bool FindPortAudioDevice(ObjectInfo &objInfo, PaDeviceInfo *dInfo);
 private:
+    void CloseDevices(bool close=false);
+    void OpenDevices();
     void BuildModel();
 
     bool closing;
