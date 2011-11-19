@@ -34,6 +34,6 @@ copy /y "%QTDIR%\bin\QtSolutions_MFCMigrationFramework-head.dll" ".\installer"
 rem copy /y "%WindowsSDKDir%\Redist\VC\vcredist_x64.exe" ".\installer"
 
 cd "installer"
-%NSIS_PATH% /DARCH=x64 /DVERSION="0.5.6" nsis.nsi
+%NSIS_PATH% /DARCH=x64 /DVERSION="0.5.7" nsis.nsi
 
 pause

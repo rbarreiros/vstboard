@@ -80,23 +80,7 @@ AudioDevices::AudioDevices(MainHostHost *myHost) :
   */
 AudioDevices::~AudioDevices()
 {
-    mutexClosing.lock();
-    closing=true;
-    mutexClosing.unlock();
-
-    mutexDevices.lock();
-    foreach(Connectables::AudioDevice *ad, listAudioDevices) {
-        ad->SetSleep(true);
-    }
-    mutexDevices.unlock();
-
-    if(model) {
-        PaError err=Pa_Terminate();
-        if(err!=paNoError) {
-            LOG("Pa_Terminate"<<Pa_GetErrorText( err ));
-        }
-//        model->deleteLater();
-    }
+    CloseDevices(true);
 
     mutexDevices.lock();
     foreach(Connectables::AudioDevice *dev, listAudioDevices)
@@ -108,11 +92,7 @@ AudioDevices::~AudioDevices()
         delete fakeRenderTimer;
 }
 
-/*!
-  Get the view model of the list
-  \return pointer to the model
-  */
-ListAudioInterfacesModel * AudioDevices::GetModel()
+void AudioDevices::CloseDevices(bool close)
 {
     mutexClosing.lock();
     closing=true;
@@ -124,26 +104,32 @@ ListAudioInterfacesModel * AudioDevices::GetModel()
     }
     mutexDevices.unlock();
 
-    mutexClosing.lock();
-    closing=false;
-    mutexClosing.unlock();
+    if(!close) {
+        mutexClosing.lock();
+        closing=false;
+        mutexClosing.unlock();
+    }
 
     if(model) {
         PaError err=Pa_Terminate();
         if(err!=paNoError) {
             LOG("Pa_Terminate"<<Pa_GetErrorText( err ));
         }
-        model->invisibleRootItem()->removeRows(0, model->invisibleRootItem()->rowCount());
+        if(!close)
+            model->invisibleRootItem()->removeRows(0, model->invisibleRootItem()->rowCount());
     }
+}
 
-
+void AudioDevices::OpenDevices()
+{
+    model=0;
     PaError paRet =Pa_Initialize();
     if(paRet!=paNoError) {
         QMessageBox msgBox;
         msgBox.setText(tr("Unable to initialize audio engine : %1").arg( Pa_GetErrorText(paRet) ));
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.exec();
-        return 0;
+        return;
     }
     BuildModel();
 
@@ -183,7 +169,16 @@ ListAudioInterfacesModel * AudioDevices::GetModel()
             obj->SetErrorMessage(errMsg);
         }
     }
+}
 
+/*!
+  Get the view model of the list
+  \return pointer to the model
+  */
+ListAudioInterfacesModel * AudioDevices::GetModel()
+{
+    CloseDevices();
+    OpenDevices();
     return model;
 }
 
@@ -486,23 +481,27 @@ bool AudioDevices::FindPortAudioDevice(ObjectInfo &objInfo, PaDeviceInfo *dInfo)
 
 void AudioDevices::ConfigDevice(const QModelIndex &index)
 {
-    PaHostApiTypeId apiIndex;
-    PaDeviceIndex devId=-1;
+    if(!index.data(UserRoles::objInfo).isValid())
+        return;
 
-    if(index.data(UserRoles::objInfo).isValid()) {
-        ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
-        devId = (PaDeviceIndex)info.id;
-        apiIndex = (PaHostApiTypeId)info.api;
+    ObjectInfo info = index.data(UserRoles::objInfo).value<ObjectInfo>();
+    PaDeviceIndex configDevId = (PaDeviceIndex)info.id;
+    PaHostApiTypeId configApiIndex = (PaHostApiTypeId)info.api;
+
+    mutexDevices.lock();
+    foreach(Connectables::AudioDevice *ad, listAudioDevices) {
+        ad->SetSleep(true);
     }
+    mutexDevices.unlock();
 
-    switch(apiIndex) {
+    switch(configApiIndex) {
         case paASIO: {
             PaError err;
 #if WIN32
-            err = PaAsio_ShowControlPanel( devId, (void*)myHost->mainWindow );
+            err = PaAsio_ShowControlPanel( configDevId, (void*)myHost->mainWindow );
 #endif
 #ifdef __APPLE__
-            err = PaAsio_ShowControlPanel( devId, (void*)0 );
+            err = PaAsio_ShowControlPanel( configDevId, (void*)0 );
 #endif
 
             if( err != paNoError ) {
@@ -512,28 +511,30 @@ void AudioDevices::ConfigDevice(const QModelIndex &index)
                                 QMessageBox::Ok);
                 msg.exec();
             }
-            return;
+            break;
         }
 
         case paMME: {
             MmeConfigDialog dlg( myHost );
             dlg.exec();
-            return;
+            break;
         }
 
         case paWASAPI: {
             WasapiConfigDialog dlg( myHost );
             dlg.exec();
-            return;
+            break;
         }
 
-        default:
+        default: {
+            QMessageBox msg(QMessageBox::Information,
+                tr("No config"),
+                tr("No config dialog for this device"),
+                QMessageBox::Ok);
+            msg.exec();
             break;
+        }
     }
 
-    QMessageBox msg(QMessageBox::Information,
-        tr("No config"),
-        tr("No config dialog for this device"),
-        QMessageBox::Ok);
-    msg.exec();
+    OpenDevices();
 }

@@ -290,6 +290,7 @@ void MainWindow::UpdateKeyBinding()
     ui->dockSolver->toggleViewAction()->setShortcut(viewConfig->keyBinding->GetMainShortcut(KeyBind::solverModel));
     ui->dockHostModel->toggleViewAction()->setShortcut(viewConfig->keyBinding->GetMainShortcut(KeyBind::hostModel));
     ui->actionHide_all_editors->setShortcut(viewConfig->keyBinding->GetMainShortcut(KeyBind::hideAllEditors));
+    ui->actionAutoShowGui->setShortcut(viewConfig->keyBinding->GetMainShortcut(KeyBind::autoOpenEditors));
 }
 
 void MainWindow::writeSettings()
@@ -638,4 +639,9 @@ void MainWindow::on_actionHide_all_editors_triggered(bool checked)
         }
         listClosedEditors.clear();
     }
+}
+
+void MainWindow::on_actionAutoShowGui_triggered(bool checked)
+{
+    viewConfig->AutoOpenGui=checked;
 }

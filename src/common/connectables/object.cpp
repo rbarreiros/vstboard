@@ -129,9 +129,10 @@ Object::~Object()
     pinLists.clear();
 
     if(containerId!=FixedObjId::noContainer) {
-        QSharedPointer<Object>cntPtr = myHost->objFactory->GetObjectFromId( containerId );
-        if(cntPtr) {
-            static_cast<Container*>(cntPtr.data())->OnChildDeleted(this);
+        QSharedPointer<Container>cntPtr = myHost->objFactory->GetObjectFromId( containerId ).staticCast<Container>();
+        QSharedPointer<Object>objPtr = myHost->objFactory->GetObjectFromId( index );
+        if(cntPtr && objPtr) {
+            cntPtr->OnChildDeleted(objPtr);
         }
     }
     Close();

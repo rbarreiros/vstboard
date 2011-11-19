@@ -299,6 +299,7 @@
     <addaction name="actionRestore_default_layout"/>
     <addaction name="actionTool_bar"/>
     <addaction name="actionAppearance"/>
+    <addaction name="actionAutoShowGui"/>
     <addaction name="actionHide_all_editors"/>
     <addaction name="separator"/>
    </widget>
@@ -382,6 +383,7 @@
    <addaction name="actionCable"/>
    <addaction name="actionValue"/>
    <addaction name="separator"/>
+   <addaction name="actionAutoShowGui"/>
    <addaction name="actionHide_all_editors"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -1211,13 +1213,28 @@
    </property>
    <property name="icon">
     <iconset resource="../resources/resources.qrc">
-     <normaloff>:/img16x16/window_nofullscreen.png</normaloff>:/img16x16/window_nofullscreen.png</iconset>
+     <normaloff>:/img16x16/14_layer_lowerlayer.png</normaloff>:/img16x16/14_layer_lowerlayer.png</iconset>
    </property>
    <property name="text">
-    <string>Hide all editors</string>
+    <string>Hide all plugins editors</string>
    </property>
    <property name="shortcut">
     <string>H</string>
+   </property>
+  </action>
+  <action name="actionAutoShowGui">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/img16x16/14_layer_raiselayer.png</normaloff>:/img16x16/14_layer_raiselayer.png</iconset>
+   </property>
+   <property name="text">
+    <string>Auto-open plugins editors</string>
+   </property>
+   <property name="shortcut">
+    <string>G</string>
    </property>
   </action>
  </widget>

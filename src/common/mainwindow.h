@@ -109,6 +109,7 @@ private slots:
     void on_actionValue_toggled(bool arg1);
     void on_actionKeyBinding_triggered();
     void on_actionHide_all_editors_triggered(bool checked);
+    void on_actionAutoShowGui_triggered(bool checked);
 };
 
 #endif // MAINWINDOW_H

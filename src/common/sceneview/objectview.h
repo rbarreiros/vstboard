@@ -128,6 +128,8 @@ namespace View {
         MinMaxPinView *learnPin;
         MinMaxPinView *bypassPin;
 
+        bool editorAutoOpened;
+
     private slots:
         void SwitchEditor(bool show);
         void SwitchLearnMode(bool on);

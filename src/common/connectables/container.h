@@ -46,7 +46,7 @@ namespace Connectables {
         void ProgramToStream (int progId, QDataStream &out);
         void ProgramFromStream (int progId, QDataStream &in);
 
-        void OnChildDeleted(Object *obj);
+        void OnChildDeleted(QSharedPointer<Object>obj);
 
         /*!
           Set this container as the holder of the rendering map
@@ -135,7 +135,7 @@ namespace Connectables {
         QPersistentModelIndex cablesNode;
 
         /// list of all loaded Objects
-        QList<Object*>listLoadedObjects;
+        QList< QWeakPointer<Object> >listLoadedObjects;
 
         /// store the objects while loading, preventing them from being deleted. (the objects are loaded before the programs using them)
         QList< QSharedPointer< Object > >listLoadingObjects;

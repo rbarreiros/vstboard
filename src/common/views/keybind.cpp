@@ -259,6 +259,7 @@ void KeyBind::SetDefaults()
     mapMainShortcuts.insert(deleteObject,       "Delete");
     mapMainShortcuts.insert(deleteObjectWithCables, "Ctrl+Delete");
     mapMainShortcuts.insert(toggleEditor,       "E");
+    mapMainShortcuts.insert(autoOpenEditors,    "G");
     mapMainShortcuts.insert(hideAllEditors,     "H");
     mapMainShortcuts.insert(toggleLearnMode,    "L");
     mapMainShortcuts.insert(toggleBypass,       "B");
