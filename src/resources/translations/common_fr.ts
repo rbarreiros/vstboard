@@ -334,17 +334,22 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>Connectables::VstPlugin</name>
     <message>
-        <location filename="../../common/connectables/vstplugin.cpp" line="298"/>
+        <location filename="../../common/connectables/vstplugin.cpp" line="308"/>
+        <source>Id %1 not in database, load the corresponding plugin first</source>
+        <translation>Le plugin %1 inconnu, ouvrez le plugin correspondant</translation>
+    </message>
+    <message>
+        <location filename="../../common/connectables/vstplugin.cpp" line="316"/>
         <source>Error while loading plugin</source>
         <translation>Erreur lors du chargement du plugin</translation>
     </message>
     <message>
-        <location filename="../../common/connectables/vstplugin.cpp" line="936"/>
+        <location filename="../../common/connectables/vstplugin.cpp" line="992"/>
         <source>Editor</source>
         <translation>Editeur</translation>
     </message>
     <message>
-        <location filename="../../common/connectables/vstplugin.cpp" line="940"/>
+        <location filename="../../common/connectables/vstplugin.cpp" line="996"/>
         <source>Learn</source>
         <translation>Learn</translation>
     </message>
@@ -586,352 +591,362 @@ p, li { white-space: pre-wrap; }
         <translation>Affichage</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="307"/>
+        <location filename="../../common/mainwindow.ui" line="308"/>
         <source>Edit</source>
         <translation>Editer</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="311"/>
+        <location filename="../../common/mainwindow.ui" line="312"/>
         <source>Tool</source>
         <translation>Outils</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="324"/>
+        <location filename="../../common/mainwindow.ui" line="325"/>
         <source>File</source>
         <translation>Fichier</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="328"/>
+        <location filename="../../common/mainwindow.ui" line="329"/>
         <source>Recent Setups</source>
         <translation>Config récentes</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="333"/>
+        <location filename="../../common/mainwindow.ui" line="334"/>
         <source>Recent Projects</source>
         <translation>Projets récents</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="350"/>
+        <location filename="../../common/mainwindow.ui" line="351"/>
         <source>Help</source>
         <translation>Aide</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="361"/>
+        <location filename="../../common/mainwindow.ui" line="362"/>
         <source>Toolbar</source>
         <translation>Barre d&apos;outils</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="411"/>
+        <location filename="../../common/mainwindow.ui" line="413"/>
         <source>Programs</source>
         <translation>Programmes</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="457"/>
+        <location filename="../../common/mainwindow.ui" line="459"/>
         <source>Midi devices</source>
         <translation>Midi interfaces</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="527"/>
+        <location filename="../../common/mainwindow.ui" line="529"/>
         <source>VST Plugins</source>
         <translation>Plugins VST</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="564"/>
+        <location filename="../../common/mainwindow.ui" line="566"/>
         <source>Audio devices</source>
         <translation>Audio interfaces</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="637"/>
+        <location filename="../../common/mainwindow.ui" line="639"/>
         <source>Solver</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="689"/>
+        <location filename="../../common/mainwindow.ui" line="691"/>
         <source>Tools</source>
         <translation>Outils</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="765"/>
+        <location filename="../../common/mainwindow.ui" line="767"/>
         <source>HostModel</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="829"/>
+        <location filename="../../common/mainwindow.ui" line="831"/>
         <source>Browser</source>
         <translation>Explorateur</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="856"/>
+        <location filename="../../common/mainwindow.ui" line="858"/>
         <source>Undo history</source>
         <translation>Historique</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="888"/>
+        <location filename="../../common/mainwindow.ui" line="890"/>
         <source>Save Project</source>
         <translation>Enregistrer le Projet</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="891"/>
+        <location filename="../../common/mainwindow.ui" line="893"/>
         <source>Save the Program and Group panels in a project file</source>
         <translation>Enregistre les panneaux Programme et Groupe dans un fichier Projet</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="894"/>
+        <location filename="../../common/mainwindow.ui" line="896"/>
         <source>Ctrl+S</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="903"/>
+        <location filename="../../common/mainwindow.ui" line="905"/>
         <source>Open Project</source>
         <translation>Ouvrir un Projet</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="906"/>
-        <location filename="../../common/mainwindow.ui" line="909"/>
+        <location filename="../../common/mainwindow.ui" line="908"/>
+        <location filename="../../common/mainwindow.ui" line="911"/>
         <source>Open a Project file</source>
         <translation>Ouvre un fichier Projet</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="912"/>
+        <location filename="../../common/mainwindow.ui" line="914"/>
         <source>Ctrl+O</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="921"/>
+        <location filename="../../common/mainwindow.ui" line="923"/>
         <source>New Project</source>
         <translation>Nouveau Projet</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="924"/>
+        <location filename="../../common/mainwindow.ui" line="926"/>
         <source>Clear the Program and Group panels</source>
         <translation>Réinitialisation des panneaux Programme et Groupe</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="927"/>
+        <location filename="../../common/mainwindow.ui" line="929"/>
         <source>Ctrl+N</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="936"/>
+        <location filename="../../common/mainwindow.ui" line="938"/>
         <source>Configuration</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="939"/>
+        <location filename="../../common/mainwindow.ui" line="941"/>
         <source>Show the configuration dialog</source>
         <translation>Affiche le panneau de configuration</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="947"/>
-        <location filename="../../common/mainwindow.ui" line="950"/>
+        <location filename="../../common/mainwindow.ui" line="949"/>
+        <location filename="../../common/mainwindow.ui" line="952"/>
         <source>Edit Shortcuts (testing)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="959"/>
-        <location filename="../../common/mainwindow.ui" line="962"/>
+        <location filename="../../common/mainwindow.ui" line="961"/>
+        <location filename="../../common/mainwindow.ui" line="964"/>
         <source>Delete</source>
         <translation>Supprimer</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="971"/>
+        <location filename="../../common/mainwindow.ui" line="973"/>
         <source>Save Setup</source>
         <translation>Enregistrer la Config</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="974"/>
+        <location filename="../../common/mainwindow.ui" line="976"/>
         <source>Save the Host panel in a setup file</source>
         <translation>Enregistre le panneau Hôte dans un fichier Config</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="977"/>
+        <location filename="../../common/mainwindow.ui" line="979"/>
         <source>Alt+S</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="986"/>
+        <location filename="../../common/mainwindow.ui" line="988"/>
         <source>New Setup</source>
         <translation>Nouvelle Config</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="989"/>
+        <location filename="../../common/mainwindow.ui" line="991"/>
         <source>Clear the Host panel</source>
         <translation>Réinitialisation du panneau Hôte</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="992"/>
+        <location filename="../../common/mainwindow.ui" line="994"/>
         <source>Alt+N</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1007"/>
+        <location filename="../../common/mainwindow.ui" line="1009"/>
         <source>Toggle Host panel</source>
         <translation>Affichier/Masquer le panneau Hôte</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1010"/>
+        <location filename="../../common/mainwindow.ui" line="1012"/>
         <source>Show or hide the host panel</source>
         <translation>Affichier/Masquer le panneau Hôte</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1013"/>
+        <location filename="../../common/mainwindow.ui" line="1015"/>
         <source>Ctrl+H</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1022"/>
+        <location filename="../../common/mainwindow.ui" line="1024"/>
         <source>About...</source>
         <translation>A propos...</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1025"/>
+        <location filename="../../common/mainwindow.ui" line="1027"/>
         <source>About</source>
         <translation>A propos</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1034"/>
+        <location filename="../../common/mainwindow.ui" line="1036"/>
         <source>Save Project As ...</source>
         <translation>Enregistrer le Projet sous ...</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1037"/>
+        <location filename="../../common/mainwindow.ui" line="1039"/>
         <source>Save Project As</source>
         <translation>Enregistrer le Projet sous</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1040"/>
+        <location filename="../../common/mainwindow.ui" line="1042"/>
         <source>Ctrl+Shift+S</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1049"/>
+        <location filename="../../common/mainwindow.ui" line="1051"/>
         <source>Save Setup As ...</source>
         <translation>Enregistrer la Config sous ...</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1052"/>
+        <location filename="../../common/mainwindow.ui" line="1054"/>
         <source>Save Setup As</source>
         <translation>Enregistrer la Config sous</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1055"/>
+        <location filename="../../common/mainwindow.ui" line="1057"/>
         <source>Alt+Shift+S</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1070"/>
-        <location filename="../../common/mainwindow.ui" line="1073"/>
+        <location filename="../../common/mainwindow.ui" line="1072"/>
+        <location filename="../../common/mainwindow.ui" line="1075"/>
         <source>Toggle Group panel</source>
         <translation>Affichier/Masquer le panneau Groupe</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1076"/>
+        <location filename="../../common/mainwindow.ui" line="1078"/>
         <source>Show or hide the group panel</source>
         <translation>Affichier/Masquer le panneau Groupe</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1079"/>
+        <location filename="../../common/mainwindow.ui" line="1081"/>
         <source>Ctrl+G</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1094"/>
+        <location filename="../../common/mainwindow.ui" line="1096"/>
         <source>Toggle Program panel</source>
         <translation>Affichier/Masquer le panneau Programme</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1097"/>
+        <location filename="../../common/mainwindow.ui" line="1099"/>
         <source>Show or hide the program panel</source>
         <translation>Affichier/Masquer le panneau Programme</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1100"/>
+        <location filename="../../common/mainwindow.ui" line="1102"/>
         <source>Ctrl+P</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1105"/>
+        <location filename="../../common/mainwindow.ui" line="1107"/>
         <source>Refresh Audio devices</source>
         <translation>Màj interfaces audio</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1110"/>
+        <location filename="../../common/mainwindow.ui" line="1112"/>
         <source>Refresh Midi devices</source>
         <translation>Màj interfaces Midi</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1115"/>
+        <location filename="../../common/mainwindow.ui" line="1117"/>
         <source>Restore default layout</source>
         <translation>Retour à l&apos;affichage par défaut</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1179"/>
+        <location filename="../../common/mainwindow.ui" line="1181"/>
         <source>Cable</source>
         <translation>Câble</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1182"/>
+        <location filename="../../common/mainwindow.ui" line="1184"/>
         <source>C</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1190"/>
+        <location filename="../../common/mainwindow.ui" line="1192"/>
         <source>Value</source>
         <translation>Valeur</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1193"/>
+        <location filename="../../common/mainwindow.ui" line="1195"/>
         <source>V</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1202"/>
+        <location filename="../../common/mainwindow.ui" line="1204"/>
         <source>Keyboard mapping</source>
         <translation>Mappage clavier</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1205"/>
+        <location filename="../../common/mainwindow.ui" line="1207"/>
         <source>Keyboard and Mouse mapping</source>
         <translation>Configuration clavier et souris</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1217"/>
-        <source>Hide all editors</source>
-        <translation>Fermer toutes les fenêtres</translation>
+        <location filename="../../common/mainwindow.ui" line="1219"/>
+        <source>Hide all plugins editors</source>
+        <translation>Masquer toutes les fenêtres de plugin</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1220"/>
+        <location filename="../../common/mainwindow.ui" line="1234"/>
+        <source>Auto-open plugins editors</source>
+        <translation>Ouvrir automatiquement les fenêtres des plugins</translation>
+    </message>
+    <message>
+        <location filename="../../common/mainwindow.ui" line="1237"/>
+        <source>G</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../../common/mainwindow.ui" line="1222"/>
         <source>H</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1123"/>
+        <location filename="../../common/mainwindow.ui" line="1125"/>
         <source>Tool bar</source>
         <translation>Barre d&apos;outils</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1138"/>
+        <location filename="../../common/mainwindow.ui" line="1140"/>
         <source>Toggle Project panel</source>
         <translation>Afficher/Masquer le panneau Projet</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1147"/>
+        <location filename="../../common/mainwindow.ui" line="1149"/>
         <source>Open Setup</source>
         <translation>Ouvrir une Config</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1150"/>
-        <location filename="../../common/mainwindow.ui" line="1153"/>
+        <location filename="../../common/mainwindow.ui" line="1152"/>
+        <location filename="../../common/mainwindow.ui" line="1155"/>
         <source>Open a Setup file</source>
         <translation>Ouvre un fichier Config</translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1156"/>
+        <location filename="../../common/mainwindow.ui" line="1158"/>
         <source>Alt+O</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/mainwindow.ui" line="1168"/>
+        <location filename="../../common/mainwindow.ui" line="1170"/>
         <source>Appearance</source>
         <translation>Apparence</translation>
     </message>
@@ -1276,22 +1291,22 @@ Drag &amp; drop some programs here to enable it.</source>
 <context>
     <name>View::ObjectView</name>
     <message>
-        <location filename="../../common/sceneview/objectview.cpp" line="143"/>
+        <location filename="../../common/sceneview/objectview.cpp" line="144"/>
         <source>Remove</source>
         <translation>Supprimer</translation>
     </message>
     <message>
-        <location filename="../../common/sceneview/objectview.cpp" line="149"/>
+        <location filename="../../common/sceneview/objectview.cpp" line="150"/>
         <source>Remove with cables</source>
         <translation>Supprimer avec les câbles</translation>
     </message>
     <message>
-        <location filename="../../common/sceneview/objectview.cpp" line="155"/>
+        <location filename="../../common/sceneview/objectview.cpp" line="156"/>
         <source>Show Editor</source>
         <translation>Afficher l&apos;éditeur</translation>
     </message>
     <message>
-        <location filename="../../common/sceneview/objectview.cpp" line="163"/>
+        <location filename="../../common/sceneview/objectview.cpp" line="164"/>
         <source>Learn Mode</source>
         <translation>Mode apprentissage</translation>
     </message>
@@ -1320,219 +1335,219 @@ Drag &amp; drop some programs here to enable it.</source>
 <context>
     <name>View::ViewConfig</name>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="41"/>
-        <location filename="../../common/views/viewconfig.cpp" line="53"/>
+        <location filename="../../common/views/viewconfig.cpp" line="42"/>
+        <location filename="../../common/views/viewconfig.cpp" line="54"/>
         <source>-undefined-</source>
         <translation>-non défini-</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="46"/>
+        <location filename="../../common/views/viewconfig.cpp" line="47"/>
         <source>Vst Plugin</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="47"/>
+        <location filename="../../common/views/viewconfig.cpp" line="48"/>
         <source>Audio Pin</source>
         <translation>Fiche audio</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="48"/>
+        <location filename="../../common/views/viewconfig.cpp" line="49"/>
         <source>Midi Pin</source>
         <translation>Fiche midi</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="49"/>
+        <location filename="../../common/views/viewconfig.cpp" line="50"/>
         <source>Parameter Pin</source>
         <translation>Fiche paramètre</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="44"/>
+        <location filename="../../common/views/viewconfig.cpp" line="45"/>
         <source>Bridge</source>
         <translation>Passerelle</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="45"/>
+        <location filename="../../common/views/viewconfig.cpp" line="46"/>
         <source>Object</source>
         <translation>Objet</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="43"/>
+        <location filename="../../common/views/viewconfig.cpp" line="44"/>
         <source>Panel</source>
         <translation>Panneau</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="56"/>
+        <location filename="../../common/views/viewconfig.cpp" line="57"/>
         <source>Background</source>
         <translation>Arrière-plan</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="60"/>
+        <location filename="../../common/views/viewconfig.cpp" line="61"/>
         <source>Text</source>
         <translation>Textes</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="58"/>
+        <location filename="../../common/views/viewconfig.cpp" line="59"/>
         <source>Vu-meter</source>
         <translation>VU-mètre</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="50"/>
+        <location filename="../../common/views/viewconfig.cpp" line="51"/>
         <source>Cursor</source>
         <translation>Curseur</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="51"/>
+        <location filename="../../common/views/viewconfig.cpp" line="52"/>
         <source>Programs</source>
         <translation>Programmes</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="62"/>
+        <location filename="../../common/views/viewconfig.cpp" line="63"/>
         <source>Button</source>
         <translation>Bouton</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="63"/>
+        <location filename="../../common/views/viewconfig.cpp" line="64"/>
         <source>Button Text</source>
         <translation>Texte bouton</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="42"/>
-        <location filename="../../common/views/viewconfig.cpp" line="54"/>
+        <location filename="../../common/views/viewconfig.cpp" line="43"/>
+        <location filename="../../common/views/viewconfig.cpp" line="55"/>
         <source>Window</source>
         <translation>Fenêtre</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="59"/>
+        <location filename="../../common/views/viewconfig.cpp" line="60"/>
         <source>Window Text</source>
         <translation>Texte fenêtre</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="55"/>
+        <location filename="../../common/views/viewconfig.cpp" line="56"/>
         <source>Base</source>
         <translation>Base</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="57"/>
+        <location filename="../../common/views/viewconfig.cpp" line="58"/>
         <source>Highlight Background</source>
         <translation>Arrière-plan en évidence</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="61"/>
+        <location filename="../../common/views/viewconfig.cpp" line="62"/>
         <source>Lines</source>
         <translation>Lignes</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="119"/>
+        <location filename="../../common/views/viewconfig.cpp" line="120"/>
         <source>!</source>
         <translation>&amp;</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="119"/>
+        <location filename="../../common/views/viewconfig.cpp" line="120"/>
         <source>1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="120"/>
+        <location filename="../../common/views/viewconfig.cpp" line="121"/>
         <source>@</source>
         <translation>é</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="120"/>
+        <location filename="../../common/views/viewconfig.cpp" line="121"/>
         <source>2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="121"/>
+        <location filename="../../common/views/viewconfig.cpp" line="122"/>
         <source>#</source>
         <translation>&quot;</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="121"/>
+        <location filename="../../common/views/viewconfig.cpp" line="122"/>
         <source>3</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="122"/>
+        <location filename="../../common/views/viewconfig.cpp" line="123"/>
         <source>$</source>
         <translation>&apos;</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="122"/>
+        <location filename="../../common/views/viewconfig.cpp" line="123"/>
         <source>4</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="123"/>
+        <location filename="../../common/views/viewconfig.cpp" line="124"/>
         <source>%</source>
         <translation>(</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="123"/>
+        <location filename="../../common/views/viewconfig.cpp" line="124"/>
         <source>5</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="124"/>
+        <location filename="../../common/views/viewconfig.cpp" line="125"/>
         <source>^</source>
         <translation>-</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="124"/>
+        <location filename="../../common/views/viewconfig.cpp" line="125"/>
         <source>6</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="125"/>
+        <location filename="../../common/views/viewconfig.cpp" line="126"/>
         <source>&amp;</source>
         <translation>è</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="125"/>
+        <location filename="../../common/views/viewconfig.cpp" line="126"/>
         <source>7</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="126"/>
+        <location filename="../../common/views/viewconfig.cpp" line="127"/>
         <source>*</source>
         <translation>_</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="126"/>
+        <location filename="../../common/views/viewconfig.cpp" line="127"/>
         <source>8</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="127"/>
+        <location filename="../../common/views/viewconfig.cpp" line="128"/>
         <source>(</source>
         <translation>ç</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="127"/>
+        <location filename="../../common/views/viewconfig.cpp" line="128"/>
         <source>9</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="128"/>
+        <location filename="../../common/views/viewconfig.cpp" line="129"/>
         <source>)</source>
         <translation>à</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="128"/>
+        <location filename="../../common/views/viewconfig.cpp" line="129"/>
         <source>0</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="129"/>
+        <location filename="../../common/views/viewconfig.cpp" line="130"/>
         <source>_</source>
         <translation>)</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="129"/>
+        <location filename="../../common/views/viewconfig.cpp" line="130"/>
         <source>-</source>
         <translation>°</translation>
     </message>
     <message>
-        <location filename="../../common/views/viewconfig.cpp" line="176"/>
+        <location filename="../../common/views/viewconfig.cpp" line="177"/>
         <source>-unknown-</source>
         <translation>-inconnu-</translation>
     </message>
