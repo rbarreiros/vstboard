@@ -91,7 +91,12 @@ void VstPlugin::SetSleep(bool sleeping)
     if(sleeping) {
         EffStopProcess();
         EffSuspend();
+
     } else {
+        foreach(Pin *in, listAudioPinIn->listPins ) {
+            AudioPin *audioIn = static_cast<AudioPin*>(in);
+            audioIn->GetBuffer()->ResetStackCounter();
+        }
         EffResume();
         EffStartProcess();
     }
