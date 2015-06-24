@@ -83,7 +83,7 @@
     the native Win32 parent. If a \a parent is provided the object is
     owned by that QObject. \a f is passed on to the QWidget constructor.
 */
-QWinWidget::QWinWidget(HWND hParentWnd, QObject *parent, Qt::WFlags f)
+QWinWidget::QWinWidget(HWND hParentWnd, QObject *parent, Qt::WindowFlags f)
 : QWidget(0, f), hParent(hParentWnd), prevFocus(0), reenable_parent(false)
 {
     if (parent)

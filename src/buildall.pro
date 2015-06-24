@@ -3,9 +3,9 @@ SUBDIRS     = \
     portmidi \
     portaudio \
     common \
-    vstdll \
-    vstboard \
+#    vstdll \
+    vstboard
     dllLoader \
-    dllLoaderInst
+#    dllLoaderInst
 
 CONFIG += ordered

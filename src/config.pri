@@ -33,8 +33,10 @@ CONFIG(debug, debug|release) {
 }
 
 win32-g++ {
-    DEFINES += WINVER=0x0501
-    DEFINES += _WIN32_WINNT=0x0501
+    DEFINES += WINVER=0x0600
+    DEFINES += _WIN32_WINNT=0x0600
+#    DEFINES += WINVER=0x0501
+#    DEFINES += _WIN32_WINNT=0x0501
 #    LIBS += -L$$quote($$MINGW_PATH/lib)
 #    INCLUDEPATH += $$quote($$MINGW_PATH/include)
 }

@@ -1,9 +1,13 @@
 include(../config.pri)
 
 QT += core gui
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TEMPLATE = lib
 CONFIG += staticlib
+
+#Disable vst sdk unused warnings
+QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter
 
 vstsdk {
     HEADERS += vst/cvsthost.h \

@@ -277,7 +277,8 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
         row=rowCount(parent);
 
     if(data->hasFormat(MIMETYPE_GROUP)) {
-        QDataStream stream( &data->data(MIMETYPE_GROUP), QIODevice::ReadOnly);
+        QByteArray d = data->data(MIMETYPE_GROUP);
+        QDataStream stream( &d, QIODevice::ReadOnly);
         while(!stream.atEnd()) {
             QByteArray tmpBa;
             stream >> tmpBa;
@@ -299,8 +300,8 @@ bool ProgramsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
                 }
                 row = rowCount( index(groupNum,0) );
             }
-
-            QDataStream stream( &data->data(MIMETYPE_PROGRAM), QIODevice::ReadOnly);
+            QByteArray d = data->data(MIMETYPE_GROUP);
+            QDataStream stream( &d, QIODevice::ReadOnly);
             while(!stream.atEnd()) {
                 QByteArray tmpBa;
                 stream >> tmpBa;

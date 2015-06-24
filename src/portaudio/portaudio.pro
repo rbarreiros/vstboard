@@ -60,11 +60,12 @@ win32 {
     $$PORTAUDIO_PATH/include/pa_win_wasapi.h \
     $$PORTAUDIO_PATH/include/pa_asio.h
 
-    SOURCES += $$PORTAUDIO_PATH/src/hostapi/wasapi/pa_win_wasapi.c \
-    $$PORTAUDIO_PATH/src/hostapi/wmme/pa_win_wmme.c \
+    #SOURCES += $$PORTAUDIO_PATH/src/hostapi/wasapi/pa_win_wasapi.c \
+    SOURCES += $$PORTAUDIO_PATH/src/hostapi/wmme/pa_win_wmme.c \
     $$PORTAUDIO_PATH/src/os/win/pa_win_waveformat.c \
     $$PORTAUDIO_PATH/src/os/win/pa_win_util.c \
     $$PORTAUDIO_PATH/src/os/win/pa_win_hostapis.c \
+    $$PORTAUDIO_PATH/src/os/win/pa_win_coinitialize.c \
     $$PORTAUDIO_PATH/src/hostapi/asio/pa_asio.cpp \
     $$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/common/asio.cpp \
     $$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host/ASIOConvertSamples.cpp \
@@ -76,13 +77,13 @@ win32 {
         DEFINES += METHOD_NEITHER=3
         DEFINES += FILE_ANY_ACCESS=0
 
-        DEFINES += PA_NO_WDMKS
-        DEFINES += PA_NO_DS
-        DEFINES += PA_NO_WASAPI
-    #    DEFINES += PA_NO_WMME
-    #    DEFINES += PA_NO_ASIO
+        DEFINES += PA_USE_WDMKS=0
+        DEFINES += PA_USE_DS=0
+        DEFINES += PA_USE_WASAPI=0
+        DEFINES += PA_USE_ASIO=1
+        DEFINES += PA_USE_WMME=1
 
-        INCLUDEPATH += $$PORTAUDIO_PATH/src/hostapi/wasapi/mingw-include
+        #INCLUDEPATH += $$PORTAUDIO_PATH/src/hostapi/wasapi/mingw-include
 
         SOURCES += $$PORTAUDIO_PATH/src/hostapi/asio/iasiothiscallresolver.cpp
 
@@ -110,6 +111,7 @@ win32 {
     HEADERS += $$PORTAUDIO_PATH/include/portaudio.h
 
     SOURCES += $$PORTAUDIO_PATH/src/common/pa_stream.c \
+        $$PORTAUDIO_PATH/src/common/pa_trace.c \
         $$PORTAUDIO_PATH/src/common/pa_skeleton.c \
         $$PORTAUDIO_PATH/src/common/pa_ringbuffer.c \
         $$PORTAUDIO_PATH/src/common/pa_process.c \

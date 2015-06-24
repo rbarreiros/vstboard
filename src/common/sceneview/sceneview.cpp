@@ -78,10 +78,21 @@ SceneView::SceneView(MainHost *myHost,Connectables::ObjectFactory *objFactory, M
     viewGroup->SetViewConfig(myHost->mainWindow->viewConfig);
 
     //we need a root object to avoid a bug when the scene is empty
-    rootObjHost = new QGraphicsRectItem(0, sceneHost);
-    rootObjProject = new QGraphicsRectItem(0, sceneProject);
-    rootObjProgram = new QGraphicsRectItem(0, sceneProgram);
-    rootObjInsert = new QGraphicsRectItem(0, sceneGroup);
+    rootObjHost = new QGraphicsRectItem(0);
+    sceneHost->addItem(rootObjHost);
+    //rootObjHost = new QGraphicsRectItem(0, sceneHost);
+
+    rootObjProject = new QGraphicsRectItem(0);
+    sceneProject->addItem(rootObjProject);
+    //rootObjProject = new QGraphicsRectItem(0, sceneProject);
+
+    rootObjProgram = new QGraphicsRectItem(0);
+    sceneProgram->addItem(rootObjProgram);
+    //rootObjProgram = new QGraphicsRectItem(0, sceneProgram);
+
+    rootObjInsert = new QGraphicsRectItem(0);
+    sceneGroup->addItem(rootObjInsert);
+    //rootObjInsert = new QGraphicsRectItem(0, sceneGroup);
 
     viewHost->setScene(sceneHost);
     viewProject->setScene(sceneProject);

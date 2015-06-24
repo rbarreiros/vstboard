@@ -67,7 +67,7 @@ namespace Connectables {
           Get the current index
           \return index
           */
-        inline const int GetIndex() const {return index;}
+        inline int GetIndex() {return index;}
 
         /// Reset the savedIndex to the current index, when the file is loaded or before saving
         inline void ResetSavedIndex(int id=-2) {savedIndex=id;}
@@ -121,7 +121,7 @@ namespace Connectables {
           Get the current container id
           \return container id
           */
-        const int GetContainerId() const {return containerId;}
+        int GetContainerId() {return containerId;}
 
         /*!
           Get the current program id

@@ -43,7 +43,7 @@
 #ifndef QMFCAPP_H
 #define QMFCAPP_H
 
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 
 #if defined(_AFXDLL) && defined(_MSC_VER)
 #define QTWINMIGRATE_WITHMFC

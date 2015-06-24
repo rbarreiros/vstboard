@@ -247,7 +247,8 @@ void ObjectView::SetErrorMessage(const QString & msg)
     } else {
         if(!errorMessage) {
             QPixmap pix(":/img32x32/agt_action_fail.png");
-            errorMessage = new QGraphicsPixmapItem(pix,this,scene());
+            //errorMessage = new QGraphicsPixmapItem(pix,this,scene());
+            errorMessage = new QGraphicsPixmapItem(pix, this);
 //            QPointF pt = geometry().center();
 //            pt.rx() -= pix.width()/2;
 //            pt.ry() -= pix.height()/2;

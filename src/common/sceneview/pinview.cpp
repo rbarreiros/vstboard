@@ -24,6 +24,8 @@
 #include "../connectables/objectfactory.h"
 #include "objectview.h"
 
+#include <QDrag>
+
 using namespace View;
 
 CableView *PinView::currentLine = 0;

@@ -29,11 +29,12 @@
 
 #ifndef QT_NO_DEBUG
 
-    void myMessageOutput(QtMsgType type, const char *msg)
+    void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
      {
-        qInstallMsgHandler(0);
-        qDebug(msg);
-        qInstallMsgHandler(myMessageOutput);
+        qInstallMessageHandler(0);
+        qDebug() << "File: " << context.file << " Line: " << context.line << " Function: " << context.function << " Msg: " << msg;
+        //qDebug(msg);
+        qInstallMessageHandler(myMessageOutput);
 
          switch (type) {
 
@@ -62,7 +63,7 @@ int main(int argc, char *argv[])
     qRegisterMetaTypeStreamOperators<ObjectInfo>("ObjectInfo");
 
 #ifndef QT_NO_DEBUG
-    qInstallMsgHandler(myMessageOutput);
+    qInstallMessageHandler(myMessageOutput);
 #endif
 
     QCoreApplication::setOrganizationName("CtrlBrk");

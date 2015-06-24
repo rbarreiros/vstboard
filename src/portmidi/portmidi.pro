@@ -23,6 +23,9 @@ QT -= core gui
 TEMPLATE = lib
 CONFIG += staticlib
 
+QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter
+QMAKE_CFLAGS += -Wno-unused-variable -Wno-unused-parameter
+
 DEFINES -= UNICODE
 
 INCLUDEPATH += $$PORTMIDI_PATH/porttime

@@ -1,6 +1,7 @@
 include(../config.pri)
 
 QT += core gui
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = "VstBoardPlugin"
 TEMPLATE = lib
@@ -9,6 +10,8 @@ TEMPLATE = lib
 #    LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/" -lvld
 #    INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include/"
 #}
+
+QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter
 
 win32 {
     LIBS += -lwinmm

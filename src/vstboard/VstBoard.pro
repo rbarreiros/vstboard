@@ -1,20 +1,16 @@
 include(../config.pri)
 
 QT += core gui
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TEMPLATE = app
-TARGET = $${APP_NAME}
+#TARGET = $${APP_NAME}
+TARGET = VstBoard
 
-LIBS += -lportmidi
+#Disable vst sdk unused warnings
+QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter
 
-win32 {
-    LIBS += -lwinmm
-    LIBS += -luser32
-    LIBS += -ladvapi32
-    LIBS += -lole32
-    LIBS += -lsetupapi
-    LIBS += -ldsound
-}
+#LIBS += -lportmidi
 
 INCLUDEPATH += $$PORTAUDIO_PATH/include
 INCLUDEPATH += $$PORTMIDI_PATH/porttime
@@ -118,3 +114,12 @@ else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../port
 else:win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../portmidi/release/portmidi.lib
 else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../portmidi/debug/portmidi.lib
 else:unix:!symbian: PRE_TARGETDEPS += $$OUT_PWD/../portmidi/libportmidi.a
+
+win32 {
+    LIBS += -lwinmm
+    LIBS += -luser32
+    LIBS += -ladvapi32
+    LIBS += -lole32
+    LIBS += -lsetupapi
+    #LIBS += -ldsound
+}

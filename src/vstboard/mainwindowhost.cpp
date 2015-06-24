@@ -32,10 +32,18 @@ MainWindowHost::MainWindowHost(MainHostHost * myHost,QWidget *parent) :
 
     //audio devices
     ui->treeAudioInterfaces->setModel(myHost->audioDevices->GetModel());
-    ui->treeAudioInterfaces->header()->setResizeMode(0,QHeaderView::Stretch);
-    ui->treeAudioInterfaces->header()->setResizeMode(1,QHeaderView::Fixed);
-    ui->treeAudioInterfaces->header()->setResizeMode(2,QHeaderView::Fixed);
-    ui->treeAudioInterfaces->header()->setResizeMode(3,QHeaderView::Fixed);
+    ui->treeAudioInterfaces->header()->setSectionResizeMode(0,QHeaderView::Stretch);
+    //ui->treeAudioInterfaces->header()->setResizeMode(0,QHeaderView::Stretch);
+
+    //ui->treeAudioInterfaces->header()->setResizeMode(1,QHeaderView::Fixed);
+    ui->treeAudioInterfaces->header()->setSectionResizeMode(1,QHeaderView::Fixed);
+
+    //ui->treeAudioInterfaces->header()->setResizeMode(2,QHeaderView::Fixed);
+    ui->treeAudioInterfaces->header()->setSectionResizeMode(2,QHeaderView::Fixed);
+
+    //ui->treeAudioInterfaces->header()->setResizeMode(3,QHeaderView::Fixed);
+    ui->treeAudioInterfaces->header()->setSectionResizeMode(3,QHeaderView::Fixed);
+
     ui->treeAudioInterfaces->header()->resizeSection(1,30);
     ui->treeAudioInterfaces->header()->resizeSection(2,30);
     ui->treeAudioInterfaces->header()->resizeSection(3,40);
@@ -43,9 +51,15 @@ MainWindowHost::MainWindowHost(MainHostHost * myHost,QWidget *parent) :
 
     //midi devices
     ui->treeMidiInterfaces->setModel(myHost->midiDevices->GetModel());
-    ui->treeMidiInterfaces->header()->setResizeMode(0,QHeaderView::Stretch);
-    ui->treeMidiInterfaces->header()->setResizeMode(1,QHeaderView::Fixed);
-    ui->treeMidiInterfaces->header()->setResizeMode(2,QHeaderView::Fixed);
+    //ui->treeMidiInterfaces->header()->setResizeMode(0,QHeaderView::Stretch);
+    ui->treeMidiInterfaces->header()->setSectionResizeMode(0,QHeaderView::Stretch);
+
+    //ui->treeMidiInterfaces->header()->setResizeMode(1,QHeaderView::Fixed);
+    ui->treeMidiInterfaces->header()->setSectionResizeMode(1,QHeaderView::Fixed);
+
+    //ui->treeMidiInterfaces->header()->setResizeMode(2,QHeaderView::Fixed);
+    ui->treeMidiInterfaces->header()->setSectionResizeMode(2,QHeaderView::Fixed);
+
     ui->treeMidiInterfaces->header()->resizeSection(1,30);
     ui->treeMidiInterfaces->header()->resizeSection(2,30);
 

@@ -282,7 +282,7 @@ void Vst::getProgramName (char* name)
 {
     if(!name)
         return;
-    vst_strncpy (name, QString("prog%1").arg(currentHostProg).toAscii(), kVstMaxProgNameLen);
+    vst_strncpy (name, QString("prog%1").arg(currentHostProg).toLatin1(), kVstMaxProgNameLen);
 }
 
 void Vst::setProgram(VstInt32 program)
@@ -317,7 +317,7 @@ void Vst::getParameterName (VstInt32 index, char* label)
 {
     if(!label)
         return;
-    vst_strncpy (label, QString("p%1").arg(index).toAscii(), kVstMaxParamStrLen);
+    vst_strncpy (label, QString("p%1").arg(index).toLatin1(), kVstMaxParamStrLen);
 }
 
 void Vst::getParameterDisplay (VstInt32 index, char* text)

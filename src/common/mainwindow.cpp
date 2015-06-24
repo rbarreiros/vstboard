@@ -99,7 +99,9 @@ MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
 
 void MainWindow::SetupBrowsersModels(const QString &vstPath, const QString &browserPath)
 {
-#if !defined(__GNUC__)
+    // This if was crashing the app on windows, because no model was defined
+    // void FileBrowser::on_parentDir_clicked() was calling model as null
+//#if !defined(__GNUC__)
     //vst plugins browser
     //sse2 crash with gcc ?
 
@@ -124,7 +126,7 @@ void MainWindow::SetupBrowsersModels(const QString &vstPath, const QString &brow
     //    listVstBanksModel->setNameFilterDisables(false);
     listVstBanksModel->setRootPath(browserPath);
     ui->BankBrowser->setModel(listVstBanksModel);
-#endif
+//#endif
 }
 
 MainWindow::~MainWindow()
@@ -209,7 +211,7 @@ void MainWindow::BuildListTools()
     parentItem->appendRow(item);
 
     ui->treeTools->setModel(listToolsModel);
-    ui->treeTools->header()->setResizeMode(0,QHeaderView::Stretch);
+    ui->treeTools->header()->setSectionResizeMode(0, QHeaderView::Stretch);
 }
 
 void MainWindow::on_actionLoad_triggered()

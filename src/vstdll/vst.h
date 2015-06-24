@@ -28,7 +28,7 @@
 #define DEFAULT_OUTPUTS 1
 
 #include <QObject>
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include <QTranslator>
 #include "mainwindowvst.h"
 #include "audioeffectx.h"
