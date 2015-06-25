@@ -190,40 +190,55 @@ PMEXPORT const PmDeviceInfo* Pm_GetDeviceInfo( PmDeviceID id ) {
 
 /* pm_success_fn -- "noop" function pointer */
 PmError pm_success_fn(PmInternal *midi) {
-    return pmNoError;
+  (void)midi;
+  return pmNoError;
 }
 
 /* none_write -- returns an error if called */
 PmError none_write_short(PmInternal *midi, PmEvent *buffer) {
-    return pmBadPtr;
+  (void)midi;
+  (void)buffer;
+  return pmBadPtr;
 }
 
 /* pm_fail_timestamp_fn -- placeholder for begin_sysex and flush */
 PmError pm_fail_timestamp_fn(PmInternal *midi, PmTimestamp timestamp) {
-    return pmBadPtr;
+  (void)midi;
+  (void)timestamp;
+  return pmBadPtr;
 }
 
 PmError none_write_byte(PmInternal *midi, unsigned char byte, 
                         PmTimestamp timestamp) {
-    return pmBadPtr;
+  (void)midi;
+  (void)byte;
+  (void)timestamp;
+  return pmBadPtr;
 }
 
 /* pm_fail_fn -- generic function, returns error if called */
 PmError pm_fail_fn(PmInternal *midi) {
-    return pmBadPtr;
+  (void)midi;
+  return pmBadPtr;
 }
 
 static PmError none_open(PmInternal *midi, void *driverInfo) {
-    return pmBadPtr;
+  (void)midi;
+  (void)driverInfo;
+  return pmBadPtr;
 }
 static void none_get_host_error(PmInternal * midi, char * msg, unsigned int len) {
-    *msg = 0; // empty string
+  (void)midi;
+  (void)len;
+  *msg = 0; // empty string
 }
 static unsigned int none_has_host_error(PmInternal * midi) {
-    return FALSE;
+  (void)midi;
+  return FALSE;
 }
 PmTimestamp none_synchronize(PmInternal *midi) {
-    return 0;
+  (void)midi;
+  return 0;
 }
 
 #define none_abort pm_fail_fn
@@ -535,7 +550,7 @@ PMEXPORT PmError Pm_Write( PortMidiStream *stream, PmEvent *buffer, int32_t leng
         if (midi->sysex_in_progress) { /* send sysex bytes until EOX */
             /* see if we can accelerate data transfer */
             if (bits == 0 && midi->fill_base && /* 4 bytes to copy */
-                (*midi->fill_offset_ptr) + 4 <= midi->fill_length &&
+                (*midi->fill_offset_ptr) + 4 <= (uint32_t)midi->fill_length &&
                 (msg & 0x80808080) == 0) { /* all data */
                     /* copy 4 bytes from msg to fill_base + fill_offset */
                     unsigned char *ptr = midi->fill_base + 
@@ -622,7 +637,7 @@ PMEXPORT PmError Pm_WriteSysEx(PortMidiStream *stream, PmTimestamp when,
                 /* optimization: maybe we can just copy bytes */
                 if (midi->fill_base) {
                     PmError err;
-                    while (*(midi->fill_offset_ptr) < midi->fill_length) {
+                    while (*(midi->fill_offset_ptr) < (uint32_t)midi->fill_length) {
                         midi->fill_base[(*midi->fill_offset_ptr)++] = *msg;
                         if (*msg++ == MIDI_EOX) {
                             err = pm_end_sysex(midi);
