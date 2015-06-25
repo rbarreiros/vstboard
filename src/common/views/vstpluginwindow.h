@@ -48,8 +48,8 @@ namespace View {
         void SaveAttribs();
 
     protected:
-        void resizeEvent ( QResizeEvent * event );
-        void showEvent ( QShowEvent * event );
+        //void resizeEvent ( QResizeEvent * event );
+        //void showEvent ( QShowEvent * event );
         void closeEvent ( QCloseEvent * event );
         Connectables::VstPlugin *plugin;
 

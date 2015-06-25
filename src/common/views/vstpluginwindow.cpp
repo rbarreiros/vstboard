@@ -63,7 +63,7 @@ bool VstPluginWindow::SetPlugin(Connectables::VstPlugin *plugin)
     if(!plugin)
         return false;
 
-    setWindowFlags(Qt::Tool);
+    setWindowFlags(Qt::Tool | Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
 
     long res;
     ERect *rect = 0;
@@ -75,9 +75,7 @@ bool VstPluginWindow::SetPlugin(Connectables::VstPlugin *plugin)
 
     //try to open the window
 //    plugin->objMutex.lock();
-    //res = plugin->EffEditOpen(static_cast<void *>(ui->scrollAreaWidgetContents->winId()));
-    unsigned int winid = ui->scrollAreaWidgetContents->winId();
-    res = plugin->EffEditOpen((void *)&winid);
+    res = plugin->EffEditOpen((void*)GetWinId());
 //    plugin->objMutex.unlock();
 
     if(res == 1L)
@@ -87,6 +85,8 @@ bool VstPluginWindow::SetPlugin(Connectables::VstPlugin *plugin)
     res = plugin->EffEditGetRect(&rect);
     if(res == 1L)
         windowOk=true;
+
+    LOG("Window Size: Top " << rect->top << " Bottom: " << rect->bottom << " Left: " << rect->left << " Right : " << rect->right);
 
     if(!windowOk)
         return false;
@@ -141,11 +141,13 @@ void VstPluginWindow::closeEvent( QCloseEvent * event )
 
 void VstPluginWindow::SetWindowSize(int newWidth, int newHeight)
 {
+    LOG("Setting windows size Width: " << newWidth << " Height: " << newHeight);
     ui->scrollAreaWidgetContents->setFixedSize(newWidth,newHeight);
     setMaximumSize(newWidth,newHeight);
-    resize(newWidth,newHeight);
+    //resize(newWidth,newHeight);
+    setFixedSize(newWidth, newHeight);
 }
-
+/*
 void VstPluginWindow::showEvent ( QShowEvent * event )
 {
     ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -177,7 +179,7 @@ void VstPluginWindow::resizeEvent ( QResizeEvent * event )
         setMaximumSize(maxW,maxH);
     }
 }
-
+*/
 
 //const QPixmap VstPluginWindow::GetScreenshot()
 //{

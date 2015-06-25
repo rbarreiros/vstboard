@@ -493,9 +493,11 @@ VstInt32 VstPlugin::IdFromFxb(const QString &fxbFile)
 
 void VstPlugin::RaiseEditor()
 {
+    LOG("Entering Raise Editor");
     if(!editorWnd || !editorWnd->isVisible())
         return;
 
+    LOG("Raising Editor");
     editorWnd->raise();
 }
 
@@ -553,6 +555,7 @@ void VstPlugin::OnEditorClosed()
 
 void VstPlugin::OnShowEditor()
 {
+    LOG("Show Editor");
     if(!editorWnd)
         CreateEditorWindow();
 
@@ -568,6 +571,7 @@ void VstPlugin::OnShowEditor()
 
 void VstPlugin::OnHideEditor()
 {
+    LOG("Hide Editor");
     if(!editorWnd)
         return;
 
