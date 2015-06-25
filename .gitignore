@@ -4,6 +4,7 @@ Thumbs.db
 .DS_Store
 src/common/_version.h
 *.o
+*.a
 *.tgz
 *.tar.gz
 *.zip
