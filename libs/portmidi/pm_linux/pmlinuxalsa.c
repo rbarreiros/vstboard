@@ -32,7 +32,7 @@
 #endif
 
 /* to store client/port in the device descriptor */
-#define MAKE_DESCRIPTOR(client, port) ((void*)(((client) << 8) | (port)))
+#define MAKE_DESCRIPTOR(client, port) ((void*)(intptr_t)(((client) << 8) | (port)))
 #define GET_DESCRIPTOR_CLIENT(info) ((((int)(info)) >> 8) & 0xff)
 #define GET_DESCRIPTOR_PORT(info) (((int)(info)) & 0xff)
 
@@ -134,6 +134,8 @@ static PmError alsa_out_open(PmInternal *midi, void *driverInfo)
     snd_seq_port_info_t *info;
     int err;
 
+    (void)driverInfo;
+    
     if (!desc) return pmInsufficientMemory;
     
     snd_seq_port_info_alloca(&info);
@@ -148,8 +150,8 @@ static PmError alsa_out_open(PmInternal *midi, void *driverInfo)
 
     /* fill in fields of desc, which is passed to pm_write routines */
     midi->descriptor = desc;
-    desc->client = GET_DESCRIPTOR_CLIENT(client_port);
-    desc->port = GET_DESCRIPTOR_PORT(client_port);
+    desc->client = GET_DESCRIPTOR_CLIENT(*((int*)client_port));
+    desc->port = GET_DESCRIPTOR_PORT(*((int*)client_port));
     desc->this_port = midi->device_id;
     desc->in_sysex = 0;
 
@@ -242,8 +244,8 @@ static PmError alsa_out_close(PmInternal *midi)
     alsa_descriptor_type desc = (alsa_descriptor_type) midi->descriptor;
     if (!desc) return pmBadPtr;
 
-    if (pm_hosterror = snd_seq_disconnect_to(seq, desc->this_port, 
-                                             desc->client, desc->port)) {
+    if ((pm_hosterror = snd_seq_disconnect_to(seq, desc->this_port, 
+					      desc->client, desc->port))) {
         // if there's an error, try to delete the port anyway, but don't
         // change the pm_hosterror value so we retain the first error
         snd_seq_delete_port(seq, desc->this_port);
@@ -265,6 +267,7 @@ static PmError alsa_out_close(PmInternal *midi)
 
 static PmError alsa_in_open(PmInternal *midi, void *driverInfo)
 {
+    (void)driverInfo;
     void *client_port = descriptors[midi->device_id].descriptor;
     alsa_descriptor_type desc = (alsa_descriptor_type) 
         pm_alloc(sizeof(alsa_descriptor_node));
@@ -290,8 +293,8 @@ static PmError alsa_in_open(PmInternal *midi, void *driverInfo)
 
     /* fill in fields of desc, which is passed to pm_write routines */
     midi->descriptor = desc;
-    desc->client = GET_DESCRIPTOR_CLIENT(client_port);
-    desc->port = GET_DESCRIPTOR_PORT(client_port);
+    desc->client = GET_DESCRIPTOR_CLIENT(*((int*)client_port));
+    desc->port = GET_DESCRIPTOR_PORT(*((int*)client_port));
     desc->this_port = midi->device_id;
     desc->in_sysex = 0;
 
@@ -332,8 +335,8 @@ static PmError alsa_in_close(PmInternal *midi)
 {
     alsa_descriptor_type desc = (alsa_descriptor_type) midi->descriptor;
     if (!desc) return pmBadPtr;
-    if (pm_hosterror = snd_seq_disconnect_from(seq, desc->this_port, 
-                                               desc->client, desc->port)) {
+    if ((pm_hosterror = snd_seq_disconnect_from(seq, desc->this_port, 
+						desc->client, desc->port))) {
         snd_seq_delete_port(seq, desc->this_port); /* try to close port */
     } else {
         pm_hosterror = snd_seq_delete_port(seq, desc->this_port);
@@ -351,6 +354,7 @@ static PmError alsa_in_close(PmInternal *midi)
 
 static PmError alsa_abort(PmInternal *midi)
 {
+  (void)midi;
     /* NOTE: ALSA documentation is vague. This is supposed to 
      * remove any pending output messages. If you can test and 
      * confirm this code is correct, please update this comment. -RBD
@@ -432,8 +436,9 @@ static PmError alsa_write(PmInternal *midi, PmEvent *buffer, int32_t length)
 
 static PmError alsa_write_flush(PmInternal *midi, PmTimestamp timestamp)
 {
+    (void)timestamp;
     alsa_descriptor_type desc = (alsa_descriptor_type) midi->descriptor;
-    VERBOSE printf("snd_seq_drain_output: 0x%x\n", (unsigned int) seq);
+    VERBOSE printf("snd_seq_drain_output: 0x%x\n", *((unsigned int*)seq));
     desc->error = snd_seq_drain_output(seq);
     if (desc->error < 0) return pmHostError;
 
@@ -463,12 +468,15 @@ static PmError alsa_write_short(PmInternal *midi, PmEvent *event)
 
 /* alsa_sysex -- implements begin_sysex and end_sysex */
 PmError alsa_sysex(PmInternal *midi, PmTimestamp timestamp) {
+    (void)midi;
+    (void)timestamp;
     return pmNoError;
 }
 
 
 static PmTimestamp alsa_synchronize(PmInternal *midi)
 {
+    (void)midi;
     return 0; /* linux implementation does not use this synchronize function */
     /* Apparently, Alsa data is relative to the time you send it, and there
        is no reference. If this is true, this is a serious shortcoming of
@@ -615,6 +623,7 @@ static void handle_event(snd_seq_event_t *ev)
 
 static PmError alsa_poll(PmInternal *midi)
 {
+    (void)midi;
     snd_seq_event_t *ev;
     /* expensive check for input data, gets data from device: */
     while (snd_seq_event_input_pending(seq, TRUE) > 0) {
