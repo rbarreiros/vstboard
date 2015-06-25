@@ -42,10 +42,10 @@ public:
     static void RemoveRecentSetupFile(const QString &file,MainHost *myHost);
     static void RemoveRecentProjectFile(const QString &file,MainHost *myHost);
 
-    static const float defaultSampleRate(MainHost *myHost);
-    static const int defaultBufferSize(MainHost *myHost);
-    static const bool defaultDoublePrecision(MainHost *myHost);
-    static const int defaultNumberOfThreads(MainHost *myHost);
+    static float defaultSampleRate(MainHost *myHost);
+    static int defaultBufferSize(MainHost *myHost);
+    static bool defaultDoublePrecision(MainHost *myHost);
+    static int defaultNumberOfThreads(MainHost *myHost);
 
 protected:
     void changeEvent(QEvent *e);

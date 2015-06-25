@@ -1,7 +1,7 @@
 #ifndef SCRIPTEDITOR_H
 #define SCRIPTEDITOR_H
 
-//#include "precomp.h"
+#include <QWidget>
 
 namespace Ui {
     class ScriptEditor;

@@ -48,7 +48,10 @@ namespace Connectables {
          \param msgType PinMessage
          \param data received data
          */
-        virtual void ReceiveMsg(const PinMessage::Enum msgType,void *data=0) {}
+        virtual void ReceiveMsg(const PinMessage::Enum msgType,void *data=0) {
+	  Q_UNUSED(msgType);
+	  Q_UNUSED(data);
+	}
 
         /*!
           Get the current value (vu meter or parameter value)

@@ -18,16 +18,17 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #include "circularbuffer.h"
-//#include "precomp.h"
+#include "precomp.h"
+#include <string.h> // for memcpy
 
 CircularBuffer::CircularBuffer(long size) :
     buffSize(0),
-    buffer(0),
     filledSize(0),
+    readPos(0),
+    writePos(0),
     bufStart(0),
     bufEnd(0),
-    readPos(0),
-    writePos(0)
+    buffer(0)
 {
     SetSize(size);
 }

@@ -43,9 +43,20 @@ namespace View {
     public:
         explicit SceneView(MainHost *myHost,Connectables::ObjectFactory *objFactory, MainGraphicsView *viewHost, MainGraphicsView *viewProject, MainGraphicsView *viewProgram, MainGraphicsView *viewGroup,QWidget *parent = 0);
 
-        QRect visualRect(const QModelIndex &index) const {return QRect();}
-        void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible) {}
-        QModelIndex indexAt(const QPoint &point) const {return QModelIndex();}
+        QRect visualRect(const QModelIndex &index) const {
+	  Q_UNUSED(index);
+	  return QRect();
+	}
+	
+        void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible) {
+	  Q_UNUSED(index);
+	  Q_UNUSED(hint);
+	}
+	
+        QModelIndex indexAt(const QPoint &point) const {
+	  Q_UNUSED(point);
+	  return QModelIndex();
+	}
 
         void SetParkings(QWidget *progPark, QWidget *groupPark);
 
@@ -62,12 +73,29 @@ namespace View {
         QGraphicsRectItem *rootObjProgram;
         QGraphicsRectItem *rootObjInsert;
 
-        QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers) {return QModelIndex();}
+        QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers) {
+	  Q_UNUSED(cursorAction);
+	  Q_UNUSED(modifiers);
+	  return QModelIndex();
+	}
+	
         int horizontalOffset() const {return 0;}
         int verticalOffset() const {return 0;}
-        bool isIndexHidden(const QModelIndex &index) const {return false;}
-        void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command) {}
-        QRegion visualRegionForSelection(const QItemSelection &selection) const {return QRegion();}
+
+	bool isIndexHidden(const QModelIndex &index) const {
+	  Q_UNUSED(index);
+	  return false;
+	}
+	
+        void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command) {
+	  Q_UNUSED(rect);
+	  Q_UNUSED(command);
+	}
+	
+        QRegion visualRegionForSelection(const QItemSelection &selection) const {
+	  Q_UNUSED(selection);
+	  return QRegion();
+	}
 
         QModelIndex traverseTroughIndexes ( QModelIndex index );
 
