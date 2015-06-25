@@ -1,0 +1,9 @@
+# Ignore all ASIO SDK Files as we can't distribute them
+ASIO SDK 2.3.pdf
+Steinberg ASIO Licensing Agreement.pdf
+asio/
+changes.txt
+common/
+driver/
+host/
+readme.txt
