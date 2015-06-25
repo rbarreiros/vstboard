@@ -180,7 +180,7 @@ _PA_DEFINE_FUNC(snd_pcm_sw_params_set_stop_threshold);
 _PA_DEFINE_FUNC(snd_pcm_sw_params_get_boundary);
 _PA_DEFINE_FUNC(snd_pcm_sw_params_set_silence_threshold);
 _PA_DEFINE_FUNC(snd_pcm_sw_params_set_silence_size);
-_PA_DEFINE_FUNC(snd_pcm_sw_params_set_xfer_align);
+//_PA_DEFINE_FUNC(snd_pcm_sw_params_set_xfer_align);
 _PA_DEFINE_FUNC(snd_pcm_sw_params_set_tstamp_mode);
 #define alsa_snd_pcm_sw_params_alloca(ptr) __alsa_snd_alloca(ptr, snd_pcm_sw_params)
 
@@ -241,12 +241,13 @@ _PA_DEFINE_FUNC(snd_output_stdio_attach);
 #ifndef PA_ALSA_PATHNAME
     #define PA_ALSA_PATHNAME "libasound.so"
 #endif
+
+#ifdef PA_ALSA_DYNAMIC
+
 static const char *g_AlsaLibName = PA_ALSA_PATHNAME;
 
 /* Handle to dynamically loaded library. */
 static void *g_AlsaLib = NULL;
-
-#ifdef PA_ALSA_DYNAMIC
 
 #define _PA_LOCAL_IMPL(x) __pa_local_##x
 
@@ -460,7 +461,7 @@ static int PaAlsa_LoadLibrary()
     _PA_LOAD_FUNC(snd_pcm_sw_params_get_boundary);
     _PA_LOAD_FUNC(snd_pcm_sw_params_set_silence_threshold);
     _PA_LOAD_FUNC(snd_pcm_sw_params_set_silence_size);
-    _PA_LOAD_FUNC(snd_pcm_sw_params_set_xfer_align);
+    //_PA_LOAD_FUNC(snd_pcm_sw_params_set_xfer_align);
     _PA_LOAD_FUNC(snd_pcm_sw_params_set_tstamp_mode);
 
     _PA_LOAD_FUNC(snd_pcm_info);
@@ -570,8 +571,8 @@ static void PaAlsa_CloseLibrary()
                 PaUtil_SetLastHostErrorInfo( paALSA, __pa_unsure_error_id, alsa_snd_strerror( __pa_unsure_error_id ) ); \
             } \
             PaUtil_DebugPrint( "Expression '" #expr "' failed in '" __FILE__ "', line: " STRINGIZE( __LINE__ ) "\n" ); \
-            if( (code) == paUnanticipatedHostError ) \
-                PA_DEBUG(( "Host error description: %s\n", alsa_snd_strerror( __pa_unsure_error_id ) )); \
+            if( (code) == paUnanticipatedHostError ) { \
+	      PA_DEBUG(( "Host error description: %s\n", alsa_snd_strerror( __pa_unsure_error_id ) )); } \
             result = (code); \
             goto error; \
         } \
@@ -834,6 +835,7 @@ static void Terminate( struct PaUtilHostApiRepresentation *hostApi )
 static PaError GropeDevice( snd_pcm_t* pcm, int isPlug, StreamDirection mode, int openBlocking,
         PaAlsaDeviceInfo* devInfo )
 {
+    (void)openBlocking;
     PaError result = paNoError;
     snd_pcm_hw_params_t *hwParams;
     snd_pcm_uframes_t alsaBufferFrames, alsaPeriodFrames;
@@ -1139,8 +1141,9 @@ static int OpenPcm( snd_pcm_t **pcmp, const char *name, snd_pcm_stream_t stream,
     }
     else
     {
-        if( ret < 0 )
+        if( ret < 0 ) {
             PA_DEBUG(( "%s: Opened device '%s' ptr[%p] - result: [%d:%s]\n", __FUNCTION__, name, *pcmp, ret, alsa_snd_strerror(ret) ));
+        }
     }
 
     return ret;
@@ -1419,8 +1422,9 @@ static PaError BuildDeviceList( PaAlsaHostApiRepresentation *alsaApi )
             }
         }
     }
-    else
+    else {
         PA_DEBUG(( "%s: Iterating over ALSA plugins failed: %s\n", __FUNCTION__, alsa_snd_strerror( res ) ));
+    }
 
     /* allocate deviceInfo memory based on the number of devices */
     PA_UNLESS( baseApi->deviceInfos = (PaDeviceInfo**)PaUtil_GroupAllocateMemory(
@@ -1450,7 +1454,7 @@ static PaError BuildDeviceList( PaAlsaHostApiRepresentation *alsaApi )
 
         PA_ENSURE( FillInDevInfo( alsaApi, hwInfo, blocking, devInfo, &devIdx ) );
     }
-    assert( devIdx < numDeviceNames );
+    assert( devIdx < (int)numDeviceNames );
     /* Now inspect 'dmix' and 'default' plugins */
     for( i = 0; i < numDeviceNames; ++i )
     {
@@ -1554,121 +1558,183 @@ static PaSampleFormat GetAvailableFormats( snd_pcm_t *pcm )
 /* Output to console all formats supported by device */
 static void LogAllAvailableFormats( snd_pcm_t *pcm )
 {
-    PaSampleFormat available = 0;
     snd_pcm_hw_params_t *hwParams;
     alsa_snd_pcm_hw_params_alloca( &hwParams );
-
     alsa_snd_pcm_hw_params_any( pcm, hwParams );
 
     PA_DEBUG(( " --- Supported Formats ---\n" ));
 
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S8 ) >= 0)
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S8 ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_S8\n" ));
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U8 ) >= 0)
+    }
+
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U8 ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_U8\n" ));
+    }
 
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S16_LE ) >= 0)
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S16_LE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_S16_LE\n" ));
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S16_BE ) >= 0)
+    }
+
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S16_BE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_S16_BE\n" ));
+    }
 
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U16_LE ) >= 0)
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U16_LE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_U16_LE\n" ));
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U16_BE ) >= 0)
+    }
+
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U16_BE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_U16_BE\n" ));
+    }
 
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S24_LE ) >= 0)
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S24_LE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_S24_LE\n" ));
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S24_BE ) >= 0)
+    }
+
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S24_BE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_S24_BE\n" ));
+    }
 
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U24_LE ) >= 0)
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U24_LE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_U24_LE\n" ));
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U24_BE ) >= 0)
+    }
+
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U24_BE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_U24_BE\n" ));
+    }
 
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_FLOAT_LE ) >= 0)
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_FLOAT_LE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_FLOAT_LE\n" ));
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_FLOAT_BE ) >= 0)
+    }
+
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_FLOAT_BE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_FLOAT_BE\n" ));
+    }
 
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_FLOAT64_LE ) >= 0)
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_FLOAT64_LE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_FLOAT64_LE\n" ));
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_FLOAT64_BE ) >= 0)
+    }
+
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_FLOAT64_BE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_FLOAT64_BE\n" ));
+    }
 
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_IEC958_SUBFRAME_LE ) >= 0)
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_IEC958_SUBFRAME_LE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_IEC958_SUBFRAME_LE\n" ));
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_IEC958_SUBFRAME_BE ) >= 0)
+    }
+
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_IEC958_SUBFRAME_BE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_IEC958_SUBFRAME_BE\n" ));
+    }
 
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_MU_LAW ) >= 0)
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_MU_LAW ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_MU_LAW\n" ));
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_A_LAW ) >= 0)
+    }
+
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_A_LAW ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_A_LAW\n" ));
+    }
 
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_IMA_ADPCM ) >= 0)
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_IMA_ADPCM ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_IMA_ADPCM\n" ));
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_MPEG ) >= 0)
+    }
+
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_MPEG ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_MPEG\n" ));
+    }
 
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_GSM ) >= 0)
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_GSM ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_GSM\n" ));
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_SPECIAL ) >= 0)
+    }
+
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_SPECIAL ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_SPECIAL\n" ));
+    }
 
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S24_3LE ) >= 0)
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S24_3LE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_S24_3LE\n" ));
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S24_3BE ) >= 0)
+    }
+
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S24_3BE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_S24_3BE\n" ));
+    }
 
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U24_3LE ) >= 0)
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U24_3LE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_U24_3LE\n" ));
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U24_3BE ) >= 0)
+    }
+
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U24_3BE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_U24_3BE\n" ));
+    }
 
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S20_3LE ) >= 0)
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S20_3LE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_S20_3LE\n" ));
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S20_3BE ) >= 0)
+    }
+
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S20_3BE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_S20_3BE\n" ));
+    }
 
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U20_3LE ) >= 0)
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U20_3LE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_U20_3LE\n" ));
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U20_3BE ) >= 0)
+    }
+
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U20_3BE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_U20_3BE\n" ));
+    }
 
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S18_3LE ) >= 0)
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S18_3LE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_S18_3LE\n" ));
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S18_3BE ) >= 0)
+    }
+
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S18_3BE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_S18_3BE\n" ));
+    }
 
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U18_3LE ) >= 0)
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U18_3LE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_U18_3LE\n" ));
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U18_3BE ) >= 0)
+    }
+
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U18_3BE ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_U18_3BE\n" ));
+    }
 
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S16 ) >= 0)
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S16 ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_S16\n" ));
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U16 ) >= 0)
+    }
+
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U16 ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_U16\n" ));
+    }
 
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S24 ) >= 0)
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S24 ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_S24\n" ));
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U24 ) >= 0)
+    }
+
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U24 ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_U24\n" ));
+    }
 
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S32 ) >= 0)
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_S32 ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_S32\n" ));
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U32 ) >= 0)
+    }
+
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_U32 ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_U32\n" ));
+    }
 
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_FLOAT ) >= 0)
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_FLOAT ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_FLOAT\n" ));
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_FLOAT64 ) >= 0)
-        PA_DEBUG(( "SND_PCM_FORMAT_FLOAT64\n" ));
+    }
 
-    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_IEC958_SUBFRAME ) >= 0)
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_FLOAT64 ) >= 0) {
+        PA_DEBUG(( "SND_PCM_FORMAT_FLOAT64\n" ));
+    }
+
+    if( alsa_snd_pcm_hw_params_test_format( pcm, hwParams, SND_PCM_FORMAT_IEC958_SUBFRAME ) >= 0) {
         PA_DEBUG(( "SND_PCM_FORMAT_IEC958_SUBFRAME\n" ));
+    }
 
     PA_DEBUG(( " -------------------------\n" ));
 }
@@ -1829,23 +1895,18 @@ static PaError IsFormatSupported( struct PaUtilHostApiRepresentation *hostApi,
                                   double sampleRate )
 {
     int inputChannelCount = 0, outputChannelCount = 0;
-    PaSampleFormat inputSampleFormat, outputSampleFormat;
     PaError result = paFormatIsSupported;
 
     if( inputParameters )
     {
         PA_ENSURE( ValidateParameters( inputParameters, hostApi, StreamDirection_In ) );
-
         inputChannelCount = inputParameters->channelCount;
-        inputSampleFormat = inputParameters->sampleFormat;
     }
 
     if( outputParameters )
     {
         PA_ENSURE( ValidateParameters( outputParameters, hostApi, StreamDirection_Out ) );
-
         outputChannelCount = outputParameters->channelCount;
-        outputSampleFormat = outputParameters->sampleFormat;
     }
 
     if( inputChannelCount )
@@ -1923,7 +1984,7 @@ static PaError PaAlsaStreamComponent_Initialize( PaAlsaStreamComponent *self, Pa
 error:
 
     /* Log all available formats. */
-    if ( hostSampleFormat == paSampleFormatNotSupported )
+    if ( hostSampleFormat == (unsigned long)paSampleFormatNotSupported )
     {
         LogAllAvailableFormats( self->pcm );
         PA_DEBUG(( "%s: Please provide the log output to PortAudio developers, your hardware does not have any sample format implemented yet.\n", __FUNCTION__ ));
@@ -1959,7 +2020,8 @@ static PaError PaAlsaStreamComponent_InitialConfigure( PaAlsaStreamComponent *se
      * the way the device is initialized, software parameters
      * affect the way ALSA interacts with me, the user-level client.
      */
-
+    (void)params;
+    (void)primeBuffers;
     PaError result = paNoError;
     snd_pcm_access_t accessMode, alternateAccessMode;
     int dir = 0;
@@ -2119,7 +2181,7 @@ static PaError PaAlsaStreamComponent_FinishConfigure( PaAlsaStreamComponent *sel
     }
 
     ENSURE_( alsa_snd_pcm_sw_params_set_avail_min( self->pcm, swParams, self->framesPerPeriod ), paUnanticipatedHostError );
-    ENSURE_( alsa_snd_pcm_sw_params_set_xfer_align( self->pcm, swParams, 1 ), paUnanticipatedHostError );
+    //ENSURE_( alsa_snd_pcm_sw_params_set_xfer_align( self->pcm, swParams, 1 ), paUnanticipatedHostError );
     ENSURE_( alsa_snd_pcm_sw_params_set_tstamp_mode( self->pcm, swParams, SND_PCM_TSTAMP_ENABLE ), paUnanticipatedHostError );
 
     /* Set the parameters! */
@@ -2746,8 +2808,9 @@ static PaError PaAlsaStream_Configure( PaAlsaStream *self, const PaStreamParamet
         int err = alsa_snd_pcm_link( self->capture.pcm, self->playback.pcm );
         if( err == 0 )
             self->pcmsSynced = 1;
-        else
+        else {
             PA_DEBUG(( "%s: Unable to sync pcms: %s\n", __FUNCTION__, alsa_snd_strerror( err ) ));
+	}
     }
 
     {
@@ -3322,18 +3385,16 @@ static PaError ContinuePoll( const PaAlsaStream *stream, StreamDirection streamD
     PaError result = paNoError;
     snd_pcm_sframes_t delay, margin;
     int err;
-    const PaAlsaStreamComponent *component = NULL, *otherComponent = NULL;
+    const PaAlsaStreamComponent *otherComponent = NULL;
 
     *continuePoll = 1;
 
     if( StreamDirection_In == streamDir )
     {
-        component = &stream->capture;
         otherComponent = &stream->playback;
     }
     else
     {
-        component = &stream->playback;
         otherComponent = &stream->capture;
     }
 
@@ -3362,7 +3423,7 @@ static PaError ContinuePoll( const PaAlsaStream *stream, StreamDirection streamD
         PA_DEBUG(( "%s: Stopping poll for %s\n", __FUNCTION__, StreamDirection_In == streamDir ? "capture" : "playback" ));
         *continuePoll = 0;
     }
-    else if( margin < otherComponent->framesPerPeriod )
+    else if( margin < (snd_pcm_sframes_t)otherComponent->framesPerPeriod )
     {
         *pollTimeout = CalculatePollTimeout( stream, margin );
         PA_DEBUG(( "%s: Trying to poll again for %s frames, pollTimeout: %d\n",
@@ -3435,8 +3496,9 @@ static void CalculateTimeInfo( PaAlsaStream *stream, PaStreamCallbackTimeInfo *t
         {
             /* Hmm, we have both a playback and a capture timestamp.
              * Hopefully they are the same... */
-            if( fabs( capture_time - playback_time ) > 0.01 )
+	  if( fabs( capture_time - playback_time ) > 0.01 ) {
                 PA_DEBUG(( "Capture time and playback time differ by %f\n", fabs( capture_time-playback_time ) ));
+	  }
         }
         else
             timeInfo->currentTime = playback_time;
@@ -3515,6 +3577,7 @@ static unsigned char *ExtractAddress( const snd_pcm_channel_area_t *area, snd_pc
  */
 static PaError PaAlsaStreamComponent_DoChannelAdaption( PaAlsaStreamComponent *self, PaUtilBufferProcessor *bp, int numFrames )
 {
+    (void)bp;
     PaError result = paNoError;
     unsigned char *p;
     int i;
@@ -3633,7 +3696,7 @@ static PaError PaAlsaStreamComponent_BeginPolling( PaAlsaStreamComponent* self, 
     PaError result = paNoError;
     int ret = alsa_snd_pcm_poll_descriptors( self->pcm, pfds, self->nfds );
     (void)ret;  /* Prevent unused variable warning if asserts are turned off */
-    assert( ret == self->nfds );
+    assert( ret == (int)self->nfds );
 
     self->ready = 0;
 
@@ -4172,7 +4235,6 @@ static void *CallbackThreadFunc( void *userData )
     snd_pcm_sframes_t startThreshold = 0;
     int callbackResult = paContinue;
     PaStreamCallbackFlags cbFlags = 0;  /* We might want to keep state across iterations */
-    int streamStarted = 0;
 
     assert( stream );
 
@@ -4198,7 +4260,7 @@ static void *CallbackThreadFunc( void *userData )
          * at least one period */
         avail = alsa_snd_pcm_avail_update( stream->playback.pcm );
         startThreshold = avail - (avail % stream->playback.framesPerPeriod);
-        assert( startThreshold >= stream->playback.framesPerPeriod );
+        assert( startThreshold >= (snd_pcm_sframes_t)stream->playback.framesPerPeriod );
     }
     else
     {
@@ -4206,8 +4268,6 @@ static void *CallbackThreadFunc( void *userData )
         /* Buffer will be zeroed */
         PA_ENSURE( AlsaStart( stream, 0 ) );
         PA_ENSURE( PaUnixThread_NotifyParent( &stream->thread ) );
-
-        streamStarted = 1;
     }
 
     while( 1 )
@@ -4561,6 +4621,7 @@ void PaAlsa_EnableWatchdog( PaStream *s, int enable )
 static PaError GetAlsaStreamPointer( PaStream* s, PaAlsaStream** stream )
 {
     PaError result = paNoError;
+    (void)result; // just to not have warnings
     PaUtilHostApiRepresentation* hostApi;
     PaAlsaHostApiRepresentation* alsaHostApi;
 

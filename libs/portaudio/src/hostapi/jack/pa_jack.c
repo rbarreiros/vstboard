@@ -280,6 +280,8 @@ BlockingCallback( const void                      *inputBuffer,
 		  PaStreamCallbackFlags            statusFlags,
 		  void                             *userData )
 {
+    (void)timeInfo;
+    (void)statusFlags;
     struct PaJackStream *stream = (PaJackStream *)userData;
     long numBytes = stream->bytesPerFrame * framesPerBuffer;
 
@@ -520,7 +522,7 @@ static PaError BuildDeviceList( PaJackHostApiRepresentation *jackApi )
         tmp_client_name[match_info.rm_eo - match_info.rm_so] = '\0';
 
         /* do we know about this port's client yet? */
-        for( i = 0; i < numClients; i++ )
+        for( i = 0; i < (int)numClients; i++ )
         {
             if( strcmp( tmp_client_name, client_names[i] ) == 0 )
                 client_seen = TRUE;
@@ -562,7 +564,7 @@ static PaError BuildDeviceList( PaJackHostApiRepresentation *jackApi )
     assert( commonApi->info.deviceCount == 0 );
 
     /* Create a PaDeviceInfo structure for every client */
-    for( client_index = 0; client_index < numClients; client_index++ )
+    for( client_index = 0; client_index < (int)numClients; client_index++ )
     {
         PaDeviceInfo *curDevInfo;
         const char **clientPorts = NULL;
@@ -594,8 +596,11 @@ static PaError BuildDeviceList( PaJackHostApiRepresentation *jackApi )
         if( clientPorts )
         {
             jack_port_t *p = jack_port_by_name( jackApi->jack_client, clientPorts[0] );
-            curDevInfo->defaultLowInputLatency = curDevInfo->defaultHighInputLatency =
-                jack_port_get_latency( p ) / globalSampleRate;
+	    jack_latency_range_t range;
+	    jack_port_get_latency_range(p, JackPlaybackLatency, &range);
+	    curDevInfo->defaultLowInputLatency = curDevInfo->defaultHighInputLatency =
+                range.max / globalSampleRate;
+	    
 
             for( i = 0; clientPorts[i] != NULL; i++)
             {
@@ -615,8 +620,10 @@ static PaError BuildDeviceList( PaJackHostApiRepresentation *jackApi )
         if( clientPorts )
         {
             jack_port_t *p = jack_port_by_name( jackApi->jack_client, clientPorts[0] );
+	    jack_latency_range_t range;
+	    jack_port_get_latency_range(p, JackPlaybackLatency, &range);
             curDevInfo->defaultLowOutputLatency = curDevInfo->defaultHighOutputLatency =
-                jack_port_get_latency( p ) / globalSampleRate;
+	       range.max / globalSampleRate;
 
             for( i = 0; clientPorts[i] != NULL; i++)
             {
@@ -842,12 +849,10 @@ static PaError IsFormatSupported( struct PaUtilHostApiRepresentation *hostApi,
                                   double sampleRate )
 {
     int inputChannelCount = 0, outputChannelCount = 0;
-    PaSampleFormat inputSampleFormat, outputSampleFormat;
 
     if( inputParameters )
     {
         inputChannelCount = inputParameters->channelCount;
-        inputSampleFormat = inputParameters->sampleFormat;
 
         /* unless alternate device specification is supported, reject the use of
             paUseHostApiSpecificDeviceSpecification */
@@ -871,7 +876,6 @@ static PaError IsFormatSupported( struct PaUtilHostApiRepresentation *hostApi,
     if( outputParameters )
     {
         outputChannelCount = outputParameters->channelCount;
-        outputSampleFormat = outputParameters->sampleFormat;
 
         /* unless alternate device specification is supported, reject the use of
             paUseHostApiSpecificDeviceSpecification */
@@ -1298,13 +1302,22 @@ static PaError OpenStream( struct PaUtilHostApiRepresentation *hostApi,
     bpInitialized = 1;
 
     if( stream->num_incoming_connections > 0 )
-        stream->streamRepresentation.streamInfo.inputLatency = (jack_port_get_latency( stream->remote_output_ports[0] )
+    {
+        jack_latency_range_t range;
+	jack_port_get_latency_range(stream->remote_output_ports[0], JackPlaybackLatency, &range);
+        stream->streamRepresentation.streamInfo.inputLatency = (range.max
                 - jack_get_buffer_size( jackHostApi->jack_client )  /* One buffer is not counted as latency */
             + PaUtil_GetBufferProcessorInputLatencyFrames( &stream->bufferProcessor )) / sampleRate;
+    }
+    
     if( stream->num_outgoing_connections > 0 )
-        stream->streamRepresentation.streamInfo.outputLatency = (jack_port_get_latency( stream->remote_input_ports[0] )
+    {
+        jack_latency_range_t range;
+	jack_port_get_latency_range(stream->remote_output_ports[0], JackPlaybackLatency, &range);
+        stream->streamRepresentation.streamInfo.outputLatency = (range.max
                 - jack_get_buffer_size( jackHostApi->jack_client )  /* One buffer is not counted as latency */
             + PaUtil_GetBufferProcessorOutputLatencyFrames( &stream->bufferProcessor )) / sampleRate;
+    }
 
     stream->streamRepresentation.streamInfo.sampleRate = jackSr;
     stream->t0 = jack_frame_time( jackHostApi->jack_client );   /* A: Time should run from Pa_OpenStream */
@@ -1364,11 +1377,17 @@ static PaError RealProcess( PaJackStream *stream, jack_nframes_t frames )
 
     timeInfo.currentTime = (jack_frame_time( stream->jack_client ) - stream->t0) / sr;
     if( stream->num_incoming_connections > 0 )
-        timeInfo.inputBufferAdcTime = timeInfo.currentTime - jack_port_get_latency( stream->remote_output_ports[0] )
-            / sr;
+    {
+        jack_latency_range_t range;
+	jack_port_get_latency_range(stream->remote_output_ports[0], JackPlaybackLatency, &range);
+        timeInfo.inputBufferAdcTime = timeInfo.currentTime - range.max / sr;
+    }
     if( stream->num_outgoing_connections > 0 )
-        timeInfo.outputBufferDacTime = timeInfo.currentTime + jack_port_get_latency( stream->remote_input_ports[0] )
-            / sr;
+    {
+        jack_latency_range_t range;
+	jack_port_get_latency_range(stream->remote_output_ports[0], JackPlaybackLatency, &range);
+        timeInfo.outputBufferDacTime = timeInfo.currentTime + range.max / sr;
+    }
 
     PaUtil_BeginCpuLoadMeasurement( &stream->cpuLoadMeasurer );
 
@@ -1411,7 +1430,7 @@ static PaError RealProcess( PaJackStream *stream, jack_nframes_t frames )
     framesProcessed = PaUtil_EndBufferProcessing( &stream->bufferProcessor,
             &stream->callbackResult );
     /* We've specified a host buffer size mode where every frame should be consumed by the buffer processor */
-    assert( framesProcessed == frames );
+    assert( framesProcessed == (int)frames );
 
     PaUtil_EndCpuLoadMeasurement( &stream->cpuLoadMeasurer, framesProcessed );
 
@@ -1508,6 +1527,7 @@ static int JackCallback( jack_nframes_t frames, void *userData )
 
     assert( hostApi );
 
+    (void)result; // just to remove the not used warning
     ENSURE_PA( UpdateQueue( hostApi ) );
 
     /* Process each stream */
@@ -1747,7 +1767,7 @@ static double GetStreamCpuLoad( PaStream* s )
 
 PaError PaJack_SetClientName( const char* name )
 {
-    if( strlen( name ) > jack_client_name_size() )
+  if( (int)strlen( name ) > jack_client_name_size() )
     {
         /* OK, I don't know any better error code */
         return paInvalidFlag;

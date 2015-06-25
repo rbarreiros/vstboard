@@ -171,12 +171,14 @@ PaTime PaUtil_GetTime( void )
 
 PaError PaUtil_InitializeThreading( PaUtilThreading *threading )
 {
+    (void)threading;
     (void) paUtilErr_;
     return paNoError;
 }
 
 void PaUtil_TerminateThreading( PaUtilThreading *threading )
 {
+    (void)threading;
 }
 
 PaError PaUtil_StartThreading( PaUtilThreading *threading, void *(*threadRoutine)(void *), void *data )
