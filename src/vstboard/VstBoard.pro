@@ -134,3 +134,11 @@ unix: LIBS += -L$$OUT_PWD/../rtaudio -lrtaudio
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../rtaudio/release -lrtaudio
 win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../rtaudio/debug -lrtaudio
 
+# RtMidi
+
+INCLUDEPATH += $$PWD/../rtmidi
+DEPENDPATH  += $$PWD/../rtmidi
+
+unix: LIBS += -L$$OUT_PWD/../rtmidi -lrtmidi
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../rtmidi/release -lrtmidi
+win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../rtmidi/debug -lrtmidi
