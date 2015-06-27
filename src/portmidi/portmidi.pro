@@ -1,5 +1,5 @@
-#    Copyright 2010 Raphaël François
-#    Contact : ctrlbrk76@gmail.com
+#    Copyright 2015 Rui Barreiros
+#    Contact : rbarreiros@gmail.com
 #
 #    This file is part of VstBoard.
 #
@@ -18,30 +18,48 @@
 
 include(../config.pri)
 
-CONFIG -= qt
 QT -= core gui
+
+TARGET = portmidi
 TEMPLATE = lib
 CONFIG += staticlib
-
-QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter
-QMAKE_CFLAGS += -Wno-unused-variable -Wno-unused-parameter
-
-DEFINES -= UNICODE
 
 INCLUDEPATH += $$PORTMIDI_PATH/porttime
 INCLUDEPATH += $$PORTMIDI_PATH/pm_common
 
+DEFINES -= UNICODE
+
+# Common sources
+
 SOURCES += $$PORTMIDI_PATH/pm_common/portmidi.c \
-    $$PORTMIDI_PATH/pm_common/pmutil.c
-
-win32:SOURCES += $$PORTMIDI_PATH/pm_win/pmwinmm.c \
-    $$PORTMIDI_PATH/pm_win/pmwin.c \
-    $$PORTMIDI_PATH/porttime/ptwinmm.c
+	   $$PORTMIDI_PATH/pm_common/pmutil.c \
+	   $$PORTMIDI_PATH/porttime/porttime.c
 
 
-unix:SOURCES += $$PORTMIDI_PATH/pm_linux/pmlinux.c \
-    $$PORTMIDI_PATH/pm_linux/finddefault.c \
-    #$$PORTMIDI_PATH/pm_linux/pmlinuxalsa.c \
-    $$PORTMIDI_PATH/porttime/ptlinux.c
+HEADERS += $$PORTMIDI_PATH/pm_common/pm_util.h \
+	   $$PORTMIDI_PATH/pm_common/pminternal.h \
+	   $$PORTMIDI_PATH/pm_common/portmidi.h \
+	   $$PORTMIDI_PATH/porttime/porttime.h
+
+win32 {
+	INCLUDEPATH += $$PORTMIDI_PATH/pm_win
+	LIBS += -lwinmm
+	SOURCES += $$PORTMIDI_PATH/pm_win/pmwinmm.c \
+                   $$PORTMIDI_PATH/pm_win/pmwin.c \
+                   $$PORTMIDI_PATH/porttime/ptwinmm.c
+	HEADERS += $$PORTMIDI_PATH/pm_win/pmwinmm.h
+}
+
+unix {
+	DEFINES += PMALSA
+	INCLUDEPATH += $$PORTMIDI_PATH/pm_linux
+	LIBS += -lasound
+	SOURCES += $$PORTMIDI_PATH/pm_linux/finddefault.c \
+		   $$PORTMIDI_PATH/pm_linux/pmlinux.c \
+                   $$PORTMIDI_PATH/pm_linux/pmlinuxalsa.c \
+                   $$PORTMIDI_PATH/porttime/ptlinux.c
+	HEADERS += $$PORTMIDI_PATH/pm_linux/pmlinux.h \
+		   $$PORTMIDI_PATH/pm_linux/pmlinuxalsa.h
+}
 
 

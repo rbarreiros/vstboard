@@ -1,5 +1,5 @@
-#    Copyright 2010 Raphaël François
-#    Contact : ctrlbrk76@gmail.com
+#    Copyright 2015 Rui Barreiros
+#    Contact : rbarreiros@gmail.com
 #
 #    This file is part of VstBoard.
 #
@@ -18,109 +18,125 @@
 
 include(../config.pri)
 
-CONFIG -= qt
 QT -= core gui
+
+TARGET = portaudio
 TEMPLATE = lib
 CONFIG += staticlib
 
+INCLUDEPATH += $$PORTAUDIO_PATH/include \
+	       $$PORTAUDIO_PATH/src/common
+
 DEFINES -= UNICODE
 
-INCLUDEPATH += $$PORTAUDIO_PATH/include
+# Shutup warnings about unused api functions
+QMAKE_CFLAGS += -Wno-unused-function
 
-linux-g++ {
-    DEFINES += KSAUDIO_SPEAKER_DIRECTOUT=0
-    DEFINES += METHOD_NEITHER=3
-    DEFINES += FILE_ANY_ACCESS=0
+# Common Source
 
-    INCLUDEPATH += $$PORTAUDIO_PATH/src/os/unix
+SOURCES += $$PORTAUDIO_PATH/src/common/pa_stream.c \
+           $$PORTAUDIO_PATH/src/common/pa_trace.c \
+           $$PORTAUDIO_PATH/src/hostapi/skeleton/pa_hostapi_skeleton.c \
+           $$PORTAUDIO_PATH/src/common/pa_ringbuffer.c \
+           $$PORTAUDIO_PATH/src/common/pa_process.c \
+           $$PORTAUDIO_PATH/src/common/pa_front.c \
+           $$PORTAUDIO_PATH/src/common/pa_dither.c \
+           $$PORTAUDIO_PATH/src/common/pa_debugprint.c \
+           $$PORTAUDIO_PATH/src/common/pa_cpuload.c \
+           $$PORTAUDIO_PATH/src/common/pa_converters.c \
+           $$PORTAUDIO_PATH/src/common/pa_allocation.c
 
-    SOURCES += $$PORTAUDIO_PATH/src/hostapi/alsa/pa_linux_alsa.c
-    SOURCES += $$PORTAUDIO_PATH/src/hostapi/jack/pa_jack.c
-    #SOURCES += $$PORTAUDIO_PATH/src/hostapi/oss/pa_unix_oss.c
-    SOURCES += $$PORTAUDIO_PATH/src/os/unix/pa_unix_hostapis.c
-    SOURCES += $$PORTAUDIO_PATH/src/os/unix/pa_unix_util.c
+unix {
+     CONFIG += link_pkgconfig
+     PKGCONFIG += jack
+     INCLUDEPATH += $$PORTAUDIO_PATH/src/os/unix
+
+     LIBS += -lasound -lm -lpthread
+
+     DEFINES += PA_USE_ALSA=1
+     DEFINES += PA_USE_JACK=1
+     DEFINES += PA_USE_OSS=0
+     DEFINES += PA_USE_ASIHPI=0
+
+     SOURCES += $$PORTAUDIO_PATH/src/hostapi/alsa/pa_linux_alsa.c \
+     	     	$$PORTAUDIO_PATH/src/hostapi/jack/pa_jack.c \
+		$$PORTAUDIO_PATH/src/common/pa_ringbuffer.c \
+		$$PORTAUDIO_PATH/src/os/unix/pa_unix_hostapis.c \
+		$$PORTAUDIO_PATH/src/os/unix/pa_unix_util.c
+
+     HEADERS += $$PORTAUDIO_PATH/include/pa_linux_alsa.h \
+     	     	$$PORTAUDIO_PATH/include/pa_jack.h
 }
 
 win32 {
 
-    LIBS += -lwinmm
-    LIBS += -luser32
-    LIBS += -ladvapi32
-    LIBS += -lole32
-    LIBS += -lsetupapi
-    LIBS += -ldsound
+    LIBS += -lwinmm -lm -lole32 -luuid -luser32 -ladvapi32 -lsetupapi -lmthreads
 
-    INCLUDEPATH += $$PORTAUDIO_PATH/src/os/win
-    INCLUDEPATH += $$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/common
-    INCLUDEPATH += $$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host
-    INCLUDEPATH += $$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host/pc
+    DEFINES += PA_USE_WDMKS=0
+    DEFINES += PA_USE_WASAPI=0
+    DEFINES += PA_USE_ASIO=1
+    DEFINES += PA_USE_WMME=1
+    DEFINES += WINDOWS
+
+    INCLUDEPATH += $$PORTAUDIO_PATH/src \
+    		   $$PORTAUDIO_PATH/src/common \
+    		   $$PORTAUDIO_PATH/src/os/win \
+        	   $$PORTAUDIO_PATH/src/hostapi/asio \
+    		   $$PORTAUDIO_PATH/src/hostapi/asio/common \
+		   $$PORTAUDIO_PATH/src/hostapi/asio/host \
+		   $$PORTAUDIO_PATH/src/hostapi/asio/host/pc
+
+    SOURCES += $$PORTAUDIO_PATH/src/hostapi/asio/pa_asio.c \
+    	       $$PORTAUDIO_PATH/src/common/pa_ringbuffer.c \
+	       $$PORTAUDIO_PATH/src/os/win/pa_win_hostapis.c \
+	       $$PORTAUDIO_PATH/src/os/win/pa_win_util.c \
+	       $$PORTAUDIO_PATH/src/os/win/pa_win_coinitialize.c \
+	       $$PORTAUDIO_PATH/src/hostapi/asio/iasiothiscallresolver.c \
+	       $$PORTAUDIO_PATH/src/hostapi/asio/common/asio.cpp \
+	       $$PORTAUDIO_PATH/src/hostapi/asio/host/asiodrivers.cpp \
+	       $$PORTAUDIO_PATH/src/hostapi/asio/host/pc/asiolist.cpp \
+	       $$PORTAUDIO_PATH/src/hostapi/asio/host/ASIOConvertSamples.cpp \
+    	       $$PORTAUDIO_PATH/src/hostapi/wmme/pa_win_wmme.c \
+	       $$PORTAUDIO_PATH/src/os/win/pa_win_hostapis.c \
+	       $$PORTAUDIO_PATH/src/os/win/pa_win_util.c \
+	       $$PORTAUDIO_PATH/src/os/win/pa_win_waveformat.c
 
     HEADERS += $$PORTAUDIO_PATH/include/pa_win_wmme.h \
-    $$PORTAUDIO_PATH/include/pa_win_waveformat.h \
-    $$PORTAUDIO_PATH/include/pa_win_wasapi.h \
-    $$PORTAUDIO_PATH/include/pa_asio.h
-
-    #SOURCES += $$PORTAUDIO_PATH/src/hostapi/wasapi/pa_win_wasapi.c \
-    SOURCES += $$PORTAUDIO_PATH/src/hostapi/wmme/pa_win_wmme.c \
-    $$PORTAUDIO_PATH/src/os/win/pa_win_waveformat.c \
-    $$PORTAUDIO_PATH/src/os/win/pa_win_util.c \
-    $$PORTAUDIO_PATH/src/os/win/pa_win_hostapis.c \
-    $$PORTAUDIO_PATH/src/os/win/pa_win_coinitialize.c \
-    $$PORTAUDIO_PATH/src/hostapi/asio/pa_asio.cpp \
-    $$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/common/asio.cpp \
-    $$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host/ASIOConvertSamples.cpp \
-    $$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host/asiodrivers.cpp \
-    $$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host/pc/asiolist.cpp
+    	       $$PORTAUDIO_PATH/include/pa_win_waveformat.h \
+    	       $$PORTAUDIO_PATH/include/pa_win_wasapi.h \
+    	       $$PORTAUDIO_PATH/include/pa_asio.h \
+	       $$PORTAUDIO_PATH/include/portaudio.h
 
     win32-g++ {
-        DEFINES += KSAUDIO_SPEAKER_DIRECTOUT=0
-        DEFINES += METHOD_NEITHER=3
-        DEFINES += FILE_ANY_ACCESS=0
+    	DEFINES += PA_USE_DS=0
 
-        DEFINES += PA_USE_WDMKS=0
-        DEFINES += PA_USE_DS=0
-        DEFINES += PA_USE_WASAPI=0
-        DEFINES += PA_USE_ASIO=1
-        DEFINES += PA_USE_WMME=1
+	# ?!?? Needed rly ???
+        #DEFINES += KSAUDIO_SPEAKER_DIRECTOUT=0
+        #DEFINES += METHOD_NEITHER=3
+        #DEFINES += FILE_ANY_ACCESS=0
 
-        #INCLUDEPATH += $$PORTAUDIO_PATH/src/hostapi/wasapi/mingw-include
+	QMAKE_CFLAGS += -ffast-math -fomit-frame-pointer	
 
         SOURCES += $$PORTAUDIO_PATH/src/hostapi/asio/iasiothiscallresolver.cpp
-
     }
 
     win32-msvc* {
+    	DEFINES += PA_USE_DS=1
         DEFINES += PAWIN_USE_DIRECTSOUNDFULLDUPLEXCREATE
 
-        INCLUDEPATH += $$PORTAUDIO_PATH/src/os/win
-        HEADERS += $$PORTAUDIO_PATH/src/os/win/pa_win_wdmks_utils.h \
-                $$PORTAUDIO_PATH/src/os/win/pa_x86_plain_converters.h \
-                $$PORTAUDIO_PATH/include/pa_win_ds.h
-        SOURCES += $$PORTAUDIO_PATH/src/hostapi/wdmks/pa_win_wdmks.c \
-                $$PORTAUDIO_PATH/src/os/win/pa_win_wdmks_utils.c \
-                $$PORTAUDIO_PATH/src/os/win/pa_x86_plain_converters.c \
-                $$PORTAUDIO_PATH/src/hostapi/dsound/pa_win_ds.c \
-                $$PORTAUDIO_PATH/src/hostapi/dsound/pa_win_ds_dynlink.c
+	LIBS += -ldsound
+
+	SOURCES += $$PORTAUDIO_PATH/src/hostapi/dsound/pa_win_ds.c \
+		   $$PORTAUDIO_PATH/src/hostapi/dsound/pa_win_ds_dynlink.c \
+		   $$PORTAUDIO_PATH/src/os/win/pa_win_hostapis.c \
+		   $$PORTAUDIO_PATH/src/os/win/pa_win_util.c \
+		   $$PORTAUDIO_PATH/src/os/win/pa_win_coinitialize.c \
+		   $$PORTAUDIO_PATH/src/os/win/pa_win_waveformat.c \
+		   $$PORTAUDIO_PATH/src/os/win/pa_x86_plain_converters.c 
+
+
+        HEADERS += $$PORTAUDIO_PATH/include/pa_win_ds.h
     }
-
-
-
-    INCLUDEPATH += $$PORTAUDIO_PATH/src/common
-    INCLUDEPATH += $$PORTAUDIO_PATH/src/
-
-    HEADERS += $$PORTAUDIO_PATH/include/portaudio.h
-
-    SOURCES += $$PORTAUDIO_PATH/src/common/pa_stream.c \
-        $$PORTAUDIO_PATH/src/common/pa_trace.c \
-        $$PORTAUDIO_PATH/src/common/pa_skeleton.c \
-        $$PORTAUDIO_PATH/src/common/pa_ringbuffer.c \
-        $$PORTAUDIO_PATH/src/common/pa_process.c \
-        $$PORTAUDIO_PATH/src/common/pa_front.c \
-        $$PORTAUDIO_PATH/src/common/pa_dither.c \
-        $$PORTAUDIO_PATH/src/common/pa_debugprint.c \
-        $$PORTAUDIO_PATH/src/common/pa_cpuload.c \
-        $$PORTAUDIO_PATH/src/common/pa_converters.c \
-        $$PORTAUDIO_PATH/src/common/pa_allocation.c
 }
 
 mac {
@@ -137,4 +153,3 @@ mac {
     $$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host/mac/codefragements.cpp
 }
 
-OTHER_FILES +=
