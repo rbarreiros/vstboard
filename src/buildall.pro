@@ -1,11 +1,13 @@
 TEMPLATE    = subdirs
+
 SUBDIRS     = \
     portmidi \
     portaudio \
     common \
-#    vstdll \
     vstboard
-    dllLoader \
-#    dllLoaderInst
+
+    # vstdll \
+    # dllLoader \
+    # dllLoaderInst
 
 CONFIG += ordered
