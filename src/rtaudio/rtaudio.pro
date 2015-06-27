@@ -18,30 +18,49 @@
 
 include(../config.pri)
 
-CONFIG -= qt
 QT -= core gui
+
+TARGET = rtaudio
 TEMPLATE = lib
 CONFIG += staticlib
 
-QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter
-QMAKE_CFLAGS += -Wno-unused-variable -Wno-unused-parameter
+INCLUDEPATH += $$RTAUDIO_PATH/ \
+               $$RTAUDIO_PATH/include
 
+CONFIG(debug, debug|release): DEFINES += __RTAUDIO_DEBUG__
 DEFINES -= UNICODE
 
-INCLUDEPATH += $$PORTMIDI_PATH/porttime
-INCLUDEPATH += $$PORTMIDI_PATH/pm_common
+# Common sources
 
-SOURCES += $$PORTMIDI_PATH/pm_common/portmidi.c \
-    $$PORTMIDI_PATH/pm_common/pmutil.c
+SOURCES += $$RTAUDIO_PATH/RtAudio.cpp
+HEADERS += $$RTAUDIO_PATH/RtAudio.h
 
-win32:SOURCES += $$PORTMIDI_PATH/pm_win/pmwinmm.c \
-    $$PORTMIDI_PATH/pm_win/pmwin.c \
-    $$PORTMIDI_PATH/porttime/ptwinmm.c
+win32: {
+        # Directsound (Requires DX SDK)
+        DEFINES += __WINDOWS_DS__
+        LIBS += -ldsound
 
+        # Windows WASAPI
+        DEFINES += __WINDOWS_WASAPI__
+        LIBS += -luuid -lksuser
 
-unix:SOURCES += $$PORTMIDI_PATH/pm_linux/pmlinux.c \
-    $$PORTMIDI_PATH/pm_linux/finddefault.c \
-    #$$PORTMIDI_PATH/pm_linux/pmlinuxalsa.c \
-    $$PORTMIDI_PATH/porttime/ptlinux.c
+        # Windows ASIO
+        DEFINES += __WINDOWS_ASIO__
+        SOURCES += $$RTAUDIO_PATH/include/asio.cpp \
+                   $$RTAUDIO_PATH/include/asiodrivers.cpp \
+                   $$RTAUDIO_PATH/include/asiolist.cpp \
+                   $$RTAUDIO_PATH/include/iasiothiscallresolver.cpp
+}
 
+unix: {
+        CONFIG += link_pkgconfig
+        PKGCONFIG += jack
+        DEFINES += __LINUX_ALSA__
+        DEFINES += __UNIX_JACK__
+        LIBS += -lasound -lm -lpthread
+}
 
+macx: {
+        DEFINES += __MACOSX_CORE__
+        LIBS += -framework CoreAudio
+}

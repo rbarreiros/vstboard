@@ -2,6 +2,7 @@ DEFINES += APP_NAME=\\\"VstBoard\\\"
 
 PORTAUDIO_PATH 	= ../../libs/portaudio
 PORTMIDI_PATH 	= ../../libs/portmidi
+RTAUDIO_PATH    = ../../libs/rtaudio
 
 win32|macx {
     VSTSDK_PATH	= ../../libs/vstsdk2.4

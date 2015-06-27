@@ -11,6 +11,7 @@ src/common/_version.h
 Makefile*
 *.Debug
 *.Release
+ui_*.h
 src/common/debug/*
 src/common/release/*
 src/dllLoader/debug/*

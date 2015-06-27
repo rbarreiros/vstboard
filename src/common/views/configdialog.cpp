@@ -293,22 +293,22 @@ const QString ConfigDialog::defaultBankPath(MainHost *myHost)
     return QDir::homePath();
 }
 
-const float ConfigDialog::defaultSampleRate(MainHost *myHost)
+float ConfigDialog::defaultSampleRate(MainHost *myHost)
 {
     return myHost->GetSetting("sampleRate",44100.0).toFloat();
 }
 
-const int ConfigDialog::defaultBufferSize(MainHost *myHost)
+int ConfigDialog::defaultBufferSize(MainHost *myHost)
 {
     return myHost->GetSetting("bufferSize").toInt();
 }
 
-const bool ConfigDialog::defaultDoublePrecision(MainHost *myHost)
+bool ConfigDialog::defaultDoublePrecision(MainHost *myHost)
 {
     return myHost->GetSetting("doublePrecision",false).toBool();
 }
 
-const int ConfigDialog::defaultNumberOfThreads(MainHost *myHost)
+int ConfigDialog::defaultNumberOfThreads(MainHost *myHost)
 {
     int th = myHost->GetSetting("NbThreads",0).toInt();
     if(th>0 && th<=32)

@@ -123,3 +123,14 @@ win32 {
     LIBS += -lsetupapi
     #LIBS += -ldsound
 }
+
+# New Stuff
+
+# RtAudio
+INCLUDEPATH += $$PWD/../rtaudio
+DEPENDPATH  += $$PWD/../rtaudio
+
+unix: LIBS += -L$$OUT_PWD/../rtaudio -lrtaudio
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../rtaudio/release -lrtaudio
+win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../rtaudio/debug -lrtaudio
+

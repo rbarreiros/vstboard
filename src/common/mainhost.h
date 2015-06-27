@@ -61,8 +61,8 @@ public:
     
 #ifdef VSTSDK // Windows or Linux or Mac 
     void SetTimeInfo(const VstTimeInfo *info);
-#elseifdef LV2 // Linux only ?? 
-#else // Add AU also ?
+//#elseif LV2 // Linux only ??
+//#else // Add AU also ?
 #endif
     
     QStandardItemModel *GetRendererModel() { return renderer->GetModel(); }

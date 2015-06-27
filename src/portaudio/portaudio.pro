@@ -86,12 +86,12 @@ win32 {
 		   $$PORTAUDIO_PATH/src/hostapi/asio/host \
 		   $$PORTAUDIO_PATH/src/hostapi/asio/host/pc
 
-    SOURCES += $$PORTAUDIO_PATH/src/hostapi/asio/pa_asio.c \
+    SOURCES += $$PORTAUDIO_PATH/src/hostapi/asio/pa_asio.cpp \
     	       $$PORTAUDIO_PATH/src/common/pa_ringbuffer.c \
 	       $$PORTAUDIO_PATH/src/os/win/pa_win_hostapis.c \
 	       $$PORTAUDIO_PATH/src/os/win/pa_win_util.c \
 	       $$PORTAUDIO_PATH/src/os/win/pa_win_coinitialize.c \
-	       $$PORTAUDIO_PATH/src/hostapi/asio/iasiothiscallresolver.c \
+               $$PORTAUDIO_PATH/src/hostapi/asio/iasiothiscallresolver.cpp \
 	       $$PORTAUDIO_PATH/src/hostapi/asio/common/asio.cpp \
 	       $$PORTAUDIO_PATH/src/hostapi/asio/host/asiodrivers.cpp \
 	       $$PORTAUDIO_PATH/src/hostapi/asio/host/pc/asiolist.cpp \
