@@ -6,43 +6,41 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TEMPLATE = lib
 CONFIG += staticlib
 
-#Disable vst sdk unused warnings
-QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter
+      vstsdk {
+      	     HEADERS += vst/cvsthost.h \
+             	     	connectables/vstplugin.h \
+        		vst/ceffect.h \
+        		vst/const.h \
+			vst/vstbank.h \
+        		vst/vstbankbase.h \
+        		vst/vstprogram.h \
+        		views/vstpluginwindow.h \
+        		views/vstshellselect.h
 
-vstsdk {
-    HEADERS += vst/cvsthost.h \
-        connectables/vstplugin.h \
-        vst/ceffect.h \
-        vst/const.h \
-        vst/vstbank.h \
-        vst/vstbankbase.h \
-        vst/vstprogram.h \
-        views/vstpluginwindow.h \
-        views/vstshellselect.h
+   	     SOURCES += vst/cvsthost.cpp \
+             	     	connectables/vstplugin.cpp \
+        		vst/ceffect.cpp \
+        		vst/vstbank.cpp \
+        		vst/vstbankbase.cpp \
+        		vst/vstprogram.cpp \
+        		views/vstpluginwindow.cpp \
+        		views/vstshellselect.cpp \
+        		$$VSTSDK_PATH/public.sdk/source/vst2.x/audioeffectx.cpp \
+        		$$VSTSDK_PATH/public.sdk/source/vst2.x/audioeffect.cpp
 
-    SOURCES += vst/cvsthost.cpp \
-        connectables/vstplugin.cpp \
-        vst/ceffect.cpp \
-        vst/vstbank.cpp \
-        vst/vstbankbase.cpp \
-        vst/vstprogram.cpp \
-        views/vstpluginwindow.cpp \
-        views/vstshellselect.cpp \
-        $$VSTSDK_PATH/public.sdk/source/vst2.x/audioeffectx.cpp \
-        $$VSTSDK_PATH/public.sdk/source/vst2.x/audioeffect.cpp
+    	     FORMS += views/vstpluginwindow.ui \
+             	      views/vstshellselect.ui
+        }
 
-    FORMS += views/vstpluginwindow.ui \
-        views/vstshellselect.ui
-}
 
 scriptengine {
     QT += script
 
     SOURCES += connectables/script.cpp \
-        views/scripteditor.cpp \
+               views/scripteditor.cpp \
 
     HEADERS += connectables/script.h \
-        views/scripteditor.h \
+               views/scripteditor.h \
 
     FORMS += views/scripteditor.ui
 }
@@ -240,43 +238,19 @@ HEADERS += \
     sceneview/vstpluginview.h \
     sceneview/objectdropzone.h
     
-FORMS += \
-    mainwindow.ui \
-    views/configdialog.ui \
-    views/filebrowser.ui \
-    views/programlist.ui \
-    views/aboutdialog.ui \
-    views/splash.ui \
-    views/viewconfigdialog.ui \
-    views/keybindingdialog.ui \
-    views/buttonswidget.ui \
-    views/modifierswidget.ui
-
+FORMS += mainwindow.ui \
+      	 views/configdialog.ui \
+    	 views/filebrowser.ui \
+    	 views/programlist.ui \
+    	 views/aboutdialog.ui \
+    	 views/splash.ui \
+    	 views/viewconfigdialog.ui \
+    	 views/keybindingdialog.ui \
+    	 views/buttonswidget.ui \
+    	 views/modifierswidget.ui
 
 PRECOMPILED_HEADER = precomp.h
 
 TRANSLATIONS = ../resources/translations/common_fr.ts
 
-RESOURCES += \
-    ../resources/resources.qrc
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+RESOURCES += ../resources/resources.qrc

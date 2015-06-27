@@ -237,7 +237,9 @@ Pin* Script::CreatePin(const ConnectionInfo &info)
 
             case PinDirection::Output :
                 return new ParameterPinOut(this,info.pinNumber,0,QString("ParamOut%1").arg(info.pinNumber));
-
+	    case PinDirection::ND:
+	    default:
+	        break;
         }
     }
 

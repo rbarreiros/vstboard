@@ -32,15 +32,15 @@
 MainWindow::MainWindow(MainHost * myHost,QWidget *parent) :
     QMainWindow(parent),
     mySceneView(0),
+    viewConfig( new View::ViewConfig(myHost,this)),
     listToolsModel(0),
     listVstPluginsModel(0),
     listVstBanksModel(0),
     ui(new Ui::MainWindow),
     myHost(myHost),
-    viewConfig( new View::ViewConfig(myHost,this)),
-    viewConfigDlg(0),
     actUndo(0),
-    actRedo(0)
+    actRedo(0),
+    viewConfigDlg(0)
 {
     myHost->mainWindow=this;
     connect(myHost,SIGNAL(programParkingModelChanged(QStandardItemModel*)),
@@ -549,6 +549,7 @@ void MainWindow::on_actionRestore_default_layout_triggered()
 
 void MainWindow::on_solverView_clicked(const QModelIndex &index)
 {
+    (void)index;
     myHost->OptimizeRenderer();
 }
 

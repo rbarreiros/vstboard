@@ -19,6 +19,8 @@
 **************************************************************************/
 
 #include "audiobuffer.h"
+#include "precomp.h"
+#include <string.h> // for memset
 
 //#define DEBUGBUFFERS
 
@@ -60,7 +62,12 @@ AudioBuffer::~AudioBuffer()
     debugbuf("delete");
 
     if(pBuffer && !externAlloc)
-        delete[] pBuffer;
+    {
+      if(doublePrecision)
+        delete[] (double*)pBuffer;
+      else
+	delete[] (float*)pBuffer;
+    }
 }
 
 /*!
@@ -83,7 +90,12 @@ bool AudioBuffer::SetSize(long newSize, bool forceRealloc)
         }
 
         if(pBuffer)
-            delete[] pBuffer;
+	{
+	  if(doublePrecision)
+            delete[] (double*)pBuffer;
+	  else
+	    delete[] (float*)pBuffer;
+	}
 
         if(doublePrecision)
             pBuffer = new double[newSize];

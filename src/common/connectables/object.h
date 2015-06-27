@@ -155,14 +155,19 @@ namespace Connectables {
         virtual void Render() {}
 
         /// Called by the midi pins when a midi message is received
-        virtual void MidiMsgFromInput(long msg) {}
+        virtual void MidiMsgFromInput(long msg) {
+	  Q_UNUSED(msg);
+	}
 
         /*!
           Get the name of a parameter pin
           \param pinInfo
           \return the name
           */
-        virtual QString GetParameterName(ConnectionInfo pinInfo) {return "";}
+        virtual QString GetParameterName(ConnectionInfo pinInfo) {
+	  Q_UNUSED(pinInfo);
+	  return "";
+	}
 
         /// the current model index
         QPersistentModelIndex modelIndex;
@@ -274,7 +279,9 @@ namespace Connectables {
         virtual void SetBufferSize(unsigned long size);
 
         /// set the sampling rate
-        virtual void SetSampleRate(float rate=44100.0) {}
+        virtual void SetSampleRate(float rate=44100.0) {
+	  Q_UNUSED(rate);
+	}
 
         virtual void OnParameterChanged(ConnectionInfo pinInfo, float value);
 

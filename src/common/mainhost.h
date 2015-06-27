@@ -58,8 +58,13 @@ public:
 //    bool IsSolverUpdateEnabled();
 
     void GetTempo(int &tempo, int &sign1, int &sign2);
+    
+#ifdef VSTSDK // Windows or Linux or Mac 
     void SetTimeInfo(const VstTimeInfo *info);
-
+#elseifdef LV2 // Linux only ?? 
+#else // Add AU also ?
+#endif
+    
     QStandardItemModel *GetRendererModel() { return renderer->GetModel(); }
 
     void OptimizeRenderer() { if(renderer) renderer->Optimize(); }

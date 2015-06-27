@@ -158,7 +158,7 @@ void Cable::Render(const PinMessage::Enum msgType,void *data)
     }
 
     //buffer is full, send data
-    if(buffer->filledSize >= delay+myHost->GetBufferSize()) {
+    if(buffer->filledSize >= (long)(delay + myHost->GetBufferSize())) {
         buffer->Get( (float*)tmpBuf->GetPointerWillBeFilled(),tmpBuf->GetSize() );
         tmpBuf->ConsumeStack();
         pin->ReceiveMsg(msgType,(void*)tmpBuf);

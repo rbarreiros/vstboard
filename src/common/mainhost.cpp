@@ -35,14 +35,14 @@ quint32 MainHost::currentFileVersion=PROJECT_AND_SETUP_FILE_VERSION;
 
 MainHost::MainHost(QObject *parent, QString settingsGroup) :
     QObject(parent),
-    solver(new PathSolver(this)),
     objFactory(0),
     mainWindow(0),
     solverNeedAnUpdate(false),
     solverUpdateEnabled(true),
 //    mutexListCables(new QMutex(QMutex::Recursive)),
     settingsGroup(settingsGroup),
-    undoProgramChangesEnabled(false)
+    undoProgramChangesEnabled(false),
+    solver(new PathSolver(this))
 {
     doublePrecision=GetSetting("doublePrecision",false).toBool();
 
@@ -757,19 +757,23 @@ void MainHost::Render()
     emit Rendered();
 }
 
+#ifdef VSTSDK
 void MainHost::SetTimeInfo(const VstTimeInfo *info)
 {
-#ifdef VSTSDK
     vstHost->SetTimeInfo(info);
 //    CheckTempo();
-#endif
 }
+#endif
 
 void MainHost::SetTempo(int tempo, int sign1, int sign2)
 {
 #ifdef VSTSDK
     vstHost->SetTempo(tempo,sign1,sign2);
 //    CheckTempo();
+#else
+    Q_UNUSED(tempo);
+    Q_UNUSED(sign1);
+    Q_UNUSED(sign2);
 #endif
 }
 
