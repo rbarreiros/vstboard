@@ -46,7 +46,7 @@ SOURCES += $$PORTAUDIO_PATH/src/common/pa_stream.c \
            $$PORTAUDIO_PATH/src/common/pa_converters.c \
            $$PORTAUDIO_PATH/src/common/pa_allocation.c
 
-unix {
+unix:!macx {
      CONFIG += link_pkgconfig
      PKGCONFIG += jack
      INCLUDEPATH += $$PORTAUDIO_PATH/src/os/unix
@@ -139,17 +139,15 @@ win32 {
     }
 }
 
-mac {
-    INCLUDEPATH += $PORTAUDIO_PATH/src/os/mac_osx
-    INCLUDEPATH += $$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/common
-    INCLUDEPATH += $$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host
-    INCLUDEPATH += $$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host/mac
+macx: {
+    INCLUDEPATH += $$PORTAUDIO_PATH/src/hostapi/coreaudio
 
-    SOURCES += $$PORTAUDIO_PATH/src/hostapi/asio/pa_asio.cpp \
-    $$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/common/asio.cpp \
-    $$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host/ASIOConvertSamples.cpp \
-    $$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host/asiodrivers.cpp \
-    $$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host/mac/asioshlib.cpp \
-    $$PORTAUDIO_PATH/src/hostapi/asio/ASIOSDK/host/mac/codefragements.cpp
+    SOURCES += $$PORTAUDIO_PATH/src/hostapi/coreaudio/pa_mac_core.c \
+               $$PORTAUDIO_PATH/src/hostapi/coreaudio/pa_mac_core_blocking.c \
+               $$PORTAUDIO_PATH/src/hostapi/coreaudio/pa_mac_core_utilities.c
+    HEADERS += $$PORTAUDIO_PATH/src/hostapi/coreaudio/pa_mac_core_blocking.h \
+               $$PORTAUDIO_PATH/src/hostapi/coreaudio/pa_mac_core_internal.h \
+               $$PORTAUDIO_PATH/src/hostapi/coreaudio/pa_mac_core_utilities.h
+
 }
 
