@@ -513,7 +513,7 @@ void AudioDevices::ConfigDevice(const QModelIndex &index)
             }
             break;
         }
-
+#ifdef WIN32
         case paMME: {
             MmeConfigDialog dlg( myHost );
             dlg.exec();
@@ -525,7 +525,7 @@ void AudioDevices::ConfigDevice(const QModelIndex &index)
             dlg.exec();
             break;
         }
-
+#endif
         default: {
             QMessageBox msg(QMessageBox::Information,
                 tr("No config"),

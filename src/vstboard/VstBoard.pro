@@ -4,17 +4,10 @@ QT += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TEMPLATE = app
-#TARGET = $${APP_NAME}
 TARGET = VstBoard
 
 #Disable vst sdk unused warnings
 QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter
-
-#LIBS += -lportmidi
-
-INCLUDEPATH += $$PORTAUDIO_PATH/include
-INCLUDEPATH += $$PORTMIDI_PATH/porttime
-INCLUDEPATH += $$PORTMIDI_PATH/pm_common
 
 INCLUDEPATH += ../common
 
@@ -40,9 +33,20 @@ SOURCES += \
     connectables/mididevice.cpp \
     audiodevices.cpp \
     mididevices.cpp \
-    views/configdialoghost.cpp \
-    views/mmeconfigdialog.cpp \
+    views/configdialoghost.cpp
+
+win32: {
+    SOURCES += views/mmeconfigdialog.cpp \
     views/wasapiconfigdialog.cpp
+
+    HEADERS +=     views/mmeconfigdialog.h \
+    views/wasapiconfigdialog.h
+
+    FORMS += \
+    views/mmeconfigdialog.ui \
+    views/wasapiconfigdialog.ui
+    
+}
 
 HEADERS += \
     mainhosthost.h \
@@ -56,14 +60,8 @@ HEADERS += \
     connectables/mididevice.h \
     audiodevices.h \
     mididevices.h \
-    views/configdialoghost.h \
-    views/mmeconfigdialog.h \
-    views/wasapiconfigdialog.h
+    views/configdialoghost.h
 
-
-FORMS += \
-    views/mmeconfigdialog.ui \
-    views/wasapiconfigdialog.ui
 
 PRECOMPILED_HEADER = ../common/precomp.h
 
@@ -82,6 +80,7 @@ else:unix:!symbian: LIBS += -L$$OUT_PWD/../common/ -lcommon
 INCLUDEPATH += $$PWD/../common
 DEPENDPATH += $$PWD/../common
 
+INCLUDEPATH += $$PORTAUDIO_PATH/include
 
 win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../common/release/libcommon.a
 else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../common/debug/libcommon.a
@@ -96,12 +95,21 @@ else:unix:!symbian: LIBS += -L$$OUT_PWD/../portaudio/ -lportaudio
 INCLUDEPATH += $$PWD/../portaudio
 DEPENDPATH += $$PWD/../portaudio
 
+unix:!macx {
+CONFIG += link_pkgconfig
+PKGCONFIG += jack
+LIBS += -lasound -lm -lpthread
+}
+
 win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../portaudio/release/libportaudio.a
 else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../portaudio/debug/libportaudio.a
 else:win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../portaudio/release/portaudio.lib
 else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../portaudio/debug/portaudio.lib
 else:unix:!symbian: PRE_TARGETDEPS += $$OUT_PWD/../portaudio/libportaudio.a
 
+INCLUDEPATH += $$PORTMIDI_PATH/porttime
+INCLUDEPATH += $$PORTMIDI_PATH/pm_common
+   
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../portmidi/release/ -lportmidi
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../portmidi/debug/ -lportmidi
 else:unix:!symbian: LIBS += -L$$OUT_PWD/../portmidi/ -lportmidi

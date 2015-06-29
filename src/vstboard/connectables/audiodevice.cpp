@@ -226,7 +226,7 @@ bool AudioDevice::OpenStream(double sampleRate)
     PaStreamFlags flags = paClipOff; //paNoFlag;
 
     if(devInfo.maxInputChannels > 0) {
-
+#ifdef WIN32
         inputParameters = new PaStreamParameters;
         ZeroMemory( inputParameters, sizeof( PaStreamParameters ) );
         inputParameters->channelCount = devInfo.maxInputChannels;
@@ -234,8 +234,10 @@ bool AudioDevice::OpenStream(double sampleRate)
         inputParameters->hostApiSpecificStreamInfo = NULL;
         inputParameters->sampleFormat = paFloat32 | paNonInterleaved;
         inputParameters->suggestedLatency = Pa_GetDeviceInfo(objInfo.id)->defaultLowInputLatency;
-
+#endif
+	
         switch(Pa_GetHostApiInfo( devInfo.hostApi )->type) {
+#ifdef WIN32
             case paDirectSound :
                 ZeroMemory( &directSoundStreamInfo, sizeof( PaWinDirectSoundStreamInfo) );
                 directSoundStreamInfo.size = sizeof( PaWinDirectSoundStreamInfo);
@@ -255,6 +257,7 @@ bool AudioDevice::OpenStream(double sampleRate)
                 wmmeStreamInfo.bufferCount = myHost->GetSetting("api/wmme_bufferCount", MME_DEFAULT_BUFFER_COUNT).toUInt();
                 inputParameters->hostApiSpecificStreamInfo = &wmmeStreamInfo;
                 break;
+#endif
             case paASIO :
                 break;
             case paSoundManager :
@@ -273,6 +276,7 @@ bool AudioDevice::OpenStream(double sampleRate)
                 break;
             case paJACK :
                 break;
+#ifdef WIN32
             case paWASAPI : {
                 ZeroMemory( &wasapiStreamInfo, sizeof(PaWasapiStreamInfo) );
                 wasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
@@ -286,6 +290,7 @@ bool AudioDevice::OpenStream(double sampleRate)
                     inputParameters->suggestedLatency = (PaTime)lat/1000;
                 break;
             }
+#endif
             case paAudioScienceHPI :
                 break;
             default:
@@ -294,7 +299,7 @@ bool AudioDevice::OpenStream(double sampleRate)
     }
 
     if(devInfo.maxOutputChannels > 0) {
-
+#ifdef WIN32
         outputParameters = new PaStreamParameters;
         ZeroMemory( outputParameters, sizeof( PaStreamParameters ) );
         outputParameters->channelCount = devInfo.maxOutputChannels;
@@ -302,8 +307,10 @@ bool AudioDevice::OpenStream(double sampleRate)
         outputParameters->hostApiSpecificStreamInfo = NULL;
         outputParameters->sampleFormat = paFloat32 | paNonInterleaved;
         outputParameters->suggestedLatency = Pa_GetDeviceInfo(objInfo.id)->defaultLowOutputLatency ;
-
+#endif
+	
         switch(Pa_GetHostApiInfo( devInfo.hostApi )->type) {
+#ifdef WIN32
             case paDirectSound :
                 ZeroMemory( &directSoundStreamInfo, sizeof(PaWinDirectSoundStreamInfo) );
                 directSoundStreamInfo.size = sizeof(PaWinDirectSoundStreamInfo);
@@ -323,6 +330,7 @@ bool AudioDevice::OpenStream(double sampleRate)
                 wmmeStreamInfo.bufferCount = myHost->GetSetting("api/wmme_bufferCount", MME_DEFAULT_BUFFER_COUNT).toUInt();
                 outputParameters->hostApiSpecificStreamInfo = &wmmeStreamInfo;
                 break;
+#endif
             case paASIO :
                 break;
             case paSoundManager :
@@ -341,6 +349,7 @@ bool AudioDevice::OpenStream(double sampleRate)
                 break;
             case paJACK :
                 break;
+#ifdef WIN32
             case paWASAPI : {
                 ZeroMemory( &wasapiStreamInfo, sizeof(PaWasapiStreamInfo) );
                 wasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
@@ -354,6 +363,7 @@ bool AudioDevice::OpenStream(double sampleRate)
                     outputParameters->suggestedLatency = (PaTime)lat/1000;
                 break;
             }
+#endif
             case paAudioScienceHPI :
                 break;
             default :

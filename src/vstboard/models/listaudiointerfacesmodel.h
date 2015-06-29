@@ -22,6 +22,10 @@
 #define AUDIOINTERFACESMODEL_H
 
 //#include "precomp.h"
+#include <QStandardItemModel>
+#include <QObject>
+#include <QModelIndex>
+#include <QMimeData>
 
 class ListAudioInterfacesModel : public QStandardItemModel 
 {

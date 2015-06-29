@@ -22,6 +22,10 @@
 #define LISTMIDIINTERFACESMODEL_H
 
 //#include "precomp.h"
+#include <QStandardItemModel>
+#include <QObject>
+#include <QMimeData>
+#include <QModelIndexList>
 
 class ListMidiInterfacesModel : public QStandardItemModel
 {
