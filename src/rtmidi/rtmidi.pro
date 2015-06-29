@@ -33,18 +33,18 @@ INCLUDEPATH += $$RTMIDI_PATH
 SOURCES += $$RTMIDI_PATH/RtMidi.cpp
 HEADERS += $$RTMIDI_PATH/RtMidi.h
 
-win32 {
+win32: {
     DEFINES += __WINDOWS_MM__
     LIBS += -lwinmm -lpthread
 }
 
-unix {
+unix:!macx {
     DEFINES += __LINUX_ALSA__
     DEFINES += __UNIX_JACK__
     LIBS += -lasound -lpthread -ljack
 }
 
-macosx {
+macx: {
     LIBS += -framework CoreMIDI -framework CoreAudio -framework CoreFoundation
     DEFINES += __MACOSX_CORE__
 }
