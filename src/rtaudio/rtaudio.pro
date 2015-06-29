@@ -52,7 +52,7 @@ win32: {
                    $$RTAUDIO_PATH/include/iasiothiscallresolver.cpp
 }
 
-unix: {
+unix:!macx {
         CONFIG += link_pkgconfig
         PKGCONFIG += jack
         DEFINES += __LINUX_ALSA__
