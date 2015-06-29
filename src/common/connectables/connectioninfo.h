@@ -21,6 +21,7 @@
 #ifndef CONNECTIONINFO_H
 #define CONNECTIONINFO_H
 
+#include <QMetaType>
 #include "../globals.h"
 class MainHost;
 class ConnectionInfo

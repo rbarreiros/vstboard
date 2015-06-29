@@ -22,6 +22,7 @@
 #define COMADDPIN_H
 
 #include <QUndoCommand>
+#include <QVariant>
 #include "connectables/connectioninfo.h"
 
 class MainHost;

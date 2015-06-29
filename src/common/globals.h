@@ -23,6 +23,8 @@
 
 //#include "precomp.h"
 
+#include <QEvent>
+
 #define EMPTY_PROGRAM 0xffff
 #define TEMP_PROGRAM 0xfffe
 

@@ -2,6 +2,7 @@
 #define COMRENAMEPROGRAM_H
 
 #include <QUndoCommand>
+#include <QVariant>
 
 class ProgramsModel;
 class ComChangeProgramItem : public QUndoCommand

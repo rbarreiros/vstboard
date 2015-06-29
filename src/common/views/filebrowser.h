@@ -21,6 +21,16 @@
 #ifndef FILEBROWSER_H
 #define FILEBROWSER_H
 
+#include <QWidget>
+#include <QString>
+#include <QFileSystemModel>
+#include <QString>
+#include <QEvent>
+#include <QModelIndex>
+#include <QAction>
+#include <QStringList>
+#include <QPoint>
+
 namespace Ui {
     class FileBrowser;
 }

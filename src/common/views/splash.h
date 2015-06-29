@@ -22,6 +22,8 @@
 #define SPLASH_H
 
 //#include "precomp.h"
+#include <QDialog>
+#include <QSettings>
 #include "../_version.h"
 
 namespace Ui {

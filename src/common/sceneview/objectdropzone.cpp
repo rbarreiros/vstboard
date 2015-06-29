@@ -18,6 +18,10 @@
 #    along with VstBoard.  If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 
+#include <QGraphicsSceneDragDropEvent>
+#include <QMimeData>
+#include <QFileInfo>
+
 #include "objectdropzone.h"
 #include "globals.h"
 

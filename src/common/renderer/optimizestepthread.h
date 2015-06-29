@@ -1,6 +1,9 @@
 #ifndef OPTIMIZESTEPTHREAD_H
 #define OPTIMIZESTEPTHREAD_H
 
+#include <QStandardItemModel>
+#include <QList>
+
 class RendererNode;
 class OptimizeStepThread
 {

@@ -3,6 +3,8 @@
 
 #include "optimizerstep.h"
 
+#include <QMutex>
+
 class Optimizer
 {
 public:

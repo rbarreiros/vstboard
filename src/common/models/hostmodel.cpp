@@ -24,7 +24,11 @@
 #include "mainhost.h"
 #include "models/programsmodel.h"
 #include "connectables/objectinfo.h"
+
+#ifdef VSTSDK
 #include "connectables/vstplugin.h"
+#endif
+
 #include "commands/comaddobject.h"
 
 HostModel::HostModel(MainHost *parent) :
@@ -195,6 +199,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                             break;
                         }
                         case NodeType::object: {
+#ifdef VSTSDK
                             QSharedPointer<Connectables::VstPlugin> senderObj = myHost->objFactory->GetObj(senderIndex).staticCast<Connectables::VstPlugin>();
                             if(!senderObj) {
                                 LOG("fxb fxp target not found");
@@ -209,6 +214,7 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
                             if( fileType == VST_PROGRAM_FILE_EXTENSION && senderObj->LoadProgram(fName) ) {
                                 return true;
                             }
+#endif
                         }
                     }
                 }
@@ -315,7 +321,9 @@ bool HostModel::dropMimeData ( const QMimeData * data, Qt::DropAction action, in
 
         ComAddObject *com = new ComAddObject(myHost, info, targetContainer, senderObj, insertType);
 //        Connectables::VstPlugin::shellSelectView->SetTargetContainer( targetContainer->GetIndex() );
+#ifdef VSTSDK
         Connectables::VstPlugin::shellSelectView->command=com;
+#endif
         myHost->undoStack.push( com );
     }
 
@@ -378,7 +386,9 @@ bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int
 
             //save vst bank file
             if(role == UserRoles::bankFile) {
+#ifdef VSTSDK
                 objPtr.staticCast<Connectables::VstPlugin>()->SaveBank( value.toString() );
+#endif
                 QStandardItem *item = itemFromIndex(index);
                 if(item)
                     item->setData(value,UserRoles::bankFile);
@@ -387,7 +397,9 @@ bool HostModel::setData ( const QModelIndex & index, const QVariant & value, int
 
             //save vst program file
             if(role == UserRoles::programFile) {
+#ifdef VSTSDK
                 objPtr.staticCast<Connectables::VstPlugin>()->SaveProgram( value.toString() );
+#endif
                 QStandardItem *item = itemFromIndex(index);
                 if(item)
                     item->setData(value,UserRoles::programFile);

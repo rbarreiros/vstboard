@@ -3,6 +3,12 @@
 
 //#include "precomp.h"
 
+#include <QThread>
+#include <QMutex>
+#include <QSemaphore>
+#include <QMap>
+#include <QReadWriteLock>
+
 class Renderer;
 class RendererNode;
 class RenderThread : public QThread

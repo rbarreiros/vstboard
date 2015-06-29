@@ -19,10 +19,10 @@
 **************************************************************************/
 
 
-#include "connectioninfo.h"
 #include "object.h"
 #include "objectfactory.h"
 #include "mainhost.h"
+#include "connectioninfo.h"
 
 /*!
   \class ConnectionInfo

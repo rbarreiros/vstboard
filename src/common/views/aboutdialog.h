@@ -22,6 +22,7 @@
 #define ABOUTDIALOG_H
 
 //#include "precomp.h"
+#include <QDialog>
 #include "../_version.h"
 
 namespace Ui {

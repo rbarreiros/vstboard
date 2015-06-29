@@ -19,8 +19,8 @@
 **************************************************************************/
 
 
-#include "objectinfo.h"
 #include "mainhost.h"
+#include "objectinfo.h"
 
 ObjectInfo::ObjectInfo() :
     nodeType(NodeType::ND),
