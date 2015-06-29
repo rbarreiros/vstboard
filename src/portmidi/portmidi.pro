@@ -36,7 +36,7 @@ SOURCES += $$PORTMIDI_PATH/pm_common/portmidi.c \
 	   $$PORTMIDI_PATH/porttime/porttime.c
 
 
-HEADERS += $$PORTMIDI_PATH/pm_common/pm_util.h \
+HEADERS += $$PORTMIDI_PATH/pm_common/pmutil.h \
 	   $$PORTMIDI_PATH/pm_common/pminternal.h \
 	   $$PORTMIDI_PATH/pm_common/portmidi.h \
 	   $$PORTMIDI_PATH/porttime/porttime.h
@@ -50,7 +50,7 @@ win32 {
 	HEADERS += $$PORTMIDI_PATH/pm_win/pmwinmm.h
 }
 
-unix {
+unix:!macx {
 	DEFINES += PMALSA
 	INCLUDEPATH += $$PORTMIDI_PATH/pm_linux
 	LIBS += -lasound
@@ -62,4 +62,16 @@ unix {
 		   $$PORTMIDI_PATH/pm_linux/pmlinuxalsa.h
 }
 
-
+macx: {
+        INCLUDEPATH += $$PORTMIDI_PATH/pm_mac \
+                       /System/Library/Frameworks/CoreFoundation.framework/Headers \
+                       /System/Library/Frameworks/CoreServices.framework/Headers \
+                       /Developer/Headers/FlatCarbon
+        DEFINES +=
+        LIBS += -framework CoreFoundation -framework CoreServices
+        SOURCES += $$PORTMIDI_PATH/pm_mac/readbinaryplist.c \
+                   $$PORTMIDI_PATH/pm_mac/pmmac.c \
+                   $$PORTMIDI_PATH/pm_mac/finddefault.c
+        HEADERS += $$PORTMIDI_PATH/pm_mac/readbinaryplist.h \
+                   $$PORTMIDI_PATH/pm_mac/pmmac.h
+}
