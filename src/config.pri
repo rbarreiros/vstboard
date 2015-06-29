@@ -5,14 +5,6 @@ PORTMIDI_PATH 	= ../../libs/portmidi
 RTAUDIO_PATH    = ../../libs/rtaudio
 RTMIDI_PATH     = ../../libs/rtmidi
 
-win32|macx {
-    VSTSDK_PATH	= ../../libs/vstsdk2.4
-    CONFIG += vstsdk
-    DEFINES += VSTSDK
-    INCLUDEPATH += $$VSTSDK_PATH \
-        $$VSTSDK_PATH/public.sdk/source/vst2.x
-}
-
 CONFIG += scriptengine
 DEFINES += SCRIPTENGINE
 

@@ -40,7 +40,8 @@ FakeTimer::FakeTimer(MainHostHost *myHost) :
 
 FakeTimer::~FakeTimer()
 {
-    LOG("stop thread"<<objectName()<<(int)currentThreadId());
+    //LOG("stop thread"<<objectName()<<(int)currentThreadId());
+    LOG("stop thread"<<objectName());
     stop=true;
     wait(1000);
 }
@@ -48,7 +49,8 @@ FakeTimer::~FakeTimer()
 void FakeTimer::run()
 {
 
-    LOG("start thread"<<objectName()<<(int)currentThreadId());
+    //LOG("start thread"<<objectName()<<(int)currentThreadId());
+    LOG("start thread"<<objectName());
     while(!stop) {
         msleep(FAKE_RENDER_TIMER_MS);
         myHost->Render();
@@ -501,7 +503,8 @@ void AudioDevices::ConfigDevice(const QModelIndex &index)
             err = PaAsio_ShowControlPanel( configDevId, (void*)myHost->mainWindow );
 #endif
 #ifdef __APPLE__
-            err = PaAsio_ShowControlPanel( configDevId, (void*)0 );
+            // TODO
+            //err = PaAsio_ShowControlPanel( configDevId, (void*)0 );
 #endif
 
             if( err != paNoError ) {

@@ -37,27 +37,63 @@
     #include <cmath>
     #include <algorithm>
 
-    #include <QtWidgets/QAction>
+    #ifdef __APPLE__
+    #include <QAction>
+    #include <QAbstractButton>
+    #include <QAbstractItemView>
+    #include <QApplication>
+    #include <QButtonGroup>
+    #include <QCheckBox>
+    #include <QHBoxLayout>
+    #include <QHeaderView>
+    #include <QComboBox>
+    #include <QDialog>
+    #include <QFileDialog>
+    #include <QFileSystemModel>
+    #include <QFrame>
+    #include <QGraphicsBlurEffect>
+    #include <QGraphicsGridLayout>
+    #include <QGraphicsLinearLayout>
+    #include <QGraphicsLineItem>
+    #include <QGraphicsRectItem>
+    #include <QGraphicsScene>
+    #include <QGraphicsSceneDragDropEvent>
+    #include <QGraphicsSceneMouseEvent>
+    #include <QGraphicsTextItem>
+    #include <QGraphicsView>
+    #include <QGraphicsWidget>
+    #include <QHBoxLayout>
+    #include <QLabel>
+    #include <QLineEdit>
+    #include <QListView>
+    #include <QListWidgetItem>
+    #include <QMainWindow>
+    #include <QMenu>
+    #include <QMessageBox>
+    #include <QPushButton>
+    #include <QScrollBar>
+    #include <QSpacerItem>
+    #include <QSplitter>
+    #include <QStyledItemDelegate>
+    #include <QToolButton>
+    #include <QTreeWidget>
+    #include <QUndoCommand>
+    #include <QUndoStack>
+    #include <QVBoxLayout>
+    #include <QWidget>
+    #else
+    #include <QtWidgets/Action>
     #include <QtWidgets/QAbstractButton>
     #include <QtWidgets/QAbstractItemView>
-    #include <QtAlgorithms>
     #include <QtWidgets/QApplication>
     #include <QtWidgets/QButtonGroup>
     #include <QtWidgets/QCheckBox>
     #include <QtWidgets/QHBoxLayout>
     #include <QtWidgets/QHeaderView>
-    #include <QClipboard>
     #include <QtWidgets/QComboBox>
     #include <QtWidgets/QDialog>
-    #include <QDir>
-    #include <QDragEnterEvent>
-    #include <QDropEvent>
-    #include <QEvent>
     #include <QtWidgets/QFileDialog>
     #include <QtWidgets/QFileSystemModel>
-    #include <QFocusEvent>
-    #include <QFont>
-    #include <QFontDatabase>
     #include <QtWidgets/QFrame>
     #include <QtWidgets/QGraphicsBlurEffect>
     #include <QtWidgets/QGraphicsGridLayout>
@@ -72,16 +108,37 @@
     #include <QtWidgets/QGraphicsWidget>
     #include <QtWidgets/QHBoxLayout>
     #include <QtWidgets/QLabel>
-    #include <QLibrary>
-    #include <QLibraryInfo>
     #include <QtWidgets/QLineEdit>
     #include <QtWidgets/QListView>
     #include <QtWidgets/QListWidgetItem>
     #include <QtWidgets/QMainWindow>
-    #include <QMap>
-    #include <qmath.h>
     #include <QtWidgets/QMenu>
     #include <QtWidgets/QMessageBox>
+    #include <QtWidgets/QPushButton>
+    #include <QtWidgets/QScrollBar>
+    #include <QtWidgets//QSpacerItem>
+    #include <QtWidgets/QSplitter>
+    #include <QtWidgets/QStyledItemDelegate>
+    #include <QtWidgets/QToolButton>
+    #include <QtWidgets/QTreeWidget>
+    #include <QtWidgets/QUndoCommand>
+    #include <QtWidgets/QUndoStack>
+    #include <QtWidgets/QVBoxLayout>
+    #include <QtWidgets/QWidget>
+    #endif
+    #include <QtAlgorithms>
+    #include <QClipboard>
+    #include <QDir>
+    #include <QDragEnterEvent>
+    #include <QDropEvent>
+    #include <QEvent>
+    #include <QFocusEvent>
+    #include <QFont>
+    #include <QFontDatabase>
+    #include <QLibrary>
+    #include <QLibraryInfo>
+    #include <QMap>
+    #include <qmath.h>
     #include <QMimeData>
     #include <QMultiHash>
     #include <QMutex>
@@ -89,32 +146,21 @@
     #include <QObject>
     #include <QtGui/QPainter>
     #include <QtGui/QPen>
-    #include <QtWidgets/QPushButton>
     #include <QReadWriteLock>
-    #include <QtWidgets/QScrollBar>
     #include <QSemaphore>
     #include <QSettings>
     #include <QSharedData>
     #include <QSharedPointer>
     #include <QSignalMapper>
-    #include <QtWidgets//QSpacerItem>
-    #include <QtWidgets/QSplitter>
     #include <QStandardItemModel>
     #include <QStringList>
-    #include <QtWidgets/QStyledItemDelegate>
     #include <QThread>
     #include <QTime>
     #include <QTimer>
-    #include <QtWidgets/QToolButton>
     #include <QTranslator>
-    #include <QtWidgets/QTreeWidget>
-    #include <QtWidgets/QUndoCommand>
-    #include <QtWidgets/QUndoStack>
     #include <QUrl>
     #include <QtCore/QVariant>
-    #include <QtWidgets/QVBoxLayout>
     #include <QWaitCondition>
-    #include <QtWidgets/QWidget>
 
     #ifdef SCRIPTENGINE
         #include <QtScript>

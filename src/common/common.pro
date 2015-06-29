@@ -6,31 +6,39 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TEMPLATE = lib
 CONFIG += staticlib
 
-      vstsdk {
-      	     HEADERS += vst/cvsthost.h \
-             	     	connectables/vstplugin.h \
-        		vst/ceffect.h \
-        		vst/const.h \
-			vst/vstbank.h \
-        		vst/vstbankbase.h \
-        		vst/vstprogram.h \
-        		views/vstpluginwindow.h \
-        		views/vstshellselect.h
+win32|macx: {
+    VSTSDK_PATH	= ../../libs/vstsdk2.4
+#    CONFIG += vstsdk
+#    DEFINES += VSTSDK
+    INCLUDEPATH += $$VSTSDK_PATH \
+                   $$VSTSDK_PATH/public.sdk/source/vst2.x
+}
 
-   	     SOURCES += vst/cvsthost.cpp \
-             	     	connectables/vstplugin.cpp \
-        		vst/ceffect.cpp \
-        		vst/vstbank.cpp \
-        		vst/vstbankbase.cpp \
-        		vst/vstprogram.cpp \
-        		views/vstpluginwindow.cpp \
-        		views/vstshellselect.cpp \
-        		$$VSTSDK_PATH/public.sdk/source/vst2.x/audioeffectx.cpp \
-        		$$VSTSDK_PATH/public.sdk/source/vst2.x/audioeffect.cpp
+vstsdk {
+     HEADERS += vst/cvsthost.h \
+                connectables/vstplugin.h \
+                vst/ceffect.h \
+                vst/const.h \
+                vst/vstbank.h \
+                vst/vstbankbase.h \
+                vst/vstprogram.h \
+                views/vstpluginwindow.h \
+                views/vstshellselect.h
 
-    	     FORMS += views/vstpluginwindow.ui \
-             	      views/vstshellselect.ui
-        }
+     SOURCES += vst/cvsthost.cpp \
+                connectables/vstplugin.cpp \
+                vst/ceffect.cpp \
+                vst/vstbank.cpp \
+                vst/vstbankbase.cpp \
+                vst/vstprogram.cpp \
+                views/vstpluginwindow.cpp \
+                views/vstshellselect.cpp \
+                $$VSTSDK_PATH/public.sdk/source/vst2.x/audioeffectx.cpp \
+                $$VSTSDK_PATH/public.sdk/source/vst2.x/audioeffect.cpp
+
+     FORMS += views/vstpluginwindow.ui \
+              views/vstshellselect.ui
+}
 
 
 scriptengine {

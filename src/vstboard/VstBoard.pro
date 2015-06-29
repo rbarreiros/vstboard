@@ -96,9 +96,14 @@ INCLUDEPATH += $$PWD/../portaudio
 DEPENDPATH += $$PWD/../portaudio
 
 unix:!macx {
-CONFIG += link_pkgconfig
-PKGCONFIG += jack
-LIBS += -lasound -lm -lpthread
+    CONFIG += link_pkgconfig
+    PKGCONFIG += jack
+    LIBS += -lasound -lm -lpthread
+}
+
+macx {
+    LIBS += -framework CoreFoundation -framework CoreServices -framework CoreMIDI \
+            -framework CoreAudio -framework AudioToolbox -framework AudioUnit -framework Carbon
 }
 
 win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../portaudio/release/libportaudio.a

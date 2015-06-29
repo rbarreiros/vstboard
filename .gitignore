@@ -14,6 +14,7 @@ Makefile*
 ui_*.h
 moc_*.cpp
 qrc_*.cpp
+*.stash
 src/common/debug/*
 src/common/release/*
 src/dllLoader/debug/*

@@ -144,7 +144,10 @@ macx: {
 
     SOURCES += $$PORTAUDIO_PATH/src/hostapi/coreaudio/pa_mac_core.c \
                $$PORTAUDIO_PATH/src/hostapi/coreaudio/pa_mac_core_blocking.c \
-               $$PORTAUDIO_PATH/src/hostapi/coreaudio/pa_mac_core_utilities.c
+               $$PORTAUDIO_PATH/src/hostapi/coreaudio/pa_mac_core_utilities.c \
+               $$PORTAUDIO_PATH/src/os/unix/pa_unix_util.c \
+               $$PORTAUDIO_PATH/src/os/unix/pa_unix_hostapis.c
+
     HEADERS += $$PORTAUDIO_PATH/src/hostapi/coreaudio/pa_mac_core_blocking.h \
                $$PORTAUDIO_PATH/src/hostapi/coreaudio/pa_mac_core_internal.h \
                $$PORTAUDIO_PATH/src/hostapi/coreaudio/pa_mac_core_utilities.h

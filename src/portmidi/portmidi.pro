@@ -71,7 +71,10 @@ macx: {
         LIBS += -framework CoreFoundation -framework CoreServices
         SOURCES += $$PORTMIDI_PATH/pm_mac/readbinaryplist.c \
                    $$PORTMIDI_PATH/pm_mac/pmmac.c \
-                   $$PORTMIDI_PATH/pm_mac/finddefault.c
+                   $$PORTMIDI_PATH/pm_mac/finddefault.c \
+                   $$PORTMIDI_PATH/porttime/ptmacosx_cf.c \
+                   $$PORTMIDI_PATH/pm_mac/pmmacosxcm.c
+
         HEADERS += $$PORTMIDI_PATH/pm_mac/readbinaryplist.h \
                    $$PORTMIDI_PATH/pm_mac/pmmac.h
 }
